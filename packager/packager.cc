@@ -1,6 +1,5 @@
 #include "packager/packager.h"
 #include "absl/strings/str_join.h"
-#include "absl/strings/str_replace.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
@@ -77,24 +76,13 @@ struct FullyQualifiedName {
     }
 };
 
-struct PackageName {
-    core::packages::MangledName mangledName;
-
-    PackageName(core::ClassOrModuleRef owner) : mangledName(core::packages::MangledName(owner)) {}
-
-    // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
-    string toString(const core::GlobalState &gs) const {
-        return mangledName.owner.show(gs);
-    }
-};
-
 struct Import {
-    PackageName name;
+    core::packages::MangledName mangledName;
     core::packages::ImportType type;
     core::LocOffsets loc;
 
-    Import(PackageName &&name, core::packages::ImportType type, core::LocOffsets loc)
-        : name(std::move(name)), type(type), loc(loc) {}
+    Import(core::packages::MangledName mangledName, core::packages::ImportType type, core::LocOffsets loc)
+        : mangledName(mangledName), type(type), loc(loc) {}
 
     bool isTestImport() const {
         return type != core::packages::ImportType::Normal;
@@ -119,10 +107,11 @@ struct Export {
 };
 
 struct VisibleTo {
-    PackageName name;
+    core::packages::MangledName mangledName;
     core::packages::VisibleToType type;
 
-    VisibleTo(PackageName &&name, core::packages::VisibleToType type) : name(move(name)), type(type) {}
+    VisibleTo(core::packages::MangledName mangledName, core::packages::VisibleToType type)
+        : mangledName(mangledName), type(type) {}
 };
 
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
@@ -165,7 +154,7 @@ public:
 class PackageInfoImpl final : public core::packages::PackageInfo {
 public:
     core::packages::MangledName mangledName() const {
-        return name.mangledName;
+        return mangledName_;
     }
 
     absl::Span<const string> pathPrefixes() const {
@@ -188,7 +177,7 @@ public:
         return visibleToTests_;
     }
 
-    PackageName name;
+    core::packages::MangledName mangledName_;
 
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
     core::Loc loc;
@@ -271,7 +260,8 @@ public:
         return make_unique<PackageInfoImpl>(*this);
     }
 
-    PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}
+    PackageInfoImpl(core::packages::MangledName mangledName, core::Loc loc, core::Loc declLoc_)
+        : mangledName_(mangledName), loc(loc), declLoc_(declLoc_) {}
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
@@ -402,7 +392,7 @@ public:
         if (!importedPackageNames.empty()) {
             core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
-                if (import.name.mangledName == info.name.mangledName) {
+                if (import.mangledName == info.mangledName()) {
                     if ((importType == core::packages::ImportType::Normal &&
                          import.type != core::packages::ImportType::Normal) ||
                         (importType == core::packages::ImportType::TestHelper &&
@@ -436,7 +426,7 @@ public:
                     }
                 }
 
-                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
+                auto &importInfo = gs.packageDB().getPackageInfo(import.mangledName);
                 if (!importInfo.exists()) {
                     importToInsertAfter = import.loc;
                     continue;
@@ -490,7 +480,7 @@ public:
         }
         ENFORCE(insertionLoc.exists());
 
-        auto packageToImport = info.name.toString(gs);
+        auto packageToImport = info.mangledName_.owner.show(gs);
         string_view importTypeHuman;
         string_view importTypeMethod;
         string_view importTypeTrailing = "";
@@ -510,7 +500,7 @@ public:
                 break;
         }
         auto suggestionTitle =
-            fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, name.toString(gs));
+            fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, mangledName_.owner.show(gs));
         vector<core::AutocorrectSuggestion::Edit> edits = {
             {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
         if (deleteTestImportEdit.has_value()) {
@@ -561,15 +551,16 @@ public:
         ENFORCE(insertionLoc.exists());
 
         auto strName = newExport.show(gs);
-        core::AutocorrectSuggestion suggestion(fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
-                                               {{insertionLoc, fmt::format("\n  export {}", strName)}});
+        core::AutocorrectSuggestion suggestion(
+            fmt::format("Export `{}` in package `{}`", strName, mangledName_.owner.show(gs)),
+            {{insertionLoc, fmt::format("\n  export {}", strName)}});
         return {suggestion};
     }
 
     vector<core::packages::VisibleTo> visibleTo() const {
         vector<core::packages::VisibleTo> rv;
         for (auto &v : visibleTo_) {
-            rv.emplace_back(v.name.mangledName, v.type);
+            rv.emplace_back(v.mangledName, v.type);
         }
         return rv;
     }
@@ -580,7 +571,7 @@ public:
         }
 
         auto imp =
-            absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.name.mangledName == mangledName; });
+            absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.mangledName == mangledName; });
         if (imp == importedPackageNames.end()) {
             return nullopt;
         }
@@ -674,14 +665,14 @@ public:
 
             auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
             for (auto &import : currInfo.importedPackageNames) {
-                auto &importInfo = gs.packageDB().getPackageInfo(import.name.mangledName);
-                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.name.mangledName)) {
+                auto &importInfo = gs.packageDB().getPackageInfo(import.mangledName);
+                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.mangledName)) {
                     continue;
                 }
-                if (!prev.contains(import.name.mangledName)) {
-                    prev[import.name.mangledName] = curr;
+                if (!prev.contains(import.mangledName)) {
+                    prev[import.mangledName] = curr;
                 }
-                toVisit.push(import.name.mangledName);
+                toVisit.push(import.mangledName);
             }
         }
 
@@ -711,14 +702,7 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
     return fqn;
 }
 
-PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit,
-                           core::ClassOrModuleRef symbol) {
-    ENFORCE(constantLit != nullptr);
-
-    return PackageName(symbol);
-}
-
-PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+core::packages::MangledName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     auto fullName = getFullyQualifiedName(ctx, constantLit);
@@ -744,7 +728,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
         owner = core::Symbols::noClassOrModule();
     }
 
-    return PackageName(owner);
+    return core::packages::MangledName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -1030,7 +1014,7 @@ public:
                 e.setHeader("This file must only define behavior in enclosing package `{}`", requiredNamespace(ctx));
                 const auto &[scopeSym, scopeLoc] = scope.back();
                 e.addErrorLine(ctx.locAt(scopeLoc), "Defining behavior in `{}` instead:", scopeSym.show(ctx));
-                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.name.toString(ctx));
+                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.mangledName_.owner.show(ctx));
                 if (pkgForNamespace.exists()) {
                     auto &packageInfo = ctx.state.packageDB().getPackageInfo(pkgForNamespace);
                     e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here", scopeSym.show(ctx));
@@ -1101,7 +1085,7 @@ private:
     }
 
     const string requiredNamespace(const core::GlobalState &gs) const {
-        auto result = pkg.name.toString(gs);
+        auto result = pkg.mangledName_.owner.show(gs);
         if (mustUseTestNamespace) {
             result = fmt::format("{}::{}", core::packages::PackageDB::TEST_NAMESPACE.show(gs), result);
         }
@@ -1360,7 +1344,7 @@ struct PackageSpecBodyWalk {
             for (auto it = exported.begin(); it != exported.end(); ++it) {
                 if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info.name.toString(ctx), "export_all!");
+                                info.mangledName_.owner.show(ctx), "export_all!");
                 }
             }
         }
@@ -1514,7 +1498,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree->original(), packageSpecClass->symbol),
+        return make_unique<PackageInfoImpl>(core::packages::MangledName(packageSpecClass->symbol),
                                             ctx.locAt(packageSpecClass->loc), ctx.locAt(packageSpecClass->declLoc));
     }
 
@@ -1553,8 +1537,9 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     auto packageFilePath = package.file.data(gs).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-    const auto shortName = absl::StrReplaceAll(info.name.mangledName.owner.show(gs), {{"::", "_"}});
-    const string slashDirName = absl::StrJoin(info.name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
+    auto fullName = getFullyQualifiedName(gs, info.mangledName_.owner);
+    const auto shortName = absl::StrJoin(fullName.parts, "_", core::packages::NameFormatter(gs));
+    const auto slashDirName = absl::StrJoin(fullName.parts, "/", core::packages::NameFormatter(gs));
     const string_view dirNameFromShortName = shortName;
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1654,13 +1639,13 @@ class ComputePackageSCCs {
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
             // because our reference might disappear from underneath us during that call.
-            auto &importInfo = this->nodeMap[i.name.mangledName];
+            auto &importInfo = this->nodeMap[i.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(i.name.mangledName, importInfo);
+                this->strongConnect<EdgeType>(i.mangledName, importInfo);
 
                 // Need to re-lookup for the reason above.
-                auto &importInfo = this->nodeMap[i.name.mangledName];
+                auto &importInfo = this->nodeMap[i.mangledName];
                 if (importInfo.index == NodeInfo::UNVISITED) {
                     // This is to handle early return above.
                     continue;
@@ -1729,14 +1714,14 @@ class ComputePackageSCCs {
                     }
 
                     // The mangled name won't exist if the import was to a package that doesn't exist.
-                    if (!i.name.mangledName.exists()) {
+                    if (!i.mangledName.exists()) {
                         continue;
                     }
 
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = packageDB.getPackageInfo(i.name.mangledName).sccID();
+                    auto impId = packageDB.getPackageInfo(i.mangledName).sccID();
                     ENFORCE(impId.has_value());
                     if (*impId == sccId) {
                         continue;
@@ -1782,10 +1767,10 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     }
 
     const auto &packageDB = ctx.state.packageDB();
-    ENFORCE(packageDB.getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(packageDB.getPackageInfo(i.mangledName).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
     auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.name.mangledName));
+    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.mangledName));
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
@@ -1850,9 +1835,9 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 }
 
 void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const Import i) {
-    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(ctx.state.packageDB().getPackageInfo(i.mangledName).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
-    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
+    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
 
     const auto &visibleTo = otherPkg.visibleTo();
     if (visibleTo.empty() && !otherPkg.visibleToTests()) {
@@ -1902,7 +1887,7 @@ void validatePackage(core::Context ctx) {
     }
 
     for (auto &i : pkgInfo.importedPackageNames) {
-        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+        auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
 
         // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
@@ -1917,7 +1902,7 @@ void validatePackage(core::Context ctx) {
             validateVisibility(ctx, pkgInfo, i);
         }
 
-        if (i.name.mangledName == pkgInfo.name.mangledName) {
+        if (i.mangledName == pkgInfo.mangledName()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
@@ -1929,7 +1914,7 @@ void validatePackage(core::Context ctx) {
                         import_ = "test_import";
                         break;
                 }
-                e.setHeader("Package `{}` cannot {} itself", pkgInfo.name.toString(ctx), import_);
+                e.setHeader("Package `{}` cannot {} itself", pkgInfo.mangledName_.owner.show(ctx), import_);
             }
         }
     }
@@ -1995,7 +1980,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
                 if (auto e = gs.beginError(pkg->loc, core::errors::Packager::RedefinitionOfPackage)) {
-                    auto pkgName = pkg->name.toString(gs);
+                    auto pkgName = pkg->mangledName_.owner.show(gs);
                     e.setHeader("Redefinition of package `{}`", pkgName);
                     e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
                 }
