@@ -6,7 +6,6 @@
 #include "common/concurrency/Parallel.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
-#include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
 #include "core/packages/Condensation.h"
