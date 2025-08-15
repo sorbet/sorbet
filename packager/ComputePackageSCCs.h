@@ -57,22 +57,22 @@ class ComputePackageSCCs {
         this->stack.push_back(pkgName);
         infoAtEntry.onStack = true;
 
-        for (auto [name, type] : packageGraph.getImports(pkgName)) {
+        for (auto &i : packageGraph.getImports(pkgName)) {
             // We want to consider all imports from test code, but only normal imports for application code.
             if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                if (type != core::packages::ImportType::Normal) {
+                if (i.type != core::packages::ImportType::Normal) {
                     continue;
                 }
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
             // because our reference might disappear from underneath us during that call.
-            auto &importInfo = this->nodeMap[name];
+            auto &importInfo = this->nodeMap[i.name];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(name, importInfo, packageGraph);
+                this->strongConnect<EdgeType>(i.name, importInfo, packageGraph);
 
                 // Need to re-lookup for the reason above.
-                auto &importInfo = this->nodeMap[name];
+                auto &importInfo = this->nodeMap[i.name];
                 if (importInfo.index == NodeInfo::UNVISITED) {
                     // This is to handle early return above.
                     continue;
@@ -129,23 +129,23 @@ class ComputePackageSCCs {
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
             for (auto name : condensationNode.members) {
-                for (auto [name, type] : packageGraph.getImports(name)) {
+                for (auto &i : packageGraph.getImports(name)) {
                     // We want to consider all imports from test code, but only normal imports for application code.
                     if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                        if (type != core::packages::ImportType::Normal) {
+                        if (i.type != core::packages::ImportType::Normal) {
                             continue;
                         }
                     }
 
                     // The mangled name won't exist if the import was to a package that doesn't exist.
-                    if (!name.exists()) {
+                    if (!i.name.exists()) {
                         continue;
                     }
 
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = packageGraph.getSCCId(name);
+                    auto impId = packageGraph.getSCCId(i.name);
                     if (impId == sccId) {
                         continue;
                     }

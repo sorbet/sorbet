@@ -1969,17 +1969,9 @@ class PackageDBPackageGraph {
 public:
     PackageDBPackageGraph(core::packages::PackageDB &packageDB) : packageDB(packageDB) {}
 
-    vector<pair<core::packages::MangledName, core::packages::ImportType>>
-    getImports(core::packages::MangledName packageName) {
+    const vector<core::packages::Import> &getImports(core::packages::MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
-        auto &pkgInfo = PackageInfoImpl::from(packageDB.getPackageInfo(packageName));
-        vector<pair<core::packages::MangledName, core::packages::ImportType>> result;
-        std::transform(pkgInfo.importedPackageNames.begin(), pkgInfo.importedPackageNames.end(),
-                       std::back_inserter(result),
-                       [](core::packages::Import i) -> pair<core::packages::MangledName, core::packages::ImportType> {
-                           return {i.name, i.type};
-                       });
-        return result;
+        return PackageInfoImpl::from(packageDB.getPackageInfo(packageName)).importedPackageNames;
     }
 
     void setSCCId(core::packages::MangledName packageName, int sccID) {
@@ -1991,7 +1983,7 @@ public:
         pkgInfo.sccID_ = sccID;
     }
 
-    int getSCCId(core::packages::MangledName packageName) {
+    int getSCCId(core::packages::MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
         ENFORCE(packageDB.getPackageInfo(packageName).sccID().has_value());
         return packageDB.getPackageInfo(packageName).sccID().value();
