@@ -346,11 +346,11 @@ public:
 
         bool isExported = pkg.exportAll();
         if (litSymbol.isClassOrModule()) {
-            isExported |= litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
         } else if (litSymbol.isFieldOrStaticField()) {
-            isExported |= litSymbol.asFieldRef().data(ctx)->flags.isExported;
+            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
-        isExported |= db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
         bool definesBehavior =
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto currentImportType = this->package.importsPackage(otherPackage);
