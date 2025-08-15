@@ -97,26 +97,34 @@ public:
     }
 
     absl::Span<const std::string> pathPrefixes() const {
+        ENFORCE(exists());
         return absl::MakeSpan(packagePathPrefixes);
     }
 
     core::Loc fullLoc() const {
+        ENFORCE(exists());
         return loc;
     }
 
     core::Loc declLoc() const {
+        ENFORCE(exists());
         return declLoc_;
     }
 
-    bool exists() const;
+    bool exists() const {
+        return mangledName().exists();
+    }
+
     std::string show(const core::GlobalState &gs) const;
     bool operator==(const PackageInfo &rhs) const;
 
     bool exportAll() const {
+        ENFORCE(exists());
         return exportAll_;
     }
 
     bool visibleToTests() const {
+        ENFORCE(exists());
         return visibleToTests_;
     }
 
@@ -158,10 +166,12 @@ public:
         min_typed_level_;
 
     std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
+        ENFORCE(exists());
         return strictDependenciesLevel_;
     }
 
     std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const {
+        ENFORCE(exists());
         return layer_;
     }
 
@@ -173,6 +183,7 @@ public:
     // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
     // date.
     std::optional<int> sccID() const {
+        ENFORCE(exists());
         return sccID_;
     }
 
@@ -186,6 +197,7 @@ public:
     // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
     // date.
     std::optional<int> testSccID() const {
+        ENFORCE(exists());
         return testSccID_;
     }
 
