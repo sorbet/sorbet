@@ -66,13 +66,13 @@ class ComputePackageSCCs {
             }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
             // because our reference might disappear from underneath us during that call.
-            auto &importInfo = this->nodeMap[i.name];
+            auto &importInfo = this->nodeMap[i.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(i.name, importInfo, packageGraph);
+                this->strongConnect<EdgeType>(i.mangledName, importInfo, packageGraph);
 
                 // Need to re-lookup for the reason above.
-                auto &importInfo = this->nodeMap[i.name];
+                auto &importInfo = this->nodeMap[i.mangledName];
                 if (importInfo.index == NodeInfo::UNVISITED) {
                     // This is to handle early return above.
                     continue;
@@ -138,14 +138,14 @@ class ComputePackageSCCs {
                     }
 
                     // The mangled name won't exist if the import was to a package that doesn't exist.
-                    if (!i.name.exists()) {
+                    if (!i.mangledName.exists()) {
                         continue;
                     }
 
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = packageGraph.getSCCId(i.name);
+                    auto impId = packageGraph.getSCCId(i.mangledName);
                     if (impId == sccId) {
                         continue;
                     }
