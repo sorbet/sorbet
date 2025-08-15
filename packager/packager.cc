@@ -687,6 +687,26 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
+vector<core::NameRef> fullyQualifiedNameFromSymbol(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
+    vector<core::NameRef> fqn;
+    while (klass != core::Symbols::root()) {
+        auto data = klass.data(gs);
+        fqn.emplace_back(data->name);
+        klass = data->owner;
+    }
+    return fqn;
+}
+
+// TODO(jez) This function is only used in two places, and should be possible to delete:
+//
+// - To resolve import/visible_to names to MangledNames
+// - To populate exports
+//
+// The constant lit resolution logic should probably not materialize the vector, and instead just
+// reimplement enough of ResolveConstantsWalk to resolve the constant literals in place, returning
+// the final package symbol.
+//
+// Exports can probably be rewritten to not need to store the fully qualified name entirely.
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
     while (constantLit != nullptr) {
@@ -1538,9 +1558,9 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     auto packageFilePath = package.file.data(gs).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-    auto fullName = getFullyQualifiedName(gs, info.mangledName_.owner);
-    const auto shortName = absl::StrJoin(fullName.parts, "_", core::packages::NameFormatter(gs));
-    const auto slashDirName = absl::StrJoin(fullName.parts, "/", core::packages::NameFormatter(gs));
+    auto fullName = fullyQualifiedNameFromSymbol(gs, info.mangledName_.owner);
+    const auto shortName = absl::StrJoin(fullName, "_", core::packages::NameFormatter(gs));
+    const auto slashDirName = absl::StrJoin(fullName, "/", core::packages::NameFormatter(gs));
     const string_view dirNameFromShortName = shortName;
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
