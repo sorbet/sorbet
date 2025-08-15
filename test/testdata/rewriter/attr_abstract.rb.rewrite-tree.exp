@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(&<blk>)
-      @foo
+      <emptyTree>
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar=<<todo method>>(bar, &<blk>)
-      @bar = bar
+      <emptyTree>
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux<<todo method>>(&<blk>)
-      @qux
+      <emptyTree>
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux=<<todo method>>(qux, &<blk>)
-      @qux = qux
+      <emptyTree>
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>, <emptyTree>::<C T>::<C Helpers>)

@@ -5,11 +5,11 @@ module IFoo
   abstract!
 
   sig { abstract.returns(String) }
-  attr_reader :foo # error: Abstract methods must not contain any code in their body
+  attr_reader :foo
 
   sig { abstract.params(bar: String).returns(String) }
-  attr_writer :bar # error: Abstract methods must not contain any code in their body
+  attr_writer :bar
 
   sig { abstract.returns(String) }
-  attr_accessor :qux # error: Abstract methods must not contain any code in their body
+  attr_accessor :qux
 end
