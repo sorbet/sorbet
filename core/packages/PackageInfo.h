@@ -3,6 +3,7 @@
 
 #include "absl/types/span.h"
 
+#include "core/Loc.h"
 #include "core/NameRef.h"
 #include "core/StrictLevel.h"
 #include "core/SymbolRef.h"
