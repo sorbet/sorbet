@@ -1941,17 +1941,12 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
 }
 
 core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
-    auto nextId = *parserUniqueCounter + 1;
-    *parserUniqueCounter = nextId;
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, nextId);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
 }
 
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
     ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
-
-    auto nextId = *desugarUniqueCounter + 1;
-    *desugarUniqueCounter = nextId;
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, nextId);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++parserUniqueCounter);
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
