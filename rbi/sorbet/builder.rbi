@@ -18,6 +18,9 @@ class T::Private::Methods::DeclBuilder
   sig {returns(T::Private::Methods::DeclBuilder)}
   def overridable; end
 
+  sig {returns(T::Private::Methods::DeclBuilder)}
+  def deprecated; end
+
   sig {params(klass: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def bind(klass); end
 
