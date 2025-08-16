@@ -1,6 +1,5 @@
 #include "packager/packager.h"
 #include "absl/strings/str_join.h"
-#include "absl/strings/str_replace.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
@@ -73,37 +72,8 @@ struct FullyQualifiedName {
     FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
     FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
 
-    FullyQualifiedName withPrefix(core::NameRef prefix) const {
-        vector<core::NameRef> prefixed(parts.size() + 1);
-        prefixed[0] = prefix;
-        std::copy(parts.begin(), parts.end(), prefixed.begin() + 1);
-        ENFORCE(prefixed.size() == parts.size() + 1);
-        return move(prefixed);
-    }
-
-    bool isSuffix(const FullyQualifiedName &prefix) const {
-        if (prefix.parts.size() >= parts.size()) {
-            return false;
-        }
-
-        return std::equal(prefix.parts.begin(), prefix.parts.end(), parts.begin());
-    }
-
     string show(const core::GlobalState &gs) const {
         return absl::StrJoin(parts, "::", core::packages::NameFormatter(gs));
-    }
-};
-
-struct PackageName {
-    core::packages::MangledName mangledName;
-    FullyQualifiedName fullName;
-
-    PackageName(core::ClassOrModuleRef owner, FullyQualifiedName &&fullName)
-        : mangledName(core::packages::MangledName(owner)), fullName(move(fullName)) {}
-
-    // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
-    string toString(const core::GlobalState &gs) const {
-        return mangledName.owner.show(gs);
     }
 };
 
@@ -125,10 +95,11 @@ struct Export {
 };
 
 struct VisibleTo {
-    PackageName name;
+    core::packages::MangledName mangledName;
     core::packages::VisibleToType type;
 
-    VisibleTo(PackageName &&name, core::packages::VisibleToType type) : name(move(name)), type(type) {}
+    VisibleTo(core::packages::MangledName mangledName, core::packages::VisibleToType type)
+        : mangledName(mangledName), type(type) {}
 };
 
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
@@ -171,11 +142,7 @@ public:
 class PackageInfoImpl final : public core::packages::PackageInfo {
 public:
     core::packages::MangledName mangledName() const {
-        return name.mangledName;
-    }
-
-    absl::Span<const core::NameRef> fullName() const {
-        return absl::MakeSpan(name.fullName.parts);
+        return mangledName_;
     }
 
     absl::Span<const string> pathPrefixes() const {
@@ -198,7 +165,7 @@ public:
         return visibleToTests_;
     }
 
-    PackageName name;
+    core::packages::MangledName mangledName_;
 
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
     core::Loc loc;
@@ -284,7 +251,8 @@ public:
         return make_unique<PackageInfoImpl>(*this);
     }
 
-    PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}
+    PackageInfoImpl(core::packages::MangledName mangledName, core::Loc loc, core::Loc declLoc_)
+        : mangledName_(mangledName), loc(loc), declLoc_(declLoc_) {}
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
@@ -415,7 +383,7 @@ public:
         if (!importedPackageNames.empty()) {
             core::LocOffsets importToInsertAfter;
             for (auto &import : importedPackageNames) {
-                if (import.mangledName == info.name.mangledName) {
+                if (import.mangledName == info.mangledName()) {
                     if ((importType == core::packages::ImportType::Normal &&
                          import.type != core::packages::ImportType::Normal) ||
                         (importType == core::packages::ImportType::TestHelper &&
@@ -503,7 +471,7 @@ public:
         }
         ENFORCE(insertionLoc.exists());
 
-        auto packageToImport = info.name.toString(gs);
+        auto packageToImport = info.mangledName_.owner.show(gs);
         string_view importTypeHuman;
         string_view importTypeMethod;
         string_view importTypeTrailing = "";
@@ -523,7 +491,7 @@ public:
                 break;
         }
         auto suggestionTitle =
-            fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, name.toString(gs));
+            fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, mangledName_.owner.show(gs));
         vector<core::AutocorrectSuggestion::Edit> edits = {
             {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
         if (deleteTestImportEdit.has_value()) {
@@ -574,15 +542,16 @@ public:
         ENFORCE(insertionLoc.exists());
 
         auto strName = newExport.show(gs);
-        core::AutocorrectSuggestion suggestion(fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
-                                               {{insertionLoc, fmt::format("\n  export {}", strName)}});
+        core::AutocorrectSuggestion suggestion(
+            fmt::format("Export `{}` in package `{}`", strName, mangledName_.owner.show(gs)),
+            {{insertionLoc, fmt::format("\n  export {}", strName)}});
         return {suggestion};
     }
 
     vector<core::packages::VisibleTo> visibleTo() const {
         vector<core::packages::VisibleTo> rv;
         for (auto &v : visibleTo_) {
-            rv.emplace_back(v.name.mangledName, v.type);
+            rv.emplace_back(v.mangledName, v.type);
         }
         return rv;
     }
@@ -709,6 +678,28 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
+vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, core::packages::MangledName pkg) {
+    auto klass = pkg.owner;
+    vector<core::NameRef> fqn;
+    while (klass != core::Symbols::PackageSpecRegistry()) {
+        auto data = klass.data(gs);
+        fqn.emplace_back(data->name);
+        klass = data->owner;
+    }
+    absl::c_reverse(fqn);
+    return fqn;
+}
+
+// TODO(jez) This function is only used in two places, and should be possible to delete:
+//
+// - To resolve import/visible_to names to MangledNames
+// - To populate exports
+//
+// The constant lit resolution logic should probably not materialize the vector, and instead just
+// reimplement enough of ResolveConstantsWalk to resolve the constant literals in place, returning
+// the final package symbol.
+//
+// Exports can probably be rewritten to not need to store the fully qualified name entirely.
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
     while (constantLit != nullptr) {
@@ -724,14 +715,8 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
     return fqn;
 }
 
-PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit,
-                           core::ClassOrModuleRef symbol) {
-    ENFORCE(constantLit != nullptr);
-
-    return PackageName(symbol, getFullyQualifiedName(ctx, constantLit));
-}
-
-PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+// TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
+core::packages::MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     auto fullName = getFullyQualifiedName(ctx, constantLit);
@@ -757,7 +742,7 @@ PackageName getUnresolvedPackageName(core::Context ctx, const ast::UnresolvedCon
         owner = core::Symbols::noClassOrModule();
     }
 
-    return PackageName(owner, move(fullName));
+    return core::packages::MangledName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -1043,7 +1028,7 @@ public:
                 e.setHeader("This file must only define behavior in enclosing package `{}`", requiredNamespace(ctx));
                 const auto &[scopeSym, scopeLoc] = scope.back();
                 e.addErrorLine(ctx.locAt(scopeLoc), "Defining behavior in `{}` instead:", scopeSym.show(ctx));
-                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.name.toString(ctx));
+                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.mangledName_.owner.show(ctx));
                 if (pkgForNamespace.exists()) {
                     auto &packageInfo = ctx.state.packageDB().getPackageInfo(pkgForNamespace);
                     e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here", scopeSym.show(ctx));
@@ -1114,7 +1099,7 @@ private:
     }
 
     const string requiredNamespace(const core::GlobalState &gs) const {
-        auto result = pkg.name.toString(gs);
+        auto result = pkg.mangledName_.owner.show(gs);
         if (mustUseTestNamespace) {
             result = fmt::format("{}::{}", core::packages::PackageDB::TEST_NAMESPACE.show(gs), result);
         }
@@ -1201,8 +1186,8 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.importedPackageNames.emplace_back(getUnresolvedPackageName(ctx, target).mangledName,
-                                                           method2ImportType(send), send.loc);
+                    info.importedPackageNames.emplace_back(resolvePackageName(ctx, target), method2ImportType(send),
+                                                           send.loc);
                 }
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
@@ -1253,7 +1238,7 @@ struct PackageSpecBodyWalk {
                         auto &posArg = send.getPosArg(0);
                         auto importArg = move(target->recv);
                         posArg = ast::packager::prependRegistry(move(importArg));
-                        info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, recv),
+                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv),
                                                      core::packages::VisibleToType::Wildcard);
                     } else {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
@@ -1267,7 +1252,7 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.visibleTo_.emplace_back(getUnresolvedPackageName(ctx, target),
+                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target),
                                                  core::packages::VisibleToType::Normal);
                 }
             }
@@ -1414,7 +1399,7 @@ struct PackageSpecBodyWalk {
             for (auto it = exported.begin(); it != exported.end(); ++it) {
                 if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info.name.toString(ctx), "export_all!");
+                                info.mangledName_.owner.show(ctx), "export_all!");
                 }
             }
         }
@@ -1587,7 +1572,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree->original(), packageSpecClass->symbol),
+        return make_unique<PackageInfoImpl>(core::packages::MangledName(packageSpecClass->symbol),
                                             ctx.locAt(packageSpecClass->loc), ctx.locAt(packageSpecClass->declLoc));
     }
 
@@ -1626,8 +1611,9 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     auto packageFilePath = package.file.data(gs).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-    const auto shortName = absl::StrReplaceAll(info.name.mangledName.owner.show(gs), {{"::", "_"}});
-    const string slashDirName = absl::StrJoin(info.name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
+    auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_);
+    const auto shortName = absl::StrJoin(fullName, "_", core::packages::NameFormatter(gs));
+    const auto slashDirName = absl::StrJoin(fullName, "/", core::packages::NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1807,7 +1793,7 @@ void validatePackage(core::Context ctx) {
             validateVisibility(ctx, pkgInfo, i);
         }
 
-        if (i.mangledName == pkgInfo.name.mangledName) {
+        if (i.mangledName == pkgInfo.mangledName()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
@@ -1819,7 +1805,7 @@ void validatePackage(core::Context ctx) {
                         import_ = "test_import";
                         break;
                 }
-                e.setHeader("Package `{}` cannot {} itself", pkgInfo.name.toString(ctx), import_);
+                e.setHeader("Package `{}` cannot {} itself", pkgInfo.mangledName_.owner.show(ctx), import_);
             }
         }
     }
@@ -1885,7 +1871,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
                 if (auto e = gs.beginError(pkg->loc, core::errors::Packager::RedefinitionOfPackage)) {
-                    auto pkgName = pkg->name.toString(gs);
+                    auto pkgName = pkg->mangledName_.owner.show(gs);
                     e.setHeader("Redefinition of package `{}`", pkgName);
                     e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
                 }

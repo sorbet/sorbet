@@ -67,7 +67,6 @@ struct VisibleTo {
 class PackageInfo {
 public:
     virtual MangledName mangledName() const = 0;
-    virtual absl::Span<const core::NameRef> fullName() const = 0;
     virtual absl::Span<const std::string> pathPrefixes() const = 0;
     virtual std::vector<VisibleTo> visibleTo() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
@@ -92,9 +91,6 @@ public:
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
     std::string show(const core::GlobalState &gs) const;
-
-    core::ClassOrModuleRef getPackageScope(const core::GlobalState &gs) const;
-    core::ClassOrModuleRef getPackageTestScope(const core::GlobalState &gs) const;
 
     virtual std::optional<ImportType> importsPackage(MangledName mangledName) const = 0;
 
