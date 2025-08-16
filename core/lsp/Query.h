@@ -22,6 +22,8 @@ public:
         VAR,
         // Looking for the definition of a certain method for the purpose of suggesting a sig.
         SUGGEST_SIG,
+        // Looking for all sends in a file.
+        SENDS,
     };
 
     Kind kind;
@@ -40,11 +42,13 @@ public:
     static Query createSymbolQuery(core::SymbolRef symbol);
     static Query createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
     static Query createSuggestSigQuery(core::MethodRef method);
+    static Query createSendsQuery();
 
     bool matchesSymbol(const core::SymbolRef &symbol) const;
     bool matchesLoc(const core::Loc &loc) const;
     bool matchesVar(const core::SymbolRef &owner, const core::LocalVariable &var) const;
     bool matchesSuggestSig(const core::SymbolRef &method) const;
+    bool matchesSend() const;
     bool isEmpty() const;
 
 private:
