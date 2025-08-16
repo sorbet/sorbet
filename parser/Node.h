@@ -92,6 +92,9 @@ public:
     }
 
     virtual ast::ExpressionPtr takeDesugaredExpr() final {
+        ENFORCE(this->desugaredExpr != nullptr,
+                "Tried to call make a second call to `takeDesugaredExpr()` on a NodeWithExpr");
+
         // We know each `NodeAndExpr` object's `takeDesugaredExpr()` will be called at most once, either:
         // 1. When its parent node is being translated in `prism/Translator.cc`,
         //    and this value is used to create that parent's expr.
@@ -104,8 +107,7 @@ public:
     }
 
     virtual bool hasDesugaredExpr() final {
-        ENFORCE(this->desugaredExpr != nullptr, "NodeWithExpr has no cached desugared expr");
-        return true;
+        return this->desugaredExpr != nullptr;
     }
 
     // Like `parser::cast_node`, but can cast a `NodeWithExpr` *as if* it was its wrapped node.

@@ -32,8 +32,8 @@ class Translator final {
     //   which is either pointing to its own storage, or to a parent's storage.
     uint16_t parserUniqueCounterStorage;  // Minics the `Builder::Impl.uniqueCounter_` in `parser/Builder.cc`
     uint32_t desugarUniqueCounterStorage; // Minics the `DesugarContext.uniqueCounter`  in `ast/desugar/Desugar.cc`
-    uint16_t *const parserUniqueCounter;  // Points to the active `parserUniqueCounterStorage`
-    uint32_t *const desugarUniqueCounter; // Points to the active `desugarUniqueCounterStorage`
+    uint16_t &parserUniqueCounter;        // Points to the active `parserUniqueCounterStorage`
+    uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
     const bool isInMethodDef = false;
@@ -47,8 +47,8 @@ public:
                bool directlyDesugar)
         : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
           parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
-          parserUniqueCounter(&this->parserUniqueCounterStorage),
-          desugarUniqueCounter(&this->desugarUniqueCounterStorage) {}
+          parserUniqueCounter(this->parserUniqueCounterStorage),
+          desugarUniqueCounter(this->desugarUniqueCounterStorage) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
@@ -61,7 +61,7 @@ private:
           directlyDesugar(parent.directlyDesugar), parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
           desugarUniqueCounterStorage(resetDesugarUniqueCounter ? std::numeric_limits<uint32_t>::min() : 1),
           parserUniqueCounter(parent.parserUniqueCounter),
-          desugarUniqueCounter(resetDesugarUniqueCounter ? &this->desugarUniqueCounterStorage
+          desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
           isInMethodDef(isInMethodDef) {}
 
