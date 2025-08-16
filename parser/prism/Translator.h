@@ -25,6 +25,9 @@ class Translator final {
     // Whether to directly desugar during in the Translator, or wait until the usual `Desugar.cc` code path.
     const bool directlyDesugar;
 
+    // TODO: document me
+    const bool preserveConcreteSyntax;
+
     // Unique counters used to create synthetic names via `ctx.state.freshNameUnique`.
     // - The storage integers either store an "active" count used by a translator and some of its children,
     //   or a dummy value (int min).
@@ -32,11 +35,14 @@ class Translator final {
     //   which is either pointing to its own storage, or to a parent's storage.
     uint16_t parserUniqueCounterStorage;  // Minics the `Builder::Impl.uniqueCounter_` in `parser/Builder.cc`
     uint32_t desugarUniqueCounterStorage; // Minics the `DesugarContext.uniqueCounter`  in `ast/desugar/Desugar.cc`
-    uint16_t *const parserUniqueCounter;  // Points to the active `parserUniqueCounterStorage`
-    uint32_t *const desugarUniqueCounter; // Points to the active `desugarUniqueCounterStorage`
+    uint16_t &parserUniqueCounter;        // Points to the active `parserUniqueCounterStorage`
+    uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
-    const bool isInMethodDef = false;
+    const core::LocOffsets enclosingMethodLoc = core::LocOffsets::none();
+    const core::NameRef enclosingMethodName;
+    const bool isInModule = false;
+    const bool isInAnyBlock = false;
 
     Translator(Translator &&) = delete;                 // Move constructor
     Translator(const Translator &) = delete;            // Copy constructor
@@ -44,11 +50,11 @@ class Translator final {
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
     Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> parseErrors,
-               bool directlyDesugar)
+               bool directlyDesugar, bool preserveConcreteSyntax)
         : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
-          parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
-          parserUniqueCounter(&this->parserUniqueCounterStorage),
-          desugarUniqueCounter(&this->desugarUniqueCounterStorage) {}
+          preserveConcreteSyntax(preserveConcreteSyntax), parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
+          parserUniqueCounter(this->parserUniqueCounterStorage),
+          desugarUniqueCounter(this->desugarUniqueCounterStorage) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
@@ -56,14 +62,17 @@ public:
 private:
     // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(const Translator &parent, bool resetDesugarUniqueCounter, bool isInMethodDef)
+    Translator(const Translator &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
+               core::NameRef enclosingMethodName, bool isInModule, bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
-          directlyDesugar(parent.directlyDesugar), parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
+          directlyDesugar(parent.directlyDesugar), preserveConcreteSyntax(parent.preserveConcreteSyntax),
+          parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
           desugarUniqueCounterStorage(resetDesugarUniqueCounter ? std::numeric_limits<uint32_t>::min() : 1),
           parserUniqueCounter(parent.parserUniqueCounter),
-          desugarUniqueCounter(resetDesugarUniqueCounter ? &this->desugarUniqueCounterStorage
+          desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
-          isInMethodDef(isInMethodDef) {}
+          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), isInModule(isInModule),
+          isInAnyBlock(isInAnyBlock) {}
 
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const;
@@ -116,10 +125,21 @@ private:
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
+    // Helper function to determine which super method to use
+    core::NameRef maybeTypedSuper();
+
+    // Helper function to convert a body node to ClassDef::RHS_store
+    // Returns nullopt if not all nodes are desugared yet
+    std::optional<ast::ClassDef::RHS_store> bodyToRHSStore(std::unique_ptr<parser::Node> &body);
+
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
     // Context management helpers. These return a copy of `this` with some change to the context.
-    Translator enterMethodDef() const;
+    bool isInMethodDef() const;
+    Translator enterMethodDef(core::LocOffsets methodLoc, core::NameRef methodName) const;
+    Translator enterBlockContext() const;
+    Translator enterModuleContext() const;
+    Translator enterClassContext() const;
 };
 
 } // namespace sorbet::parser::Prism

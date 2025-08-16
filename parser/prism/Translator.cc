@@ -29,8 +29,7 @@ template <typename... Rest> bool hasExpr(const std::unique_ptr<parser::Node> &fi
 
 // Check if all nodes in NodeVec are null or have a desugared expr.
 bool hasExpr(const parser::NodeVec &nodes) {
-    return absl::c_find_if(nodes, [](const auto &node) { return node != nullptr && !node->hasDesugaredExpr(); }) ==
-           nodes.end();
+    return absl::c_all_of(nodes, [](const auto &node) { return node == nullptr || node->hasDesugaredExpr(); });
 }
 
 // Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
@@ -450,13 +449,63 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translate(classNode->constant_path);
             auto declLoc = translateLoc(classNode->class_keyword_loc).join(name->loc);
             auto superclass = translate(classNode->superclass);
-            auto body = translate(classNode->body);
 
             if (superclass != nullptr) {
                 declLoc = declLoc.join(superclass->loc);
             }
 
-            return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
+            // Handle PM_STATEMENTS_NODE here instead of calling `translate(classNode->body)`,
+            // so that we don't end up with an `NodeWithExpr` for a Begin node that has its expr pulled out.
+            unique_ptr<parser::Node> bodyBeginParserNode;
+            if (classNode->body != nullptr) {
+                // Handle PM_STATEMENTS_NODE here instead of calling `translate(classNode->body)`,
+                // so that we don't end up with an `NodeWithExpr` for a Begin node that has its expr pulled out.
+                auto bodyStatements = down_cast<pm_statements_node>(classNode->body);
+
+                if (bodyStatements->body.size == 1) {
+                    bodyBeginParserNode = translate(bodyStatements->body.nodes[0]);
+                } else {
+                    auto beginLoc = translateLoc(bodyStatements->base.location);
+                    parser::NodeVec sorbetStmts = translateMulti(bodyStatements->body);
+                    bodyBeginParserNode =
+                        make_node_with_expr<parser::Begin>(MK::Nil(beginLoc), beginLoc, move(sorbetStmts));
+                }
+            } else {
+                bodyBeginParserNode = nullptr;
+            }
+
+            // Check if we can desugar
+            if (!directlyDesugar || !hasExpr(name)) {
+                return make_unique<parser::Class>(location, declLoc, move(name), move(superclass),
+                                                  move(bodyBeginParserNode));
+            }
+
+            // Convert body to RHS_store
+            auto bodyStore = bodyToRHSStore(bodyBeginParserNode);
+            if (!bodyStore.has_value()) {
+                return make_unique<parser::Class>(location, declLoc, move(name), move(superclass),
+                                                  move(bodyBeginParserNode));
+            }
+
+            // Process superclass
+            ast::ClassDef::ANCESTORS_store ancestors;
+            if (superclass == nullptr) {
+                ancestors.emplace_back(MK::Constant(location, core::Symbols::todo()));
+            } else {
+                if (!hasExpr(superclass)) {
+                    return make_unique<parser::Class>(location, declLoc, move(name), move(superclass),
+                                                      move(bodyBeginParserNode));
+                }
+                ancestors.emplace_back(superclass->takeDesugaredExpr());
+            }
+
+            // Create the desugared expression
+            auto nameExpr = name->takeDesugaredExpr();
+            auto expr =
+                MK::Class(location, declLoc, std::move(nameExpr), std::move(ancestors), std::move(bodyStore.value()));
+
+            return make_node_with_expr<parser::Class>(std::move(expr), location, declLoc, move(name), move(superclass),
+                                                      move(bodyBeginParserNode));
         }
         case PM_CLASS_VARIABLE_AND_WRITE_NODE: { // And-assignment to a class variable, e.g. `@@a &&= 1`
             return translateOpAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(node);
@@ -541,21 +590,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translateConstantName(defNode->name);
 
-            // These 2 need to be called on a new Translator with isInMethod set to true
-            Translator childContext = enterMethodDef();
-
-            unique_ptr<parser::Node> params;
-
             // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
             // In this case, Sorbet's legacy parser will still hold an empty Args node, so we need to
             // create one here
+            unique_ptr<parser::Node> params;
             if (defNode->parameters == nullptr && rparenLoc.start != nullptr) {
                 params = make_unique<parser::Args>(location, NodeVec{});
             } else {
-                params = childContext.translate(up_cast(defNode->parameters));
+                params = translate(up_cast(defNode->parameters));
             }
 
-            auto body = childContext.translate(defNode->body);
+            Translator methodContext = this->isInModule ? this->enterMethodDef(declLoc, name).enterModuleContext()
+                                                        : this->enterMethodDef(declLoc, name);
+            auto body = methodContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
@@ -578,12 +625,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             if (auto receiver = defNode->receiver; receiver != nullptr) {
-                auto sorbetReceiver = translate(receiver);
-                return make_unique<parser::DefS>(location, declLoc, move(sorbetReceiver), name, move(params),
+                return make_unique<parser::DefS>(location, declLoc, translate(defNode->receiver), name, move(params),
                                                  move(body));
+            } else {
+                return make_unique<parser::DefMethod>(location, declLoc, name, move(params), move(body));
             }
-
-            return make_unique<parser::DefMethod>(location, declLoc, name, move(params), move(body));
         }
         case PM_DEFINED_NODE: {
             auto definedNode = down_cast<pm_defined_node>(node);
@@ -601,12 +647,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Can be multiple statements separated by `;`.
             auto embeddedStmtsNode = down_cast<pm_embedded_statements_node>(node);
 
-            if (auto stmtsNode = embeddedStmtsNode->statements; stmtsNode != nullptr) {
-                auto inlineIfSingle = false;
-                return translateStatements(stmtsNode, inlineIfSingle);
-            } else {
-                return make_unique<parser::Begin>(translateLoc(embeddedStmtsNode->base.location), NodeVec{});
+            auto stmtsNode = embeddedStmtsNode->statements;
+            if (stmtsNode == nullptr) {
+                return make_node_with_expr<parser::Begin>(MK::Nil(location), location, NodeVec{});
             }
+
+            auto inlineIfSingle = false;
+            return translateStatements(stmtsNode, inlineIfSingle);
         }
         case PM_EMBEDDED_VARIABLE_NODE: {
             auto embeddedVariableNode = down_cast<pm_embedded_variable_node>(node);
@@ -981,9 +1028,40 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translate(moduleNode->constant_path);
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
-            auto body = translate(moduleNode->body);
 
-            return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            unique_ptr<parser::Node> bodyBeginParserNode;
+            if (moduleNode->body != nullptr) {
+                // Handle PM_STATEMENTS_NODE here instead of calling `translate(classNode->body)`,
+                // so that we don't end up with an `NodeWithExpr` for a Begin node that has its expr pulled out.
+                auto bodyStatements = down_cast<pm_statements_node>(moduleNode->body);
+
+                if (bodyStatements->body.size == 1) {
+                    bodyBeginParserNode = translate(bodyStatements->body.nodes[0]);
+                } else {
+                    auto beginLoc = translateLoc(bodyStatements->base.location);
+                    parser::NodeVec sorbetStmts = translateMulti(bodyStatements->body);
+                    bodyBeginParserNode =
+                        make_node_with_expr<parser::Begin>(MK::Nil(beginLoc), beginLoc, move(sorbetStmts));
+                }
+            } else {
+                bodyBeginParserNode = nullptr;
+            }
+
+            if (!directlyDesugar || !hasExpr(name)) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(bodyBeginParserNode));
+            }
+
+            auto bodyStore = bodyToRHSStore(bodyBeginParserNode);
+            if (!bodyStore.has_value()) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(bodyBeginParserNode));
+            }
+
+            auto nameExpr = name->takeDesugaredExpr();
+            ast::ClassDef::ANCESTORS_store ancestors;
+            auto expr = MK::Module(location, declLoc, move(nameExpr), move(ancestors), move(*bodyStore));
+
+            return make_node_with_expr<parser::Module>(move(expr), location, declLoc, move(name),
+                                                       move(bodyBeginParserNode));
         }
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
             auto multiTargetNode = down_cast<pm_multi_target_node>(node);
@@ -1112,12 +1190,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_PARENTHESES_NODE: { // A parethesized expression, e.g. `(a)`
             auto parensNode = down_cast<pm_parentheses_node>(node);
 
-            if (auto stmtsNode = parensNode->body; stmtsNode != nullptr) {
-                auto inlineIfSingle = false;
-                return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle);
-            } else {
-                return make_unique<parser::Begin>(location, NodeVec{});
+            auto stmtsNode = parensNode->body;
+            if (stmtsNode == nullptr) {
+                return make_node_with_expr<parser::Begin>(MK::Nil(location), location, NodeVec{});
             }
+
+            auto inlineIfSingle = false;
+            return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle);
         }
         case PM_PRE_EXECUTION_NODE: {
             auto preExecutionNode = down_cast<pm_pre_execution_node>(node);
@@ -1240,9 +1319,56 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t declLoc = classNode->class_keyword_loc;
 
             auto expr = translate(classNode->expression);
-            auto body = translate(classNode->body);
+            auto body = this->enterClassContext().translate(classNode->body);
 
-            return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
+            unique_ptr<parser::Node> bodyBeginParserNode;
+            if (classNode->body != nullptr) {
+                // Handle PM_STATEMENTS_NODE here instead of calling `translate(classNode->body)`,
+                // so that we don't end up with an `NodeWithExpr` for a Begin node that has its expr pulled out.
+                auto bodyStatements = down_cast<pm_statements_node>(classNode->body);
+
+                if (bodyStatements->body.size == 1) {
+                    bodyBeginParserNode = translate(bodyStatements->body.nodes[0]);
+                } else {
+                    auto beginLoc = translateLoc(bodyStatements->base.location);
+                    parser::NodeVec sorbetStmts = translateMulti(bodyStatements->body);
+                    bodyBeginParserNode =
+                        make_node_with_expr<parser::Begin>(MK::Nil(beginLoc), beginLoc, move(sorbetStmts));
+                }
+            } else {
+                bodyBeginParserNode = nullptr;
+            }
+
+            if (!directlyDesugar || !hasExpr(expr)) {
+                return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr),
+                                                   move(bodyBeginParserNode));
+            }
+
+            if (!parser::NodeWithExpr::isa_node<parser::Self>(expr.get())) {
+                if (auto e = ctx.state.beginIndexerError(core::Loc(ctx.file, expr->loc),
+                                                         core::errors::Desugar::InvalidSingletonDef)) {
+                    e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
+                }
+                auto emptyTree = MK::EmptyTree();
+                return make_node_with_expr<parser::SClass>(move(emptyTree), location, translateLoc(declLoc), move(expr),
+                                                           nullptr);
+            }
+
+            auto bodyExprsOpt = bodyToRHSStore(bodyBeginParserNode);
+            if (!bodyExprsOpt) {
+                return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr),
+                                                   move(bodyBeginParserNode));
+            }
+            auto bodyExprs = move(*bodyExprsOpt);
+
+            ast::ClassDef::ANCESTORS_store emptyAncestors;
+            auto classDef = MK::Class(location, translateLoc(declLoc),
+                                      ast::make_expression<ast::UnresolvedIdent>(
+                                          expr->loc, ast::UnresolvedIdent::Kind::Class, core::Names::singleton()),
+                                      move(emptyAncestors), move(bodyExprs));
+
+            return make_node_with_expr<parser::SClass>(move(classDef), location, translateLoc(declLoc), move(expr),
+                                                       move(bodyBeginParserNode));
         }
         case PM_SOURCE_ENCODING_NODE: { // The `__ENCODING__` keyword
             return make_node_with_expr<parser::EncodingLiteral>(
@@ -1639,7 +1765,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             // Sorbet's parser always wraps the pinned expression in a `Begin` node.
             NodeVec statements;
             statements.emplace_back(move(expr));
-            auto beginNode = make_unique<parser::Begin>(translateLoc(pinnedExprNode->base.location), move(statements));
+            auto beginNode = make_node_with_expr<parser::Begin>(MK::Nil(location), location, move(statements));
 
             return make_unique<Pin>(location, move(beginNode));
         }
@@ -1653,8 +1779,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_SPLAT_NODE: { // A splat, like `*a` in an array pattern
             auto prismSplatNode = down_cast<pm_splat_node>(node);
             auto expr = patternTranslate(prismSplatNode->expression);
-            auto splatLoc = translateLoc(prismSplatNode->base.location);
-            return make_unique<MatchRest>(splatLoc, move(expr));
+            return make_unique<MatchRest>(location, move(expr));
         }
         default: {
             return translate(node);
@@ -1773,16 +1898,15 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
-
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismBlockNode->parameters);
-        body = translate(prismBlockNode->body);
+        body = this->enterBlockContext().translate(prismBlockNode->body);
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismLambdaNode->parameters);
-        body = translate(prismLambdaNode->body);
+        body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
 
     if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
@@ -1853,7 +1977,29 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     // For multiple statements, convert each statement and add them to the body of a Begin node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
-    return make_unique<parser::Begin>(translateLoc(stmtsNode->base.location), move(sorbetStmts));
+    auto beginLoc = translateLoc(stmtsNode->base.location);
+
+    if (sorbetStmts.empty()) {
+        return make_node_with_expr<parser::Begin>(MK::Nil(beginLoc), beginLoc, NodeVec{});
+    }
+
+    if (!directlyDesugar || !hasExpr(sorbetStmts)) {
+        return make_unique<parser::Begin>(beginLoc, move(sorbetStmts));
+    }
+
+    ast::InsSeq::STATS_store statements;
+    statements.reserve(sorbetStmts.size() - 1); // -1 because the `Begin` node stores the last element separately.
+
+    auto end = sorbetStmts.end();
+    --end; // Chop one off the end, so we iterate over all but the last element.
+    for (auto it = sorbetStmts.begin(); it != end; ++it) {
+        auto &statement = *it;
+        statements.emplace_back(statement->takeDesugaredExpr());
+    };
+    auto finalExpr = sorbetStmts.back()->takeDesugaredExpr(); // Process the last element separately.
+
+    auto instructionSequence = MK::InsSeq(beginLoc, move(statements), move(finalExpr));
+    return make_node_with_expr<parser::Begin>(move(instructionSequence), beginLoc, move(sorbetStmts));
 }
 
 // Handles any one of the Prism nodes that models any kind of constant or constant path.
@@ -1880,7 +2026,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
 
-    if (isInMethodDef && replaceWithDynamicConstAssign) {
+    if (this->isInMethodDef() && replaceWithDynamicConstAssign) {
         // Check if this is a dynamic constant assignment (SyntaxError at runtime)
         // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
         // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
@@ -1943,17 +2089,12 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
 }
 
 core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
-    auto nextId = *parserUniqueCounter + 1;
-    *parserUniqueCounter = nextId;
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, nextId);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
 }
 
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
     ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
-
-    auto nextId = *desugarUniqueCounter + 1;
-    *desugarUniqueCounter = nextId;
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, nextId);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++parserUniqueCounter);
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
@@ -2043,11 +2184,69 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
 }
 
+// Extracts the the desugared expressions out of the body of a class, singleton class, or module.
+optional<ast::ClassDef::RHS_store> Translator::bodyToRHSStore(unique_ptr<parser::Node> &body) {
+    ENFORCE(directlyDesugar, "bodyToRHSStore should only be called when direct desugaring is enabled");
+
+    if (body == nullptr) {
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(MK::EmptyTree());
+        return result;
+    }
+
+    if (auto *begin = parser::NodeWithExpr::cast_node<parser::Begin>(body.get())) { // Handle multi-statement body
+        if (!hasExpr(begin->stmts)) {
+            return nullopt;
+        }
+
+        ast::ClassDef::RHS_store result;
+        result.reserve(begin->stmts.size());
+        for (auto &stmt : begin->stmts) {
+            result.emplace_back(stmt->takeDesugaredExpr());
+        }
+        return result;
+    } else { // Handle single-statement body
+        if (!hasExpr(body)) {
+            return nullopt;
+        }
+
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(body->takeDesugaredExpr());
+        return result;
+    }
+}
+
 // Context management methods
-Translator Translator::enterMethodDef() const {
+bool Translator::isInMethodDef() const {
+    return enclosingMethodLoc.exists();
+}
+
+Translator Translator::enterMethodDef(core::LocOffsets methodLoc, core::NameRef methodName) const {
     auto resetDesugarUniqueCounter = true;
-    auto isInMethodDef = true;
-    return Translator(*this, resetDesugarUniqueCounter, isInMethodDef);
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, this->isInAnyBlock, this->isInModule);
+}
+
+Translator Translator::enterBlockContext() const {
+    auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
+    auto isInAnyBlock = true;
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, this->isInModule);
+}
+
+Translator Translator::enterModuleContext() const {
+    auto resetDesugarUniqueCounter = true;
+    auto isInModule = true;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, isInModule);
+}
+
+Translator Translator::enterClassContext() const {
+    auto resetDesugarUniqueCounter = true;
+    auto isInModule = true;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, isInModule);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {
