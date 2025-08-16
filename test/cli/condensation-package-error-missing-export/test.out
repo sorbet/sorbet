@@ -1,0 +1,207 @@
+use_other/foo_class.rb:10: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    10 |      Foo::Bar::OtherPackage::NotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:7: Defined here
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:3: Insert `export Foo::Bar::OtherPackage::NotExported`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+                                                  ^
+  Note:
+    Try running generate-packages.sh
+
+use_other/foo_class.rb:11: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    11 |      Bar::OtherPackage::NotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:7: Defined here
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:3: Insert `export Foo::Bar::OtherPackage::NotExported`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+                                                  ^
+  Note:
+    Try running generate-packages.sh
+
+use_other/foo_class.rb:12: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:10: Defined here
+    10 |  class Inner::AlsoNotExported
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:3: Insert `export Foo::Bar::OtherPackage::Inner::AlsoNotExported`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+                                                  ^
+  Note:
+    Try running generate-packages.sh
+
+use_other/foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    13 |      Bar::OtherPackage::Inner::AlsoNotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/other_class.rb:10: Defined here
+    10 |  class Inner::AlsoNotExported
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:3: Insert `export Foo::Bar::OtherPackage::Inner::AlsoNotExported`
+     3 |class Foo::Bar::OtherPackage < PackageSpec
+                                                  ^
+  Note:
+    Try running generate-packages.sh
+
+use_other/__package.rb:5: Parent of class `Foo::MyPackage` redefined from `Object` to `Sorbet::Private::Static::PackageSpec` https://srb.help/5012
+     5 |class Foo::MyPackage < PackageSpec
+                               ^^^^^^^^^^^
+
+use_other/__package.rb:6: Method `import` does not exist on `T.class_of(Foo::MyPackage)` https://srb.help/7003
+     6 |  import Foo::Bar::OtherPackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    use_other/__package.rb:6: Replace with `abort`
+     6 |  import Foo::Bar::OtherPackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+use_other/__package.rb:5: Parent of class `Foo::MyPackage` redefined from `Object` to `Sorbet::Private::Static::PackageSpec` https://srb.help/5012
+     5 |class Foo::MyPackage < PackageSpec
+                               ^^^^^^^^^^^
+
+use_other/__package.rb:6: Method `import` does not exist on `T.class_of(Foo::MyPackage)` https://srb.help/7003
+     6 |  import Foo::Bar::OtherPackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    use_other/__package.rb:6: Replace with `abort`
+     6 |  import Foo::Bar::OtherPackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 8
+use_app_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
+              ^^^^^^^^
+  Did you mean `Dir`? Use `-a` to autocorrect
+    use_app_false_cycle_package/foo.rb:6: Replace with `Dir`
+     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#L11: `Dir` defined here
+    11 |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:5: Parent of class `Foo::Bar::AppFalseCyclePackage` redefined from `Object` to `Sorbet::Private::Static::PackageSpec` https://srb.help/5012
+     5 |class Foo::Bar::AppFalseCyclePackage < PackageSpec
+                                               ^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:6: Method `layer` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+     6 |  layer 'app'
+          ^^^^^
+
+app_false_cycle_package/__package.rb:7: Method `strict_dependencies` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+     7 |  strict_dependencies 'false'
+          ^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:9: Method `import` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+     9 |  import Foo::Bar::AppFalseCyclePackage::SubPackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    app_false_cycle_package/__package.rb:9: Replace with `abort`
+     9 |  import Foo::Bar::AppFalseCyclePackage::SubPackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:10: Method `import` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+    10 |  import Foo::MyPackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    app_false_cycle_package/__package.rb:10: Replace with `abort`
+    10 |  import Foo::MyPackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:6: Parent of class `Foo::Bar::AppFalseCyclePackage::SubPackage` redefined from `Object` to `Sorbet::Private::Static::PackageSpec` https://srb.help/5012
+     6 |class Foo::Bar::AppFalseCyclePackage::SubPackage < PackageSpec
+                                                           ^^^^^^^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:7: Method `layer` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage::SubPackage)` https://srb.help/7003
+     7 |  layer 'lib'
+          ^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:8: Method `strict_dependencies` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage::SubPackage)` https://srb.help/7003
+     8 |  strict_dependencies 'false'
+          ^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:10: Method `import` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage::SubPackage)` https://srb.help/7003
+    10 |  import Foo::Bar::AppFalseCyclePackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    app_false_cycle_package/sub_package/__package.rb:10: Replace with `abort`
+    10 |  import Foo::Bar::AppFalseCyclePackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:5: Parent of class `Foo::Bar::AppFalseCyclePackage` redefined from `Object` to `Sorbet::Private::Static::PackageSpec` https://srb.help/5012
+     5 |class Foo::Bar::AppFalseCyclePackage < PackageSpec
+                                               ^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:6: Method `layer` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+     6 |  layer 'app'
+          ^^^^^
+
+app_false_cycle_package/__package.rb:7: Method `strict_dependencies` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+     7 |  strict_dependencies 'false'
+          ^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:9: Method `import` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+     9 |  import Foo::Bar::AppFalseCyclePackage::SubPackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    app_false_cycle_package/__package.rb:9: Replace with `abort`
+     9 |  import Foo::Bar::AppFalseCyclePackage::SubPackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/__package.rb:10: Method `import` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage)` https://srb.help/7003
+    10 |  import Foo::MyPackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    app_false_cycle_package/__package.rb:10: Replace with `abort`
+    10 |  import Foo::MyPackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:6: Parent of class `Foo::Bar::AppFalseCyclePackage::SubPackage` redefined from `Object` to `Sorbet::Private::Static::PackageSpec` https://srb.help/5012
+     6 |class Foo::Bar::AppFalseCyclePackage::SubPackage < PackageSpec
+                                                           ^^^^^^^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:7: Method `layer` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage::SubPackage)` https://srb.help/7003
+     7 |  layer 'lib'
+          ^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:8: Method `strict_dependencies` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage::SubPackage)` https://srb.help/7003
+     8 |  strict_dependencies 'false'
+          ^^^^^^^^^^^^^^^^^^^
+
+app_false_cycle_package/sub_package/__package.rb:10: Method `import` does not exist on `T.class_of(Foo::Bar::AppFalseCyclePackage::SubPackage)` https://srb.help/7003
+    10 |  import Foo::Bar::AppFalseCyclePackage
+          ^^^^^^
+  Did you mean `abort`? Use `-a` to autocorrect
+    app_false_cycle_package/sub_package/__package.rb:10: Replace with `abort`
+    10 |  import Foo::Bar::AppFalseCyclePackage
+          ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1103: Defined here
+    1103 |  def abort(msg=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 19
