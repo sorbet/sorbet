@@ -16,4 +16,6 @@ foo/foo.rb:14: `Project::Bar::UnexportedClass` resolves but is not exported from
     bar/bar.rb:14:
     14 |  class UnexportedClass; end
           ^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
 Errors: 2
