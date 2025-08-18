@@ -324,6 +324,8 @@ pipeline_tests(
             "testdata/deviations/keyword_method_names.rb",
             "testdata/rewriter/minitest_empty_test_each.rb",
             "testdata/infer/crash_after_parse_errors.rb",
+            "testdata/parser/invalid_def_block_param_after_forward.rb",
+            "testdata/parser/invalid_def_forward_after_block_param.rb",
 
             # Sorbets' parser incorrectly accepts invalid syntax
             "testdata/desugar/pattern_matching_hash.rb",  # See https://github.com/Shopify/sorbet/issues/362
