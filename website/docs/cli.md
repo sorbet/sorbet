@@ -20,7 +20,7 @@ In this doc, we'll cover **only** the command line interface to the `srb tc` sub
 
 The first time `tapioca init` runs, it creates a config file that `srb tc` will read, located at `sorbet/config`. The config file is actually just a newline-separated list of arguments to pass to `srb tc`, the same as if they'd been passed at the command line.
 
-```plain
+```plaintext
 --dir
 .
 # Full-line comment
