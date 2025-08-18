@@ -1688,11 +1688,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
                 result = move(res);
             },
-            [&](parser::NthRef *var) {
-                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global,
-                                                                     dctx.ctx.state.enterNameUTF8(to_string(var->ref)));
-                result = move(res);
-            },
+            [&](parser::NthRef *var) { desugaredByPrismTranslator(var); },
             [&](parser::Super *super) {
                 // Desugar super into a call to a normal method named `super`;
                 // Do this by synthesizing a `Send` parse node and letting our
@@ -2238,12 +2234,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto res = MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, move(args));
                 result = move(res);
             },
-            [&](parser::LineLiteral *line) {
-                auto details = dctx.ctx.locAt(loc).toDetails(dctx.ctx);
-                ENFORCE(details.first.line == details.second.line, "position corrupted");
-                auto res = MK::Int(loc, details.first.line);
-                result = move(res);
-            },
+            [&](parser::LineLiteral *line) { desugaredByPrismTranslator(line); },
             [&](parser::XString *xstring) {
                 auto res = MK::Send1(loc, MK::Self(loc), core::Names::backtick(), locZeroLen,
                                      desugarDString(dctx, loc, move(xstring->nodes)));
@@ -2300,11 +2291,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 res = MK::InsSeq1(loc, move(exprVar), move(res));
                 result = move(res);
             },
-            [&](parser::Backref *backref) {
-                auto recv = MK::Magic(loc);
-                auto arg = MK::Symbol(backref->loc, backref->name);
-                result = MK::Send1(loc, move(recv), core::Names::regexBackref(), locZeroLen, move(arg));
-            },
+            [&](parser::Backref *backref) { desugaredByPrismTranslator(backref); },
             [&](parser::EFlipflop *eflipflop) { desugaredByPrismTranslator(eflipflop); },
             [&](parser::IFlipflop *iflipflop) { desugaredByPrismTranslator(iflipflop); },
             [&](parser::MatchCurLine *matchCurLine) { desugaredByPrismTranslator(matchCurLine); },

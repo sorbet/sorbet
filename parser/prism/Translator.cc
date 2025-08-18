@@ -211,11 +211,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         "`PM_HASH_PATTERN_NODE`, because its translation depends on whether its used in a "
                         "Hash literal, Hash pattern, or method call.");
         }
-        case PM_BACK_REFERENCE_READ_NODE: {
+        case PM_BACK_REFERENCE_READ_NODE: { // One of the special global variables for accessing info about the previous
+                                            // Regexp match, such as `$&`, `$`, `$'`, and `$+`.
             auto backReferenceReadNode = down_cast<pm_back_reference_read_node>(node);
             auto name = translateConstantName(backReferenceReadNode->name);
 
-            return make_unique<parser::Backref>(location, name);
+            // Desugar `$&` to `<Magic>.<regex-backref>(:&)`
+            auto recv = MK::Magic(location);
+            auto arg = MK::Symbol(location, name);
+            auto locZeroLen = location.copyWithZeroLength();
+            auto expr = MK::Send1(location, move(recv), core::Names::regexBackref(), locZeroLen, move(arg));
+
+            return make_node_with_expr<parser::Backref>(move(expr), location, name);
         }
         case PM_BEGIN_NODE: { // A `begin ... end` block
             auto beginNode = down_cast<pm_begin_node>(node);
@@ -1033,7 +1040,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto numberedReferenceReadNode = down_cast<pm_numbered_reference_read_node>(node);
             auto number = numberedReferenceReadNode->number;
 
-            return make_unique<parser::NthRef>(location, number);
+            auto name = ctx.state.enterNameUTF8(to_string(number));
+            auto expr = ast::make_expression<ast::UnresolvedIdent>(location, ast::UnresolvedIdent::Kind::Global, name);
+
+            return make_node_with_expr<parser::NthRef>(move(expr), location, number);
         }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: { // An optional keyword parameter, like `def foo(a: 1)`
             auto optionalKeywordParamNode = down_cast<pm_optional_keyword_parameter_node>(node);
@@ -1253,7 +1263,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_node_with_expr<parser::FileLiteral>(MK::String(location, core::Names::currentFile()), location);
         }
         case PM_SOURCE_LINE_NODE: { // The `__LINE__` keyword
-            return make_unique<parser::LineLiteral>(location);
+            auto details = ctx.locAt(location).toDetails(ctx);
+            ENFORCE(details.first.line == details.second.line, "position corrupted");
+
+            return make_node_with_expr<parser::LineLiteral>(MK::Int(location, details.first.line), location);
         }
         case PM_SPLAT_NODE: { // A splat, like `*a` in an array literal or method call
             auto splatNode = down_cast<pm_splat_node>(node);
