@@ -6,7 +6,6 @@
 #include "common/concurrency/Parallel.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
-#include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
 #include "core/packages/Condensation.h"
@@ -15,22 +14,21 @@
 #include "packager/ComputePackageSCCs.h"
 #include <algorithm>
 #include <cctype>
-#include <queue>
 #include <sys/stat.h>
 
 using namespace std;
 
 namespace sorbet::packager {
+using namespace core::packages;
 namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-bool visibilityApplies(const core::GlobalState &gs, const core::packages::VisibleTo &vt,
-                       core::packages::MangledName name) {
-    if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
+bool visibilityApplies(const core::GlobalState &gs, const VisibleTo &vt, MangledName name) {
+    if (vt.type == VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         auto curPkg = name.owner;
-        auto prefix = vt.packageName.owner;
+        auto prefix = vt.mangledName.owner;
         do {
             if (curPkg == prefix) {
                 return true;
@@ -40,7 +38,7 @@ bool visibilityApplies(const core::GlobalState &gs, const core::packages::Visibl
         return false;
     } else {
         // otherwise it needs to be the same
-        return vt.packageName == name;
+        return vt.mangledName == name;
     }
 }
 
@@ -61,46 +59,6 @@ string buildValidLayersStr(const core::GlobalState &gs) {
     result += core::ErrorColors::format("or `{}`", validLayers.back().shortName(gs));
     return result;
 }
-
-struct FullyQualifiedName {
-    vector<core::NameRef> parts;
-
-    FullyQualifiedName() = default;
-    FullyQualifiedName(vector<core::NameRef> parts) : parts(parts) {}
-    explicit FullyQualifiedName(const FullyQualifiedName &) = default;
-    FullyQualifiedName(FullyQualifiedName &&) = default;
-    FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
-    FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
-
-    string show(const core::GlobalState &gs) const {
-        return absl::StrJoin(parts, "::", core::packages::NameFormatter(gs));
-    }
-};
-
-struct Export {
-    FullyQualifiedName fqn;
-    core::LocOffsets loc;
-
-    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(move(fqn)), loc(loc) {}
-
-    const vector<core::NameRef> &parts() const {
-        return fqn.parts;
-    }
-
-    // Lex sort by name.
-    static bool lexCmp(const Export &a, const Export &b) {
-        return absl::c_lexicographical_compare(a.parts(), b.parts(),
-                                               [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
-    }
-};
-
-struct VisibleTo {
-    core::packages::MangledName mangledName;
-    core::packages::VisibleToType type;
-
-    VisibleTo(core::packages::MangledName mangledName, core::packages::VisibleToType type)
-        : mangledName(mangledName), type(type) {}
-};
 
 // For a given vector of NameRefs, this represents the "next" vector that does not begin with its
 // prefix (without actually constructing it). Consider the following sorted names:
@@ -139,546 +97,13 @@ public:
     }
 };
 
-class PackageInfoImpl final : public core::packages::PackageInfo {
-public:
-    core::packages::MangledName mangledName() const {
-        return mangledName_;
-    }
-
-    absl::Span<const string> pathPrefixes() const {
-        return absl::MakeSpan(packagePathPrefixes);
-    }
-
-    core::Loc fullLoc() const {
-        return loc;
-    }
-
-    core::Loc declLoc() const {
-        return declLoc_;
-    }
-
-    bool exportAll() const {
-        return exportAll_;
-    }
-
-    bool visibleToTests() const {
-        return visibleToTests_;
-    }
-
-    core::packages::MangledName mangledName_;
-
-    // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
-    core::Loc loc;
-    // loc for the package definition. Single line (just the class def). Used for error messages.
-    core::Loc declLoc_;
-    // The possible path prefixes associated with files in the package, including path separator at end.
-    vector<string> packagePathPrefixes = {};
-    // The names of each package imported by this package.
-    vector<core::packages::Import> importedPackageNames = {};
-    // List of exported items that form the body of this package's public API.
-    // These are copied into every package that imports this package.
-    vector<Export> exports_ = {};
-
-    // Whether this package should just export everything
-    bool exportAll_ = false;
-
-    // The other packages to which this package is visible. If this vector is empty, then it means
-    // the package is fully public and can be imported by anything.
-    //
-    // The `VisibleToType` here represents whether to treat this line as a "wildcard". `Wildcard` means the
-    // `visible_to` line allows this package to be imported not just by the referenced package name
-    // but also any package name underneath it. `Normal` means the package can be imported
-    // by the referenced package name but not any child packages (unless they have a separate
-    // `visible_to` line of their own.)
-    vector<VisibleTo> visibleTo_ = {};
-
-    // Whether `visible_to` directives should be ignored for test code
-    bool visibleToTests_ = false;
-
-    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_ = nullopt;
-    optional<pair<core::NameRef, core::LocOffsets>> layer_ = nullopt;
-    vector<core::LocOffsets> extraDirectives_ = {};
-    std::optional<
-        std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
-        min_typed_level_ = nullopt;
-
-    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
-        return strictDependenciesLevel_;
-    }
-
-    optional<pair<core::NameRef, core::LocOffsets>> layer() const {
-        return layer_;
-    }
-
-    // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
-    optional<int> sccID_ = nullopt;
-
-    optional<int> sccID() const {
-        return sccID_;
-    }
-
-    // ID of the strongly-connected component that this package's tests are in, according to its graph of import
-    // dependencies
-    optional<int> testSccID_ = nullopt;
-
-    optional<int> testSccID() const {
-        return testSccID_;
-    }
-
-    // PackageInfoImpl is the only implementation of PackageInfo
-    static PackageInfoImpl &from(core::GlobalState &gs, core::packages::MangledName pkg) {
-        ENFORCE(pkg.exists());
-        return from(*gs.packageDB().getPackageInfoNonConst(pkg));
-    }
-
-    const static PackageInfoImpl &from(const core::GlobalState &gs, core::packages::MangledName pkg) {
-        ENFORCE(pkg.exists());
-        return from(gs.packageDB().getPackageInfo(pkg));
-    }
-
-    // PackageInfoImpl is the only implementation of PackageInfo
-    const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
-        ENFORCE(pkg.exists());
-        return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
-    }
-
-    static PackageInfoImpl &from(core::packages::PackageInfo &pkg) {
-        ENFORCE(pkg.exists());
-        return reinterpret_cast<PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
-    }
-
-    unique_ptr<PackageInfo> deepCopy() const {
-        return make_unique<PackageInfoImpl>(*this);
-    }
-
-    PackageInfoImpl(core::packages::MangledName mangledName, core::Loc loc, core::Loc declLoc_)
-        : mangledName_(mangledName), loc(loc), declLoc_(declLoc_) {}
-    explicit PackageInfoImpl(const PackageInfoImpl &) = default;
-    PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
-
-    // What order should these packages be in the import list?
-    // Returns -1 if a should come before b, 0 if they are equivalent, and 1 if a should come after b.
-    //
-    // This method replicates the logic used at Stripe to order packages and thus has all of the associated "quirks".
-    // In particular, the ordering in a given package is a function of the strictness level of the package, and it is
-    // not a simple "false < layered < layered_dag < dag" ordering. The ordering is as follows:
-    // For strictDependenciesLevel::False:
-    // - layering violations
-    // - imports to 'false' packages
-    // - imports to 'layered' or stricter packages
-    // - test imports
-    // For strictDependenciesLevel::Layered and LayeredDag:
-    // - layering violations
-    // - imports to 'false' packages
-    // - imports to 'layered' or 'layered_dag' packages
-    // - imports to 'dag' packages
-    // - test imports
-    // For strictDependenciesLevel::Dag:
-    // - layering violations
-    // - imports to 'false', 'layered', or 'layered_dag' packages
-    // - imports to 'dag' packages
-    // - test imports
-    // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
-    // < dag" ordering)
-    int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
-                     bool bIsTestImport) const {
-        // Test imports always come last, and aren't sorted by `strict_dependencies`
-        if (aIsTestImport && bIsTestImport) {
-            return orderByAlphabetical(gs, a, b);
-        } else if (aIsTestImport && !bIsTestImport) {
-            return 1;
-        } else if (!aIsTestImport && bIsTestImport) {
-            return -1;
-        } // Neither is a test import
-
-        auto strictnessCompareResult = orderByStrictness(gs.packageDB(), a, b);
-        if (strictnessCompareResult == 0) {
-            return orderByAlphabetical(gs, a, b);
-        }
-        return strictnessCompareResult;
-    }
-
-    int orderByStrictness(const core::packages::PackageDB &packageDB, const PackageInfo &a,
-                          const PackageInfo &b) const {
-        if (!packageDB.enforceLayering() || !strictDependenciesLevel().has_value() ||
-            !a.strictDependenciesLevel().has_value() || !b.strictDependenciesLevel().has_value() ||
-            !a.layer().has_value() || !b.layer().has_value()) {
-            return 0;
-        }
-
-        // Layering violations always come first
-        auto aCausesLayeringViolation = causesLayeringViolation(packageDB, a.layer().value().first);
-        auto bCausesLayeringViolation = causesLayeringViolation(packageDB, b.layer().value().first);
-        if (aCausesLayeringViolation && bCausesLayeringViolation) {
-            return 0;
-        } else if (aCausesLayeringViolation && !bCausesLayeringViolation) {
-            return -1;
-        } else if (!aCausesLayeringViolation && bCausesLayeringViolation) {
-            return 1;
-        }
-
-        auto aStrictDependenciesLevel = a.strictDependenciesLevel().value().first;
-        auto bStrictDependenciesLevel = b.strictDependenciesLevel().value().first;
-        switch (strictDependenciesLevel().value().first) {
-            case core::packages::StrictDependenciesLevel::False: {
-                // Sort order: Layering violations, false, layered or stricter
-                switch (aStrictDependenciesLevel) {
-                    case core::packages::StrictDependenciesLevel::False:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
-                    case core::packages::StrictDependenciesLevel::Layered:
-                    case core::packages::StrictDependenciesLevel::LayeredDag:
-                    case core::packages::StrictDependenciesLevel::Dag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 1 : 0;
-                }
-            }
-            case core::packages::StrictDependenciesLevel::Layered:
-            case core::packages::StrictDependenciesLevel::LayeredDag: {
-                // Sort order: Layering violations, false, layered or layered_dag, dag
-                switch (aStrictDependenciesLevel) {
-                    case core::packages::StrictDependenciesLevel::False:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::False ? 0 : -1;
-                    case core::packages::StrictDependenciesLevel::Layered:
-                    case core::packages::StrictDependenciesLevel::LayeredDag:
-                        switch (bStrictDependenciesLevel) {
-                            case core::packages::StrictDependenciesLevel::False:
-                                return 1;
-                            case core::packages::StrictDependenciesLevel::Layered:
-                            case core::packages::StrictDependenciesLevel::LayeredDag:
-                                return 0;
-                            case core::packages::StrictDependenciesLevel::Dag:
-                                return -1;
-                        }
-                    case core::packages::StrictDependenciesLevel::Dag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
-                }
-            }
-            case core::packages::StrictDependenciesLevel::Dag: {
-                // Sort order: Layering violations, false or layered or layered_dag, dag
-                switch (aStrictDependenciesLevel) {
-                    case core::packages::StrictDependenciesLevel::False:
-                    case core::packages::StrictDependenciesLevel::Layered:
-                    case core::packages::StrictDependenciesLevel::LayeredDag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? -1 : 0;
-                    case core::packages::StrictDependenciesLevel::Dag:
-                        return bStrictDependenciesLevel == core::packages::StrictDependenciesLevel::Dag ? 0 : 1;
-                }
-            }
-        }
-    }
-
-    int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const {
-        auto aStrName = a.show(gs);
-        auto bStrName = b.show(gs);
-        if (aStrName == bStrName) {
-            return 0;
-        }
-        return aStrName < bStrName ? -1 : 1;
-    }
-
-    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                    core::packages::ImportType importType) const {
-        auto &info = PackageInfoImpl::from(pkg);
-        auto insertionLoc = core::Loc::none(loc.file());
-        optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
-        if (!importedPackageNames.empty()) {
-            core::LocOffsets importToInsertAfter;
-            for (auto &import : importedPackageNames) {
-                if (import.mangledName == info.mangledName()) {
-                    if ((importType == core::packages::ImportType::Normal &&
-                         import.type != core::packages::ImportType::Normal) ||
-                        (importType == core::packages::ImportType::TestHelper &&
-                         import.type == core::packages::ImportType::TestUnit)) {
-                        // There's already an import for this package, so we'll "upgrade" it to the desired import.
-                        // importToInsertAfter already tracks where we need to insert the import.  So we can craft an
-                        // edit to delete the existing line, and then use the regular logic for adding an import to
-                        // insert the `import`.
-                        auto importLoc = core::Loc(fullLoc().file(), import.loc);
-                        auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
-                        auto beginPos =
-                            lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
-                        auto endPos = importLoc.endPos();
-                        core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
-
-                        deleteTestImportEdit = {replaceLoc, ""};
-
-                        // as a special-case: if we're converting a `test_import` to remove `only:`, then we want to
-                        // re-insert it at this exact same point (since we sort those together.) Let's find the previous
-                        // import!
-                        // TODO: we should find and delete just the `, only: ...` in this case, but that's slightly
-                        // tricky
-
-                        if (importType == core::packages::ImportType::TestHelper) {
-                            insertionLoc = {importLoc.file(), beginPos - 1, beginPos - 1};
-                            break;
-                        }
-                    } else {
-                        // we already import this, and if so, don't return an autocorrect
-                        return nullopt;
-                    }
-                }
-
-                auto &importInfo = gs.packageDB().getPackageInfo(import.mangledName);
-                if (!importInfo.exists()) {
-                    importToInsertAfter = import.loc;
-                    continue;
-                }
-
-                auto compareResult = orderImports(gs, info, importType != core::packages::ImportType::Normal,
-                                                  importInfo, import.isTestImport());
-                if (compareResult == 1 || compareResult == 0) {
-                    importToInsertAfter = import.loc;
-                }
-            }
-            if (!importToInsertAfter.exists()) {
-                // Insert before the first import
-                core::Loc beforePackageName = {loc.file(), importedPackageNames.front().loc};
-                auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
-                auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
-                insertionLoc = endOfPrevLine.copyWithZeroLength();
-            } else {
-                insertionLoc = core::Loc(loc.file(), importToInsertAfter.copyEndWithZeroLength());
-            }
-        } else {
-            // if we don't have any imports, then we can try adding it
-            // either before the first export, or if we have no
-            // exports, then right before the final `end`
-            int64_t exportLoc;
-            if (!exports_.empty()) {
-                exportLoc = exports_.front().loc.beginPos() - "export "sv.size() - 1;
-            } else {
-                exportLoc = loc.endPos() - "end"sv.size() - 1;
-            }
-
-            string_view file_source = loc.file().data(gs).source();
-
-            // Defensively guard against the first export loc or the package's loc being invalid.
-            if (exportLoc <= 0 || exportLoc >= file_source.size()) {
-                ENFORCE(false, "Failed to find a valid starting loc");
-                return nullopt;
-            }
-
-            // we want to find the end of the last non-empty line, so
-            // let's do something gross: walk backward until we find non-whitespace
-            while (isspace(file_source[exportLoc])) {
-                exportLoc--;
-                // this shouldn't happen in a well-formatted
-                // `__package.rb` file, but just to be safe
-                if (exportLoc == 0) {
-                    return nullopt;
-                }
-            }
-            insertionLoc = core::Loc(loc.file(), exportLoc + 1, exportLoc + 1);
-        }
-        ENFORCE(insertionLoc.exists());
-
-        auto packageToImport = info.mangledName_.owner.show(gs);
-        string_view importTypeHuman;
-        string_view importTypeMethod;
-        string_view importTypeTrailing = "";
-        switch (importType) {
-            case core::packages::ImportType::Normal:
-                importTypeHuman = "Import";
-                importTypeMethod = "import";
-                break;
-            case core::packages::ImportType::TestUnit:
-                importTypeHuman = "Test Import";
-                importTypeMethod = "test_import";
-                importTypeTrailing = ", only: \"test_rb\"";
-                break;
-            case core::packages::ImportType::TestHelper:
-                importTypeHuman = "Test Import";
-                importTypeMethod = "test_import";
-                break;
-        }
-        auto suggestionTitle =
-            fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, mangledName_.owner.show(gs));
-        vector<core::AutocorrectSuggestion::Edit> edits = {
-            {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
-        if (deleteTestImportEdit.has_value()) {
-            edits.push_back(deleteTestImportEdit.value());
-            suggestionTitle = fmt::format("Convert existing import to `{}`", importTypeMethod);
-        }
-
-        core::AutocorrectSuggestion suggestion(suggestionTitle, edits);
-        return {suggestion};
-    }
-
-    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                    const core::SymbolRef newExport) const {
-        auto pkgFile = loc.file();
-        auto insertionLoc = core::Loc::none(pkgFile);
-        if (!exports_.empty()) {
-            core::LocOffsets exportToInsertAfter;
-            for (auto &e : exports_) {
-                if (newExport.show(gs) > e.fqn.show(gs)) {
-                    exportToInsertAfter = e.loc;
-                }
-            }
-            if (!exportToInsertAfter.exists()) {
-                // Insert before the first export
-                auto beforeConstantName = exports_.front().loc;
-                auto [beforeExport, numWhitespace] = core::Loc(pkgFile, beforeConstantName).findStartOfIndentation(gs);
-                auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
-                insertionLoc = endOfPrevLine.copyWithZeroLength();
-            } else {
-                insertionLoc = core::Loc(pkgFile, exportToInsertAfter.copyEndWithZeroLength());
-            }
-        } else {
-            // if we don't have any exports, then we can try adding it right before the final `end`
-            uint32_t exportLoc = loc.endPos() - "end"sv.size() - 1;
-            // we want to find the end of the last non-empty line, so
-            // let's do something gross: walk backward until we find non-whitespace
-            const auto &file_source = loc.file().data(gs).source();
-            while (isspace(file_source[exportLoc])) {
-                exportLoc--;
-                // this shouldn't happen in a well-formatted
-                // `__package.rb` file, but just to be safe
-                if (exportLoc == 0) {
-                    return nullopt;
-                }
-            }
-            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
-        }
-        ENFORCE(insertionLoc.exists());
-
-        auto strName = newExport.show(gs);
-        core::AutocorrectSuggestion suggestion(
-            fmt::format("Export `{}` in package `{}`", strName, mangledName_.owner.show(gs)),
-            {{insertionLoc, fmt::format("\n  export {}", strName)}});
-        return {suggestion};
-    }
-
-    vector<core::packages::VisibleTo> visibleTo() const {
-        vector<core::packages::VisibleTo> rv;
-        for (auto &v : visibleTo_) {
-            rv.emplace_back(v.mangledName, v.type);
-        }
-        return rv;
-    }
-
-    optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
-        if (!mangledName.exists()) {
-            return nullopt;
-        }
-
-        auto imp =
-            absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.mangledName == mangledName; });
-        if (imp == importedPackageNames.end()) {
-            return nullopt;
-        }
-
-        return imp->type;
-    }
-
-    // Is it a layering violation to import otherPkg from this package?
-    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
-        if (!otherPkg.layer().has_value()) {
-            return false;
-        }
-
-        return causesLayeringViolation(packageDB, otherPkg.layer().value().first);
-    }
-
-    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, core::NameRef otherPkgLayer) const {
-        if (!layer().has_value()) {
-            return false;
-        }
-
-        auto pkgLayer = layer().value().first;
-        auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
-        auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
-
-        return pkgLayerIndex < otherPkgLayerIndex;
-    }
-
-    // What is the minimum strict dependencies level that this package's imports must have?
-    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const {
-        if (!strictDependenciesLevel().has_value()) {
-            return core::packages::StrictDependenciesLevel::False;
-        }
-
-        switch (strictDependenciesLevel().value().first) {
-            case core::packages::StrictDependenciesLevel::False:
-                return core::packages::StrictDependenciesLevel::False;
-            case core::packages::StrictDependenciesLevel::Layered:
-            case core::packages::StrictDependenciesLevel::LayeredDag:
-                return core::packages::StrictDependenciesLevel::Layered;
-            case core::packages::StrictDependenciesLevel::Dag:
-                return core::packages::StrictDependenciesLevel::Dag;
-        }
-    }
-
-    string renderPath(const core::GlobalState &gs, const vector<core::packages::MangledName> &path) const {
-        // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
-        // 5) to prevent error being too long
-        // Note: This function iterates through path in reverse order because pathTo generates it in that order, so
-        // iterating reverse gives the regular order.
-        string pathMessage;
-        for (int i = path.size() - 1; i >= 0; i--) {
-            auto name = gs.packageDB().getPackageInfo(path[i]).show(gs);
-            bool showArrow = i > 0;
-            pathMessage += core::ErrorColors::format("    `{}`{}\n", name, showArrow ? " →" : "");
-        }
-        return pathMessage;
-    }
-
-    optional<string> pathTo(const core::GlobalState &gs, const core::packages::MangledName dest) const {
-        // Note: This implements BFS.
-        auto src = mangledName();
-        queue<core::packages::MangledName> toVisit;
-        // Maps from package to what package we came from to get to that package, used to construct the path
-        // Ex. A -> B -> C means that prev[C] = B and prev[B] = A
-        UnorderedMap<core::packages::MangledName, core::packages::MangledName> prev;
-        UnorderedSet<core::packages::MangledName> visited;
-
-        toVisit.push(src);
-        while (!toVisit.empty()) {
-            auto curr = toVisit.front();
-            toVisit.pop();
-            auto [_it, inserted] = visited.emplace(curr);
-            if (!inserted) {
-                continue;
-            }
-
-            if (curr == dest) {
-                // Found the target node, walk backward through the prev map to construct the path
-                vector<core::packages::MangledName> path;
-                path.push_back(curr);
-                while (curr != src) {
-                    curr = prev[curr];
-                    path.push_back(curr);
-                }
-                // Note: here, path will be in reverse order (ie. from dest -> src), and then renderPath iterates it in
-                // reverse, to get the correct order. If you plan to use path directly, make sure to reverse it (and
-                // then upate renderPath to iterate normally).
-                return renderPath(gs, path);
-            }
-
-            auto &currInfo = PackageInfoImpl::from(gs.packageDB().getPackageInfo(curr));
-            for (auto &import : currInfo.importedPackageNames) {
-                auto &importInfo = gs.packageDB().getPackageInfo(import.mangledName);
-                if (!importInfo.exists() || import.isTestImport() || visited.contains(import.mangledName)) {
-                    continue;
-                }
-                if (!prev.contains(import.mangledName)) {
-                    prev[import.mangledName] = curr;
-                }
-                toVisit.push(import.mangledName);
-            }
-        }
-
-        // No path found
-        return nullopt;
-    }
-};
-
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
-bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
+bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
-vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, core::packages::MangledName pkg) {
+vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, MangledName pkg) {
     auto klass = pkg.owner;
     vector<core::NameRef> fqn;
     while (klass != core::Symbols::PackageSpecRegistry()) {
@@ -716,7 +141,7 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
 }
 
 // TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
-core::packages::MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     auto fullName = getFullyQualifiedName(ctx, constantLit);
@@ -742,7 +167,7 @@ core::packages::MangledName resolvePackageName(core::Context ctx, const ast::Unr
         owner = core::Symbols::noClassOrModule();
     }
 
-    return core::packages::MangledName(owner);
+    return MangledName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -791,7 +216,7 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
 
 struct PackageForSymbolResult {
     // The closest package for `sym`
-    core::packages::MangledName bestPkg;
+    MangledName bestPkg;
 
     // The closest owner symbol inside `<PackageSpecRegistry>`. Might not actually correspond to a
     // package if it's just a namespace, e.g. `<PSR>::Pkg1::NS` for `::Pkg1::Inner::NS::A`
@@ -801,8 +226,7 @@ struct PackageForSymbolResult {
     bool couldBePrefix;
 };
 
-bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope,
-                 core::packages::MangledName pkg) {
+bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope, MangledName pkg) {
     auto owner = pkg.owner;
     while (owner != core::Symbols::root()) {
         if (owner == ownerForScope) {
@@ -818,7 +242,7 @@ bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef owner
 // Visitor that ensures for constants defined within a package that all have the package as a
 // prefix.
 class EnforcePackagePrefix final {
-    const PackageInfoImpl &pkg;
+    const PackageInfo &pkg;
 
     // Whether code in this file must use the `Test::` namespace.
     //
@@ -862,10 +286,9 @@ class EnforcePackagePrefix final {
     int errorDepth = 0;
 
 public:
-    EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
+    EnforcePackagePrefix(core::Context ctx, const PackageInfo &pkg)
         : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)),
-          maybeTestNamespace(
-              core::Symbols::root().data(ctx)->findMember(ctx, core::packages::PackageDB::TEST_NAMESPACE)) {
+          maybeTestNamespace(core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE)) {
         ENFORCE(pkg.exists());
     }
 
@@ -1052,7 +475,7 @@ private:
         scope.pop_back();
     }
 
-    core::packages::MangledName packageForNamespace(const core::GlobalState &gs) const {
+    MangledName packageForNamespace(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
         return scopeSym.enclosingClass(gs).data(gs)->package;
     }
@@ -1101,7 +524,7 @@ private:
     const string requiredNamespace(const core::GlobalState &gs) const {
         auto result = pkg.mangledName_.owner.show(gs);
         if (mustUseTestNamespace) {
-            result = fmt::format("{}::{}", core::packages::PackageDB::TEST_NAMESPACE.show(gs), result);
+            result = fmt::format("{}::{}", PackageDB::TEST_NAMESPACE.show(gs), result);
         }
         return result;
     }
@@ -1140,9 +563,9 @@ private:
 };
 
 struct PackageSpecBodyWalk {
-    PackageSpecBodyWalk(PackageInfoImpl &info) : info(info) {}
+    PackageSpecBodyWalk(PackageInfo &info) : info(info) {}
 
-    PackageInfoImpl &info;
+    PackageInfo &info;
     vector<Export> exported;
     bool foundFirstPackageSpec = false;
     bool foundLayerDeclaration = false;
@@ -1238,8 +661,7 @@ struct PackageSpecBodyWalk {
                         auto &posArg = send.getPosArg(0);
                         auto importArg = move(target->recv);
                         posArg = ast::packager::prependRegistry(move(importArg));
-                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv),
-                                                     core::packages::VisibleToType::Wildcard);
+                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv), VisibleToType::Wildcard);
                     } else {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                             e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -1252,8 +674,7 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target),
-                                                 core::packages::VisibleToType::Normal);
+                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target), VisibleToType::Normal);
                 }
             }
         } else if (send.fun == core::Names::strictDependencies()) {
@@ -1451,17 +872,17 @@ struct PackageSpecBodyWalk {
         }
     }
 
-    core::packages::ImportType method2ImportType(const ast::Send &send) const {
+    ImportType method2ImportType(const ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-                return core::packages::ImportType::Normal;
+                return ImportType::Normal;
             case core::Names::testImport().rawId():
                 // we'll validate elsewhere that the only valid keyword args to appear here are `only: :test_rb`,
                 // which means if there are keyword args _at all_, they must indicate a test unit import
                 if (send.numKwArgs() > 0) {
-                    return core::packages::ImportType::TestUnit;
+                    return ImportType::TestUnit;
                 } else {
-                    return core::packages::ImportType::TestHelper;
+                    return ImportType::TestHelper;
                 }
             default:
                 ENFORCE(false);
@@ -1496,7 +917,7 @@ struct PackageSpecBodyWalk {
     }
 
 private:
-    optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
+    optional<StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
             return nullopt;
@@ -1504,13 +925,13 @@ private:
         auto value = lit->asString();
 
         if (value == core::Names::false_()) {
-            return core::packages::StrictDependenciesLevel::False;
+            return StrictDependenciesLevel::False;
         } else if (value == core::Names::layered()) {
-            return core::packages::StrictDependenciesLevel::Layered;
+            return StrictDependenciesLevel::Layered;
         } else if (value == core::Names::layeredDag()) {
-            return core::packages::StrictDependenciesLevel::LayeredDag;
+            return StrictDependenciesLevel::LayeredDag;
         } else if (value == core::Names::dag()) {
-            return core::packages::StrictDependenciesLevel::Dag;
+            return StrictDependenciesLevel::Dag;
         }
 
         return nullopt;
@@ -1549,7 +970,7 @@ private:
     }
 };
 
-unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
+unique_ptr<PackageInfo> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(gs).isPackage(gs));
     // Assumption: Root of AST is <root> class. (This won't be true
@@ -1572,14 +993,14 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfoImpl>(core::packages::MangledName(packageSpecClass->symbol),
-                                            ctx.locAt(packageSpecClass->loc), ctx.locAt(packageSpecClass->declLoc));
+        return make_unique<PackageInfo>(MangledName(packageSpecClass->symbol), ctx.locAt(packageSpecClass->loc),
+                                        ctx.locAt(packageSpecClass->declLoc));
     }
 
     return nullptr;
 }
 
-void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
+void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
@@ -1598,7 +1019,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     bodyWalk.finalize(ctx);
 }
 
-void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
+void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
@@ -1612,8 +1033,8 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
     auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_);
-    const auto shortName = absl::StrJoin(fullName, "_", core::packages::NameFormatter(gs));
-    const auto slashDirName = absl::StrJoin(fullName, "/", core::packages::NameFormatter(gs)) + "/";
+    const auto shortName = absl::StrJoin(fullName, "_", NameFormatter(gs));
+    const auto slashDirName = absl::StrJoin(fullName, "/", NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1652,7 +1073,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-void validateLayering(const core::Context &ctx, const core::packages::Import &i) {
+void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.isTestImport()) {
         return;
     }
@@ -1660,8 +1081,8 @@ void validateLayering(const core::Context &ctx, const core::packages::Import &i)
     const auto &packageDB = ctx.state.packageDB();
     ENFORCE(packageDB.getPackageInfo(i.mangledName).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
-    auto &thisPkg = PackageInfoImpl::from(ctx, packageDB.getPackageNameForFile(ctx.file));
-    auto &otherPkg = PackageInfoImpl::from(packageDB.getPackageInfo(i.mangledName));
+    auto &thisPkg = PackageInfo::from(ctx, packageDB.getPackageNameForFile(ctx.file));
+    auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
@@ -1670,7 +1091,7 @@ void validateLayering(const core::Context &ctx, const core::packages::Import &i)
         return;
     }
 
-    if (thisPkg.strictDependenciesLevel().value().first == core::packages::StrictDependenciesLevel::False) {
+    if (thisPkg.strictDependenciesLevel().value().first == StrictDependenciesLevel::False) {
         return;
     }
 
@@ -1690,12 +1111,12 @@ void validateLayering(const core::Context &ctx, const core::packages::Import &i)
         }
     }
 
-    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
+    StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
     if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
-                        "import", core::packages::strictDependenciesLevelToString(otherPkgExpectedLevel));
+                        "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
             // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
@@ -1705,12 +1126,12 @@ void validateLayering(const core::Context &ctx, const core::packages::Import &i)
         }
     }
 
-    if (thisPkg.strictDependenciesLevel().value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
+    if (thisPkg.strictDependenciesLevel().value().first >= StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
-                auto level = fmt::format(
-                    "strict_dependencies '{}'",
-                    core::packages::strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
+                auto level =
+                    fmt::format("strict_dependencies '{}'",
+                                strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
@@ -1725,7 +1146,7 @@ void validateLayering(const core::Context &ctx, const core::packages::Import &i)
     }
 }
 
-void validateVisibility(const core::Context &ctx, const PackageInfoImpl &absPkg, const core::packages::Import i) {
+void validateVisibility(const core::Context &ctx, const PackageInfo &absPkg, const Import i) {
     ENFORCE(ctx.state.packageDB().getPackageInfo(i.mangledName).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
@@ -1769,7 +1190,7 @@ void validatePackage(core::Context ctx) {
         }
     }
 
-    auto &pkgInfo = PackageInfoImpl::from(ctx, absPkg);
+    auto &pkgInfo = PackageInfo::from(ctx, absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
 
@@ -1797,11 +1218,11 @@ void validatePackage(core::Context ctx) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
                 string import_;
                 switch (i.type) {
-                    case core::packages::ImportType::Normal:
+                    case ImportType::Normal:
                         import_ = "import";
                         break;
-                    case core::packages::ImportType::TestUnit:
-                    case core::packages::ImportType::TestHelper:
+                    case ImportType::TestUnit:
+                    case ImportType::TestHelper:
                         import_ = "test_import";
                         break;
                 }
@@ -1837,7 +1258,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         return;
     }
 
-    auto &pkgImpl = PackageInfoImpl::from(ctx, pkg);
+    auto &pkgImpl = PackageInfo::from(ctx, pkg);
 
     EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
@@ -1855,7 +1276,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
     // Find packages and determine their imports/exports.
     {
         core::UnfreezeNameTable unfreeze(gs);
-        core::packages::UnfreezePackages packages = gs.unfreezePackages();
+        UnfreezePackages packages = gs.unfreezePackages();
         for (auto &file : files) {
             if (!file.file.data(gs).isPackage(gs)) {
                 continue;
@@ -1863,7 +1284,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
             auto pkg = definePackage(gs, file);
             if (pkg == nullptr) {
-                // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
+                // There was an error creating a PackageInfo for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
                 continue;
             }
@@ -1900,7 +1321,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             if (!pkgName.exists()) {
                 continue;
             }
-            auto &info = PackageInfoImpl::from(gs, pkgName);
+            auto &info = PackageInfo::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
         }
     }
@@ -1910,7 +1331,7 @@ namespace {
 
 template <typename Elem, typename Proj>
 void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> files, Proj &&proj) {
-    vector<pair<core::FileRef, core::packages::MangledName>> mapping;
+    vector<pair<core::FileRef, MangledName>> mapping;
     mapping.reserve(files.size());
 
     {
@@ -1959,38 +1380,36 @@ enum class PackagerMode {
 };
 
 class PackageDBPackageGraph {
-    core::packages::PackageDB &packageDB;
+    PackageDB &packageDB;
 
 public:
-    PackageDBPackageGraph(core::packages::PackageDB &packageDB) : packageDB(packageDB) {}
+    PackageDBPackageGraph(PackageDB &packageDB) : packageDB(packageDB) {}
 
-    const absl::Span<const core::packages::Import> getImports(core::packages::MangledName packageName) const {
+    const absl::Span<const Import> getImports(MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
-        return PackageInfoImpl::from(packageDB.getPackageInfo(packageName)).importedPackageNames;
+        return packageDB.getPackageInfo(packageName).importedPackageNames;
     }
 
-    void setSCCId(core::packages::MangledName packageName, int sccID) {
+    void setSCCId(MangledName packageName, int sccID) {
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
         if (!pkgInfoPtr) {
             return;
         }
-        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
-        pkgInfo.sccID_ = sccID;
+        pkgInfoPtr->sccID_ = sccID;
     }
 
-    int getSCCId(core::packages::MangledName packageName) const {
+    int getSCCId(MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
         ENFORCE(packageDB.getPackageInfo(packageName).sccID().has_value());
         return packageDB.getPackageInfo(packageName).sccID().value();
     }
 
-    void setTestSCCId(core::packages::MangledName packageName, int sccID) {
+    void setTestSCCId(MangledName packageName, int sccID) {
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
         if (!pkgInfoPtr) {
             return;
         }
-        auto &pkgInfo = PackageInfoImpl::from(*pkgInfoPtr);
-        pkgInfo.testSccID_ = sccID;
+        pkgInfoPtr->testSccID_ = sccID;
     }
 };
 
