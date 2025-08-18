@@ -29,8 +29,7 @@ template <typename... Rest> bool hasExpr(const std::unique_ptr<parser::Node> &fi
 
 // Check if all nodes in NodeVec are null or have a desugared expr.
 bool hasExpr(const parser::NodeVec &nodes) {
-    return absl::c_find_if(nodes, [](const auto &node) { return node != nullptr && !node->hasDesugaredExpr(); }) ==
-           nodes.end();
+    return absl::c_all_of(nodes, [](const auto &node) { return node == nullptr || node->hasDesugaredExpr(); });
 }
 
 // Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
@@ -612,7 +611,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto inlineIfSingle = false;
                 return translateStatements(stmtsNode, inlineIfSingle);
             } else {
-                return make_unique<parser::Begin>(translateLoc(embeddedStmtsNode->base.location), NodeVec{});
+                return make_unique<parser::Begin>(location, NodeVec{});
             }
         }
         case PM_EMBEDDED_VARIABLE_NODE: {
@@ -1652,7 +1651,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             // Sorbet's parser always wraps the pinned expression in a `Begin` node.
             NodeVec statements;
             statements.emplace_back(move(expr));
-            auto beginNode = make_unique<parser::Begin>(translateLoc(pinnedExprNode->base.location), move(statements));
+            auto beginNode = make_unique<parser::Begin>(location, move(statements));
 
             return make_unique<Pin>(location, move(beginNode));
         }
@@ -1666,8 +1665,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_SPLAT_NODE: { // A splat, like `*a` in an array pattern
             auto prismSplatNode = down_cast<pm_splat_node>(node);
             auto expr = patternTranslate(prismSplatNode->expression);
-            auto splatLoc = translateLoc(prismSplatNode->base.location);
-            return make_unique<MatchRest>(splatLoc, move(expr));
+            return make_unique<MatchRest>(location, move(expr));
         }
         default: {
             return translate(node);
@@ -1956,17 +1954,12 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
 }
 
 core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
-    auto nextId = *parserUniqueCounter + 1;
-    *parserUniqueCounter = nextId;
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, nextId);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
 }
 
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
     ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
-
-    auto nextId = *desugarUniqueCounter + 1;
-    *desugarUniqueCounter = nextId;
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, nextId);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++parserUniqueCounter);
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
