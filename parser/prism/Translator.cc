@@ -96,7 +96,8 @@ unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNod
         } else if constexpr (is_same_v<SorbetLHSNode, parser::LVarLhs>) {
             kind = ast::UnresolvedIdent::Kind::Local;
         } else {
-            unreachable("Unhandled LHS type: {}", typeid(SorbetLHSNode).name());
+            static_assert(false && sizeof(SorbetLHSNode),
+                          "Invalid LHS type. Must be one of `IVarLhs`, `GVarLhs`, `CVarLhs`, or `LVarLhs`.");
         }
 
         auto expr = ast::make_expression<ast::UnresolvedIdent>(loc, kind, name);
