@@ -1042,7 +1042,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translateConstantName(optionalKeywordParamNode->name);
             auto value = translate(optionalKeywordParamNode->value);
 
-            return make_unique<parser::Kwoptarg>(location, name, nameLoc, move(value));
+            if (!hasExpr(value)) {
+                return make_unique<parser::Kwoptarg>(location, name, nameLoc, move(value));
+            }
+
+            auto expr = MK::OptionalArg(location, MK::KeywordArg(nameLoc, name), value->takeDesugaredExpr());
+            return make_node_with_expr<parser::Kwoptarg>(move(expr), location, name, nameLoc, move(value));
         }
         case PM_OPTIONAL_PARAMETER_NODE: { // An optional positional parameter, like `def foo(a = 1)`
             auto optionalParamNode = down_cast<pm_optional_parameter_node>(node);
@@ -1051,7 +1056,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translateConstantName(optionalParamNode->name);
             auto value = translate(optionalParamNode->value);
 
-            return make_unique<parser::Optarg>(location, name, nameLoc, move(value));
+            if (!hasExpr(value)) {
+                return make_unique<parser::Optarg>(location, name, nameLoc, move(value));
+            }
+
+            auto expr = MK::OptionalArg(location, MK::Local(nameLoc, name), value->takeDesugaredExpr());
+            return make_node_with_expr<parser::Optarg>(move(expr), location, name, nameLoc, move(value));
         }
         case PM_OR_NODE: { // operator `||` and `or`
             auto orNode = down_cast<pm_or_node>(node);
