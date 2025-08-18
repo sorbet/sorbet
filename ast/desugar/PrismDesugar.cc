@@ -1660,18 +1660,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr res = MK::Nil(loc);
                 result = move(res);
             },
-            [&](parser::IVar *var) {
-                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
-                result = move(res);
-            },
-            [&](parser::GVar *var) {
-                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
-                result = move(res);
-            },
-            [&](parser::CVar *var) {
-                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
-                result = move(res);
-            },
+            [&](parser::IVar *var) { desugaredByPrismTranslator(var); },
+            [&](parser::GVar *var) { desugaredByPrismTranslator(var); },
+            [&](parser::CVar *var) { desugaredByPrismTranslator(var); },
             [&](parser::LVarLhs *var) {
                 ExpressionPtr res = MK::Local(loc, var->name);
                 result = move(res);
@@ -2317,7 +2308,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) {
-                Exception::raise("Unimplemented Parser Node: {} (class: {})", node->nodeName(),
+                Exception::raise("Unimplemented Parser Node: PrismDesugar: {} (class: {})", node->nodeName(),
                                  demangle(typeid(*node).name()));
             });
         ENFORCE(result.get() != nullptr, "desugar result unset, (node class was: {})", demangle(typeid(*what).name()));
