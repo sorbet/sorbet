@@ -2774,7 +2774,13 @@ class String < Object
   #
   # Thus unpack1 is convenient, makes clear the intention and signals the
   # expected return value to those reading the code.
-  def unpack1(_); end
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.nilable(T.any(Integer, Float, String)))
+  end
+  def unpack1(arg0); end
 
   # Returns a copy of *str* with all lowercase letters replaced with their
   # uppercase counterparts.
