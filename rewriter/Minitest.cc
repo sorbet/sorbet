@@ -134,10 +134,10 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
 }
 
 // Helper function to create shared_examples_module constant reference with local scope only
-ast::ExpressionPtr makeSharedExamplesModuleConstantLocal(core::MutableContext ctx, core::LocOffsets loc, const string &argString) {
-    return ast::MK::UnresolvedConstant(
-        loc, ast::MK::EmptyTree(),
-        ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
+ast::ExpressionPtr makeSharedExamplesModuleConstantLocal(core::MutableContext ctx, core::LocOffsets loc,
+                                                         const string &argString) {
+    return ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(),
+                                       ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
 }
 
 } // namespace
