@@ -1,7 +1,7 @@
 # typed: true
 
 class RSpecBasicsTest
-  # Test traditional describe syntax (should still work)  
+  # Test traditional describe syntax (should still work)
   describe 'traditional describe syntax' do
     it 'still works without RSpec receiver' do
       puts 'traditional test'
