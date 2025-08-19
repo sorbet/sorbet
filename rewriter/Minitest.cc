@@ -366,22 +366,23 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 }
             }
 
-            // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
             ast::MethodDef::ARGS_store new_args;
             for (auto &arg : args) {
                 new_args.emplace_back(arg.deepCopy());
             }
 
-            auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
-            auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
-                                            send->loc.copyWithZeroLength(), move(blk));
-
             // let/subject blocks should return their computed value, not void
             ast::ExpressionPtr method;
             if (send->fun == core::Names::let() || send->fun == core::Names::letBang() ||
                 send->fun == core::Names::subject()) {
-                method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each));
+                // For let/subject blocks, create a simple method that just returns the block result
+                // TODO: This doesn't provide access to test parameters yet, but fixes the return type issue
+                method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(body));
             } else {
+                // For it/before/after blocks, use the each iteration pattern
+                auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
+                auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
+                                                send->loc.copyWithZeroLength(), move(blk));
                 method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each)));
             }
             return constantMover.addConstantsToExpression(send->loc, move(method));
@@ -390,8 +391,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
-        e.setHeader("Only valid `{}`, `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before",
-                    "after", "describe", "it_behaves_like", eachName.show(ctx));
+        e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
+                    "describe", eachName.show(ctx));
         e.addErrorNote("For other things, like constant and variable assignments,"
                        "    hoist them to constants or methods defined outside the `{}` block.",
                        eachName.show(ctx));
