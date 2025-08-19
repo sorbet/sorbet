@@ -1,7 +1,35 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C RSpecIncludeContextTest><<C <todo sym>>> < (::<todo sym>)
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    def self.describe<<todo method>>(name, &block)
+      ::<Magic>.<call-with-block>(<emptyTree>::<C Core>::<C ExampleGroup>, :describe, block, name)
+    end
 
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def self.describe<<todo method>>(name, &block)
+          <emptyTree>
+        end
+
+        def expect<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of self.describe>
+
+        <runtime method definition of expect>
+
+        <runtime method definition of eq>
+      end
+    end
+
+    <runtime method definition of self.describe>
+  end
+
+  class <emptyTree>::<C <describe 'include context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
     class <emptyTree>::<C <describe 'nonexistent context'>><<C <todo sym>>> < (<self>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.void()
@@ -64,152 +92,122 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <runtime method definition of <it 'can access variable from included context'>>
       end
     end
-  end
 
-  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
-    def self.describe<<todo method>>(name, &block)
-      ::<Magic>.<call-with-block>(<emptyTree>::<C Core>::<C ExampleGroup>, :describe, block, name)
-    end
-
-    module <emptyTree>::<C Core><<C <todo sym>>> < ()
-      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
-        def self.describe<<todo method>>(name, &block)
-          <emptyTree>
-        end
-
-        def expect<<todo method>>(*args, &<blk>)
-          <emptyTree>
-        end
-
-        def eq<<todo method>>(*args, &<blk>)
-          <emptyTree>
-        end
-
-        <runtime method definition of self.describe>
-
-        <runtime method definition of expect>
-
-        <runtime method definition of eq>
-      end
-    end
-
-    <runtime method definition of self.describe>
-  end
-
-  class <emptyTree>::<C <describe 'RSpec context with shared_context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    begin
-      class <emptyTree>::<C <shared_examples 'authenticated user'>><<C <todo sym>>> < (<self>)
-        def user<<todo method>>(&<blk>)
-          "authenticated_user"
-        end
-
-        def token<<todo method>>(&<blk>)
-          "auth_token_123"
-        end
-
-        def auth_helper<<todo method>>(&<blk>)
-          ::<Magic>.<string-interpolate>(<self>.user(), " with ", <self>.token())
-        end
-
-        <runtime method definition of user>
-
-        <runtime method definition of token>
-
-        <runtime method definition of auth_helper>
-      end
-      module <emptyTree>::<C <shared_examples_module 'authenticated user'>><<C <todo sym>>> < ()
-        def user<<todo method>>(&<blk>)
-          "authenticated_user"
-        end
-
-        def token<<todo method>>(&<blk>)
-          "auth_token_123"
-        end
-
-        def auth_helper<<todo method>>(&<blk>)
-          ::<Magic>.<string-interpolate>(<self>.user(), " with ", <self>.token())
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Helpers>)
-
-        <runtime method definition of user>
-
-        <runtime method definition of token>
-
-        <runtime method definition of auth_helper>
-      end
-    end
-
-    class <emptyTree>::<C <describe 'API endpoint'>><<C <todo sym>>> < (<self>)
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
-      def <it 'has access to shared context variables and methods'><<todo method>>(&<blk>)
-        begin
-          <self>.expect(<self>.user()).to(<self>.eq("authenticated_user"))
-          <self>.expect(<self>.token()).to(<self>.eq("auth_token_123"))
-          <self>.expect(<self>.auth_helper()).to(<self>.eq("authenticated_user with auth_token_123"))
-        end
-      end
-
-      <self>.include(<emptyTree>::<C <shared_examples_module 'authenticated user'>>)
-
+    class <emptyTree>::<C <describe 'RSpec context with shared_context'>><<C <todo sym>>> < (<self>)
       begin
-        "has access to shared context variables and methods"
-        <runtime method definition of <it 'has access to shared context variables and methods'>>
-      end
-    end
-
-    class <emptyTree>::<C <describe 'e2e context'>><<C <todo sym>>> < (<self>)
-      begin
-        class <emptyTree>::<C <shared_examples 'e2e context'>><<C <todo sym>>> < (<self>)
-          def foo<<todo method>>(&<blk>)
-            "bar"
+        class <emptyTree>::<C <shared_examples 'authenticated user'>><<C <todo sym>>> < (<self>)
+          def user<<todo method>>(&<blk>)
+            "authenticated_user"
           end
 
-          def config<<todo method>>(&<blk>)
-            "default_config"
+          def token<<todo method>>(&<blk>)
+            "auth_token_123"
           end
 
-          <runtime method definition of foo>
+          def auth_helper<<todo method>>(&<blk>)
+            ::<Magic>.<string-interpolate>(<self>.user(), " with ", <self>.token())
+          end
 
-          <runtime method definition of config>
+          <runtime method definition of user>
+
+          <runtime method definition of token>
+
+          <runtime method definition of auth_helper>
         end
-        module <emptyTree>::<C <shared_examples_module 'e2e context'>><<C <todo sym>>> < ()
-          def foo<<todo method>>(&<blk>)
-            "bar"
+        module <emptyTree>::<C <shared_examples_module 'authenticated user'>><<C <todo sym>>> < ()
+          def user<<todo method>>(&<blk>)
+            "authenticated_user"
           end
 
-          def config<<todo method>>(&<blk>)
-            "default_config"
+          def token<<todo method>>(&<blk>)
+            "auth_token_123"
+          end
+
+          def auth_helper<<todo method>>(&<blk>)
+            ::<Magic>.<string-interpolate>(<self>.user(), " with ", <self>.token())
           end
 
           <self>.extend(<emptyTree>::<C T>::<C Helpers>)
 
-          <runtime method definition of foo>
+          <runtime method definition of user>
 
-          <runtime method definition of config>
+          <runtime method definition of token>
+
+          <runtime method definition of auth_helper>
         end
       end
 
-      class <emptyTree>::<C <describe 'with parameters'>><<C <todo sym>>> < (<self>)
+      class <emptyTree>::<C <describe 'API endpoint'>><<C <todo sym>>> < (<self>)
         ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
           <self>.void()
         end
 
-        def <it 'should include the context and ignore parameters'><<todo method>>(&<blk>)
+        def <it 'has access to shared context variables and methods'><<todo method>>(&<blk>)
           begin
-            <self>.expect(<self>.foo()).to(<self>.eq("bar"))
-            <self>.expect(<self>.config()).to(<self>.eq("default_config"))
+            <self>.expect(<self>.user()).to(<self>.eq("authenticated_user"))
+            <self>.expect(<self>.token()).to(<self>.eq("auth_token_123"))
+            <self>.expect(<self>.auth_helper()).to(<self>.eq("authenticated_user with auth_token_123"))
           end
         end
 
-        <self>.include(<emptyTree>::<C <shared_examples_module 'e2e context'>>)
+        <self>.include(<emptyTree>::<C <shared_examples_module 'authenticated user'>>)
 
         begin
-          "should include the context and ignore parameters"
-          <runtime method definition of <it 'should include the context and ignore parameters'>>
+          "has access to shared context variables and methods"
+          <runtime method definition of <it 'has access to shared context variables and methods'>>
+        end
+      end
+
+      class <emptyTree>::<C <describe 'e2e context'>><<C <todo sym>>> < (<self>)
+        begin
+          class <emptyTree>::<C <shared_examples 'e2e context'>><<C <todo sym>>> < (<self>)
+            def foo<<todo method>>(&<blk>)
+              "bar"
+            end
+
+            def config<<todo method>>(&<blk>)
+              "default_config"
+            end
+
+            <runtime method definition of foo>
+
+            <runtime method definition of config>
+          end
+          module <emptyTree>::<C <shared_examples_module 'e2e context'>><<C <todo sym>>> < ()
+            def foo<<todo method>>(&<blk>)
+              "bar"
+            end
+
+            def config<<todo method>>(&<blk>)
+              "default_config"
+            end
+
+            <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+            <runtime method definition of foo>
+
+            <runtime method definition of config>
+          end
+        end
+
+        class <emptyTree>::<C <describe 'with parameters'>><<C <todo sym>>> < (<self>)
+          ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+            <self>.void()
+          end
+
+          def <it 'should include the context and ignore parameters'><<todo method>>(&<blk>)
+            begin
+              <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+              <self>.expect(<self>.config()).to(<self>.eq("default_config"))
+            end
+          end
+
+          <self>.include(<emptyTree>::<C <shared_examples_module 'e2e context'>>)
+
+          begin
+            "should include the context and ignore parameters"
+            <runtime method definition of <it 'should include the context and ignore parameters'>>
+          end
         end
       end
     end
