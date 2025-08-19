@@ -70,17 +70,10 @@ struct Import {
 };
 
 struct Export {
-    FullyQualifiedName fqn;
+    core::SymbolRef sym;
     core::LocOffsets loc;
 
-    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(std::move(fqn)), loc(loc) {}
-
-    const std::vector<core::NameRef> &parts() const {
-        return fqn.parts;
-    }
-
-    // Lex sort by name.
-    static bool lexCmp(const Export &a, const Export &b);
+    explicit Export(SymbolRef sym, core::LocOffsets loc) : sym(sym), loc(loc) {}
 };
 
 struct VisibleTo {
@@ -121,6 +114,11 @@ public:
     bool exportAll() const {
         ENFORCE(exists());
         return exportAll_;
+    }
+
+    std::vector<Export> &exports() {
+        ENFORCE(exists());
+        return exports_;
     }
 
     bool visibleToTests() const {
