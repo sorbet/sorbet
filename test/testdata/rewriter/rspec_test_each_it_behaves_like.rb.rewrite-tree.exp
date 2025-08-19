@@ -1,0 +1,73 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
+    def self.test_each<<todo method>>(iter, &blk)
+      <emptyTree>
+    end
+
+    def self.it<<todo method>>(name, &blk)
+      <emptyTree>
+    end
+
+    def self.describe<<todo method>>(name, &blk)
+      <emptyTree>
+    end
+
+    def self.it_behaves_like<<todo method>>(name, *args, &<blk>)
+      <emptyTree>
+    end
+
+    def self.shared_examples<<todo method>>(name, &blk)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'has the value'><<todo method>>(&<blk>)
+      [1, 2, 3].each() do |value|
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.test_each>
+
+    <runtime method definition of self.it>
+
+    <runtime method definition of self.describe>
+
+    <runtime method definition of self.it_behaves_like>
+
+    <runtime method definition of self.shared_examples>
+
+    begin
+      class ::<root>::<C <shared_examples 'common behavior'>><<C <todo sym>>> < (<self>)
+        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+          <self>.void()
+        end
+
+        def <it 'works'><<todo method>>(&<blk>)
+          <self>.puts("shared example")
+        end
+
+        "works"
+
+        <runtime method definition of <it 'works'>>
+      end
+      module ::<root>::<C <shared_examples_module 'common behavior'>><<C <todo sym>>> < ()
+        <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+      end
+    end
+
+    <self>.test_each([1, 2, 3]) do |value|
+      begin
+        <self>.include(<emptyTree>::<C <shared_examples_module 'common behavior'>>)
+        <runtime method definition of <it 'has the value'>>
+      end
+    end
+  end
+end
