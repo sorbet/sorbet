@@ -52,7 +52,7 @@ typecheck() {
     cache_hash=$(compute_md5 Gemfile.lock | awk '{ print $1 }')
     cache_file="${cache_dir}/${cache_hash}"
     if [ ! -f "$cache_file" ]; then
-      $0 rbi find-gem-rbis > /dev/null
+      "$0" rbi find-gem-rbis > /dev/null
     fi
     args+=("@$cache_file")
   fi
@@ -147,4 +147,4 @@ esac
 exit $?
 # The closing comment for ruby to be ok with this file
 =end
-exec(__FILE__, *ARGV)
+exec([__FILE__, __FILE__], *ARGV)
