@@ -241,8 +241,6 @@ public:
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;
 
-    std::string renderPath(const core::GlobalState &gs, const std::vector<MangledName> &path) const;
-
     // Returns a string representing the path to the given package from this package, if it exists. Note: this only
     // looks at non-test imports.
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;

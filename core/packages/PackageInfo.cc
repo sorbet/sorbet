@@ -390,7 +390,7 @@ StrictDependenciesLevel PackageInfo::minimumStrictDependenciesLevel() const {
     }
 }
 
-string PackageInfo::renderPath(const core::GlobalState &gs, const vector<MangledName> &path) const {
+string renderPath(const core::GlobalState &gs, const vector<MangledName> &path) {
     // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
     // 5) to prevent error being too long
     // Note: This function iterates through path in reverse order because pathTo generates it in that order, so
