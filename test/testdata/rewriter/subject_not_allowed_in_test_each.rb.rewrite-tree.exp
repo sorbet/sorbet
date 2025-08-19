@@ -1,0 +1,24 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C SubjectNotAllowedInTestEach><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'should not be able to use subject'><<todo method>>(&<blk>)
+      ["foo", "bar"].each() do |test_case|
+        <self>.puts("test")
+      end
+    end
+
+    <self>.test_each(["foo", "bar"]) do |test_case|
+      begin
+        <self>.subject() do ||
+          "not allowed"
+        end
+        <runtime method definition of <it 'should not be able to use subject'>>
+      end
+    end
+  end
+end

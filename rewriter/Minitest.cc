@@ -331,7 +331,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                    ((send->fun == core::Names::let() && send->numPosArgs() == 1) ||
                     (send->fun == core::Names::letBang() && send->numPosArgs() == 1) ||
                     (send->fun == core::Names::subject() && send->numPosArgs() <= 1)) &&
-                   correctBlockArity && ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+                   correctBlockArity && (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0)))) {
             core::NameRef methodName;
             core::LocOffsets declLoc;
 
