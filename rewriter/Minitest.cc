@@ -180,8 +180,7 @@ string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {
-        // Use toString to get the full qualified name instead of just the final component
-        return arg.toString(ctx);
+        return argConstant->cnst.show(ctx);
     }
     return arg.toString(ctx);
 }

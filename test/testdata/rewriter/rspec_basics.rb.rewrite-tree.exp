@@ -14,16 +14,32 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of <it 'still works without RSpec receiver'>>
     end
 
-    <self>.context("using context instead of describe") do ||
+    class <emptyTree>::<C <describe 'using context instead of describe'>><<C <todo sym>>> < (<self>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it 'context should work like describe'><<todo method>>(&<blk>)
+        <self>.puts("context test")
+      end
+
       begin
-        <self>.it("context should work like describe") do ||
-          <self>.puts("context test")
+        "context should work like describe"
+        <runtime method definition of <it 'context should work like describe'>>
+      end
+
+      class <emptyTree>::<C <describe 'nested contexts'>><<C <todo sym>>> < (<self>)
+        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+          <self>.void()
         end
-        <self>.context("nested contexts") do ||
-          <self>.it("should handle nesting") do ||
-            <self>.puts("nested context test")
-          end
+
+        def <it 'should handle nesting'><<todo method>>(&<blk>)
+          <self>.puts("nested context test")
         end
+
+        "should handle nesting"
+
+        <runtime method definition of <it 'should handle nesting'>>
       end
     end
 
@@ -36,25 +52,51 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.puts("regular test runs")
       end
 
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <xit 'pending test with description'><<todo method>>(&<blk>)
+        <self>.puts("this should be skipped")
+      end
+
       begin
         "regular test"
         <runtime method definition of <it 'regular test'>>
       end
 
-      <self>.xit("pending test with description") do ||
-        <self>.puts("this should be skipped")
+      begin
+        "pending test with description"
+        <runtime method definition of <xit 'pending test with description'>>
       end
     end
 
     class <emptyTree>::<C <describe 'mixed syntax'>><<C <todo sym>>> < (<self>)
-      <self>.context("inside describe") do ||
+      class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
+        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+          <self>.void()
+        end
+
+        def <it 'regular it block'><<todo method>>(&<blk>)
+          <self>.puts("mixed syntax test")
+        end
+
+        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+          <self>.void()
+        end
+
+        def <xit 'pending in context'><<todo method>>(&<blk>)
+          <self>.puts("pending test")
+        end
+
         begin
-          <self>.it("regular it block") do ||
-            <self>.puts("mixed syntax test")
-          end
-          <self>.xit("pending in context") do ||
-            <self>.puts("pending test")
-          end
+          "regular it block"
+          <runtime method definition of <it 'regular it block'>>
+        end
+
+        begin
+          "pending in context"
+          <runtime method definition of <xit 'pending in context'>>
         end
       end
 
@@ -104,10 +146,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of <it 'should work fine'>>
     end
 
-    <emptyTree>::<C RSpec>.describe(<emptyTree>::<C Bar>::<C Baz>) do ||
-      <self>.it("should work fine") do ||
+    class <emptyTree>::<C <describe 'Baz'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it 'should work fine'><<todo method>>(&<blk>)
         <self>.puts("nested traditional in describe")
       end
+
+      "should work fine"
+
+      <runtime method definition of <it 'should work fine'>>
     end
   end
 end
