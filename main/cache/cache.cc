@@ -2,10 +2,14 @@
 #include "common/FileOps.h"
 #include "common/Random.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/exception/Exception.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "sorbet_version/sorbet_version.h"
+#include <charconv>
+#include <cstdio>
+#include <unistd.h>
 
 using namespace std;
 
@@ -224,16 +228,58 @@ void removeCacheDir(const string &path) {
         FileOps::removeFile(lockMdb);
     }
 
-    // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we will
-    // have removed the largest files.
-    FileOps::removeEmptyDir(path);
+    // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we
+    // will have removed the largest files.
+    auto err = rmdir(path.c_str());
+    if (err) {
+        switch (errno) {
+            // Return `false` if the directory is missing, isn't actually a directory, or wasn't empty.
+            case ENOENT:
+            case ENOTDIR:
+            case ENOTEMPTY:
+                break;
+
+            default: {
+                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", path, errno);
+                throw sorbet::RemoveDirException(msg);
+            }
+        }
+    }
 }
 } // namespace
+
+const string_view SessionCache::SESSION_DIR_PREFIX = "sorbet-session-";
 
 SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
 SessionCache::~SessionCache() noexcept(false) {
     removeCacheDir(this->path);
+}
+
+void SessionCache::reapOldCaches(const options::Options &opts) {
+    if (opts.cacheDir.empty() || !FileOps::dirExists(opts.cacheDir)) {
+        return;
+    }
+
+    for (const auto &dir : FileOps::listSubdirs(opts.cacheDir)) {
+        auto pos = dir.find(SESSION_DIR_PREFIX);
+        if (pos != 0) {
+            continue;
+        }
+
+        string_view pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
+        pid_t pid = -1;
+        auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
+        if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
+            continue;
+        }
+
+        if (processExists(pid) != ProcessStatus::Missing) {
+            continue;
+        }
+
+        removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
+    }
 }
 
 unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore> kvstore, ::spdlog::logger &logger,
@@ -243,7 +289,7 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
     }
 
     auto pid = getpid();
-    auto path = fmt::format("{}/session-{}", opts.cacheDir, pid);
+    auto path = fmt::format("{}/{}{}", opts.cacheDir, SESSION_DIR_PREFIX, pid);
 
     // If the directory already exists, we're reusing a PID from a previous run of Sorbet.
     if (FileOps::dirExists(path)) {

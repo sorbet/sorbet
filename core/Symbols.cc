@@ -23,7 +23,7 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 58;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 59;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 6;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 71;
@@ -860,28 +860,6 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
         res = findMemberFuzzyMatchConstant(gs, name, betterThan);
     }
     return res;
-}
-
-bool SymbolRef::isUnderNamespace(const GlobalState &gs, ClassOrModuleRef otherClass) const {
-    if (isClassOrModule() && otherClass == asClassOrModuleRef()) {
-        return true;
-    }
-
-    // if we are checking for nesting under root itself, which is always true
-    if (otherClass == core::Symbols::root()) {
-        return true;
-    }
-
-    auto curOwner = owner(gs).asClassOrModuleRef();
-    while (curOwner != core::Symbols::root()) {
-        if (curOwner == otherClass) {
-            return true;
-        }
-
-        curOwner = curOwner.data(gs)->owner;
-    }
-
-    return false;
 }
 
 vector<ClassOrModule::FuzzySearchResult>
@@ -2151,6 +2129,8 @@ void ArgInfo::ArgFlags::setFromU1(uint8_t flags) {
 ClassOrModule ClassOrModule::deepCopy(const GlobalState &to, bool keepGsId) const {
     ClassOrModule result;
     result.owner = this->owner;
+    result.packageRegistryOwner = this->packageRegistryOwner;
+    result.package = this->package;
     result.flags = this->flags;
     result.mixins_ = this->mixins_;
     result.resultType = this->resultType;
@@ -2357,6 +2337,8 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) co
     flagsCopy.isBehaviorDefining = false;
     result = mix(result, std::move(flagsCopy).serialize());
 
+    result = mix(result, this->packageRegistryOwner.id());
+    result = mix(result, this->package.owner.id());
     result = mix(result, this->owner.id());
     result = mix(result, this->superClass_.id());
     // argumentsOrMixins, typeParams, typeAliases

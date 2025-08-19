@@ -362,7 +362,13 @@ public:
                 break;
             }
             case core::Names::packagePrivate().rawId():
-            case core::Names::packagePrivateClassMethod().rawId():
+            case core::Names::packagePrivateClassMethod().rawId(): {
+                if (!ctx.state.packageDB().enabled()) {
+                    // These are only special if running in the packager.
+                    break;
+                }
+                [[fallthrough]];
+            }
             case core::Names::private_().rawId():
             case core::Names::protected_().rawId():
             case core::Names::public_().rawId():
@@ -1018,6 +1024,16 @@ private:
                     break;
                 case core::Names::packagePrivate().rawId():
                 case core::Names::packagePrivateClassMethod().rawId():
+                    if (!owner.data(ctx)->package.exists()) {
+                        if (auto e = ctx.beginError(mod.loc, core::errors::Namer::PackagePrivateOutsidePackage)) {
+                            e.setHeader("Method `{}` is not in a package and so cannot be made `{}`", method.show(ctx),
+                                        mod.name.show(ctx));
+                            e.addErrorLine(owner.data(ctx)->loc(), "This class has no package");
+                            e.addErrorLine(method.data(ctx)->loc(), "Method defined here");
+                        }
+                        break;
+                    }
+
                     method.data(ctx)->flags.isPackagePrivate = true;
                     break;
                 case core::Names::protected_().rawId():

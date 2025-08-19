@@ -51,11 +51,16 @@ class SessionCache {
     explicit SessionCache(std::string path);
 
 public:
+    static const std::string_view SESSION_DIR_PREFIX;
+
     // Removes the session cache.
     ~SessionCache() noexcept(false);
 
     // The path to the unique copy.
     std::string_view kvstorePath() const;
+
+    // Look for old session caches in the cache directory, and remove them if their Sorbet process is no longer active.
+    static void reapOldCaches(const options::Options &opts);
 
     // Close out the kvstore, and create a copy that's stored at `opts.cacheDir + '/' + randomUuid`. If the creation
     // failed, or the kvstore was a `nullptr`, this returns a null pointer.

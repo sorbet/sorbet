@@ -282,8 +282,9 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
 
     unique_ptr<parser::Node> nodes;
     {
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        nodes = parser::Prism::Parser::run(gs, file);
+        nodes = parser::Prism::Parser::run(ctx);
     }
 
     if (print.ParseTree.enabled) {
@@ -695,9 +696,10 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     }
 
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
-        opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-        opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
+        opts.cacheSensitiveOptions.stripePackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
+        opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
+        opts.stripePackagesHint);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -1610,9 +1612,8 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
         }
 
         writer.String("package");
-        if (sym.exists() && sym.loc(gs).exists()) {
-            const auto file = sym.loc(gs).file();
-            const auto &pkg = gs.packageDB().getPackageNameForFile(file);
+        if (sym.exists()) {
+            auto pkg = sym.enclosingClass(gs).data(gs)->package;
             if (!pkg.exists()) {
                 writer.String("<none>");
             } else {

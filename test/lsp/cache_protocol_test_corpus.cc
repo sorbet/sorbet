@@ -489,9 +489,10 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
 
     auto workers = WorkerPool::create(0, *logger);
     vector<string> toRemove;
+    string needle = fmt::format("/{}", realmain::cache::SessionCache::SESSION_DIR_PREFIX);
     for (auto &path : FileOps::listFilesInDir(opts->cacheDir, {".mdb"}, *workers, true, {}, {})) {
         fmt::println(stderr, "path = {}", path);
-        if (path.find("/session-") != string::npos) {
+        if (path.find(needle) != string::npos) {
             toRemove.emplace_back(std::move(path));
         }
     }
@@ -517,7 +518,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }
-    REQUIRE(FileOps::removeEmptyDir(sessionCacheDir));
+    FileOps::removeDir(sessionCacheDir);
 
     {
         auto copy = sessionCache->open(logger, *opts);
@@ -603,6 +604,72 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
     REQUIRE(FileOps::exists(sessionPath));
     sessionCache.reset();
     REQUIRE(!FileOps::exists(sessionPath));
+}
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
+    auto opts = lspWrapper->opts;
+    REQUIRE(!opts->cacheDir.empty());
+
+    // We don't need any additional LSP behavior here
+    lspWrapper = nullptr;
+
+    // We should start in a state where there are no cache directories.
+    REQUIRE(FileOps::listSubdirs(opts->cacheDir).empty());
+
+    // Create a few fake cache directories to simulate crashes. We test for existing pids to avoid faking a directory
+    // for an unrelated pid.
+    vector<string> caches;
+    {
+        auto needed = 5;
+        auto pid = getpid();
+        while (needed > 0) {
+            // Handle wrap around, as pid_t is a signed type and we don't know where we're starting with `getpid()`.
+            pid = std::max(pid + 1, 2);
+
+            if (sorbet::processExists(pid) != ProcessStatus::Missing) {
+                continue;
+            }
+
+            --needed;
+
+            const auto &path = caches.emplace_back(
+                fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::SESSION_DIR_PREFIX, pid));
+            FileOps::createDir(path);
+
+            // Create data and lock files to simulate a fully populated cache
+            FileOps::write(fmt::format("{}/data.mdb", path), "");
+            FileOps::write(fmt::format("{}/lock.mdb", path), "");
+        }
+    }
+
+    // We require that we created at least one cache
+    REQUIRE(!caches.empty());
+    REQUIRE(!FileOps::listSubdirs(opts->cacheDir).empty());
+
+    realmain::cache::SessionCache::reapOldCaches(*opts);
+
+    // We should reap all of the directories that we created.
+    REQUIRE(FileOps::listSubdirs(opts->cacheDir).empty());
+
+    // Pick one of the caches to re-populate with a file that would cause it to survive the reaping
+    auto &path = caches.front();
+    FileOps::createDir(path);
+    FileOps::write(fmt::format("{}/data.mdb", path), "");
+    FileOps::write(fmt::format("{}/lock.mdb", path), "");
+    FileOps::write(fmt::format("{}/keep-around", path), "");
+
+    REQUIRE(!FileOps::listSubdirs(opts->cacheDir).empty());
+
+    realmain::cache::SessionCache::reapOldCaches(*opts);
+
+    // We should not reap directories that had additional files in them, but the mdb files should get removed.
+    REQUIRE(!FileOps::exists(fmt::format("{}/data.mdb", path)));
+    REQUIRE(!FileOps::exists(fmt::format("{}/lock.mdb", path)));
+    REQUIRE(FileOps::exists(fmt::format("{}/keep-around", path)));
+
+    // Clean up
+    FileOps::removeFile(fmt::format("{}/keep-around", path));
+    FileOps::removeDir(path);
 }
 
 } // namespace sorbet::test::lsp

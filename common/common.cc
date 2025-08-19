@@ -104,19 +104,6 @@ void sorbet::FileOps::removeDir(const string &path) {
     }
 }
 
-bool sorbet::FileOps::removeEmptyDir(const string &path) {
-    auto err = rmdir(path.c_str());
-    if (err) {
-        if (errno == ENOTEMPTY) {
-            return false;
-        }
-        auto msg = fmt::format("Error in removeEmptyDir('{}'): {}", path, errno);
-        throw sorbet::RemoveDirException(msg);
-    }
-
-    return true;
-}
-
 void sorbet::FileOps::removeFile(const string &path) {
     auto err = remove(path.c_str());
     if (err) {
@@ -470,6 +457,39 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
     return result;
 }
 
+vector<string> sorbet::FileOps::listSubdirs(const string &path) {
+    vector<string> result;
+
+    DIR *dir;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        switch (errno) {
+            case ENOTDIR:
+                throw sorbet::FileNotDirException();
+
+            default:
+                // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
+                auto msg = fmt::format("Couldn't open directory `{}`", path);
+                throw sorbet::FileNotFoundException(msg);
+        }
+    }
+
+    struct dirent *entry = nullptr;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (entry->d_type == DT_DIR) {
+            auto namelen = strlen(entry->d_name);
+            std::string_view name{entry->d_name, namelen};
+            if (name == "." || name == "..") {
+                continue;
+            }
+
+            result.emplace_back(name);
+        }
+    }
+
+    closedir(dir);
+    return result;
+}
+
 // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     // Avoid underflow in subtraction on next line.
@@ -485,6 +505,31 @@ uint32_t sorbet::nextPowerOfTwo(uint32_t v) {
     v |= v >> 16;
     v++;
     return v;
+}
+
+sorbet::ProcessStatus sorbet::processExists(pid_t pid) {
+    if (kill(pid, 0) == 0) {
+        return ProcessStatus::Running;
+    }
+
+    switch (errno) {
+        case EINVAL:
+            // This should be impossible, as we're using the signal value of `0`, which is well-defined.
+            return ProcessStatus::Unknown;
+
+        case EPERM:
+            // The process does exist, but we don't have permissions to send it signals.
+            return ProcessStatus::Running;
+
+        case ESRCH:
+            // No process exists with this pid.
+            return ProcessStatus::Missing;
+
+        default:
+            // We return `Unknown` here as the above three cases are the only ones called out in the man page for the
+            // kill syscall.
+            return ProcessStatus::Unknown;
+    }
 }
 
 vector<uint32_t> sorbet::findLineBreaks(string_view s) {

@@ -483,6 +483,10 @@ class Info < T::struct
 end
 ```
 
+## 3516
+
+`attr_reader` and `attr_accessor` may not be given a signature of `void`, as these accessor methods correspond to instance variables which cannot be assigned type `void`.
+
 ## 3550
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
@@ -873,6 +877,22 @@ Additionally, if a package is at `strict_dependencies 'dag'`, all packages it im
 
 Note: `test_import`s are not checked for strict dependency violations.
 
+## 3728
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The following directives can only appear once per `__package.rb` file:
+
+- `layer`
+- `strict_dependencies`
+- `sorbet min_typed_level: ..., tests_min_typed_level: ...`.
+
+## 3729
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. It takes two keyword arguments: `min_typed_level` and `tests_min_typed_level`. For each, the valid options are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
@@ -1183,6 +1203,23 @@ end
 ```
 
 You can resolve this error by giving a different name to one of the conflicting arguments.
+
+## 4025
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A method can only be made package-private if the class it's defined in has a package. For example:
+
+```ruby
+# -- lib/some_package/example.rb
+class SomePackage::Example
+  class ::SomeGlobalClass
+    package_private def foo; end # 💥
+  end
+end
+```
+
+This file defines a global class called `::SomeGlobalClass` outside of the enclosing namespace of the current package. This means it will not be treated as belonging to the package `SomePackage`, and therefore cannot be made `package_private`.
 
 ## 5001
 

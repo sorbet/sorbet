@@ -1,6 +1,6 @@
 a/__package.rb:7: Strict dependencies violation: importing `B` will put `A` into a cycle, which is not valid at `strict_dependencies 'layered_dag'` https://srb.help/3727
      7 |  import B
-                 ^
+          ^^^^^^^^
   Note:
     Path from `B` to `A`:
     `B` →

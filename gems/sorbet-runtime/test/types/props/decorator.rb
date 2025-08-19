@@ -406,4 +406,22 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     T::Configuration.normalize_sensitivity_and_pii_handler = nil
 
   end
+
+  it 'tells the name of pii prop if bad pii' do
+    e = assert_raises do
+      T::Configuration.normalize_sensitivity_and_pii_handler = lambda do |meta|
+        meta[:pii] = :set
+        meta
+      end
+      class NoPII < T::Struct
+        def self.contains_pii?
+          false
+        end
+
+        prop :foo, Integer, sensitivity: true
+      end
+    end
+    assert_match(/NoPII#foo/, e.message)
+    assert_match(/because `.*::NoPII` is `contains_no_pii`/, e.message)
+  end
 end

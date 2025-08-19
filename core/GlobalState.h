@@ -280,7 +280,8 @@ public:
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
     std::unique_ptr<GlobalState>
-    copyForIndex(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+    copyForIndex(const bool packagerEnabled,
+                 const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                  const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                  const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                  const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,

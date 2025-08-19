@@ -14,5 +14,5 @@ class Importers::Allowed < PackageSpec
 
   # not allowed---this package is NOT referenced using `visible_to`
   import Exporters::OnlyTestVisibleTo
-       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
 end

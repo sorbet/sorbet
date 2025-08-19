@@ -236,7 +236,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             case realmain::options::Parser::PRISM: {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-                auto nodes = parser::Prism::Parser::run(gs, file);
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+                auto nodes = parser::Prism::Parser::run(ctx);
                 parseResult = parser::Parser::ParseResult{move(nodes), {}};
                 break;
             }
@@ -703,15 +704,17 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // this replicates the logic of pipeline::indexOne
         parser::Parser::ParseResult parseResult;
+        unique_ptr<parser::Node> directlyDesugaredTree;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
                 auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
                 parseResult = parser::Parser::run(*gs, f.file, settings);
+                directlyDesugaredTree = nullptr;
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                auto nodes = parser::Prism::Parser::run(ctx, f.file);
-                parseResult = parser::Parser::ParseResult{move(nodes), {}};
+                parseResult = parser::Parser::ParseResult{parser::Prism::Parser::run(ctx, false), {}};
+                directlyDesugaredTree = parser::Prism::Parser::run(ctx, true);
                 break;
             }
         }
@@ -731,17 +734,29 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
 
-        ast::ParsedFile file;
-        switch (parser) {
-            case realmain::options::Parser::ORIGINAL: {
-                file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
-                break;
-            }
-            case realmain::options::Parser::PRISM: {
-                file = testSerialize(*gs, ast::ParsedFile{ast::prismDesugar::node2Tree(ctx, move(nodes)), f.file});
-                break;
+        ast::ExpressionPtr ast;
+        {
+            core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
+            ast = ast::desugar::node2Tree(ctx, move(nodes));
+
+            if (directlyDesugaredTree != nullptr) {
+                // This AST would have been desugared deirectly by Prism::Translator
+                auto directlyDesugaredAST = ast::prismDesugar::node2Tree(ctx, move(directlyDesugaredTree));
+
+                if (!ast.exactlyEqual(*gs, directlyDesugaredAST, f.file)) {
+                    auto expected = ast.showRawWithLocs(*gs, f.file);
+                    auto actual = directlyDesugaredAST.showRawWithLocs(*gs, f.file);
+                    CHECK_EQ_DIFF(expected, actual,
+                                  fmt::format("Prism desugared tree does not match legacy desugared tree"));
+                }
+
+                // If we get to here, we know the two trees are equivalent, so it doesn't really matter which we use.
+                // Let's just use the directly desugared one.
+                ast = move(directlyDesugaredAST);
             }
         }
+
+        ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{move(ast), f.file});
 
         handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });

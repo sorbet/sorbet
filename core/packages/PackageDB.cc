@@ -1,124 +1,13 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/str_split.h"
-#include "absl/types/span.h"
-#include "common/sort/sort.h"
-#include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
-#include "core/Loc.h"
 
 using namespace std;
 
 namespace sorbet::core::packages {
 
 namespace {
-class NonePackage final : public PackageInfo {
-public:
-    MangledName mangledName() const {
-        return MangledName();
-    }
-
-    absl::Span<const core::NameRef> fullName() const {
-        notImplemented();
-        return absl::Span<const core::NameRef>();
-    }
-
-    absl::Span<const string> pathPrefixes() const {
-        notImplemented();
-        return absl::Span<const string>();
-    }
-
-    unique_ptr<PackageInfo> deepCopy() const {
-        notImplemented();
-        return make_unique<NonePackage>();
-    }
-
-    Loc fullLoc() const {
-        notImplemented();
-        return Loc::none();
-    }
-
-    Loc declLoc() const {
-        notImplemented();
-        return Loc::none();
-    }
-
-    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                    ImportType importType) const {
-        notImplemented();
-        return nullopt;
-    }
-
-    optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs, const core::SymbolRef name) const {
-        return {};
-    }
-
-    bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        notImplemented();
-        return false;
-    }
-
-    bool exportAll() const {
-        notImplemented();
-        return false;
-    }
-
-    bool visibleToTests() const {
-        notImplemented();
-        return false;
-    }
-
-    vector<VisibleTo> visibleTo() const {
-        return {};
-    }
-
-    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
-        notImplemented();
-        return nullopt;
-    }
-
-    optional<pair<core::NameRef, core::LocOffsets>> layer() const {
-        notImplemented();
-        return nullopt;
-    }
-
-    optional<int> sccID() const {
-        notImplemented();
-        return nullopt;
-    }
-
-    optional<int> testSccID() const {
-        notImplemented();
-        return nullopt;
-    }
-
-    bool causesLayeringViolation(const core::packages::PackageDB &packageDB, const PackageInfo &otherPkg) const {
-        notImplemented();
-        return false;
-    }
-
-    core::packages::StrictDependenciesLevel minimumStrictDependenciesLevel() const {
-        notImplemented();
-        return core::packages::StrictDependenciesLevel::False;
-    }
-
-    optional<string> pathTo(const core::GlobalState &gs, const MangledName dest) const {
-        notImplemented();
-        return nullopt;
-    }
-
-    optional<ImportType> importsPackage(MangledName mangledName) const {
-        notImplemented();
-        return nullopt;
-    }
-
-    ~NonePackage() {}
-
-private:
-    void notImplemented() const {
-        ENFORCE(false, "Not implemented for NonePackage");
-    }
-};
-static const NonePackage NONE_PKG;
+static const PackageInfo NONE_PKG(MangledName(), Loc::none(), Loc::none());
 } // namespace
 
 UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
@@ -129,10 +18,6 @@ UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
-    fast_sort(db.mangledNames, [&db = this->db](auto a, auto b) -> bool {
-        return PackageInfo::lexCmp(db.getPackageInfo(a).fullName(), db.getPackageInfo(b).fullName());
-    });
-
     db.writerThread = std::thread::id();
     db.frozen = true;
 }
