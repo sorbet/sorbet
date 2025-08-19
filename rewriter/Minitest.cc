@@ -270,12 +270,11 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                         name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
                     }
                 } else {
-                    // no argument provided, use a deterministic unique name based on location
-                    auto pos = send->loc.beginPos();
+                    // no argument provided, use static anonymous names
                     if (send->fun == core::Names::xit()) {
-                        name = ctx.state.enterNameUTF8("<anonymous_xit_" + to_string(pos) + ">");
+                        name = core::Names::anonymousXit();
                     } else {
-                        name = ctx.state.enterNameUTF8("<anonymous_it_" + to_string(pos) + ">");
+                        name = core::Names::anonymousIt();
                     }
                 }
             }

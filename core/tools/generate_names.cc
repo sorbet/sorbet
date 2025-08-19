@@ -368,6 +368,8 @@ NameDef names[] = {
     {"blkArg", "<blk>"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
+    {"anonymousIt", "<anonymous-it>"},
+    {"anonymousXit", "<anonymous-xit>"},
 
     // Method names known to Data
     {"define"},
