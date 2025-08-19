@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C RSpecBasicsTest><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C <describe 'traditional describe syntax'>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'traditional describe syntax'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.void()
       end
@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of <it 'still works without RSpec receiver'>>
     end
 
-    class <emptyTree>::<C <describe 'using context instead of describe'>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'using context instead of describe'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.void()
       end
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    class <emptyTree>::<C <describe 'pending tests with xit'>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'pending tests with xit'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.void()
       end
@@ -71,7 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    class <emptyTree>::<C <describe 'mixed syntax'>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'mixed syntax'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
       class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
         ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
           <self>.void()
@@ -132,7 +132,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    class <emptyTree>::<C <describe 'Baz'>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'Baz'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.void()
       end

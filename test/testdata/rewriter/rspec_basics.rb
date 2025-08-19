@@ -2,14 +2,14 @@
 
 class RSpecBasicsTest
   # Test traditional describe syntax (should still work)
-  describe 'traditional describe syntax' do
+  RSpec.describe 'traditional describe syntax' do
     it 'still works without RSpec receiver' do
       puts 'traditional test'
     end
   end
 
   # Test context as alias for describe
-  context 'using context instead of describe' do
+  RSpec.context 'using context instead of describe' do
     it 'context should work like describe' do
       puts 'context test'
     end
@@ -22,7 +22,7 @@ class RSpecBasicsTest
   end
 
   # Test xit (pending/skipped tests) - only named ones for now
-  describe 'pending tests with xit' do
+  RSpec.describe 'pending tests with xit' do
     it 'regular test' do
       puts 'regular test runs'
     end
@@ -33,7 +33,7 @@ class RSpecBasicsTest
   end
 
   # Test mixed describe and context
-  describe 'mixed syntax' do
+  RSpec.describe 'mixed syntax' do
     context 'inside describe' do
       it 'regular it block' do
         puts 'mixed syntax test'
@@ -68,7 +68,7 @@ class RSpecBasicsTest
     end
   end
 
-  describe Foo::Baz do
+  RSpec.describe Foo::Baz do
     it 'should work fine' do
       puts 'nested traditional in describe'
     end
