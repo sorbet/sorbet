@@ -390,6 +390,7 @@ StrictDependenciesLevel PackageInfo::minimumStrictDependenciesLevel() const {
     }
 }
 
+namespace {
 string renderPath(const core::GlobalState &gs, const vector<MangledName> &path) {
     // TODO(neil): if the cycle has a large number of nodes (10?), show partial path (first 5, ... (n omitted), last
     // 5) to prevent error being too long
@@ -403,6 +404,8 @@ string renderPath(const core::GlobalState &gs, const vector<MangledName> &path) 
     }
     return pathMessage;
 }
+
+} // namespace
 
 // Returns a string representing the path to the given package from this package, if it exists. Note: this only
 // looks at non-test imports.
