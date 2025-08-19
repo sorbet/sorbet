@@ -370,20 +370,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 new_args.emplace_back(arg.deepCopy());
             }
 
-            // let/subject blocks should return their computed value, not void
-            ast::ExpressionPtr method;
-            if (send->fun == core::Names::let() || send->fun == core::Names::letBang() ||
-                send->fun == core::Names::subject()) {
-                // For let/subject blocks, create a simple method that just returns the block result
-                // TODO: This doesn't provide access to test parameters yet, but fixes the return type issue
-                method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(body));
-            } else {
-                // For it/before/after blocks, use the each iteration pattern
-                auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
-                auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
-                                                send->loc.copyWithZeroLength(), move(blk));
-                method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(each)));
-            }
+            ast::ExpressionPtr method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(body));
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
     }
