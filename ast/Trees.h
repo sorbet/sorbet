@@ -834,6 +834,9 @@ public:
     const core::LocOffsets funLoc;
 
     struct Flags {
+        // True if the receiver was self (either implicit like `foo()` or explicit like `self.foo()`)
+        //   - Prior to Ruby 2.7, it was illegal to call a private method with an explicit receiver.
+        //   - As of Ruby 2.7, it became legal to call private methods on self, e.g. `self.foo()`.
         bool isPrivateOk : 1;
         bool isRewriterSynthesized : 1;
         bool hasBlock : 1;
