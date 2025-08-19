@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         <runtime method definition of <it 'works'>>
       end
-      module ::<root>::<C <shared_examples_module 'common behavior'>><<C <todo sym>>> < ()
+      module <emptyTree>::<C <shared_examples_module 'common behavior'>><<C <todo sym>>> < ()
         <self>.extend(<emptyTree>::<C T>::<C Helpers>)
       end
     end
