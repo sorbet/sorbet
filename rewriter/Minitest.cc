@@ -133,6 +133,13 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
     return send.loc.copyWithZeroLength().join(send.block()->loc.copyWithZeroLength());
 }
 
+// Helper function to create shared_examples_module constant reference with local scope only
+ast::ExpressionPtr makeSharedExamplesModuleConstantLocal(core::MutableContext ctx, core::LocOffsets loc, const string &argString) {
+    return ast::MK::UnresolvedConstant(
+        loc, ast::MK::EmptyTree(),
+        ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
+}
+
 } // namespace
 
 ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe);
@@ -322,9 +329,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             auto &arg = send->getPosArg(0);
             auto argString = to_s(ctx, arg);
             // Create an include statement that includes the shared_examples companion module
-            auto moduleName = ast::MK::UnresolvedConstant(
-                arg.loc(), ast::MK::EmptyTree(),
-                ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
+            auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
             // Create an include statement to include the shared_examples companion module
             return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
                                   std::move(moduleName));
@@ -468,9 +473,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto argString = to_s(ctx, arg);
         // Create an include statement that includes the shared_examples companion module
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
-        auto moduleName = ast::MK::UnresolvedConstant(
-            arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-            ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
+        auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
         // Create an include statement to include the shared_examples companion module
         return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
                               std::move(moduleName));
@@ -541,9 +544,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto argString = to_s(ctx, arg);
         // Create an include statement that includes the filtered shared_examples module
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
-        auto moduleName = ast::MK::UnresolvedConstant(
-            arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-            ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
+        auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
         // Create an include statement to include the filtered shared_examples module
         return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
                               std::move(moduleName));
@@ -672,9 +673,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                           flattenDescribeBody(rhs.deepCopy()));
 
         // Create a filtered module version that contains only includable methods (let, etc.)
-        auto moduleName = ast::MK::UnresolvedConstant(
-            arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-            ctx.state.enterNameConstant("<shared_examples_module '" + argString + "'>"));
+        auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
 
         // Filter the RHS to include only methods that should be includable
         ast::ClassDef::RHS_store filteredModuleRhs;
