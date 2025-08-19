@@ -383,12 +383,36 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             unique_ptr<parser::Node> sendNode;
 
+            auto name = ctx.state.enterNameUTF8(constantNameString);
+
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
-                sendNode = make_unique<parser::CSend>(loc, move(receiver), ctx.state.enterNameUTF8(constantNameString),
-                                                      messageLoc, move(args));
+                sendNode = make_unique<parser::CSend>(loc, move(receiver), name, messageLoc, move(args));
             } else { // Regular send, e.g. `a.b`
-                sendNode = make_unique<parser::Send>(loc, move(receiver), ctx.state.enterNameUTF8(constantNameString),
-                                                     messageLoc, move(args));
+                // Method calls are really complex, and we're building support for different kinds of arguments bit by
+                // bit. This bool is true when this particular method call is supported by our desugar logic.
+                auto supportedCallType = receiver == nullptr && args.empty() && constantNameString != "block_given?" &&
+                                         hasExpr(receiver) && hasExpr(args);
+
+                if (supportedCallType) {
+                    ast::Send::Flags flags;
+
+                    ast::ExpressionPtr receiverExpr;
+                    if (receiver == nullptr) { // Convert `foo()` to `self.foo()`
+                        // 0-sized Loc, since `self.` doesn't appear in the original file.
+                        receiverExpr = MK::Self(loc.copyWithZeroLength());
+                    } else {
+                        receiverExpr = receiver->takeDesugaredExpr();
+                    }
+
+                    flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+
+                    auto expr =
+                        MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
+                    sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc,
+                                                                 move(args));
+                } else {
+                    sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
+                }
             }
 
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
