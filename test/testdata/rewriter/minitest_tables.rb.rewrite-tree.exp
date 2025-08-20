@@ -42,10 +42,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'works with instance methods'><<todo method>>(&<blk>)
       [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()].each() do |value|
         begin
@@ -54,10 +50,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(value)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'succeeds with a constant list'><<todo method>>(&<blk>)
@@ -69,10 +61,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'succeeds with a typed constant list'><<todo method>>(&<blk>)
       <emptyTree>::<C ANOTHER_CONST_LIST>.each() do |value|
         begin
@@ -80,10 +68,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(value)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'succeed with a local variable but cannot type it'><<todo method>>(&<blk>)
@@ -95,28 +79,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'fails with non-it statements'><<todo method>>(&<blk>)
       <emptyTree>::<C CONST_LIST>.each() do |value|
         <self>.puts(x)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'handles lists with several types'><<todo method>>(&<blk>)
       ["foo", 5, {:x => false}].each() do |v|
         <emptyTree>::<C T>.reveal_type(v)
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'blocks get padded with NilClass arguments'><<todo method>>(&<blk>)
@@ -128,10 +100,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'multiple it blocks are ok with multiple arguments'><<todo method>>(&<blk>)
       [1, 2, 3].each() do |k, v|
         begin
@@ -139,10 +107,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(v)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'destructured blocks get padded with NilClass arguments'><<todo method>>(&<blk>)
@@ -163,10 +127,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'multiple it blocks are ok with multiple destructured arguments'><<todo method>>(&<blk>)
       [1, 2, 3].each() do |<destructure>$4|
         begin
@@ -183,10 +143,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           end
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'handles mixed destructuring and positional arguments'><<todo method>>(&<blk>)
@@ -217,10 +173,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'multiple it blocks are ok with mixed argument styles'><<todo method>>(&<blk>)
       [[1, ["hi", false]], [2, ["bye", true]]].each() do |i, <destructure>$7, <destructure>$10|
         begin
@@ -247,10 +199,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'succeeds with a constant list of tuples'><<todo method>>(&<blk>)
       <emptyTree>::<C CONST_LIST_TUPLE>.each() do |i, s|
         begin
@@ -258,10 +206,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(s)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'succeeds with a constant list of tuples and destructuring'><<todo method>>(&<blk>)
@@ -282,10 +226,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'succeeds with a typed constant tuple list'><<todo method>>(&<blk>)
       <emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>.each() do |i, s|
         begin
@@ -293,10 +233,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(s)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'succeeds with a typed constant tuple list with destructuring'><<todo method>>(&<blk>)
@@ -317,10 +253,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'succeed with local variables but cannot type them'><<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented").each() do |i, s|
         begin
@@ -328,10 +260,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(s)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'succeed with destructured local variables but cannot type them'><<todo method>>(&<blk>)
@@ -352,10 +280,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'rejects manual destructuring of the list argument'><<todo method>>(&<blk>)
       [[1, "a"], [2, "b"]].each() do |value|
         begin
@@ -363,10 +287,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(s)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it '::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)'><<todo method>>(&<blk>)
@@ -387,10 +307,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'handles lists with several types'><<todo method>>(&<blk>)
       {:foo => 1, :bar => 2, :baz => 3}.each() do |k, v|
         begin
@@ -398,10 +314,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(v)
         end
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'fails to typecheck with non-hash arguments to `test_each-hash`'><<todo method>>(&<blk>)

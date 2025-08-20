@@ -22,18 +22,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C Test>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'it block 1'><<todo method>>(&<blk>)
       [[1, 2], [3, 4]].each() do |<destructure>$2|
         <emptyTree>
       end
-    end
-
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
     end
 
     def <it 'it block 2'><<todo method>>(&<blk>)
