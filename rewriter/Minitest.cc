@@ -107,7 +107,19 @@ public:
     }
 };
 
-ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
+ast::ExpressionPtr addSigVoid(core::Context ctx, ast::ExpressionPtr expr) {
+    if (ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict) {
+        // Only add a dummy sig if it would be required (because the file is `# typed: strict`).
+        // This is to save memory (and possibly also typechecking runtime).
+        //
+        // Another alternative if this approach becomes problematic would be to set some sort of
+        // flag on MethodDef that says to suppress the "missing sig" error, or to implicitly assume
+        // a sig of `sig { void }` or something.
+        //
+        // For example, in a world where all tests are `# typed: strict`, this approach saves no memory.
+        return expr;
+    }
+
     core::LocOffsets declLoc;
     if (auto mdef = ast::cast_tree<ast::MethodDef>(expr)) {
         declLoc = mdef->declLoc;
@@ -264,7 +276,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                                             send->loc.copyWithZeroLength(), move(blk));
             // put that into a method def named the appropriate thing
             auto declLoc = declLocForSendWithBlock(*send);
-            auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
+            auto method = addSigVoid(ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
         } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && correctBlockArity) {
@@ -415,8 +427,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto declLoc = declLocForSendWithBlock(*send);
-        auto method = addSigVoid(ast::MK::SyntheticMethod0(
-            send->loc, declLoc, name, prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
+        auto method = addSigVoid(
+            ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, name,
+                                           prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -459,9 +472,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         const bool bodyIsClass = false;
         auto declLoc = declLocForSendWithBlock(*send);
-        auto method = addSigVoid(
-            ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                      prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
+        auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                                prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
+        // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
+        // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
+        // omitting it saves memory.
+        ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
+        method = addSigVoid(ctx, move(method));
         if (!ast::isa_tree<ast::Literal>(arg)) {
             method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         }
