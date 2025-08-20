@@ -16,10 +16,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTestParent><<C <todo sym>>> < (<emptyTree>::<C MyTestGrandParent>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <before><<todo method>>(&<blk>)
       @x = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
     end
@@ -39,10 +35,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of initialize>
 
     class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
       def <it 'does thing'><<todo method>>(&<blk>)
         <emptyTree>::<C T>.reveal_type(@x)
       end

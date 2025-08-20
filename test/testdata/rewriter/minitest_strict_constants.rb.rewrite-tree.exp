@@ -1,9 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
     def <it 'allows let-ed constants inside of IT'><<todo method>>(&<blk>)
       ::Module.const_set(:C2, <cast:let>(10, <todo sym>, <emptyTree>::<C Integer>))
     end
