@@ -81,7 +81,7 @@ This will ignore input files that contain the given pattern in their paths (rela
 
 Using `# typed: ignore` means only "ignore the contents of this file for the purpose of type checking." Sorbet still must read every `# typed: ignore` file in the codebase (to find the sigil in the first place)
 
-By contract, the `--ignore` means Sorbet only has to look at a file's path to ignore it—it does not have to read the files' contents.
+By contract, the `--ignore` flag means Sorbet only has to look at a file's path to ignore it—it does not have to read the files' contents.
 
 If Sorbet reads a file's contents, it never drops that file's memory—specifically, `# typed: ignore` files are not offloaded from memory after Sorbet determines to ignore them. This means that whenever ignoring large swaths of a codebase, it's better to use `--ignore` than `# typed: ignore`, especially when there is a very large amount of code to ignore.
 
