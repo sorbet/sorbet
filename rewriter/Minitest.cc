@@ -462,7 +462,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto method = addSigVoid(
             ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
                                       prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
-        method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
+        if (!ast::isa_tree<ast::Literal>(arg)) {
+            method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
+        }
         return constantMover.addConstantsToExpression(send->loc, move(method));
     } else if (insideDescribe && send->fun == core::Names::let() && ast::isa_tree<ast::Literal>(arg)) {
         auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
