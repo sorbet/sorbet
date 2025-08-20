@@ -108,7 +108,7 @@ public:
 };
 
 ast::ExpressionPtr addSigVoid(core::Context ctx, ast::ExpressionPtr expr) {
-    if (ctx.file.data(ctx).strictLevel >= core::StrictLevel::Strict) {
+    if (ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict) {
         // Only add a dummy sig if it would be required (because the file is `# typed: strict`).
         // This is to save memory (and possibly also typechecking runtime).
         //
