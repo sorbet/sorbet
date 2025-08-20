@@ -95,26 +95,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of outside_method>
 
-    <runtime method definition of <it 'works outside'>>
-
     begin
       <emptyTree>::<C CONST> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      <runtime method definition of <it 'allows constants inside of IT'>>
+      <emptyTree>
     end
 
     begin
       <emptyTree>::<C C2> = <cast:let>(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <todo sym>, <emptyTree>::<C Integer>)
-      <runtime method definition of <it 'allows let-ed constants inside of IT'>>
+      <emptyTree>
     end
 
     begin
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
-      <runtime method definition of <it 'allows path constants inside of IT'>>
+      <emptyTree>
     end
 
     begin
       ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
-      <runtime method definition of <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'>>
+      <emptyTree>
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
@@ -134,8 +132,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of inside_method>
-
-      <runtime method definition of <it 'works inside'>>
     end
 
     <runtime method definition of instance_helper>
@@ -143,8 +139,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of <before>>
 
     <runtime method definition of <after>>
-
-    <runtime method definition of <it 'can read foo'>>
 
     <runtime method definition of self.random_method>
 
@@ -171,12 +165,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       begin
         <emptyTree>::<C Object>
-        <runtime method definition of <it 'Object'>>
+        <emptyTree>
       end
 
       begin
         <emptyTree>::<C Object>
-        <runtime method definition of <it 'Object'>>
+        <emptyTree>
       end
     end
 
@@ -199,8 +193,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
       end
-
-      <runtime method definition of <it 'contains nested describes'>>
     end
   end
 
@@ -227,8 +219,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <runtime method definition of example>
-
-    <runtime method definition of <it 'calls example'>>
   end
 
   <runtime method definition of junk>

@@ -76,17 +76,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     begin
       ::<Magic>.<string-interpolate>("outside test_each ", x)
-      <runtime method definition of <it '::<Magic>.<string-interpolate>("outside test_each ", x)'>>
+      <emptyTree>
     end
 
     begin
       ::<Magic>.<string-interpolate>("outside test_each ", <self>.y())
-      <runtime method definition of <it '::<Magic>.<string-interpolate>("outside test_each ", <self>.y())'>>
+      <emptyTree>
     end
 
     begin
       ::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)
-      <runtime method definition of <it '::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)'>>
+      <emptyTree>
     end
 
     <self>.test_each(["foo"]) do |x|

@@ -459,9 +459,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         const bool bodyIsClass = false;
         auto declLoc = declLocForSendWithBlock(*send);
-        auto method = addSigVoid(
-            ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                      prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
+        auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                                prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
+        // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
+        // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
+        // omitting it saves memory.
+        ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
+        method = addSigVoid(move(method));
         if (!ast::isa_tree<ast::Literal>(arg)) {
             method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         }
