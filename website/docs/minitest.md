@@ -155,6 +155,8 @@ test_each(KEY_VAL_PAIRS) do |key, val|
 end
 ```
 
+For more on correct and incorrect usage, consider reading the error documentation for [error code 3507](error-reference.md#3507).
+
 ### `test_each` and `test_each_hash` definitions
 
 These definitions can either:
