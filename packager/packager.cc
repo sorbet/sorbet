@@ -1390,26 +1390,18 @@ public:
         return packageDB.getPackageInfo(packageName).importedPackageNames;
     }
 
-    void setSCCId(MangledName packageName, int sccID) {
-        auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
-        if (!pkgInfoPtr) {
-            return;
-        }
-        pkgInfoPtr->sccID_ = sccID;
+    void setSCCId(PackageInfo &info, int sccID) {
+        info.sccID_ = sccID;
     }
 
-    int getSCCId(MangledName packageName) const {
-        ENFORCE(packageDB.getPackageInfo(packageName).exists());
-        ENFORCE(packageDB.getPackageInfo(packageName).sccID().has_value());
-        return packageDB.getPackageInfo(packageName).sccID().value();
+    int getSCCId(const PackageInfo &info) const {
+        ENFORCE(info.exists());
+        ENFORCE(info.sccID().has_value());
+        return info.sccID().value();
     }
 
-    void setTestSCCId(MangledName packageName, int sccID) {
-        auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
-        if (!pkgInfoPtr) {
-            return;
-        }
-        pkgInfoPtr->testSccID_ = sccID;
+    void setTestSCCId(PackageInfo &info, int sccID) {
+        info.testSccID_ = sccID;
     }
 };
 

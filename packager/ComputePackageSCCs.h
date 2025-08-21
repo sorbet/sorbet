@@ -115,14 +115,17 @@ class ComputePackageSCCs {
                 this->stack.pop_back();
                 this->nodeMap[poppedPkgName].onStack = false;
 
+                auto *packageInfo = packageDB.getPackageInfoNonConst(poppedPkgName);
+                ENFORCE(packageInfo != nullptr);
+
                 if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                    packageGraph.setSCCId(poppedPkgName, sccId);
+                    packageGraph.setSCCId(*packageInfo, sccId);
                 } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
-                    packageGraph.setTestSCCId(poppedPkgName, sccId);
+                    packageGraph.setTestSCCId(*packageInfo, sccId);
 
                     // Tests have an implicit dependency on their package's application code. Those scc ids must
                     // exist at this point, as we've already traversed all packages once.
-                    auto appSccId = packageGraph.getSCCId(poppedPkgName);
+                    auto appSccId = packageGraph.getSCCId(*packageInfo);
                     condensationNode.imports.insert(appSccId);
                 }
             } while (poppedPkgName != pkgName);
@@ -148,13 +151,12 @@ class ComputePackageSCCs {
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = importedPkg.sccID();
-                    ENFORCE(impId.has_value());
-                    if (*impId == sccId) {
+                    auto impId = packageGraph.getSCCId(importedPkg);
+                    if (impId == sccId) {
                         continue;
                     }
 
-                    condensationNode.imports.insert(*impId);
+                    condensationNode.imports.insert(impId);
                 }
             }
         }
