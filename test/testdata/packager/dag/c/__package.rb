@@ -6,5 +6,6 @@ class C < PackageSpec
   layer 'business'
 
   import A # error: All of `C`'s `import`s must be `dag` or higher
+  import Nested
   test_import B
 end
