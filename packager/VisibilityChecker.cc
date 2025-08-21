@@ -227,13 +227,7 @@ const FileType fileTypeFromCtx(const core::Context ctx) {
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
-        if (definedHereLoc.file().data(ctx).isRBI()) {
-            e.addErrorSection(
-                core::ErrorSection(core::ErrorColors::format("Consider marking this RBI file `{}` if it is meant to "
-                                                             "declare unpackaged constants",
-                                                             "# packaged: false"),
-                                   {core::ErrorLine(definedHereLoc, "")}));
-        } else if (definesBehavior) {
+        if (definesBehavior) {
             e.addErrorLine(definedHereLoc, "Defined here");
         } else {
             e.addErrorSection(core::ErrorSection(
