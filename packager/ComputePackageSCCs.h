@@ -138,23 +138,20 @@ class ComputePackageSCCs {
                         }
                     }
 
-                    // Only process valid imports (this is the same check as in the early return at the beginning of
-                    // this function)
-                    auto &importedPkg = packageDB.getPackageInfo(i.mangledName);
-                    if (!importedPkg.exists()) {
+                    // The mangled name won't exist if the import was to a package that doesn't exist.
+                    if (!i.mangledName.exists()) {
                         continue;
                     }
 
                     // All of the imports of every member of the SCC will have been processed in the recursive step, so
                     // we can assume the scc id of the target exists. Additionally, all imports are to the original
                     // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = importedPkg.sccID();
-                    ENFORCE(impId.has_value());
-                    if (*impId == sccId) {
+                    auto impId = packageGraph.getSCCId(i.mangledName);
+                    if (impId == sccId) {
                         continue;
                     }
 
-                    condensationNode.imports.insert(*impId);
+                    condensationNode.imports.insert(impId);
                 }
             }
         }
