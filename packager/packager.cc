@@ -669,7 +669,7 @@ struct PackageSpecBodyWalk {
                         auto &posArg = send.getPosArg(0);
                         auto importArg = move(target->recv);
                         posArg = ast::packager::prependRegistry(move(importArg));
-                        // Allow namespaces to allow wildcard visible_to of namespaces, not just rooted packages.
+                        // Allow namespaces to enable wildcard visible_to of namespaces, not just rooted packages.
                         auto allowNamespace = true;
                         info.visibleTo_.emplace_back(resolvePackageName(ctx, recv, allowNamespace),
                                                      VisibleToType::Wildcard);
