@@ -81,10 +81,6 @@ StrictLevel File::fileStrictSigil(string_view source) {
     return ParseSigil<StrictLevel>::parse(source);
 }
 
-PackagedLevel File::filePackagedSigil(string_view source) {
-    return ParseSigil<PackagedLevel>::parse(source);
-}
-
 bool isTestPath(string_view path) {
     return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
 }
@@ -115,9 +111,8 @@ File::Flags::Flags(string_view path)
       hasPackageRBIPath(isPackageRBIPath(path)), hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
-    : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
-      path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
-      strictLevel(originalSigil) {
+    : epoch(epoch), sourceType(sourceType), flags(path_), path_(move(path_)), source_(move(source_)),
+      originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil) {
     if (this->source_.size() >= INVALID_POS_LOC) [[unlikely]] {
         Exception::raise("File not less than {} bytes. Got: {}", UINT32_MAX, this->source_.size());
     }
@@ -301,17 +296,6 @@ bool File::hasIndexErrors() const {
 
 void File::setHasIndexErrors(bool value) {
     flags.hasIndexErrors = value;
-}
-
-bool File::isPackaged() const {
-    switch (this->packagedLevel) {
-        case PackagedLevel::False:
-            return false;
-
-        case PackagedLevel::True:
-        case PackagedLevel::None:
-            return true;
-    }
 }
 
 } // namespace sorbet::core

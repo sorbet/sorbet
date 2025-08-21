@@ -4,7 +4,6 @@
 #include "core/FileRef.h"
 #include "core/LocOffsets.h"
 #include "core/Names.h"
-#include "core/PackagedLevel.h"
 #include "core/StrictLevel.h"
 #include <string>
 #include <string_view>
@@ -35,7 +34,6 @@ public:
     friend class ::sorbet::core::serialize::SerializerImpl;
 
     static StrictLevel fileStrictSigil(std::string_view source);
-    static PackagedLevel filePackagedSigil(std::string_view source);
 
     std::string_view path() const;
     std::string_view source() const;
@@ -66,9 +64,6 @@ public:
 
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
-
-    // Returns whether or not this file is considered to be packaged.
-    bool isPackaged() const;
 
     File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
     File(File &&other) = delete;
@@ -120,8 +115,6 @@ private:
     CheckSize(Flags, 1, 1);
 
     Flags flags;
-
-    const PackagedLevel packagedLevel;
 
     const std::string path_;
     const std::string source_;
