@@ -225,15 +225,6 @@ const FileType fileTypeFromCtx(const core::Context ctx) {
 }
 
 class VisibilityCheckerPass final {
-    void addPackagedFalseNote(core::Context ctx, core::ErrorBuilder &e) {
-        if (!ctx.file.data(ctx).isPackaged()) {
-            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's "
-                           "namespace,\n    "
-                           "but must still respect its enclosing package's imports.",
-                           "# packaged: false");
-        }
-    }
-
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
         if (definedHereLoc.file().data(ctx).isRBI()) {
@@ -429,7 +420,6 @@ public:
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                        addPackagedFalseNote(ctx, e);
                     }
                 } else if (!isExported && testImportInProd) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
@@ -460,7 +450,6 @@ public:
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                        addPackagedFalseNote(ctx, e);
                     }
                 } else if (testImportInProd) {
                     ENFORCE(!isTestImport);
