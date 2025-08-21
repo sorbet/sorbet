@@ -141,7 +141,7 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
 }
 
 // TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
-MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
+MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit, bool allowNamespace) {
     ENFORCE(constantLit != nullptr);
 
     auto fullName = getFullyQualifiedName(ctx, constantLit);
@@ -167,7 +167,13 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
         owner = core::Symbols::noClassOrModule();
     }
 
-    return MangledName(owner);
+    auto result = MangledName(owner);
+
+    if (!allowNamespace && !ctx.state.packageDB().getPackageInfo(result).exists()) {
+        return MangledName();
+    }
+
+    return result;
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -609,8 +615,10 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.importedPackageNames.emplace_back(resolvePackageName(ctx, target), method2ImportType(send),
-                                                           send.loc);
+                    // No such thing as "wildcard imports"--imports must pass a complete package name.
+                    auto allowNamespace = false;
+                    info.importedPackageNames.emplace_back(resolvePackageName(ctx, target, allowNamespace),
+                                                           method2ImportType(send), send.loc);
                 }
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
@@ -661,7 +669,10 @@ struct PackageSpecBodyWalk {
                         auto &posArg = send.getPosArg(0);
                         auto importArg = move(target->recv);
                         posArg = ast::packager::prependRegistry(move(importArg));
-                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv), VisibleToType::Wildcard);
+                        // Allow namespaces to allow wildcard visible_to of namespaces, not just rooted packages.
+                        auto allowNamespace = true;
+                        info.visibleTo_.emplace_back(resolvePackageName(ctx, recv, allowNamespace),
+                                                     VisibleToType::Wildcard);
                     } else {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                             e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -674,7 +685,9 @@ struct PackageSpecBodyWalk {
                     auto importArg = move(posArg);
                     posArg = ast::packager::prependRegistry(move(importArg));
 
-                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target), VisibleToType::Normal);
+                    auto allowNamespace = false;
+                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target, allowNamespace),
+                                                 VisibleToType::Normal);
                 }
             }
         } else if (send.fun == core::Names::strictDependencies()) {
