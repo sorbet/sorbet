@@ -167,13 +167,13 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
         owner = core::Symbols::noClassOrModule();
     }
 
-    auto result = MangledName(owner);
-
-    if (!allowNamespace && !ctx.state.packageDB().getPackageInfo(result).exists()) {
-        return MangledName();
+    if (owner.exists()) {
+        if (!allowNamespace && owner.data(ctx)->superClass() != core::Symbols::PackageSpec()) {
+            return MangledName();
+        }
     }
 
-    return result;
+    return MangledName(owner);
 }
 
 bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
@@ -811,9 +811,6 @@ struct PackageSpecBodyWalk {
         if (!this->foundFirstPackageSpec) {
             auto packageSpecClass = ast::packager::asPackageSpecClass(tree);
             this->foundFirstPackageSpec |= (packageSpecClass != nullptr);
-
-            // Already reported an error (in definePackage) or no need to report an error (because
-            // this is the package spec class)
             return;
         }
 
@@ -983,7 +980,7 @@ private:
     }
 };
 
-unique_ptr<PackageInfo> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
+unique_ptr<PackageInfo> definePackage(core::GlobalState &gs, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(gs).isPackage(gs));
     // Assumption: Root of AST is <root> class. (This won't be true
@@ -1002,6 +999,9 @@ unique_ptr<PackageInfo> definePackage(const core::GlobalState &gs, ast::ParsedFi
             // rewriter already reported an error
             continue;
         }
+
+        // Eagerly resolve the superclass, so that we can rely on the
+        packageSpecClass->symbol.data(gs)->setSuperClass(core::Symbols::PackageSpec());
 
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
@@ -1492,9 +1492,14 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &file) {
         core::Context ctx(gs, core::Symbols::root(), file.file);
         if (file.file.data(gs).isPackage(gs)) {
-            auto info = definePackage(gs, file);
-            if (info != nullptr) {
-                rewritePackageSpec(gs, file, *info);
+            auto packageName = gs.packageDB().getPackageNameForFile(file.file);
+            auto &info = gs.packageDB().getPackageInfo(packageName);
+            if (info.exists()) {
+                // We aren't going to mutate the packageDB at this point, but we do need something to give to
+                // rewritePackageSpec. We make the most shallow copy possible, to ensure that we don't raise duplicate
+                // errors on the fast path.
+                PackageInfo copy{info.mangledName_, info.loc, info.declLoc_};
+                rewritePackageSpec(gs, file, copy);
             }
             validatePackage(ctx);
         } else {
