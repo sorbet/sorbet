@@ -11,6 +11,7 @@ extern "C" {
 
 #include "core/LocOffsets.h"
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
+#include "parser/ParseResult.h"
 
 namespace sorbet::parser::Prism {
 
