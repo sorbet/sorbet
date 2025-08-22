@@ -43,11 +43,11 @@ class TestClass
 
   m_or_n = T.cast(nil, T.all(M, N))
   puts m_or_n
-  #    ^ type: MN
+  #    ^^^^^^ error: Expected `Object` but found `T.all(M, N)` for argument `arg0`
 
   a_or_b_or_mn = T.let(A.new, T.any(A, B, T.all(M, N)))
   puts a_or_b_or_mn
-  #    ^ type: ABMN
+  #    ^^^^^^^^^^^^ error: Expected `Object` but found `T.any(A, B, T.all(M, N))` for argument `arg0`
 
   def example(x)
     #         ^ type: (nothing)
