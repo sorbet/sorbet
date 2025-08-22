@@ -86,8 +86,10 @@ struct Export {
 struct VisibleTo {
     MangledName mangledName;
     VisibleToType type;
+    core::LocOffsets loc;
 
-    VisibleTo(MangledName mangledName, VisibleToType type) : mangledName(mangledName), type(type){};
+    VisibleTo(MangledName mangledName, VisibleToType type, core::LocOffsets loc)
+        : mangledName(mangledName), type(type), loc(loc){};
 };
 
 class PackageInfo {

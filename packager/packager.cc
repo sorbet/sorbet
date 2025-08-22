@@ -672,7 +672,7 @@ struct PackageSpecBodyWalk {
                         // Allow namespaces to enable wildcard visible_to of namespaces, not just rooted packages.
                         auto allowNamespace = true;
                         info.visibleTo_.emplace_back(resolvePackageName(ctx, recv, allowNamespace),
-                                                     VisibleToType::Wildcard);
+                                                     VisibleToType::Wildcard, send.loc);
                     } else {
                         if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                             e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -686,8 +686,8 @@ struct PackageSpecBodyWalk {
                     posArg = ast::packager::prependRegistry(move(importArg));
 
                     auto allowNamespace = false;
-                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target, allowNamespace),
-                                                 VisibleToType::Normal);
+                    info.visibleTo_.emplace_back(resolvePackageName(ctx, target, allowNamespace), VisibleToType::Normal,
+                                                 send.loc);
                 }
             }
         } else if (send.fun == core::Names::strictDependencies()) {
