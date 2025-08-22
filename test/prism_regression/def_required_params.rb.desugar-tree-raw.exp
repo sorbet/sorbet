@@ -35,5 +35,18 @@ ClassDef{
         } }]
       rhs = EmptyTree
     }
+
+    MethodDef{
+      flags = {}
+      name = <U foo><<U <todo method>>>
+      params = [UnresolvedIdent{
+          kind = Local
+          name = <U a>
+        }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
   ]
 }
