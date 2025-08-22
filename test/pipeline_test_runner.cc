@@ -283,7 +283,10 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
-                desugared = testSerialize(gs, ast::ParsedFile{ast::prismDesugar::node2Tree(ctx, move(nodes)), file});
+                auto directlyDesugar = !gs.cacheSensitiveOptions.rbsEnabled;
+                auto tree = directlyDesugar ? ast::prismDesugar::node2Tree(ctx, move(nodes))
+                                            : ast::desugar::node2Tree(ctx, move(nodes));
+                desugared = testSerialize(gs, ast::ParsedFile{move(tree), file});
                 break;
             }
         }

@@ -314,8 +314,11 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        ast = gs.parseWithPrism ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
-                                : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
+        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
+        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+        auto directlyDesugar = gs.parseWithPrism && !gs.cacheSensitiveOptions.rbsEnabled;
+        ast = directlyDesugar ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
+                              : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
     if (print.DesugarTree.enabled) {
         print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
