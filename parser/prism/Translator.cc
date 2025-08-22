@@ -725,12 +725,23 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
     return move(lhs);
 }
 
+// Used the 3 kinds of assignment that lower to `Send` nodes:
+// 1. `recv.a &&= b`
+// 2. `recv.a ||= b`
+// 3. `recv.a  += b`
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, core::LocOffsets location) {
     auto callNode = down_cast<PrismAssignmentNode>(node);
     auto name = translateConstantName(callNode->read_name);
     auto receiver = translate(callNode->receiver);
     auto messageLoc = translateLoc(callNode->message_loc);
+
+    // The assign's location spans from the start of the receiver to the end of
+    // the message, not including the operator or RHS:
+    //     recv.a += b
+    //     ^^^^^^^^^^^ assign loc
+    //     ^^^^^^      lhs send loc
+    auto lhsLoc = core::LocOffsets{location.beginPos(), messageLoc.endPos()};
 
     if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
         // Handle operator assignment to the result of a safe method call, like `a&.b += 1`
@@ -741,7 +752,7 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
 
     // Handle operator assignment to the result of a method call, like `a.b += 1`
     if (!directlyDesugar || !hasExpr(receiver)) {
-        auto lhs = make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{});
+        auto lhs = make_unique<parser::Send>(lhsLoc, move(receiver), name, messageLoc, NodeVec{});
         auto result = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
             callNode, location, move(lhs));
         return result;
@@ -751,8 +762,8 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
     ast::Send::Flags flags;
     flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
-    auto send = MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
-    auto lhs = make_node_with_expr<parser::Send>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
+    auto send = MK::Send(lhsLoc, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
+    auto lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), name, messageLoc, NodeVec{});
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(callNode, location,
                                                                                              move(lhs));
