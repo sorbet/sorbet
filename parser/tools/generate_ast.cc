@@ -1027,8 +1027,15 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\"" << maybeComma
-        << "\\n\");\n";
+
+    // Print "type"
+    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"type\" : \")" << node.name << "\\\",\\n\");\n";
+
+    // Print "loc"
+    out << "    printTabs(buf, tabs + 1);" << '\n';
+    out << R"(    fmt::format_to(std::back_inserter(buf),  "\"loc\" : \"{}\")" << maybeComma << "\\n\", "
+        << "core::Loc(file, this->loc).filePosToString(gs, true));\n";
+
     i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
