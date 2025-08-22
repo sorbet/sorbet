@@ -224,10 +224,10 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
     return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
 }
 
-parser::Parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                      bool traceLexer, bool traceParser) {
+parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                              bool traceLexer, bool traceParser) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
-    parser::Parser::ParseResult result;
+    parser::ParseResult result;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         auto indentationAware = false;               // Don't start in indentation-aware error recovery mode

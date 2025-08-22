@@ -9,12 +9,14 @@ cc_library(
         "NodeCopying.cc",
         "Node_gen.cc",
         "Node_gen.h",
+        "ParseResult.h",
         "Parser.cc",
         "diagnostics.cc",
         "helper.h",
         "parser.h",
     ],
     hdrs = [
+        "ParseResult.h",
         "parser.h",
     ],
     linkstatic = select({

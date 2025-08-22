@@ -225,7 +225,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             continue;
         }
 
-        parser::Parser::ParseResult parseResult;
+        parser::ParseResult parseResult;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
@@ -703,7 +703,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
 
         // this replicates the logic of pipeline::indexOne
-        parser::Parser::ParseResult parseResult;
+        parser::ParseResult parseResult;
         unique_ptr<parser::Node> directlyDesugaredTree;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
