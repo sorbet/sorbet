@@ -5732,7 +5732,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {}
+          flags = {rewriterSynthesized}
           name = <U foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -5826,7 +5826,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {}
+          flags = {rewriterSynthesized}
           name = <U encrypted_foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -5930,7 +5930,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {}
+          flags = {rewriterSynthesized}
           name = <U foo=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -6067,7 +6067,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {}
+          flags = {rewriterSynthesized}
           name = <U encrypted_foo=><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
@@ -6149,7 +6149,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {}
+          flags = {rewriterSynthesized}
           name = <U bar><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
@@ -6243,7 +6243,7 @@ ClassDef{
         }
 
         MethodDef{
-          flags = {}
+          flags = {rewriterSynthesized}
           name = <U encrypted_bar><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
