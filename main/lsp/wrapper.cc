@@ -27,6 +27,7 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     options.threads = numWorkerThreads;
     // Ensure LSP is enabled.
     options.runLSP = true;
+    options.enableDeprecated = true;
 
     // All of this stuff is ignored by LSP, but we need it to construct ErrorQueue/GlobalState.
     stderrColorSinkOut = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
@@ -111,6 +112,7 @@ SingleThreadedLSPWrapper::createWithGlobalState(unique_ptr<core::GlobalState> gs
                                                 shared_ptr<spdlog::logger> logger, unique_ptr<KeyValueStore> kvstore,
                                                 bool disableFastPath) {
     options->runLSP = true;
+    options->enableDeprecated = true;
     pipeline::setGlobalStateOptions(*gs, *options);
     // Note: To keep the constructor private, we need to construct with `new` and put it into a `unique_ptr` privately.
     // `make_unique` doesn't work because that method doesn't have access to the constructor.
