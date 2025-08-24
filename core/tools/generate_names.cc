@@ -264,6 +264,7 @@ NameDef names[] = {
     {"classAttribute", "class_attribute"},
 
     {"describe"},
+    {"xdescribe"},
     {"it"},
     {"before"},
     {"beforeAngles", "<before>"},
@@ -277,6 +278,7 @@ NameDef names[] = {
     {"Core", "Core", true},
     {"ExampleGroup", "ExampleGroup", true},
     {"context"},
+    {"xcontext"},
     {"subject"},
     {"sharedExamples", "shared_examples"},
     {"sharedContext", "shared_context"},

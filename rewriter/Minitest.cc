@@ -15,7 +15,8 @@ namespace sorbet::rewriter {
 namespace {
 
 bool isDescribeOrSimilar(core::NameRef method) {
-    return method == core::Names::describe() || method == core::Names::context();
+    return method == core::Names::describe() || method == core::Names::context() ||
+           method == core::Names::xdescribe() || method == core::Names::xcontext();
 }
 
 bool isSharedExamples(core::NameRef method) {
