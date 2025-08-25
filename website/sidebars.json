@@ -53,6 +53,10 @@
       "non-forcing-constants",
       "strong"
     ],
+    "Ruby & DSL Features": [
+      "attr_reader",
+      "minitest"
+    ],
     "Editor Features": [
       "lsp",
       "server-status",
