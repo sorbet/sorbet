@@ -341,7 +341,14 @@ public:
         bool definesBehavior =
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto currentImportType = this->package.importsPackage(otherPackage);
-        auto wasImported = currentImportType.has_value();
+        bool wasImported = currentImportType.has_value();
+
+        // Prelude packages are implicitly imported into all non-prelude packages, and their imports are modeled as
+        // normal imports.
+        if (!this->package.isPreludePackage() && pkg.isPreludePackage()) {
+            wasImported = true;
+            currentImportType.emplace(core::packages::ImportType::Normal);
+        }
 
         // Is this a test import (whether test helper or not) used in a production context?
         auto testImportInProd = wasImported && currentImportType.value() != core::packages::ImportType::Normal &&

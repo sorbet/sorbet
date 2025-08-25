@@ -641,6 +641,8 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() == 0) {
                 info.exportAll_ = true;
             }
+        } else if (send.fun == core::Names::preludePackage() && send.numPosArgs() == 0) {
+            info.isPreludePackage_ = true;
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
                 if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
@@ -876,6 +878,7 @@ struct PackageSpecBodyWalk {
             case core::Names::export_().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
+            case core::Names::preludePackage().rawId():
                 return true;
             default:
                 return false;
@@ -1186,7 +1189,7 @@ void validateVisibility(const core::Context &ctx, const PackageInfo &absPkg, con
     }
 }
 
-void validatePackage(core::Context ctx) {
+void validatePackage(core::Context ctx, absl::Span<const core::packages::MangledName> preludePackages) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
     if (!absPkg.exists()) {
@@ -1209,6 +1212,76 @@ void validatePackage(core::Context ctx) {
 
     if (skipImportVisibilityCheck && !enforceLayering) {
         return;
+    }
+
+    if (pkgInfo.isPreludePackage()) {
+        // Prelude packages must be in the lowest possible layer, as that's the only way to ensure that the implicit
+        // imports of them are valid.
+        if (enforceLayering) {
+            if (auto layer = pkgInfo.layer()) {
+                if (packageDB.layerIndex(layer->first) != 0) {
+                    if (auto e = ctx.beginError(layer->second, core::errors::Packager::PreludeLowestLayer)) {
+                        auto layers = packageDB.layers();
+                        e.setHeader("Prelude package `{}` must be in layer `{}`", pkgInfo.show(ctx),
+                                    layers.front().toString(ctx));
+                    }
+                }
+            }
+        }
+
+        // We disallow `visible_to` annotations in prelude pakcages, as they're implicitly imported by all non-prelude
+        // packages.
+        for (auto &v : pkgInfo.visibleTo_) {
+            if (auto e = ctx.beginError(v.loc, core::errors::Packager::NoPreludeVisibleTo)) {
+                // TODO: an autocorrect to remove the `visible_to` declarations would be nice, but we would need to
+                // start tracking the decl loc.
+                e.setHeader("Prelude package `{}` may not include `{}` annotations", pkgInfo.show(ctx), "visible_to");
+            }
+        }
+
+        for (auto &i : pkgInfo.importedPackageNames) {
+            auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
+            if (!otherPkg.isPreludePackage()) {
+                if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
+                    string_view import_;
+                    switch (i.type) {
+                        case core::packages::ImportType::Normal:
+                            import_ = "import";
+                            break;
+                        case core::packages::ImportType::TestUnit:
+                        case core::packages::ImportType::TestHelper:
+                            import_ = "test_import";
+                            break;
+                    }
+                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`", pkgInfo.show(ctx),
+                                import_, otherPkg.show(ctx));
+                }
+            }
+        }
+    } else {
+        // We only check implicit prelude imports for non-prelude packages.
+        auto declLoc = pkgInfo.declLoc().offsets();
+        for (auto name : packageDB.preludePackages()) {
+            if (enforceLayering) {
+                validateLayering(ctx, Import{name, ImportType::Normal, declLoc});
+            }
+        }
+
+        for (auto &i : pkgInfo.importedPackageNames) {
+            auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
+
+            // this might mean the other package doesn't exist, but that should have been caught already
+            if (!otherPkg.exists()) {
+                continue;
+            }
+
+            // We don't allow explicit imports of prelude packages from non-prelude packages.
+            if (otherPkg.isPreludePackage()) {
+                if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoExplicitPreludeImport)) {
+                    e.setHeader("Prelude package `{}` may not be explicitly imported", otherPkg.show(ctx));
+                }
+            }
+        }
     }
 
     for (auto &i : pkgInfo.importedPackageNames) {
@@ -1460,14 +1533,15 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
 
         {
             Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
+            auto preludePackages = gs.packageDB().preludePackages();
             Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
-                              [&gs = as_const(gs)](auto &job) {
+                              [&gs = as_const(gs), &preludePackages](auto &job) {
                                   auto file = job.file;
                                   core::Context ctx(gs, core::Symbols::root(), file);
 
                                   if (file.data(gs).isPackage(gs)) {
                                       ENFORCE(buildPackageDB);
-                                      validatePackage(ctx);
+                                      validatePackage(ctx, preludePackages);
                                   } else {
                                       ENFORCE(validatePackagedFiles);
                                       validatePackagedFile(ctx, job.tree);
@@ -1489,23 +1563,26 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     // building in an understanding of the dependencies between packages.
     Timer timeit(gs.tracer(), "packager.runIncremental");
 
-    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &file) {
-        core::Context ctx(gs, core::Symbols::root(), file.file);
-        if (file.file.data(gs).isPackage(gs)) {
-            auto packageName = gs.packageDB().getPackageNameForFile(file.file);
-            auto &info = gs.packageDB().getPackageInfo(packageName);
-            if (info.exists()) {
-                // We aren't going to mutate the packageDB at this point, but we do need something to give to
-                // rewritePackageSpec. We make the most shallow copy possible, to ensure that we don't raise duplicate
-                // errors on the fast path.
-                PackageInfo copy{info.mangledName_, info.loc, info.declLoc_};
-                rewritePackageSpec(gs, file, copy);
-            }
-            validatePackage(ctx);
-        } else {
-            validatePackagedFile(ctx, file.tree);
-        }
-    });
+    const auto preludePackages = gs.packageDB().preludePackages();
+
+    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
+                      [&gs = as_const(gs), &preludePackages](auto &file) {
+                          core::Context ctx(gs, core::Symbols::root(), file.file);
+                          if (file.file.data(gs).isPackage(gs)) {
+                              auto packageName = gs.packageDB().getPackageNameForFile(file.file);
+                              auto &info = gs.packageDB().getPackageInfo(packageName);
+                              if (info.exists()) {
+                                  // We aren't going to mutate the packageDB at this point, but we do need something to
+                                  // give to rewritePackageSpec. We make the most shallow copy possible, to ensure that
+                                  // we don't raise duplicate errors on the fast path.
+                                  PackageInfo copy{info.mangledName_, info.loc, info.declLoc_};
+                                  rewritePackageSpec(gs, file, copy);
+                              }
+                              validatePackage(ctx, preludePackages);
+                          } else {
+                              validatePackagedFile(ctx, file.tree);
+                          }
+                      });
 
     return files;
 }
