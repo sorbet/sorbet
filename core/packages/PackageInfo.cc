@@ -294,12 +294,13 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
 
 optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalState &gs,
                                                              const core::SymbolRef newExport) const {
+    auto strName = newExport.show(gs);
     auto pkgFile = loc.file();
     auto insertionLoc = core::Loc::none(pkgFile);
     if (!exports_.empty()) {
         core::LocOffsets exportToInsertAfter;
         for (auto &e : exports_) {
-            if (newExport.show(gs) > e.fqn.show(gs)) {
+            if (strName > e.sym.show(gs)) {
                 exportToInsertAfter = e.loc;
             }
         }
@@ -330,7 +331,6 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     }
     ENFORCE(insertionLoc.exists());
 
-    auto strName = newExport.show(gs);
     core::AutocorrectSuggestion suggestion(
         fmt::format("Export `{}` in package `{}`", strName, mangledName_.owner.show(gs)),
         {{insertionLoc, fmt::format("\n  export {}", strName)}});
