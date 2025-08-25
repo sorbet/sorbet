@@ -1025,6 +1025,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 auto locWithoutBlock = send.locWithoutBlock(bind.loc);
                 if (lspQueryMatch && locWithoutBlock.exists() && !locWithoutBlock.empty()) {
                     lspQueryMatch = lspQuery.matchesLoc(ctx.locAt(locWithoutBlock));
+                } else if (lspQuery.matchesSend()) {
+                    lspQueryMatch = true;
                 }
 
                 InlinedVector<const core::TypeAndOrigins *, 2> args;
