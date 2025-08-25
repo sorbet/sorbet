@@ -218,8 +218,8 @@ struct AutogenResult {
     vector<pair<int, Serialized>> prints;
 };
 
-vector<ast::ParsedFile> runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers,
-                                   std::unique_ptr<const OwnedKeyValueStore> kvstore) {
+void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers,
+                std::unique_ptr<const OwnedKeyValueStore> kvstore) {
     if (!opts.inlineInput.empty()) {
         Exception::raise("Autogen ignores `-e`");
     }
@@ -293,7 +293,8 @@ vector<ast::ParsedFile> runAutogen(core::GlobalState &gs, options::Options &opts
                     }
 
                     core::Context ctx(gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
+                    auto leakTrees = true;
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder, leakTrees);
                     auto file = pf.file;
 
                     AutogenResult::Serialized serialized;
@@ -387,8 +388,6 @@ vector<ast::ParsedFile> runAutogen(core::GlobalState &gs, options::Options &opts
 
         opts.print.AutogenSubclasses.fmt("{}\n", fmt::join(serializedDescendantsMap, "\n"));
     }
-
-    return indexed;
 }
 
 #endif
@@ -571,7 +570,7 @@ int realmain(int argc, char *argv[]) {
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
     } else if (gs->cacheSensitiveOptions.runningUnderAutogen) {
         Timer timeall(logger, "wall_time");
-        auto indexed = runAutogen(*gs, opts, *workers, move(kvstore));
+        runAutogen(*gs, opts, *workers, move(kvstore));
 
         gs->errorQueue->flushAllErrors(*gs);
         if (!opts.noErrorCount) {
