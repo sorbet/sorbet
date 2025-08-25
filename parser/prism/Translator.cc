@@ -836,22 +836,37 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             ENFORCE(!value.empty());
 
-            char sign = value[0];
             // Check for optional leading '+' or '-'
-            if (sign == '+' || sign == '-') {
-                value.remove_prefix(1);
+            auto sign = value[0];
+            bool hasSign = (sign == '+' || sign == '-');
 
-                // Create the Complex node with the unsigned value
-                auto receiver = make_unique<parser::Complex>(location, string(value));
+            if (hasSign) {
+                value.remove_prefix(1); // Remove the sign
+            }
 
-                // Return the appropriate unary operation
+            // Create the desugared Complex call: `Kernel.Complex(0, unsigned_value)`
+            auto kernel = MK::Constant(location, core::Symbols::Kernel());
+            core::NameRef complexName = core::Names::Constants::Complex().dataCnst(ctx)->original;
+            core::NameRef valueName = ctx.state.enterNameUTF8(value);
+            auto complexCall = MK::Send2(location, move(kernel), complexName, location.copyWithZeroLength(),
+                                         MK::Int(location, 0), MK::String(location, valueName));
+
+            // If there was a sign, wrap in unary operation
+            // E.g. desugar `+42` to `42.+()`
+            if (hasSign) {
+                auto complexNode = make_unique<parser::Complex>(location, string(value));
                 core::NameRef unaryOp = (sign == '-') ? core::Names::unaryMinus() : core::Names::unaryPlus();
-                return make_unique<parser::Send>(location, move(receiver), unaryOp,
-                                                 core::LocOffsets{location.beginLoc, location.beginLoc + 1}, NodeVec{});
+
+                auto unarySend = MK::Send0(location, move(complexCall), unaryOp,
+                                           core::LocOffsets{location.beginLoc, location.beginLoc + 1});
+
+                return make_node_with_expr<parser::Send>(move(unarySend), location, move(complexNode), unaryOp,
+                                                         core::LocOffsets{location.beginLoc, location.beginLoc + 1},
+                                                         NodeVec{});
             }
 
             // No leading sign; return the Complex node directly
-            return make_unique<parser::Complex>(location, string(value));
+            return make_node_with_expr<parser::Complex>(move(complexCall), location, string(value));
         }
         case PM_IMPLICIT_NODE: { // A hash key without explicit value, like the `k4` in `{ k4: }`
             auto implicitNode = down_cast<pm_implicit_node>(node);
