@@ -857,12 +857,13 @@ ast::ParsedFile copyPackageWithoutTestExports(const core::GlobalState &gs, const
 
 } // namespace
 
-vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
-                                                 absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
-    Timer timeit(gs.tracer(), "condensationLayers");
+vector<CondensationStratumInfo> condensationStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+                                                   absl::Span<core::FileRef> sourceFiles,
+                                                   const options::Options &opts) {
+    Timer timeit(gs.tracer(), "condensationStrata");
 
     if (!opts.packageDirected) {
-        return vector{CondensationLayerInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+        return vector{CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
     }
 
     auto &db = gs.packageDB();
@@ -870,7 +871,7 @@ vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, ve
     auto numPackageFiles = packageFiles.size();
 
     // We move all the package files into a map, so that it's easy to go from package name to package file while
-    // processing the layers of the traversal.
+    // processing the strata of the traversal.
     UnorderedMap<core::packages::MangledName, ast::ParsedFile> packagesToPackageRb;
     for (auto &ast : packageFiles) {
         auto pkgName = db.getPackageNameForFile(ast.file);
@@ -886,11 +887,11 @@ vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, ve
     auto traversal = db.condensation().computeTraversal(gs);
     ENFORCE(!traversal.parallel.empty());
 
-    vector<uint32_t> fileToLayer(gs.filesUsed());
+    vector<uint32_t> fileToStratum(gs.filesUsed());
     {
-        Timer timeit(gs.tracer(), "condensationLayers.layerMapping");
+        Timer timeit(gs.tracer(), "condensationStrata.stratumMapping");
 
-        auto layerMapping = traversal.buildLayerMapping(gs);
+        auto stratumMapping = traversal.buildStratumMapping(gs);
 
         int ix = 0;
         for (auto &file : gs.getFiles().subspan(1)) {
@@ -898,48 +899,48 @@ vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, ve
             core::FileRef fref(ix);
             auto pkgName = db.getPackageNameForFile(fref);
             if (!pkgName.exists()) {
-                // This is a file with no package, so we unconditionally put it in the first layer. This means that
-                // it'll be checked at the same time as the first layer of packaged code.
-                fileToLayer[ix] = 0;
+                // This is a file with no package, so we unconditionally put it in the first stratum. This means that
+                // it'll be checked at the same time as the first stratum of packaged code.
+                fileToStratum[ix] = 0;
                 continue;
             }
 
-            ENFORCE(layerMapping.find(pkgName) != layerMapping.end(),
+            ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
                     "All packages must be present in the condensation graph");
-            auto &info = layerMapping[pkgName];
+            auto &info = stratumMapping[pkgName];
             if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                fileToLayer[ix] = info.testLayer;
+                fileToStratum[ix] = info.testStratum;
             } else {
-                fileToLayer[ix] = info.applicationLayer;
+                fileToStratum[ix] = info.applicationStratum;
             }
         }
 
-        fast_sort(sourceFiles, [&fileToLayer = as_const(fileToLayer)](core::FileRef l, core::FileRef r) -> bool {
+        fast_sort(sourceFiles, [&fileToStratum = as_const(fileToStratum)](core::FileRef l, core::FileRef r) -> bool {
             auto lid = l.id();
             auto rid = r.id();
-            auto lLayer = fileToLayer[lid];
-            auto rLayer = fileToLayer[rid];
-            return std::tie(lLayer, lid) < std::tie(rLayer, rid);
+            auto lStratum = fileToStratum[lid];
+            auto rStratum = fileToStratum[rid];
+            return std::tie(lStratum, lid) < std::tie(rStratum, rid);
         });
     }
 
-    // Reserve enough space for all the layers of the condensation traversal, plus one more for unpackaged code.
-    auto maxLayers = traversal.parallel.size() + 1;
+    // Reserve enough space for all the strata of the condensation traversal, plus one more for unpackaged code.
+    auto maxStrata = traversal.parallel.size() + 1;
 
-    vector<CondensationLayerInfo> result;
-    result.reserve(maxLayers);
+    vector<CondensationStratumInfo> result;
+    result.reserve(maxStrata);
 
     auto sourceSpan = sourceFiles;
 
-    int currentLayer = -1;
-    for (auto &layer : traversal.parallel) {
-        ++currentLayer;
+    int currentStratum = -1;
+    for (auto &stratum : traversal.parallel) {
+        ++currentStratum;
 
-        auto &resultLayer = result.emplace_back();
+        auto &resultStratum = result.emplace_back();
 
         {
             auto start = packageFiles.size();
-            for (auto &scc : layer) {
+            for (auto &scc : stratum) {
                 if (scc.isTest) {
                     for (auto member : scc.members) {
                         packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
@@ -956,22 +957,21 @@ vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, ve
 
             auto len = packageFiles.size() - start;
             ENFORCE(len > 0);
-            resultLayer.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
+            resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
         }
 
         {
-            auto it = absl::c_find_if(sourceSpan, [currentLayer, &fileToLayer = as_const(fileToLayer)](auto file) {
-                return fileToLayer[file.id()] > currentLayer;
-            });
+            auto it = absl::c_find_if(sourceSpan, [currentStratum, &fileToStratum = as_const(fileToStratum)](
+                                                      auto file) { return fileToStratum[file.id()] > currentStratum; });
             auto len = std::distance(sourceSpan.begin(), it);
-            resultLayer.sourceFiles = sourceSpan.subspan(0, len);
+            resultStratum.sourceFiles = sourceSpan.subspan(0, len);
             sourceSpan = sourceSpan.subspan(len);
         }
     }
 
     ENFORCE(sourceSpan.empty());
     ENFORCE(!result.empty());
-    ENFORCE(result.size() <= maxLayers);
+    ENFORCE(result.size() <= maxStrata);
 
     return result;
 }

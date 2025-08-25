@@ -77,14 +77,14 @@ public:
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
 
-        struct LayerInfo {
-            uint32_t applicationLayer;
-            uint32_t testLayer;
+        struct StratumInfo {
+            uint32_t applicationStratum;
+            uint32_t testStratum;
         };
 
         // Build a mapping from package mangled name to the entry in `this->parallel` that the application and test code
         // belong to, respectively.
-        UnorderedMap<MangledName, LayerInfo> buildLayerMapping(const core::GlobalState &gs) const;
+        UnorderedMap<MangledName, StratumInfo> buildStratumMapping(const core::GlobalState &gs) const;
     };
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each

@@ -39,12 +39,12 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     result.packages.reserve(2 * gs.packageDB().packages().size());
 
     vector<uint32_t> sccLengths;
-    vector<uint32_t> layerLengths;
+    vector<uint32_t> stratumLengths;
 
     while (!frontier.empty()) {
         next.clear();
 
-        layerLengths.emplace_back(frontier.size());
+        stratumLengths.emplace_back(frontier.size());
 
         for (auto sccId : frontier) {
             auto &node = this->nodes_[sccId];
@@ -92,10 +92,10 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
         offset += length;
     }
 
-    // Fill in the parallel layer spans
-    result.parallel.reserve(layerLengths.size());
+    // Fill in the parallel stratum spans
+    result.parallel.reserve(stratumLengths.size());
     offset = 0;
-    for (auto length : layerLengths) {
+    for (auto length : stratumLengths) {
         result.parallel.emplace_back(absl::MakeSpan(result.sccs).subspan(offset, length));
         offset += length;
     }
@@ -103,21 +103,21 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     return result;
 }
 
-UnorderedMap<MangledName, Condensation::Traversal::LayerInfo>
-Condensation::Traversal::buildLayerMapping(const core::GlobalState &gs) const {
-    UnorderedMap<MangledName, LayerInfo> result;
+UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
+Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
+    UnorderedMap<MangledName, StratumInfo> result;
 
     int ix = -1;
-    for (auto layer : this->parallel) {
+    for (auto stratum : this->parallel) {
         ++ix;
-        for (auto &scc : layer) {
+        for (auto &scc : stratum) {
             if (scc.isTest) {
                 for (auto name : scc.members) {
-                    result[name].testLayer = ix;
+                    result[name].testStratum = ix;
                 }
             } else {
                 for (auto name : scc.members) {
-                    result[name].applicationLayer = ix;
+                    result[name].applicationStratum = ix;
                 }
             }
         }

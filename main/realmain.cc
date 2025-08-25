@@ -601,14 +601,14 @@ int realmain(int argc, char *argv[]) {
         // The latter is so that we reuse memory as we traverse the package graph.
         const bool intentionallyLeakASTs = !sorbet::emscripten_build && !opts.packageDirected;
 
-        // The rest of the pipeline proceeds by layer in the package condensation graph. When stripe-packages is not
-        // enabled, everything ends up in one big layer.
-        vector<ast::ParsedFile> layerFiles;
-        for (auto &layer : pipeline::condensationLayers(*gs, indexed, inputFilesSpan, opts)) {
-            layerFiles.clear();
-            layerFiles.reserve(layer.packageFiles.size() + layer.sourceFiles.size());
+        // The rest of the pipeline proceeds by strata in the package condensation graph. When stripe-packages is not
+        // enabled, everything ends up in one big stratum.
+        vector<ast::ParsedFile> stratumFiles;
+        for (auto &stratum : pipeline::condensationStrata(*gs, indexed, inputFilesSpan, opts)) {
+            stratumFiles.clear();
+            stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
 
-            absl::c_move(layer.packageFiles, back_inserter(layerFiles));
+            absl::c_move(stratum.packageFiles, back_inserter(stratumFiles));
 
             {
                 // ----- index -----
@@ -616,9 +616,9 @@ int realmain(int argc, char *argv[]) {
                 auto nonPackageIndexedResult =
                     (!opts.storeState.empty() || opts.forceHashing)
                         // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
-                        ? hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, layer.sourceFiles, *workers,
+                        ? hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, stratum.sourceFiles, *workers,
                                                                       kvstore)
-                        : pipeline::index(*gs, layer.sourceFiles, opts, *workers, kvstore);
+                        : pipeline::index(*gs, stratum.sourceFiles, opts, *workers, kvstore);
                 ENFORCE(nonPackageIndexedResult.hasResult(), "There's no cancellation in batch mode");
                 auto nonPackageIndexed = std::move(nonPackageIndexedResult.result());
 
@@ -641,7 +641,7 @@ int realmain(int argc, char *argv[]) {
                 // Now validate all the other files (the packageDB shouldn't change)
                 pipeline::validatePackagedFiles(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers);
 
-                pipeline::unpartitionPackageFiles(layerFiles, move(nonPackageIndexed));
+                pipeline::unpartitionPackageFiles(stratumFiles, move(nonPackageIndexed));
 
                 if (gs->hadCriticalError()) {
                     gs->errorQueue->flushAllErrors(*gs);
@@ -649,14 +649,14 @@ int realmain(int argc, char *argv[]) {
             }
 
             if (gs->cacheSensitiveOptions.runningUnderAutogen) {
-                runAutogen(*gs, opts, *workers, layerFiles);
+                runAutogen(*gs, opts, *workers, stratumFiles);
             } else {
-                layerFiles = move(pipeline::resolve(*gs, move(layerFiles), opts, *workers).result());
+                stratumFiles = move(pipeline::resolve(*gs, move(stratumFiles), opts, *workers).result());
                 if (gs->hadCriticalError()) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
 
-                pipeline::typecheck(*gs, move(layerFiles), opts, *workers, /* cancelable */ false, nullopt,
+                pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
                                     /* presorted */ false, intentionallyLeakASTs);
 
                 if (gs->hadCriticalError()) {
