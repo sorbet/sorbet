@@ -514,7 +514,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         receiverExpr = receiver->takeDesugaredExpr();
                     }
 
-                    flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+                    // Unsupported nodes are desugared to an empty tree.
+                    // Treat them as if they were `self` to match `Desugar.cc`.
+                    // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+                    if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
+                        receiverExpr = MK::Self(loc.copyWithZeroLength());
+                        flags.isPrivateOk = true;
+                    } else {
+                        flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+                    }
 
                     int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
 
