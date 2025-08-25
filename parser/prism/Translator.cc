@@ -1311,7 +1311,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             if (auto stmtsNode = parensNode->body; stmtsNode != nullptr) {
                 auto inlineIfSingle = false;
-                return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle);
+                // Override the begin node location to be the parentheses location instead of the statements location
+                return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle,
+                                           parensNode->base.location);
             } else {
                 return make_unique<parser::Begin>(location, NodeVec{});
             }
@@ -2037,10 +2039,24 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         body = translate(prismLambdaNode->body);
     }
 
+    auto blockLoc = sendNode->loc;
+
+    // Modify send node's endLoc to be position before first space
+    if (sendNode->loc.exists()) {
+        auto source = ctx.file.data(ctx).source();
+        auto beginPos = sendNode->loc.beginPos();
+
+        // Find first space character starting from begin position
+        auto spacePos = source.find(' ', beginPos);
+        if (spacePos != std::string_view::npos) {
+            sendNode->loc = core::LocOffsets{beginPos, static_cast<uint32_t>(spacePos)};
+        }
+    }
+
     if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
-        return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
+        return make_unique<parser::NumBlock>(blockLoc, move(sendNode), move(parametersNode), move(body));
     } else {
-        return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
+        return make_unique<parser::Block>(blockLoc, move(sendNode), move(parametersNode), move(body));
     }
 }
 
@@ -2083,8 +2099,28 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
                 ? nullptr
                 : make_unique<parser::Array>(translateLoc(currentRescueNode->base.location), move(exceptions));
 
-        rescueBodies.emplace_back(make_unique<parser::Resbody>(translateLoc(currentRescueNode->base.location),
-                                                               move(exceptionsArray), move(var), move(rescueBody)));
+        auto resbodyLoc = translateLoc(currentRescueNode->base.location);
+
+        // If there's a subsequent rescue clause, we want the previous resbody to end at the end of the line
+        // before the subsequent rescue starts, instead of extending all the way to the subsequent rescue
+        if (currentRescueNode->subsequent != nullptr) {
+            auto subsequentLoc = translateLoc(currentRescueNode->subsequent->base.location);
+
+            // We want to end just before the subsequent rescue begins
+            // So we use the position right before the subsequent rescue starts
+            auto endPos = subsequentLoc.beginPos();
+
+            // Move back to find the end of the previous line (before any whitespace)
+            const auto &source = ctx.file.data(ctx).source();
+            while (endPos > resbodyLoc.beginPos() && isspace(source[endPos - 1])) {
+                endPos--;
+            }
+
+            resbodyLoc = core::LocOffsets{resbodyLoc.beginPos(), endPos};
+        }
+
+        rescueBodies.emplace_back(
+            make_unique<parser::Resbody>(resbodyLoc, move(exceptionsArray), move(var), move(rescueBody)));
     }
 
     // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
@@ -2093,7 +2129,9 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
-unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle) {
+// @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
+unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
+                                                         std::optional<pm_location_t> overrideLocation) {
     if (stmtsNode == nullptr)
         return nullptr;
 
@@ -2105,7 +2143,8 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     // For multiple statements, convert each statement and add them to the body of a Begin node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
-    return make_unique<parser::Begin>(translateLoc(stmtsNode->base.location), move(sorbetStmts));
+    pm_location_t beginLocation = overrideLocation.value_or(stmtsNode->base.location);
+    return make_unique<parser::Begin>(translateLoc(beginLocation), move(sorbetStmts));
 }
 
 // Handles any one of the Prism nodes that models any kind of constant or constant path.

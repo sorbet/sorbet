@@ -2,6 +2,7 @@
 #define SORBET_PARSER_PARSER_H
 
 #include "Node.h"
+#include "ParseResult.h"
 
 namespace sorbet::parser {
 
@@ -21,11 +22,6 @@ public:
         Settings withIndentationAware() {
             return Settings{this->traceLexer, this->traceParser, true, this->collectComments};
         }
-    };
-
-    struct ParseResult {
-        std::unique_ptr<Node> tree;
-        std::vector<core::LocOffsets> commentLocations;
     };
 
     static ParseResult run(core::GlobalState &gs, core::FileRef file, Settings settings,
