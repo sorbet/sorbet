@@ -116,6 +116,11 @@ private:
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
+    // Helper function for creating if nodes with optional desugaring
+    std::unique_ptr<parser::Node> translateIfNode(core::LocOffsets location, std::unique_ptr<parser::Node> predicate,
+                                                  std::unique_ptr<parser::Node> ifTrue,
+                                                  std::unique_ptr<parser::Node> ifFalse);
+
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
     // Context management helpers. These return a copy of `this` with some change to the context.
