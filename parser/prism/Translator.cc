@@ -587,7 +587,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translate(classNode->constant_path);
             auto declLoc = translateLoc(classNode->class_keyword_loc).join(name->loc);
             auto superclass = translate(classNode->superclass);
-            auto body = translate(classNode->body);
+            auto body = this->enterClassContext().translate(classNode->body);
 
             if (superclass != nullptr) {
                 declLoc = declLoc.join(superclass->loc);
@@ -679,21 +679,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translateConstantName(defNode->name);
 
-            // These 2 need to be called on a new Translator with isInMethod set to true
-            Translator childContext = enterMethodDef();
-
-            unique_ptr<parser::Node> params;
-
             // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
             // In this case, Sorbet's legacy parser will still hold an empty Args node, so we need to
             // create one here
+            unique_ptr<parser::Node> params;
             if (defNode->parameters == nullptr && rparenLoc.start != nullptr) {
                 params = make_unique<parser::Args>(location, NodeVec{});
             } else {
-                params = childContext.translate(up_cast(defNode->parameters));
+                params = translate(up_cast(defNode->parameters));
             }
 
-            auto body = childContext.translate(defNode->body);
+            Translator methodContext = this->isInModule ? this->enterMethodDef(declLoc, name).enterModuleContext()
+                                                        : this->enterMethodDef(declLoc, name);
+            auto body = methodContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
@@ -716,12 +714,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             if (auto receiver = defNode->receiver; receiver != nullptr) {
-                auto sorbetReceiver = translate(receiver);
-                return make_unique<parser::DefS>(location, declLoc, move(sorbetReceiver), name, move(params),
+                return make_unique<parser::DefS>(location, declLoc, translate(defNode->receiver), name, move(params),
                                                  move(body));
+            } else {
+                return make_unique<parser::DefMethod>(location, declLoc, name, move(params), move(body));
             }
-
-            return make_unique<parser::DefMethod>(location, declLoc, name, move(params), move(body));
         }
         case PM_DEFINED_NODE: {
             auto definedNode = down_cast<pm_defined_node>(node);
@@ -1138,7 +1135,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translate(moduleNode->constant_path);
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
-            auto body = translate(moduleNode->body);
+            auto body = this->enterModuleContext().translate(moduleNode->body);
 
             return make_unique<parser::Module>(location, declLoc, move(name), move(body));
         }
@@ -1434,12 +1431,38 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_SINGLETON_CLASS_NODE: { // A singleton class, like `class << self ... end`
             auto classNode = down_cast<pm_singleton_class_node>(node);
-            pm_location_t declLoc = classNode->class_keyword_loc;
 
-            auto expr = translate(classNode->expression);
-            auto body = translate(classNode->body);
+            auto declLoc = translateLoc(classNode->class_keyword_loc);
+            auto receiver = translate(classNode->expression); // The receiver like `self` in `class << self`
+            auto body = this->enterClassContext().translate(classNode->body);
 
-            return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
+            if (!directlyDesugar || !hasExpr(receiver, body)) {
+                return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
+            }
+
+            if (!parser::NodeWithExpr::isa_node<parser::Self>(receiver.get())) {
+                if (auto e = ctx.state.beginIndexerError(core::Loc(ctx.file, receiver->loc),
+                                                         core::errors::Desugar::InvalidSingletonDef)) {
+                    e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
+                }
+                auto emptyTree = MK::EmptyTree();
+                return make_node_with_expr<parser::SClass>(move(emptyTree), location, declLoc, move(receiver), nullptr);
+            }
+
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            if (!bodyExprsOpt.has_value()) {
+                return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
+            }
+            auto bodyExprs = move(*bodyExprsOpt);
+
+            // Singleton classes are modelled as a class with a special name `<singleton>`
+            auto singletonClassName = ast::make_expression<ast::UnresolvedIdent>(
+                receiver->loc, ast::UnresolvedIdent::Kind::Class, core::Names::singleton());
+
+            auto sClassDef = MK::Class(location, declLoc, move(singletonClassName), ast::ClassDef::ANCESTORS_store{},
+                                       move(bodyExprs));
+
+            return make_node_with_expr<parser::SClass>(move(sClassDef), location, declLoc, move(receiver), move(body));
         }
         case PM_SOURCE_ENCODING_NODE: { // The `__ENCODING__` keyword
             return make_node_with_expr<parser::EncodingLiteral>(
@@ -2025,16 +2048,15 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
-
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismBlockNode->parameters);
-        body = translate(prismBlockNode->body);
+        body = this->enterBlockContext().translate(prismBlockNode->body);
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismLambdaNode->parameters);
-        body = translate(prismLambdaNode->body);
+        body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
 
     if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
@@ -2132,7 +2154,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
 
-    if (isInMethodDef && replaceWithDynamicConstAssign) {
+    if (this->isInMethodDef() && replaceWithDynamicConstAssign) {
         // Check if this is a dynamic constant assignment (SyntaxError at runtime)
         // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
         // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
@@ -2290,11 +2312,79 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
 }
 
+// Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
+// The body can be a Begin node comprising multiple statements, or a single statement.
+// Return nullopt if the body does not have all of its expressions desugared.
+// TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(unique_ptr<parser::Node> &scopeBody) {
+    ENFORCE(directlyDesugar, "desugarScopeBodyToRHSStore should only be called when direct desugaring is enabled");
+
+    if (scopeBody == nullptr) { // Empty body
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(MK::EmptyTree());
+        return result;
+    }
+
+    if (auto *begin = parser::NodeWithExpr::cast_node<parser::Begin>(scopeBody.get())) { // Handle multi-statement body
+        if (!hasExpr(scopeBody)) {
+            return nullopt;
+        }
+
+        auto beginExpr = scopeBody->takeDesugaredExpr();
+
+        auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
+        ENFORCE(insSeqExpr != nullptr, "The cached expr on every multi-statement Begin should be an InsSeq.")
+
+        ast::ClassDef::RHS_store result;
+        result.reserve(insSeqExpr->stats.size());
+        for (auto &statement : insSeqExpr->stats) {
+            result.emplace_back(move(statement));
+        }
+        // Move the the final expression too, which is separated out in the `ast::InsSeq`.
+        result.emplace_back(move(insSeqExpr->expr));
+        return result;
+    } else { // Handle single-statement body
+        if (!hasExpr(scopeBody)) {
+            return nullopt;
+        }
+
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(scopeBody->takeDesugaredExpr());
+        return result;
+    }
+}
+
 // Context management methods
-Translator Translator::enterMethodDef() const {
+bool Translator::isInMethodDef() const {
+    return enclosingMethodLoc.exists();
+}
+
+Translator Translator::enterMethodDef(core::LocOffsets methodLoc, core::NameRef methodName) const {
     auto resetDesugarUniqueCounter = true;
-    auto isInMethodDef = true;
-    return Translator(*this, resetDesugarUniqueCounter, isInMethodDef);
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, this->isInAnyBlock, this->isInModule);
+}
+
+Translator Translator::enterBlockContext() const {
+    auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
+    auto isInAnyBlock = true;
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, this->isInModule);
+}
+
+Translator Translator::enterModuleContext() const {
+    auto resetDesugarUniqueCounter = true;
+    auto isInModule = true;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, isInModule);
+}
+
+Translator Translator::enterClassContext() const {
+    auto resetDesugarUniqueCounter = true;
+    auto isInModule = true;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, isInModule);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {
