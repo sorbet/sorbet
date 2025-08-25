@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/common.h"
+#include "common/os/os.h"
 #include "common/strings/formatting.h"
 #include "main/autogen/crc_builder.h"
 
@@ -418,6 +419,10 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const Auto
                              const CRCBuilder &crcBuilder) {
     AutogenWalk walk(autogenCfg);
     ast::ConstTreeWalk::apply(ctx, walk, tree.tree);
+
+    // Leak the tree, as we don't run autogen in an interactive mode
+    intentionallyLeakMemory(tree.tree.release());
+
     auto pf = walk.parsedFile();
     pf.path = string(tree.file.data(ctx).path());
     auto src = tree.file.data(ctx).source();
