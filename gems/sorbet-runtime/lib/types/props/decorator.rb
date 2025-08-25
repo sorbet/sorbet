@@ -318,7 +318,10 @@ class T::Props::Decorator
 
   sig(:final) { params(name: Symbol).returns(T::Boolean).checked(:never) }
   private def method_defined_on_ancestor?(name)
-    @class.method_defined?(name) && !@class.method_defined?(name, false)
+    (@class.method_defined?(name) || @class.private_method_defined?(name)) &&
+      # Unfortunately, older versions of ruby don't allow the second parameter on
+      # `private_method_defined?`.
+      (!@class.method_defined?(name, false) && !@class.private_method_defined?(name, false))
   end
 
   sig(:final) { params(name: Symbol, rules: Rules).void.checked(:never) }
