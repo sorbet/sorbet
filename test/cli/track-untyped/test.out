@@ -28,9 +28,9 @@ a.rb:8: Conditional branch on `T.untyped` https://srb.help/7018
 a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
      9 |    puts(result)
                  ^^^^^^
-  Expected `BasicObject` for argument `arg0` of method `Kernel#puts`:
+  Expected `Object` for argument `arg0` of method `Kernel#puts`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: BasicObject,
+      NN |        arg0: Object,
                   ^^^^
   Got `T.untyped` originating from:
     a.rb:6:
@@ -128,9 +128,9 @@ a.rb:8: Conditional branch on `T.untyped` https://srb.help/7018
 a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
      9 |    puts(result)
                  ^^^^^^
-  Expected `BasicObject` for argument `arg0` of method `Kernel#puts`:
+  Expected `Object` for argument `arg0` of method `Kernel#puts`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: BasicObject,
+      NN |        arg0: Object,
                   ^^^^
   Got `T.untyped` originating from:
     a.rb:6:
@@ -226,9 +226,9 @@ a.rb:8: Conditional branch on `T.untyped` https://srb.help/7018
 a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
      9 |    puts(result)
                  ^^^^^^
-  Expected `BasicObject` for argument `arg0` of method `Kernel#puts`:
+  Expected `Object` for argument `arg0` of method `Kernel#puts`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: BasicObject,
+      NN |        arg0: Object,
                   ^^^^
   Got `T.untyped` originating from:
     a.rb:6:

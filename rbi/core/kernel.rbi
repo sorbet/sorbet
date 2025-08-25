@@ -1920,7 +1920,7 @@ module Kernel
   # ```
   sig do
     params(
-        arg0: BasicObject,
+        arg0: Object,
     )
     .returns(NilClass)
   end
@@ -1954,7 +1954,7 @@ module Kernel
   # ```
   sig do
     params(
-        arg0: BasicObject,
+        arg0: Object,
     )
     .returns(NilClass)
   end
