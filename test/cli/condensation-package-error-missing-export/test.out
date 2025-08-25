@@ -1,0 +1,51 @@
+use_other/foo_class.rb:10: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    10 |      Foo::Bar::OtherPackage::NotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Foo::Bar::OtherPackage::NotExported` does not define behavior and thus will not be automatically exported
+    other/other_class.rb:7:
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+
+use_other/foo_class.rb:11: `Foo::Bar::OtherPackage::NotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    11 |      Bar::OtherPackage::NotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Foo::Bar::OtherPackage::NotExported` does not define behavior and thus will not be automatically exported
+    other/other_class.rb:7:
+     7 |  class NotExported
+          ^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+
+use_other/foo_class.rb:12: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    12 |      Foo::Bar::OtherPackage::Inner::AlsoNotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Foo::Bar::OtherPackage::Inner::AlsoNotExported` does not define behavior and thus will not be automatically exported
+    other/other_class.rb:10:
+    10 |  class Inner::AlsoNotExported
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+
+use_other/foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` resolves but is not exported from `Foo::Bar::OtherPackage` https://srb.help/3717
+    13 |      Bar::OtherPackage::Inner::AlsoNotExported
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Foo::Bar::OtherPackage::Inner::AlsoNotExported` does not define behavior and thus will not be automatically exported
+    other/other_class.rb:10:
+    10 |  class Inner::AlsoNotExported
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+Errors: 4
+use_app_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
+              ^^^^^^^^
+  Did you mean `Dir`? Use `-a` to autocorrect
+    use_app_false_cycle_package/foo.rb:6: Replace with `Dir`
+     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
+              ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#L11: `Dir` defined here
+    11 |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
+Errors: 1

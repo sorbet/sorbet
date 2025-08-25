@@ -810,6 +810,172 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
+namespace {
+
+bool isTestExport(const ast::ExpressionPtr &expr) {
+    auto send = ast::cast_tree<ast::Send>(expr);
+    if (!send || send->fun != core::Names::export_() || send->numPosArgs() != 1) {
+        return false;
+    }
+
+    auto sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
+    while (sym) {
+        if (ast::isa_tree<ast::EmptyTree>(sym->scope)) {
+            return sym->cnst == core::Names::Constants::Test();
+        }
+
+        if (auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope)) {
+            sym = parent;
+        } else {
+            break;
+        }
+    }
+
+    return false;
+}
+
+ast::ParsedFile copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &ast) {
+    ENFORCE(ast.file.isPackage(gs));
+
+    ast::ParsedFile result{ast.tree.deepCopy(), ast.file};
+
+    auto root = ast::cast_tree<ast::ClassDef>(result.tree);
+    if (!root || root->rhs.size() != 1) {
+        return result;
+    }
+
+    auto package = ast::cast_tree<ast::ClassDef>(root->rhs.front());
+    if (!package) {
+        return result;
+    }
+
+    auto it = std::remove_if(package->rhs.begin(), package->rhs.end(), isTestExport);
+    package->rhs.erase(it, package->rhs.end());
+
+    return result;
+}
+
+} // namespace
+
+vector<CondensationLayerInfo> condensationLayers(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+                                                 absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
+    Timer timeit(gs.tracer(), "condensationLayers");
+
+    if (!opts.packageDirected) {
+        return vector{CondensationLayerInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+    }
+
+    auto &db = gs.packageDB();
+
+    auto numPackageFiles = packageFiles.size();
+
+    // We move all the package files into a map, so that it's easy to go from package name to package file while
+    // processing the layers of the traversal.
+    UnorderedMap<core::packages::MangledName, ast::ParsedFile> packagesToPackageRb;
+    for (auto &ast : packageFiles) {
+        auto pkgName = db.getPackageNameForFile(ast.file);
+        ENFORCE(pkgName.exists());
+
+        packagesToPackageRb[pkgName] = move(ast);
+    }
+
+    // We'll generate non-test variants of each package, so we need to double the storage of this vector.
+    packageFiles.clear();
+    packageFiles.reserve(numPackageFiles * 2);
+
+    auto traversal = db.condensation().computeTraversal(gs);
+    ENFORCE(!traversal.parallel.empty());
+
+    vector<uint32_t> fileToLayer(gs.filesUsed());
+    {
+        Timer timeit(gs.tracer(), "condensationLayers.layerMapping");
+
+        auto layerMapping = traversal.buildLayerMapping(gs);
+
+        int ix = 0;
+        for (auto &file : gs.getFiles().subspan(1)) {
+            ++ix;
+            core::FileRef fref(ix);
+            auto pkgName = db.getPackageNameForFile(fref);
+            if (!pkgName.exists()) {
+                // This is a file with no package, so we unconditionally put it in the first layer. This means that
+                // it'll be checked at the same time as the first layer of packaged code.
+                fileToLayer[ix] = 0;
+                continue;
+            }
+
+            ENFORCE(layerMapping.find(pkgName) != layerMapping.end(),
+                    "All packages must be present in the condensation graph");
+            auto &info = layerMapping[pkgName];
+            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
+                fileToLayer[ix] = info.testLayer;
+            } else {
+                fileToLayer[ix] = info.applicationLayer;
+            }
+        }
+
+        fast_sort(sourceFiles, [&fileToLayer = as_const(fileToLayer)](core::FileRef l, core::FileRef r) -> bool {
+            auto lid = l.id();
+            auto rid = r.id();
+            auto lLayer = fileToLayer[lid];
+            auto rLayer = fileToLayer[rid];
+            return std::tie(lLayer, lid) < std::tie(rLayer, rid);
+        });
+    }
+
+    // Reserve enough space for all the layers of the condensation traversal, plus one more for unpackaged code.
+    auto maxLayers = traversal.parallel.size() + 1;
+
+    vector<CondensationLayerInfo> result;
+    result.reserve(maxLayers);
+
+    auto sourceSpan = sourceFiles;
+
+    int currentLayer = -1;
+    for (auto &layer : traversal.parallel) {
+        ++currentLayer;
+
+        auto &resultLayer = result.emplace_back();
+
+        {
+            auto start = packageFiles.size();
+            for (auto &scc : layer) {
+                if (scc.isTest) {
+                    for (auto member : scc.members) {
+                        packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
+                    }
+                } else {
+                    // When processing the application source of a package, we need to make a copy of the package file,
+                    // and edit out any reference to test symbols.
+                    for (auto member : scc.members) {
+                        const auto &package = packagesToPackageRb[member];
+                        packageFiles.emplace_back(copyPackageWithoutTestExports(gs, package));
+                    }
+                }
+            }
+
+            auto len = packageFiles.size() - start;
+            ENFORCE(len > 0);
+            resultLayer.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
+        }
+
+        {
+            auto it = absl::c_find_if(sourceSpan, [currentLayer, &fileToLayer = as_const(fileToLayer)](auto file) {
+                return fileToLayer[file.id()] > currentLayer;
+            });
+            auto len = std::distance(sourceSpan.begin(), it);
+            resultLayer.sourceFiles = sourceSpan.subspan(0, len);
+            sourceSpan = sourceSpan.subspan(len);
+        }
+    }
+
+    ENFORCE(sourceSpan.empty());
+    ENFORCE(!result.empty());
+    ENFORCE(result.size() <= maxLayers);
+
+    return result;
+}
+
 // packager intentionally runs outside of rewriter so that its output does not get cached.
 // TODO(jez) How much of this still needs to be outside of rewriter?
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
