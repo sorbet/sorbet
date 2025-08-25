@@ -183,7 +183,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto newName = translate(aliasGlobalVariableNode->new_name);
             auto oldName = translate(aliasGlobalVariableNode->old_name);
 
-            return make_unique<parser::Alias>(location, move(newName), move(oldName));
+            if (!directlyDesugar) {
+                return make_unique<parser::Alias>(location, move(newName), move(oldName));
+            }
+
+            auto toExpr = newName->takeDesugaredExpr();
+            auto fromExpr = oldName->takeDesugaredExpr();
+
+            // Desugar `alias $new $old` to `self.alias_method($new, $old)`
+            auto expr = MK::Send2(location, MK::Self(location), core::Names::aliasMethod(),
+                                  location.copyWithZeroLength(), std::move(toExpr), std::move(fromExpr));
+
+            return make_node_with_expr<parser::Alias>(move(expr), location, move(newName), move(oldName));
         }
         case PM_ALIAS_METHOD_NODE: { // The `alias` keyword, like `alias new_method old_method`
             auto aliasMethodNode = down_cast<pm_alias_method_node>(node);
