@@ -487,4 +487,22 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       end
     end
   end
+
+  it 'disallows overriding a private method defined in the same scope' do
+    err = assert_raises(ArgumentError) do
+      class LocalPrivateOverride < T::Struct
+        extend T::Sig
+        extend T::Helpers
+
+        abstract!
+
+        sig { abstract.returns(Integer) }
+        private def foo; end
+
+        const :foo, Integer, override: true
+      end
+    end
+
+    assert(err.message.include?("doesn't exist to be overridden"))
+  end
 end
