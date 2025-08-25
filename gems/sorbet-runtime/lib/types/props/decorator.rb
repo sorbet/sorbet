@@ -11,28 +11,39 @@ class T::Props::Decorator
   extend T::Sig
 
   Rules = T.type_alias { T::Hash[Symbol, T.untyped] }
-  DecoratedInstance = T.type_alias { Object } # Would be T::Props, but that produces circular reference errors in some circumstances
+  # Would be T::Props, but that produces circular reference errors in some circumstances
+  DecoratedInstance = T.type_alias { Object }
   PropType = T.type_alias { T::Types::Base }
   PropTypeOrClass = T.type_alias { T.any(PropType, Module) }
   OverrideRules = T.type_alias { T::Hash[Symbol, {allow_incompatible: T::Boolean}] }
 
-  class NoRulesError < StandardError; end
+  class NoRulesError < StandardError
+  end
 
   EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules], checked: false)
   private_constant :EMPTY_PROPS
 
-  OVERRIDE_TRUE = T.let({
-    reader: {allow_incompatible: false}.freeze,
-    writer: {allow_incompatible: false}.freeze,
-  }.freeze, OverrideRules)
+  OVERRIDE_TRUE = T.let(
+    {
+      reader: {allow_incompatible: false}.freeze,
+      writer: {allow_incompatible: false}.freeze
+    }.freeze,
+    OverrideRules
+  )
 
-  OVERRIDE_READER = T.let({
-    reader: {allow_incompatible: false}.freeze,
-  }.freeze, OverrideRules)
+  OVERRIDE_READER = T.let(
+    {
+      reader: {allow_incompatible: false}.freeze
+    }.freeze,
+    OverrideRules
+  )
 
-  OVERRIDE_WRITER = T.let({
-    writer: {allow_incompatible: false}.freeze,
-  }.freeze, OverrideRules)
+  OVERRIDE_WRITER = T.let(
+    {
+      writer: {allow_incompatible: false}.freeze
+    }.freeze,
+    OverrideRules
+  )
 
   OVERRIDE_EMPTY = T.let({}.freeze, OverrideRules)
 
@@ -42,6 +53,7 @@ class T::Props::Decorator
     @class.plugins.each do |mod|
       T::Props::Plugin::Private.apply_decorator_methods(mod, self)
     end
+
     @props = T.let(EMPTY_PROPS, T::Hash[Symbol, Rules], checked: false)
   end
 
@@ -66,7 +78,11 @@ class T::Props::Decorator
     override = rules.delete(:override)
 
     if props.include?(name) && !override
-      raise ArgumentError.new("Attempted to redefine prop #{name.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(name)}")
+      raise(
+        ArgumentError.new(
+          "Attempted to redefine prop #{name.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(name)}"
+        )
+      )
     end
 
     @props = @props.merge(name => rules.freeze).freeze
@@ -80,20 +96,26 @@ class T::Props::Decorator
   # options. If you're considering adding a new rule key, please come chat with
   # the Sorbet team first, as we'd really like to learn more about how to best
   # solve the problem you're encountering.
-  VALID_RULE_KEYS = T.let(%i[
-    enum
-    foreign
-    ifunset
-    immutable
-    override
-    redaction
-    sensitivity
-    without_accessors
-    clobber_existing_method!
-    extra
-    setter_validate
-    _tnilable
-  ].to_h { |k| [k, true] }.freeze, T::Hash[Symbol, T::Boolean], checked: false)
+  VALID_RULE_KEYS = T.let(
+    %i[
+      enum
+      foreign
+      ifunset
+      immutable
+      override
+      redaction
+      sensitivity
+      without_accessors
+      clobber_existing_method!
+      extra
+      setter_validate
+      _tnilable
+    ]
+      .to_h { |k| [k, true] }
+      .freeze,
+    T::Hash[Symbol, T::Boolean],
+    checked: false
+  )
   private_constant :VALID_RULE_KEYS
 
   sig { params(key: Symbol).returns(T::Boolean).checked(:never) }
@@ -134,12 +156,13 @@ class T::Props::Decorator
       val: T.untyped,
       rules: Rules
     )
-    .void
-    .checked(:never)
+      .void
+      .checked(:never)
   end
-  def prop_set(instance, prop, val, rules=prop_rules(prop))
+  def prop_set(instance, prop, val, rules = prop_rules(prop))
     instance.instance_exec(val, &rules.fetch(:setter_proc))
   end
+
   alias_method :set, :prop_set
 
   # Only Models have any custom get logic but we need to call this on
@@ -150,8 +173,8 @@ class T::Props::Decorator
       prop: Symbol,
       value: T.untyped
     )
-    .returns(T.untyped)
-    .checked(:never)
+      .returns(T.untyped)
+      .checked(:never)
   end
   def prop_get_logic(instance, prop, value)
     value
@@ -170,11 +193,14 @@ class T::Props::Decorator
       prop: T.any(String, Symbol),
       rules: Rules
     )
-    .returns(T.untyped)
-    .checked(:never)
+      .returns(T.untyped)
+      .checked(:never)
   end
-  def prop_get(instance, prop, rules=prop_rules(prop))
-    val = instance.instance_variable_get(rules[:accessor_key]) if instance.instance_variable_defined?(rules[:accessor_key])
+  def prop_get(instance, prop, rules = prop_rules(prop))
+    if instance.instance_variable_defined?(rules[:accessor_key])
+      val = instance.instance_variable_get(rules[:accessor_key])
+    end
+
     if !val.nil?
       val
     elsif (d = rules[:ifunset])
@@ -190,13 +216,14 @@ class T::Props::Decorator
       prop: T.any(String, Symbol),
       rules: Rules
     )
-    .returns(T.untyped)
-    .checked(:never)
+      .returns(T.untyped)
+      .checked(:never)
   end
-  def prop_get_if_set(instance, prop, rules=prop_rules(prop))
+  def prop_get_if_set(instance, prop, rules = prop_rules(prop))
     instance.instance_variable_get(rules[:accessor_key]) if instance.instance_variable_defined?(rules[:accessor_key])
   end
-  alias_method :get, :prop_get_if_set # Alias for backwards compatibility
+  # Alias for backwards compatibility
+  alias_method :get, :prop_get_if_set
 
   # checked(:never) - O(prop accesses)
   sig do
@@ -205,18 +232,22 @@ class T::Props::Decorator
       prop: Symbol,
       foreign_class: Module,
       rules: Rules,
-      opts: T::Hash[Symbol, T.untyped],
+      opts: T::Hash[Symbol, T.untyped]
     )
-    .returns(T.untyped)
-    .checked(:never)
+      .returns(T.untyped)
+      .checked(:never)
   end
-  def foreign_prop_get(instance, prop, foreign_class, rules=prop_rules(prop), opts={})
+  def foreign_prop_get(instance, prop, foreign_class, rules = prop_rules(prop), opts = {})
     return if !(value = prop_get(instance, prop, rules))
     T.unsafe(foreign_class).load(value, {}, opts)
   end
 
   # TODO: we should really be checking all the methods on `cls`, not just Object
-  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) { |x, acc| acc[x] = true }.freeze, T::Hash[Symbol, TrueClass], checked: false)
+  BANNED_METHOD_NAMES = T.let(
+    Object.instance_methods.each_with_object({}) { |x, acc| acc[x] = true }.freeze,
+    T::Hash[Symbol, TrueClass],
+    checked: false
+  )
 
   # checked(:never) - Rules hash is expensive to check
   sig do
@@ -226,15 +257,19 @@ class T::Props::Decorator
       rules: Rules,
       type: PropTypeOrClass
     )
-    .void
-    .checked(:never)
+      .void
+      .checked(:never)
   end
   def prop_validate_definition!(name, cls, rules, type)
     validate_prop_name(name)
 
     if rules.key?(:pii)
-      raise ArgumentError.new("The 'pii:' option for props has been renamed " \
-        "to 'sensitivity:' (in prop #{@class.name}.#{name})")
+      raise(
+        ArgumentError.new(
+          "The 'pii:' option for props has been renamed " \
+            "to 'sensitivity:' (in prop #{@class.name}.#{name})"
+        )
+      )
     end
 
     if rules.keys.any? { |k| !valid_rule_key?(k) }
@@ -242,11 +277,13 @@ class T::Props::Decorator
     end
 
     if !rules[:clobber_existing_method!] && !rules[:without_accessors] && BANNED_METHOD_NAMES.include?(name.to_sym)
-      raise ArgumentError.new(
-        "#{name} can't be used as a prop in #{@class} because a method with " \
-        "that name already exists (defined by #{@class.instance_method(name).owner} " \
-        "at #{@class.instance_method(name).source_location || '<unknown>'}). " \
-        "(If using this name is unavoidable, try `without_accessors: true`.)"
+      raise(
+        ArgumentError.new(
+          "#{name} can't be used as a prop in #{@class} because a method with " \
+            "that name already exists (defined by #{@class.instance_method(name).owner} " \
+            "at #{@class.instance_method(name).source_location || "<unknown>"}). " \
+            "(If using this name is unavoidable, try `without_accessors: true`.)"
+        )
       )
     end
 
@@ -287,6 +324,7 @@ class T::Props::Decorator
       else
         Object
       end
+
     when T::Types::Simple
       type.raw_type
     else
@@ -305,20 +343,22 @@ class T::Props::Decorator
   sig do
     params(
       cls: PropTypeOrClass,
-      rules: Rules,
+      rules: Rules
     )
-    .returns(T.anything)
-    .checked(:never)
+      .returns(T.anything)
+      .checked(:never)
   end
   private def prop_nilable?(cls, rules)
     # NB: `prop` and `const` do not `T::Utils::coerce the type of the prop if it is a `Module`,
     # hence the bare `NilClass` check.
-    T::Utils::Nilable.is_union_with_nilclass(cls) || ((cls == T.untyped || cls == NilClass) && rules.key?(:default) && rules[:default].nil?)
+    T::Utils::Nilable.is_union_with_nilclass(cls) ||
+      ((cls == T.untyped || cls == NilClass) && rules.key?(:default) && rules[:default].nil?)
   end
 
   sig(:final) { params(name: Symbol).returns(T::Boolean).checked(:never) }
   private def method_defined_on_ancestor?(name)
-    @class.method_defined?(name) && !@class.method_defined?(name, false)
+    (@class.method_defined?(name) || @class.private_method_defined?(name)) &&
+      (!@class.method_defined?(name, false) || !@class.private_method_defined?(name, false))
   end
 
   sig(:final) { params(name: Symbol, rules: Rules).void.checked(:never) }
@@ -328,12 +368,23 @@ class T::Props::Decorator
     return if rules[:without_accessors]
 
     if override[:reader] && !method_defined_on_ancestor?(name) && !props.include?(name)
-      raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
+      raise(
+        ArgumentError.new(
+          "You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden."
+        )
+      )
     end
 
     # Properly, we should also check whether `props[name]` is immutable, but the old code didn't either.
-    if !rules[:immutable] && override[:writer] && !method_defined_on_ancestor?("#{name}=".to_sym) && !props.include?(name)
-      raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
+    if !rules[:immutable] &&
+        override[:writer] &&
+        !method_defined_on_ancestor?("#{name}=".to_sym) &&
+        !props.include?(name)
+      raise(
+        ArgumentError.new(
+          "You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden."
+        )
+      )
     end
   end
 
@@ -342,12 +393,12 @@ class T::Props::Decorator
     params(
       name: T.any(Symbol, String),
       cls: PropTypeOrClass,
-      rules: Rules,
+      rules: Rules
     )
-    .void
-    .checked(:never)
+      .void
+      .checked(:never)
   end
-  def prop_defined(name, cls, rules={})
+  def prop_defined(name, cls, rules = {})
     cls = T::Utils.resolve_alias(cls)
 
     if prop_nilable?(cls, rules)
@@ -363,6 +414,7 @@ class T::Props::Decorator
     if !cls.is_a?(Module)
       cls = convert_type_to_class(cls)
     end
+
     type_object = smart_coerce(type, enum: rules[:enum])
 
     prop_validate_definition!(name, cls, rules, type_object)
@@ -383,8 +435,10 @@ class T::Props::Decorator
         # are ultimately included does.
         #
         if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !T.unsafe(@class).contains_pii?
-          raise ArgumentError.new(
-            "Cannot define pii prop `#{@class}##{name}` because `#{@class}` is `contains_no_pii`"
+          raise(
+            ArgumentError.new(
+              "Cannot define pii prop `#{@class}##{name}` because `#{@class}` is `contains_no_pii`"
+            )
           )
         end
       end
@@ -441,7 +495,6 @@ class T::Props::Decorator
           # Fast path (~4x faster as of Ruby 2.6)
           @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
         end
-
       end
 
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
@@ -451,15 +504,16 @@ class T::Props::Decorator
         end
       else
         # Fast path (~30x faster as of Ruby 2.6)
-        @class.send(:attr_reader, name) # send is used because `attr_reader` is private in 2.4
+        # send is used because `attr_reader` is private in 2.4
+        @class.send(:attr_reader, name)
       end
     end
   end
 
   sig do
     params(type: PropTypeOrClass, enum: T.untyped)
-    .returns(T::Types::Base)
-    .checked(:never)
+      .returns(T::Types::Base)
+      .checked(:never)
   end
   private def smart_coerce(type, enum:)
     # Backwards compatibility for pre-T::Types style
@@ -483,10 +537,10 @@ class T::Props::Decorator
       if rules[:redaction]
         T::Configuration.hard_assert_handler(
           "#{@class}##{prop_name} has a 'redaction:' annotation but no " \
-          "'sensitivity:' annotation. This is probably wrong, because if a " \
-          "prop needs redaction then it is probably sensitive. Add a " \
-          "sensitivity annotation like 'sensitivity: Opus::Sensitivity::PII." \
-          "whatever', or explicitly override this check with 'sensitivity: []'."
+            "'sensitivity:' annotation. This is probably wrong, because if a " \
+            "prop needs redaction then it is probably sensitive. Add a " \
+            "sensitivity annotation like 'sensitivity: Opus::Sensitivity::PII." \
+            "whatever', or explicitly override this check with 'sensitivity: []'."
         )
       end
       # TODO(PRIVACYENG-982) Ideally we'd also check for 'password' and possibly
@@ -495,11 +549,11 @@ class T::Props::Decorator
       if /\bsecret\b/.match?(prop_name)
         T::Configuration.hard_assert_handler(
           "#{@class}##{prop_name} has the word 'secret' in its name, but no " \
-          "'sensitivity:' annotation. This is probably wrong, because if a " \
-          "prop is named 'secret' then it is probably sensitive. Add a " \
-          "sensitivity annotation like 'sensitivity: Opus::Sensitivity::NonPII." \
-          "security_token', or explicitly override this check with " \
-          "'sensitivity: []'."
+            "'sensitivity:' annotation. This is probably wrong, because if a " \
+            "prop is named 'secret' then it is probably sensitive. Add a " \
+            "sensitivity annotation like 'sensitivity: Opus::Sensitivity::NonPII." \
+            "security_token', or explicitly override this check with " \
+            "'sensitivity: []'."
         )
       end
     end
@@ -509,10 +563,10 @@ class T::Props::Decorator
   sig do
     params(
       prop_name: Symbol,
-      redaction: T.untyped,
+      redaction: T.untyped
     )
-    .void
-    .checked(:never)
+      .void
+      .checked(:never)
   end
   private def handle_redaction_option(prop_name, redaction)
     redacted_method = "#{prop_name}_redacted"
@@ -523,6 +577,7 @@ class T::Props::Decorator
       if !handler
         raise "Using `redaction:` on a prop requires specifying `T::Configuration.redaction_handler`"
       end
+
       handler.call(value, redaction)
     end
   end
@@ -531,16 +586,18 @@ class T::Props::Decorator
     params(
       option_sym: Symbol,
       foreign: T.untyped,
-      valid_type_msg: String,
+      valid_type_msg: String
     )
-    .void
-    .checked(:never)
+      .void
+      .checked(:never)
   end
   private def validate_foreign_option(option_sym, foreign, valid_type_msg:)
     if foreign.is_a?(Symbol) || foreign.is_a?(String)
-      raise ArgumentError.new(
-        "Using a symbol/string for `#{option_sym}` is no longer supported. Instead, use a Proc " \
-        "that returns the class, e.g., foreign: -> {Foo}"
+      raise(
+        ArgumentError.new(
+          "Using a symbol/string for `#{option_sym}` is no longer supported. Instead, use a Proc " \
+            "that returns the class, e.g., foreign: -> {Foo}"
+        )
       )
     end
 
@@ -554,10 +611,10 @@ class T::Props::Decorator
     params(
       prop_name: T.any(String, Symbol),
       rules: Rules,
-      foreign: T.untyped,
+      foreign: T.untyped
     )
-    .void
-    .checked(:never)
+      .void
+      .checked(:never)
   end
   private def define_foreign_method(prop_name, rules, foreign)
     fk_method = "#{prop_name}_"
@@ -571,15 +628,18 @@ class T::Props::Decorator
       if foreign.is_a?(Proc)
         resolved_foreign = foreign.call
         if !resolved_foreign.respond_to?(:load)
-          raise ArgumentError.new(
-            "The `foreign` proc for `#{prop_name}` must return a model class. " \
-            "Got `#{resolved_foreign.inspect}` instead."
+          raise(
+            ArgumentError.new(
+              "The `foreign` proc for `#{prop_name}` must return a model class. " \
+                "Got `#{resolved_foreign.inspect}` instead."
+            )
           )
         end
         # `foreign` is part of the closure state, so this will persist to future invocations
         # of the method, optimizing it so this only runs on the first invocation.
         foreign = resolved_foreign
       end
+
       opts = if allow_direct_mutation.nil?
         {}
       else
@@ -594,10 +654,11 @@ class T::Props::Decorator
       loaded_foreign = send(fk_method, allow_direct_mutation: allow_direct_mutation)
       if !loaded_foreign
         T::Configuration.hard_assert_handler(
-          'Failed to load foreign model',
+          "Failed to load foreign model",
           storytime: {method: force_fk_method, class: self.class}
         )
       end
+
       loaded_foreign
     end
   end
@@ -608,14 +669,16 @@ class T::Props::Decorator
       prop_name: Symbol,
       prop_cls: Module,
       rules: Rules,
-      foreign: T.untyped,
+      foreign: T.untyped
     )
-    .void
-    .checked(:never)
+      .void
+      .checked(:never)
   end
   private def handle_foreign_option(prop_name, prop_cls, rules, foreign)
     validate_foreign_option(
-      :foreign, foreign, valid_type_msg: "a model class or a Proc that returns one"
+      :foreign,
+      foreign,
+      valid_type_msg: "a model class or a Proc that returns one"
     )
 
     if prop_cls != String
@@ -626,20 +689,26 @@ class T::Props::Decorator
       # We don't support arrays with `foreign` because it's hard to both preserve ordering and
       # keep them from being lurky performance hits by issuing a bunch of un-batched DB queries.
       # We could potentially address that by porting over something like AmbiguousIDLoader.
-      raise ArgumentError.new(
-        "Using an array for `foreign` is no longer supported. Instead, please use a union type of " \
-        "token types for the prop type, e.g., T.any(Opus::Autogen::Tokens::FooModelToken, Opus::Autogen::Tokens::BarModelToken)"
+      raise(
+        ArgumentError.new(
+          "Using an array for `foreign` is no longer supported. Instead, please use a union type of " \
+            "token types for the prop type, e.g., T.any(Opus::Autogen::Tokens::FooModelToken, Opus::Autogen::Tokens::BarModelToken)"
+        )
       )
     end
 
     unless foreign.is_a?(Proc)
-      T::Configuration.soft_assert_handler(<<~MESSAGE, storytime: {prop: prop_name, value: foreign}, notify: 'jerry')
-        Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign`. In other words:
+      T::Configuration.soft_assert_handler(
+        <<~MESSAGE,
+          Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign`. In other words:
 
-          instead of `prop :foo, String, foreign: FooModel`
-          use `prop :foo, String, foreign: -> {FooModel}`
+            instead of `prop :foo, String, foreign: FooModel`
+            use `prop :foo, String, foreign: -> {FooModel}`
 
-      MESSAGE
+        MESSAGE
+        storytime: {prop: prop_name, value: foreign},
+        notify: "jerry"
+      )
     end
 
     define_foreign_method(prop_name, rules, foreign)
@@ -720,7 +789,11 @@ class T::Props::Decorator
     return OVERRIDE_WRITER if d == :writer
     return OVERRIDE_EMPTY if d == false || d.nil?
     unless d.is_a?(Hash)
-      raise ArgumentError.new("`override` only accepts `true`, `:reader`, `:writer`, or a Hash in prop #{@class.name}.#{name} (got #{d.class})")
+      raise(
+        ArgumentError.new(
+          "`override` only accepts `true`, `:reader`, `:writer`, or a Hash in prop #{@class.name}.#{name} (got #{d.class})"
+        )
+      )
     end
 
     # cwong: should we check for bad keys? `sig { override(not_real: true) }` on a normal function
@@ -729,8 +802,10 @@ class T::Props::Decorator
     # XX cwong: this means {reader: false, allow_incompatible: true} will become {allow_incompatible: true},
     # is that fine?
     unless (allow_incompatible = d[:allow_incompatible]).nil?
-      return {reader: {allow_incompatible: !!allow_incompatible},
-              writer: {allow_incompatible: !!allow_incompatible}}.to_h
+      return {
+        reader: {allow_incompatible: !!allow_incompatible},
+        writer: {allow_incompatible: !!allow_incompatible}
+      }.to_h
     end
 
     result = {}
@@ -742,13 +817,13 @@ class T::Props::Decorator
   sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
   private def clobber_getter?(child, prop)
     !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
-       child.instance_method(prop).source_location&.first == __FILE__)
+      child.instance_method(prop).source_location&.first == __FILE__)
   end
 
   sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
   private def clobber_setter?(child, prop)
     !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
-       child.instance_method("#{prop}=").source_location&.first == __FILE__)
+      child.instance_method("#{prop}=").source_location&.first == __FILE__)
   end
 
   sig { params(mod: Module).void.checked(:never) }

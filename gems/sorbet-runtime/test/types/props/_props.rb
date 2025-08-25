@@ -468,5 +468,23 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
 
       assert(err.message.include?("Attempted to redefine prop"))
     end
+
+    it 'allows overriding private methods' do
+      module A
+        extend T::Sig
+        extend T::Helpers
+
+        abstract!
+
+        sig { abstract.returns(Integer) }
+        private def foo
+        end
+      end
+
+      class B < T::Struct
+        include A
+        const :foo, Integer, override: true
+      end
+    end
   end
 end
