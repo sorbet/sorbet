@@ -334,7 +334,7 @@ pipeline_tests(
             "testdata/rbs/**/*.rb",
         ],
     ),
-    "PrismPosTests",
+    "PosTests",
     parser = "prism",
 )
 
@@ -366,7 +366,7 @@ pipeline_tests(
         "prism_regression/**/*.rb",
         "prism_regression/**/*.exp",
     ]),
-    "PrismPosTests",
+    "PosTests",
     parser = "prism",
 )
 
