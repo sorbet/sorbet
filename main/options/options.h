@@ -204,20 +204,22 @@ struct Options {
 
         bool stripePackages : 1;
 
+        core::StrictLevel defaultStrictnessLevel : 3;
+
         // HELLO! adding/removing MUST also change this number!!
-        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+        constexpr static uint8_t NUMBER_OF_BITS = 9;
 
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
             : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
-              runningUnderAutogen(false), stripePackages(false) {}
+              runningUnderAutogen(false), stripePackages(false), defaultStrictnessLevel(core::StrictLevel::False) {}
 
-        constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
+        constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_BITS) - 1;
 
-        uint8_t serialize() const {
-            static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
+        uint16_t serialize() const {
+            static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint16_t));
             // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            auto rawBits = *reinterpret_cast<const uint16_t *>(this);
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
