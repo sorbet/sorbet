@@ -1418,7 +1418,31 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto returnValues = translateArguments(returnNode->arguments);
 
-            return make_unique<parser::Return>(location, move(returnValues));
+            if (returnValues.empty()) {
+                auto expr = MK::Return(location, MK::EmptyTree());
+                return make_node_with_expr<parser::Return>(move(expr), location, move(returnValues));
+            }
+
+            if (!directlyDesugar || !hasExpr(returnValues)) {
+                return make_unique<parser::Return>(location, move(returnValues));
+            }
+
+            bool hasBlock = absl::c_any_of(returnValues, [](const auto &node) {
+                return node != nullptr && parser::isa_node<parser::BlockPass>(node.get());
+            });
+            ENFORCE(!hasBlock, "Prism expected to disallow block argument for `return` as invalid syntax.");
+
+            ExpressionPtr returnArgs;
+            if (returnValues.size() == 1) {
+                auto &first = returnValues[0];
+                returnArgs = first == nullptr ? MK::EmptyTree() : first->takeDesugaredExpr();
+            } else {
+                auto args = nodeVecToStore<ast::Array::ENTRY_store>(std::move(returnValues));
+                auto arrayLocation = parser.translateLocation(returnNode->arguments->base.location);
+                returnArgs = MK::Array(arrayLocation, std::move(args));
+            }
+            auto expr = MK::Return(location, std::move(returnArgs));
+            return make_node_with_expr<parser::Return>(move(expr), location, std::move(returnValues));
         }
         case PM_RETRY_NODE: { // The `retry` keyword
             return make_node_with_expr<parser::Retry>(ast::make_expression<ast::Retry>(location), location);
