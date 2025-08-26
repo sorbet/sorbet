@@ -292,6 +292,8 @@ public:
     // Remove knowledge of what this package is in `file`.
     // We do this so that when VisibilityChecker is re-run over `file`, we can delete stale information.
     void untrackPackageReferencesFor(const core::FileRef file);
+
+    std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
 };
 
 } // namespace sorbet::core::packages
