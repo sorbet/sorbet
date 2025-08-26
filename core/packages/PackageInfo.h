@@ -83,6 +83,11 @@ struct VisibleTo {
         : mangledName(mangledName), type(type), loc(loc){};
 };
 
+struct PackageReferenceInfo {
+    bool importNeeded;
+    bool causesModularityError;
+};
+
 class PackageInfo {
 public:
     MangledName mangledName() const {
@@ -177,9 +182,14 @@ public:
 
     StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
+    // Map from pkg -> {list of files in this package that reference pkg, whether this package is missing an import
+    // for pkg and whether importing this package would cause a modularity error}
+    UnorderedMap<core::packages::MangledName, std::pair<UnorderedSet<core::FileRef>, PackageReferenceInfo>>
+        referencedPackages = {};
+
     // The id of the SCC that this package's normal imports belong to.
     //
-    // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
+    // WARNING: Modifying the contents of the package DB after ComputePackageSCCs will cause this id to go out of
     // date.
     std::optional<int> sccID() const {
         ENFORCE(exists());
@@ -189,7 +199,7 @@ public:
     // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
     // condensation graph.
     //
-    // WARNING: Modifying the contents of the package DB after this operation will cause this id to go out of
+    // WARNING: Modifying the contents of the package DB after ComputePackageSCCs will cause this id to go out of
     // date.
     std::optional<int> testSccID() const {
         ENFORCE(exists());
@@ -249,8 +259,16 @@ public:
     bool isPreludePackage() const {
         return this->isPreludePackage_;
     }
+
+    // Track that this package references `package` in `file`
+    void trackPackageReference(const core::FileRef file, const core::packages::MangledName package,
+                               const PackageReferenceInfo packageReferenceInfo);
+
+    // Remove knowledge of what this package is in `file`.
+    // We do this so that when VisibilityChecker is re-run over `file`, we can delete stale information.
+    void untrackPackageReferencesFor(const core::FileRef file);
 };
-CheckSize(PackageInfo, 208, 8);
+CheckSize(PackageInfo, 240, 8);
 
 } // namespace sorbet::core::packages
 #endif

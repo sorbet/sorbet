@@ -466,6 +466,28 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
     return nullopt;
 }
 
+void PackageInfo::trackPackageReference(const core::FileRef file, const core::packages::MangledName package,
+                                        const PackageReferenceInfo packageReferenceInfo) {
+    auto r = referencedPackages.find(package);
+    if (r != referencedPackages.end()) {
+        r->second.first.insert(file);
+    } else {
+        referencedPackages[package] = {{file}, packageReferenceInfo};
+    }
+}
+
+void PackageInfo::untrackPackageReferencesFor(const core::FileRef file) {
+    for (auto &[_, v] : referencedPackages) {
+        auto files = v.first;
+        auto it = files.find(file);
+        if (it == files.end()) {
+            continue;
+        }
+        files.erase(it);
+    }
+    erase_if(referencedPackages, [](const auto &x) { return x.second.first.empty(); });
+}
+
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
     return mangledName() == rhs.mangledName();
 }
