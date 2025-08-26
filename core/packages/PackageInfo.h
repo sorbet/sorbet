@@ -112,6 +112,11 @@ struct VisibleTo {
         : mangledName(mangledName), type(type), loc(loc){};
 };
 
+struct PackageReferenceInfo {
+    bool importNeeded;
+    bool causesModularityError;
+};
+
 class PackageInfo {
 public:
     MangledName mangledName() const {
@@ -186,6 +191,11 @@ public:
     std::optional<
         std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
         min_typed_level_;
+
+    // Map from pkg -> {list of files in this package that reference pkg, whether this package is missing an import
+    // for pkg}
+    UnorderedMap<core::packages::MangledName, std::pair<UnorderedSet<core::FileRef>, PackageReferenceInfo>>
+        referencedPackages = {};
 
     std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         ENFORCE(exists());
@@ -274,6 +284,14 @@ public:
     bool isPreludePackage() const {
         return this->isPreludePackage_;
     }
+
+    // Track that this package references `package` in `file`
+    void trackPackageReference(const core::FileRef file, const core::packages::MangledName package,
+                               const PackageReferenceInfo packageReferenceInfo);
+
+    // Remove knowledge of what this package is in `file`.
+    // We do this so that when VisibilityChecker is re-run over `file`, we can delete stale information.
+    void untrackPackageReferencesFor(const core::FileRef file);
 };
 
 } // namespace sorbet::core::packages
