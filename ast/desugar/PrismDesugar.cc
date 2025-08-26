@@ -875,9 +875,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // Desugar a call with a splat and a Symbol block pass argument.
                             // E.g. `foo(*splat, &:to_s)`
 
+                            auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            sendargs.emplace_back(move(desugaredBlockLiteral));
+                            flags.hasBlock = true;
+
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            move(sendargs), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(blockPassArg)));
                         } else {
                             // Desugar a call with a splat, and any other expression as a block pass argument.
                             // E.g. `foo(*splat, &block)`
@@ -917,9 +920,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // Desugar a call without a splat and a Symbol block pass argument.
                             // E.g. `a.map(:to_s)`
 
+                            auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            args.emplace_back(move(desugaredBlockLiteral));
+                            flags.hasBlock = true;
+
                             res =
                                 MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(blockPassArg)));
                         } else {
                             // Desugar a call without a splat, and any other expression as a block pass argument.
                             // E.g. `a.each(&block)`
