@@ -99,7 +99,7 @@ From time to time, [we do close `hard` issues](https://github.com/sorbet/sorbet/
 
 ## Changes to user-facing syntax and APIs
 
-Changes to user-facing syntax **always** require a [design proposal](#design-proposals-scoping-large-features). This includes changes to `sig` and associated builder methods, `T.let`, type syntax, `# typed:`, any `sorbet-runtime` API which is either directly exposed (e.g. `T::Types`, `T::Configuration`, etc.) or indirectly exposed (e.g., what's stored on runtime `Signature` objects).
+Changes to user-facing syntax **always** require a [design proposal](#design-proposals-scoping-large-features). This includes changes to `sig` and associated builder methods, `T.let`, type syntax, `# typed:`, command line options, any `sorbet-runtime` API which is either directly exposed (e.g. `T::Types`, `T::Configuration`, etc.) or indirectly exposed (e.g., what's stored on runtime `Signature` objects).
 
 [See below](#design-proposals-scoping-large-features) for more.
 
