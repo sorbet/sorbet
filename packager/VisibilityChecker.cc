@@ -265,6 +265,7 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
+    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> packageReferences;
 
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
@@ -350,8 +351,10 @@ public:
         auto testUnitImportInHelper = wasImported &&
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
+        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
+        packageReferences[otherPackage] = {importNeeded, false};
 
-        if (!wasImported || testImportInProd || testUnitImportInHelper || !isExported) {
+        if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
             if (isTestImport) {
@@ -382,8 +385,14 @@ public:
                               path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
+                if (db.genPackages()) {
+                    // TODO(neil): this is technically incorrect since it means export errors won't be reported at all
+                    // until we implement export handling in genPackages mode
+                    return;
+                }
+
                 std::optional<core::AutocorrectSuggestion> importAutocorrect;
-                if (!wasImported || testImportInProd || testUnitImportInHelper) {
+                if (importNeeded) {
                     if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
                         importAutocorrect.emplace(exp.value());
                     }
@@ -466,6 +475,7 @@ public:
                     ENFORCE(false);
                 }
             } else {
+                packageReferences[otherPackage].causesModularityError = true;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 core::ErrorClass error =
@@ -552,19 +562,55 @@ public:
         }
     }
 
-    static vector<ast::ParsedFile> run(const core::GlobalState &gs, WorkerPool &workers,
+    static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
                                        vector<ast::ParsedFile> files) {
+        const core::GlobalState &gs = nonConstGs;
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<std::pair<
+            core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
+            files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        Parallel::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs](ast::ParsedFile &f) {
+        Parallel::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs, resultq](ast::ParsedFile &f) {
             if (!f.file.data(gs).isPackage(gs)) {
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                 if (pkgName.exists()) {
                     core::Context ctx{gs, core::Symbols::root(), f.file};
                     VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                     ast::TreeWalk::apply(ctx, pass, f.tree);
+                    resultq->push(
+                        std::optional<std::pair<core::FileRef, UnorderedMap<core::packages::MangledName,
+                                                                            core::packages::PackageReferenceInfo>>>(
+                            {f.file, std::move(pass.packageReferences)}),
+                        1);
+                } else {
+                    resultq->push(std::nullopt, 1);
                 }
+            } else {
+                resultq->push(std::nullopt, 1);
             }
         });
+
+        // TODO: Parallel::iterate uses multiplexJobWait, so this loop won't start consuming from resultq until every
+        // file is visited, but that's not necessary, we can start consuming them before that. Make the above use
+        // multiplexJob.
+        std::optional<
+            std::pair<core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
+            threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem() && threadResult.has_value()) {
+                auto file = threadResult.value().first;
+                auto pkgName = gs.packageDB().getPackageNameForFile(file);
+                if (!pkgName.exists()) {
+                    continue;
+                }
+                auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
+                nonConstPackageInfo->untrackPackageReferencesFor(file);
+                for (auto [p, packageReferenceInfo] : threadResult.value().second) {
+                    nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
+                }
+            }
+        }
 
         return files;
     }
