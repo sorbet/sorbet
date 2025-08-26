@@ -1459,10 +1459,11 @@ class Module < Object
   sig do
     params(
         arg0: T.any(Symbol, String),
+        include_ancestors: T::Boolean
     )
     .returns(T::Boolean)
   end
-  def private_method_defined?(arg0); end
+  def private_method_defined?(arg0, include_ancestors=false); end
 
   # With no arguments, sets the default visibility for subsequently defined
   # methods to protected. With arguments, sets the named methods to have
