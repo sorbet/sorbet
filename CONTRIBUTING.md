@@ -180,11 +180,11 @@ To create a new proposal:
 
 1.  Open that file in GitHub, and click "Copy raw file" at the top of the file
 
-1.  Visit <https://hackmd.io/new> to create a new, blank doc.
+1.  Visit <https://hackmd.io/new> to create a new, blank doc, or open a GitHub Issue with the proposal template.
 
-    HackMD is a free, real-time collaborative editor that supports Markdown and in-line commenting. You may also open a GitHub Issue with the proposal template, but HackMD is preferred for better threaded, in-line discussions.
+    HackMD is a free, real-time collaborative editor that supports Markdown and in-line commenting, and is preferred for lengthier proposals or those which would benefit from multiple, threaded discussions. You may also open a GitHub Issue with the proposal template, especially for short proposals. 
 
-1.  Follow the instructions in the template
+1.  Follow the instructions in the template to fill it out.
 
 1.  Share a link to your proposal in the [#internals](https://sorbet-ruby.slack.com/archives/CFT8Y4909) channel on the [Sorbet Slack](https://sorbet.org/slack).
 
