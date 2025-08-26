@@ -117,7 +117,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
         // working in `__package.rb` since every edit causes a slow path.
         // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS yet
-        if (this->config->opts.cacheSensitiveOptions.stripePackages && oldFile.hasPackageRbPath() &&
+        if (this->config->opts.cacheSensitiveOptions.sorbetPackages && oldFile.hasPackageRbPath() &&
             oldFile.source() != f->source()) {
             logger.debug("Taking slow path because {} is a package file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
@@ -275,7 +275,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     // indexer and typechecker's file tables will almost immediately diverge, but that's not an issue as we don't share
     // `core::FileRef` values between the two.
     auto typecheckerGS = std::exchange(
-        this->gs, this->gs->copyForIndex(this->config->opts.cacheSensitiveOptions.stripePackages,
+        this->gs, this->gs->copyForIndex(this->config->opts.cacheSensitiveOptions.sorbetPackages,
                                          this->config->opts.extraPackageFilesDirectoryUnderscorePrefixes,
                                          this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                          this->config->opts.extraPackageFilesDirectorySlashPrefixes,

@@ -429,7 +429,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
-    if (opts.cacheSensitiveOptions.stripePackages) {
+    if (opts.cacheSensitiveOptions.sorbetPackages) {
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
@@ -485,7 +485,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
 
-        if (opts.cacheSensitiveOptions.stripePackages) {
+        if (opts.cacheSensitiveOptions.sorbetPackages) {
             trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
         }
 
@@ -807,7 +807,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
-    if (opts.cacheSensitiveOptions.stripePackages) {
+    if (opts.cacheSensitiveOptions.sorbetPackages) {
         absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
         trees = packager::Packager::runIncremental(*gs, move(trees), *workers);
         for (auto &tree : trees) {
@@ -827,7 +827,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                      .result());
     }
 
-    if (opts.cacheSensitiveOptions.stripePackages) {
+    if (opts.cacheSensitiveOptions.sorbetPackages) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
     }
 

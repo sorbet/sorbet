@@ -111,7 +111,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     gs.suggestUnsafe = opts.suggestUnsafe;
 
 #ifndef SORBET_REALMAIN_MIN
-    if (opts.cacheSensitiveOptions.stripePackages) {
+    if (opts.cacheSensitiveOptions.sorbetPackages) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
         gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
@@ -701,7 +701,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     }
 
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
-        opts.cacheSensitiveOptions.stripePackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+        opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
         opts.stripePackagesHint);
@@ -939,7 +939,7 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
-    if (!opts.cacheSensitiveOptions.stripePackages) {
+    if (!opts.cacheSensitiveOptions.sorbetPackages) {
         return;
     }
 
@@ -964,7 +964,7 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                     WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
-    if (!opts.cacheSensitiveOptions.stripePackages) {
+    if (!opts.cacheSensitiveOptions.sorbetPackages) {
         return;
     }
 
@@ -989,7 +989,7 @@ void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, con
 void setPackageForSourceFiles(core::GlobalState &gs, absl::Span<core::FileRef> packageFiles,
                               const options::Options &opts) {
 #ifndef SORBET_REALMAIN_MIN
-    if (!opts.cacheSensitiveOptions.stripePackages) {
+    if (!opts.cacheSensitiveOptions.sorbetPackages) {
         return;
     }
 
@@ -1008,7 +1008,7 @@ void setPackageForSourceFiles(core::GlobalState &gs, absl::Span<core::FileRef> p
 void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
-    if (!opts.cacheSensitiveOptions.stripePackages) {
+    if (!opts.cacheSensitiveOptions.sorbetPackages) {
         return;
     }
 
@@ -1171,7 +1171,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
             }
 
 #ifndef SORBET_REALMAIN_MIN
-            if (opts.cacheSensitiveOptions.stripePackages) {
+            if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
                 what = packager::VisibilityChecker::run(gs, workers, std::move(what));
             }
@@ -1358,7 +1358,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
         }
 
 #ifndef SORBET_REALMAIN_MIN
-        if (opts.cacheSensitiveOptions.stripePackages) {
+        if (opts.cacheSensitiveOptions.sorbetPackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
             // For simplicity, we still call Packager::runIncremental here, even though
             // pipeline::nameAndResolve no longer calls Packager::run.
@@ -1391,7 +1391,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
         }
 
 #ifndef SORBET_REALMAIN_MIN
-        if (opts.cacheSensitiveOptions.stripePackages) {
+        if (opts.cacheSensitiveOptions.sorbetPackages) {
             what = packager::VisibilityChecker::run(gs, workers, std::move(what));
         }
 #endif

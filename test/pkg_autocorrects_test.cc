@@ -86,7 +86,7 @@ const vector<string> LAYERS_UTIL_LIB_APP = {"util", "lib", "app"};
 void makeDefaultPackagerGlobalState(core::GlobalState &gs, const vector<string> &packagerLayers = NO_LAYERS) {
     gs.initEmpty();
     realmain::options::Options opts;
-    opts.cacheSensitiveOptions.stripePackages = true;
+    opts.cacheSensitiveOptions.sorbetPackages = true;
     opts.packagerLayers = packagerLayers;
     realmain::pipeline::setGlobalStateOptions(gs, opts);
 }
