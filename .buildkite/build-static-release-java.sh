@@ -15,7 +15,7 @@ buildkite-agent artifact download "_out_/**/*.gem" .
 mkdir -p gems/sorbet-static/libexec
 
 git_commit_count=$(git rev-list --count HEAD)
-prefix="0.5"
+prefix="0.6"
 release_version="$prefix.${git_commit_count}"
 
 rbenv install --skip-existing
