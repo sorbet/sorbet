@@ -167,6 +167,10 @@ public:
         std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
         min_typed_level_;
 
+    // Map from pkg -> {list of files in this package that reference pkg, whether this package is missing an import
+    // for pkg}
+    UnorderedMap<core::packages::MangledName, std::pair<UnorderedSet<core::FileRef>, bool>> referencedPackages = {};
+
     std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         ENFORCE(exists());
         return strictDependenciesLevel_;
@@ -246,6 +250,14 @@ public:
     // Returns a string representing the path to the given package from this package, if it exists. Note: this only
     // looks at non-test imports.
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;
+
+    // Track that this package references `package` in `file`
+    void trackPackageReference(const core::FileRef file, const core::packages::MangledName package,
+                               const bool importNeeded);
+
+    // Remove knowledge of what this package is in `file`.
+    // We do this so that when VisibilityChecker is re-run over `file`, we can delete stale information.
+    void untrackPackageReferencesFor(const core::FileRef file);
 };
 
 } // namespace sorbet::core::packages
