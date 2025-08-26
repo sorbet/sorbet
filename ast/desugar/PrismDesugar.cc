@@ -356,13 +356,14 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     return mdef;
 }
 
+// Desugar a Symbol block pass like the `&foo` in `m(&:foo)` into a block literal.
+// `&:foo` => `{ |*temp| (temp[0]).foo(*temp[1, LONG_MAX]) }`
 ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
     core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
     auto lit = cast_tree<Literal>(expr);
     ENFORCE(lit && lit->isSymbol());
 
-    // &:foo => {|*temp| (temp[0]).foo(*tmp[1, LONG_MAX]) }
     core::NameRef name = core::cast_type_nonnull<core::NamedLiteralType>(lit->value).asName();
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
@@ -737,7 +738,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 auto methodName = MK::Symbol(locZeroLen, send->method);
 
-                // Pop the BlockPass off the end of the arguments, if there is one.
+                // Pop the BlockPass off the end of the arguments, if there is one. (e.g. the `&:b` in `foo(&:b)`)
+                // Note: this does *not* handle regular block arguments (e.g. `foo { }`),
+                //       which are handled separately in the`parser::Block *` case.
                 ExpressionPtr block;
                 if (!send->args.empty() && parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
                     auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
@@ -862,14 +865,23 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     sendargs.emplace_back(move(kwargs));
                     ExpressionPtr res;
                     if (block == nullptr) {
+                        // Desugar any call with a splat and without a block pass argument.
+                        // If there's a literal block argument, that's handled here, too.
+                        // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
                         res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                        move(sendargs), flags);
                     } else {
                         if (auto lit = cast_tree<Literal>(block); lit && lit->isSymbol()) {
+                            // Desugar a call with a splat and a Symbol block pass argument.
+                            // E.g. `foo(*splat, &:to_s)`
+
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            move(sendargs), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(block)));
                         } else {
+                            // Desugar a call with a splat, and any other expression as a block pass argument.
+                            // E.g. `foo(*splat, &block)`
+
                             sendargs.emplace_back(move(block));
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), send->methodLoc,
                                            5, move(sendargs), flags);
@@ -896,13 +908,22 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                     ExpressionPtr res;
                     if (block == nullptr) {
+                        // Desugar any call without a splat and without a block pass argument.
+                        // If there's a literal block argument, that's handled here, too.
+                        // E.g. `a.each` or `a.each { |x| puts(x) }`
                         res = MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
                     } else {
                         if (auto lit = cast_tree<Literal>(block); lit && lit->isSymbol()) {
+                            // Desugar a call without a splat and a Symbol block pass argument.
+                            // E.g. `a.map(:to_s)`
+
                             res =
                                 MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
                             ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(block)));
                         } else {
+                            // Desugar a call without a splat, and any other expression as a block pass argument.
+                            // E.g. `a.each(&block)`
+
                             Send::ARGS_store sendargs;
                             sendargs.reserve(3 + args.size());
                             sendargs.emplace_back(move(rec));
