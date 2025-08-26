@@ -777,14 +777,14 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Pop the BlockPass off the end of the arguments, if there is one. (e.g. the `&:b` in `foo(&:b)`)
                 // Note: this does *not* handle regular block arguments (e.g. `foo { }`),
                 //       which are handled separately in the`parser::Block *` case.
-                ExpressionPtr block;
+                ExpressionPtr blockPassArg;
                 if (!send->args.empty() && parser::isa_node<parser::BlockPass>(send->args.back().get())) {
                     auto *bp = parser::cast_node<parser::BlockPass>(send->args.back().get());
                     if (bp->block == nullptr) {
                         // Replace an anonymous block pass like `f(&)` with a local variable reference, like `f(&&)`.
-                        block = MK::Local(bp->loc, core::Names::ampersand());
+                        blockPassArg = MK::Local(bp->loc, core::Names::ampersand());
                     } else {
-                        block = node2TreeImpl(dctx, bp->block);
+                        blockPassArg = node2TreeImpl(dctx, bp->block);
                     }
 
                     send->args.pop_back();
@@ -813,10 +813,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         arg.get(),
                         [&](parser::ForwardedArgs *fwdArgs) {
                             // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
-                            hasFwdArgs = true;
-                            ENFORCE(block == nullptr, "The parser should have rejected `foo(&, ...)`");
+
+                            ENFORCE(blockPassArg == nullptr, "The parser should have rejected `foo(&, ...)`");
                             // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &<fwd-block>)`.
-                            block = MK::Local(loc, core::Names::fwdBlock());
+                            blockPassArg = MK::Local(loc, core::Names::fwdBlock());
+
+                            hasFwdArgs = true;
                             eraseFromArgs = true;
                         },
                         [&](parser::ForwardedRestArg *fwdRestArg) {
@@ -899,25 +901,25 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     sendargs.emplace_back(move(kwargs));
                     ExpressionPtr res;
 
-                    if (block == nullptr) {
+                    if (blockPassArg == nullptr) {
                         // Desugar any call with a splat and without a block pass argument.
                         // If there's a literal block argument, that's handled here, too.
                         // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
                         res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                        move(sendargs), flags);
                     } else {
-                        if (auto lit = cast_tree<Literal>(block); lit && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(blockPassArg); lit && lit->isSymbol()) {
                             // Desugar a call with a splat and a Symbol block pass argument.
                             // E.g. `foo(*splat, &:to_s)`
 
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            move(sendargs), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(block)));
+                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(blockPassArg)));
                         } else {
                             // Desugar a call with a splat, and any other expression as a block pass argument.
                             // E.g. `foo(*splat, &block)`
 
-                            sendargs.emplace_back(move(block));
+                            sendargs.emplace_back(move(blockPassArg));
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), send->methodLoc,
                                            5, move(sendargs), flags);
                         }
@@ -942,19 +944,18 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
 
                     ExpressionPtr res;
-                    if (block == nullptr) {
+                    if (blockPassArg == nullptr) {
                         // Desugar any call without a splat and without a block pass argument.
                         // If there's a literal block argument, that's handled here, too.
                         // E.g. `a.each` or `a.each { |x| puts(x) }`
                         res = MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
                     } else {
-                        if (auto lit = cast_tree<Literal>(block); lit && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(blockPassArg); lit && lit->isSymbol()) {
                             // Desugar a call without a splat and a Symbol block pass argument.
                             // E.g. `a.map(:to_s)`
 
                             res =
                                 MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(block)));
                         } else {
                             // Desugar a call without a splat, and any other expression as a block pass argument.
                             // E.g. `a.each(&block)`
@@ -963,7 +964,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             sendargs.reserve(3 + args.size());
                             sendargs.emplace_back(move(rec));
                             sendargs.emplace_back(move(methodName));
-                            sendargs.emplace_back(move(block));
+                            sendargs.emplace_back(move(blockPassArg));
 
                             numPosArgs += 3;
 
