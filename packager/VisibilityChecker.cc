@@ -768,11 +768,7 @@ public:
                     core::Context ctx{gs, core::Symbols::root(), f.file};
                     VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                     ast::TreeWalk::apply(ctx, pass, f.tree);
-                    resultq->push(
-                        std::optional<std::pair<core::FileRef, UnorderedMap<core::packages::MangledName,
-                                                                            core::packages::PackageReferenceInfo>>>(
-                            {f.file, std::move(pass.packageReferences)}),
-                        1);
+                    resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
                 } else {
                     resultq->push(std::nullopt, 1);
                 }
@@ -819,8 +815,23 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             PropagateVisibility::run(gs, f);
         }
     }
+    auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
-    return VisibilityCheckerPass::run(gs, workers, std::move(files));
+    if (gs.packageDB().genPackages()) {
+        for (auto package : gs.packageDB().packages()) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(package);
+            ENFORCE(pkgInfo.exists());
+            if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{} is missing imports", pkgInfo.show(gs));
+                    e.addAutocorrect(move(autocorrect.value()));
+                    // TODO(neil): we should also delete imports that are unused but have a modularity error here
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 } // namespace sorbet::packager
