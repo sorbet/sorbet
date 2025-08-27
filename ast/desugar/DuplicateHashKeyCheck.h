@@ -17,11 +17,7 @@ public:
 
     void check(const ExpressionPtr &key) {
         auto lit = ast::cast_tree<ast::Literal>(key);
-        if (lit == nullptr) {
-            return;
-        }
-
-        if (!lit->isName()) {
+        if (lit == nullptr || !lit->isName()) {
             return;
         }
         auto nameRef = lit->asName();
