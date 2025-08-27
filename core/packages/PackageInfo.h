@@ -294,6 +294,8 @@ public:
     void untrackPackageReferencesFor(const core::FileRef file);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
+
+    std::vector<const Import> packageReferencesToImportList(const core::GlobalState &gs) const;
 };
 
 } // namespace sorbet::core::packages
