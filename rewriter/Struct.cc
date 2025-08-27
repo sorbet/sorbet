@@ -24,10 +24,10 @@ bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &nod
 
 // Elem = type_member {{fixed: T.untyped}}
 ast::ExpressionPtr elemFixedUntyped(core::LocOffsets loc) {
-    auto typeMember = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength());
-    ast::cast_tree_nonnull<ast::Send>(typeMember)
-        .setBlock(ast::MK::Block0(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc))));
+    auto block =
+        ast::MK::Block0(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)));
+    auto typeMember =
+        ast::MK::Send0Block(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength(), move(block));
     return ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
                            std::move(typeMember));
 }
