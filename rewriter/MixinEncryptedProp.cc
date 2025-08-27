@@ -70,10 +70,10 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     // Compute the getters
 
     stats.emplace_back(ast::MK::Sig(loc, {}, mkNilableString(loc)));
-    stats.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
+    stats.emplace_back(ASTUtil::mkSyntheticGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
 
     stats.emplace_back(ast::MK::Sig(loc, {}, mkNilableEncryptedValue(ctx, loc)));
-    stats.emplace_back(ASTUtil::mkGet(ctx, loc, enc_name, ast::MK::RaiseUnimplemented(loc)));
+    stats.emplace_back(ASTUtil::mkSyntheticGet(ctx, loc, enc_name, ast::MK::RaiseUnimplemented(loc)));
     core::NameRef setName = name.addEq(ctx);
     core::NameRef setEncName = enc_name.addEq(ctx);
 
@@ -81,11 +81,11 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     if (!isImmutable) {
         stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableString(loc),
                                          mkNilableString(loc)));
-        stats.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+        stats.emplace_back(ASTUtil::mkSyntheticSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
 
         stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()),
                                          mkNilableEncryptedValue(ctx, loc), mkNilableEncryptedValue(ctx, loc)));
-        stats.emplace_back(ASTUtil::mkSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+        stats.emplace_back(ASTUtil::mkSyntheticSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 
     return stats;
