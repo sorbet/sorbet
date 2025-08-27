@@ -650,13 +650,14 @@ ExpressionPtr doUntil(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr c
 }
 
 class DuplicateHashKeyCheck {
-    DesugarContext dctx;
+    const core::MutableContext ctx;
     const core::GlobalState &gs;
     UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
     UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
 
 public:
-    DuplicateHashKeyCheck(DesugarContext dctx) : dctx{dctx}, gs{dctx.ctx.state}, hashKeySymbols(), hashKeyStrings() {}
+    DuplicateHashKeyCheck(const core::MutableContext &ctx)
+        : ctx{ctx}, gs{ctx.state}, hashKeySymbols(), hashKeyStrings() {}
 
     void check(const ExpressionPtr &key) {
         auto lit = ast::cast_tree<ast::Literal>(key);
@@ -675,7 +676,7 @@ public:
         } else if (!isSymbol && !hashKeyStrings.contains(nameRef)) {
             hashKeyStrings[nameRef] = key.loc();
         } else {
-            if (auto e = dctx.ctx.beginIndexerError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
+            if (auto e = ctx.beginIndexerError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
                 core::LocOffsets originalLoc;
                 if (isSymbol) {
                     originalLoc = hashKeySymbols[nameRef];
@@ -684,7 +685,7 @@ public:
                 }
 
                 e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                e.addErrorLine(dctx.ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
+                e.addErrorLine(ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
             }
         }
     }
@@ -695,8 +696,8 @@ public:
     }
 
     // This is only used with Send::ARGS_store and Array::ELEMS_store
-    template <typename T> static void checkSendArgs(DesugarContext dctx, int numPosArgs, const T &args) {
-        DuplicateHashKeyCheck duplicateKeyCheck{dctx};
+    template <typename T> static void checkSendArgs(const core::MutableContext ctx, int numPosArgs, const T &args) {
+        DuplicateHashKeyCheck duplicateKeyCheck{ctx};
 
         // increment by two so that a keyword args splat gets skipped.
         for (int i = numPosArgs; i < args.size(); i += 2) {
@@ -884,7 +885,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                         kwargs = node2TreeImpl(dctx, kwArray);
 
-                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, cast_tree<Array>(kwargs)->elems);
+                        DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, 0, cast_tree<Array>(kwargs)->elems);
                     } else {
                         kwargs = MK::Nil(loc);
                     }
@@ -926,7 +927,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         args.emplace_back(node2TreeImpl(dctx, stat));
                     };
 
-                    DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
+                    DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, numPosArgs, args);
 
                     ExpressionPtr res;
                     if (block == nullptr) {
@@ -980,7 +981,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 auto acc = dctx.freshNameUnique(core::Names::hashTemp());
 
-                DuplicateHashKeyCheck hashKeyDupes(dctx);
+                DuplicateHashKeyCheck hashKeyDupes(dctx.ctx);
                 Send::ARGS_store mergeValues;
                 mergeValues.reserve(hash->pairs.size() * 2 + 1);
                 mergeValues.emplace_back(MK::Local(loc, acc));
