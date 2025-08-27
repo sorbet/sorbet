@@ -21,24 +21,19 @@ public:
             return;
         }
 
-        auto isSymbol = lit->isSymbol();
         if (!lit->isName()) {
             return;
         }
         auto nameRef = lit->asName();
 
+        auto isSymbol = lit->isSymbol();
         if (isSymbol && !hashKeySymbols.contains(nameRef)) {
             hashKeySymbols[nameRef] = key.loc();
         } else if (!isSymbol && !hashKeyStrings.contains(nameRef)) {
             hashKeyStrings[nameRef] = key.loc();
         } else {
             if (auto e = ctx.beginIndexerError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
-                core::LocOffsets originalLoc;
-                if (isSymbol) {
-                    originalLoc = hashKeySymbols[nameRef];
-                } else {
-                    originalLoc = hashKeyStrings[nameRef];
-                }
+                core::LocOffsets originalLoc = isSymbol ? hashKeySymbols[nameRef] : hashKeyStrings[nameRef];
 
                 e.setHeader("Hash key `{}` is duplicated", nameRef.toString(ctx.state));
                 e.addErrorLine(ctx.locAt(originalLoc), "First occurrence of `{}` hash key",
