@@ -39,7 +39,7 @@ public:
     }
 
     // This is only used with Send::ARGS_store and Array::ELEMS_store
-    template <typename T> static void checkSendArgs(const core::MutableContext ctx, int numPosArgs, const T &args) {
+    static void checkSendArgs(const core::MutableContext ctx, int numPosArgs, absl::Span<const ExpressionPtr> args) {
         DuplicateHashKeyCheck duplicateKeyCheck{ctx};
 
         // increment by two so that a keyword args splat gets skipped.
