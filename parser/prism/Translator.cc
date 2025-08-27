@@ -351,6 +351,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable("PM_BLOCK_PARAMETER_NODE is handled separately in `Translator::translateParametersNode()`.");
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
+            // Like the `|x|` in `foo { |x| ... } `
             auto paramsNode = down_cast<pm_block_parameters_node>(node);
 
             if (paramsNode->parameters == nullptr) {
@@ -765,11 +766,36 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 }
             }
 
-            if (isSingletonMethod) {
-                return make_unique<parser::DefS>(location, declLoc, move(receiver), name, move(params), move(body));
+            // Method defs are complex, and we're building support for different kinds of arguments bit by
+            // bit. This bool is true when this particular method def is supported by our desugar logic.
+            auto attemptToDesugarParams = directlyDesugar && hasExpr(receiver, body);
+
+            ast::MethodDef::ARGS_store argsStore;
+            ast::InsSeq::STATS_store statsStore;
+            bool didDesugarParams; // ...and by impliciation, everything else (see  `attemptToDesugarParams`)
+            std::tie(argsStore, statsStore, didDesugarParams) =
+                desugarParametersNode(params.get(), attemptToDesugarParams);
+
+            if (!didDesugarParams) {
+                if (isSingletonMethod) {
+                    return make_unique<parser::DefS>(location, declLoc, move(receiver), name, move(params), move(body));
+                } else {
+                    return make_unique<parser::DefMethod>(location, declLoc, name, move(params), move(body));
+                }
             }
 
-            return make_unique<parser::DefMethod>(location, declLoc, name, move(params), move(body));
+            auto methodBody = body == nullptr ? MK::EmptyTree() : body->takeDesugaredExpr();
+
+            auto methodExpr = MK::Method(location, declLoc, name, move(argsStore), move(methodBody));
+
+            if (isSingletonMethod) {
+                ast::cast_tree<ast::MethodDef>(methodExpr)->flags.isSelfMethod = true;
+                return make_node_with_expr<parser::DefS>(move(methodExpr), location, declLoc, move(receiver), name,
+                                                         move(params), move(body));
+            }
+
+            return make_node_with_expr<parser::DefMethod>(move(methodExpr), location, declLoc, name, move(params),
+                                                          move(body));
         }
         case PM_DEFINED_NODE: {
             auto definedNode = down_cast<pm_defined_node>(node);
@@ -846,6 +872,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::ForwardedArgs>(location);
         }
         case PM_FORWARDING_PARAMETER_NODE: { // The `...` parameter in a method definition, like `def foo(...)`
+            // Desugared in desugarParametersNode().
             return make_unique<parser::ForwardArg>(location);
         }
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
@@ -2130,6 +2157,61 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
     }
 
     return {make_unique<parser::Args>(location, move(params)), enclosingBlockParamName};
+}
+
+tuple<ast::MethodDef::ARGS_store, ast::InsSeq::STATS_store, bool /* didDesugarParams */>
+Translator::desugarParametersNode(parser::Args *paramsNode, bool attemptToDesugarParams) {
+    if (!attemptToDesugarParams) {
+        return make_tuple(ast::MethodDef::ARGS_store{}, ast::InsSeq::STATS_store{}, false);
+    }
+
+    if (paramsNode == nullptr) {
+        return make_tuple(ast::MethodDef::ARGS_store{}, ast::InsSeq::STATS_store{}, true);
+    }
+
+    auto supportedParams = absl::c_all_of(paramsNode->args, [](auto &param) {
+        return param->hasDesugaredExpr() ||
+               // These other block types don't have their own dedicated desugared
+               // representation, so they won't be directly translated.
+               // Instead, they have special desugar logic below.
+               parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `f(**nil)`
+               parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `f(...)`
+               parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `f(*)`
+               parser::NodeWithExpr::isa_node<parser::Splat>(param.get());              // a splat like `f(*a)`
+    });
+
+    if (!supportedParams) {
+        return make_tuple(ast::MethodDef::ARGS_store{}, ast::InsSeq::STATS_store{}, false);
+    }
+
+    ast::MethodDef::ARGS_store argsStore;
+    ast::InsSeq::STATS_store statsStore;
+
+    for (auto &param : paramsNode->args) {
+        auto loc = param->loc;
+
+        if (parser::NodeWithExpr::isa_node<parser::Mlhs>(param.get())) { // `def f((a, b))`
+            unreachable("Support for Mlhs is not implemented yet!");
+        } else if (parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get())) { // `def foo(**nil)`
+            // TODO: implement logic for `**nil` args
+        } else if (parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get())) { // `def foo(...)`
+            // Desugar `def foo(m, n, ...)` into:
+            // `def foo(m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)`
+
+            // add `*<fwd-args>`
+            argsStore.emplace_back(MK::RestArg(loc, MK::Local(loc, core::Names::fwdArgs())));
+
+            // add `**<fwd-kwargs>`
+            argsStore.emplace_back(MK::RestArg(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
+
+            // add `&<fwd-block>`
+            argsStore.emplace_back(MK::BlockArg(loc, MK::Local(loc, core::Names::fwdBlock())));
+        } else {
+            argsStore.emplace_back(param->takeDesugaredExpr());
+        }
+    }
+
+    return make_tuple(move(argsStore), move(statsStore), true);
 }
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
