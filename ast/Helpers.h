@@ -346,33 +346,33 @@ public:
     static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret) {
         auto params = Params(loc, Self(loc), std::move(args));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
-        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
-                         Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
-        auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->setBlock(Block0(loc, std::move(returns)));
-        sigSend->flags.isRewriterSynthesized = true;
-        return sig;
+        Send::Flags flags;
+        flags.isRewriterSynthesized = true;
+        flags.hasBlock = true;
+        return Send(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc, 1,
+                    SendArgs(Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), Block0(loc, std::move(returns))),
+                    flags);
     }
 
     static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args) {
         auto params = Params(loc, Self(loc), std::move(args));
         auto void_ = Send0(loc, std::move(params), core::Names::void_(), loc);
-        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
-                         Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
-        auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->setBlock(Block0(loc, std::move(void_)));
-        sigSend->flags.isRewriterSynthesized = true;
-        return sig;
+        Send::Flags flags;
+        flags.isRewriterSynthesized = true;
+        flags.hasBlock = true;
+        return Send(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc, 1,
+                    SendArgs(Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), Block0(loc, std::move(void_))),
+                    flags);
     }
 
     static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret) {
         auto returns = Send1(loc, Self(loc), core::Names::returns(), loc, std::move(ret));
-        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc,
-                         Constant(loc, core::Symbols::T_Sig_WithoutRuntime()));
-        auto sigSend = ast::cast_tree<ast::Send>(sig);
-        sigSend->setBlock(Block0(loc, std::move(returns)));
-        sigSend->flags.isRewriterSynthesized = true;
-        return sig;
+        Send::Flags flags;
+        flags.isRewriterSynthesized = true;
+        flags.hasBlock = true;
+        return Send(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc, 1,
+                    SendArgs(Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), Block0(loc, std::move(returns))),
+                    flags);
     }
 
     static ExpressionPtr Sig1(core::LocOffsets loc, ExpressionPtr key, ExpressionPtr value, ExpressionPtr ret) {
