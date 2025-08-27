@@ -36,7 +36,8 @@ class Translator final {
     uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
-    const bool isInMethodDef = false;
+    const core::LocOffsets enclosingMethodLoc; // The location of the method we're in, or `none()`
+    const core::NameRef enclosingMethodName;   // The name of the method we're in, or `noName()`
 
     Translator(Translator &&) = delete;                 // Move constructor
     Translator(const Translator &) = delete;            // Copy constructor
@@ -56,14 +57,15 @@ public:
 private:
     // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as the minimum integer value and is never used
-    Translator(const Translator &parent, bool resetDesugarUniqueCounter, bool isInMethodDef)
+    Translator(const Translator &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
+               core::NameRef enclosingMethodName)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           directlyDesugar(parent.directlyDesugar), parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
           desugarUniqueCounterStorage(resetDesugarUniqueCounter ? std::numeric_limits<uint32_t>::min() : 1),
           parserUniqueCounter(parent.parserUniqueCounter),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
-          isInMethodDef(isInMethodDef) {}
+          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName) {}
 
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const;
@@ -119,7 +121,8 @@ private:
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
     // Context management helpers. These return a copy of `this` with some change to the context.
-    Translator enterMethodDef() const;
+    bool isInMethodDef() const;
+    Translator enterMethodDef(core::LocOffsets methodLoc, core::NameRef methodName) const;
 };
 
 } // namespace sorbet::parser::Prism

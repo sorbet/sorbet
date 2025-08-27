@@ -679,21 +679,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translateConstantName(defNode->name);
 
-            // These 2 need to be called on a new Translator with isInMethod set to true
-            Translator childContext = enterMethodDef();
-
-            unique_ptr<parser::Node> params;
-
             // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
             // In this case, Sorbet's legacy parser will still hold an empty Args node, so we need to
             // create one here
+            unique_ptr<parser::Node> params;
             if (defNode->parameters == nullptr && rparenLoc.start != nullptr) {
                 params = make_unique<parser::Args>(location, NodeVec{});
             } else {
-                params = childContext.translate(up_cast(defNode->parameters));
+                params = translate(up_cast(defNode->parameters));
             }
 
-            auto body = childContext.translate(defNode->body);
+            Translator methodContext = this->enterMethodDef(declLoc, name);
+            auto body = methodContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
@@ -2132,7 +2129,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
 
-    if (isInMethodDef && replaceWithDynamicConstAssign) {
+    if (this->isInMethodDef() && replaceWithDynamicConstAssign) {
         // Check if this is a dynamic constant assignment (SyntaxError at runtime)
         // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
         // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
@@ -2291,10 +2288,17 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 }
 
 // Context management methods
-Translator Translator::enterMethodDef() const {
+bool Translator::isInMethodDef() const {
+    ENFORCE(enclosingMethodLoc.exists() == enclosingMethodName.exists(),
+            "The enclosing method name and location should always both be present, "
+            "or both be absecent, depending on whether we're in a method def or not.")
+
+    return enclosingMethodName.exists();
+}
+
+Translator Translator::enterMethodDef(core::LocOffsets methodLoc, core::NameRef methodName) const {
     auto resetDesugarUniqueCounter = true;
-    auto isInMethodDef = true;
-    return Translator(*this, resetDesugarUniqueCounter, isInMethodDef);
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {
