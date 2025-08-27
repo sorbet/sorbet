@@ -5,6 +5,7 @@
 #include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
+#include "ast/desugar/DuplicateHashKeyCheck.h"
 #include "ast/desugar/PrismDesugar.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
@@ -23,6 +24,7 @@
 namespace sorbet::ast::prismDesugar {
 
 using namespace std;
+using sorbet::ast::desugar::DuplicateHashKeyCheck;
 
 namespace {
 
@@ -608,62 +610,6 @@ ExpressionPtr doUntil(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr c
     return MK::While(loc, MK::True(loc), move(breakWithBody));
 }
 
-class DuplicateHashKeyCheck {
-    DesugarContext dctx;
-    const core::GlobalState &gs;
-    UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
-    UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
-
-public:
-    DuplicateHashKeyCheck(DesugarContext dctx) : dctx{dctx}, gs{dctx.ctx.state}, hashKeySymbols(), hashKeyStrings() {}
-
-    void check(const ExpressionPtr &key) {
-        auto lit = ast::cast_tree<ast::Literal>(key);
-        if (lit == nullptr) {
-            return;
-        }
-
-        auto isSymbol = lit->isSymbol();
-        if (!lit || !lit->isName()) {
-            return;
-        }
-        auto nameRef = lit->asName();
-
-        if (isSymbol && !hashKeySymbols.contains(nameRef)) {
-            hashKeySymbols[nameRef] = key.loc();
-        } else if (!isSymbol && !hashKeyStrings.contains(nameRef)) {
-            hashKeyStrings[nameRef] = key.loc();
-        } else {
-            if (auto e = dctx.ctx.beginIndexerError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
-                core::LocOffsets originalLoc;
-                if (isSymbol) {
-                    originalLoc = hashKeySymbols[nameRef];
-                } else {
-                    originalLoc = hashKeyStrings[nameRef];
-                }
-
-                e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                e.addErrorLine(dctx.ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
-            }
-        }
-    }
-
-    void reset() {
-        hashKeySymbols.clear();
-        hashKeyStrings.clear();
-    }
-
-    // This is only used with Send::ARGS_store and Array::ELEMS_store
-    template <typename T> static void checkSendArgs(DesugarContext dctx, int numPosArgs, const T &args) {
-        DuplicateHashKeyCheck duplicateKeyCheck{dctx};
-
-        // increment by two so that a keyword args splat gets skipped.
-        for (int i = numPosArgs; i < args.size(); i += 2) {
-            duplicateKeyCheck.check(args[i]);
-        }
-    }
-};
-
 // Flattens the key/value pairs from the Kwargs Hash into the destination container.
 // If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
 template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargsHash, Container &destination) {
@@ -850,7 +796,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                         kwargs = node2TreeImpl(dctx, kwArray);
 
-                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, cast_tree<Array>(kwargs)->elems);
+                        DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, 0, cast_tree<Array>(kwargs)->elems);
                     } else {
                         kwargs = MK::Nil(loc);
                     }
@@ -892,7 +838,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         args.emplace_back(node2TreeImpl(dctx, stat));
                     };
 
-                    DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
+                    DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, numPosArgs, args);
 
                     ExpressionPtr res;
                     if (block == nullptr) {
@@ -946,7 +892,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 auto acc = dctx.freshNameUnique(core::Names::hashTemp());
 
-                DuplicateHashKeyCheck hashKeyDupes(dctx);
+                DuplicateHashKeyCheck hashKeyDupes(dctx.ctx);
                 Send::ARGS_store mergeValues;
                 mergeValues.reserve(hash->pairs.size() * 2 + 1);
                 mergeValues.emplace_back(MK::Local(loc, acc));
