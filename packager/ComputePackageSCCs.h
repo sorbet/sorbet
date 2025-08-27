@@ -109,6 +109,15 @@ class ComputePackageSCCs {
                 this->condensation.pushNode(EdgeType, packageDB.getPackageInfo(pkgName).isPreludePackage());
             auto sccId = condensationNode.id;
 
+            // This SCC's layer, if all packages in the SCC have the same one.
+            std::optional<core::NameRef> condensationNodeLayer = std::nullopt;
+            {
+                auto firstPkgLayer = packageDB.getPackageInfo(this->stack.back()).layer;
+                if (firstPkgLayer.exists()) {
+                    condensationNodeLayer = firstPkgLayer;
+                }
+            }
+
             // Set the SCC ids for all of the members of the SCC
             do {
                 poppedPkgName = this->stack.back();
@@ -118,6 +127,13 @@ class ComputePackageSCCs {
 
                 if constexpr (EdgeType == core::packages::ImportType::Normal) {
                     packageGraph.setSCCId(poppedPkgName, sccId);
+
+                    if (condensationNodeLayer.has_value()) {
+                        auto thisPkgLayer = packageDB.getPackageInfo(poppedPkgName).layer;
+                        if (!thisPkgLayer.exists() || thisPkgLayer != condensationNodeLayer.value()) {
+                            condensationNodeLayer = std::nullopt;
+                        }
+                    }
                 } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
                     packageGraph.setTestSCCId(poppedPkgName, sccId);
 
@@ -133,6 +149,15 @@ class ComputePackageSCCs {
                     }
                 }
             } while (poppedPkgName != pkgName);
+            condensationNode.layer = condensationNodeLayer;
+
+            if (!condensationNode.layer.has_value()) {
+                // SCC has multiple layers, which implies layering violation
+                condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::False;
+            } else if (condensationNode.members.size() > 1) {
+                // More than one package in SCC, which implies cycle
+                condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::Layered;
+            }
 
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
@@ -163,6 +188,23 @@ class ComputePackageSCCs {
                     }
 
                     condensationNode.imports.insert(impId);
+                }
+            }
+
+            for (auto impSccId : condensationNode.imports) {
+                auto &impScc = this->condensation.nodes()[impSccId];
+                if (impScc.bestStrictness == core::packages::StrictDependenciesLevel::False) {
+                    // imports a strict_dependencies 'false' package
+                    condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::False;
+                } else if (impScc.layer.has_value() && condensationNode.layer.has_value() &&
+                           packageDB.layerIndex(condensationNode.layer.value()) <
+                               packageDB.layerIndex(impScc.layer.value())) {
+                    // layering violation
+                    condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::False;
+                } else if (condensationNode.bestStrictness == core::packages::StrictDependenciesLevel::Dag &&
+                           impScc.bestStrictness != core::packages::StrictDependenciesLevel::Dag) {
+                    // imports a package that is strict_dependencies 'layered' or 'layered_dag'
+                    condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::LayeredDag;
                 }
             }
         }

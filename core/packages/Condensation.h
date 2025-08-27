@@ -32,6 +32,12 @@ public:
         // True when this node contains prelude packages.
         const bool isPrelude = false;
 
+        // This node's layer, if all packages in this node have the same layer.
+        std::optional<core::NameRef> layer;
+
+        // The highest strictness a package in this node can be
+        StrictDependenciesLevel bestStrictness = StrictDependenciesLevel::Dag;
+
         Node(int id, bool isTest, bool isPrelude) : id{id}, isTest{isTest}, isPrelude{isPrelude} {}
     };
 
