@@ -611,7 +611,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translate(classNode->constant_path);
             auto declLoc = translateLoc(classNode->class_keyword_loc).join(name->loc);
             auto superclass = translate(classNode->superclass);
-            auto body = translate(classNode->body);
+            auto body = this->enterClassContext().translate(classNode->body);
 
             if (superclass != nullptr) {
                 declLoc = declLoc.join(superclass->loc);
@@ -701,23 +701,23 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 declLoc = declLoc.join(translateLoc(defNode->rparen_loc));
             }
 
+            auto receiver = translate(defNode->receiver); // The singleton receiver, like `self` in `self.foo()`
             auto name = translateConstantName(defNode->name);
 
-            // These 2 need to be called on a new Translator with isInMethod set to true
-            Translator childContext = enterMethodDef();
-
-            unique_ptr<parser::Node> params;
+            auto isSingletonMethod = receiver != nullptr;
 
             // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
             // In this case, Sorbet's legacy parser will still hold an empty Args node, so we need to
             // create one here
+            unique_ptr<parser::Node> params;
             if (defNode->parameters == nullptr && rparenLoc.start != nullptr) {
                 params = make_unique<parser::Args>(location, NodeVec{});
             } else {
-                params = childContext.translate(up_cast(defNode->parameters));
+                params = translate(up_cast(defNode->parameters));
             }
 
-            auto body = childContext.translate(defNode->body);
+            Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name);
+            auto body = methodContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
@@ -739,10 +739,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 }
             }
 
-            if (auto receiver = defNode->receiver; receiver != nullptr) {
-                auto sorbetReceiver = translate(receiver);
-                return make_unique<parser::DefS>(location, declLoc, move(sorbetReceiver), name, move(params),
-                                                 move(body));
+            if (isSingletonMethod) {
+                return make_unique<parser::DefS>(location, declLoc, move(receiver), name, move(params), move(body));
             }
 
             return make_unique<parser::DefMethod>(location, declLoc, name, move(params), move(body));
@@ -1162,7 +1160,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translate(moduleNode->constant_path);
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
-            auto body = translate(moduleNode->body);
+            auto body = this->enterModuleContext().translate(moduleNode->body);
 
             return make_unique<parser::Module>(location, declLoc, move(name), move(body));
         }
@@ -1485,7 +1483,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t declLoc = classNode->class_keyword_loc;
 
             auto expr = translate(classNode->expression);
-            auto body = translate(classNode->body);
+            auto body = this->enterClassContext().translate(classNode->body);
 
             return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
         }
@@ -2073,16 +2071,15 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
-
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismBlockNode->parameters);
-        body = translate(prismBlockNode->body);
+        body = this->enterBlockContext().translate(prismBlockNode->body);
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismLambdaNode->parameters);
-        body = translate(prismLambdaNode->body);
+        body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
 
     if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
@@ -2195,7 +2192,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
 
-    if (isInMethodDef && replaceWithDynamicConstAssign) {
+    if (this->isInMethodDef() && replaceWithDynamicConstAssign) {
         // Check if this is a dynamic constant assignment (SyntaxError at runtime)
         // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
         // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
@@ -2354,10 +2351,42 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 }
 
 // Context management methods
-Translator Translator::enterMethodDef() const {
+bool Translator::isInMethodDef() const {
+    ENFORCE(enclosingMethodLoc.exists() == enclosingMethodName.exists(),
+            "The enclosing method name and location should always both be present, "
+            "or both be absecent, depending on whether we're in a method def or not.")
+
+    return enclosingMethodName.exists();
+}
+
+Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc,
+                                      core::NameRef methodName) const {
     auto resetDesugarUniqueCounter = true;
-    auto isInMethodDef = true;
-    return Translator(*this, resetDesugarUniqueCounter, isInMethodDef);
+    auto isInModule = this->isInModule && !isSingletonMethod;
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, this->isInAnyBlock, isInModule);
+}
+
+Translator Translator::enterBlockContext() const {
+    auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
+    auto isInAnyBlock = true;
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, this->isInModule);
+}
+
+Translator Translator::enterModuleContext() const {
+    auto resetDesugarUniqueCounter = true;
+    auto isInModule = true;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, isInModule);
+}
+
+Translator Translator::enterClassContext() const {
+    auto resetDesugarUniqueCounter = true;
+    auto isInModule = false;
+    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                      isInAnyBlock, isInModule);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {
