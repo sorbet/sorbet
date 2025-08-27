@@ -496,9 +496,9 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             auto importType = fileToImportType(gs, file);
             auto it = toImport.find(packageName);
             if (it != toImport.end()) {
-                auto currentBroadestImport = it->second;
+                auto &currentBroadestImport = it->second;
                 if (importType < currentBroadestImport) {
-                    it->second = importType;
+                    currentBroadestImport = importType;
                 }
             } else {
                 toImport[packageName] = importType;
@@ -537,6 +537,34 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
 
     AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
     return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
+}
+
+vector<Import> PackageInfo::packageReferencesToImportList(const core::GlobalState &gs) const {
+    vector<Import> result;
+    UnorderedMap<core::packages::MangledName, core::packages::ImportType> imports;
+    // TODO: dedup this with aggregateMissingImports
+    for (auto &[file, value] : packagesReferencedByFile) {
+        for (auto &[packageName, packageReferenceInfo] : value) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
+            if (!pkgInfo.exists()) {
+                continue;
+            }
+            auto importType = fileToImportType(gs, file);
+            auto it = imports.find(packageName);
+            if (it != imports.end()) {
+                auto &currentBroadestImport = it->second;
+                if (importType < currentBroadestImport) {
+                    currentBroadestImport = importType;
+                }
+            } else {
+                imports[packageName] = importType;
+            }
+        }
+    }
+    for (auto [pkgName, importType] : imports) {
+        result.push_back({pkgName, importType, core::LocOffsets::none()});
+    }
+    return result;
 }
 
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
