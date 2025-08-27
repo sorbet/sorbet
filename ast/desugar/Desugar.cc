@@ -392,6 +392,14 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 
 // Desugar a Symbol block pass like the `&foo` in `m(&:foo)` into a block literal.
 // `&:foo` => `{ |*temp| (temp[0]).foo(*temp[1, LONG_MAX]) }`
+//
+// This works because Sorbet is guaranteed to infer a tuple type for `temp` corresponding to however
+// many block params the enclosing Send declares (or T.untyped). From there, various tuple-specific
+// intrinsics kick in:
+//
+// - temp[0]            (evaluates to the 0th elem of the tuple)
+// - temp[1, LONG_MAX]  (evalutes to a tuple type if temp is a tuple type)
+// - foo(*expr)         (call-with-splat handles case of splatted tuple type)
 ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
     core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
