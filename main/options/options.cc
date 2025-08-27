@@ -1021,12 +1021,6 @@ void readOptions(Options &opts,
         opts.stopAfterPhase = extractStopAfter(raw, logger);
 
         opts.parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
-        if (opts.parser == Parser::PRISM && opts.cacheSensitiveOptions.rbsEnabled) {
-            logger->error("Prism support is experimental and still under active development. It is not yet compatible "
-                          "with RBS signatures. https://github.com/Shopify/sorbet/issues/574");
-            throw EarlyReturnWithCode(1);
-        }
-
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
         opts.didYouMean = raw["did-you-mean"].as<bool>();
