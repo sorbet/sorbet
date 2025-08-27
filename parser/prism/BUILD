@@ -15,6 +15,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//ast/desugar",  # Needed for `DuplicateHashKeyCheck.h`
         "//core",
         "//parser",  # Legacy parser, needed for translating to its nodes defined in `parser/Node_gen.h`
         "@prism",

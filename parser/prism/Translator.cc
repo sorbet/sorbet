@@ -3,6 +3,7 @@
 
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
+#include "ast/desugar/DuplicateHashKeyCheck.h"
 #include "core/errors/desugar.h"
 
 #include "absl/strings/str_replace.h"
@@ -1021,7 +1022,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         }
         case PM_HASH_NODE: { // A hash literal, like `{ a: 1, b: 2 }`
             auto kvPairs = translateKeyValuePairs(down_cast<pm_hash_node>(node)->elements);
-            return make_unique<parser::Hash>(location, false, move(kvPairs));
+
+            if (!directlyDesugar || !hasExpr(kvPairs)) {
+                return make_unique<parser::Hash>(location, false, move(kvPairs));
+            }
+
+            auto hashExpr = desugarHash(location, kvPairs);
+
+            return make_node_with_expr<parser::Hash>(move(hashExpr), location, false, move(kvPairs));
         }
         case PM_IF_NODE: { // An `if` statement or modifier, like `if cond; ...; end` or `a.b if cond`
             auto ifNode = down_cast<pm_if_node>(node);
@@ -2437,6 +2445,129 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     }
 
     return sorbetElements;
+}
+
+ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPairs) {
+    auto locZeroLen = loc.copyWithZeroLength();
+
+    ast::InsSeq::STATS_store updateStmts;
+    updateStmts.reserve(kvPairs.size());
+
+    auto acc = nextUniqueDesugarName(core::Names::hashTemp());
+
+    ast::desugar::DuplicateHashKeyCheck hashKeyDupes(ctx);
+    ast::Send::ARGS_store mergeValues;
+    mergeValues.reserve(kvPairs.size() * 2 + 1);
+    mergeValues.emplace_back(MK::Local(loc, acc));
+    bool havePairsToMerge = false;
+
+    // build a hash literal assuming that the argument follows the same format as `mergeValues`:
+    // arg 0: the hash to merge into
+    // arg 1: key
+    // arg 2: value
+    // ...
+    // arg n: key
+    // arg n+1: value
+    auto buildHashLiteral = [loc](ast::Send::ARGS_store &mergeValues) {
+        ast::Hash::ENTRY_store keys;
+        ast::Hash::ENTRY_store values;
+
+        keys.reserve(mergeValues.size() / 2);
+        values.reserve(mergeValues.size() / 2);
+
+        // skip the first positional argument for the accumulator that would have been mutated
+        for (auto it = mergeValues.begin() + 1; it != mergeValues.end();) {
+            keys.emplace_back(move(*it++));
+            values.emplace_back(move(*it++));
+        }
+
+        return MK::Hash(loc, move(keys), move(values));
+    };
+
+    // Desguar
+    //   {**x, a: 'a', **y, remaining}
+    // into
+    //   acc = <Magic>.<to-hash-dup>(x)
+    //   acc = <Magic>.<merge-hash-values>(acc, :a, 'a')
+    //   acc = <Magic>.<merge-hash>(acc, <Magic>.<to-hash-nodup>(y))
+    //   acc = <Magic>.<merge-hash>(acc, remaining)
+    //   acc
+    for (auto &pairAsExpression : kvPairs) {
+        auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(pairAsExpression.get());
+        if (pair != nullptr) {
+            auto key = pair->key->takeDesugaredExpr();
+            hashKeyDupes.check(key);
+            mergeValues.emplace_back(move(key));
+
+            auto value = pair->value->takeDesugaredExpr();
+            mergeValues.emplace_back(move(value));
+
+            havePairsToMerge = true;
+            continue;
+        }
+
+        auto *splat = parser::NodeWithExpr::cast_node<parser::Kwsplat>(pairAsExpression.get());
+
+        ast::ExpressionPtr expr;
+        if (splat != nullptr) {
+            expr = splat->expr->takeDesugaredExpr();
+        } else {
+            auto *fwdKwrestArg = parser::NodeWithExpr::cast_node<parser::ForwardedKwrestArg>(pairAsExpression.get());
+            ENFORCE(fwdKwrestArg != nullptr, "kwsplat and fwdkwrestarg cast failed");
+
+            auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
+            expr = MK::Unsafe(loc, move(fwdKwargs));
+        }
+
+        if (havePairsToMerge) {
+            havePairsToMerge = false;
+
+            // ensure that there's something to update
+            if (updateStmts.empty()) {
+                updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
+            } else {
+                int numPosArgs = mergeValues.size();
+                updateStmts.emplace_back(MK::Assign(loc, acc,
+                                                    MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(),
+                                                             locZeroLen, numPosArgs, move(mergeValues))));
+            }
+
+            mergeValues.clear();
+            mergeValues.emplace_back(MK::Local(loc, acc));
+        }
+
+        // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
+        // intrinsic is assumed to mutate its first argument.
+        if (updateStmts.empty()) {
+            updateStmts.emplace_back(
+                MK::Assign(loc, acc, MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(expr))));
+        } else {
+            updateStmts.emplace_back(MK::Assign(
+                loc, acc,
+                MK::Send2(loc, MK::Magic(loc), core::Names::mergeHash(), locZeroLen, MK::Local(loc, acc),
+                          MK::Send1(loc, MK::Magic(loc), core::Names::toHashNoDup(), locZeroLen, move(expr)))));
+        }
+    };
+
+    if (havePairsToMerge) {
+        // There were only keyword args/values present, so construct a hash literal directly
+        if (updateStmts.empty()) {
+            return buildHashLiteral(mergeValues);
+        }
+
+        // there are already other entries in updateStmts, so append the `merge-hash-values` call and fall
+        // through to the rest of the processing
+        int numPosArgs = mergeValues.size();
+        updateStmts.emplace_back(MK::Assign(
+            loc, acc,
+            MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(), locZeroLen, numPosArgs, move(mergeValues))));
+    }
+
+    if (updateStmts.empty()) {
+        return MK::Hash0(loc);
+    } else {
+        return MK::InsSeq(loc, move(updateStmts), MK::Local(loc, acc));
+    }
 }
 
 // Copied from `Builder::isKeywordHashElement()`
