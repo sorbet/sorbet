@@ -351,7 +351,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_unique<parser::Args>(location, NodeVec{});
             }
 
-            unique_ptr<parser::Args> params = translateParametersNode(paramsNode->parameters);
+            unique_ptr<parser::Args> params;
+            std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters);
 
             // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's Args node,
             // after all other parameters.
@@ -693,8 +694,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto isSingletonMethod = receiver != nullptr;
 
             unique_ptr<parser::Args> params;
+            core::NameRef enclosingBlockParamName;
             if (defNode->parameters != nullptr) {
-                params = translateParametersNode(defNode->parameters);
+                std::tie(params, enclosingBlockParamName) = translateParametersNode(defNode->parameters);
             } else {
                 if (rparenLoc.start != nullptr) {
                     // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
@@ -705,7 +707,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 }
             }
 
-            Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name);
+            Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamName);
             auto body = methodContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
@@ -1941,7 +1943,8 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
     }
 }
 
-unique_ptr<parser::Args> Translator::translateParametersNode(pm_parameters_node *paramsNode) {
+pair<unique_ptr<parser::Args>, core::NameRef /* enclosingBlockParamName */>
+Translator::translateParametersNode(pm_parameters_node *paramsNode) {
     auto location = translateLoc(paramsNode->base.location);
 
     auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
@@ -1984,8 +1987,8 @@ unique_ptr<parser::Args> Translator::translateParametersNode(pm_parameters_node 
         }
     }
 
+    core::NameRef enclosingBlockParamName;
     if (auto *prismBlockParam = paramsNode->block) {
-        core::NameRef enclosingBlockParamName;
         if (auto prismName = prismBlockParam->name; prismName != PM_CONSTANT_ID_UNSET) {
             // A named block parameter, like `def foo(&block)`
             enclosingBlockParamName = translateConstantName(prismName);
@@ -2004,7 +2007,7 @@ unique_ptr<parser::Args> Translator::translateParametersNode(pm_parameters_node 
         params.emplace_back(move(blockParamNode));
     }
 
-    return make_unique<parser::Args>(location, move(params));
+    return {make_unique<parser::Args>(location, move(params)), enclosingBlockParamName};
 }
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
@@ -2447,18 +2450,19 @@ bool Translator::isInMethodDef() const {
     return enclosingMethodName.exists();
 }
 
-Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc,
-                                      core::NameRef methodName) const {
+Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
+                                      core::NameRef enclosingBlockParamName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = this->isInModule && !isSingletonMethod;
-    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, this->isInAnyBlock, isInModule);
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamName,
+                      this->isInAnyBlock, isInModule);
 }
 
 Translator Translator::enterBlockContext() const {
     auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
     auto isInAnyBlock = true;
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInAnyBlock, this->isInModule);
+                      this->enclosingBlockParamName, isInAnyBlock, this->isInModule);
 }
 
 Translator Translator::enterModuleContext() const {
@@ -2466,7 +2470,7 @@ Translator Translator::enterModuleContext() const {
     auto isInModule = true;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInAnyBlock, isInModule);
+                      this->enclosingBlockParamName, isInAnyBlock, isInModule);
 }
 
 Translator Translator::enterClassContext() const {
@@ -2474,7 +2478,7 @@ Translator Translator::enterClassContext() const {
     auto isInModule = false;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInAnyBlock, isInModule);
+                      this->enclosingBlockParamName, isInAnyBlock, isInModule);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {
