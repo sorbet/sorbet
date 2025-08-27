@@ -47,11 +47,6 @@ public:
         }
     }
 
-    void reset() {
-        hashKeySymbols.clear();
-        hashKeyStrings.clear();
-    }
-
     // This is only used with Send::ARGS_store and Array::ELEMS_store
     template <typename T> static void checkSendArgs(const core::MutableContext ctx, int numPosArgs, const T &args) {
         DuplicateHashKeyCheck duplicateKeyCheck{ctx};
