@@ -897,6 +897,12 @@ The following directives can only appear once per `__package.rb` file:
 
 The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. It takes two keyword arguments: `min_typed_level` and `tests_min_typed_level`. For each, the valid options are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
 
+## 3729
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error occurs in the `--gen-packages` mode, and is reported on `__package.rb` files that are missing imports.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
