@@ -1523,6 +1523,23 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRe
     return store;
 }
 
+ArgInfo &GlobalState::enterMethodArgumentSymbolWithDupes(Loc loc, MethodRef owner, NameRef name) {
+    ENFORCE_NO_TIMER(owner.exists(), "entering symbol in to non-existing owner");
+    ENFORCE_NO_TIMER(name.exists(), "entering symbol with non-existing name");
+    MethodData ownerScope = owner.data(*this);
+
+    auto &store = ownerScope->arguments.emplace_back();
+
+    ENFORCE_NO_TIMER(!symbolTableFrozen);
+
+    store.name = name;
+    store.loc = loc;
+    DEBUG_ONLY(categoryCounterInc("symbols", "argument"););
+
+    wasModified_ = true;
+    return store;
+}
+
 string_view GlobalState::enterString(string_view nm) {
     DEBUG_ONLY(if (ensureCleanStrings) {
         if (nm != "<" && nm != "<<" && nm != "<=" && nm != "<=>" && nm != ">" && nm != ">>" && nm != ">=") {
