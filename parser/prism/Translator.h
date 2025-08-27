@@ -87,6 +87,7 @@ private:
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
+    std::unique_ptr<parser::Args> translateParametersNode(pm_parameters_node *paramsNode);
     NodeVec translateArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
     parser::NodeVec translateKeyValuePairs(pm_node_list_t elements);
     static bool isKeywordHashElement(sorbet::parser::Node *node);
