@@ -92,11 +92,11 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
         offset += length;
     }
 
-    // Fill in the parallel stratum spans
-    result.parallel.reserve(stratumLengths.size());
+    // Fill in the stratum spans, now that the scc vector is fully defined
+    result.strata.reserve(stratumLengths.size());
     offset = 0;
     for (auto length : stratumLengths) {
-        result.parallel.emplace_back(absl::MakeSpan(result.sccs).subspan(offset, length));
+        result.strata.emplace_back(absl::MakeSpan(result.sccs).subspan(offset, length));
         offset += length;
     }
 
@@ -108,7 +108,7 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
     UnorderedMap<MangledName, StratumInfo> result;
 
     int ix = -1;
-    for (auto stratum : this->parallel) {
+    for (auto stratum : this->strata) {
         ++ix;
         for (auto &scc : stratum) {
             if (scc.isTest) {

@@ -561,40 +561,38 @@ int realmain(int argc, char *argv[]) {
 
         auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
 
-        {
-            // ----- build the package DB -----
+        // ----- build the package DB -----
 
-            if (opts.cacheSensitiveOptions.stripePackages) {
-                auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
-                auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
-                inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
+        if (opts.cacheSensitiveOptions.stripePackages) {
+            auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
+            auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
+            inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
-                if (!opts.storeState.empty() || opts.forceHashing) {
-                    auto result = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
-                                                                              *workers, kvstore);
-                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
-                    indexed = std::move(result.result());
-                } else {
-                    auto result = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
-                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
-                    indexed = std::move(result.result());
-                }
-
-                // Cache these before any pipeline::package rewrites, so that the cache is still
-                // usable regardless of whether `--stripe-packages` was passed.
-                // Want to keep the kvstore around so we can still write to it later.
-                kvstore = cache::ownIfUnchanged(
-                    *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
-                                                              *workers, indexed));
-
-                // Populate the packageDB by processing only the __package.rb files.
-                // Only need to compute hashes when running to compute a FileHash
-                auto foundHashes = nullptr;
-                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
-                ENFORCE(!canceled, "There's no cancellation in batch mode");
-                pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), opts, *workers);
-                pipeline::setPackageForSourceFiles(*gs, inputFilesSpan, opts);
+            if (!opts.storeState.empty() || opts.forceHashing) {
+                auto result = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
+                                                                          *workers, kvstore);
+                ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                indexed = std::move(result.result());
+            } else {
+                auto result = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
+                ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                indexed = std::move(result.result());
             }
+
+            // Cache these before any pipeline::package rewrites, so that the cache is still
+            // usable regardless of whether `--stripe-packages` was passed.
+            // Want to keep the kvstore around so we can still write to it later.
+            kvstore =
+                cache::ownIfUnchanged(*gs, cache::maybeCacheGlobalStateAndFiles(
+                                               OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed));
+
+            // Populate the packageDB by processing only the __package.rb files.
+            // Only need to compute hashes when running to compute a FileHash
+            auto foundHashes = nullptr;
+            auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
+            ENFORCE(!canceled, "There's no cancellation in batch mode");
+            pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), opts, *workers);
+            pipeline::setPackageForSourceFiles(*gs, inputFilesSpan, opts);
         }
 
         // We disable tree leaking if we're targeting emscripten, or if we're typechecking in package dependency order.
@@ -604,7 +602,7 @@ int realmain(int argc, char *argv[]) {
         // The rest of the pipeline proceeds by strata in the package condensation graph. When stripe-packages is not
         // enabled, everything ends up in one big stratum.
         vector<ast::ParsedFile> stratumFiles;
-        for (auto &stratum : pipeline::condensationStrata(*gs, indexed, inputFilesSpan, opts)) {
+        for (auto &stratum : pipeline::computePackageStrata(*gs, indexed, inputFilesSpan, opts)) {
             stratumFiles.clear();
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
 
