@@ -6,6 +6,7 @@
 #include "common/concurrency/Parallel.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
+#include "packager/ComputePackageSCCs.h"
 
 using namespace std;
 
@@ -901,6 +902,43 @@ void exportField(const core::GlobalState &gs,
         break;
     }
 }
+
+class ReferencesPackageGraph {
+    core::packages::PackageDB &packageDB;
+    const core::GlobalState &gs;
+
+public:
+    struct SCCInfo {
+        int sccId;
+        int testSccId;
+    };
+    UnorderedMap<core::packages::MangledName, SCCInfo> nodeMap;
+
+    ReferencesPackageGraph(const core::GlobalState &gs, core::packages::PackageDB &packageDB)
+        : packageDB(packageDB), gs(gs) {}
+
+    vector<core::packages::Import> getImports(core::packages::MangledName packageName) {
+        auto &pkgInfo = packageDB.getPackageInfo(packageName);
+        ENFORCE(pkgInfo.exists());
+        return pkgInfo.packageReferencesToImportList(gs);
+    }
+
+    void setSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].sccId = sccId;
+    }
+
+    int getSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].sccId;
+    }
+
+    void setTestSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].testSccId = sccId;
+    }
+
+    int getTestSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].testSccId;
+    }
+};
 } // namespace
 
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
@@ -982,6 +1020,9 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
                 }
             }
         }
+    } else if (gs.packageDB().genPackagesStrict()) {
+        ReferencesPackageGraph referencesPackageGraph{gs, gs.packageDB()};
+        auto condensation = ComputePackageSCCs::run(gs, referencesPackageGraph);
     }
 
     return result;
