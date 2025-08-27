@@ -22,7 +22,7 @@ public:
         }
 
         auto isSymbol = lit->isSymbol();
-        if (!lit || !lit->isName()) {
+        if (!lit->isName()) {
             return;
         }
         auto nameRef = lit->asName();
