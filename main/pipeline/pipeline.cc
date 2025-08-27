@@ -5,7 +5,6 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
-#include "packager/packager.h"
 #include "rapidjson/writer.h"
 #include <sstream>
 #endif
@@ -39,6 +38,7 @@
 #include "local_vars/local_vars.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
+#include "packager/packager.h"
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
 #include "parser/prism/Translator.h"
@@ -810,57 +810,10 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
-namespace {
-
-bool isTestExport(const ast::ExpressionPtr &expr) {
-    auto send = ast::cast_tree<ast::Send>(expr);
-    if (!send || send->fun != core::Names::export_() || send->numPosArgs() != 1) {
-        return false;
-    }
-
-    auto sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
-    while (sym) {
-        if (ast::isa_tree<ast::EmptyTree>(sym->scope)) {
-            return sym->cnst == core::Names::Constants::Test();
-        }
-
-        if (auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope)) {
-            sym = parent;
-        } else {
-            break;
-        }
-    }
-
-    return false;
-}
-
-ast::ParsedFile copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &ast) {
-    ENFORCE(ast.file.isPackage(gs));
-
-    ast::ParsedFile result{ast.tree.deepCopy(), ast.file};
-
-    auto root = ast::cast_tree<ast::ClassDef>(result.tree);
-    if (!root || root->rhs.size() != 1) {
-        return result;
-    }
-
-    auto package = ast::cast_tree<ast::ClassDef>(root->rhs.front());
-    if (!package) {
-        return result;
-    }
-
-    auto it = std::remove_if(package->rhs.begin(), package->rhs.end(), isTestExport);
-    package->rhs.erase(it, package->rhs.end());
-
-    return result;
-}
-
-} // namespace
-
-vector<CondensationStratumInfo> condensationStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
-                                                   absl::Span<core::FileRef> sourceFiles,
-                                                   const options::Options &opts) {
-    Timer timeit(gs.tracer(), "condensationStrata");
+vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+                                                     absl::Span<core::FileRef> sourceFiles,
+                                                     const options::Options &opts) {
+    Timer timeit(gs.tracer(), "computePackageStrata");
 
     if (!opts.packageDirected) {
         return vector{CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
@@ -885,11 +838,11 @@ vector<CondensationStratumInfo> condensationStrata(const core::GlobalState &gs, 
     packageFiles.reserve(numPackageFiles * 2);
 
     auto traversal = db.condensation().computeTraversal(gs);
-    ENFORCE(!traversal.parallel.empty());
+    ENFORCE(!traversal.strata.empty());
 
     vector<uint32_t> fileToStratum(gs.filesUsed());
     {
-        Timer timeit(gs.tracer(), "condensationStrata.stratumMapping");
+        Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
 
         auto stratumMapping = traversal.buildStratumMapping(gs);
 
@@ -925,7 +878,7 @@ vector<CondensationStratumInfo> condensationStrata(const core::GlobalState &gs, 
     }
 
     // Reserve enough space for all the strata of the condensation traversal, plus one more for unpackaged code.
-    auto maxStrata = traversal.parallel.size() + 1;
+    auto maxStrata = traversal.strata.size() + 1;
 
     vector<CondensationStratumInfo> result;
     result.reserve(maxStrata);
@@ -933,7 +886,7 @@ vector<CondensationStratumInfo> condensationStrata(const core::GlobalState &gs, 
     auto sourceSpan = sourceFiles;
 
     int currentStratum = -1;
-    for (auto &stratum : traversal.parallel) {
+    for (auto &stratum : traversal.strata) {
         ++currentStratum;
 
         auto &resultStratum = result.emplace_back();
@@ -950,7 +903,7 @@ vector<CondensationStratumInfo> condensationStrata(const core::GlobalState &gs, 
                     // and edit out any reference to test symbols.
                     for (auto member : scc.members) {
                         const auto &package = packagesToPackageRb[member];
-                        packageFiles.emplace_back(copyPackageWithoutTestExports(gs, package));
+                        packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
                     }
                 }
             }

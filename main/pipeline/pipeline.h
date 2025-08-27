@@ -52,16 +52,17 @@ struct CondensationStratumInfo {
     // The `__package.rb` sources in this stratum of the condensation graph.
     absl::Span<ast::ParsedFile> packageFiles;
 
-    // The ruby sources in this stratum of the condensation graph.
+    // The ruby source and RBI files in this stratum of the condensation graph.
     absl::Span<core::FileRef> sourceFiles;
 };
 
-// Using the condensation graph, sort the package and source files according to the stratum they would show up in the
-// parallel traversal of the condensation graph. The `packageFiles` vector will be mutated to include non-test versions
-// of the package files included originally.
-std::vector<CondensationStratumInfo> condensationStrata(const core::GlobalState &gs,
-                                                        std::vector<ast::ParsedFile> &packageFiles,
-                                                        absl::Span<core::FileRef> files, const options::Options &opts);
+// Using the condensation graph, sort the package and source files according to the stratum they would show up in a
+// parallel traversal of the condensation graph from its roots. The `packageFiles` vector will be mutated to include
+// non-test versions of the package files included originally.
+std::vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs,
+                                                          std::vector<ast::ParsedFile> &packageFiles,
+                                                          absl::Span<core::FileRef> files,
+                                                          const options::Options &opts);
 
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);

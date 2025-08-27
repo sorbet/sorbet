@@ -63,6 +63,12 @@ public:
 
     static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
 
+    // Remove the `test_export` sends from the package definition in `file`, as we process the package definition with
+    // both the application and test sources, which will occur in different strata.
+    //
+    // NOTE: this can be removed if we ever switch to keeping tests in a completely separate package.
+    static ast::ParsedFile copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &file);
+
     Packager() = delete;
 };
 } // namespace sorbet::packager
