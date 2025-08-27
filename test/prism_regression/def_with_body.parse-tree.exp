@@ -1,7 +1,59 @@
-DefMethod {
-  name = <U foo>
-  args = NULL
-  body = Integer {
-    val = "5"
-  }
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U one_statement>
+      args = NULL
+      body = Integer {
+        val = "1"
+      }
+    }
+    DefMethod {
+      name = <U two_statements>
+      args = NULL
+      body = Begin {
+        stmts = [
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U three_statements>
+      args = NULL
+      body = Begin {
+        stmts = [
+          Integer {
+            val = "4"
+          }
+          Integer {
+            val = "5"
+          }
+          Integer {
+            val = "6"
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U begin_block>
+      args = NULL
+      body = Kwbegin {
+        stmts = [
+          Integer {
+            val = "7"
+          }
+          Integer {
+            val = "8"
+          }
+          Integer {
+            val = "9"
+          }
+        ]
+      }
+    }
+  ]
 }
