@@ -5,6 +5,7 @@
 #include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
+#include "ast/desugar/DuplicateHashKeyCheck.h"
 #include "ast/desugar/PrismDesugar.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
@@ -23,6 +24,7 @@
 namespace sorbet::ast::prismDesugar {
 
 using namespace std;
+using sorbet::ast::desugar::DuplicateHashKeyCheck;
 
 namespace {
 
@@ -607,63 +609,6 @@ ExpressionPtr doUntil(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr c
     auto breakWithBody = MK::InsSeq1(loc, move(body), move(breaker));
     return MK::While(loc, MK::True(loc), move(breakWithBody));
 }
-
-class DuplicateHashKeyCheck {
-    const core::MutableContext ctx;
-    const core::GlobalState &gs;
-    UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
-    UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
-
-public:
-    DuplicateHashKeyCheck(const core::MutableContext &ctx)
-        : ctx{ctx}, gs{ctx.state}, hashKeySymbols(), hashKeyStrings() {}
-
-    void check(const ExpressionPtr &key) {
-        auto lit = ast::cast_tree<ast::Literal>(key);
-        if (lit == nullptr) {
-            return;
-        }
-
-        auto isSymbol = lit->isSymbol();
-        if (!lit || !lit->isName()) {
-            return;
-        }
-        auto nameRef = lit->asName();
-
-        if (isSymbol && !hashKeySymbols.contains(nameRef)) {
-            hashKeySymbols[nameRef] = key.loc();
-        } else if (!isSymbol && !hashKeyStrings.contains(nameRef)) {
-            hashKeyStrings[nameRef] = key.loc();
-        } else {
-            if (auto e = ctx.beginIndexerError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
-                core::LocOffsets originalLoc;
-                if (isSymbol) {
-                    originalLoc = hashKeySymbols[nameRef];
-                } else {
-                    originalLoc = hashKeyStrings[nameRef];
-                }
-
-                e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                e.addErrorLine(ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
-            }
-        }
-    }
-
-    void reset() {
-        hashKeySymbols.clear();
-        hashKeyStrings.clear();
-    }
-
-    // This is only used with Send::ARGS_store and Array::ELEMS_store
-    template <typename T> static void checkSendArgs(const core::MutableContext ctx, int numPosArgs, const T &args) {
-        DuplicateHashKeyCheck duplicateKeyCheck{ctx};
-
-        // increment by two so that a keyword args splat gets skipped.
-        for (int i = numPosArgs; i < args.size(); i += 2) {
-            duplicateKeyCheck.check(args[i]);
-        }
-    }
-};
 
 // Flattens the key/value pairs from the Kwargs Hash into the destination container.
 // If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
