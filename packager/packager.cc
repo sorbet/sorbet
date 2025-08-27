@@ -1210,6 +1210,31 @@ void validatePackage(core::Context ctx) {
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
 
+    bool pkgIsPrelude = pkgInfo.isPreludePackage();
+    if (pkgIsPrelude) {
+        // Prelude packages must be in the lowest possible layer, as that's the only way to ensure that the implicit
+        // imports of them are valid.
+        if (enforceLayering) {
+            if (auto layer = pkgInfo.layer()) {
+                if (packageDB.layerIndex(layer->first) != 0) {
+                    if (auto e = ctx.beginError(layer->second, core::errors::Packager::PreludeLowestLayer)) {
+                        auto layers = packageDB.layers();
+                        e.setHeader("Prelude package `{}` must be in layer `{}`", pkgInfo.show(ctx),
+                                    layers.front().toString(ctx));
+                    }
+                }
+            }
+        }
+
+        // We disallow `visible_to` annotations in prelude packages, as they're implicitly imported by all non-prelude
+        // packages.
+        for (auto &v : pkgInfo.visibleTo()) {
+            if (auto e = ctx.beginError(v.loc, core::errors::Packager::NoPreludeVisibleTo)) {
+                e.setHeader("Prelude package `{}` may not include `{}` annotations", pkgInfo.show(ctx), "visible_to");
+            }
+        }
+    }
+
     if (skipImportVisibilityCheck && !enforceLayering) {
         return;
     }
@@ -1220,6 +1245,34 @@ void validatePackage(core::Context ctx) {
         // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
             continue;
+        }
+
+        if (pkgIsPrelude) {
+            // Prelude packages may only import other prelude packages
+            ENFORCE(!i.isSynthetic(), "Prelude packages shouldn't have implicit imports");
+            if (!otherPkg.isPreludePackage()) {
+                if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
+                    string_view import;
+                    switch (i.type) {
+                        case core::packages::ImportType::Normal:
+                            import = "import";
+                            break;
+                        case core::packages::ImportType::TestHelper:
+                        case core::packages::ImportType::TestUnit:
+                            import = "test_import";
+                            break;
+                    }
+                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`", pkgInfo.show(ctx), import,
+                                otherPkg.show(ctx));
+                }
+            }
+        } else {
+            // Implicit imports of prelude packages are all added with locs that don't exist.
+            if (!i.isSynthetic() && otherPkg.isPreludePackage()) {
+                if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoExplicitPreludeImport)) {
+                    e.setHeader("Prelude package `{}` may not be explicitly imported", otherPkg.show(ctx));
+                }
+            }
         }
 
         if (enforceLayering) {
@@ -1328,6 +1381,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
 
+        vector<MangledName> preludePackages;
         for (auto &file : files) {
             if (!file.file.data(gs).isPackage(gs)) {
                 continue;
@@ -1339,6 +1393,29 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
             auto &info = PackageInfo::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
+
+            if (info.isPreludePackage()) {
+                preludePackages.emplace_back(pkgName);
+            }
+        }
+
+        // Now that we know the set of prelude packages, we can loop over the whole package DB and add implicit imports
+        // to the imports of the non-prelude set.
+        if (!preludePackages.empty()) {
+            for (auto pkgName : gs.packageDB().packages()) {
+                auto *info = gs.packageDB().getPackageInfoNonConst(pkgName);
+                ENFORCE(info != nullptr);
+                if (info->isPreludePackage()) {
+                    continue;
+                }
+
+                // Extend the imports with the implicit prelude imports, which can be identified by their non-existant
+                // locs.
+                auto implicitImportLoc = info->declLoc_.offsets();
+                info->importedPackageNames.reserve(info->importedPackageNames.size() + preludePackages.size());
+                absl::c_transform(preludePackages, back_inserter(info->importedPackageNames),
+                                  [implicitImportLoc](auto name) { return Import::prelude(name, implicitImportLoc); });
+            }
         }
     }
 }
