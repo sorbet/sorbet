@@ -5,7 +5,6 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
-#include "packager/packager.h"
 #include "rapidjson/writer.h"
 #include <sstream>
 #endif
@@ -39,6 +38,7 @@
 #include "local_vars/local_vars.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
+#include "packager/packager.h"
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
 #include "parser/prism/Translator.h"
@@ -808,6 +808,125 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
         packageFiles.reserve(packageFiles.size() + nonPackageFiles.size());
         absl::c_move(nonPackageFiles, back_inserter(packageFiles));
     }
+}
+
+vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+                                                     absl::Span<core::FileRef> sourceFiles,
+                                                     const options::Options &opts) {
+    Timer timeit(gs.tracer(), "computePackageStrata");
+
+    if (!opts.packageDirected) {
+        return vector{CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+    }
+
+    auto &db = gs.packageDB();
+
+    auto numPackageFiles = packageFiles.size();
+
+    // We move all the package files into a map, so that it's easy to go from package name to package file while
+    // processing the strata of the traversal.
+    UnorderedMap<core::packages::MangledName, ast::ParsedFile> packagesToPackageRb;
+    for (auto &ast : packageFiles) {
+        auto pkgName = db.getPackageNameForFile(ast.file);
+        ENFORCE(pkgName.exists());
+
+        packagesToPackageRb[pkgName] = move(ast);
+    }
+
+    // We'll generate non-test variants of each package, so we need to double the storage of this vector.
+    packageFiles.clear();
+    packageFiles.reserve(numPackageFiles * 2);
+
+    auto traversal = db.condensation().computeTraversal(gs);
+    ENFORCE(!traversal.strata.empty());
+
+    vector<uint32_t> fileToStratum(gs.filesUsed());
+    {
+        Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
+
+        auto stratumMapping = traversal.buildStratumMapping(gs);
+
+        int ix = 0;
+        for (auto &file : gs.getFiles().subspan(1)) {
+            ++ix;
+            core::FileRef fref(ix);
+            auto pkgName = db.getPackageNameForFile(fref);
+            if (!pkgName.exists()) {
+                // This is a file with no package, so we unconditionally put it in the first stratum. This means that
+                // it'll be checked at the same time as the first stratum of packaged code.
+                fileToStratum[ix] = 0;
+                continue;
+            }
+
+            ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
+                    "All packages must be present in the condensation graph");
+            auto &info = stratumMapping[pkgName];
+            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
+                fileToStratum[ix] = info.testStratum;
+            } else {
+                fileToStratum[ix] = info.applicationStratum;
+            }
+        }
+
+        fast_sort(sourceFiles, [&fileToStratum = as_const(fileToStratum)](core::FileRef l, core::FileRef r) -> bool {
+            auto lid = l.id();
+            auto rid = r.id();
+            auto lStratum = fileToStratum[lid];
+            auto rStratum = fileToStratum[rid];
+            return std::tie(lStratum, lid) < std::tie(rStratum, rid);
+        });
+    }
+
+    // Reserve enough space for all the strata of the condensation traversal, plus one more for unpackaged code.
+    auto maxStrata = traversal.strata.size() + 1;
+
+    vector<CondensationStratumInfo> result;
+    result.reserve(maxStrata);
+
+    auto sourceSpan = sourceFiles;
+
+    int currentStratum = -1;
+    for (auto &stratum : traversal.strata) {
+        ++currentStratum;
+
+        auto &resultStratum = result.emplace_back();
+
+        {
+            auto start = packageFiles.size();
+            for (auto &scc : stratum) {
+                if (scc.isTest) {
+                    for (auto member : scc.members) {
+                        packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
+                    }
+                } else {
+                    // When processing the application source of a package, we need to make a copy of the package file,
+                    // and edit out any reference to test symbols.
+                    for (auto member : scc.members) {
+                        const auto &package = packagesToPackageRb[member];
+                        packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
+                    }
+                }
+            }
+
+            auto len = packageFiles.size() - start;
+            ENFORCE(len > 0);
+            resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
+        }
+
+        {
+            auto it = absl::c_find_if(sourceSpan, [currentStratum, &fileToStratum = as_const(fileToStratum)](
+                                                      auto file) { return fileToStratum[file.id()] > currentStratum; });
+            auto len = std::distance(sourceSpan.begin(), it);
+            resultStratum.sourceFiles = sourceSpan.subspan(0, len);
+            sourceSpan = sourceSpan.subspan(len);
+        }
+    }
+
+    ENFORCE(sourceSpan.empty());
+    ENFORCE(!result.empty());
+    ENFORCE(result.size() <= maxStrata);
+
+    return result;
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.

@@ -39,6 +39,7 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 #include <csignal>
+#include <iterator>
 #include <poll.h>
 
 using namespace std;
@@ -558,83 +559,107 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        {
-            // ----- index -----
+        auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
 
-            auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
-            if (opts.cacheSensitiveOptions.stripePackages) {
-                auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
-                auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
-                inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
+        // ----- build the package DB -----
 
-                if (!opts.storeState.empty() || opts.forceHashing) {
-                    auto result = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
-                                                                              *workers, kvstore);
-                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
-                    indexed = std::move(result.result());
-                } else {
-                    auto result = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
-                    ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
-                    indexed = std::move(result.result());
-                }
+        if (opts.cacheSensitiveOptions.stripePackages) {
+            auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
+            auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
+            inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
-                // Cache these before any pipeline::package rewrites, so that the cache is still
-                // usable regardless of whether `--stripe-packages` was passed.
-                // Want to keep the kvstore around so we can still write to it later.
-                kvstore = cache::ownIfUnchanged(
-                    *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
-                                                              *workers, indexed));
-
-                // Populate the packageDB by processing only the __package.rb files.
-                // Only need to compute hashes when running to compute a FileHash
-                auto foundHashes = nullptr;
-                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
-                ENFORCE(!canceled, "There's no cancellation in batch mode");
-                pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), opts, *workers);
-                pipeline::setPackageForSourceFiles(*gs, inputFilesSpan, opts);
+            if (!opts.storeState.empty() || opts.forceHashing) {
+                auto result = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
+                                                                          *workers, kvstore);
+                ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                indexed = std::move(result.result());
+            } else {
+                auto result = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
+                ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
+                indexed = std::move(result.result());
             }
 
-            auto nonPackageIndexedResult =
-                (!opts.storeState.empty() || opts.forceHashing)
-                    // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
-                    ? hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputFilesSpan, *workers, kvstore)
-                    : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
-            ENFORCE(nonPackageIndexedResult.hasResult(), "There's no cancellation in batch mode");
-            auto nonPackageIndexed = std::move(nonPackageIndexedResult.result());
+            // Cache these before any pipeline::package rewrites, so that the cache is still
+            // usable regardless of whether `--stripe-packages` was passed.
+            // Want to keep the kvstore around so we can still write to it later.
+            kvstore =
+                cache::ownIfUnchanged(*gs, cache::maybeCacheGlobalStateAndFiles(
+                                               OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed));
 
-            // Cache these before any pipeline::package rewrites, so that the cache is still usable
-            // regardless of whether `--stripe-packages` was passed.
-            cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
-                                                 nonPackageIndexed);
-
+            // Populate the packageDB by processing only the __package.rb files.
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
-            auto canceled = pipeline::name(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers, foundHashes);
+            auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
-            // Now validate all the other files (the packageDB shouldn't change)
-            pipeline::validatePackagedFiles(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers);
-
-            pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
-            // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
-
-            if (gs->hadCriticalError()) {
-                gs->errorQueue->flushAllErrors(*gs);
-            }
+            pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), opts, *workers);
+            pipeline::setPackageForSourceFiles(*gs, inputFilesSpan, opts);
         }
 
-        if (gs->cacheSensitiveOptions.runningUnderAutogen) {
-            runAutogen(*gs, opts, *workers, indexed);
-        } else {
-            indexed = move(pipeline::resolve(*gs, move(indexed), opts, *workers).result());
-            if (gs->hadCriticalError()) {
-                gs->errorQueue->flushAllErrors(*gs);
+        // We disable tree leaking if we're targeting emscripten, or if we're typechecking in package dependency order.
+        // The latter is so that we reuse memory as we traverse the package graph.
+        const bool intentionallyLeakASTs = !sorbet::emscripten_build && !opts.packageDirected;
+
+        // The rest of the pipeline proceeds by strata in the package condensation graph. When stripe-packages is not
+        // enabled, everything ends up in one big stratum.
+        vector<ast::ParsedFile> stratumFiles;
+        for (auto &stratum : pipeline::computePackageStrata(*gs, indexed, inputFilesSpan, opts)) {
+            stratumFiles.clear();
+            stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
+
+            absl::c_move(stratum.packageFiles, back_inserter(stratumFiles));
+
+            {
+                // ----- index -----
+
+                auto nonPackageIndexedResult =
+                    (!opts.storeState.empty() || opts.forceHashing)
+                        // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
+                        ? hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, stratum.sourceFiles, *workers,
+                                                                      kvstore)
+                        : pipeline::index(*gs, stratum.sourceFiles, opts, *workers, kvstore);
+                ENFORCE(nonPackageIndexedResult.hasResult(), "There's no cancellation in batch mode");
+                auto nonPackageIndexed = std::move(nonPackageIndexedResult.result());
+
+                // Cache these before any pipeline::package rewrites, so that the cache is still usable
+                // regardless of whether `--stripe-packages` was passed.
+                kvstore = cache::ownIfUnchanged(
+                    *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
+                                                              *workers, nonPackageIndexed));
+
+                // If we're not running in package-directed mode, there will only be a single iteration of this loop and
+                // we can safely free the cache early.
+                if (!opts.packageDirected) {
+                    kvstore.reset();
+                }
+
+                // Only need to compute hashes when running to compute a FileHash
+                auto foundHashes = nullptr;
+                auto canceled = pipeline::name(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers, foundHashes);
+                ENFORCE(!canceled, "There's no cancellation in batch mode");
+                // Now validate all the other files (the packageDB shouldn't change)
+                pipeline::validatePackagedFiles(*gs, absl::MakeSpan(nonPackageIndexed), opts, *workers);
+
+                pipeline::unpartitionPackageFiles(stratumFiles, move(nonPackageIndexed));
+
+                if (gs->hadCriticalError()) {
+                    gs->errorQueue->flushAllErrors(*gs);
+                }
             }
 
-            pipeline::typecheck(*gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
-                                /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
+            if (gs->cacheSensitiveOptions.runningUnderAutogen) {
+                runAutogen(*gs, opts, *workers, stratumFiles);
+            } else {
+                stratumFiles = move(pipeline::resolve(*gs, move(stratumFiles), opts, *workers).result());
+                if (gs->hadCriticalError()) {
+                    gs->errorQueue->flushAllErrors(*gs);
+                }
 
-            if (gs->hadCriticalError()) {
-                gs->errorQueue->flushAllErrors(*gs);
+                pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
+                                    /* presorted */ false, intentionallyLeakASTs);
+
+                if (gs->hadCriticalError()) {
+                    gs->errorQueue->flushAllErrors(*gs);
+                }
             }
         }
 

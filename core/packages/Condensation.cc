@@ -39,12 +39,12 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     result.packages.reserve(2 * gs.packageDB().packages().size());
 
     vector<uint32_t> sccLengths;
-    vector<uint32_t> layerLengths;
+    vector<uint32_t> stratumLengths;
 
     while (!frontier.empty()) {
         next.clear();
 
-        layerLengths.emplace_back(frontier.size());
+        stratumLengths.emplace_back(frontier.size());
 
         for (auto sccId : frontier) {
             auto &node = this->nodes_[sccId];
@@ -92,12 +92,35 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
         offset += length;
     }
 
-    // Fill in the parallel layer spans
-    result.parallel.reserve(layerLengths.size());
+    // Fill in the stratum spans, now that the scc vector is fully defined
+    result.strata.reserve(stratumLengths.size());
     offset = 0;
-    for (auto length : layerLengths) {
-        result.parallel.emplace_back(absl::MakeSpan(result.sccs).subspan(offset, length));
+    for (auto length : stratumLengths) {
+        result.strata.emplace_back(absl::MakeSpan(result.sccs).subspan(offset, length));
         offset += length;
+    }
+
+    return result;
+}
+
+UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
+Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
+    UnorderedMap<MangledName, StratumInfo> result;
+
+    int ix = -1;
+    for (auto stratum : this->strata) {
+        ++ix;
+        for (auto &scc : stratum) {
+            if (scc.isTest) {
+                for (auto name : scc.members) {
+                    result[name].testStratum = ix;
+                }
+            } else {
+                for (auto name : scc.members) {
+                    result[name].applicationStratum = ix;
+                }
+            }
+        }
     }
 
     return result;

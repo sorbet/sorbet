@@ -66,8 +66,8 @@ public:
         // Spans of `this->packages` that correspond to an SCC.
         std::vector<SCCInfo> sccs;
 
-        // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in parallel.
-        std::vector<absl::Span<SCCInfo>> parallel;
+        // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in the same stratum.
+        std::vector<absl::Span<SCCInfo>> strata;
 
         Traversal() = default;
 
@@ -76,11 +76,22 @@ public:
 
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
+
+        // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
+        // DSL method of "layer" (utility, business, service, etc.)
+        struct StratumInfo {
+            uint32_t applicationStratum;
+            uint32_t testStratum;
+        };
+
+        // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code
+        // belong to, respectively.
+        UnorderedMap<MangledName, StratumInfo> buildStratumMapping(const core::GlobalState &gs) const;
     };
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
-    // other. These groups are acceptable to typecheck in parallel, under the assumption that the package graph is
-    // well-formed.
+    // other. These groups are acceptable to typecheck in the same stratum, under the assumption that the package graph
+    // is well-formed.
     const Traversal computeTraversal(const GlobalState &gs) const;
 
     absl::Span<const Node> nodes() const {
