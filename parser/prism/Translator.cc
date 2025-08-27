@@ -341,20 +341,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                                           location, sorbetName);
         }
         case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
-            auto blockParamNode = down_cast<pm_block_parameter_node>(node);
-
-            core::NameRef sorbetName;
-            if (auto prismName = blockParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
-                // A named block parameter, like `def foo(&block)`
-                sorbetName = translateConstantName(prismName);
-            } else { // An anonymous block parameter, like `def foo(&)`
-                sorbetName = nextUniqueParserName(core::Names::ampersand());
-            }
-
-            auto blockLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
-
-            return make_node_with_expr<parser::Blockarg>(MK::BlockArg(blockLoc, MK::Local(blockLoc, sorbetName)),
-                                                         blockLoc, sorbetName);
+            unreachable("PM_BLOCK_PARAMETER_NODE is handled separately in `Translator::translateParametersNode()`.");
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             auto paramsNode = down_cast<pm_block_parameters_node>(node);
@@ -1997,8 +1984,25 @@ unique_ptr<parser::Args> Translator::translateParametersNode(pm_parameters_node 
         }
     }
 
-    if (paramsNode->block != nullptr)
-        params.emplace_back(translate(up_cast(paramsNode->block)));
+    if (auto *prismBlockParam = paramsNode->block) {
+        core::NameRef enclosingBlockParamName;
+        if (auto prismName = prismBlockParam->name; prismName != PM_CONSTANT_ID_UNSET) {
+            // A named block parameter, like `def foo(&block)`
+            enclosingBlockParamName = translateConstantName(prismName);
+        } else { // An anonymous block parameter, like `def foo(&)`
+            enclosingBlockParamName = nextUniqueParserName(core::Names::ampersand());
+        }
+
+        auto blockParamLoc = translateLoc(prismBlockParam->base.location);
+        // Drop the `&` before the name of the block parameter.
+        blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + 1, blockParamLoc.endPos()};
+
+        auto blockParamExpr = MK::BlockArg(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
+        auto blockParamNode =
+            make_node_with_expr<parser::Blockarg>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
+
+        params.emplace_back(move(blockParamNode));
+    }
 
     return make_unique<parser::Args>(location, move(params));
 }
