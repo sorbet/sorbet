@@ -1022,6 +1022,8 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
         }
     } else if (gs.packageDB().genPackagesStrict()) {
         ReferencesPackageGraph referencesPackageGraph{gs, gs.packageDB()};
+        // TODO: handle the case where packager is enabled but layering is not
+        // TODO(neil): don't raise strictness for packages that are build packages or have no source files
         auto condensation = ComputePackageSCCs::run(gs, referencesPackageGraph);
     }
 

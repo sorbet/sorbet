@@ -110,6 +110,7 @@ class ComputePackageSCCs {
             auto sccId = condensationNode.id;
 
             // This SCC's layer, if all packages in the SCC have the same one.
+            // TODO: handle the case where packager is enabled but layering is not
             std::optional<core::NameRef> condensationNodeLayer = std::nullopt;
             {
                 auto firstPkgLayer = packageDB.getPackageInfo(this->stack.back()).layer;
