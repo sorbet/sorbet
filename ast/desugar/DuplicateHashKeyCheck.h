@@ -9,13 +9,11 @@ namespace sorbet::ast::desugar {
 
 class DuplicateHashKeyCheck {
     const core::MutableContext ctx;
-    const core::GlobalState &gs;
     UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
     UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
 
 public:
-    DuplicateHashKeyCheck(const core::MutableContext &ctx)
-        : ctx{ctx}, gs{ctx.state}, hashKeySymbols(), hashKeyStrings() {}
+    DuplicateHashKeyCheck(const core::MutableContext &ctx) : ctx{ctx}, hashKeySymbols(), hashKeyStrings() {}
 
     void check(const ExpressionPtr &key) {
         auto lit = ast::cast_tree<ast::Literal>(key);
@@ -42,8 +40,9 @@ public:
                     originalLoc = hashKeyStrings[nameRef];
                 }
 
-                e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                e.addErrorLine(ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
+                e.setHeader("Hash key `{}` is duplicated", nameRef.toString(ctx.state));
+                e.addErrorLine(ctx.locAt(originalLoc), "First occurrence of `{}` hash key",
+                               nameRef.toString(ctx.state));
             }
         }
     }
