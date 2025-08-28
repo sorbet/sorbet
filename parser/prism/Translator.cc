@@ -705,6 +705,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 } else {
                     params = nullptr;
                 }
+
+                // Desugaring a method def like `def foo()` should behave like `def foo(&<blk>)`,
+                // so we set a synthetic name here for `yield` to use.
+                enclosingBlockParamName = core::Names::blkArg();
+
+                // TODO: In a future PR, we'll actually generate the expr via `Mk::Block`
+                // See the `Mk::Block` call in Desugar.cc's `buildMethod()` for reference.
             }
 
             Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamName);
@@ -2005,6 +2012,10 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
             make_node_with_expr<parser::Blockarg>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
 
         params.emplace_back(move(blockParamNode));
+    } else {
+        // Desugaring a method def like `def foo(a, b)` should behave like `def foo(a, b, &<blk>)`,
+        // so we set a synthetic name here for `yield` to use.
+        enclosingBlockParamName = core::Names::blkArg();
     }
 
     return {make_unique<parser::Args>(location, move(params)), enclosingBlockParamName};
