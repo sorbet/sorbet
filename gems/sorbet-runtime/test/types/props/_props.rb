@@ -398,7 +398,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         end
       end
 
-      assert(error.message.include?("You marked the getter for prop :b as `override`, but the method `b` doesn't exist to be overridden."))
+      assert(error.message.include?("You marked the reader for prop :b as `override`, but the method `b` doesn't exist to be overridden."))
     end
 
     module ManualGetter
