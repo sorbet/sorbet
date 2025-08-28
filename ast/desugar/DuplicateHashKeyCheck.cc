@@ -1,4 +1,5 @@
 #include "ast/desugar/DuplicateHashKeyCheck.h"
+#include "core/KwPair.h"
 #include "core/errors/desugar.h"
 
 namespace sorbet::ast::desugar {
@@ -23,14 +24,18 @@ void DuplicateHashKeyCheck::check(const ExpressionPtr &key) {
     }
 }
 
-// This is only used with Send::ARGS_store and Array::ELEMS_store
 void DuplicateHashKeyCheck::checkSendArgs(const core::MutableContext ctx, int numPosArgs,
                                           absl::Span<const ExpressionPtr> args) {
     DuplicateHashKeyCheck duplicateKeyCheck{ctx};
 
-    // increment by two so that a keyword args splat gets skipped.
-    for (int i = numPosArgs; i < args.size(); i += 2) {
-        duplicateKeyCheck.check(args[i]);
+    args.remove_prefix(numPosArgs);
+    // Drop any kwsplat arg.
+    if ((args.size() % 2) == 1) {
+        args.remove_suffix(1);
+    }
+
+    for (auto [key, _value] : core::KwPairSpan<const ExpressionPtr>{args}) {
+        duplicateKeyCheck.check(key);
     }
 }
 
