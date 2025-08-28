@@ -1493,12 +1493,37 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_SINGLETON_CLASS_NODE: { // A singleton class, like `class << self ... end`
             auto classNode = down_cast<pm_singleton_class_node>(node);
-            pm_location_t declLoc = classNode->class_keyword_loc;
 
-            auto expr = translate(classNode->expression);
+            auto declLoc = translateLoc(classNode->class_keyword_loc);
+            auto receiver = translate(classNode->expression); // The receiver like `self` in `class << self`
             auto body = this->enterClassContext().translate(classNode->body);
 
-            return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
+            if (!directlyDesugar || !hasExpr(receiver, body)) {
+                return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
+            }
+
+            if (!parser::NodeWithExpr::isa_node<parser::Self>(receiver.get())) {
+                if (auto e = ctx.beginIndexerError(receiver->loc, core::errors::Desugar::InvalidSingletonDef)) {
+                    e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
+                }
+                auto emptyTree = MK::EmptyTree();
+                return make_node_with_expr<parser::SClass>(move(emptyTree), location, declLoc, move(receiver), nullptr);
+            }
+
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            if (!bodyExprsOpt.has_value()) {
+                return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
+            }
+            auto bodyExprs = move(*bodyExprsOpt);
+
+            // Singleton classes are modelled as a class with a special name `<singleton>`
+            auto singletonClassName = ast::make_expression<ast::UnresolvedIdent>(
+                receiver->loc, ast::UnresolvedIdent::Kind::Class, core::Names::singleton());
+
+            auto sClassDef = MK::Class(location, declLoc, move(singletonClassName), ast::ClassDef::ANCESTORS_store{},
+                                       move(bodyExprs));
+
+            return make_node_with_expr<parser::SClass>(move(sClassDef), location, declLoc, move(receiver), move(body));
         }
         case PM_SOURCE_ENCODING_NODE: { // The `__ENCODING__` keyword
             return make_node_with_expr<parser::EncodingLiteral>(
@@ -2426,6 +2451,48 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
     translateMultiInto(sorbetLhs, prismRights);
 
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
+}
+
+// Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
+// The body can be a Begin node comprising multiple statements, or a single statement.
+// Return nullopt if the body does not have all of its expressions desugared.
+// TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(unique_ptr<parser::Node> &scopeBody) {
+    ENFORCE(directlyDesugar, "desugarScopeBodyToRHSStore should only be called when direct desugaring is enabled");
+
+    if (scopeBody == nullptr) { // Empty body
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(MK::EmptyTree());
+        return result;
+    }
+
+    if (parser::NodeWithExpr::isa_node<parser::Begin>(scopeBody.get())) { // Handle multi-statement body
+        if (!hasExpr(scopeBody)) {
+            return nullopt;
+        }
+
+        auto beginExpr = scopeBody->takeDesugaredExpr();
+
+        auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
+        ENFORCE(insSeqExpr != nullptr, "The cached expr on every multi-statement Begin should be an InsSeq.")
+
+        ast::ClassDef::RHS_store result;
+        result.reserve(insSeqExpr->stats.size());
+        for (auto &statement : insSeqExpr->stats) {
+            result.emplace_back(move(statement));
+        }
+        // Move the the final expression too, which is separated out in the `ast::InsSeq`.
+        result.emplace_back(move(insSeqExpr->expr));
+        return result;
+    } else { // Handle single-statement body
+        if (!hasExpr(scopeBody)) {
+            return nullopt;
+        }
+
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(scopeBody->takeDesugaredExpr());
+        return result;
+    }
 }
 
 // Context management methods
