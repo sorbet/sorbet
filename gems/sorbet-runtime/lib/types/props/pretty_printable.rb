@@ -22,8 +22,8 @@ module T::Props::PrettyPrintable
             custom_inspect.call(val, {multiline: multiline})
           end
           pp.text(inspected.nil? ? "nil" : inspected)
-        elsif rules[:sensitivity] && !rules[:sensitivity].empty? && !val.nil?
-          pp.text("<REDACTED #{rules[:sensitivity].join(', ')}>")
+        elsif (sensitivity = rules[:sensitivity]) && !sensitivity.empty? && !val.nil?
+          pp.text("<REDACTED #{sensitivity.join(', ')}>")
         else
           val.pretty_print(pp)
         end
