@@ -12,8 +12,8 @@ module T::Props::PrettyPrintable
     pp.group(1, "<#{klass.inspect_class_with_decoration(self)}", ">") do
       klass.all_props.sort.each do |prop|
         pp.breakable
-        val = klass.get(self, prop)
         rules = klass.prop_rules(prop)
+        val = klass.get(self, prop, rules)
         pp.text("#{prop}=")
         if (custom_inspect = rules[:inspect])
           inspected = if T::Utils.arity(custom_inspect) == 1
@@ -22,8 +22,8 @@ module T::Props::PrettyPrintable
             custom_inspect.call(val, {multiline: multiline})
           end
           pp.text(inspected.nil? ? "nil" : inspected)
-        elsif rules[:sensitivity] && !rules[:sensitivity].empty? && !val.nil?
-          pp.text("<REDACTED #{rules[:sensitivity].join(', ')}>")
+        elsif (sensitivity = rules[:sensitivity]) && !sensitivity.empty? && !val.nil?
+          pp.text("<REDACTED #{sensitivity.join(', ')}>")
         else
           val.pretty_print(pp)
         end
