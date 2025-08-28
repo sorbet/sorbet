@@ -543,7 +543,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // Create an include statement that includes the filtered shared_examples module
         // Use proper scoping - if we're inside a describe block, look locally; otherwise use root
         auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
-        // Create an include statement to include the filtered shared_examples module
         return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
                               std::move(moduleName));
     }
