@@ -525,4 +525,20 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
 
     assert(err.message.include?("not marked as `override: :reader`"))
   end
+
+  it "allows implicitly overriding a non-`overridable` supermethod" do
+    module NoOverridableParent
+      extend T::Sig
+      # no `overridable`
+      sig { returns(Integer) }
+      def foo
+        1
+      end
+    end
+
+    class UnmarkedChild < T::Struct
+      include NoOverridableParent
+      const :foo, Integer # no override
+    end
+  end
 end
