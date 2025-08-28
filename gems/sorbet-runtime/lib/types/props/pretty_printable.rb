@@ -12,8 +12,8 @@ module T::Props::PrettyPrintable
     pp.group(1, "<#{klass.inspect_class_with_decoration(self)}", ">") do
       klass.all_props.sort.each do |prop|
         pp.breakable
-        val = klass.get(self, prop)
         rules = klass.prop_rules(prop)
+        val = klass.get(self, prop, rules)
         pp.text("#{prop}=")
         if (custom_inspect = rules[:inspect])
           inspected = if T::Utils.arity(custom_inspect) == 1
