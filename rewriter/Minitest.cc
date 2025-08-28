@@ -390,7 +390,25 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return nullptr;
     }
 
-    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs() == 1) {
+    switch (send->fun.rawId()) {
+        case core::Names::testEach().rawId():
+        case core::Names::testEachHash().rawId(): {
+        if (send->numPosArgs() != 1) {
+            if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
+                auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
+                if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::BadTestEach)) {
+                    e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
+                    if (send->numPosArgs() == 0 && errLoc.exists()) {
+                        auto replaceLoc = ctx.locAt(errLoc);
+                        e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}",
+                                      replaceLoc.source(ctx).value());
+                    }
+                }
+            }
+
+            return nullptr;
+        }
+
         if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
             (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
             if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
@@ -399,6 +417,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             }
             return nullptr;
         }
+
         // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing we
         // can freely copy into methoddef scope
         auto iteratee = getIteratee(send->getPosArg(0));
@@ -409,20 +428,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                              ast::MK::SendArgs(move(send->getPosArg(0)),
                                                ast::MK::Block(block->loc, std::move(body), std::move(block->args))),
                              send->flags);
-    }
-
-    if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
-        auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
-        if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::BadTestEach)) {
-            e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
-            if (send->numPosArgs() == 0 && errLoc.exists()) {
-                auto replaceLoc = ctx.locAt(errLoc);
-                e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}", replaceLoc.source(ctx).value());
-            }
         }
-    }
 
-    if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
+        case core::Names::after().rawId():
+        case core::Names::before().rawId(): {
+        if (send->numPosArgs() != 0) {
+            return nullptr;
+        }
+
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
@@ -431,14 +444,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, name,
                                            prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
         return constantMover.addConstantsToExpression(send->loc, move(method));
-    }
+        }
 
-    if (send->numPosArgs() != 1) {
-        return nullptr;
-    }
-    auto &arg = send->getPosArg(0);
-
-    if (send->fun == core::Names::describe()) {
+        case core::Names::describe().rawId(): {
+        if (send->numPosArgs() != 1) {
+            return nullptr;
+        }
+        auto &arg = send->getPosArg(0);
         auto argString = to_s(ctx, arg);
         ast::ClassDef::ANCESTORS_store ancestors;
 
@@ -465,15 +477,23 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto declLoc = declLocForSendWithBlock(*send);
         return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                               flattenDescribeBody(move(rhs)));
-    } else if (send->fun == core::Names::it()) {
+        }
+
+        case core::Names::it().rawId(): {
+        if (send->numPosArgs() != 1) {
+            return nullptr;
+        }
+        auto &arg = send->getPosArg(0);
+
         auto argString = to_s(ctx, arg);
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         const bool bodyIsClass = false;
         auto declLoc = declLocForSendWithBlock(*send);
-        auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                                prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
+        auto method =
+            ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                      prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
         // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
         // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
         // omitting it saves memory.
@@ -483,7 +503,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         }
         return constantMover.addConstantsToExpression(send->loc, move(method));
-    } else if (insideDescribe && send->fun == core::Names::let() && ast::isa_tree<ast::Literal>(arg)) {
+        }
+
+        case core::Names::let().rawId(): {
+        if (!insideDescribe || send->numPosArgs() != 1) {
+            return nullptr;
+        }
+        auto &arg = send->getPosArg(0);
+        if (!ast::isa_tree<ast::Literal>(arg)) {
+            return nullptr;
+        }
         auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
         if (!argLiteral.isName()) {
             return nullptr;
@@ -492,6 +521,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
         auto methodName = argLiteral.asName();
         return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
+        }
     }
 
     return nullptr;
