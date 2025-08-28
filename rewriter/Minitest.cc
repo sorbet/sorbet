@@ -390,108 +390,139 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return nullptr;
     }
 
-    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs() == 1) {
-        if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
-            (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
-            if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
-                e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
-                            send->fun == core::Names::testEach() ? "at least 1" : "2", block->args.size());
+    switch (send->fun.rawId()) {
+        case core::Names::testEach().rawId():
+        case core::Names::testEachHash().rawId(): {
+            if (send->numPosArgs() != 1) {
+                if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
+                    auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
+                    if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::BadTestEach)) {
+                        e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
+                        if (send->numPosArgs() == 0 && errLoc.exists()) {
+                            auto replaceLoc = ctx.locAt(errLoc);
+                            e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}",
+                                          replaceLoc.source(ctx).value());
+                        }
+                    }
+                }
+
+                return nullptr;
             }
-            return nullptr;
-        }
-        // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing we
-        // can freely copy into methoddef scope
-        auto iteratee = getIteratee(send->getPosArg(0));
-        // and then reconstruct the send but with a modified body
-        auto body =
-            prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee, insideDescribe);
-        return ast::MK::Send(send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
-                             ast::MK::SendArgs(move(send->getPosArg(0)),
-                                               ast::MK::Block(block->loc, std::move(body), std::move(block->args))),
-                             send->flags);
-    }
 
-    if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
-        auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
-        if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::BadTestEach)) {
-            e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
-            if (send->numPosArgs() == 0 && errLoc.exists()) {
-                auto replaceLoc = ctx.locAt(errLoc);
-                e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}", replaceLoc.source(ctx).value());
+            if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
+                (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
+                if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
+                    e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`",
+                                send->fun.show(ctx), send->fun == core::Names::testEach() ? "at least 1" : "2",
+                                block->args.size());
+                }
+                return nullptr;
             }
-        }
-    }
 
-    if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
-        auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
-        ConstantMover constantMover;
-        ast::TreeWalk::apply(ctx, constantMover, block->body);
-        auto declLoc = declLocForSendWithBlock(*send);
-        auto method = addSigVoid(
-            ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, name,
-                                           prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
-        return constantMover.addConstantsToExpression(send->loc, move(method));
-    }
-
-    if (send->numPosArgs() != 1) {
-        return nullptr;
-    }
-    auto &arg = send->getPosArg(0);
-
-    if (send->fun == core::Names::describe()) {
-        auto argString = to_s(ctx, arg);
-        ast::ClassDef::ANCESTORS_store ancestors;
-
-        // First ancestor is the superclass
-        if (isClass) {
-            ancestors.emplace_back(ast::MK::Self(arg.loc()));
-        } else {
-            // Avoid subclassing self when it's a module, as that will produce an error.
-            ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
-
-            // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
-            // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
-            // an ancestor, which we're choosing not to model so that this rewriter pass works for
-            // RSpec specs too. This means users might have to add extra `include` lines in their
-            // describe bodies to convince Sorbet what's available, but at least it won't say that
-            // Minitest::Spec is an ancestor for RSpec tests.
+            // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing
+            // we can freely copy into methoddef scope
+            auto iteratee = getIteratee(send->getPosArg(0));
+            // and then reconstruct the send but with a modified body
+            auto body =
+                prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee, insideDescribe);
+            return ast::MK::Send(send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
+                                 ast::MK::SendArgs(move(send->getPosArg(0)),
+                                                   ast::MK::Block(block->loc, std::move(body), std::move(block->args))),
+                                 send->flags);
         }
 
-        const bool bodyIsClass = true;
-        auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
+        case core::Names::after().rawId():
+        case core::Names::before().rawId(): {
+            if (send->numPosArgs() != 0) {
+                return nullptr;
+            }
 
-        auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
-                                                ctx.state.enterNameConstant("<describe '" + argString + "'>"));
-        auto declLoc = declLocForSendWithBlock(*send);
-        return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
-                              flattenDescribeBody(move(rhs)));
-    } else if (send->fun == core::Names::it()) {
-        auto argString = to_s(ctx, arg);
-        ConstantMover constantMover;
-        ast::TreeWalk::apply(ctx, constantMover, block->body);
-        auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-        const bool bodyIsClass = false;
-        auto declLoc = declLocForSendWithBlock(*send);
-        auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                                prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
-        // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
-        // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
-        // omitting it saves memory.
-        ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
-        method = addSigVoid(ctx, move(method));
-        if (!ast::isa_tree<ast::Literal>(arg)) {
-            method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
-        }
-        return constantMover.addConstantsToExpression(send->loc, move(method));
-    } else if (insideDescribe && send->fun == core::Names::let() && ast::isa_tree<ast::Literal>(arg)) {
-        auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
-        if (!argLiteral.isName()) {
-            return nullptr;
+            auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
+            ConstantMover constantMover;
+            ast::TreeWalk::apply(ctx, constantMover, block->body);
+            auto declLoc = declLocForSendWithBlock(*send);
+            auto method = addSigVoid(
+                ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, name,
+                                               prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
+            return constantMover.addConstantsToExpression(send->loc, move(method));
         }
 
-        auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
-        auto methodName = argLiteral.asName();
-        return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
+        case core::Names::describe().rawId(): {
+            if (send->numPosArgs() != 1) {
+                return nullptr;
+            }
+            auto &arg = send->getPosArg(0);
+            auto argString = to_s(ctx, arg);
+            ast::ClassDef::ANCESTORS_store ancestors;
+
+            // First ancestor is the superclass
+            if (isClass) {
+                ancestors.emplace_back(ast::MK::Self(arg.loc()));
+            } else {
+                // Avoid subclassing self when it's a module, as that will produce an error.
+                ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
+
+                // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
+                // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
+                // an ancestor, which we're choosing not to model so that this rewriter pass works for
+                // RSpec specs too. This means users might have to add extra `include` lines in their
+                // describe bodies to convince Sorbet what's available, but at least it won't say that
+                // Minitest::Spec is an ancestor for RSpec tests.
+            }
+
+            const bool bodyIsClass = true;
+            auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
+
+            auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
+                                                    ctx.state.enterNameConstant("<describe '" + argString + "'>"));
+            auto declLoc = declLocForSendWithBlock(*send);
+            return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
+                                  flattenDescribeBody(move(rhs)));
+        }
+
+        case core::Names::it().rawId(): {
+            if (send->numPosArgs() != 1) {
+                return nullptr;
+            }
+            auto &arg = send->getPosArg(0);
+
+            auto argString = to_s(ctx, arg);
+            ConstantMover constantMover;
+            ast::TreeWalk::apply(ctx, constantMover, block->body);
+            auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+            const bool bodyIsClass = false;
+            auto declLoc = declLocForSendWithBlock(*send);
+            auto method =
+                ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                          prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
+            // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
+            // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
+            // omitting it saves memory.
+            ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
+            method = addSigVoid(ctx, move(method));
+            if (!ast::isa_tree<ast::Literal>(arg)) {
+                method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
+            }
+            return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+
+        case core::Names::let().rawId(): {
+            if (!insideDescribe || send->numPosArgs() != 1) {
+                return nullptr;
+            }
+            auto &arg = send->getPosArg(0);
+            if (!ast::isa_tree<ast::Literal>(arg)) {
+                return nullptr;
+            }
+            auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
+            if (!argLiteral.isName()) {
+                return nullptr;
+            }
+
+            auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
+            auto methodName = argLiteral.asName();
+            return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
+        }
     }
 
     return nullptr;
