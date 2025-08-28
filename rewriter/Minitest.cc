@@ -473,7 +473,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto argString = to_s(ctx, arg);
         // Create an include statement that includes the shared_examples companion module
         auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
-        // Create an include statement to include the shared_examples companion module
         return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::include(), send->funLoc,
                               std::move(moduleName));
     }
