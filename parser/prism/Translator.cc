@@ -341,39 +341,26 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                                           location, sorbetName);
         }
         case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
-            auto blockParamNode = down_cast<pm_block_parameter_node>(node);
-
-            core::NameRef sorbetName;
-            if (auto prismName = blockParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
-                // A named block parameter, like `def foo(&block)`
-                sorbetName = translateConstantName(prismName);
-            } else { // An anonymous block parameter, like `def foo(&)`
-                sorbetName = nextUniqueParserName(core::Names::ampersand());
-            }
-
-            auto blockLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
-
-            return make_node_with_expr<parser::Blockarg>(MK::BlockArg(blockLoc, MK::Local(blockLoc, sorbetName)),
-                                                         blockLoc, sorbetName);
+            unreachable("PM_BLOCK_PARAMETER_NODE is handled separately in `Translator::translateParametersNode()`.");
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             auto paramsNode = down_cast<pm_block_parameters_node>(node);
 
             if (paramsNode->parameters == nullptr) {
+                // TODO: future follow up, ensure we add the block local variables ("shadowargs"), if any.
                 return make_unique<parser::Args>(location, NodeVec{});
             }
 
-            // Sorbet's legacy parser inserts locals (Shadowargs) into the block's Args node, along with its other
-            // parameters. So we need to extract the args vector from the Args node, and insert the locals at the end of
-            // it.
-            auto sorbetArgsNode = translate(up_cast(paramsNode->parameters));
-            auto argsNode = parser::NodeWithExpr::cast_node<parser::Args>(sorbetArgsNode.get());
-            auto sorbetShadowArgs = translateMulti(paramsNode->locals);
-            // Sorbet's legacy parser inserts locals (Shadowargs) at the end of the the block's Args node
-            argsNode->args.insert(argsNode->args.end(), make_move_iterator(sorbetShadowArgs.begin()),
-                                  make_move_iterator(sorbetShadowArgs.end()));
+            unique_ptr<parser::Args> params;
+            std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters);
 
-            return sorbetArgsNode;
+            // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's Args node,
+            // after all other parameters.
+            auto sorbetShadowParams = translateMulti(paramsNode->locals);
+            params->args.insert(params->args.end(), make_move_iterator(sorbetShadowParams.begin()),
+                                make_move_iterator(sorbetShadowParams.end()));
+
+            return params;
         }
         case PM_BREAK_NODE: { // A `break` statement, e.g. `break`, `break 1, 2, 3`
             auto breakNode = down_cast<pm_break_node>(node);
@@ -706,17 +693,28 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto isSingletonMethod = receiver != nullptr;
 
-            // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
-            // In this case, Sorbet's legacy parser will still hold an empty Args node, so we need to
-            // create one here
-            unique_ptr<parser::Node> params;
-            if (defNode->parameters == nullptr && rparenLoc.start != nullptr) {
-                params = make_unique<parser::Args>(location, NodeVec{});
+            unique_ptr<parser::Args> params;
+            core::NameRef enclosingBlockParamName;
+            if (defNode->parameters != nullptr) {
+                std::tie(params, enclosingBlockParamName) = translateParametersNode(defNode->parameters);
             } else {
-                params = translate(up_cast(defNode->parameters));
+                if (rparenLoc.start != nullptr) {
+                    // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
+                    // In this case, Sorbet's legacy parser will still hold an empty Args node
+                    params = make_unique<parser::Args>(location, NodeVec{});
+                } else {
+                    params = nullptr;
+                }
+
+                // Desugaring a method def like `def foo()` should behave like `def foo(&<blk>)`,
+                // so we set a synthetic name here for `yield` to use.
+                enclosingBlockParamName = core::Names::blkArg();
+
+                // TODO: In a future PR, we'll actually generate the expr via `Mk::Block`
+                // See the `Mk::Block` call in Desugar.cc's `buildMethod()` for reference.
             }
 
-            Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name);
+            Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamName);
             auto body = methodContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
@@ -1292,52 +1290,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Or>(location, move(left), move(right));
         }
         case PM_PARAMETERS_NODE: { // The parameters declared at the top of a PM_DEF_NODE
-            auto paramsNode = down_cast<pm_parameters_node>(node);
-
-            auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
-            auto optionals = absl::MakeSpan(paramsNode->optionals.nodes, paramsNode->optionals.size);
-            auto keywords = absl::MakeSpan(paramsNode->keywords.nodes, paramsNode->keywords.size);
-            auto posts = absl::MakeSpan(paramsNode->posts.nodes, paramsNode->posts.size);
-
-            parser::NodeVec params;
-
-            auto restSize = paramsNode->rest == nullptr ? 0 : 1;
-            auto kwrestSize = paramsNode->keyword_rest == nullptr ? 0 : 1;
-            auto blockSize = paramsNode->block == nullptr ? 0 : 1;
-
-            params.reserve(requireds.size() + optionals.size() + restSize + posts.size() + keywords.size() +
-                           kwrestSize + blockSize);
-
-            translateMultiInto(params, requireds);
-            translateMultiInto(params, optionals);
-
-            if (paramsNode->rest != nullptr)
-                params.emplace_back(translate(paramsNode->rest));
-
-            translateMultiInto(params, posts);
-            translateMultiInto(params, keywords);
-
-            if (auto prismKwRestNode = paramsNode->keyword_rest; prismKwRestNode != nullptr) {
-                switch (PM_NODE_TYPE(prismKwRestNode)) {
-                    case PM_KEYWORD_REST_PARAMETER_NODE: // `**kwargs`
-                        [[fallthrough]];
-                    case PM_FORWARDING_PARAMETER_NODE: { // `**`
-                        params.emplace_back(translate(prismKwRestNode));
-                        break;
-                    }
-                    case PM_NO_KEYWORDS_PARAMETER_NODE: { // `**nil`
-                        params.emplace_back(make_unique<parser::Kwnilarg>(translateLoc(prismKwRestNode->location)));
-                        break;
-                    }
-                    default:
-                        unreachable("Unexpected keyword_rest node type in Hash pattern.");
-                }
-            }
-
-            if (paramsNode->block != nullptr)
-                params.emplace_back(translate(up_cast(paramsNode->block)));
-
-            return make_unique<parser::Args>(location, move(params));
+            unreachable("PM_PARAMETERS_NODE is handled separately in translateParametersNode.");
         }
         case PM_PARENTHESES_NODE: { // A parethesized expression, e.g. `(a)`
             auto parensNode = down_cast<pm_parentheses_node>(node);
@@ -2022,6 +1975,77 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
     }
 }
 
+pair<unique_ptr<parser::Args>, core::NameRef /* enclosingBlockParamName */>
+Translator::translateParametersNode(pm_parameters_node *paramsNode) {
+    auto location = translateLoc(paramsNode->base.location);
+
+    auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
+    auto optionals = absl::MakeSpan(paramsNode->optionals.nodes, paramsNode->optionals.size);
+    auto keywords = absl::MakeSpan(paramsNode->keywords.nodes, paramsNode->keywords.size);
+    auto posts = absl::MakeSpan(paramsNode->posts.nodes, paramsNode->posts.size);
+
+    parser::NodeVec params;
+
+    auto restSize = paramsNode->rest == nullptr ? 0 : 1;
+    auto kwrestSize = paramsNode->keyword_rest == nullptr ? 0 : 1;
+    auto blockSize = paramsNode->block == nullptr ? 0 : 1;
+
+    params.reserve(requireds.size() + optionals.size() + restSize + posts.size() + keywords.size() + kwrestSize +
+                   blockSize);
+
+    translateMultiInto(params, requireds);
+    translateMultiInto(params, optionals);
+
+    if (paramsNode->rest != nullptr) {
+        params.emplace_back(translate(paramsNode->rest));
+    }
+
+    translateMultiInto(params, posts);
+    translateMultiInto(params, keywords);
+
+    if (auto *prismKwRestNode = paramsNode->keyword_rest) {
+        switch (PM_NODE_TYPE(prismKwRestNode)) {
+            case PM_KEYWORD_REST_PARAMETER_NODE: // `def foo(**kwargs)`
+            case PM_FORWARDING_PARAMETER_NODE: { // `def foo(...)`
+                params.emplace_back(translate(prismKwRestNode));
+                break;
+            }
+            case PM_NO_KEYWORDS_PARAMETER_NODE: { // `def foo(**nil)`
+                params.emplace_back(make_unique<parser::Kwnilarg>(translateLoc(prismKwRestNode->location)));
+                break;
+            }
+            default:
+                unreachable("Unexpected keyword_rest node type in Hash pattern.");
+        }
+    }
+
+    core::NameRef enclosingBlockParamName;
+    if (auto *prismBlockParam = paramsNode->block) {
+        if (auto prismName = prismBlockParam->name; prismName != PM_CONSTANT_ID_UNSET) {
+            // A named block parameter, like `def foo(&block)`
+            enclosingBlockParamName = translateConstantName(prismName);
+        } else { // An anonymous block parameter, like `def foo(&)`
+            enclosingBlockParamName = nextUniqueParserName(core::Names::ampersand());
+        }
+
+        auto blockParamLoc = translateLoc(prismBlockParam->base.location);
+        // Drop the `&` before the name of the block parameter.
+        blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + 1, blockParamLoc.endPos()};
+
+        auto blockParamExpr = MK::BlockArg(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
+        auto blockParamNode =
+            make_node_with_expr<parser::Blockarg>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
+
+        params.emplace_back(move(blockParamNode));
+    } else {
+        // Desugaring a method def like `def foo(a, b)` should behave like `def foo(a, b, &<blk>)`,
+        // so we set a synthetic name here for `yield` to use.
+        enclosingBlockParamName = core::Names::blkArg();
+    }
+
+    return {make_unique<parser::Args>(location, move(params)), enclosingBlockParamName};
+}
+
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
 // of argument nodes. It just uses a NodeVec directly, which is what this function produces.
 NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockArgumentNode) {
@@ -2504,18 +2528,19 @@ bool Translator::isInMethodDef() const {
     return enclosingMethodName.exists();
 }
 
-Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc,
-                                      core::NameRef methodName) const {
+Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
+                                      core::NameRef enclosingBlockParamName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = this->isInModule && !isSingletonMethod;
-    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, this->isInAnyBlock, isInModule);
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamName,
+                      this->isInAnyBlock, isInModule);
 }
 
 Translator Translator::enterBlockContext() const {
     auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
     auto isInAnyBlock = true;
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInAnyBlock, this->isInModule);
+                      this->enclosingBlockParamName, isInAnyBlock, this->isInModule);
 }
 
 Translator Translator::enterModuleContext() const {
@@ -2523,7 +2548,7 @@ Translator Translator::enterModuleContext() const {
     auto isInModule = true;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInAnyBlock, isInModule);
+                      this->enclosingBlockParamName, isInAnyBlock, isInModule);
 }
 
 Translator Translator::enterClassContext() const {
@@ -2531,7 +2556,7 @@ Translator Translator::enterClassContext() const {
     auto isInModule = false;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      isInAnyBlock, isInModule);
+                      this->enclosingBlockParamName, isInAnyBlock, isInModule);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {

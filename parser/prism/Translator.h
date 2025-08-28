@@ -41,8 +41,9 @@ class Translator final {
     uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
-    const core::LocOffsets enclosingMethodLoc; // The location of the method we're in, or `none()`
-    const core::NameRef enclosingMethodName;   // The name of the method we're in, or `noName()`
+    const core::LocOffsets enclosingMethodLoc;   // The location of the method we're in, or `none()`
+    const core::NameRef enclosingMethodName;     // The name of the method we're in, or `noName()`
+    const core::NameRef enclosingBlockParamName; // The name of the block param of the method we're in, or `noName()`
     const bool isInModule = false;   // True if we're in a Module definition. False for classes and singleton classes
     const bool isInAnyBlock = false; // True if we're in a `{ }`/`do end` block
 
@@ -65,7 +66,8 @@ private:
     // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as the minimum integer value and is never used
     Translator(const Translator &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
-               core::NameRef enclosingMethodName, bool isInModule, bool isInAnyBlock)
+               core::NameRef enclosingMethodName, core::NameRef enclosingBlockParamName, bool isInModule,
+               bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           directlyDesugar(parent.directlyDesugar), preserveConcreteSyntax(parent.preserveConcreteSyntax),
           parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
@@ -73,8 +75,8 @@ private:
           parserUniqueCounter(parent.parserUniqueCounter),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
-          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), isInModule(isInModule),
-          isInAnyBlock(isInAnyBlock) {}
+          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName),
+          enclosingBlockParamName(enclosingBlockParamName), isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
 
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const;
@@ -86,6 +88,9 @@ private:
 
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
+
+    std::pair<std::unique_ptr<parser::Args>, core::NameRef /* enclosingBlockParamName */>
+    translateParametersNode(pm_parameters_node *paramsNode);
 
     NodeVec translateArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
     parser::NodeVec translateKeyValuePairs(pm_node_list_t elements);
@@ -140,7 +145,8 @@ private:
 
     // Context management helpers. These return a copy of `this` with some change to the context.
     bool isInMethodDef() const;
-    Translator enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName) const;
+    Translator enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
+                              core::NameRef enclosingBlockParamName) const;
     Translator enterBlockContext() const;
     Translator enterModuleContext() const;
     Translator enterClassContext() const;
