@@ -483,9 +483,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference() && !((isDescribeOrSimilar(send->fun) || isSharedExamples(send->fun) ||
-                                            send->fun == core::Names::includeContext()) &&
-                                           isRSpec(send->recv))) {
+    if (!send->recv.isSelfReference() &&
+        !((isDescribeOrSimilar(send->fun) || isSharedExamples(send->fun)) && isRSpec(send->recv))) {
         return nullptr;
     }
 
@@ -675,7 +674,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         // Add Magic.requires_ancestor for RSpec context modules
         if (!send->recv.isSelfReference() && isRSpec(send->recv)) {
             auto magic = ast::MK::Magic(send->loc);
-            
+
             // Build RSpec::Core::ExampleGroup constant
             auto rspecExampleGroup = ast::MK::EmptyTree();
             rspecExampleGroup =
