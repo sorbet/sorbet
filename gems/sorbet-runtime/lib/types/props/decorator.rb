@@ -331,8 +331,7 @@ class T::Props::Decorator
 
     return if rules[:without_accessors] || rules[:clobber_existing_method!]
 
-    # We could check if the prop is already defined here, but it's easier to check at prop definition
-    # time.
+    # We could check if the prop is already defined here, but it's easier to check in `add_prop_definition`
     if method_defined_on_ancestor?(name) && !override[:reader]
       raise ArgumentError.new("The reader for prop #{name.inspect} overrides the method `#{name}`, but is not marked as `override: :reader`.")
     end
