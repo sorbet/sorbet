@@ -868,6 +868,11 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg0())
                  .buildWithResult(Types::any(*this, Types::nilClass(), Types::String()));
 
+    // Synthesize <Magic>.requires_ancestor(self: T.untyped) => Void
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::requiresAncestor())
+                 .untypedArg(Names::selfLocal())
+                 .buildWithResult(Types::void_());
+
     // Synthesize <DeclBuilderForProcs>.params(args: T.untyped) => DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
                  .kwsplatArg(Names::arg0())

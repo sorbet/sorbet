@@ -674,17 +674,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         ast::ClassDef::RHS_store filteredModuleRhs;
         auto flattenedRhs = flattenDescribeBody(move(rhs));
 
-        // Add extend T::Helpers at the beginning
-        auto tHelpers = ast::MK::EmptyTree();
-        tHelpers = ast::MK::UnresolvedConstant(arg.loc(), move(tHelpers), core::Names::Constants::T());
-        tHelpers = ast::MK::UnresolvedConstant(arg.loc(), move(tHelpers), core::Names::Constants::Helpers());
-        auto extendStatement = ast::MK::Send1(send->loc, ast::MK::Self(send->loc), core::Names::extend(), send->funLoc,
-                                              std::move(tHelpers));
-        filteredModuleRhs.emplace_back(std::move(extendStatement));
-
-        // Add requires_ancestor { RSpec::Core::ExampleGroup }
         if (!send->recv.isSelfReference() && isRSpec(send->recv)) {
-            // Add requires_ancestor when we have explicit RSpec receiver (RSpec context)
+            // Use Magic method approach instead of extending T::Helpers
+            auto magic = ast::MK::Magic(send->loc);
+
+            // Build RSpec::Core::ExampleGroup constant
             auto rspecExampleGroup = ast::MK::EmptyTree();
             rspecExampleGroup =
                 ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::RSpec());
@@ -698,8 +692,15 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ast::MethodDef::ARGS_store blockArgs;
             auto block = ast::MK::Block(send->loc, std::move(blockBody), std::move(blockArgs));
 
-            auto requiresAncestorStatement = ast::MK::Send0Block(
-                send->loc, ast::MK::Self(send->loc), core::Names::requiresAncestor(), send->loc, std::move(block));
+            // Create Magic.requires_ancestor(self) { block }
+            ast::Send::ARGS_store args;
+            args.emplace_back(ast::MK::Self(send->loc)); // positional arg: self
+            args.emplace_back(std::move(block));         // block arg
+            ast::Send::Flags flags;
+            flags.hasBlock = true;
+
+            auto requiresAncestorStatement = ast::MK::Send(send->loc, std::move(magic), core::Names::requiresAncestor(),
+                                                           send->loc, 1, std::move(args), flags);
             filteredModuleRhs.emplace_back(std::move(requiresAncestorStatement));
         }
 
