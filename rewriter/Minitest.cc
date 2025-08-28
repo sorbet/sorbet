@@ -637,9 +637,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         // Create a class for shared_examples that inherits from the same parent as the current describe block
         // Use proper scoping - if we're inside a describe block, nest under it; otherwise use root
-        auto name = ast::MK::UnresolvedConstant(
-            arg.loc(), insideDescribe ? ast::MK::EmptyTree() : ast::MK::Constant(arg.loc(), core::Symbols::root()),
-            ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
+        auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
+                                                ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
         ast::ClassDef::ANCESTORS_store ancestors;
 
