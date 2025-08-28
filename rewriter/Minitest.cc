@@ -663,9 +663,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ancestors.emplace_back(move(exampleGroup));
         }
 
-        // Create the class version (contains everything)
-        auto classResult = ast::MK::Class(send->loc, declLoc, name.deepCopy(), std::move(ancestors),
-                                          flattenDescribeBody(rhs.deepCopy()));
+        // Only create a module version (no class needed)
 
         // Create a filtered module version that contains only includable methods (let, etc.)
         auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
@@ -674,10 +672,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         ast::ClassDef::RHS_store filteredModuleRhs;
         auto flattenedRhs = flattenDescribeBody(move(rhs));
 
+        // Add Magic.requires_ancestor for RSpec context modules
         if (!send->recv.isSelfReference() && isRSpec(send->recv)) {
-            // Use Magic method approach instead of extending T::Helpers
             auto magic = ast::MK::Magic(send->loc);
-
+            
             // Build RSpec::Core::ExampleGroup constant
             auto rspecExampleGroup = ast::MK::EmptyTree();
             rspecExampleGroup =
@@ -716,10 +714,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto moduleResult = ast::MK::Module(send->loc, declLoc, std::move(moduleName), std::move(moduleAncestors),
                                             std::move(filteredModuleRhs));
 
-        // Return both the class and filtered module in a sequence
-        ast::InsSeq::STATS_store statements;
-        statements.emplace_back(std::move(classResult));
-        return ast::MK::InsSeq(send->loc, std::move(statements), std::move(moduleResult));
+        // Return only the module
+        return moduleResult;
     } else if (send->fun == core::Names::its()) {
         auto argString = to_s(ctx, arg);
         ConstantMover constantMover;
