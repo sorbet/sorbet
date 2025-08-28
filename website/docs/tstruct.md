@@ -110,6 +110,38 @@ To fix this, `T::Struct` takes measures to clone objects, so that they are not s
 
 These rules prevent the most common misuses of accidentally mutating default values via references, but it is still possible to construct cases where the above rules are not strong enough. In such cases, use `factory:` to compute the default value in whatever way necessary. The value produced by `factory:` is used verbatim. (This means that `factory:` can be used when reference sharing across default values is actually the _desired_ outcome.)
 
+## Fine-grained inheritance control with `override:`
+
+Methods defined with `prop` or `const` must also annotate the methods they override (just like if the reader and writer methods had been defined as normal `def` methods). Use the `override` keyword argument on a `prop` or `const` to declare the override. In the simplest cases, this will be one of:
+
+- `..., override: :reader` (only overrides `foo`, the reader method)
+- `..., override: :writer` (only overrides `foo=`, the writer method)
+- `..., override: true` (overrides both `foo` and `foo=`).
+
+The `override` keyword also accepts a `Hash` to declare more fine-grained overrides (for example, if an override [incompatibly overrides](https://sorbet.org/docs/override-checking#use-overrideallow_incompatible-true) another method). Use the `reader` and `writer` keys:
+
+```ruby
+module Interface
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig { abstract.returns(T.nilable(String)) }
+  def foo; end
+
+  sig { abstract.params(foo: String).returns(String) }
+  def foo=(foo); end
+end
+
+class Concrete < T::Struct
+  include Interface
+
+  prop :foo, String, override: {reader: {allow_incompatible: true}, writer: true}
+end
+```
+
+See [Overrides and the `prop` DSL](override-checking.md#overrides-and-the-prop-dsl) for a full specification of what `override` accepts.
+
 ## Structs and inheritance
 
 Sorbet does not allow inheriting from a class which inherits from `T::Struct`.
@@ -209,38 +241,6 @@ A decision was made to factor the code for the `prop` DSL into a standalone libr
 Unfortunately, this process left warts in the publicly-accessible `T::Struct` APIs that persist today. Certain parts of the `prop` DSL only make sense when used alongside Stripe-internal abstractions. The DSL also contains things that are technically publicly accessible that were never meant to be. This legacy makes it hard to evolve and improve the `T::Struct` APIs without breaking existing code.
 
 The remainder of this documentation is presented for completeness. Use the APIs below at your own discretion. Our goal here is simply to outline the potential pitfalls that arise when using them.
-
-## Fine-grained inheritance control with `override:`
-
-Methods defined with `prop` or `const` must also annotate the methods they override (just like if the reader and writer methods had been defined as normal `def` methods). Use the `override` keyword argument on a `prop` or `const` to declare the override. In the simplest cases, this will be one of:
-
-- `..., override: :reader` (only overrides `foo`, the reader method)
-- `..., override: :writer` (only overrides `foo=`, the writer method)
-- `..., override: true` (overrides both `foo` and `foo=`).
-
-The `override` keyword also accepts a `Hash` to declare more fine-grained overrides (for example, if an override [incompatibly overrides](https://sorbet.org/docs/override-checking#use-overrideallow_incompatible-true) another method). Use the `reader` and `writer` keys:
-
-```ruby
-module Interface
-  extend T::Sig
-  extend T::Helpers
-  abstract!
-
-  sig { abstract.returns(T.nilable(String)) }
-  def foo; end
-
-  sig { abstract.params(foo: String).returns(String) }
-  def foo=(foo); end
-end
-
-class Concrete < T::Struct
-  include Interface
-
-  prop :foo, String, override: {reader: {allow_incompatible: true}, writer: true}
-end
-```
-
-See [Overrides and the `prop` DSL](override-checking.md#overrides-and-the-prop-dsl) for a full specification of what `override` accepts.
 
 ## `serialize` and `from_hash`: Converting `T::Struct` to and from `Hash`
 
