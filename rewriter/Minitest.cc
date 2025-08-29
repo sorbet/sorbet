@@ -691,10 +691,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     // Handle it/xit blocks with 0 arguments separately
     if (send->fun == core::Names::it() || send->fun == core::Names::xit()) {
-        if (send->numPosArgs() != 0 && send->numPosArgs() != 1) {
-            return nullptr;
-        }
-
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
 
