@@ -568,9 +568,9 @@ public:
     // Returns the locations that are allowed to subclass the sealed class.
     absl::Span<const Loc> sealedLocs(const GlobalState &gs) const;
 
-    TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
+    TypePtr sealedSubclassesToUnion(const GlobalState &gs) const;
 
-    bool hasSingleSealedSubclass(const GlobalState &ctx) const;
+    bool hasSingleSealedSubclass(const GlobalState &gs) const;
 
     // Record a required ancestor for this class of module
     void recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc);

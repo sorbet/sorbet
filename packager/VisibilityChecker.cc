@@ -62,7 +62,7 @@ class PropagateVisibility final {
         }
     }
 
-    bool ignoreRBIExportEnforcement(core::MutableContext &ctx, core::FileRef file) {
+    bool ignoreRBIExportEnforcement(core::MutableContext ctx, core::FileRef file) {
         const auto path = file.data(ctx).path();
 
         return absl::c_any_of(ctx.state.packageDB().skipRBIExportEnforcementDirs(),
@@ -70,7 +70,7 @@ class PropagateVisibility final {
     }
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
-    void checkExportPackage(core::MutableContext &ctx, core::LocOffsets loc, core::SymbolRef sym) {
+    void checkExportPackage(core::MutableContext ctx, core::LocOffsets loc, core::SymbolRef sym) {
         ENFORCE(!sym.locs(ctx).empty()); // Can't be empty
 
         bool allRBI = absl::c_all_of(sym.locs(ctx), [&](const core::Loc &loc) {

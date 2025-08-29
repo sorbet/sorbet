@@ -7,7 +7,7 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
-parser::ParseResult Parser::run(core::MutableContext &ctx, bool directlyDesugar, bool preserveConcreteSyntax) {
+parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, bool preserveConcreteSyntax) {
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};

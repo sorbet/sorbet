@@ -1910,7 +1910,7 @@ void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
     }
 }
 
-void Environment::setUninitializedVarsToNil(const core::Context &ctx, core::Loc origin) {
+void Environment::setUninitializedVarsToNil(core::Context ctx, core::Loc origin) {
     for (auto &uninitialized : _vars) {
         if (uninitialized.second.typeAndOrigins.type == nullptr) {
             uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
