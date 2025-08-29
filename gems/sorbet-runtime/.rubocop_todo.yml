@@ -51,7 +51,6 @@ Layout/EmptyLineBetweenDefs:
 Layout/EmptyLines:
   Exclude:
     - 'lib/types/private/methods/call_validation.rb'
-    - 'lib/types/private/methods/call_validation_2_6.rb'
     - 'lib/types/private/methods/call_validation_2_7.rb'
     - 'bench/constructor.rb'
     - 'lib/types/_types.rb'
@@ -102,7 +101,6 @@ Layout/EmptyLinesAroundModuleBody:
     - 'bench/getters.rb'
     - 'bench/prop_definition.rb'
     - 'bench/setters.rb'
-    - 'lib/types/private/methods/call_validation_2_6.rb'
     - 'lib/types/private/methods/call_validation_2_7.rb'
     - 'lib/types/private/retry.rb'
     - 'lib/types/props/has_lazily_specialized_methods.rb'

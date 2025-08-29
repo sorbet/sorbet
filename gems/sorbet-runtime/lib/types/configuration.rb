@@ -2,9 +2,6 @@
 # frozen_string_literal: true
 
 module T::Configuration
-  # Cache this comparisonn to avoid two allocations all over the place.
-  AT_LEAST_RUBY_2_7 = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
-
   # Announces to Sorbet that we are currently in a test environment, so it
   # should treat any sigs which are marked `.checked(:tests)` as if they were
   # just a normal sig.

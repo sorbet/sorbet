@@ -168,11 +168,7 @@ module T::Types
         obj.class
       else
         # This is a specialized enumerable type, just return the class.
-        if T::Configuration::AT_LEAST_RUBY_2_7
-          Object.instance_method(:class).bind_call(obj)
-        else
-          Object.instance_method(:class).bind(obj).call # rubocop:disable Performance/BindCall
-        end
+        Object.instance_method(:class).bind_call(obj)
       end
     end
 

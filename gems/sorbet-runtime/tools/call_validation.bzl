@@ -3,7 +3,6 @@ def call_validation_rb_files():
     updaters = []
 
     configs = [
-        ("2_6", "--bind-call=false"),
         ("2_7", "--bind-call=true"),
     ]
 
