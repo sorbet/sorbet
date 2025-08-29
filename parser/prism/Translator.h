@@ -150,6 +150,9 @@ private:
     Translator enterBlockContext() const;
     Translator enterModuleContext() const;
     Translator enterClassContext() const;
+
+    // String interpolation desugaring
+    sorbet::ast::ExpressionPtr desugarDString(core::LocOffsets loc, pm_node_list prismNodeList);
 };
 
 } // namespace sorbet::parser::Prism

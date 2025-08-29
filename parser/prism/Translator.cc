@@ -76,6 +76,71 @@ template <typename... TArgs>
     Exception::raise(reasonFormatStr, forward<TArgs>(args)...);
 }
 
+// Helper function to check if an AST expression is a string literal
+bool isStringLit(ast::ExpressionPtr &expr) {
+    if (auto lit = ast::cast_tree<ast::Literal>(expr)) {
+        return lit->isString();
+    }
+    return false;
+}
+
+// Helper function to merge multiple string literals into one
+ast::ExpressionPtr mergeStrings(core::MutableContext &ctx, core::LocOffsets loc,
+                                absl::InlinedVector<ast::ExpressionPtr, 4> stringsAccumulated) {
+    if (stringsAccumulated.size() == 1) {
+        return std::move(stringsAccumulated[0]);
+    } else {
+        std::string result;
+        for (const auto &expr : stringsAccumulated) {
+            if (ast::isa_tree<ast::EmptyTree>(expr)) {
+                // empty string - skip
+            } else {
+                result += ast::cast_tree<ast::Literal>(expr)->asString().shortName(ctx);
+            }
+        }
+        return MK::String(loc, ctx.state.enterNameUTF8(result));
+    }
+}
+
+// Member function implementation for desugarDString
+ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list prismNodeList) {
+    if (prismNodeList.size == 0) {
+        return MK::String(loc, core::Names::empty());
+    }
+
+    absl::InlinedVector<ast::ExpressionPtr, 4> stringsAccumulated;
+    ast::Send::ARGS_store interpArgs;
+
+    bool allStringsSoFar = true;
+
+    auto prismNodes = absl::MakeSpan(prismNodeList.nodes, prismNodeList.size);
+    for (pm_node *prismNode : prismNodes) {
+        auto parserNode = translate(prismNode);
+        auto expr = parserNode->takeDesugaredExpr();
+        if (allStringsSoFar && isStringLit(expr)) {
+            stringsAccumulated.emplace_back(std::move(expr));
+        } else {
+            if (allStringsSoFar) {
+                // Transition from all strings to mixed content
+                allStringsSoFar = false;
+                if (!stringsAccumulated.empty()) {
+                    auto mergedStrings = mergeStrings(ctx, loc, std::move(stringsAccumulated));
+                    interpArgs.emplace_back(std::move(mergedStrings));
+                }
+            }
+            interpArgs.emplace_back(std::move(expr));
+        }
+    }
+
+    if (allStringsSoFar) {
+        return mergeStrings(ctx, loc, std::move(stringsAccumulated));
+    } else {
+        auto recv = MK::Magic(loc);
+        return MK::Send(loc, std::move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(),
+                        static_cast<uint16_t>(interpArgs.size()), std::move(interpArgs));
+    }
+}
+
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
 unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNode) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
@@ -1049,21 +1114,38 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto sorbetParts = translateMulti(interpolatedStringNode->parts);
 
-            return make_unique<parser::DString>(location, move(sorbetParts));
+            if (!directlyDesugar || !hasExpr(sorbetParts)) {
+                return make_unique<parser::DString>(location, move(sorbetParts));
+            }
+
+            auto desugared = desugarDString(location, interpolatedStringNode->parts);
+            return make_node_with_expr<parser::DString>(move(desugared), location, move(sorbetParts));
         }
         case PM_INTERPOLATED_SYMBOL_NODE: { // A symbol like `:"a #{b} c"`
             auto interpolatedSymbolNode = down_cast<pm_interpolated_symbol_node>(node);
 
             auto sorbetParts = translateMulti(interpolatedSymbolNode->parts);
 
-            return make_unique<parser::DSymbol>(location, move(sorbetParts));
+            if (!directlyDesugar || !hasExpr(sorbetParts)) {
+                return make_unique<parser::DSymbol>(location, move(sorbetParts));
+            }
+
+            auto desugared = desugarDString(location, interpolatedSymbolNode->parts);
+            return make_node_with_expr<parser::DSymbol>(move(desugared), location, move(sorbetParts));
         }
         case PM_INTERPOLATED_X_STRING_NODE: { // An executable string with backticks, like `echo "Hello, world!"`
             auto interpolatedXStringNode = down_cast<pm_interpolated_x_string_node>(node);
 
             auto sorbetParts = translateMulti(interpolatedXStringNode->parts);
 
-            return make_unique<parser::XString>(location, move(sorbetParts));
+            if (!directlyDesugar || !hasExpr(sorbetParts)) {
+                return make_unique<parser::XString>(location, move(sorbetParts));
+            }
+
+            auto desugared = desugarDString(location, interpolatedXStringNode->parts);
+            auto res = MK::Send1(location, MK::Self(location), core::Names::backtick(), location.copyWithZeroLength(),
+                                 move(desugared));
+            return make_node_with_expr<parser::XString>(move(res), location, move(sorbetParts));
         }
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // The `it` implicit parameter added in Ruby 3.4, e.g. `a.map { it + 1 }`
             [[fallthrough]];
@@ -1664,7 +1746,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 }
             }
         }
-        case PM_X_STRING_NODE: { // An interpolated x-string, like `/usr/bin/env ls`
+        case PM_X_STRING_NODE: { // A non-interpolated x-string, like `/usr/bin/env ls`
             auto strNode = down_cast<pm_x_string_node>(node);
 
             auto unescaped = &strNode->unescaped;
