@@ -622,50 +622,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasBlockArg &&
                                      !hasFwdArgs && !hasFwdRestArg && !hasSplat && hasExpr(receiver) && hasExpr(args);
 
-            if (supportedCallType) {
-                ast::Send::Flags flags;
-
-                ast::ExpressionPtr receiverExpr;
-                if (receiver == nullptr) { // Convert `foo()` to `self.foo()`
-                    // 0-sized Loc, since `self.` doesn't appear in the original file.
-                    receiverExpr = MK::Self(loc.copyWithZeroLength());
-                } else {
-                    receiverExpr = receiver->takeDesugaredExpr();
-                }
-
-                // Unsupported nodes are desugared to an empty tree.
-                // Treat them as if they were `self` to match `Desugar.cc`.
-                // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-                if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
-                    receiverExpr = MK::Self(loc.copyWithZeroLength());
-                    flags.isPrivateOk = true;
-                } else {
-                    flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-                }
-
-                int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
-
-                ast::Send::ARGS_store sendArgs{};
-                sendArgs.reserve(args.size());
-                for (auto &arg : args) {
-                    sendArgs.emplace_back(arg->takeDesugaredExpr());
-                }
-
-                auto expr = MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
-                sendNode =
-                    make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
-
-                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
-                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
-                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
-                    // The legacy parser inverts this , with a parent "Block" with a child
-                    // "Send".
-                    return translateCallWithBlock(prismBlock, move(sendNode));
-                }
-
-                return sendNode;
-            } else {
+            if (!supportedCallType) {
                 sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
@@ -679,6 +636,48 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 return sendNode;
             }
+
+            ast::Send::Flags flags;
+
+            ast::ExpressionPtr receiverExpr;
+            if (receiver == nullptr) { // Convert `foo()` to `self.foo()`
+                // 0-sized Loc, since `self.` doesn't appear in the original file.
+                receiverExpr = MK::Self(loc.copyWithZeroLength());
+            } else {
+                receiverExpr = receiver->takeDesugaredExpr();
+            }
+
+            // Unsupported nodes are desugared to an empty tree.
+            // Treat them as if they were `self` to match `Desugar.cc`.
+            // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+            if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
+                receiverExpr = MK::Self(loc.copyWithZeroLength());
+                flags.isPrivateOk = true;
+            } else {
+                flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+            }
+
+            int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
+
+            ast::Send::ARGS_store sendArgs{};
+            sendArgs.reserve(args.size());
+            for (auto &arg : args) {
+                sendArgs.emplace_back(arg->takeDesugaredExpr());
+            }
+
+            auto expr = MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
+            sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
+
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                // The legacy parser inverts this , with a parent "Block" with a child
+                // "Send".
+                return translateCallWithBlock(prismBlock, move(sendNode));
+            }
+
+            return sendNode;
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
             if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
