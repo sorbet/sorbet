@@ -1,9 +1,5 @@
 # typed: false
 
-def foo(&blk); end
+def foo(&my_block_param); end
 
 def foo(&); end
-
-def foo(&blk)
-  super(&blk)
-end
