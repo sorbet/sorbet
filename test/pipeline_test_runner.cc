@@ -225,7 +225,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             continue;
         }
 
-        parser::Parser::ParseResult parseResult;
+        parser::ParseResult parseResult;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
@@ -237,8 +237,10 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
-                auto nodes = parser::Prism::Parser::run(ctx);
-                parseResult = parser::Parser::ParseResult{move(nodes), {}};
+                // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
+                // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+                auto directlyTranslate = !gs.cacheSensitiveOptions.rbsEnabled;
+                parseResult = parser::Prism::Parser::run(ctx, directlyTranslate);
                 break;
             }
         }
@@ -281,7 +283,10 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
-                desugared = testSerialize(gs, ast::ParsedFile{ast::prismDesugar::node2Tree(ctx, move(nodes)), file});
+                auto directlyDesugar = !gs.cacheSensitiveOptions.rbsEnabled;
+                auto tree = directlyDesugar ? ast::prismDesugar::node2Tree(ctx, move(nodes))
+                                            : ast::desugar::node2Tree(ctx, move(nodes));
+                desugared = testSerialize(gs, ast::ParsedFile{move(tree), file});
                 break;
             }
         }
@@ -703,7 +708,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
 
         // this replicates the logic of pipeline::indexOne
-        parser::Parser::ParseResult parseResult;
+        parser::ParseResult parseResult;
         unique_ptr<parser::Node> directlyDesugaredTree;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
@@ -713,8 +718,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                parseResult = parser::Parser::ParseResult{parser::Prism::Parser::run(ctx, false), {}};
-                directlyDesugaredTree = parser::Prism::Parser::run(ctx, true);
+                parseResult = parser::Prism::Parser::run(ctx, false);
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    directlyDesugaredTree = nullptr;
+                } else {
+                    directlyDesugaredTree = parser::Prism::Parser::run(ctx).tree;
+                }
                 break;
             }
         }
@@ -740,7 +749,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             ast = ast::desugar::node2Tree(ctx, move(nodes));
 
             if (directlyDesugaredTree != nullptr) {
-                // This AST would have been desugared deirectly by Prism::Translator
+                // This AST would have been desugared directly by Prism::Translator
                 auto directlyDesugaredAST = ast::prismDesugar::node2Tree(ctx, move(directlyDesugaredTree));
 
                 if (!ast.exactlyEqual(*gs, directlyDesugaredAST, f.file)) {

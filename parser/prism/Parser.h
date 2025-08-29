@@ -11,6 +11,7 @@ extern "C" {
 
 #include "core/LocOffsets.h"
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
+#include "parser/ParseResult.h"
 
 namespace sorbet::parser::Prism {
 
@@ -54,15 +55,17 @@ public:
     Parser(Parser &&) = delete;
     Parser &operator=(Parser &&) = delete;
 
-    static std::unique_ptr<parser::Node> run(core::MutableContext &ctx, bool directlyDesugar = true);
+    static parser::ParseResult run(core::MutableContext &ctx, bool directlyDesugar = true,
+                                   bool preserveConcreteSyntax = false);
 
-    ParseResult parse();
+    ParseResult parse(bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
     std::string_view extractString(pm_string_t *string) const;
 
 private:
     std::vector<ParseError> collectErrors();
+    std::vector<core::LocOffsets> collectCommentLocations();
     pm_parser_t *getRawParserPointer();
 };
 
@@ -81,9 +84,12 @@ class ParseResult final {
     const Parser &parser;
     const std::unique_ptr<pm_node_t, NodeDeleter> node;
     const std::vector<ParseError> parseErrors;
+    std::vector<core::LocOffsets> commentLocations;
 
-    ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors)
-        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors} {}
+    ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors,
+                std::vector<core::LocOffsets> commentLocations)
+        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors}, commentLocations{
+                                                                                         commentLocations} {}
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment

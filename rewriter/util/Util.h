@@ -30,6 +30,14 @@ public:
                                     core::LocOffsets argLoc, ast::ExpressionPtr rhs,
                                     ast::MethodDef::Flags flags = ast::MethodDef::Flags());
 
+    static ast::ExpressionPtr mkSyntheticGet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
+                                             ast::ExpressionPtr rhs,
+                                             ast::MethodDef::Flags flags = ast::MethodDef::Flags());
+
+    static ast::ExpressionPtr mkSyntheticSet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
+                                             core::LocOffsets argLoc, ast::ExpressionPtr rhs,
+                                             ast::MethodDef::Flags flags = ast::MethodDef::Flags());
+
     static ast::ExpressionPtr mkNilable(core::LocOffsets loc, ast::ExpressionPtr type);
 
     static ast::ExpressionPtr thunkBody(core::MutableContext ctx, ast::ExpressionPtr &node);

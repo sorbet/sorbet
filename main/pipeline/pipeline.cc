@@ -5,7 +5,6 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
-#include "packager/packager.h"
 #include "rapidjson/writer.h"
 #include <sstream>
 #endif
@@ -39,6 +38,7 @@
 #include "local_vars/local_vars.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
+#include "packager/packager.h"
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
 #include "parser/prism/Translator.h"
@@ -224,10 +224,10 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
     return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
 }
 
-parser::Parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                      bool traceLexer, bool traceParser) {
+parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                              bool traceLexer, bool traceParser) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
-    parser::Parser::ParseResult result;
+    parser::ParseResult result;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         auto indentationAware = false;               // Don't start in indentation-aware error recovery mode
@@ -251,8 +251,8 @@ parser::Parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file,
     return result;
 }
 
-unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file,
-                                       parser::Parser::ParseResult &&parseResult, const options::Printers &print) {
+unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::ParseResult &&parseResult,
+                                       const options::Printers &print) {
     auto node = move(parseResult.tree);
     auto commentLocations = move(parseResult.commentLocations);
 
@@ -277,30 +277,34 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
     return node;
 }
 
-unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
+parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                                   bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
 
-    unique_ptr<parser::Node> nodes;
+    parser::ParseResult parseResult;
     {
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        nodes = parser::Prism::Parser::run(ctx);
+        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
+        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+        auto directlyTranslate = !gs.cacheSensitiveOptions.rbsEnabled;
+        parseResult = parser::Prism::Parser::run(ctx, directlyTranslate);
     }
 
     if (print.ParseTree.enabled) {
-        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
+        print.ParseTree.fmt("{}\n", parseResult.tree->toStringWithTabs(gs, 0));
     }
     if (print.ParseTreeJson.enabled) {
-        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
+        print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSON(gs, 0));
     }
     if (print.ParseTreeJsonWithLocs.enabled) {
-        print.ParseTreeJson.fmt("{}\n", nodes->toJSONWithLocs(gs, file, 0));
+        print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSONWithLocs(gs, file, 0));
     }
     if (print.ParseTreeWhitequark.enabled) {
-        print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
+        print.ParseTreeWhitequark.fmt("{}\n", parseResult.tree->toWhitequark(gs, 0));
     }
 
-    return nodes;
+    return parseResult;
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
@@ -310,8 +314,11 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        ast = gs.parseWithPrism ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
-                                : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
+        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
+        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+        auto directlyDesugar = gs.parseWithPrism && !gs.cacheSensitiveOptions.rbsEnabled;
+        ast = directlyDesugar ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
+                              : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
     if (print.DesugarTree.enabled) {
         print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
@@ -400,14 +407,12 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     break;
                 }
                 case options::Parser::PRISM: {
-                    parseTree = runPrismParser(lgs, file, print);
+                    auto parseResult = runPrismParser(lgs, file, print);
+                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
 
                     if (opts.stopAfterPhase == options::Phase::PARSER) {
                         return emptyParsedFile(file);
                     }
-
-                    // RBS rewriting is not yet supported for Prism. https://github.com/Shopify/sorbet/issues/574
-                    ENFORCE(opts.stopAfterPhase != options::Phase::RBS_REWRITER);
 
                     break;
                 }
@@ -808,6 +813,125 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
         packageFiles.reserve(packageFiles.size() + nonPackageFiles.size());
         absl::c_move(nonPackageFiles, back_inserter(packageFiles));
     }
+}
+
+vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+                                                     absl::Span<core::FileRef> sourceFiles,
+                                                     const options::Options &opts) {
+    Timer timeit(gs.tracer(), "computePackageStrata");
+
+    if (!opts.packageDirected) {
+        return vector{CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+    }
+
+    auto &db = gs.packageDB();
+
+    auto numPackageFiles = packageFiles.size();
+
+    // We move all the package files into a map, so that it's easy to go from package name to package file while
+    // processing the strata of the traversal.
+    UnorderedMap<core::packages::MangledName, ast::ParsedFile> packagesToPackageRb;
+    for (auto &ast : packageFiles) {
+        auto pkgName = db.getPackageNameForFile(ast.file);
+        ENFORCE(pkgName.exists());
+
+        packagesToPackageRb[pkgName] = move(ast);
+    }
+
+    // We'll generate non-test variants of each package, so we need to double the storage of this vector.
+    packageFiles.clear();
+    packageFiles.reserve(numPackageFiles * 2);
+
+    auto traversal = db.condensation().computeTraversal(gs);
+    ENFORCE(!traversal.strata.empty());
+
+    vector<uint32_t> fileToStratum(gs.filesUsed());
+    {
+        Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
+
+        auto stratumMapping = traversal.buildStratumMapping(gs);
+
+        int ix = 0;
+        for (auto &file : gs.getFiles().subspan(1)) {
+            ++ix;
+            core::FileRef fref(ix);
+            auto pkgName = db.getPackageNameForFile(fref);
+            if (!pkgName.exists()) {
+                // This is a file with no package, so we unconditionally put it in the first stratum. This means that
+                // it'll be checked at the same time as the first stratum of packaged code.
+                fileToStratum[ix] = 0;
+                continue;
+            }
+
+            ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
+                    "All packages must be present in the condensation graph");
+            auto &info = stratumMapping[pkgName];
+            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
+                fileToStratum[ix] = info.testStratum;
+            } else {
+                fileToStratum[ix] = info.applicationStratum;
+            }
+        }
+
+        fast_sort(sourceFiles, [&fileToStratum = as_const(fileToStratum)](core::FileRef l, core::FileRef r) -> bool {
+            auto lid = l.id();
+            auto rid = r.id();
+            auto lStratum = fileToStratum[lid];
+            auto rStratum = fileToStratum[rid];
+            return std::tie(lStratum, lid) < std::tie(rStratum, rid);
+        });
+    }
+
+    // Reserve enough space for all the strata of the condensation traversal, plus one more for unpackaged code.
+    auto maxStrata = traversal.strata.size() + 1;
+
+    vector<CondensationStratumInfo> result;
+    result.reserve(maxStrata);
+
+    auto sourceSpan = sourceFiles;
+
+    int currentStratum = -1;
+    for (auto &stratum : traversal.strata) {
+        ++currentStratum;
+
+        auto &resultStratum = result.emplace_back();
+
+        {
+            auto start = packageFiles.size();
+            for (auto &scc : stratum) {
+                if (scc.isTest) {
+                    for (auto member : scc.members) {
+                        packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
+                    }
+                } else {
+                    // When processing the application source of a package, we need to make a copy of the package file,
+                    // and edit out any reference to test symbols.
+                    for (auto member : scc.members) {
+                        const auto &package = packagesToPackageRb[member];
+                        packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
+                    }
+                }
+            }
+
+            auto len = packageFiles.size() - start;
+            ENFORCE(len > 0);
+            resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
+        }
+
+        {
+            auto it = absl::c_find_if(sourceSpan, [currentStratum, &fileToStratum = as_const(fileToStratum)](
+                                                      auto file) { return fileToStratum[file.id()] > currentStratum; });
+            auto len = std::distance(sourceSpan.begin(), it);
+            resultStratum.sourceFiles = sourceSpan.subspan(0, len);
+            sourceSpan = sourceSpan.subspan(len);
+        }
+    }
+
+    ENFORCE(sourceSpan.empty());
+    ENFORCE(!result.empty());
+    ENFORCE(result.size() <= maxStrata);
+
+    return result;
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.

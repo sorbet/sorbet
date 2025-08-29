@@ -72,6 +72,7 @@ cc_library(
         "//local_vars",
         "//main/options",
         "//namer",
+        "//packager",
         "//parser",
         "//parser/prism",
         "//payload/binary",

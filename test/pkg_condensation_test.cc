@@ -18,7 +18,7 @@ TEST_CASE("Condensation Graph - One package") {
     core::GlobalState gs(errorQueue);
     test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
 
-    // Enter a single package, and verify that we get out a condensation with two parallel layers.
+    // Enter a single package, and verify that we get out a condensation with two strata.
     auto parsedFiles = test::PackageHelpers::enterPackages(
         gs, {{"lib/foo/a/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")}});
 
@@ -31,11 +31,11 @@ TEST_CASE("Condensation Graph - One package") {
     auto traversal = condensation.computeTraversal(gs);
 
     {
-        INFO("The traversal should include two parallel layers, each with a single SCC");
-        CHECK_EQ(2, traversal.parallel.size());
+        INFO("The traversal should include two strata, each with a single SCC");
+        CHECK_EQ(2, traversal.strata.size());
         CHECK_EQ(2, traversal.sccs.size());
-        for (auto layer : traversal.parallel) {
-            for (auto scc : layer) {
+        for (auto stratum : traversal.strata) {
+            for (auto scc : stratum) {
                 CHECK_EQ(1, scc.members.size());
             }
         }
@@ -66,27 +66,27 @@ TEST_CASE("Condensation Graph - Two packages") {
     auto traversal = condensation.computeTraversal(gs);
 
     {
-        INFO("The traversal should include three parallel layers, and four SCCs");
-        REQUIRE_EQ(3, traversal.parallel.size());
+        INFO("The traversal should include three strata, and four SCCs");
+        REQUIRE_EQ(3, traversal.strata.size());
         CHECK_EQ(4, traversal.sccs.size());
     }
 
     {
-        INFO("The first layer should be B's application code");
-        CHECK_EQ(1, absl::c_count_if(traversal.parallel[0], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(0, absl::c_count_if(traversal.parallel[0], [](auto &scc) { return scc.isTest; }));
+        INFO("The first stratum should be B's application code");
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
+        CHECK_EQ(0, absl::c_count_if(traversal.strata[0], [](auto &scc) { return scc.isTest; }));
     }
 
     {
-        INFO("The second layer should be A's application code and B's test");
-        CHECK_EQ(1, absl::c_count_if(traversal.parallel[1], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(1, absl::c_count_if(traversal.parallel[1], [](auto &scc) { return scc.isTest; }));
+        INFO("The second stratum should be A's application code and B's test");
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return !scc.isTest; }));
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return scc.isTest; }));
     }
 
     {
-        INFO("The third layer should be A's application code");
-        CHECK_EQ(0, absl::c_count_if(traversal.parallel[2], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(1, absl::c_count_if(traversal.parallel[2], [](auto &scc) { return scc.isTest; }));
+        INFO("The third stratum should be A's application code");
+        CHECK_EQ(0, absl::c_count_if(traversal.strata[2], [](auto &scc) { return !scc.isTest; }));
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[2], [](auto &scc) { return scc.isTest; }));
     }
 }
 
@@ -111,27 +111,27 @@ TEST_CASE("Condensation Graph - Four packages without deps") {
     auto traversal = condensation.computeTraversal(gs);
 
     {
-        INFO("The traversal should include two parallel layers, each with four SCCs");
-        REQUIRE_EQ(2, traversal.parallel.size());
+        INFO("The traversal should include two strata, each with four SCCs");
+        REQUIRE_EQ(2, traversal.strata.size());
         CHECK_EQ(8, traversal.sccs.size());
-        for (auto layer : traversal.parallel) {
-            CHECK_EQ(4, layer.size());
-            for (auto scc : layer) {
+        for (auto stratum : traversal.strata) {
+            CHECK_EQ(4, stratum.size());
+            for (auto scc : stratum) {
                 CHECK_EQ(1, scc.members.size());
             }
         }
     }
 
     {
-        INFO("The first layer should be all application code");
-        for (auto scc : traversal.parallel[0]) {
+        INFO("The first stratum should be all application code");
+        for (auto scc : traversal.strata[0]) {
             CHECK(!scc.isTest);
         }
     }
 
     {
-        INFO("The second layer should be all test code");
-        for (auto scc : traversal.parallel[1]) {
+        INFO("The second stratum should be all test code");
+        for (auto scc : traversal.strata[1]) {
             CHECK(scc.isTest);
         }
     }
@@ -160,20 +160,20 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     auto pkgD = test::PackageHelpers::packageInfoFor(gs, parsedFiles[3].file).mangledName();
 
     {
-        INFO("There should be three layers in the resulting traversal");
-        REQUIRE_EQ(3, traversal.parallel.size());
+        INFO("There should be three strata in the resulting traversal");
+        REQUIRE_EQ(3, traversal.strata.size());
     }
 
     {
-        INFO("The first layer should be the A->B->D->A application code cycle");
-        REQUIRE_EQ(1, traversal.parallel[0].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.parallel[0], [](auto &scc) { return !scc.isTest; }));
+        INFO("The first stratum should be the A->B->D->A application code cycle");
+        REQUIRE_EQ(1, traversal.strata[0].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
 
         for (auto pkg : {pkgA, pkgB, pkgD}) {
             INFO("Checking for application package " << pkg.owner.showFullName(gs));
 
             auto found = false;
-            for (auto scc : traversal.parallel[0]) {
+            for (auto scc : traversal.strata[0]) {
                 CHECK(!scc.isTest);
                 auto it = absl::c_find(scc.members, pkg);
                 if (it != scc.members.end()) {
@@ -186,15 +186,15 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     }
 
     {
-        INFO("The second layer should include only the application code of C");
-        REQUIRE_EQ(1, traversal.parallel[1].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.parallel[1], [](auto &scc) { return !scc.isTest; }));
+        INFO("The second stratum should include only the application code of C");
+        REQUIRE_EQ(1, traversal.strata[1].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return !scc.isTest; }));
 
         for (auto pkg : {pkgC}) {
             INFO("Checking for application package " << pkg.owner.showFullName(gs));
 
             auto found = false;
-            for (auto scc : traversal.parallel[1]) {
+            for (auto scc : traversal.strata[1]) {
                 if (scc.isTest) {
                     continue;
                 }
@@ -209,15 +209,15 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     }
 
     {
-        INFO("The third layer should include all of the test packages");
-        REQUIRE_EQ(1, traversal.parallel[2].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.parallel[2], [](auto &scc) { return scc.isTest; }));
+        INFO("The third stratum should include all of the test packages");
+        REQUIRE_EQ(1, traversal.strata[2].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[2], [](auto &scc) { return scc.isTest; }));
 
         for (auto pkg : {pkgA, pkgB, pkgC, pkgD}) {
             INFO("Checking for test package " << pkg.owner.showFullName(gs));
 
             auto found = false;
-            for (auto scc : traversal.parallel[2]) {
+            for (auto scc : traversal.strata[2]) {
                 if (!scc.isTest) {
                     continue;
                 }

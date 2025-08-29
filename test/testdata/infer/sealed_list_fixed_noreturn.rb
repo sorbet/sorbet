@@ -16,7 +16,7 @@ module List
     include List
     Elem = type_member
 
-    prop :head, Elem
+    prop :head, Elem, override: :reader
     prop :tail, List[Elem]
   end
 

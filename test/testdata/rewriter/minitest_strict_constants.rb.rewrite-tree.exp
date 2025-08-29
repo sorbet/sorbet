@@ -10,10 +10,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     begin
       <emptyTree>::<C C2> = <cast:let>(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <todo sym>, <emptyTree>::<C Integer>)
-      begin
-        "allows let-ed constants inside of IT"
-        <runtime method definition of <it 'allows let-ed constants inside of IT'>>
-      end
+      <emptyTree>
     end
   end
 end

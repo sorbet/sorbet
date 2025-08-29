@@ -653,6 +653,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("package-skip-rbi-export-enforcement",
                                  "Constants defined in RBIs in these directories (and no others) can be exported",
                                  cxxopts::value<vector<string>>(), "<dir>");
+    options.add_options(section)("experimental-package-directed",
+                                 "Enable support for checking by package, instead of processing all files at once",
+                                 cxxopts::value<bool>());
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1018,12 +1021,6 @@ void readOptions(Options &opts,
         opts.stopAfterPhase = extractStopAfter(raw, logger);
 
         opts.parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
-        if (opts.parser == Parser::PRISM && opts.cacheSensitiveOptions.rbsEnabled) {
-            logger->error("Prism support is experimental and still under active development. It is not yet compatible "
-                          "with RBS signatures. https://github.com/Shopify/sorbet/issues/574");
-            throw EarlyReturnWithCode(1);
-        }
-
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
         opts.didYouMean = raw["did-you-mean"].as<bool>();
@@ -1212,6 +1209,12 @@ void readOptions(Options &opts,
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
         opts.cacheSensitiveOptions.stripePackages = raw["stripe-packages"].as<bool>();
+
+        opts.packageDirected = raw["experimental-package-directed"].as<bool>();
+        if (opts.packageDirected && !opts.cacheSensitiveOptions.stripePackages) {
+            logger->error("--experimental-package-directed can only be specified in --stripe-packages mode");
+            throw EarlyReturnWithCode(1);
+        }
 
         if (raw.count("extra-package-files-directory-prefix-underscore")) {
             for (const string &dirName : raw["extra-package-files-directory-prefix-underscore"].as<vector<string>>()) {

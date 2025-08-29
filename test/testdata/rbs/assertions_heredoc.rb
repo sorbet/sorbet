@@ -62,15 +62,15 @@ HEREDOC13 = <<-MSG#: String?
 MSG
 T.reveal_type(HEREDOC13) # error: Revealed type: `T.nilable(String)`
 
-HEREDOC13 = <<-MSG#: String?
+HEREDOC14 = <<-MSG#: String?
   #{42}
   #{42}
 MSG
-T.reveal_type(HEREDOC13) # error: Revealed type: `T.nilable(String)`
+T.reveal_type(HEREDOC14) # error: Revealed type: `T.nilable(String)`
 
-HEREDOC14 = <<-MSG, <<-MSG2#: String? # error: Argument does not have asserted type `T.nilable(String)`
+HEREDOC15 = <<-MSG, <<-MSG2#: String? # error: Argument does not have asserted type `T.nilable(String)`
   foo
 MSG
   bar
 MSG2
-T.reveal_type(HEREDOC14) # error: Revealed type: `T.nilable(String)`
+T.reveal_type(HEREDOC15) # error: Revealed type: `T.nilable(String)`

@@ -6,6 +6,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "ast/desugar/DuplicateHashKeyCheck.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
@@ -390,13 +391,22 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     return mdef;
 }
 
+// Desugar a Symbol block pass like the `&foo` in `m(&:foo)` into a block literal.
+// `&:foo` => `{ |*temp| (temp[0]).foo(*temp[1, LONG_MAX]) }`
+//
+// This works because Sorbet is guaranteed to infer a tuple type for `temp` corresponding to however
+// many block params the enclosing Send declares (or T.untyped). From there, various tuple-specific
+// intrinsics kick in:
+//
+// - temp[0]            (evaluates to the 0th elem of the tuple)
+// - temp[1, LONG_MAX]  (evalutes to a tuple type if temp is a tuple type)
+// - foo(*expr)         (call-with-splat handles case of splatted tuple type)
 ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
     core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
     auto lit = cast_tree<Literal>(expr);
     ENFORCE(lit && lit->isSymbol());
 
-    // &:foo => {|*temp| (temp[0]).foo(*tmp[1, LONG_MAX]) }
     core::NameRef name = core::cast_type_nonnull<core::NamedLiteralType>(lit->value).asName();
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
@@ -649,62 +659,6 @@ ExpressionPtr doUntil(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr c
     return MK::While(loc, MK::True(loc), move(breakWithBody));
 }
 
-class DuplicateHashKeyCheck {
-    DesugarContext dctx;
-    const core::GlobalState &gs;
-    UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
-    UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
-
-public:
-    DuplicateHashKeyCheck(DesugarContext dctx) : dctx{dctx}, gs{dctx.ctx.state}, hashKeySymbols(), hashKeyStrings() {}
-
-    void check(const ExpressionPtr &key) {
-        auto lit = ast::cast_tree<ast::Literal>(key);
-        if (lit == nullptr) {
-            return;
-        }
-
-        auto isSymbol = lit->isSymbol();
-        if (!lit || !lit->isName()) {
-            return;
-        }
-        auto nameRef = lit->asName();
-
-        if (isSymbol && !hashKeySymbols.contains(nameRef)) {
-            hashKeySymbols[nameRef] = key.loc();
-        } else if (!isSymbol && !hashKeyStrings.contains(nameRef)) {
-            hashKeyStrings[nameRef] = key.loc();
-        } else {
-            if (auto e = dctx.ctx.beginIndexerError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
-                core::LocOffsets originalLoc;
-                if (isSymbol) {
-                    originalLoc = hashKeySymbols[nameRef];
-                } else {
-                    originalLoc = hashKeyStrings[nameRef];
-                }
-
-                e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                e.addErrorLine(dctx.ctx.locAt(originalLoc), "First occurrence of `{}` hash key", nameRef.toString(gs));
-            }
-        }
-    }
-
-    void reset() {
-        hashKeySymbols.clear();
-        hashKeyStrings.clear();
-    }
-
-    // This is only used with Send::ARGS_store and Array::ELEMS_store
-    template <typename T> static void checkSendArgs(DesugarContext dctx, int numPosArgs, const T &args) {
-        DuplicateHashKeyCheck duplicateKeyCheck{dctx};
-
-        // increment by two so that a keyword args splat gets skipped.
-        for (int i = numPosArgs; i < args.size(); i += 2) {
-            duplicateKeyCheck.check(args[i]);
-        }
-    }
-};
-
 // Flattens the key/value pairs from the Kwargs Hash into the destination container.
 // If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
 template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargsHash, Container &destination) {
@@ -773,15 +727,17 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 auto methodName = MK::Symbol(locZeroLen, send->method);
 
-                // Pop the BlockPass off the end of the arguments, if there is one.
-                ExpressionPtr block;
+                // Pop the BlockPass off the end of the arguments, if there is one. (e.g. the `&:b` in `foo(&:b)`)
+                // Note: this does *not* handle regular block arguments (e.g. `foo { }`),
+                //       which are handled separately in the`parser::Block *` case.
+                ExpressionPtr blockPassArg;
                 if (!send->args.empty() && parser::isa_node<parser::BlockPass>(send->args.back().get())) {
                     auto *bp = parser::cast_node<parser::BlockPass>(send->args.back().get());
                     if (bp->block == nullptr) {
                         // Replace an anonymous block pass like `f(&)` with a local variable reference, like `f(&&)`.
-                        block = MK::Local(bp->loc, core::Names::ampersand());
+                        blockPassArg = MK::Local(bp->loc, core::Names::ampersand());
                     } else {
-                        block = node2TreeImpl(dctx, bp->block);
+                        blockPassArg = node2TreeImpl(dctx, bp->block);
                     }
 
                     send->args.pop_back();
@@ -810,10 +766,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         arg.get(),
                         [&](parser::ForwardedArgs *fwdArgs) {
                             // Pull out the ForwardedArgs (the `...` argument in a method call, like `foo(...)`)
-                            hasFwdArgs = true;
-                            ENFORCE(block == nullptr, "The parser should have rejected `foo(&, ...)`");
+
+                            ENFORCE(blockPassArg == nullptr, "The parser should have rejected `foo(&, ...)`");
                             // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &<fwd-block>)`.
-                            block = MK::Local(loc, core::Names::fwdBlock());
+                            blockPassArg = MK::Local(loc, core::Names::fwdBlock());
+
+                            hasFwdArgs = true;
                             eraseFromArgs = true;
                         },
                         [&](parser::ForwardedRestArg *fwdRestArg) {
@@ -884,7 +842,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                         kwargs = node2TreeImpl(dctx, kwArray);
 
-                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, cast_tree<Array>(kwargs)->elems);
+                        DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, 0, cast_tree<Array>(kwargs)->elems);
                     } else {
                         kwargs = MK::Nil(loc);
                     }
@@ -895,16 +853,29 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     sendargs.emplace_back(move(args));
                     sendargs.emplace_back(move(kwargs));
                     ExpressionPtr res;
-                    if (block == nullptr) {
+
+                    if (blockPassArg == nullptr) {
+                        // Desugar any call with a splat and without a block pass argument.
+                        // If there's a literal block argument, that's handled here, too.
+                        // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
                         res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                        move(sendargs), flags);
                     } else {
-                        if (auto lit = cast_tree<Literal>(block); lit && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(blockPassArg); lit && lit->isSymbol()) {
+                            // Desugar a call with a splat and a Symbol block pass argument.
+                            // E.g. `foo(*splat, &:to_s)`
+
+                            auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            sendargs.emplace_back(move(desugaredBlockLiteral));
+                            flags.hasBlock = true;
+
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            move(sendargs), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(block)));
                         } else {
-                            sendargs.emplace_back(move(block));
+                            // Desugar a call with a splat, and any other expression as a block pass argument.
+                            // E.g. `foo(*splat, &block)`
+
+                            sendargs.emplace_back(move(blockPassArg));
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), send->methodLoc,
                                            5, move(sendargs), flags);
                         }
@@ -926,22 +897,34 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         args.emplace_back(node2TreeImpl(dctx, stat));
                     };
 
-                    DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
+                    DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, numPosArgs, args);
 
                     ExpressionPtr res;
-                    if (block == nullptr) {
+                    if (blockPassArg == nullptr) {
+                        // Desugar any call without a splat and without a block pass argument.
+                        // If there's a literal block argument, that's handled here, too.
+                        // E.g. `a.each` or `a.each { |x| puts(x) }`
                         res = MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
                     } else {
-                        if (auto lit = cast_tree<Literal>(block); lit && lit->isSymbol()) {
+                        if (auto lit = cast_tree<Literal>(blockPassArg); lit && lit->isSymbol()) {
+                            // Desugar a call without a splat and a Symbol block pass argument.
+                            // E.g. `a.map(:to_s)`
+
+                            auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            args.emplace_back(move(desugaredBlockLiteral));
+                            flags.hasBlock = true;
+
                             res =
                                 MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
-                            ast::cast_tree_nonnull<ast::Send>(res).setBlock(symbol2Proc(dctx, move(block)));
                         } else {
+                            // Desugar a call without a splat, and any other expression as a block pass argument.
+                            // E.g. `a.each(&block)`
+
                             Send::ARGS_store sendargs;
                             sendargs.reserve(3 + args.size());
                             sendargs.emplace_back(move(rec));
                             sendargs.emplace_back(move(methodName));
-                            sendargs.emplace_back(move(block));
+                            sendargs.emplace_back(move(blockPassArg));
 
                             numPosArgs += 3;
 
@@ -980,7 +963,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 auto acc = dctx.freshNameUnique(core::Names::hashTemp());
 
-                DuplicateHashKeyCheck hashKeyDupes(dctx);
+                DuplicateHashKeyCheck hashKeyDupes(dctx.ctx);
                 Send::ARGS_store mergeValues;
                 mergeValues.reserve(hash->pairs.size() * 2 + 1);
                 mergeValues.emplace_back(MK::Local(loc, acc));

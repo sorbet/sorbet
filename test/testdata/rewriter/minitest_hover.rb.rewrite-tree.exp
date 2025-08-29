@@ -1,0 +1,80 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def describe<<todo method>>(name, &blk)
+    <emptyTree>
+  end
+
+  def it<<todo method>>(name, &blk)
+    <emptyTree>
+  end
+
+  def before<<todo method>>(name, &blk)
+    <emptyTree>
+  end
+
+  def after<<todo method>>(name, &blk)
+    <emptyTree>
+  end
+
+  def test_each<<todo method>>(arg, &blk)
+    <emptyTree>
+  end
+
+  def test_each_hash<<todo method>>(hash, &blk)
+    <emptyTree>
+  end
+
+  <runtime method definition of describe>
+
+  <runtime method definition of it>
+
+  <runtime method definition of before>
+
+  <runtime method definition of after>
+
+  <runtime method definition of test_each>
+
+  <runtime method definition of test_each_hash>
+
+  <emptyTree>::<C X> = "hello"
+
+  class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
+    def <it '::<Magic>.<string-interpolate>("outside test_each ", x)'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <it '::<Magic>.<string-interpolate>("outside test_each ", <self>.y())'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <it '::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <it '::<Magic>.<string-interpolate>("bar ", x)'><<todo method>>(&<blk>)
+      ["foo"].each() do |x|
+        <emptyTree>
+      end
+    end
+
+    x = "hello"
+
+    begin
+      ::<Magic>.<string-interpolate>("outside test_each ", x)
+      <emptyTree>
+    end
+
+    begin
+      ::<Magic>.<string-interpolate>("outside test_each ", <self>.y())
+      <emptyTree>
+    end
+
+    begin
+      ::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)
+      <emptyTree>
+    end
+
+    <self>.test_each(["foo"]) do |x|
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("bar ", x)'>>
+    end
+  end
+end

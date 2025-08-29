@@ -12,8 +12,8 @@ module T::Props::PrettyPrintable
     pp.group(1, "<#{klass.inspect_class_with_decoration(self)}", ">") do
       klass.all_props.sort.each do |prop|
         pp.breakable
-        val = klass.get(self, prop)
         rules = klass.prop_rules(prop)
+        val = klass.get(self, prop, rules)
         pp.text("#{prop}=")
         if (custom_inspect = rules[:inspect])
           inspected = if T::Utils.arity(custom_inspect) == 1
@@ -22,8 +22,8 @@ module T::Props::PrettyPrintable
             custom_inspect.call(val, {multiline: multiline})
           end
           pp.text(inspected.nil? ? "nil" : inspected)
-        elsif rules[:sensitivity] && !rules[:sensitivity].empty? && !val.nil?
-          pp.text("<REDACTED #{rules[:sensitivity].join(', ')}>")
+        elsif (sensitivity = rules[:sensitivity]) && !sensitivity.empty? && !val.nil?
+          pp.text("<REDACTED #{sensitivity.join(', ')}>")
         else
           val.pretty_print(pp)
         end
@@ -56,14 +56,14 @@ module T::Props::PrettyPrintable
 
     # Overridable method to specify how the first part of a `pretty_print`d object's class should look like
     # NOTE: This is just to support Stripe's `PrettyPrintableModel` case, and not recommended to be overridden
-    sig { params(instance: T::Props::PrettyPrintable).returns(String) }
+    sig { params(instance: T::Props::PrettyPrintable).returns(String).checked(:never) }
     def inspect_class_with_decoration(instance)
       T.unsafe(instance).class.to_s
     end
 
     # Overridable method to add anything that is not a prop
     # NOTE: This is to support cases like Serializable's `@_extra_props`, and Stripe's `PrettyPrintableModel#@_deleted`
-    sig { params(instance: T::Props::PrettyPrintable, pp: T.any(PrettyPrint, PP::SingleLine)).void }
+    sig { params(instance: T::Props::PrettyPrintable, pp: T.any(PrettyPrint, PP::SingleLine)).void.checked(:never) }
     def pretty_print_extra(instance, pp); end
   end
 end

@@ -1,0 +1,57 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C HEREDOC1> = "#: Integer\n".strip()
+
+  <emptyTree>::<C HEREDOC2> = "<<~ #: Integer".strip()
+
+  <emptyTree>::<C HEREDOC3> = "#: Integer\n"
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC3>)
+
+  <emptyTree>::<C HEREDOC4> = <cast:let>("foo\n", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC4>)
+
+  <emptyTree>::<C HEREDOC5> = <cast:let>(::<Magic>.<string-interpolate>(42, "\n").strip().strip(), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC5>)
+
+  <emptyTree>::<C HEREDOC6> = <cast:let>(<self>.String("foo\n".strip()), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC6>)
+
+  <emptyTree>::<C HEREDOC7> = <cast:let>("foo\nbar\nbaz\n", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC7>)
+
+  <emptyTree>::<C HEREDOC8> = <cast:let>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC8>)
+
+  <emptyTree>::<C HEREDOC9> = <cast:let>("", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC9>)
+
+  <emptyTree>::<C HEREDOC10> = <cast:let>("  foo\n", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC10>)
+
+  <emptyTree>::<C HEREDOC11> = <cast:let>("  foo\n", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC11>)
+
+  <emptyTree>::<C HEREDOC12> = <cast:let>("  foo\n", <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC12>)
+
+  <emptyTree>::<C HEREDOC13> = <cast:let>(::<Magic>.<string-interpolate>("  ", 42, "\n"), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC13>)
+
+  <emptyTree>::<C HEREDOC14> = <cast:let>(::<Magic>.<string-interpolate>("  ", 42, "\n  ", 42, "\n"), <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC14>)
+
+  <emptyTree>::<C HEREDOC15> = <cast:let>(["  foo\n", "  bar\n"], <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C HEREDOC15>)
+end

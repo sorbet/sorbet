@@ -80,6 +80,27 @@ x.created      # => 1666483576.475571
 x.nilable      # => nil
 ```
 
+### `T.nilable` without implying `default: nil`
+
+Due to an accident of history (see [Legacy code and historical context](#legacy-code-and-historical-context)), props marked `T.nilable` always have an implied `default: nil` associated with them.
+
+There is no way to opt out of this behavior at the time being.
+
+One way to work around it is to hide the `T.nilable(...)` type from Sorbet statically:
+
+```ruby
+class MustConstructWithFoo < T::Struct
+  NilableInteger = T.type_alias { T.nilable(Integer) }
+  prop :foo, NilableInteger
+end
+
+MustConstructWithFoo.new # error: Missing required keyword arg `foo`
+```
+
+This is a **partial**, static-only solution: at runtime, the `foo` keyword is still optional with an implied default of `nil`. But Statically, Sorbet will require typed call sites to provide a value.
+
+(This workaround only because of a technical limitation in Sorbet: the phase which handles the `prop` DSL is syntax-directed—it has no semantic information available, which means it does not resolve through type aliases).
+
 ### Default values and references
 
 To avoid having a default value be shared and mutated by **all** instances of a `T::Struct`, certain built-in types are deeply cloned at initialization time. Other types that are not built into Ruby have their `.clone` method called.
@@ -109,6 +130,38 @@ To fix this, `T::Struct` takes measures to clone objects, so that they are not s
 - All other default values are simply cloned by calling `.clone` on the provided default.
 
 These rules prevent the most common misuses of accidentally mutating default values via references, but it is still possible to construct cases where the above rules are not strong enough. In such cases, use `factory:` to compute the default value in whatever way necessary. The value produced by `factory:` is used verbatim. (This means that `factory:` can be used when reference sharing across default values is actually the _desired_ outcome.)
+
+## Fine-grained inheritance control with `override:`
+
+Methods defined with `prop` or `const` must also annotate the methods they override (just like if the reader and writer methods had been defined as normal `def` methods). Use the `override` keyword argument on a `prop` or `const` to declare the override. In the simplest cases, this will be one of:
+
+- `..., override: :reader` (only overrides `foo`, the reader method)
+- `..., override: :writer` (only overrides `foo=`, the writer method)
+- `..., override: true` (overrides both `foo` and `foo=`).
+
+The `override` keyword also accepts a `Hash` to declare more fine-grained overrides (for example, if an override [incompatibly overrides](https://sorbet.org/docs/override-checking#use-overrideallow_incompatible-true) another method). Use the `reader` and `writer` keys:
+
+```ruby
+module Interface
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig { abstract.returns(T.nilable(String)) }
+  def foo; end
+
+  sig { abstract.params(foo: String).returns(String) }
+  def foo=(foo); end
+end
+
+class Concrete < T::Struct
+  include Interface
+
+  prop :foo, String, override: {reader: {allow_incompatible: true}, writer: true}
+end
+```
+
+See [Overrides and the `prop` DSL](override-checking.md#overrides-and-the-prop-dsl) for a full specification of what `override` accepts.
 
 ## Structs and inheritance
 
@@ -173,13 +226,13 @@ end
 
 class ChildOne < T::Struct
   include Common
-  prop :foo, Integer
+  prop :foo, Integer, override: true
   prop :bar, String
 end
 
 class ChildTwo < T::Struct
   include Common
-  prop :foo, Integer
+  prop :foo, Integer, override: true
   prop :quz, Symbol
 end
 ```

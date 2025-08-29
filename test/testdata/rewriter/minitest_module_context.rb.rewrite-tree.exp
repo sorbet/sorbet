@@ -9,49 +9,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C M><<C <todo sym>>> < ()
     class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
       def <it 'adds a method'><<todo method>>(&<blk>)
         <emptyTree>
       end
 
-      begin
-        "adds a method"
-        <runtime method definition of <it 'adds a method'>>
-      end
-
       class <emptyTree>::<C <describe 'inner'>><<C <todo sym>>> < (<self>)
-        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-          <self>.void()
-        end
-
         def <it 'inner test'><<todo method>>(&<blk>)
           <emptyTree>
         end
-
-        "inner test"
-
-        <runtime method definition of <it 'inner test'>>
       end
     end
 
     class <emptyTree>::<C <describe 'another'>><<C <todo sym>>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
       def <it 'something'><<todo method>>(&<blk>)
         <self>.foo()
       end
 
       <self>.include(<emptyTree>::<C Helper>)
-
-      begin
-        "something"
-        <runtime method definition of <it 'something'>>
-      end
     end
   end
 
@@ -63,17 +37,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of test_method>
 
     class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (<self>)
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
       def <it 'adds a method'><<todo method>>(&<blk>)
         <self>.test_method()
       end
-
-      "adds a method"
-
-      <runtime method definition of <it 'adds a method'>>
     end
   end
 end
