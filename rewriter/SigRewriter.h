@@ -6,7 +6,7 @@
 namespace sorbet::rewriter {
 class SigRewriter {
 public:
-    static bool run(core::MutableContext &ctx, ast::Send *send);
+    static bool run(core::MutableContext ctx, ast::Send *send);
 };
 } // namespace sorbet::rewriter
 #endif

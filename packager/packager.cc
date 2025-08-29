@@ -1086,7 +1086,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     }
 }
 
-void validateLayering(const core::Context &ctx, const Import &i) {
+void validateLayering(core::Context ctx, const Import &i) {
     if (i.isTestImport()) {
         return;
     }
@@ -1159,7 +1159,7 @@ void validateLayering(const core::Context &ctx, const Import &i) {
     }
 }
 
-void validateVisibility(const core::Context &ctx, const PackageInfo &absPkg, const Import i) {
+void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Import i) {
     ENFORCE(ctx.state.packageDB().getPackageInfo(i.mangledName).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
