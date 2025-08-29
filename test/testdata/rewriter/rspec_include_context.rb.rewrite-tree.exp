@@ -25,36 +25,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.puts(<self>.shared_variable())
       end
 
-      begin
-        class <emptyTree>::<C <shared_examples 'user helpers'>><<C <todo sym>>> < (<self>)
-          def shared_variable<<todo method>>(&<blk>)
-            "shared value"
-          end
-
-          ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-            <self>.void()
-          end
-
-          def <it 'can use test assertions within shared examples'><<todo method>>(&<blk>)
-            <self>.expect(<self>.shared_variable()).to(<self>.eq("shared value"))
-          end
-
-          <runtime method definition of shared_variable>
-
-          begin
-            "can use test assertions within shared examples"
-            <runtime method definition of <it 'can use test assertions within shared examples'>>
-          end
+      module <emptyTree>::<C <shared_examples_module 'user helpers'>><<C <todo sym>>> < ()
+        def shared_variable<<todo method>>(&<blk>)
+          "shared value"
         end
-        module <emptyTree>::<C <shared_examples_module 'user helpers'>><<C <todo sym>>> < ()
-          def shared_variable<<todo method>>(&<blk>)
-            "shared value"
-          end
 
-          <self>.extend(<emptyTree>::<C T>::<C Helpers>)
-
-          <runtime method definition of shared_variable>
+        ::<Magic>.requires_ancestor(<self>) do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
         end
+
+        <runtime method definition of shared_variable>
       end
 
       <self>.include(<emptyTree>::<C <shared_examples_module 'user helpers'>>)
@@ -97,47 +77,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C <describe 'RSpec context with shared_context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    begin
-      class <emptyTree>::<C <shared_examples 'authenticated user'>><<C <todo sym>>> < (<self>)
-        def user<<todo method>>(&<blk>)
-          "authenticated_user"
-        end
-
-        def token<<todo method>>(&<blk>)
-          "auth_token_123"
-        end
-
-        def auth_helper<<todo method>>(&<blk>)
-          ::<Magic>.<string-interpolate>(<self>.user(), " with ", <self>.token())
-        end
-
-        <runtime method definition of user>
-
-        <runtime method definition of token>
-
-        <runtime method definition of auth_helper>
+    module <emptyTree>::<C <shared_examples_module 'authenticated user'>><<C <todo sym>>> < ()
+      def user<<todo method>>(&<blk>)
+        "authenticated_user"
       end
-      module <emptyTree>::<C <shared_examples_module 'authenticated user'>><<C <todo sym>>> < ()
-        def user<<todo method>>(&<blk>)
-          "authenticated_user"
-        end
 
-        def token<<todo method>>(&<blk>)
-          "auth_token_123"
-        end
-
-        def auth_helper<<todo method>>(&<blk>)
-          ::<Magic>.<string-interpolate>(<self>.user(), " with ", <self>.token())
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Helpers>)
-
-        <runtime method definition of user>
-
-        <runtime method definition of token>
-
-        <runtime method definition of auth_helper>
+      def token<<todo method>>(&<blk>)
+        "auth_token_123"
       end
+
+      def auth_helper<<todo method>>(&<blk>)
+        ::<Magic>.<string-interpolate>(<self>.user(), " with ", <self>.token())
+      end
+
+      ::<Magic>.requires_ancestor(<self>) do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+
+      <runtime method definition of user>
+
+      <runtime method definition of token>
+
+      <runtime method definition of auth_helper>
     end
 
     class <emptyTree>::<C <describe 'API endpoint'>><<C <todo sym>>> < (<self>)
@@ -162,35 +123,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'e2e context'>><<C <todo sym>>> < (<self>)
-      begin
-        class <emptyTree>::<C <shared_examples 'e2e context'>><<C <todo sym>>> < (<self>)
-          def foo<<todo method>>(&<blk>)
-            "bar"
-          end
-
-          def config<<todo method>>(&<blk>)
-            "default_config"
-          end
-
-          <runtime method definition of foo>
-
-          <runtime method definition of config>
+      module <emptyTree>::<C <shared_examples_module 'e2e context'>><<C <todo sym>>> < ()
+        def foo<<todo method>>(&<blk>)
+          "bar"
         end
-        module <emptyTree>::<C <shared_examples_module 'e2e context'>><<C <todo sym>>> < ()
-          def foo<<todo method>>(&<blk>)
-            "bar"
-          end
 
-          def config<<todo method>>(&<blk>)
-            "default_config"
-          end
-
-          <self>.extend(<emptyTree>::<C T>::<C Helpers>)
-
-          <runtime method definition of foo>
-
-          <runtime method definition of config>
+        def config<<todo method>>(&<blk>)
+          "default_config"
         end
+
+        ::<Magic>.requires_ancestor(<self>) do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+
+        <runtime method definition of foo>
+
+        <runtime method definition of config>
       end
 
       class <emptyTree>::<C <describe 'with parameters'>><<C <todo sym>>> < (<self>)

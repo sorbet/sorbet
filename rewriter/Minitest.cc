@@ -488,52 +488,198 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return nullptr;
     }
 
-    if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->numPosArgs() == 1) {
-        if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
-            (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
-            if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
-                e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
-                            send->fun == core::Names::testEach() ? "at least 1" : "2", block->args.size());
+    switch (send->fun.rawId()) {
+        case core::Names::testEach().rawId():
+        case core::Names::testEachHash().rawId(): {
+            if (send->numPosArgs() != 1) {
+                if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
+                    auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
+                    if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::BadTestEach)) {
+                        e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
+                        if (send->numPosArgs() == 0 && errLoc.exists()) {
+                            auto replaceLoc = ctx.locAt(errLoc);
+                            e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}",
+                                          replaceLoc.source(ctx).value());
+                        }
+                    }
+                }
+                return nullptr;
             }
-            return nullptr;
-        }
-        // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing we
-        // can freely copy into methoddef scope
-        auto iteratee = getIteratee(send->getPosArg(0));
-        // and then reconstruct the send but with a modified body
-        auto body =
-            prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee, insideDescribe);
-        return ast::MK::Send(send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
-                             ast::MK::SendArgs(move(send->getPosArg(0)),
-                                               ast::MK::Block(block->loc, std::move(body), std::move(block->args))),
-                             send->flags);
-    }
 
-    if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
-        auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
-        if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::BadTestEach)) {
-            e.setHeader("`{}` expects a single `{}` argument, not keyword args", "test_each_hash", "Hash");
-            if (send->numPosArgs() == 0 && errLoc.exists()) {
-                auto replaceLoc = ctx.locAt(errLoc);
-                e.replaceWith("Wrap with curly braces", replaceLoc, "{{{}}}", replaceLoc.source(ctx).value());
+            if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
+                (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
+                if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
+                    e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`",
+                                send->fun.show(ctx), send->fun == core::Names::testEach() ? "at least 1" : "2",
+                                block->args.size());
+                }
+                return nullptr;
+            }
+
+            // if this has the form `test_each(expr) { |arg | .. }`, then start by trying to convert `expr` into a thing
+            // we can freely copy into methoddef scope
+            auto iteratee = getIteratee(send->getPosArg(0));
+            // and then reconstruct the send but with a modified body
+            auto body =
+                prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee, insideDescribe);
+            return ast::MK::Send(send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
+                                 ast::MK::SendArgs(move(send->getPosArg(0)),
+                                                   ast::MK::Block(block->loc, std::move(body), std::move(block->args))),
+                                 send->flags);
+        }
+
+        case core::Names::before().rawId():
+        case core::Names::after().rawId(): {
+            if (send->numPosArgs() != 0) {
+                return nullptr;
+            }
+
+            auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
+            ConstantMover constantMover;
+            ast::TreeWalk::apply(ctx, constantMover, block->body);
+            auto declLoc = declLocForSendWithBlock(*send);
+            auto method = addSigVoid(ast::MK::SyntheticMethod0(
+                send->loc, declLoc, name, prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
+            return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+
+        case core::Names::subject().rawId(): {
+            if (send->numPosArgs() == 0) {
+                // Anonymous subject() { ... }
+                auto declLoc = send->funLoc;
+                return ast::MK::SyntheticMethod0(send->loc, declLoc, core::Names::subject(), std::move(block->body));
+            } else if (insideDescribe && send->numPosArgs() == 1) {
+                // Named subject(:name) { ... } - handle like let(:name) { ... }
+                auto &arg = send->getPosArg(0);
+                if (!ast::isa_tree<ast::Literal>(arg)) {
+                    return nullptr;
+                }
+                auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
+                if (!argLiteral.isName()) {
+                    return nullptr;
+                }
+
+                auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
+                auto methodName = argLiteral.asName();
+                return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
+            } else {
+                return nullptr;
             }
         }
+
+        case core::Names::describe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xdescribe().rawId():
+        case core::Names::xcontext().rawId(): {
+            if (send->numPosArgs() != 1) {
+                return nullptr;
+            }
+            auto &arg = send->getPosArg(0);
+            auto argString = to_s(ctx, arg);
+            ast::ClassDef::ANCESTORS_store ancestors;
+
+            // First ancestor is the superclass
+            if (send->recv.isSelfReference()) {
+                if (isClass) {
+                    ancestors.emplace_back(ast::MK::Self(arg.loc()));
+                } else {
+                    // Avoid subclassing self when it's a module, as that will produce an error.
+                    ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
+
+                    // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
+                    // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
+                    // an ancestor, which we're choosing not to model so that this rewriter pass works for
+                    // RSpec specs too. This means users might have to add extra `include` lines in their
+                    // describe bodies to convince Sorbet what's available, but at least it won't say that
+                    // Minitest::Spec is an ancestor for RSpec tests.
+                }
+            } else {
+                ENFORCE(isRSpec(send->recv));
+                auto exampleGroup = ast::MK::EmptyTree();
+                exampleGroup =
+                    ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
+                exampleGroup =
+                    ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
+                exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup),
+                                                           core::Names::Constants::ExampleGroup());
+                ancestors.emplace_back(move(exampleGroup));
+            }
+
+            const bool bodyIsClass = true;
+            auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
+
+            auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
+                                                    ctx.state.enterNameConstant("<describe '" + argString + "'>"));
+            auto declLoc = declLocForSendWithBlock(*send);
+            return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
+                                  flattenDescribeBody(move(rhs)));
+        }
+
+        case core::Names::sharedExamples().rawId():
+        case core::Names::sharedContext().rawId(): {
+            if (send->numPosArgs() != 1) {
+                return nullptr;
+            }
+            auto &arg = send->getPosArg(0);
+            auto argString = to_s(ctx, arg);
+            const bool bodyIsClass = true; // Process body as class context to get proper RSpec context
+            auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
+
+            // Create a filtered module version that contains only includable methods (let, etc.)
+            auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
+
+            // Filter the RHS to include only methods that should be includable
+            ast::ClassDef::RHS_store filteredModuleRhs;
+            auto flattenedRhs = flattenDescribeBody(move(rhs));
+
+            // Add Magic.requires_ancestor for RSpec::Core::ExampleGroup - all shared examples need this
+            // to be includable in RSpec contexts regardless of how they're called
+            auto magic = ast::MK::Magic(send->loc);
+
+            // Build RSpec::Core::ExampleGroup constant
+            auto rspecExampleGroup = ast::MK::EmptyTree();
+            rspecExampleGroup =
+                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::RSpec());
+            rspecExampleGroup =
+                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::Core());
+            rspecExampleGroup =
+                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::ExampleGroup());
+
+            // Create a block that returns the RSpec::Core::ExampleGroup constant
+            auto blockBody = std::move(rspecExampleGroup);
+            ast::MethodDef::ARGS_store blockArgs;
+            auto blockForRequires = ast::MK::Block(send->loc, std::move(blockBody), std::move(blockArgs));
+
+            // Create Magic.requires_ancestor(self) { block }
+            ast::Send::ARGS_store args;
+            args.emplace_back(ast::MK::Self(send->loc)); // positional arg: self
+            args.emplace_back(std::move(blockForRequires));         // block arg
+            ast::Send::Flags flags;
+            flags.hasBlock = true;
+
+            auto requiresAncestorStatement = ast::MK::Send(send->loc, std::move(magic), core::Names::requiresAncestor(),
+                                                           send->loc, 1, std::move(args), flags);
+            filteredModuleRhs.emplace_back(std::move(requiresAncestorStatement));
+
+            for (auto &expr : flattenedRhs) {
+                // Only include method definitions (let, subject, etc.) in the module
+                // Skip describe blocks and other non-includable constructs
+                if (auto method = ast::cast_tree<ast::MethodDef>(expr)) {
+                    filteredModuleRhs.emplace_back(expr.deepCopy());
+                }
+            }
+
+            ast::ClassDef::ANCESTORS_store moduleAncestors;
+            auto declLoc = declLocForSendWithBlock(*send);
+            auto moduleResult = ast::MK::Module(send->loc, declLoc, std::move(moduleName), std::move(moduleAncestors),
+                                                std::move(filteredModuleRhs));
+
+            // Return only the module
+            return moduleResult;
+        }
     }
 
-    if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
-        auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
-        ConstantMover constantMover;
-        ast::TreeWalk::apply(ctx, constantMover, block->body);
-        auto declLoc = declLocForSendWithBlock(*send);
-        auto method = addSigVoid(ast::MK::SyntheticMethod0(
-            send->loc, declLoc, name, prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
-        return constantMover.addConstantsToExpression(send->loc, move(method));
-    }
-
-    if (send->numPosArgs() == 0 && send->fun == core::Names::subject()) {
-        auto declLoc = send->funLoc;
-        return ast::MK::SyntheticMethod0(send->loc, declLoc, core::Names::subject(), std::move(block->body));
-    }
+    // Handle remaining logic after switch statement
 
     // Handle include_context with block (1+ pos args + optional kwargs/block)
     if (send->fun == core::Names::includeContext() && send->numPosArgs() >= 1) {
@@ -585,137 +731,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
+    // Handle cases with 1 argument that weren't covered in the switch
     if (send->numPosArgs() != 1) {
         return nullptr;
     }
     auto &arg = send->getPosArg(0);
 
-    if (isDescribeOrSimilar(send->fun)) {
-        auto argString = to_s(ctx, arg);
-        ast::ClassDef::ANCESTORS_store ancestors;
-
-        if (send->recv.isSelfReference()) {
-            // First ancestor is the superclass
-            if (isClass) {
-                ancestors.emplace_back(ast::MK::Self(arg.loc()));
-            } else {
-                // Avoid subclassing self when it's a module, as that will produce an error.
-                ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
-
-                // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
-                // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
-                // an ancestor, which we're choosing not to model so that this rewriter pass works for
-                // RSpec specs too. This means users might have to add extra `include` lines in their
-                // describe bodies to convince Sorbet what's available, but at least it won't say that
-                // Minitest::Spec is an ancestor for RSpec tests.
-            }
-        } else {
-            ENFORCE(isRSpec(send->recv));
-            auto exampleGroup = ast::MK::EmptyTree();
-            exampleGroup =
-                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
-            exampleGroup =
-                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
-            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup),
-                                                       core::Names::Constants::ExampleGroup());
-            ancestors.emplace_back(move(exampleGroup));
-        }
-
-        const bool bodyIsClass = true;
-        auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
-
-        auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
-                                                ctx.state.enterNameConstant("<describe '" + argString + "'>"));
-        auto declLoc = declLocForSendWithBlock(*send);
-        return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
-                              flattenDescribeBody(move(rhs)));
-    } else if (isSharedExamples(send->fun)) {
-        auto argString = to_s(ctx, arg);
-        const bool bodyIsClass = true; // Process body as class context to get proper RSpec context
-        auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
-
-        // Create a class for shared_examples that inherits from the same parent as the current describe block
-        // Use proper scoping - if we're inside a describe block, nest under it; otherwise use root
-        auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
-                                                ctx.state.enterNameConstant("<shared_examples '" + argString + "'>"));
-        auto declLoc = declLocForSendWithBlock(*send);
-        ast::ClassDef::ANCESTORS_store ancestors;
-
-        // shared_examples should inherit from the same parent as the current describe block
-        // This gives them access to RSpec methods and context
-        if (send->recv.isSelfReference()) {
-            if (isClass) {
-                // Inherit from Self's parent (same as what a describe block would inherit from)
-                ancestors.emplace_back(ast::MK::Self(arg.loc()));
-            } else {
-                ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
-            }
-        } else {
-            ENFORCE(isRSpec(send->recv));
-            auto exampleGroup = ast::MK::EmptyTree();
-            exampleGroup =
-                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
-            exampleGroup =
-                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
-            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup),
-                                                       core::Names::Constants::ExampleGroup());
-            ancestors.emplace_back(move(exampleGroup));
-        }
-
-        // Only create a module version (no class needed)
-
-        // Create a filtered module version that contains only includable methods (let, etc.)
-        auto moduleName = makeSharedExamplesModuleConstantLocal(ctx, arg.loc(), argString);
-
-        // Filter the RHS to include only methods that should be includable
-        ast::ClassDef::RHS_store filteredModuleRhs;
-        auto flattenedRhs = flattenDescribeBody(move(rhs));
-
-        // Add Magic.requires_ancestor for RSpec context modules
-        if (!send->recv.isSelfReference() && isRSpec(send->recv)) {
-            auto magic = ast::MK::Magic(send->loc);
-
-            // Build RSpec::Core::ExampleGroup constant
-            auto rspecExampleGroup = ast::MK::EmptyTree();
-            rspecExampleGroup =
-                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::RSpec());
-            rspecExampleGroup =
-                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::Core());
-            rspecExampleGroup =
-                ast::MK::UnresolvedConstant(arg.loc(), move(rspecExampleGroup), core::Names::Constants::ExampleGroup());
-
-            // Create a block that returns the RSpec::Core::ExampleGroup constant
-            auto blockBody = std::move(rspecExampleGroup);
-            ast::MethodDef::ARGS_store blockArgs;
-            auto block = ast::MK::Block(send->loc, std::move(blockBody), std::move(blockArgs));
-
-            // Create Magic.requires_ancestor(self) { block }
-            ast::Send::ARGS_store args;
-            args.emplace_back(ast::MK::Self(send->loc)); // positional arg: self
-            args.emplace_back(std::move(block));         // block arg
-            ast::Send::Flags flags;
-            flags.hasBlock = true;
-
-            auto requiresAncestorStatement = ast::MK::Send(send->loc, std::move(magic), core::Names::requiresAncestor(),
-                                                           send->loc, 1, std::move(args), flags);
-            filteredModuleRhs.emplace_back(std::move(requiresAncestorStatement));
-        }
-
-        for (auto &expr : flattenedRhs) {
-            // Only include method definitions (let, subject, etc.) in the module
-            // Skip describe blocks and other non-includable constructs
-            if (auto method = ast::cast_tree<ast::MethodDef>(expr)) {
-                filteredModuleRhs.emplace_back(expr.deepCopy());
-            }
-        }
-
-        ast::ClassDef::ANCESTORS_store moduleAncestors;
-        auto moduleResult = ast::MK::Module(send->loc, declLoc, std::move(moduleName), std::move(moduleAncestors),
-                                            std::move(filteredModuleRhs));
-
-        // Return only the module
-        return moduleResult;
-    } else if (send->fun == core::Names::its()) {
+    if (send->fun == core::Names::its()) {
         auto argString = to_s(ctx, arg);
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
@@ -730,8 +752,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     } else if (insideDescribe &&
-               ((send->fun == core::Names::let() || send->fun == core::Names::letBang() ||
-                 send->fun == core::Names::subject())) &&
+               ((send->fun == core::Names::let() || send->fun == core::Names::letBang())) &&
                ast::isa_tree<ast::Literal>(arg)) {
         auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
         if (!argLiteral.isName()) {
