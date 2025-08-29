@@ -1669,7 +1669,29 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto yieldArgs = translateArguments(yieldNode->arguments);
 
-            return make_unique<parser::Yield>(location, move(yieldArgs));
+            if (!directlyDesugar || !hasExpr(yieldArgs)) {
+                return make_unique<parser::Yield>(location, move(yieldArgs));
+            }
+
+            ExpressionPtr recv;
+            if (enclosingBlockParamName.exists()) {
+                if (enclosingBlockParamName == core::Names::blkArg()) {
+                    if (auto e =
+                            ctx.beginIndexerError(enclosingMethodLoc, core::errors::Desugar::UnnamedBlockParameter)) {
+                        e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
+                                    enclosingMethodName.show(ctx), "yield");
+                        e.addErrorLine(ctx.locAt(location), "Arising from use of `{}` in method body", "yield");
+                    }
+                }
+                recv = MK::Local(location, enclosingBlockParamName);
+            } else {
+                recv = MK::RaiseUnimplemented(location);
+            }
+
+            auto args = nodeVecToStore<ast::Send::ARGS_store>(yieldArgs);
+            auto expr = MK::Send(location, std::move(recv), core::Names::call(), location.copyWithZeroLength(),
+                                 args.size(), std::move(args));
+            return make_node_with_expr<parser::Yield>(std::move(expr), location, move(yieldArgs));
         }
 
         case PM_ALTERNATION_PATTERN_NODE: // A pattern like `1 | 2`
