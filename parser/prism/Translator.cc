@@ -76,8 +76,10 @@ template <typename... TArgs>
     Exception::raise(reasonFormatStr, forward<TArgs>(args)...);
 }
 
+// Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
+// TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
-unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNode) {
+unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
     auto location = translateLoc(untypedNode->location);
     auto rhs = translate(node->value);
@@ -114,7 +116,12 @@ unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNod
         lhs = make_node_with_expr<SorbetLHSNode>(move(expr), loc, name);
     }
 
-    return make_unique<parser::Assign>(location, move(lhs), move(rhs));
+    if (!hasExpr(lhs, rhs)) {
+        return make_unique<parser::Assign>(location, move(lhs), move(rhs));
+    }
+
+    auto exp = MK::Assign(location, lhs->takeDesugaredExpr(), rhs->takeDesugaredExpr());
+    return make_node_with_expr<parser::Assign>(move(exp), location, move(lhs), move(rhs));
 }
 
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>

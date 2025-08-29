@@ -110,7 +110,7 @@ private:
     template <typename PrismNode> std::unique_ptr<parser::Mlhs> translateMultiTargetLhs(PrismNode *);
 
     template <typename PrismAssignmentNode, typename SorbetLHSNode>
-    std::unique_ptr<parser::Assign> translateAssignment(pm_node_t *node);
+    std::unique_ptr<parser::Node> translateAssignment(pm_node_t *node);
 
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
     std::unique_ptr<SorbetAssignmentNode> translateOpAssignment(pm_node_t *node);
