@@ -1421,23 +1421,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
           T::Props::GeneratedCodeValidation.validate_deserialize(src)
         end
       end
-
-      describe 'with custom module_name_mangler' do
-        before do
-          T::Configuration.module_name_mangler = ->(type) { "MANGLED::#{type}" }
-        end
-
-        after do
-          T::Configuration.module_name_mangler = nil
-        end
-
-        it 'mangles the custom type names in generated code' do
-          src = ComplexStruct.decorator.send(:generate_deserialize_source).to_s
-          T::Props::GeneratedCodeValidation.validate_deserialize(src)
-          assert_includes(src, "MANGLED::#{MySerializable}")
-          assert_includes(src, "MANGLED::#{CustomType}")
-        end
-      end
     end
 
     describe 'disabling evaluation' do

@@ -441,32 +441,6 @@ module T::Configuration
     @scalar_types || @default_scalar_types
   end
 
-  # Guard against overrides of `name` or `to_s`
-  MODULE_NAME = Module.instance_method(:name)
-  private_constant :MODULE_NAME
-
-  @default_module_name_mangler = if T::Configuration::AT_LEAST_RUBY_2_7
-    ->(type) { MODULE_NAME.bind_call(type) }
-  else
-    ->(type) { MODULE_NAME.bind(type).call } # rubocop:disable Performance/BindCall
-  end
-
-  @module_name_mangler = nil
-
-  def self.module_name_mangler
-    @module_name_mangler || @default_module_name_mangler
-  end
-
-  # Set to override the default behavior for converting types
-  #   to names in generated code. Used by the runtime implementation
-  #   associated with `--stripe-packages` mode.
-  #
-  # @param [Lambda, Proc, nil] handler Proc that converts a type (Class/Module)
-  #   to a String (pass nil to reset to default behavior)
-  def self.module_name_mangler=(handler)
-    @module_name_mangler = handler
-  end
-
   @sensitivity_and_pii_handler = nil
   # Set to a PII handler function. This will be called with the `sensitivity:`
   # annotations on things that use `T::Props` and can modify them ahead-of-time.

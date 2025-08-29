@@ -410,8 +410,6 @@ module T::Configuration
   def self.inline_type_error_handler=(value); end
   def self.log_info_handler(str, extra); end
   def self.log_info_handler=(value); end
-  def self.module_name_mangler; end
-  def self.module_name_mangler=(value); end
   def self.scalar_types; end
   def self.scalar_types=(values); end
   def self.sealed_violation_whitelist; end
