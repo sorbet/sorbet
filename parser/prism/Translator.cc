@@ -565,6 +565,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
                 sendNode = make_unique<parser::CSend>(loc, move(receiver), name, messageLoc, move(args));
+
+                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                    // The legacy parser inverts this , with a parent "Block" with a child
+                    // "Send".
+                    return translateCallWithBlock(prismBlock, move(sendNode));
+                }
+
+                return sendNode;
             } else { // Regular send, e.g. `a.b`
                 // The keyword arguments hash (if there is one) can be the last argument if there is no block,
                 // and is otherwise located in the second-to-last argument, before the block.
@@ -640,20 +651,31 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
                     sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc,
                                                                  move(args));
+
+                    if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                        // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                        // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                        // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                        // The legacy parser inverts this , with a parent "Block" with a child
+                        // "Send".
+                        return translateCallWithBlock(prismBlock, move(sendNode));
+                    }
+
+                    return sendNode;
                 } else {
                     sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
-                }
-            }
 
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
-                // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
-                // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
-                // The legacy parser inverts this , with a parent "Block" with a child
-                // "Send".
-                return translatecallWithBlockPass(prismBlock, move(sendNode));
-            } else {
-                return sendNode;
+                    if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                        // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                        // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                        // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                        // The legacy parser inverts this , with a parent "Block" with a child
+                        // "Send".
+                        return translateCallWithBlock(prismBlock, move(sendNode));
+                    }
+
+                    return sendNode;
+                }
             }
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
