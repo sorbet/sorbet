@@ -70,8 +70,8 @@ module T::Types
 
     def to_nilable
       @nilable ||= T::Private::Types::SimplePairUnion.new(
-        self,
         T::Utils::Nilable::NIL_TYPE,
+        self,
       )
     end
 

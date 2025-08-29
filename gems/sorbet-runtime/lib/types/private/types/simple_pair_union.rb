@@ -25,7 +25,14 @@ class T::Private::Types::SimplePairUnion < T::Types::Union
 
   # @override Union
   def valid?(obj)
-    obj.is_a?(@raw_a) || obj.is_a?(@raw_b)
+    return true if obj.is_a?(@raw_a)
+    obj.is_a?(@raw_b)
+  end
+
+  # TODO(jez) Specialize a subclass of SimplePairUnion for `T.nilable`
+  def fast_valid_for_nil?(obj)
+    return true if nil == obj
+    obj.is_a?(@raw_b)
   end
 
   # @override Union
