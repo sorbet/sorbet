@@ -56,7 +56,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 
 ## Sorbet user-facing design principles
 
-Early in our project, we've defined some guidelines for how working with sorbet should feel like.
+Early in our project, we've defined some guidelines for how working with Sorbet should feel like.
 
 1. **Explicit**
 
