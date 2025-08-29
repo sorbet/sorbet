@@ -346,8 +346,6 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 if (argLiteral.isName()) {
                     declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
                     methodName = argLiteral.asName();
-                } else {
-                    return nullptr;
                 }
             } else {
                 declLoc = send->loc.copyWithZeroLength().join(send->funLoc);
@@ -652,8 +650,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             // Create Magic.requires_ancestor(self) { block }
             ast::Send::ARGS_store args;
-            args.emplace_back(ast::MK::Self(send->loc)); // positional arg: self
-            args.emplace_back(std::move(blockForRequires));         // block arg
+            args.emplace_back(ast::MK::Self(send->loc));    // positional arg: self
+            args.emplace_back(std::move(blockForRequires)); // block arg
             ast::Send::Flags flags;
             flags.hasBlock = true;
 
@@ -751,8 +749,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                       prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
         method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
-    } else if (insideDescribe &&
-               ((send->fun == core::Names::let() || send->fun == core::Names::letBang())) &&
+    } else if (insideDescribe && ((send->fun == core::Names::let() || send->fun == core::Names::letBang())) &&
                ast::isa_tree<ast::Literal>(arg)) {
         auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
         if (!argLiteral.isName()) {
