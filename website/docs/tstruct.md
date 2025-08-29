@@ -80,6 +80,27 @@ x.created      # => 1666483576.475571
 x.nilable      # => nil
 ```
 
+### `T.nilable` without implying `default: nil`
+
+Due to an accident of history (see [Legacy code and historical context](#legacy-code-and-historical-context)), props marked `T.nilable` always have an implied `default: nil` associated with them.
+
+There is no way to opt out of this behavior at the time being.
+
+One way to work around it is to hide the `T.nilable(...)` type from Sorbet statically:
+
+```ruby
+class MustConstructWithFoo < T::Struct
+  NilableInteger = T.type_alias { T.nilable(Integer) }
+  prop :foo, NilableInteger
+end
+
+MustConstructWithFoo.new # error: Missing required keyword arg `foo`
+```
+
+This is a **partial**, static-only solution: at runtime, the `foo` keyword is still optional with an implied default of `nil`. But Statically, Sorbet will require typed call sites to provide a value.
+
+(This workaround only because of a technical limitation in Sorbet: the phase which handles the `prop` DSL is syntax-directed—it has no semantic information available, which means it does not resolve through type aliases).
+
 ### Default values and references
 
 To avoid having a default value be shared and mutated by **all** instances of a `T::Struct`, certain built-in types are deeply cloned at initialization time. Other types that are not built into Ruby have their `.clone` method called.
