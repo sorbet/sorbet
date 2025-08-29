@@ -55,7 +55,7 @@ public:
     Parser(Parser &&) = delete;
     Parser &operator=(Parser &&) = delete;
 
-    static parser::ParseResult run(core::MutableContext &ctx, bool directlyDesugar = true,
+    static parser::ParseResult run(core::MutableContext ctx, bool directlyDesugar = true,
                                    bool preserveConcreteSyntax = false);
 
     ParseResult parse(bool collectComments = false);

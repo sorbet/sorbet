@@ -209,7 +209,7 @@ public:
 
     void initializeBasicBlockArgs(const cfg::BasicBlock &bb);
 
-    void setUninitializedVarsToNil(const core::Context &ctx, core::Loc origin);
+    void setUninitializedVarsToNil(core::Context ctx, core::Loc origin);
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 

@@ -12,7 +12,7 @@ class DuplicateHashKeyCheck {
     UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
 
 public:
-    DuplicateHashKeyCheck(const core::MutableContext &ctx) : ctx{ctx}, hashKeySymbols(), hashKeyStrings() {}
+    DuplicateHashKeyCheck(core::MutableContext ctx) : ctx{ctx}, hashKeySymbols(), hashKeyStrings() {}
 
     void check(const ExpressionPtr &key);
 

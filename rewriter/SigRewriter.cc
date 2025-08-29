@@ -24,7 +24,7 @@ bool isTSigWithoutRuntime(ast::ExpressionPtr &expr) {
 } // namespace
 
 // Rewrite all sig usage into uses of `Sorbet::Private::Static.<sig>`, and mark them as being dsl synthesized.
-bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
+bool SigRewriter::run(core::MutableContext ctx, ast::Send *send) {
     if (send->fun != core::Names::sig()) {
         return false;
     }
