@@ -26,6 +26,7 @@ module T::Props
         # manually.
         non_nil_type = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
         accessor_key = rules.fetch(:accessor_key)
+        # TODO(jez) There are only two users of setter_validate
         validate = rules[:setter_validate]
 
         # It seems like a bug that this affects the behavior of setters, but
