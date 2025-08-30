@@ -75,7 +75,6 @@ require_relative 'types/private/abstract/validate'
 # Catch all. Sort of built by `cd extn; find types -type f | grep -v test | sort`
 require_relative 'types/generic'
 require_relative 'types/private/abstract/declare'
-require_relative 'types/private/abstract/hooks'
 require_relative 'types/private/casts'
 require_relative 'types/private/methods/decl_builder'
 require_relative 'types/private/methods/signature'

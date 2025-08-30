@@ -17,8 +17,6 @@ module T::Private::Abstract::Declare
     Abstract::Data.set(mod.singleton_class, :can_have_abstract_methods, true)
     Abstract::Data.set(mod, :abstract_type, type)
 
-    mod.extend(Abstract::Hooks)
-
     if Class.===(mod)
       if type == :interface
         # Since `interface!` is just `abstract!` with some extra validation, we could technically

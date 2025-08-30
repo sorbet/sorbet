@@ -7,10 +7,6 @@ module T::AbstractUtils
   # Returns whether a module is declared as abstract. After the module is finished being declared,
   # this is equivalent to whether it has any abstract methods that haven't been implemented
   # (because we validate that and raise an error otherwise).
-  #
-  # Note that checking `mod.is_a?(Abstract::Hooks)` is not a safe substitute for this method; when
-  # a class extends `Abstract::Hooks`, all of its subclasses, including the eventual concrete
-  # ones, will still have `Abstract::Hooks` as an ancestor.
   def self.abstract_module?(mod)
     !T::Private::Abstract::Data.get(mod, :abstract_type).nil?
   end
