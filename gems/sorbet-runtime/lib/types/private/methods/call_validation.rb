@@ -70,8 +70,9 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
     has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
       original_method.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
+    can_skip_bind = method_sig.bind.nil?
     can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
-    ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+    ok_for_fast_path = has_fixed_arity && can_skip_block_type && can_skip_bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
 
     all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
     simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
@@ -103,11 +104,11 @@ module T::Private::Methods::CallValidation
           create_validator_method_skip_return_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path
           create_validator_method_medium(mod, original_method, method_sig, original_visibility)
-        elsif can_skip_block_type
+        elsif can_skip_block_type && can_skip_bind
           # The Ruby VM already validates that any block passed to a method
           # must be either `nil` or a `Proc` object, so there's no need to also
           # have sorbet-runtime check that.
-          create_validator_slow_skip_block_type(mod, original_method, method_sig, original_visibility)
+          create_validator_slow_skip_bind_and_block_type(mod, original_method, method_sig, original_visibility)
         else
           create_validator_slow(mod, original_method, method_sig, original_visibility)
         end
@@ -116,29 +117,15 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_slow_skip_block_type(mod, original_method, method_sig, original_visibility)
+  def self.create_validator_slow_skip_bind_and_block_type(mod, original_method, method_sig, original_visibility)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
-      CallValidation.validate_call_skip_block_type(self, original_method, method_sig, args, blk)
+      CallValidation.validate_call_skip_bind_and_block_type(self, original_method, method_sig, args, blk)
     end
   end
 
-  def self.validate_call_skip_block_type(instance, original_method, method_sig, args, blk)
+  def self.validate_call_skip_bind_and_block_type(instance, original_method, method_sig, args, blk)
     # This method is called for every `sig`. It's critical to keep it fast and
     # reduce number of allocations that happen here.
-
-    if method_sig.bind
-      message = method_sig.bind.error_message_for_obj(instance)
-      if message
-        CallValidation.report_error(
-          method_sig,
-          message,
-          'Bind',
-          nil,
-          method_sig.bind,
-          instance
-        )
-      end
-    end
 
     # NOTE: We don't bother validating for missing or extra kwargs;
     # the method call itself will take care of that.
