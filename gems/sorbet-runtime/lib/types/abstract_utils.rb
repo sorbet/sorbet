@@ -8,7 +8,7 @@ module T::AbstractUtils
   # this is equivalent to whether it has any abstract methods that haven't been implemented
   # (because we validate that and raise an error otherwise).
   def self.abstract_module?(mod)
-    !T::Private::Abstract::Data.get(mod, :abstract_type).nil?
+    !T::Private::Abstract::Data.get(mod, T::Private::Abstract::Data::ABSTRACT_TYPE).nil?
   end
 
   def self.abstract_method?(method)

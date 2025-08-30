@@ -4,7 +4,7 @@
 module T::Private
   module MixesInClassMethods
     def included(other)
-      mods = Abstract::Data.get(self, :class_methods_mixins)
+      mods = Abstract::Data.get(self, Abstract::Data::CLASS_METHODS_MIXINS)
       mods.each { |mod| other.extend(mod) }
       super
     end
@@ -16,12 +16,12 @@ module T::Private
         raise "Classes cannot be used as mixins, and so mixes_in_class_methods cannot be used on a Class."
       end
 
-      if Abstract::Data.key?(mixin, :class_methods_mixins)
-        class_methods = Abstract::Data.get(mixin, :class_methods_mixins) + class_methods
+      if Abstract::Data.key?(mixin, Abstract::Data::CLASS_METHODS_MIXINS)
+        class_methods = Abstract::Data.get(mixin, Abstract::Data::CLASS_METHODS_MIXINS) + class_methods
       end
 
       mixin.singleton_class.include(MixesInClassMethods)
-      Abstract::Data.set(mixin, :class_methods_mixins, class_methods)
+      Abstract::Data.set(mixin, Abstract::Data::CLASS_METHODS_MIXINS, class_methods)
     end
   end
 end

@@ -11,16 +11,20 @@
 # `mod`, and we can't trust that arbitrary modules can be added to those, because there are lurky
 # modules that override the `hash` method with something completely broken.
 module T::Private::Abstract::Data
+  CLASS_METHODS_MIXINS = "@opus_abstract__class_methods_mixins"
+  ABSTRACT_TYPE = "@opus_abstract__abstract_type"
+  CAN_HAVE_ABSTRACT_METHODS = "@opus_abstract__can_have_abstract_methods"
+
   def self.get(mod, key)
-    mod.instance_variable_get("@opus_abstract__#{key}") if key?(mod, key)
+    mod.instance_variable_get(key) if key?(mod, key)
   end
 
   def self.set(mod, key, value)
-    mod.instance_variable_set("@opus_abstract__#{key}", value)
+    mod.instance_variable_set(key, value)
   end
 
   def self.key?(mod, key)
-    mod.instance_variable_defined?("@opus_abstract__#{key}")
+    mod.instance_variable_defined?(key)
   end
 
   # Works like `setdefault` in Python. If key has already been set, return its value. If not,

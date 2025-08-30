@@ -13,9 +13,9 @@ module T::Private::Abstract::Declare
       raise "#{mod} was already declared as final and cannot be declared as abstract"
     end
 
-    Abstract::Data.set(mod, :can_have_abstract_methods, true)
-    Abstract::Data.set(mod.singleton_class, :can_have_abstract_methods, true)
-    Abstract::Data.set(mod, :abstract_type, type)
+    Abstract::Data.set(mod, Abstract::Data::CAN_HAVE_ABSTRACT_METHODS, true)
+    Abstract::Data.set(mod.singleton_class, Abstract::Data::CAN_HAVE_ABSTRACT_METHODS, true)
+    Abstract::Data.set(mod, Abstract::Data::ABSTRACT_TYPE, type)
 
     if Class.===(mod)
       if type == :interface

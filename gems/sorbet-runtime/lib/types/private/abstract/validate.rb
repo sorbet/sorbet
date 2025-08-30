@@ -7,15 +7,18 @@ module T::Private::Abstract::Validate
   Methods = T::Private::Methods
   SignatureValidation = T::Private::Methods::SignatureValidation
 
+  # TODO(jez) Realistically this isn't getting run over Stripe's CI anymore,
+  # and this is the only place where we check this ABSTRACT_TYPE ivar.
+  # We could delete this and remove it.
   def self.validate_abstract_module(mod)
-    type = Abstract::Data.get(mod, :abstract_type)
+    type = Abstract::Data.get(mod, Abstract::Data::ABSTRACT_TYPE)
     validate_interface(mod) if type == :interface
   end
 
   # Validates a class/module with an abstract class/module as an ancestor. This must be called
   # after all methods on `mod` have been defined.
   def self.validate_subclass(mod)
-    can_have_abstract_methods = !T::Private::Abstract::Data.get(mod, :can_have_abstract_methods)
+    can_have_abstract_methods = !T::Private::Abstract::Data.get(mod, Abstract::Data::CAN_HAVE_ABSTRACT_METHODS)
     unimplemented_methods = []
 
     T::AbstractUtils.declared_abstract_methods_for(mod).each do |abstract_method|
