@@ -163,6 +163,10 @@ class T::Props::Decorator
   # Note this path is NOT used by generated getters on instances,
   # unless `ifunset` is used on the prop, or `prop_get` is overridden.
   #
+  # TODO(jez) In practice, this is showing up a lot. I'm not sure whether
+  # that's because prop_get is overridden (most likely) or because props that
+  # use ifunset are hot (only 100 such props).
+  #
   # checked(:never) - O(prop accesses)
   sig do
     params(
