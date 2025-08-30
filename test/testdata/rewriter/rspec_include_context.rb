@@ -7,7 +7,8 @@ class RSpecIncludeContextTest
   # it works on the Rails monolith this was tested against.
   describe 'nonexistent context' do
     it 'cannot reference undefined context' do
-      include_context 'nonexistent context' # error: Unable to resolve constant `<shared_examples 'nonexistent context'>`
+      include_context 'nonexistent context' # error: Method `include` does not exist on `RSpecIncludeContextTest::<describe 'nonexistent context'>` (fix available)
+                                         # error: Unable to resolve constant `<shared_examples_module 'nonexistent context'>` (fix available)
     end
   end
 

@@ -5,10 +5,6 @@ class Test
   extend T::Sig
 
   def self.test_each(iter, &blk); end
-  def self.it(name, &blk); end
-  def self.describe(name, &blk); end
-  def self.it_behaves_like(name, *args); end
-  def self.shared_examples(name, &blk); end
 
   shared_examples "common behavior" do
     it "works" do
@@ -25,4 +21,21 @@ class Test
       end
     end
   end
+end
+
+# Define minimal RSpec for testing
+module RSpec
+  module Core
+    class ExampleGroup
+      def self.describe(name, &block); end
+      def expect(*args); end
+      def eq(*args); end
+    end
+  end
+  
+  def self.describe(name, &block)
+    Core::ExampleGroup.describe(name, &block)
+  end
+  
+  def self.shared_examples(name, &block); end
 end
