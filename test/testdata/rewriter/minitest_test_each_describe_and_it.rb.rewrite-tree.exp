@@ -14,6 +14,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'b'><<todo method>>(&<blk>)
       [[1, 2], [3, 4]].each() do |<destructure>$2|
         begin
@@ -27,6 +31,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>::<C T>.reveal_type(a)
         end
       end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def <it 'a'><<todo method>>(&<blk>)
