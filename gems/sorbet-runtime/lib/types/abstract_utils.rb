@@ -17,7 +17,7 @@ module T::AbstractUtils
 
   def self.abstract_method?(method)
     signature = Methods.signature_for_method(method)
-    signature&.mode == Methods::Modes.abstract
+    Methods::Modes.abstract == signature&.mode
   end
 
   # Given a module, returns the set of methods declared as abstract (in itself or ancestors)

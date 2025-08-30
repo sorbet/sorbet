@@ -22,7 +22,7 @@ module T::Private::Final
   end
 
   def self.declare(mod)
-    if !mod.is_a?(Module)
+    if !Module.===(mod)
       raise "#{mod} is not a class or module and cannot be declared as final with `final!`"
     end
     if final_module?(mod)
@@ -34,7 +34,7 @@ module T::Private::Final
     if T::Private::Sealed.sealed_module?(mod)
       raise "#{mod} was already declared as sealed and cannot be declared as final"
     end
-    mod.extend(mod.is_a?(Class) ? NoInherit : NoIncludeExtend)
+    mod.extend(Class.===(mod) ? NoInherit : NoIncludeExtend)
     mark_as_final_module(mod)
     mark_as_final_module(mod.singleton_class)
     T::Private::Methods.install_hooks(mod)

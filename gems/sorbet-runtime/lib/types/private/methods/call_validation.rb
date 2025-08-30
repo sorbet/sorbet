@@ -74,19 +74,20 @@ module T::Private::Methods::CallValidation
     can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
     ok_for_fast_path = has_fixed_arity && can_skip_block_type && can_skip_bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
 
-    all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
-    simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
-    simple_procedure = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
+    all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| T::Types::Simple.===(type) }
+    simple_method = all_args_are_simple && T::Types::Simple.===(method_sig.return_type)
+    is_procedure = T::Private::Types::Void::Private::INSTANCE.equal?(method_sig.return_type)
+    simple_procedure = all_args_are_simple && is_procedure
 
     # All the types for which valid? unconditionally returns `true`
     return_is_ignorable =
-      (method_sig.return_type.equal?(T::Types::Untyped::Private::INSTANCE) ||
-       method_sig.return_type.equal?(T::Types::Anything::Private::INSTANCE) ||
-       method_sig.return_type.equal?(T::Types::AttachedClassType::Private::INSTANCE) ||
-       method_sig.return_type.equal?(T::Types::SelfType::Private::INSTANCE) ||
-       method_sig.return_type.is_a?(T::Types::TypeParameter) ||
-       method_sig.return_type.is_a?(T::Types::TypeVariable) ||
-       (method_sig.return_type.is_a?(T::Types::Simple) && method_sig.return_type.raw_type.equal?(BasicObject)))
+      (T::Types::Untyped::Private::INSTANCE.equal?(method_sig.return_type) ||
+       T::Types::Anything::Private::INSTANCE.equal?(method_sig.return_type) ||
+       T::Types::AttachedClassType::Private::INSTANCE.equal?(method_sig.return_type) ||
+       T::Types::SelfType::Private::INSTANCE.equal?(method_sig.return_type) ||
+       T::Types::TypeParameter.===(method_sig.return_type) ||
+       T::Types::TypeVariable.===(method_sig.return_type) ||
+       (T::Types::Simple.===(method_sig.return_type) && BasicObject.equal?(method_sig.return_type.raw_type)))
 
     returns_anything_method = all_args_are_simple && return_is_ignorable
 
@@ -98,7 +99,7 @@ module T::Private::Methods::CallValidation
           create_validator_method_skip_return_fast(mod, original_method, method_sig, original_visibility)
         elsif simple_procedure
           create_validator_procedure_fast(mod, original_method, method_sig, original_visibility)
-        elsif ok_for_fast_path && method_sig.return_type.is_a?(T::Private::Types::Void)
+        elsif ok_for_fast_path && is_procedure
           create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path && return_is_ignorable
           create_validator_method_skip_return_medium(mod, original_method, method_sig, original_visibility)
@@ -167,7 +168,7 @@ module T::Private::Methods::CallValidation
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
-    if method_sig.return_type.is_a?(T::Private::Types::Void)
+    if T::Private::Types::Void::Private::INSTANCE.equal?(method_sig.return_type)
       T::Private::Types::Void::VOID
     else
       message = method_sig.return_type.error_message_for_obj(return_value)
@@ -270,7 +271,7 @@ module T::Private::Methods::CallValidation
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
-    if method_sig.return_type.is_a?(T::Private::Types::Void)
+    if T::Private::Types::Void::Private::INSTANCE.equal?(method_sig.return_type)
       T::Private::Types::Void::VOID
     else
       message = method_sig.return_type.error_message_for_obj(return_value)

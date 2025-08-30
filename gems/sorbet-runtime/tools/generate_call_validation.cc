@@ -77,7 +77,7 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
                typeString);
     switch (kind) {
         case ValidatorKind::Method:
-            fmt::print("    if method_sig.return_type.is_a?(T::Private::Types::Void)\n"
+            fmt::print("    if T::Private::Types::Void::Private::INSTANCE.equal?(method_sig.return_type)\n"
                        "      raise 'Should have used create_validator_procedure_{}'\n"
                        "    end\n",
                        typeString);

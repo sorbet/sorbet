@@ -282,7 +282,7 @@ module T
 
   module Array
     def self.[](type)
-      if type.is_a?(T::Types::Untyped)
+      if T::Types::Untyped::Private::INSTANCE.equal?(type)
         T::Types::TypedArray::Untyped::Private::INSTANCE
       else
         T::Types::TypedArray::Private::Pool.type_for_module(type)
@@ -292,7 +292,7 @@ module T
 
   module Hash
     def self.[](keys, values)
-      if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)
+      if T::Types::Untyped::Private::INSTANCE.equal?(keys) && T::Types::Untyped::Private::INSTANCE.equal?(values)
         T::Types::TypedHash::Untyped.new
       else
         T::Types::TypedHash.new(keys: keys, values: values)
@@ -302,7 +302,7 @@ module T
 
   module Enumerable
     def self.[](type)
-      if type.is_a?(T::Types::Untyped)
+      if T::Types::Untyped::Private::INSTANCE.equal?(type)
         T::Types::TypedEnumerable::Untyped.new
       else
         T::Types::TypedEnumerable.new(type)
@@ -312,7 +312,7 @@ module T
 
   module Enumerator
     def self.[](type)
-      if type.is_a?(T::Types::Untyped)
+      if T::Types::Untyped::Private::INSTANCE.equal?(type)
         T::Types::TypedEnumerator::Untyped.new
       else
         T::Types::TypedEnumerator.new(type)
@@ -321,7 +321,7 @@ module T
 
     module Lazy
       def self.[](type)
-        if type.is_a?(T::Types::Untyped)
+        if T::Types::Untyped::Private::INSTANCE.equal?(type)
           T::Types::TypedEnumeratorLazy::Untyped.new
         else
           T::Types::TypedEnumeratorLazy.new(type)
@@ -331,7 +331,7 @@ module T
 
     module Chain
       def self.[](type)
-        if type.is_a?(T::Types::Untyped)
+        if T::Types::Untyped::Private::INSTANCE.equal?(type)
           T::Types::TypedEnumeratorChain::Untyped.new
         else
           T::Types::TypedEnumeratorChain.new(type)
@@ -348,7 +348,7 @@ module T
 
   module Set
     def self.[](type)
-      if type.is_a?(T::Types::Untyped)
+      if T::Types::Untyped::Private::INSTANCE.equal?(type)
         T::Types::TypedSet::Untyped.new
       else
         T::Types::TypedSet.new(type)
@@ -358,9 +358,9 @@ module T
 
   module Class
     def self.[](type)
-      if type.is_a?(T::Types::Untyped)
+      if T::Types::Untyped::Private::INSTANCE.equal?(type)
         T::Types::TypedClass::Untyped::Private::INSTANCE
-      elsif type.is_a?(T::Types::Anything)
+      elsif T::Types::Anything::Private::INSTANCE.equal?(type)
         T::Types::TypedClass::Anything::Private::INSTANCE
       else
         T::Types::TypedClass::Private::Pool.type_for_module(type)

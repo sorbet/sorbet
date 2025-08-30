@@ -29,5 +29,9 @@ module T::Types
     module Private
       INSTANCE = Untyped.new.freeze
     end
+
+    # Mark new private after we've created the one instance of it to discourage
+    # people from making new instances.
+    private_class_method :new
   end
 end

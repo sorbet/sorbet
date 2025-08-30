@@ -19,7 +19,7 @@ module T::Private::Abstract::Declare
 
     mod.extend(Abstract::Hooks)
 
-    if mod.is_a?(Class)
+    if Class.===(mod)
       if type == :interface
         # Since `interface!` is just `abstract!` with some extra validation, we could technically
         # allow this, but it's unclear there are good use cases, and it might be confusing.

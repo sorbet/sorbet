@@ -116,7 +116,7 @@ class T::Enum
     # serialized, we throw the error on L102.
     return nil if instance.nil?
 
-    if self == T::Enum
+    if T::Enum == self
       raise "Cannot call T::Enum.serialize directly. You must call on a specific child class."
     end
     if instance.class != self
@@ -128,7 +128,7 @@ class T::Enum
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
   sig { override.params(mongo_value: SerializedVal).returns(T.attached_class).checked(:never) }
   def self.deserialize(mongo_value)
-    if self == T::Enum
+    if T::Enum == self
       raise "Cannot call T::Enum.deserialize directly. You must call on a specific child class."
     end
     self.from_serialized(mongo_value)
@@ -278,7 +278,7 @@ class T::Enum
 
   sig { params(serialized_val: SerializedVal).void }
   def initialize(serialized_val=UNSET)
-    raise 'T::Enum is abstract' if self.class == T::Enum
+    raise 'T::Enum is abstract' if T::Enum == self.class
     if !self.class.started_initializing?
       raise "Must instantiate all enum values of #{self.class} inside 'enums do'."
     end
@@ -303,7 +303,7 @@ class T::Enum
   sig { params(const_name: Symbol).void }
   def _bind_name(const_name)
     @const_name = const_name
-    @serialized_val = const_to_serialized_val(const_name) if @serialized_val.equal?(UNSET)
+    @serialized_val = const_to_serialized_val(const_name) if UNSET.equal?(@serialized_val)
     freeze
   end
 
@@ -342,7 +342,7 @@ class T::Enum
   # All enum values must be defined within this block.
   sig { params(blk: T.proc.void).void }
   def self.enums(&blk)
-    raise "enums cannot be defined for T::Enum" if self == T::Enum
+    raise "enums cannot be defined for T::Enum" if T::Enum == self
     raise "Enum #{self} was already initialized" if fully_initialized?
     raise "Enum #{self} is still initializing" if started_initializing?
 

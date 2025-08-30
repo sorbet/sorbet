@@ -3,6 +3,7 @@
 
 module T::Utils
   module Private
+    # TODO(jez) Convert this to a case/when statement?
     def self.coerce_and_check_module_types(val, check_val, check_module_type)
       # rubocop:disable Style/CaseLikeIf
       if val.is_a?(T::Types::Base)
@@ -109,7 +110,7 @@ module T::Utils
   # Returns the arity of a method, unwrapping the sig if needed
   def self.arity(method)
     arity = method.arity
-    return arity if arity != -1 || method.is_a?(Proc)
+    return arity if arity != -1 || Proc.===(method)
     sig = T::Private::Methods.signature_for_method(method)
     sig ? sig.method.arity : arity
   end
@@ -151,7 +152,7 @@ module T::Utils
   end
 
   def self.lift_enum(enum)
-    unless enum.is_a?(T::Types::Enum)
+    unless T::Types::Enum.===(enum)
       raise ArgumentError.new("#{enum.inspect} is not a T.deprecated_enum")
     end
 
@@ -173,9 +174,9 @@ module T::Utils
     NIL_TYPE = T::Utils.coerce(NilClass)
 
     def self.get_type_info(prop_type)
-      if prop_type.is_a?(T::Types::Union)
+      if T::Types::Union.===(prop_type)
         non_nilable_type = prop_type.unwrap_nilable
-        if non_nilable_type.is_a?(T::Types::Simple)
+        if T::Types::Simple.===(non_nilable_type)
           non_nilable_type = non_nilable_type.raw_type
         end
         TypeInfo.new(true, non_nilable_type)
@@ -188,13 +189,14 @@ module T::Utils
     #  - if the type is A, the function returns A
     #  - if the type is T.nilable(A), the function returns A
     def self.get_underlying_type(prop_type)
-      if prop_type.is_a?(T::Types::Union)
+      case prop_type
+      when T::Types::Union
         non_nilable_type = prop_type.unwrap_nilable
-        if non_nilable_type.is_a?(T::Types::Simple)
+        if T::Types::Simple.===(non_nilable_type)
           non_nilable_type = non_nilable_type.raw_type
         end
         non_nilable_type || prop_type
-      elsif prop_type.is_a?(T::Types::Simple)
+      when T::Types::Simple
         prop_type.raw_type
       else
         prop_type
