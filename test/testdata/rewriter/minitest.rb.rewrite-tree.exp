@@ -8,20 +8,40 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'works outside'><<todo method>>(&<blk>)
       <self>.outside_method()
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def <it 'allows constants inside of IT'><<todo method>>(&<blk>)
       ::Module.const_set(:CONST, 10)
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'allows let-ed constants inside of IT'><<todo method>>(&<blk>)
       ::Module.const_set(:C2, <cast:let>(10, <todo sym>, <emptyTree>::<C Integer>))
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'allows path constants inside of IT'><<todo method>>(&<blk>)
       <emptyTree>::<C C3>.new()
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<todo method>>(&<blk>)
@@ -32,6 +52,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <before><<todo method>>(&<blk>)
       begin
         @foo = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
@@ -39,11 +63,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <after><<todo method>>(&<blk>)
       begin
         @foo = nil
         <self>.instance_helper()
       end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def <it 'can read foo'><<todo method>>(&<blk>)
@@ -64,28 +96,46 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of outside_method>
 
     begin
+      "works outside"
+      <runtime method definition of <it 'works outside'>>
+    end
+
+    begin
       <emptyTree>::<C CONST> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      <emptyTree>
+      begin
+        "allows constants inside of IT"
+        <runtime method definition of <it 'allows constants inside of IT'>>
+      end
     end
 
     begin
       <emptyTree>::<C C2> = <cast:let>(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <todo sym>, <emptyTree>::<C Integer>)
-      <emptyTree>
+      begin
+        "allows let-ed constants inside of IT"
+        <runtime method definition of <it 'allows let-ed constants inside of IT'>>
+      end
     end
 
     begin
       <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
-      <emptyTree>
+      begin
+        "allows path constants inside of IT"
+        <runtime method definition of <it 'allows path constants inside of IT'>>
+      end
     end
 
     begin
       ::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())
-      <emptyTree>
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'>>
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
       def inside_method<<todo method>>(&<blk>)
         <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
       end
 
       def <it 'works inside'><<todo method>>(&<blk>)
@@ -96,6 +146,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of inside_method>
+
+      begin
+        "works inside"
+        <runtime method definition of <it 'works inside'>>
+      end
     end
 
     <runtime method definition of instance_helper>
@@ -104,6 +159,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of <after>>
 
+    begin
+      "can read foo"
+      <runtime method definition of <it 'can read foo'>>
+    end
+
     <runtime method definition of self.random_method>
 
     <self>.random_method() do ||
@@ -111,8 +171,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
       def <it 'Object'><<todo method>>(&<blk>)
         <emptyTree>
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
       end
 
       def <it 'Object'><<todo method>>(&<blk>)
@@ -121,12 +189,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       begin
         <emptyTree>::<C Object>
-        <emptyTree>
+        <runtime method definition of <it 'Object'>>
       end
 
       begin
         <emptyTree>::<C Object>
-        <emptyTree>
+        <runtime method definition of <it 'Object'>>
       end
     end
 
@@ -139,11 +207,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
       def <it 'contains nested describes'><<todo method>>(&<blk>)
         <emptyTree>
       end
 
       class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
+      end
+
+      begin
+        "contains nested describes"
+        <runtime method definition of <it 'contains nested describes'>>
       end
     end
   end
@@ -157,6 +234,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       0
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'calls example'><<todo method>>(&<blk>)
       begin
         res = <self>.example()
@@ -167,6 +248,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <runtime method definition of example>
+
+    begin
+      "calls example"
+      <runtime method definition of <it 'calls example'>>
+    end
   end
 
   <runtime method definition of junk>

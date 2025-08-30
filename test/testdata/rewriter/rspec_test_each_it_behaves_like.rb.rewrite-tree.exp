@@ -6,22 +6,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    def self.it<<todo method>>(name, &blk)
-      <emptyTree>
-    end
-
-    def self.describe<<todo method>>(name, &blk)
-      <emptyTree>
-    end
-
-    def self.it_behaves_like<<todo method>>(name, *args, &<blk>)
-      <emptyTree>
-    end
-
-    def self.shared_examples<<todo method>>(name, &blk)
-      <emptyTree>
-    end
-
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
@@ -36,30 +20,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.test_each>
 
-    <runtime method definition of self.it>
-
-    <runtime method definition of self.describe>
-
-    <runtime method definition of self.it_behaves_like>
-
-    <runtime method definition of self.shared_examples>
-
-    begin
-      class ::<root>::<C <shared_examples 'common behavior'>><<C <todo sym>>> < (<self>)
-        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-          <self>.void()
-        end
-
-        def <it 'works'><<todo method>>(&<blk>)
-          <self>.puts("shared example")
-        end
-
-        "works"
-
-        <runtime method definition of <it 'works'>>
-      end
-      module <emptyTree>::<C <shared_examples_module 'common behavior'>><<C <todo sym>>> < ()
-        <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+    module <emptyTree>::<C <shared_examples_module 'common behavior'>><<C <todo sym>>> < ()
+      ::<Magic>.requires_ancestor(<self>) do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
       end
     end
 
@@ -69,5 +32,41 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <runtime method definition of <it 'has the value'>>
       end
     end
+  end
+
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    def self.describe<<todo method>>(name, &block)
+      ::<Magic>.<call-with-block>(<emptyTree>::<C Core>::<C ExampleGroup>, :describe, block, name)
+    end
+
+    def self.shared_examples<<todo method>>(name, &block)
+      <emptyTree>
+    end
+
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def self.describe<<todo method>>(name, &block)
+          <emptyTree>
+        end
+
+        def expect<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of self.describe>
+
+        <runtime method definition of expect>
+
+        <runtime method definition of eq>
+      end
+    end
+
+    <runtime method definition of self.describe>
+
+    <runtime method definition of self.shared_examples>
   end
 end

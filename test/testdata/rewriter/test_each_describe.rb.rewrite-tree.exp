@@ -22,6 +22,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <before><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
         begin
@@ -32,10 +36,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <after><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
         @enabled = false
       end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def <it 'do this thing'><<todo method>>(&<blk>)
@@ -67,6 +79,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTestBad2><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it ''><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
         <emptyTree>
@@ -86,6 +102,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTestBad3><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it ''><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
         <emptyTree>
@@ -105,6 +125,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTestBad4><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it ''><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
         <emptyTree>
