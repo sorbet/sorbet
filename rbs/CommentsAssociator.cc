@@ -269,6 +269,25 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
 }
 
 unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique_ptr<parser::Node> body) {
+    bool allowTypeAlias = false;
+    if (!contextAllowingTypeAlias.empty()) {
+        allowTypeAlias = contextAllowingTypeAlias.back().first;
+    }
+
+    if (allowTypeAlias && body == nullptr) {
+        int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+        auto nodes = parser::NodeVec();
+
+        maybeInsertStandalonePlaceholders(nodes, 0, lastLine, endLine);
+        lastLine = endLine;
+
+        if (!nodes.empty()) {
+            return make_unique<parser::Begin>(node->loc, move(nodes));
+        }
+
+        return nullptr;
+    }
+
     if (body == nullptr) {
         return nullptr;
     }
