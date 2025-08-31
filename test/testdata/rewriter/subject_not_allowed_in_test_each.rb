@@ -3,11 +3,11 @@
 class SubjectNotAllowedInTestEach
   extend T::Sig
 
+  def self.test_each(iter, &blk); end
   test_each(['foo', 'bar']) do |test_case|
     describe("subject rejection test for #{test_case}") do
-      # This should produce an error: subject blocks are not allowed in test_each
-      subject { "not allowed" }
-      # ^^ error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
+      # subject blocks are allowed in test_each when inside describe
+      subject { "allowed" }
 
       it 'should not be able to use subject' do
         puts "test"

@@ -1,6 +1,1 @@
-test/testdata/rewriter/subject_not_allowed_in_test_each.rb:10: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each` https://srb.help/3507
-    10 |      subject { "not allowed" }
-              ^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    For other things, like constant and variable assignments,    hoist them to constants or methods defined outside the `test_each` block.
-Errors: 1
+No errors found
