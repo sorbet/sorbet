@@ -304,6 +304,8 @@ class LocalNameInserter {
         // We'll also look for the block arg, which should always be present at the end of the args.
         ast::ExpressionPtr blockArg;
 
+        core::NameRef newFun = original.fun;
+
         for (const auto &arg : enclosingMethodScopeStack.args) {
             ENFORCE(blockArg == nullptr, "Block arg was not in final position");
 
@@ -417,16 +419,16 @@ class LocalNameInserter {
 
             if (originalBlock != nullptr) {
                 // <call-with-splat> and "do"
-                original.fun = core::Names::callWithSplat();
+                newFun = core::Names::callWithSplat();
                 // Re-add block argument
                 original.setBlock(std::move(originalBlock));
             } else if (shouldForwardBlockArg) {
                 // <call-with-splat-and-block>(..., &blk)
-                original.fun = core::Names::callWithSplatAndBlock();
+                newFun = core::Names::callWithSplatAndBlock();
                 original.addPosArg(std::move(blockArg));
             } else {
                 // <call-with-splat>(...)
-                original.fun = core::Names::callWithSplat();
+                newFun = core::Names::callWithSplat();
             }
         } else if (originalBlock == nullptr && shouldForwardBlockArg) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
@@ -453,7 +455,7 @@ class LocalNameInserter {
             kwArgValueEntries.clear();
 
             original.recv = ast::MK::Magic(original.loc);
-            original.fun = core::Names::callWithBlock();
+            newFun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
             original.reserveArguments(posArgsEntries.size(), kwArgKeyEntries.size(),
@@ -480,6 +482,7 @@ class LocalNameInserter {
             kwArgValueEntries.clear();
         }
 
+        original.fun = newFun;
         return tree;
     }
 
