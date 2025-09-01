@@ -76,8 +76,10 @@ template <typename... TArgs>
     Exception::raise(reasonFormatStr, forward<TArgs>(args)...);
 }
 
+// Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
+// TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
-unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNode) {
+unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
     auto location = translateLoc(untypedNode->location);
     auto rhs = translate(node->value);
@@ -114,7 +116,12 @@ unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNod
         lhs = make_node_with_expr<SorbetLHSNode>(move(expr), loc, name);
     }
 
-    return make_unique<parser::Assign>(location, move(lhs), move(rhs));
+    if (!hasExpr(lhs, rhs)) {
+        return make_unique<parser::Assign>(location, move(lhs), move(rhs));
+    }
+
+    auto exp = MK::Assign(location, lhs->takeDesugaredExpr(), rhs->takeDesugaredExpr());
+    return make_node_with_expr<parser::Assign>(move(exp), location, move(lhs), move(rhs));
 }
 
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
@@ -1171,7 +1178,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
             auto body = this->enterModuleContext().translate(moduleNode->body);
 
-            return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            if (!directlyDesugar || !hasExpr(name, body)) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            }
+
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            if (!bodyExprsOpt.has_value()) {
+                return make_unique<parser::Module>(location, declLoc, move(name), move(body));
+            }
+            auto bodyExprs = move(*bodyExprsOpt);
+
+            auto nameExpr = name->takeDesugaredExpr();
+            ast::ClassDef::ANCESTORS_store ancestors;
+            auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(ancestors), move(bodyExprs));
+
+            return make_node_with_expr<parser::Module>(move(moduleDef), location, declLoc, move(name), move(body));
         }
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
             auto multiTargetNode = down_cast<pm_multi_target_node>(node);
@@ -1669,7 +1690,29 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto yieldArgs = translateArguments(yieldNode->arguments);
 
-            return make_unique<parser::Yield>(location, move(yieldArgs));
+            if (!directlyDesugar || !hasExpr(yieldArgs)) {
+                return make_unique<parser::Yield>(location, move(yieldArgs));
+            }
+
+            ExpressionPtr recv;
+            if (enclosingBlockParamName.exists()) {
+                if (enclosingBlockParamName == core::Names::blkArg()) {
+                    if (auto e =
+                            ctx.beginIndexerError(enclosingMethodLoc, core::errors::Desugar::UnnamedBlockParameter)) {
+                        e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
+                                    enclosingMethodName.show(ctx), "yield");
+                        e.addErrorLine(ctx.locAt(location), "Arising from use of `{}` in method body", "yield");
+                    }
+                }
+                recv = MK::Local(location, enclosingBlockParamName);
+            } else {
+                recv = MK::RaiseUnimplemented(location);
+            }
+
+            auto args = nodeVecToStore<ast::Send::ARGS_store>(yieldArgs);
+            auto expr = MK::Send(location, std::move(recv), core::Names::call(), location.copyWithZeroLength(),
+                                 args.size(), std::move(args));
+            return make_node_with_expr<parser::Yield>(std::move(expr), location, move(yieldArgs));
         }
 
         case PM_ALTERNATION_PATTERN_NODE: // A pattern like `1 | 2`
