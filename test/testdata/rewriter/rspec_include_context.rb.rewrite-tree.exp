@@ -2,21 +2,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C RSpecIncludeContextTest><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    class <emptyTree>::<C <describe 'nonexistent context'>><<C <todo sym>>> < (<self>)
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
-      def <it 'cannot reference undefined context'><<todo method>>(&<blk>)
-        <self>.include(<emptyTree>::<C <shared_examples_module 'nonexistent context'>>)
-      end
-
-      "cannot reference undefined context"
-
-      <runtime method definition of <it 'cannot reference undefined context'>>
+    class <emptyTree>::<C <describe 'nonexistent context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples_module 'nonexistent context'>>)
     end
 
-    class <emptyTree>::<C <describe 'working include_context'>><<C <todo sym>>> < (<self>)
+    class <emptyTree>::<C <describe 'working include_context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.void()
       end
