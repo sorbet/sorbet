@@ -305,6 +305,7 @@ class LocalNameInserter {
         ast::ExpressionPtr blockArg;
 
         core::NameRef newFun = original.fun;
+        ast::Send::Flags newFlags = original.flags;
 
         for (const auto &arg : enclosingMethodScopeStack.args) {
             ENFORCE(blockArg == nullptr, "Block arg was not in final position");
@@ -421,6 +422,7 @@ class LocalNameInserter {
                 // <call-with-splat> and "do"
                 newFun = core::Names::callWithSplat();
                 // Re-add block argument
+                newFlags.hasBlock = true;
                 original.setBlock(std::move(originalBlock));
             } else if (shouldForwardBlockArg) {
                 // <call-with-splat-and-block>(..., &blk)
@@ -476,6 +478,7 @@ class LocalNameInserter {
             }
             // Re-add original block
             if (originalBlock) {
+                newFlags.hasBlock = true;
                 original.setBlock(std::move(originalBlock));
             }
             kwArgKeyEntries.clear();
@@ -483,6 +486,7 @@ class LocalNameInserter {
         }
 
         original.fun = newFun;
+        original.flags = newFlags;
         return tree;
     }
 
