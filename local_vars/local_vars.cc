@@ -466,8 +466,10 @@ class LocalNameInserter {
             newFun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
-            newArgs.reserve(posArgsEntries.size() + kwArgKeyEntries.size() * 2
-                            /* hasKwSplat */ + int(kwArgsHash != nullptr) + /* hasBlock */ int(originalBlock != nullptr));
+            newArgs.reserve(posArgsEntries.size() +
+                            kwArgKeyEntries.size() * 2
+                            /* hasKwSplat */
+                            + int(kwArgsHash != nullptr) + /* hasBlock */ int(originalBlock != nullptr));
 
             absl::c_move(std::move(posArgsEntries), std::back_inserter(newArgs));
             posArgsEntries.clear();
@@ -492,7 +494,8 @@ class LocalNameInserter {
             kwArgValueEntries.clear();
         }
 
-        return ast::make_expression<ast::Send>(original.loc, std::move(newRecv), newFun, original.funLoc, newNumPosArgs, std::move(newArgs), newFlags);
+        return ast::make_expression<ast::Send>(original.loc, std::move(newRecv), newFun, original.funLoc, newNumPosArgs,
+                                               std::move(newArgs), newFlags);
     }
 
     void walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
