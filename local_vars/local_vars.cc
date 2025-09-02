@@ -379,12 +379,16 @@ class LocalNameInserter {
         auto shouldForwardBlockArg =
             blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict;
 
+        ast::ExpressionPtr newRecv = std::move(original.recv);
+
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
             // a hack, but 'super' is currently treated as untyped anyway.
             // TODO(neil): this probably blames to unsafe, we should find a way to blame to super maybe?
-            original.addPosArg(ast::MK::Unsafe(original.loc, std::move(original.recv)));
+            original.addPosArg(ast::MK::Unsafe(original.loc, std::move(newRecv)));
+            newRecv = ast::MK::Magic(original.loc);
+
             original.addPosArg(std::move(method));
 
             // For <call-with-splat> and <call-with-splat-and-block> posargs are always passed in an array.
@@ -416,8 +420,6 @@ class LocalNameInserter {
             }
             original.addPosArg(std::move(boxedKwArgs));
 
-            original.recv = ast::MK::Magic(original.loc);
-
             if (originalBlock != nullptr) {
                 // <call-with-splat> and "do"
                 newFun = core::Names::callWithSplat();
@@ -436,7 +438,8 @@ class LocalNameInserter {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
             original.reserveArguments(3 + posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
-            original.addPosArg(std::move(original.recv));
+            original.addPosArg(std::move(newRecv));
+            newRecv = ast::MK::Magic(original.loc);
             original.addPosArg(std::move(method));
             original.addPosArg(std::move(blockArg));
 
@@ -456,7 +459,6 @@ class LocalNameInserter {
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
 
-            original.recv = ast::MK::Magic(original.loc);
             newFun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
@@ -485,6 +487,7 @@ class LocalNameInserter {
             kwArgValueEntries.clear();
         }
 
+        original.recv = std::move(newRecv);
         original.fun = newFun;
         original.flags = newFlags;
         return tree;
