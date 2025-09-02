@@ -269,8 +269,10 @@ public:
     void untrackPackageReferencesFor(const core::FileRef file);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
+    std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
+                                                                       std::vector<core::SymbolRef> &toExport) const;
 };
-CheckSize(PackageInfo, 208, 8);
+CheckSize(PackageInfo, 240, 8);
 
 } // namespace sorbet::core::packages
 #endif

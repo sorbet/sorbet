@@ -979,6 +979,7 @@ void GlobalState::initEmpty() {
 
     // First file is used to indicate absence of a file
     files.emplace_back();
+    symbolsReferencedByFile.emplace_back();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
@@ -1772,6 +1773,7 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
 
     auto path = file->path();
     files.emplace_back(std::move(file));
+    symbolsReferencedByFile.emplace_back();
     auto ret = FileRef(filesUsed() - 1);
     fileRefByPath[path] = ret;
     return ret;
@@ -2141,6 +2143,8 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
 
     result->strings = this->strings;
     result->files = this->files;
+    // TODO: do we need this?
+    result->symbolsReferencedByFile = this->symbolsReferencedByFile;
     result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
@@ -2216,6 +2220,8 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
 
     // Additional options that might be used during indexing are manually copied over here
     result->files = this->files;
+    // TODO: do we need this?
+    result->symbolsReferencedByFile = this->symbolsReferencedByFile;
     result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
 
@@ -2248,6 +2254,8 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     // We share the file table entries with the original GlobalState, and then copy the content of the name table,
     // string storage, and uuid to ensure that we remain compatible with the session cache.
     result->files = this->files;
+    // TODO: do we need this?
+    result->symbolsReferencedByFile = this->symbolsReferencedByFile;
     result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
     result->strings = this->strings;

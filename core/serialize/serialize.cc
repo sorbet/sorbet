@@ -849,6 +849,7 @@ Pickler SerializerImpl::pickleFileTable(const GlobalState &gs, bool payloadOnly)
 }
 
 void SerializerImpl::pickleFileTable(Pickler &p, const GlobalState &gs, bool payloadOnly) {
+    fmt::print("pickle: {}\n", gs.files.size());
     p.putU4(gs.files.size());
     int i = -1;
     for (const auto &f : gs.files) {
@@ -871,8 +872,10 @@ void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
         for (int i = 0; i < filesSize; i++) {
             if (i == 0) {
                 result.files.emplace_back();
+                result.symbolsReferencedByFile.emplace_back();
             } else {
                 result.files.emplace_back(unpickleFile(p));
+                result.symbolsReferencedByFile.emplace_back();
             }
         }
     }
