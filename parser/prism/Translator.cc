@@ -611,7 +611,28 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 declLoc = declLoc.join(superclass->loc);
             }
 
-            return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
+            if (!directlyDesugar || !hasExpr(name, superclass, body)) {
+                return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
+            }
+
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            if (!bodyExprsOpt.has_value()) {
+                return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
+            }
+            auto bodyExprs = move(*bodyExprsOpt);
+
+            ast::ClassDef::ANCESTORS_store ancestors;
+            if (superclass == nullptr) {
+                ancestors.emplace_back(MK::Constant(location, core::Symbols::todo()));
+            } else {
+                ancestors.emplace_back(superclass->takeDesugaredExpr());
+            }
+
+            auto nameExpr = name->takeDesugaredExpr();
+            auto classDef = MK::Class(location, declLoc, move(nameExpr), move(ancestors), move(bodyExprs));
+
+            return make_node_with_expr<parser::Class>(move(classDef), location, declLoc, move(name), move(superclass),
+                                                      move(body));
         }
         case PM_CLASS_VARIABLE_AND_WRITE_NODE: { // And-assignment to a class variable, e.g. `@@a &&= 1`
             return translateOpAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(node);
