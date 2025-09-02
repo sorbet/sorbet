@@ -18,11 +18,6 @@ struct CommentNodePrism {
     std::string_view string;
 };
 
-struct CommentMapPrism {
-    std::map<parser::Node *, std::vector<CommentNodePrism>> signaturesForNode;
-    std::map<parser::Node *, std::vector<CommentNodePrism>> assertionsForNode;
-};
-
 struct CommentMapPrismNode {
     std::map<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
     std::map<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
@@ -33,7 +28,6 @@ public:
     static const std::string_view RBS_PREFIX;
 
     CommentsAssociatorPrism(core::MutableContext ctx, std::vector<core::LocOffsets> commentLocations);
-    CommentMapPrism run(std::unique_ptr<parser::Node> &tree);
     CommentMapPrismNode run(pm_node_t *node);
 
 private:
@@ -44,23 +38,24 @@ private:
     core::MutableContext ctx;
     std::vector<core::LocOffsets> commentLocations;
     std::map<int, CommentNodePrism> commentByLine;
-    std::map<parser::Node *, std::vector<CommentNodePrism>> signaturesForNode;
-    std::map<parser::Node *, std::vector<CommentNodePrism>> assertionsForNode;
+    std::map<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
+    std::map<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
     std::vector<std::pair<bool, core::LocOffsets>> contextAllowingTypeAlias;
     int lastLine;
 
-    void walkNode(parser::Node *node);
-    void walkNodes(parser::NodeVec &nodes);
-    void walkStatements(parser::NodeVec &nodes);
-    std::unique_ptr<parser::Node> walkBody(parser::Node *node, std::unique_ptr<parser::Node> body);
-    void associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc);
-    void associateSignatureCommentsToNode(parser::Node *node);
-    void consumeCommentsInsideNode(parser::Node *node, std::string kind);
+    void walkNode(pm_node_t *node);
+    void walkNodes(pm_node_list_t &nodes);
+    void walkStatements(pm_node_list_t &nodes);
+    pm_node_t* walkBody(pm_node_t *node, pm_node_t* body);
+    void associateAssertionCommentsToNode(pm_node_t *node, bool adjustLocForHeredoc);
+    void associateSignatureCommentsToNode(pm_node_t *node);
+    void consumeCommentsInsideNode(pm_node_t *node, std::string kind);
     void consumeCommentsBetweenLines(int startLine, int endLine, std::string kind);
     void consumeCommentsUntilLine(int line);
-    std::optional<uint32_t> locateTargetLine(parser::Node *node);
+    std::optional<uint32_t> locateTargetLine(pm_node_t *node);
+    core::LocOffsets translateLocation(pm_location_t location);
 
-    int maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine, int currentLine);
+    int maybeInsertStandalonePlaceholders(pm_node_list_t &nodes, int index, int lastLine, int currentLine);
     bool nestingAllowsTypeAlias();
 };
 
