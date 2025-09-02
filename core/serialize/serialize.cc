@@ -871,6 +871,7 @@ void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
 
     for (int i = 0; i < filesSize; i++) {
         files.emplace(unpickleFile(p));
+        result.symbolsReferencedByFile.emplace_back();
     }
 
     result.files = make_shared<FileTable>(move(files));

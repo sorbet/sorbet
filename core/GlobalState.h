@@ -583,6 +583,7 @@ public:
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
     bool shouldReportErrorOn(FileRef file, ErrorClass what) const;
+    std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
 
 private:
     struct DeepCloneHistoryEntry {
