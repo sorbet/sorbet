@@ -1,0 +1,177 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C RSpecItsTest><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    class <emptyTree>::<C <describe 'its functionality'>><<C <todo sym>>> < (<self>)
+      def subject<<todo method>>(&<blk>)
+        {:name => "John", :age => 30}
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its name><<todo method>>(&<blk>)
+        <self>.puts("testing name property")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its age><<todo method>>(&<blk>)
+        <self>.puts("testing age property")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its size><<todo method>>(&<blk>)
+        <self>.puts("testing size method")
+      end
+
+      <runtime method definition of subject>
+
+      begin
+        :name
+        <runtime method definition of <its name>>
+      end
+
+      begin
+        :age
+        <runtime method definition of <its age>>
+      end
+
+      begin
+        :size
+        <runtime method definition of <its size>>
+      end
+    end
+
+    class <emptyTree>::<C <describe 'its with string subject'>><<C <todo sym>>> < (<self>)
+      def subject<<todo method>>(&<blk>)
+        "hello world"
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its length><<todo method>>(&<blk>)
+        <self>.puts("testing string length")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its upcase><<todo method>>(&<blk>)
+        <self>.puts("testing string upcase")
+      end
+
+      <runtime method definition of subject>
+
+      begin
+        :length
+        <runtime method definition of <its length>>
+      end
+
+      begin
+        :upcase
+        <runtime method definition of <its upcase>>
+      end
+    end
+
+    class <emptyTree>::<C <describe 'its with array subject'>><<C <todo sym>>> < (<self>)
+      def subject<<todo method>>(&<blk>)
+        [1, 2, 3, 4, 5]
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its first><<todo method>>(&<blk>)
+        <self>.puts("testing array first")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its last><<todo method>>(&<blk>)
+        <self>.puts("testing array last")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <its count><<todo method>>(&<blk>)
+        <self>.puts("testing array count")
+      end
+
+      <runtime method definition of subject>
+
+      begin
+        :first
+        <runtime method definition of <its first>>
+      end
+
+      begin
+        :last
+        <runtime method definition of <its last>>
+      end
+
+      begin
+        :count
+        <runtime method definition of <its count>>
+      end
+    end
+
+    class <emptyTree>::<C <describe 'nested context with its'>><<C <todo sym>>> < (<self>)
+      def subject<<todo method>>(&<blk>)
+        {:user => {:profile => {:name => "Jane"}}}
+      end
+
+      <runtime method definition of subject>
+
+      class <emptyTree>::<C <describe 'accessing nested properties'>><<C <todo sym>>> < (<self>)
+        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+          <self>.void()
+        end
+
+        def <its user><<todo method>>(&<blk>)
+          <self>.puts("accessing user hash")
+        end
+
+        begin
+          :user
+          <runtime method definition of <its user>>
+        end
+
+        class <emptyTree>::<C <describe 'deeper nesting'>><<C <todo sym>>> < (<self>)
+          def subject<<todo method>>(&<blk>)
+            <self>.<untypedSuper>().[](:user)
+          end
+
+          ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+            <self>.void()
+          end
+
+          def <its profile><<todo method>>(&<blk>)
+            <self>.puts("accessing profile")
+          end
+
+          <runtime method definition of subject>
+
+          begin
+            :profile
+            <runtime method definition of <its profile>>
+          end
+        end
+      end
+    end
+  end
+end
