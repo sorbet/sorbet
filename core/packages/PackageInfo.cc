@@ -565,6 +565,22 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
     return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
 }
 
+std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingExports(const core::GlobalState &gs) const {
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto sym : missingExports) {
+        auto autocorrect = addExport(gs, sym);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+    if (allEdits.size() == 0) {
+        return nullopt;
+    }
+    mergeAdjacentEdits(allEdits);
+    return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
+}
+
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
     return mangledName() == rhs.mangledName();
 }

@@ -267,6 +267,7 @@ public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> packageReferences;
+    UnorderedSet<core::SymbolRef> symbolsReferenced;
 
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
@@ -306,6 +307,8 @@ public:
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
+
+        symbolsReferenced.insert(litSymbol);
 
         auto loc = litSymbol.loc(ctx);
 
@@ -566,9 +569,9 @@ public:
     static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
                                        vector<ast::ParsedFile> files) {
         const core::GlobalState &gs = nonConstGs;
-        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<std::pair<
-            core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
-            files.size());
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<
+            std::tuple<core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
+                       UnorderedSet<core::SymbolRef>>>>>(files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto filesSpan = absl::MakeSpan(files);
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(filesSpan.size());
@@ -598,7 +601,8 @@ public:
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
-                resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
+                resultq->push(make_tuple(f.file, std::move(pass.packageReferences), std::move(pass.symbolsReferenced)),
+                              1);
             }
             barrier.DecrementCount();
         });
@@ -615,23 +619,48 @@ public:
                 nonConstPackageInfo->untrackPackageReferencesFor(file);
             }
 
-            std::optional<std::pair<core::FileRef,
-                                    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
+            std::optional<std::tuple<core::FileRef,
+                                     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
+                                     UnorderedSet<core::SymbolRef>>>
                 threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem() && threadResult.has_value()) {
-                    auto file = threadResult.value().first;
+                    auto file = std::get<0>(threadResult.value());
                     auto pkgName = gs.packageDB().getPackageNameForFile(file);
                     if (!pkgName.exists()) {
                         continue;
                     }
                     auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
-                    for (auto [p, packageReferenceInfo] : threadResult.value().second) {
+                    for (auto [p, packageReferenceInfo] : std::get<1>(threadResult.value())) {
                         nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
                     }
+
+                    for (auto symbol : std::get<2>(threadResult.value())) {
+                        core::packages::MangledName owningPackage;
+                        bool isExported = false;
+                        if (symbol.isClassOrModule()) {
+                            auto data = symbol.asClassOrModuleRef().data(gs);
+                            owningPackage = data->package;
+                            isExported = data->flags.isExported;
+                        } else if (symbol.isFieldOrStaticField()) {
+                            auto data = symbol.asFieldRef().data(gs)->owner.data(gs);
+                            owningPackage = data->package;
+                            isExported = data->flags.isExported;
+                        } else {
+                            ENFORCE(false);
+                        }
+                        auto imported = nonConstPackageInfo->importsPackage(owningPackage);
+                        if (!owningPackage.exists() || !imported.has_value() || isExported) {
+                            continue;
+                        }
+                        auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(owningPackage);
+                        ENFORCE(nonConstPackageInfo->exists());
+                        nonConstPackageInfo->missingExports.insert(symbol);
+                    }
                 }
+            }
         }
         barrier.Wait();
 
@@ -656,11 +685,19 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
         for (auto package : gs.packageDB().packages()) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
-            if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
+
+            if (auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs)) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
-                    e.addAutocorrect(move(autocorrect.value()));
+                    e.addAutocorrect(move(importsAutocorrect.value()));
                     // TODO(neil): we should also delete imports that are unused but have a modularity error here
+                }
+            }
+
+            if (auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs)) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{} is missing exports", pkgInfo.show(gs));
+                    e.addAutocorrect(move(exportsAutocorrect.value()));
                 }
             }
         }

@@ -197,6 +197,9 @@ public:
     UnorderedMap<core::packages::MangledName, std::pair<UnorderedSet<core::FileRef>, PackageReferenceInfo>>
         referencedPackages = {};
 
+    // TODO: document
+    UnorderedSet<core::SymbolRef> missingExports;
+
     std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         ENFORCE(exists());
         return strictDependenciesLevel_;
@@ -294,6 +297,7 @@ public:
     void untrackPackageReferencesFor(const core::FileRef file);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
+    std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs) const;
 };
 
 } // namespace sorbet::core::packages
