@@ -1,0 +1,20 @@
+- faster props:
+  - T::Boolean hot path
+  - type_member hot path
+  - T.untyped hot path
+  - T.self_type hot path
+  - keyword params??
+  - T::Array[...] hot path
+  - T.nilable hot path
+  - how do defaulted positional params work?
+    - they're not checked--let's just send them through the fast path methods (or make comparable versions)
+    - should also work for defaulted kwargs too?
+  - get rid of method_sig.bind
+  - get rid of AT_LEAST_RUBY_2_7
+  - method_sig.return_type.is_a?(void) to `==` or `.eql?`
+  - could we add a VM special function for iterating the keyword args without allocating a hash?
+  - check memory tradeoff of src_transform vs closure-based
+  - fast1, fast2, etc. with no block?
+  - turn off abstract instance check for tests
+  - fast path to undefine the `defined?(super)` abstract method forwarders if it was called successfully once
+
