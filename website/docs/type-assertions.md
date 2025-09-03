@@ -125,7 +125,9 @@ end
   → View on sorbet.run
 </a>
 
-Here's the same example with `T.must_because`, showing the user of custom reasons. The reason is provided as a block that returns a `String`, so that the reason is only computed if the exception would be raised.
+### `T.must_because`
+
+Here's the same example with `T.must_because`, showing the use of custom reasons. The reason is provided as a block that returns a `String`, so that the reason is only computed if the exception would be raised.
 
 ```ruby
 class A
