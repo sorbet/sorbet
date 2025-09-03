@@ -2,7 +2,6 @@
 
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
-#include "common/typecase.h"
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "rbs/SignatureTranslator.h"
@@ -46,32 +45,41 @@ optional<uint32_t> CommentsAssociatorPrism::locateTargetLine(pm_node_t *node) {
         return result;
     }
 
-    typecase(
-        node,
-        [&](pm_string_node_t *lit) {
+    switch (node->type) {
+        case PM_STRING_NODE: {
             auto loc = translateLocation(node->location);
             if (hasHeredocMarkerPrism(ctx, loc.beginPos(), loc.endPos())) {
                 result = core::Loc::pos2Detail(ctx.file.data(ctx), loc.beginPos()).line;
             }
-        },
-        [&](pm_interpolated_string_node_t *lit) {
+            break;
+        }
+        case PM_INTERPOLATED_STRING_NODE: {
             auto loc = translateLocation(node->location);
             if (hasHeredocMarkerPrism(ctx, loc.beginPos(), loc.endPos())) {
                 result = core::Loc::pos2Detail(ctx.file.data(ctx), loc.beginPos()).line;
             }
-        },
-        [&](pm_array_node_t *arr) {
+            break;
+        }
+        case PM_ARRAY_NODE: {
+            auto *arr = (pm_array_node_t *)node;
             for (size_t i = 0; i < arr->elements.size; i++) {
                 if (auto line = locateTargetLine(arr->elements.nodes[i])) {
                     result = *line;
                     break;
                 }
             }
-        },
-        [&](pm_call_node_t *send) { result = locateTargetLine(send->receiver); },
-        [&](pm_node_t *expr) {
+            break;
+        }
+        case PM_CALL_NODE: {
+            auto *send = (pm_call_node_t *)node;
+            result = locateTargetLine(send->receiver);
+            break;
+        }
+        default: {
             // No special handling for other node types
-        });
+            break;
+        }
+    }
 
     return result;
 }
@@ -387,31 +395,38 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
         return;
     }
 
-    typecase(
-        node,
-
-        [&](pm_and_node_t *and_) {
+    switch (node->type) {
+        case PM_AND_NODE: {
+            auto *and_ = (pm_and_node_t *)node;
             associateAssertionCommentsToNode(node);
             walkNode(and_->right);
             walkNode(and_->left);
             consumeCommentsInsideNode(node, "and");
-        },
-        [&](pm_local_variable_and_write_node_t *andAsgn) {
+            break;
+        }
+        case PM_LOCAL_VARIABLE_AND_WRITE_NODE: {
+            auto *andAsgn = (pm_local_variable_and_write_node_t *)node;
             associateAssertionCommentsToNode(andAsgn->value, true);
             walkNode(andAsgn->value);
             consumeCommentsInsideNode(node, "and_asgn");
-        },
-        [&](pm_array_node_t *array) {
+            break;
+        }
+        case PM_ARRAY_NODE: {
+            auto *array = (pm_array_node_t *)node;
             associateAssertionCommentsToNode(node);
             walkNodes(array->elements);
             consumeCommentsInsideNode(node, "array");
-        },
-        [&](pm_local_variable_write_node_t *assign) {
+            break;
+        }
+        case PM_LOCAL_VARIABLE_WRITE_NODE: {
+            auto *assign = (pm_local_variable_write_node_t *)node;
             associateAssertionCommentsToNode(assign->value, true);
             walkNode(assign->value);
             consumeCommentsInsideNode(node, "assign");
-        },
-        [&](pm_begin_node_t *begin) {
+            break;
+        }
+        case PM_BEGIN_NODE: {
+            auto *begin = (pm_begin_node_t *)node;
             // Differentiate between implicit and explicit begin nodes by checking if begin_keyword_loc is populated
             // In Prism, both implicit and explicit begin constructs use PM_BEGIN_NODE, unlike Whitequark which had
             // separate types
@@ -444,8 +459,10 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             auto nodeLoc = translateLocation(node->location);
             lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), nodeLoc.endPos()).line;
             consumeCommentsInsideNode(node, "begin");
-        },
-        [&](pm_block_node_t *block) {
+            break;
+        }
+        case PM_BLOCK_NODE: {
+            auto *block = (pm_block_node_t *)node;
             auto blockLoc = translateLocation(node->location);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), blockLoc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
@@ -456,8 +473,10 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             walkNode(block->body);
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), blockLoc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "block");
-        },
-        [&](pm_break_node_t *break_) {
+            break;
+        }
+        case PM_BREAK_NODE: {
+            auto *break_ = (pm_break_node_t *)node;
             // Only associate comments if the last expression is on the same line as the break
             if (break_->arguments != nullptr && break_->arguments->arguments.size > 0) {
                 auto breakLoc = translateLocation(node->location);
@@ -474,22 +493,28 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
                 walkNodes(break_->arguments->arguments);
             }
             consumeCommentsInsideNode(node, "break");
-        },
-        [&](pm_case_node_t *case_) {
+            break;
+        }
+        case PM_CASE_NODE: {
+            auto *case_ = (pm_case_node_t *)node;
             associateAssertionCommentsToNode(node);
             walkNode(case_->predicate);
             walkNodes(case_->conditions);
             case_->else_clause = (pm_else_node_t *)walkBody(node, (pm_node_t *)case_->else_clause);
             consumeCommentsInsideNode(node, "case");
-        },
-        [&](pm_case_match_node_t *case_) {
+            break;
+        }
+        case PM_CASE_MATCH_NODE: {
+            auto *case_ = (pm_case_match_node_t *)node;
             associateAssertionCommentsToNode(node);
             walkNode(case_->predicate);
             walkNodes(case_->conditions);
             case_->else_clause = (pm_else_node_t *)walkBody(node, (pm_node_t *)case_->else_clause);
             consumeCommentsInsideNode(node, "case");
-        },
-        [&](pm_class_node_t *cls) {
+            break;
+        }
+        case PM_CLASS_NODE: {
+            auto *cls = (pm_class_node_t *)node;
             auto classKeywordLoc = translateLocation(cls->class_keyword_loc);
             contextAllowingTypeAlias.push_back(make_pair(true, classKeywordLoc));
             associateSignatureCommentsToNode(node);
@@ -500,8 +525,10 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), classLoc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "class");
             contextAllowingTypeAlias.pop_back();
-        },
-        // [&](pm_call_node_t *call) {
+            break;
+        }
+        // case PM_CALL_NODE: {
+        //     auto *call = (pm_call_node_t *)node;
         //     // Handle setter methods (foo.x=(y) or foo&.x=(y))
         //     if (call->name.isSetter(ctx.state) && call->arguments != nullptr && call->arguments->arguments.size == 1)
         //     {
@@ -550,8 +577,10 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
         //         }
         //         consumeCommentsInsideNode(node, "call");
         //     }
-        // },
-        [&](pm_def_node_t *def) {
+        // break;
+        // }
+        case PM_DEF_NODE: {
+            auto *def = (pm_def_node_t *)node;
             auto defKeywordLoc = translateLocation(def->def_keyword_loc);
             contextAllowingTypeAlias.push_back(make_pair(false, defKeywordLoc));
             associateSignatureCommentsToNode(node);
@@ -562,30 +591,40 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             def->body = walkBody((pm_node_t *)def, def->body);
             consumeCommentsInsideNode(node, "method");
             contextAllowingTypeAlias.pop_back();
-        },
-        [&](pm_else_node_t *else_) {
+            break;
+        }
+        case PM_ELSE_NODE: {
+            auto *else_ = (pm_else_node_t *)node;
             walkNode((pm_node_t *)else_->statements);
             consumeCommentsInsideNode(node, "else");
-        },
-        [&](pm_ensure_node_t *ensure) {
+            break;
+        }
+        case PM_ENSURE_NODE: {
+            auto *ensure = (pm_ensure_node_t *)node;
             walkNode((pm_node_t *)ensure->statements);
             consumeCommentsInsideNode(node, "ensure");
-        },
-        [&](pm_for_node_t *for_) {
+            break;
+        }
+        case PM_FOR_NODE: {
+            auto *for_ = (pm_for_node_t *)node;
             associateAssertionCommentsToNode(node);
             walkNode(for_->collection);
             walkNode(for_->index);
             walkNode((pm_node_t *)for_->statements);
             consumeCommentsInsideNode(node, "for");
-        },
-        [&](pm_hash_node_t *hash) {
+            break;
+        }
+        case PM_HASH_NODE: {
+            auto *hash = (pm_hash_node_t *)node;
             // TODO: Check if this hash is keyword arguments or regular hash
             // For now, always associate assertion comments
             associateAssertionCommentsToNode(node);
             walkNodes(hash->elements);
             consumeCommentsInsideNode(node, "hash");
-        },
-        [&](pm_if_node_t *if_) {
+            break;
+        }
+        case PM_IF_NODE: {
+            auto *if_ = (pm_if_node_t *)node;
             auto ifLoc = translateLocation(node->location);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), ifLoc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), ifLoc.endPos()).line;
@@ -614,23 +653,31 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             }
 
             consumeCommentsInsideNode(node, "if");
-        },
-        [&](pm_in_node_t *inPattern) {
+            break;
+        }
+        case PM_IN_NODE: {
+            auto *inPattern = (pm_in_node_t *)node;
             walkNode(inPattern->pattern);
             // Note: InNode doesn't have a guard field in Prism
             walkNode((pm_node_t *)inPattern->statements);
             consumeCommentsInsideNode(node, "in_pattern");
-        },
-        [&](pm_keyword_hash_node_t *kwsplat) {
+            break;
+        }
+        case PM_KEYWORD_HASH_NODE: {
+            // auto *kwsplat = (pm_keyword_hash_node_t *)node;
             // TODO: Fix kwsplat field access for Prism nodes
             consumeCommentsInsideNode(node, "kwsplat");
-        },
-        [&](pm_multi_write_node_t *masgn) {
+            break;
+        }
+        case PM_MULTI_WRITE_NODE: {
+            auto *masgn = (pm_multi_write_node_t *)node;
             associateAssertionCommentsToNode(masgn->value, true);
             walkNode(masgn->value);
             consumeCommentsInsideNode(node, "masgn");
-        },
-        [&](pm_module_node_t *mod) {
+            break;
+        }
+        case PM_MODULE_NODE: {
+            auto *mod = (pm_module_node_t *)node;
             auto moduleKeywordLoc = translateLocation(mod->module_keyword_loc);
             contextAllowingTypeAlias.push_back(make_pair(true, moduleKeywordLoc));
             associateSignatureCommentsToNode(node);
@@ -641,8 +688,10 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), modLoc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "module");
             contextAllowingTypeAlias.pop_back();
-        },
-        [&](pm_next_node_t *next) {
+            break;
+        }
+        case PM_NEXT_NODE: {
+            auto *next = (pm_next_node_t *)node;
             // Only associate comments if the last expression is on the same line as the next
             if (next->arguments && next->arguments->arguments.size > 0) {
                 auto nextLoc = translateLocation(node->location);
@@ -659,29 +708,39 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
                 walkNodes(next->arguments->arguments);
             }
             consumeCommentsInsideNode(node, "next");
-        },
-        [&](pm_local_variable_operator_write_node_t *opAsgn) {
+            break;
+        }
+        case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE: {
+            auto *opAsgn = (pm_local_variable_operator_write_node_t *)node;
             associateAssertionCommentsToNode(opAsgn->value, true);
             walkNode(opAsgn->value);
             consumeCommentsInsideNode(node, "op_asgn");
-        },
-        [&](pm_or_node_t *or_) {
+            break;
+        }
+        case PM_OR_NODE: {
+            auto *or_ = (pm_or_node_t *)node;
             associateAssertionCommentsToNode(node);
             walkNode(or_->right);
             walkNode(or_->left);
             consumeCommentsInsideNode(node, "or");
-        },
-        [&](pm_local_variable_or_write_node_t *orAsgn) {
+            break;
+        }
+        case PM_LOCAL_VARIABLE_OR_WRITE_NODE: {
+            auto *orAsgn = (pm_local_variable_or_write_node_t *)node;
             associateAssertionCommentsToNode(orAsgn->value, true);
             walkNode(orAsgn->value);
             consumeCommentsInsideNode(node, "or_asgn");
-        },
-        [&](pm_assoc_node_t *pair) {
+            break;
+        }
+        case PM_ASSOC_NODE: {
+            auto *pair = (pm_assoc_node_t *)node;
             walkNode(pair->value);
             walkNode(pair->key);
             consumeCommentsInsideNode(node, "pair");
-        },
-        [&](pm_rescue_node_t *rescue) {
+            break;
+        }
+        case PM_RESCUE_NODE: {
+            auto *rescue = (pm_rescue_node_t *)node;
             auto rescueLoc = translateLocation(node->location);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), rescueLoc.beginPos()).line;
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), rescueLoc.endPos()).line;
@@ -709,8 +768,10 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             }
 
             consumeCommentsBetweenLines(beginLine, endLine, "rescue");
-        },
-        [&](pm_return_node_t *ret) {
+            break;
+        }
+        case PM_RETURN_NODE: {
+            auto *ret = (pm_return_node_t *)node;
             // Only associate comments if the last expression is on the same line as the return
             if (ret->arguments && ret->arguments->arguments.size > 0) {
                 auto returnLoc = translateLocation(node->location);
@@ -727,32 +788,40 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
                 walkNodes(ret->arguments->arguments);
             }
             consumeCommentsInsideNode(node, "return");
-        },
-        [&](pm_singleton_class_node_t *sclass) {
+            break;
+        }
+        case PM_SINGLETON_CLASS_NODE: {
+            auto *sclass = (pm_singleton_class_node_t *)node;
             auto classKeywordLoc = translateLocation(sclass->class_keyword_loc);
             contextAllowingTypeAlias.push_back(make_pair(true, classKeywordLoc));
             associateSignatureCommentsToNode(node);
             auto sclassLoc = translateLocation(node->location);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), sclassLoc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
-            sclass->body = walkBody(sclass, sclass->body);
+            sclass->body = walkBody((pm_node_t *)sclass, sclass->body);
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), sclassLoc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "sclass");
             contextAllowingTypeAlias.pop_back();
-        },
-        [&](pm_splat_node_t *splat) {
+            break;
+        }
+        case PM_SPLAT_NODE: {
+            auto *splat = (pm_splat_node_t *)node;
             walkNode(splat->expression);
             consumeCommentsInsideNode(node, "splat");
-        },
-        [&](pm_super_node_t *super_) {
+            break;
+        }
+        case PM_SUPER_NODE: {
+            auto *super_ = (pm_super_node_t *)node;
             associateAssertionCommentsToNode(node);
             if (super_->arguments) {
                 walkNodes(super_->arguments->arguments);
             }
             walkNode(super_->block);
             consumeCommentsInsideNode(node, "super");
-        },
-        [&](pm_until_node_t *until) {
+            break;
+        }
+        case PM_UNTIL_NODE: {
+            auto *until = (pm_until_node_t *)node;
             // Check if this is post-condition until (modifier form: "body until condition")
             bool isModifier = until->base.flags & PM_LOOP_FLAGS_BEGIN_MODIFIER;
 
@@ -767,14 +836,18 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
                 walkNode((pm_node_t *)until->statements);
             }
             consumeCommentsInsideNode(node, "until");
-        },
-        [&](pm_when_node_t *when) {
+            break;
+        }
+        case PM_WHEN_NODE: {
+            auto *when = (pm_when_node_t *)node;
             walkNode((pm_node_t *)when->statements);
             if (when->statements) {
                 consumeCommentsInsideNode((pm_node_t *)when->statements, "when");
             }
-        },
-        [&](pm_while_node_t *while_) {
+            break;
+        }
+        case PM_WHILE_NODE: {
+            auto *while_ = (pm_while_node_t *)node;
             // Check if this is post-condition while (modifier form: "body while condition")
             bool isModifier = while_->base.flags & PM_LOOP_FLAGS_BEGIN_MODIFIER;
 
@@ -789,11 +862,14 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
                 walkNode((pm_node_t *)while_->statements);
             }
             consumeCommentsInsideNode(node, "while");
-        },
-        [&](pm_node_t *other) {
+            break;
+        }
+        default: {
             associateAssertionCommentsToNode(node);
             consumeCommentsInsideNode(node, "other");
-        });
+            break;
+        }
+    }
 }
 
 CommentMapPrismNode CommentsAssociatorPrism::run(pm_node_t *node) {
