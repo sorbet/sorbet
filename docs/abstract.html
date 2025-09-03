@@ -202,7 +202,7 @@
 <p>This technique is also quite flexible: the <code>ShortName</code> module can be used in <strong>any</strong> context where a <code>name</code> method is available. So for example, if you had some <code>T::Struct</code> that stores a <code>name</code>, this <code>ShortName</code> mixin could also be used:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span> &lt; T::Struct</span>
   <span class="hljs-keyword">include</span> ShortName
-  prop <span class="hljs-symbol">:name</span>, String
+  prop <span class="hljs-symbol">:name</span>, String, <span class="hljs-symbol">override:</span> <span class="hljs-symbol">:reader</span>
 <span class="hljs-keyword">end</span>
 
 C.new(<span class="hljs-symbol">name:</span> <span class="hljs-string">"Some::Long::Namespace"</span>).short_name <span class="hljs-comment"># =&gt; "Namespace"</span>
