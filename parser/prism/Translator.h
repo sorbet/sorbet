@@ -138,6 +138,9 @@ private:
                                                   std::unique_ptr<parser::Node> ifTrue,
                                                   std::unique_ptr<parser::Node> ifFalse);
 
+    // String interpolation desugaring
+    sorbet::ast::ExpressionPtr desugarDString(core::LocOffsets loc, pm_node_list prismNodeList);
+
     // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
     std::optional<ast::ClassDef::RHS_store> desugarScopeBodyToRHSStore(std::unique_ptr<parser::Node> &scopeBody);
 
