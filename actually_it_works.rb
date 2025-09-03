@@ -1,18 +1,8 @@
 module Helpers
   def abstract!
+    @__is_abstract = true
     class << self
       alias_method :__orig_new, :new
-    end
-
-    mod = self
-    self.define_singleton_method(:new) do |*args, &blk|
-      puts("⚠️ called slow wrapper #{mod}.new")
-
-      result = super(*args, &blk)
-      if result.instance_of?(mod)
-        raise "💥 instantiated abstract class #{mod}"
-      end
-      result
     end
 
     extend(Hooks)
@@ -25,6 +15,21 @@ module Hooks
     class << other
       alias_method :new, :__orig_new
     end
+  end
+
+  def new(...)
+    puts("⚠️ called slow wrapper")
+
+    result = super
+    if @__is_abstract
+      raise "💥 instantiated abstract class #{self}"
+    end
+    result
+  end
+
+  def abstract!
+    super
+    self.define_singleton_method(:new, Hooks.instance_method(:new))
   end
 end
 
