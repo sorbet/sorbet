@@ -185,7 +185,7 @@ This technique is also quite flexible: the `ShortName` module can be used in **a
 ```ruby
 class C < T::Struct
   include ShortName
-  prop :name, String
+  prop :name, String, override: :reader
 end
 
 C.new(name: "Some::Long::Namespace").short_name # => "Namespace"
