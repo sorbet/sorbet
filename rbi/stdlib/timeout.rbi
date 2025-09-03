@@ -103,3 +103,14 @@ class Timeout::Error < RuntimeError
   sig {returns(::T.untyped)}
   def thread(); end
 end
+
+# # Internal error raised to when a timeout is triggered.
+class Timeout::ExitException < Exception
+  sig do
+    params(
+      _: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def exception(*_); end
+end
