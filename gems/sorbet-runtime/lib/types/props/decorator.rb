@@ -238,7 +238,9 @@ class T::Props::Decorator
     end
 
     if rules.keys.any? { |k| !valid_rule_key?(k) }
-      raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
+      invalid_keys = rules.keys.reject { |k| valid_rule_key?(k) }
+      suffix = invalid_keys.size == 1 ? "" : "s"
+      raise ArgumentError.new("Invalid prop arg#{suffix} supplied in #{self}: #{invalid_keys.inspect}")
     end
 
     if !rules[:clobber_existing_method!] && !rules[:without_accessors] && BANNED_METHOD_NAMES.include?(name.to_sym)
