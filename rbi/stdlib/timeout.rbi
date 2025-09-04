@@ -77,6 +77,10 @@ module Timeout
   def self.timeout(sec, klass = nil, message = nil, &blk); end
 end
 
+class Timeout::ExitException < Exception
+  def exception(*); end
+end
+
 # Raised by
 # [`Timeout.timeout`](https://docs.ruby-lang.org/en/2.7.0/Timeout.html#method-c-timeout)
 # when the block times out.
