@@ -2764,15 +2764,15 @@ Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets m
                                       core::NameRef enclosingBlockParamName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = this->isInModule && !isSingletonMethod;
-    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamName,
-                      this->isInAnyBlock, isInModule);
+    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamName, isInModule,
+                      this->isInAnyBlock);
 }
 
 Translator Translator::enterBlockContext() const {
     auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
     auto isInAnyBlock = true;
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      this->enclosingBlockParamName, isInAnyBlock, this->isInModule);
+                      this->enclosingBlockParamName, this->isInModule, isInAnyBlock);
 }
 
 Translator Translator::enterModuleContext() const {
@@ -2780,7 +2780,7 @@ Translator Translator::enterModuleContext() const {
     auto isInModule = true;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      this->enclosingBlockParamName, isInAnyBlock, isInModule);
+                      this->enclosingBlockParamName, isInModule, isInAnyBlock);
 }
 
 Translator Translator::enterClassContext() const {
@@ -2788,7 +2788,7 @@ Translator Translator::enterClassContext() const {
     auto isInModule = false;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
     return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      this->enclosingBlockParamName, isInAnyBlock, isInModule);
+                      this->enclosingBlockParamName, isInModule, isInAnyBlock);
 }
 
 void Translator::reportError(core::LocOffsets loc, const string &message) const {
