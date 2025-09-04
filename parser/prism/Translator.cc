@@ -1165,7 +1165,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto parts = translateMulti(interpolatedRegexNode->parts);
             auto options = translateRegexpOptions(interpolatedRegexNode->closing_loc);
 
-            return make_unique<parser::Regexp>(location, move(parts), move(options));
+            if (!directlyDesugar || !hasExpr(parts)) {
+                return make_unique<parser::Regexp>(location, move(parts), move(options));
+            }
+
+            auto desugared = desugarDString(location, interpolatedRegexNode->parts);
+            return make_node_with_expr<parser::Regexp>(move(desugared), location, move(parts), move(options));
         }
         case PM_INTERPOLATED_STRING_NODE: { // An interpolated string like `"foo #{bar} baz"`
             auto interpolatedStringNode = down_cast<pm_interpolated_string_node>(node);
