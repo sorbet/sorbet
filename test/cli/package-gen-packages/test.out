@@ -1,0 +1,41 @@
+C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+     8 |      puts F::CONSTANT_FROM_F
+                   ^^^^^^^^^^^^^^^^^^
+    F/__package.rb:4: `F` must be at least `strict_dependencies 'dag'` but is currently `strict_dependencies 'layered'`
+     4 |  strict_dependencies 'layered'
+                              ^^^^^^^^^
+  Note:
+    `F::CONSTANT_FROM_F`'s package is not imported
+
+C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
+     7 |  import A
+          ^^^^^^^^
+    C/__package.rb:5: `C`'s `layer` declared here
+     5 |  layer 'util'
+                ^^^^^^
+    A/__package.rb:5: `A`'s `layer` declared here
+     5 |  layer 'app'
+                ^^^^^
+
+C/__package.rb:3: C is missing imports https://srb.help/3734
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    C/__package.rb:7: Inserted `import B`
+     7 |  import A
+                  ^
+    C/__package.rb:8: Inserted `import E`
+     8 |  import D
+                  ^
+Errors: 3
+# typed: strict
+
+class C < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  import A
+  import B
+  import D
+  import E
+end
