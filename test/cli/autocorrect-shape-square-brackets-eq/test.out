@@ -158,7 +158,26 @@ autocorrect-shape-square-brackets-eq.rb:48: Expected `NilClass` but found `Integ
     autocorrect-shape-square-brackets-eq.rb:45: Replaced with `T.let(nil, T.nilable(Integer))`
     45 |  another_key_with_suffix: nil,
                                    ^^^
-Errors: 10
+
+autocorrect-shape-square-brackets-eq.rb:50: Expected `FalseClass` but found `T.attached_class (of <root>)` for key `Symbol(:bar)` https://srb.help/7002
+    50 |xs[:bar] = new
+                   ^^^
+  Shape originates from here:
+    autocorrect-shape-square-brackets-eq.rb:3:
+     3 |xs = {
+     4 |  foo: nil,
+     5 |  bar: false,
+     6 |  qux: true,
+     7 |}
+  Got `T.attached_class (of <root>)` originating from:
+    autocorrect-shape-square-brackets-eq.rb:50:
+    50 |xs[:bar] = new
+                   ^^^
+  Autocorrect: Done
+    autocorrect-shape-square-brackets-eq.rb:5: Replaced with `T.let(false, T.any(FalseClass, T.attached_class (of <root>)))`
+     5 |  bar: false,
+               ^^^^^
+Errors: 11
 
 --------------------------------------------------------------------------
 
@@ -210,3 +229,5 @@ ws = {
   suffix: nil,
 }
 ws[:suffix] = 1
+
+xs[:bar] = new

@@ -46,3 +46,5 @@ ws = {
   suffix: nil,
 }
 ws[:suffix] = 1
+
+xs[:bar] = new
