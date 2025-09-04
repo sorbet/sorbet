@@ -7,34 +7,6 @@ Begin {
     }
     DefMethod {
       name = <U bar>
-      args = NULL
-      body = Begin {
-        stmts = [
-          String {
-            val = <U string1>
-          }
-          String {
-            val = <U string2>
-          }
-        ]
-      }
-    }
-    DefMethod {
-      name = <U baz>
-      args = NULL
-      body = Kwbegin {
-        stmts = [
-          String {
-            val = <U string1>
-          }
-          String {
-            val = <U string2>
-          }
-        ]
-      }
-    }
-    DefMethod {
-      name = <U qux>
       args = Args {
         args = [
         ]
