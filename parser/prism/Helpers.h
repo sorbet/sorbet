@@ -210,6 +210,28 @@ inline std::string_view cast_prism_string(const uint8_t *source, size_t length) 
     return std::string_view(reinterpret_cast<const char *>(source), length);
 }
 
+template <typename SorbetLHSType> struct IdentKindHelper {};
+
+template <> struct IdentKindHelper<parser::IVarLhs> {
+    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Instance;
+};
+
+template <> struct IdentKindHelper<parser::CVarLhs> {
+    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Class;
+};
+
+template <> struct IdentKindHelper<parser::GVarLhs> {
+    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Global;
+};
+
+template <> struct IdentKindHelper<parser::LVarLhs> {
+    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Local;
+};
+
+template <typename SorbetLHSType> constexpr ast::UnresolvedIdent::Kind getIdentKind() {
+    return IdentKindHelper<SorbetLHSType>::Kind;
+}
+
 } // namespace sorbet::parser::Prism
 
 #endif // SORBET_PARSER_PRISM_HELPERS_H

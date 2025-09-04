@@ -279,6 +279,20 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *l
     return MK::InsSeq(loc, move(stats), MK::Local(loc, tempRhs));
 }
 
+// Helper to check if an ExpressionPtr represents a T.let call
+ast::Send *asTLet(ExpressionPtr &arg) {
+    auto send = ast::cast_tree<ast::Send>(arg);
+    if (send == nullptr || send->fun != core::Names::let() || send->numPosArgs() < 2) {
+        return nullptr;
+    }
+
+    if (!ast::MK::isT(send->recv)) {
+        return nullptr;
+    }
+
+    return send;
+}
+
 // Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
@@ -300,20 +314,7 @@ unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode)
         // Handle regular assignment to any other kind of LHS.
         auto name = translateConstantName(node->name);
         auto loc = translateLoc(node->name_loc);
-        ast::UnresolvedIdent::Kind kind;
-
-        if constexpr (is_same_v<SorbetLHSNode, parser::IVarLhs>) {
-            kind = ast::UnresolvedIdent::Kind::Instance;
-        } else if constexpr (is_same_v<SorbetLHSNode, parser::GVarLhs>) {
-            kind = ast::UnresolvedIdent::Kind::Global;
-        } else if constexpr (is_same_v<SorbetLHSNode, parser::CVarLhs>) {
-            kind = ast::UnresolvedIdent::Kind::Class;
-        } else if constexpr (is_same_v<SorbetLHSNode, parser::LVarLhs>) {
-            kind = ast::UnresolvedIdent::Kind::Local;
-        } else {
-            static_assert(false && sizeof(SorbetLHSNode),
-                          "Invalid LHS type. Must be one of `IVarLhs`, `GVarLhs`, `CVarLhs`, or `LVarLhs`.");
-        }
+        auto kind = getIdentKind<SorbetLHSNode>();
 
         auto expr = ast::make_expression<ast::UnresolvedIdent>(loc, kind, name);
         lhs = make_node_with_expr<SorbetLHSNode>(move(expr), loc, name);
@@ -327,68 +328,435 @@ unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode)
     return make_node_with_expr<parser::Assign>(move(exp), location, move(lhs), move(rhs));
 }
 
+// widen the type from `parser::OpAsgn` to `parser::Node` to handle `make_node_with_expr` correctly.
+// TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *untypedNode) {
+unique_ptr<parser::Node> Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                              unique_ptr<parser::Node> lhs) {
     static_assert(
         is_same_v<SorbetAssignmentNode, parser::OpAsgn> || is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
             is_same_v<SorbetAssignmentNode, parser::OrAsgn>,
         "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
 
-    auto node = down_cast<PrismAssignmentNode>(untypedNode);
-    auto location = translateLoc(untypedNode->location);
-
-    unique_ptr<parser::Node> lhs;
     auto rhs = translate(node->value);
 
-    // Various node types need special handling to construct their corresponding Sorbet LHS nodes.
-    if constexpr (is_same_v<PrismAssignmentNode, pm_index_operator_write_node> ||
-                  is_same_v<PrismAssignmentNode, pm_index_and_write_node> ||
-                  is_same_v<PrismAssignmentNode, pm_index_or_write_node>) {
-        // Handle operator assignment to an indexed expression, like `a[0] += 1`
-        auto openingLoc = translateLoc(node->opening_loc);
-        auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
+    if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
+        return translateAndOrAssignment<parser::AndAsgn>(location, move(lhs), move(rhs));
+    }
 
-        auto receiver = translate(node->receiver);
-        auto args = translateArguments(node->arguments, up_cast(node->block));
-        lhs =
-            make_unique<parser::Send>(location, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
-    } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_operator_write_node> ||
-                         is_same_v<PrismAssignmentNode, pm_constant_and_write_node> ||
-                         is_same_v<PrismAssignmentNode, pm_constant_or_write_node>) {
-        // Handle operator assignment to a "plain" constant, like `A += 1`
-        auto replaceWithDynamicConstAssign = true;
-        lhs = translateConst<PrismAssignmentNode, parser::ConstLhs>(node, replaceWithDynamicConstAssign);
-    } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_path_operator_write_node> ||
-                         is_same_v<PrismAssignmentNode, pm_constant_path_and_write_node> ||
-                         is_same_v<PrismAssignmentNode, pm_constant_path_or_write_node>) {
-        // Handle operator assignment to a constant path, like `A::B::C += 1` or `::C += 1`
-        lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target);
-    } else if constexpr (is_same_v<SorbetLHSNode, parser::Send> || is_same_v<SorbetLHSNode, parser::CSend>) {
-        // Handle operator assignment to the result of a method call, like `a.b += 1`
-        auto name = translateConstantName(node->read_name);
-        auto receiver = translate(node->receiver);
-        auto messageLoc = translateLoc(node->message_loc);
-        lhs = make_unique<SorbetLHSNode>(location, move(receiver), name, messageLoc, NodeVec{});
-    } else {
-        // Handle regular assignment to any other kind of LHS.
-        auto nameLoc = translateLoc(node->name_loc);
-        auto name = translateConstantName(node->name);
-        lhs = make_unique<SorbetLHSNode>(nameLoc, name);
+    if constexpr (is_same_v<SorbetAssignmentNode, parser::OrAsgn>) {
+        return translateAndOrAssignment<parser::OrAsgn>(location, move(lhs), move(rhs));
     }
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
-        // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
-        auto opLoc = translateLoc(node->binary_operator_loc);
-        auto op = translateConstantName(node->binary_operator);
+        return translateOpAssignment<SorbetAssignmentNode, PrismAssignmentNode>(node, location, move(lhs), move(rhs));
+    }
 
-        return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+    unreachable(
+        "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
+}
+
+template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untypedNode, core::LocOffsets location) {
+    auto node = down_cast<PrismAssignmentNode>(untypedNode);
+
+    // Handle operator assignment to an indexed expression, like `a[0] += 1`
+    auto openingLoc = translateLoc(node->opening_loc);
+    auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
+
+    auto receiver = translate(node->receiver);
+    auto args = translateArguments(node->arguments, up_cast(node->block));
+
+    unique_ptr<parser::Node> lhs;
+    if (!directlyDesugar || !hasExpr(receiver) || !hasExpr(args)) {
+        lhs =
+            make_unique<parser::Send>(location, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
     } else {
-        // `AndAsgn` and `OrAsgn` are specific to a single operator, so don't need any extra information like `OpAsgn`.
-        static_assert(is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
-                      is_same_v<SorbetAssignmentNode, parser::OrAsgn>);
+        auto receiverExpr = receiver->takeDesugaredExpr();
+        auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
 
+        // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
+        auto send = MK::Send(location, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(),
+                             move(args2));
+        lhs = make_node_with_expr<parser::Send>(move(send), location, move(receiver), core::Names::squareBrackets(),
+                                                lBracketLoc, move(args));
+    }
+
+    return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
+}
+
+template <typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets location, unique_ptr<parser::Node> lhs,
+                                                              unique_ptr<parser::Node> rhs) {
+    const auto isOrAsgn = is_same_v<SorbetAssignmentNode, parser::OrAsgn>;
+    const auto isAndAsgn = is_same_v<SorbetAssignmentNode, parser::AndAsgn>;
+    static_assert(isOrAsgn || isAndAsgn);
+
+    if (!directlyDesugar || !hasExpr(lhs, rhs)) {
         return make_unique<SorbetAssignmentNode>(location, move(lhs), move(rhs));
     }
+
+    auto lhsExpr = lhs->takeDesugaredExpr();
+    auto rhsExpr = rhs->takeDesugaredExpr();
+
+    if (preserveConcreteSyntax) {
+        auto magicName = isAndAsgn ? core::Names::andAsgn() : core::Names::orAsgn();
+        auto locZeroLen = location.copyWithZeroLength();
+
+        // Desugar `x &&= y` to `<Magic>.&&=(x, y)` (likewise for `||=`)
+        auto magicSend =
+            MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
+        return make_node_with_expr<SorbetAssignmentNode>(move(magicSend), location, move(lhs), move(rhs));
+    }
+
+    if (auto s = ast::cast_tree<ast::Send>(lhsExpr)) {
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+        auto numPosAssgnArgs = numPosArgs + 1;
+        assgnArgs.emplace_back(move(rhsExpr));
+        auto cond =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+        auto tempResult = nextUniqueDesugarName(s->fun);
+        stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
+        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                             numPosAssgnArgs, move(assgnArgs), s->flags);
+        auto elsep = MK::Local(sendLoc, tempResult);
+        ExpressionPtr if_;
+        if constexpr (isAndAsgn) {
+            // Desugar `lhs &&= rhs` to `if (lhs) { lhs = rhs } else { lhs }`
+            if_ = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+        } else {
+            // OrAsgn: if (lhs) { lhs } else { lhs = rhs }
+            if_ = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(elsep), move(body));
+        }
+        auto wrapped = MK::InsSeq(location, move(stats), move(if_));
+        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), move(rhs));
+    }
+
+    if (isa_reference(lhsExpr)) {
+        auto lhsCopy = MK::cpRef(lhsExpr);
+        auto cond = MK::cpRef(lhsExpr);
+
+        // Check for T.let handling for instance and class variables in ||= assignments
+        auto lhsIsIvar = parser::NodeWithExpr::isa_node<parser::IVarLhs>(lhs.get());
+        auto lhsIsCvar = parser::NodeWithExpr::isa_node<parser::CVarLhs>(lhs.get());
+        auto rhsIsTLet = asTLet(rhsExpr);
+
+        ExpressionPtr assignExpr;
+        if (isOrAsgn && (lhsIsIvar || lhsIsCvar) && rhsIsTLet) {
+            // Special handling for ||= with T.let on instance/class variables
+            // Save the original value before replacing it
+            auto originalValue = rhsIsTLet->getPosArg(0).deepCopy();
+
+            // Replace the first argument of T.let with the LHS variable
+            rhsIsTLet->getPosArg(0) = MK::cpRef(lhsExpr);
+
+            // Generate pattern: { @z = T.let(@z, ...); <temp> = <original_value>; @z = <temp> }
+            auto decl = MK::Assign(location, MK::cpRef(lhsExpr), move(rhsExpr));
+
+            // Create a temporary variable and assign the original value to it
+            core::NameRef tempName = nextUniqueDesugarName(core::Names::statTemp());
+            auto tempAssign = MK::Assign(location, tempName, move(originalValue));
+
+            // Final assignment from temp to LHS
+            auto finalAssign = MK::Assign(location, MK::cpRef(lhsExpr), MK::Local(location, tempName));
+
+            ast::InsSeq::STATS_store stats;
+            stats.emplace_back(move(decl));
+            stats.emplace_back(move(tempAssign));
+
+            assignExpr = MK::InsSeq(location, move(stats), move(finalAssign));
+        } else {
+            assignExpr = MK::Assign(location, MK::cpRef(lhsExpr), move(rhsExpr));
+        }
+
+        ExpressionPtr if_;
+        if constexpr (isAndAsgn) {
+            // AndAsgn: if (lhs) { lhs = rhs } else { lhs }
+            if_ = MK::If(location, move(cond), move(assignExpr), move(lhsCopy));
+        } else {
+            // OrAsgn: if (lhs) { lhs } else { lhs = rhs }
+            if_ = MK::If(location, move(cond), move(lhsCopy), move(assignExpr));
+        }
+
+        return make_node_with_expr<SorbetAssignmentNode>(move(if_), location, move(lhs), move(rhs));
+    }
+
+    if (ast::isa_tree<ast::UnresolvedConstantLit>(lhsExpr)) {
+        if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
+            e.setHeader("Constant reassignment is not supported");
+        }
+        ExpressionPtr res = MK::EmptyTree();
+        return make_node_with_expr<SorbetAssignmentNode>(move(res), location, move(lhs), move(rhs));
+    }
+
+    if (ast::isa_tree<ast::InsSeq>(lhsExpr)) {
+        auto i = ast::cast_tree<ast::InsSeq>(lhsExpr);
+        auto ifExpr = ast::cast_tree<ast::If>(i->expr);
+        if (!ifExpr) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        auto s = ast::cast_tree<ast::Send>(ifExpr->elsep);
+        if (!s) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+        auto numPosAssgnArgs = numPosArgs + 1;
+        assgnArgs.emplace_back(move(rhsExpr));
+        auto cond =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+        auto tempResult = nextUniqueDesugarName(s->fun);
+        stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
+        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                             numPosAssgnArgs, move(assgnArgs), s->flags);
+        auto elsep = MK::Local(sendLoc, tempResult);
+        auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+        auto wrapped = MK::InsSeq(location, move(stats), move(iff));
+        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), move(rhs));
+    }
+
+    Exception::raise("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
+}
+
+Translator::OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
+    // This is for storing the temporary assignments followed by the final update. In the case that we have other
+    // arguments to the send (e.g. in the case of x.y[z] += 1) we'll want to store the other parameters (z) in a
+    // temporary as well, producing a sequence like
+    //
+    //   { $arg = z; $tmp = x.y[$arg]; x.y[$arg] = $tmp + 1 }
+    //
+    // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
+    // temporary assignment and the last for the actual update we're desugaring.
+    ENFORCE(!s->hasKwArgs() && !s->hasBlock());
+    const auto numPosArgs = s->numPosArgs();
+    ast::InsSeq::STATS_store stats;
+    stats.reserve(numPosArgs + 2);
+    core::NameRef tempRecv = nextUniqueDesugarName(s->fun);
+    stats.emplace_back(MK::Assign(s->loc, tempRecv, move(s->recv)));
+    ast::Send::ARGS_store readArgs;
+    ast::Send::ARGS_store assgnArgs;
+    // these are the arguments for the first send, e.g. x.y(). The number of arguments should be identical to
+    // whatever we saw on the LHS.
+    readArgs.reserve(numPosArgs);
+    // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra
+    // argument here: to accommodate the call to field= instead of just field.
+    assgnArgs.reserve(numPosArgs + 1);
+
+    for (auto &arg : s->posArgs()) {
+        auto argLoc = arg.loc();
+        core::NameRef name = nextUniqueDesugarName(s->fun);
+        stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
+        readArgs.emplace_back(MK::Local(argLoc, name));
+        assgnArgs.emplace_back(MK::Local(argLoc, name));
+    }
+
+    return {tempRecv, move(stats), numPosArgs, move(readArgs), move(assgnArgs)};
+}
+
+template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
+unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                           unique_ptr<parser::Node> lhs, unique_ptr<parser::Node> rhs) {
+    // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
+    auto opLoc = translateLoc(node->binary_operator_loc);
+    auto op = translateConstantName(node->binary_operator);
+    if (!directlyDesugar || !hasExpr(lhs, rhs)) {
+        return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    auto lhsExpr = lhs->takeDesugaredExpr();
+    auto rhsExpr = rhs->takeDesugaredExpr();
+
+    if (preserveConcreteSyntax) {
+        auto magicName = core::Names::opAsgn();
+        auto locZeroLen = location.copyWithZeroLength();
+        auto magicSend =
+            MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
+        return make_node_with_expr<parser::OpAsgn>(move(magicSend), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (ast::isa_tree<ast::Send>(lhsExpr)) {
+        auto s = ast::cast_tree<ast::Send>(lhsExpr);
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+
+        // Create the read operation: obj.method() or obj[index]
+        auto prevValue =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+
+        // Apply the operation: prevValue op rhsExpr
+        auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhsExpr));
+
+        // Add the new value to the assignment arguments
+        assgnArgs.emplace_back(move(newValue));
+        auto numPosAssgnArgs = numPosArgs + 1;
+
+        // Create the assignment operation: obj.method=(newValue) or obj[]=(index, newValue)
+        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                            numPosAssgnArgs, move(assgnArgs), s->flags);
+
+        auto wrapped = MK::InsSeq(location, move(stats), move(res));
+        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (isa_reference(lhsExpr)) {
+        auto lhsCopy = MK::cpRef(lhsExpr);
+        auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
+        auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
+        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (ast::isa_tree<ast::UnresolvedConstantLit>(lhsExpr)) {
+        if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
+            e.setHeader("Constant reassignment is not supported");
+        }
+        ExpressionPtr res = MK::EmptyTree();
+        return make_node_with_expr<SorbetAssignmentNode>(move(res), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (auto i = ast::cast_tree<ast::InsSeq>(lhsExpr)) {
+        // if this is an InsSeq, then is probably the result of a safe send (i.e. an expression of the form
+        // x&.y on the LHS) which means it'll take the rough shape:
+        //   { $temp = x; if $temp == nil then nil else $temp.y }
+        // on the LHS. We want to insert the y= into the if-expression at the end, like:
+        //   { $temp = x; if $temp == nil then nil else { $t2 = $temp.y; $temp.y = $t2 op RHS } }
+        // that means we first need to find out whether the final expression is an If...
+        auto ifExpr = ast::cast_tree<ast::If>(i->expr);
+        if (!ifExpr) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        // and if so, find out whether the else-case is a send...
+        auto s = ast::cast_tree<ast::Send>(ifExpr->elsep);
+        if (!s) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        // Similar to Send handling above but specialized for InsSeq structure modification
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+        auto prevValue =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+        auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhsExpr));
+        auto numPosAssgnArgs = numPosArgs + 1;
+        assgnArgs.emplace_back(move(newValue));
+
+        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                            numPosAssgnArgs, move(assgnArgs), s->flags);
+        auto wrapped = MK::InsSeq(location, move(stats), move(res));
+        ifExpr->elsep = move(wrapped);
+        return make_node_with_expr<SorbetAssignmentNode>(move(lhsExpr), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    auto s = fmt::format("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
+    Exception::raise(s);
+}
+
+template <typename PrismConstantNode, typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateConstantAssignment(pm_node_t *node, core::LocOffsets location) {
+    if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
+        e.setHeader("Constant reassignment is not supported");
+    }
+
+    auto constantNode = down_cast<PrismConstantNode>(node);
+    auto replaceWithDynamicConstAssign = true;
+    auto lhs = translateConst<PrismConstantNode, parser::ConstLhs>(constantNode, replaceWithDynamicConstAssign);
+    return translateAnyOpAssignment<PrismConstantNode, SorbetAssignmentNode, parser::ConstLhs>(constantNode, location,
+                                                                                               move(lhs));
+}
+
+template <typename PrismConstantPathNode, typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateConstantPathAssignment(pm_node_t *node, core::LocOffsets location) {
+    auto constantPathNode = down_cast<PrismConstantPathNode>(node);
+    auto target = constantPathNode->target;
+    auto lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(target);
+    return translateAnyOpAssignment<PrismConstantPathNode, SorbetAssignmentNode, parser::ConstLhs>(constantPathNode,
+                                                                                                   location, move(lhs));
+}
+
+template <typename PrismVariableNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
+unique_ptr<parser::Node> Translator::translateVariableAssignment(pm_node_t *node, core::LocOffsets location) {
+    auto variableNode = down_cast<PrismVariableNode>(node);
+    auto nameLoc = translateLoc(variableNode->name_loc);
+    auto name = translateConstantName(variableNode->name);
+
+    auto expr = ast::make_expression<ast::UnresolvedIdent>(nameLoc, getIdentKind<SorbetLHSNode>(), name);
+    auto lhs = make_node_with_expr<SorbetLHSNode>(move(expr), nameLoc, name);
+    return translateAnyOpAssignment<PrismVariableNode, SorbetAssignmentNode, SorbetLHSNode>(variableNode, location,
+                                                                                            move(lhs));
+}
+
+// Handle operator assignment to the result of a safe method call, like `a&.b += 1`
+// This creates a pattern like: { $temp = a; if $temp == nil then nil else $temp.b += 1 }
+template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNode *callNode, core::LocOffsets location,
+                                                              unique_ptr<parser::Node> receiver, core::NameRef name,
+                                                              core::LocOffsets messageLoc) {
+    if (!directlyDesugar || !hasExpr(receiver)) {
+        // Fall back to CSend if we can't desugar directly
+        auto lhs = make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
+        return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::CSend>(callNode, location,
+                                                                                                  move(lhs));
+    }
+
+    // Create temporary variable to hold the receiver
+    auto tempRecv = nextUniqueDesugarName(core::Names::assignTemp());
+    auto receiverExpr = receiver->takeDesugaredExpr();
+    auto recvLoc = receiver->loc;
+    auto zeroLengthLoc = location.copyWithZeroLength();
+    auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
+
+    auto tempAssign = MK::Assign(zeroLengthRecvLoc, tempRecv, move(receiverExpr));
+    auto cond = MK::Send1(zeroLengthLoc, MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
+                          core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
+    auto send =
+        MK::Send(location, MK::Local(zeroLengthRecvLoc, tempRecv), name, messageLoc, 0, ast::Send::ARGS_store{});
+    auto tempSend = make_node_with_expr<parser::Send>(move(send), location, nullptr, name, messageLoc, NodeVec{});
+
+    // Recursively handle the assignment operation on the temporary send
+    auto assignmentResult = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
+        callNode, location, move(tempSend));
+
+    auto assignmentExpr = assignmentResult->takeDesugaredExpr();
+    auto nilValue = MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
+                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(zeroLengthLoc, tempRecv));
+    auto ifExpr = MK::If(zeroLengthLoc, move(cond), move(nilValue), move(assignmentExpr));
+    auto result = MK::InsSeq1(location, move(tempAssign), move(ifExpr));
+
+    // Create a node that directly contains the InsSeq expression for the safe navigation pattern
+    auto lhs = make_node_with_expr<parser::Send>(move(result), location, nullptr, name, messageLoc, NodeVec{});
+    return move(lhs);
+}
+
+template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, core::LocOffsets location) {
+    auto callNode = down_cast<PrismAssignmentNode>(node);
+    auto name = translateConstantName(callNode->read_name);
+    auto receiver = translate(callNode->receiver);
+    auto messageLoc = translateLoc(callNode->message_loc);
+
+    if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+        // Handle operator assignment to the result of a safe method call, like `a&.b += 1`
+        auto result = translateCSendAssignment<PrismAssignmentNode, SorbetAssignmentNode>(
+            callNode, location, move(receiver), name, messageLoc);
+        return result;
+    }
+
+    // Handle operator assignment to the result of a method call, like `a.b += 1`
+    if (!directlyDesugar || !hasExpr(receiver)) {
+        auto lhs = make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{});
+        auto result = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
+            callNode, location, move(lhs));
+        return result;
+    }
+    auto receiverExpr = receiver->takeDesugaredExpr();
+
+    ast::Send::Flags flags;
+    flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+
+    auto send = MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
+    auto lhs = make_node_with_expr<parser::Send>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
+
+    return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(callNode, location,
+                                                                                             move(lhs));
 }
 
 unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveConcreteSyntax) {
@@ -642,11 +1010,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_node_with_expr<parser::Break>(move(expr), location, move(arguments));
         }
         case PM_CALL_AND_WRITE_NODE: { // And-assignment to a method call, e.g. `a.b &&= false`
-            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::CSend>(node);
-            } else {
-                return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::Send>(node);
-            }
+            return translateSendAssignment<pm_call_and_write_node, parser::AndAsgn>(node, location);
         }
         case PM_CALL_NODE: { // A method call like `a.b()` or `a&.b()`
             auto callNode = down_cast<pm_call_node>(node);
@@ -1213,18 +1577,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return sendNode;
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
-            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::CSend>(node);
-            } else {
-                return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::Send>(node);
-            }
+            return translateSendAssignment<pm_call_operator_write_node, parser::OpAsgn>(node, location);
         }
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
-            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::CSend>(node);
-            } else {
-                return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
-            }
+            return translateSendAssignment<pm_call_or_write_node, parser::OrAsgn>(node, location);
         }
         case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
             // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
@@ -1436,13 +1792,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                                       move(body));
         }
         case PM_CLASS_VARIABLE_AND_WRITE_NODE: { // And-assignment to a class variable, e.g. `@@a &&= 1`
-            return translateOpAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(node);
+            return translateVariableAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(
+                node, location);
         }
         case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE: { // Compound assignment to a class variable, e.g. `@@a += 1`
-            return translateOpAssignment<pm_class_variable_operator_write_node, parser::OpAsgn, parser::CVarLhs>(node);
+            return translateVariableAssignment<pm_class_variable_operator_write_node, parser::OpAsgn, parser::CVarLhs>(
+                node, location);
         }
         case PM_CLASS_VARIABLE_OR_WRITE_NODE: { // Or-assignment to a class variable, e.g. `@@a ||= 1`
-            return translateOpAssignment<pm_class_variable_or_write_node, parser::OrAsgn, parser::CVarLhs>(node);
+            return translateVariableAssignment<pm_class_variable_or_write_node, parser::OrAsgn, parser::CVarLhs>(
+                node, location);
         }
         case PM_CLASS_VARIABLE_READ_NODE: { // A class variable, like `@@a`
             auto classVarNode = down_cast<pm_class_variable_read_node>(node);
@@ -1462,7 +1821,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateAssignment<pm_class_variable_write_node, parser::CVarLhs>(node);
         }
         case PM_CONSTANT_PATH_AND_WRITE_NODE: { // And-assignment to a constant path, e.g. `A::B &&= false`
-            return translateOpAssignment<pm_constant_path_and_write_node, parser::AndAsgn, parser::ConstLhs>(node);
+            return translateConstantPathAssignment<pm_constant_path_and_write_node, parser::AndAsgn>(node, location);
         }
         case PM_CONSTANT_PATH_NODE: { // Part of a constant path, like the `A::B` in `A::B::C`.
             // See`PM_CONSTANT_READ_NODE`, which handles the `::C` part
@@ -1471,10 +1830,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateConst<pm_constant_path_node, parser::Const>(constantPathNode);
         }
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE: { // Compound assignment to a constant path, e.g. `A::B += 1`
-            return translateOpAssignment<pm_constant_path_operator_write_node, parser::OpAsgn, parser::ConstLhs>(node);
+            return translateConstantPathAssignment<pm_constant_path_operator_write_node, parser::OpAsgn>(node,
+                                                                                                         location);
         }
         case PM_CONSTANT_PATH_OR_WRITE_NODE: { // Or-assignment to a constant path, e.g. `A::B ||= true`
-            return translateOpAssignment<pm_constant_path_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
+            return translateConstantPathAssignment<pm_constant_path_or_write_node, parser::OrAsgn>(node, location);
         }
         case PM_CONSTANT_PATH_TARGET_NODE: { // Target of an indirect write to a constant path
             // ... like `A::TARGET1, A::TARGET2 = 1, 2`, `rescue => A::TARGET`, etc.
@@ -1491,13 +1851,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateConst<pm_constant_target_node, parser::ConstLhs>(constantTargetNode);
         }
         case PM_CONSTANT_AND_WRITE_NODE: { // And-assignment to a constant, e.g. `C &&= false`
-            return translateOpAssignment<pm_constant_and_write_node, parser::AndAsgn, parser::ConstLhs>(node);
+            return translateConstantAssignment<pm_constant_and_write_node, parser::AndAsgn>(node, location);
         }
         case PM_CONSTANT_OPERATOR_WRITE_NODE: { // Compound assignment to a constant, e.g. `C += 1`
-            return translateOpAssignment<pm_constant_operator_write_node, parser::OpAsgn, parser::ConstLhs>(node);
+            return translateConstantAssignment<pm_constant_operator_write_node, parser::OpAsgn>(node, location);
         }
         case PM_CONSTANT_OR_WRITE_NODE: { // Or-assignment to a constant, e.g. `C ||= true`
-            return translateOpAssignment<pm_constant_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
+            return translateConstantAssignment<pm_constant_or_write_node, parser::OrAsgn>(node, location);
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like `Foo`
             auto constantReadNode = down_cast<pm_constant_read_node>(node);
@@ -1752,13 +2112,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translatedNode;
         }
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a global variable, e.g. `$g &&= false`
-            return translateOpAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(node);
+            return translateVariableAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(
+                node, location);
         }
         case PM_GLOBAL_VARIABLE_OPERATOR_WRITE_NODE: { // Compound assignment to a global variable, e.g. `$g += 1`
-            return translateOpAssignment<pm_global_variable_operator_write_node, parser::OpAsgn, parser::GVarLhs>(node);
+            return translateVariableAssignment<pm_global_variable_operator_write_node, parser::OpAsgn, parser::GVarLhs>(
+                node, location);
         }
         case PM_GLOBAL_VARIABLE_OR_WRITE_NODE: { // Or-assignment to a global variable, e.g. `$g ||= true`
-            return translateOpAssignment<pm_global_variable_or_write_node, parser::OrAsgn, parser::GVarLhs>(node);
+            return translateVariableAssignment<pm_global_variable_or_write_node, parser::OrAsgn, parser::GVarLhs>(
+                node, location);
         }
         case PM_GLOBAL_VARIABLE_READ_NODE: { // A global variable, like `$g`
             auto globalVarReadNode = down_cast<pm_global_variable_read_node>(node);
@@ -1859,13 +2222,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_node_with_expr<parser::RestParam>(move(expr), restLoc, sorbetName, restLoc);
         }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
-            return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
+            return translateIndexAssignment<pm_index_and_write_node, parser::AndAsgn>(node, location);
         }
         case PM_INDEX_OPERATOR_WRITE_NODE: { // Compound assignment to an index, e.g. `a[i] += 1`
-            return translateOpAssignment<pm_index_operator_write_node, parser::OpAsgn, void>(node);
+            return translateIndexAssignment<pm_index_operator_write_node, parser::OpAsgn>(node, location);
         }
         case PM_INDEX_OR_WRITE_NODE: { // Or-assignment to an index, e.g. `a[i] ||= true`
-            return translateOpAssignment<pm_index_or_write_node, parser::OrAsgn, void>(node);
+            return translateIndexAssignment<pm_index_or_write_node, parser::OrAsgn>(node, location);
         }
         case PM_INDEX_TARGET_NODE: { // Target of an indirect write to an indexed expression
             // ... like `target[0], target[1] = 1, 2`, `rescue => target[0]`, etc.
@@ -1880,14 +2243,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                              move(arguments));
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
-            return translateOpAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
+            return translateVariableAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(
+                node, location);
         }
         case PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE: { // Compound assignment to an instance variable, e.g. `@iv += 1`
-            return translateOpAssignment<pm_instance_variable_operator_write_node, parser::OpAsgn, parser::IVarLhs>(
-                node);
+            return translateVariableAssignment<pm_instance_variable_operator_write_node, parser::OpAsgn,
+                                               parser::IVarLhs>(node, location);
         }
         case PM_INSTANCE_VARIABLE_OR_WRITE_NODE: { // Or-assignment to an instance variable, e.g. `@iv ||= true`
-            return translateOpAssignment<pm_instance_variable_or_write_node, parser::OrAsgn, parser::IVarLhs>(node);
+            return translateVariableAssignment<pm_instance_variable_or_write_node, parser::OrAsgn, parser::IVarLhs>(
+                node, location);
         }
         case PM_INSTANCE_VARIABLE_READ_NODE: { // An instance variable, like `@iv`
             auto instanceVarNode = down_cast<pm_instance_variable_read_node>(node);
@@ -2092,13 +2457,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateCallWithBlock(node, move(sendNode));
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a local variable, e.g. `local &&= false`
-            return translateOpAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(node);
+            return translateVariableAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(
+                node, location);
         }
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE: { // Compound assignment to a local variable, e.g. `local += 1`
-            return translateOpAssignment<pm_local_variable_operator_write_node, parser::OpAsgn, parser::LVarLhs>(node);
+            return translateVariableAssignment<pm_local_variable_operator_write_node, parser::OpAsgn, parser::LVarLhs>(
+                node, location);
         }
         case PM_LOCAL_VARIABLE_OR_WRITE_NODE: { // Or-assignment to a local variable, e.g. `local ||= true`
-            return translateOpAssignment<pm_local_variable_or_write_node, parser::OrAsgn, parser::LVarLhs>(node);
+            return translateVariableAssignment<pm_local_variable_or_write_node, parser::OrAsgn, parser::LVarLhs>(
+                node, location);
         }
         case PM_LOCAL_VARIABLE_READ_NODE: { // A local variable, like `lv`
             auto localVarReadNode = down_cast<pm_local_variable_read_node>(node);
@@ -3731,7 +4099,8 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
         // Check if this is a dynamic constant assignment (SyntaxError at runtime)
         // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
         // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
-        return make_unique<LVarLhs>(location, core::Names::dynamicConstAssign());
+        auto expr = MK::Local(location, core::Names::dynamicConstAssign());
+        return make_node_with_expr<LVarLhs>(move(expr), location, core::Names::dynamicConstAssign());
     }
 
     auto constantName = ctx.state.enterNameConstant(name);
@@ -3777,12 +4146,12 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
         parentExpr = MK::EmptyTree();
     }
 
-    if (parentExpr != nullptr) {
-        ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
-        return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
-    } else {
-        return make_unique<SorbetLHSNode>(location, move(parent), constantName);
+    if (parentExpr == nullptr) {
+        parentExpr = MK::EmptyTree();
     }
+
+    ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
+    return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
 }
 
 core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
