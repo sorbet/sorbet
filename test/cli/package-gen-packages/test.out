@@ -1,0 +1,15 @@
+C/__package.rb:3: PackageC is missing imports https://srb.help/3730
+     3 |class PackageC < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    C/__package.rb:3: Inserted `import PackageA
+      import PackageB`
+     3 |class PackageC < PackageSpec
+                                    ^
+Errors: 1
+# typed: strict
+
+class PackageC < PackageSpec
+  import PackageA
+  import PackageB
+end
