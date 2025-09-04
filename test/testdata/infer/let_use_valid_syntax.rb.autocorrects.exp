@@ -14,7 +14,7 @@ class B
   extend T::Sig
   sig { void }
   def self.foo
-    @foo = T.let(new, <todo sym>)
+    @foo = T.let(new, T.attached_class)
   end
 end
 # ------------------------------

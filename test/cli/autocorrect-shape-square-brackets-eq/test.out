@@ -174,7 +174,7 @@ autocorrect-shape-square-brackets-eq.rb:50: Expected `FalseClass` but found `T.a
     50 |xs[:bar] = new
                    ^^^
   Autocorrect: Done
-    autocorrect-shape-square-brackets-eq.rb:5: Replaced with `T.let(false, T.any(FalseClass, T.attached_class (of <root>)))`
+    autocorrect-shape-square-brackets-eq.rb:5: Replaced with `T.let(false, T.any(FalseClass, T.attached_class))`
      5 |  bar: false,
                ^^^^^
 Errors: 11
