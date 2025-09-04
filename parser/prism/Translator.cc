@@ -209,8 +209,18 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
 
         auto receiver = translate(node->receiver);
         auto args = translateArguments(node->arguments, up_cast(node->block));
-        lhs =
-            make_unique<parser::Send>(location, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
+
+        if (!directlyDesugar || !hasExpr(receiver) || !hasExpr(args)) {
+            lhs = make_unique<parser::Send>(location, move(receiver), core::Names::squareBrackets(), lBracketLoc,
+                                            move(args));
+        } else {
+            auto receiverExpr = receiver->takeDesugaredExpr();
+            auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
+            auto send = MK::Send(location, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(),
+                                 move(args2));
+            lhs = make_node_with_expr<parser::Send>(move(send), location, move(receiver), core::Names::squareBrackets(),
+                                                    lBracketLoc, move(args));
+        }
     } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_operator_write_node> ||
                          is_same_v<PrismAssignmentNode, pm_constant_and_write_node> ||
                          is_same_v<PrismAssignmentNode, pm_constant_or_write_node>) {
@@ -227,7 +237,13 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         auto name = translateConstantName(node->read_name);
         auto receiver = translate(node->receiver);
         auto messageLoc = translateLoc(node->message_loc);
-        lhs = make_unique<SorbetLHSNode>(location, move(receiver), name, messageLoc, NodeVec{});
+        if (!directlyDesugar || !hasExpr(receiver)) {
+            lhs = make_unique<SorbetLHSNode>(location, move(receiver), name, messageLoc, NodeVec{});
+        } else {
+            auto receiverExpr = receiver->takeDesugaredExpr();
+            auto send = MK::Send0(location, move(receiverExpr), name, messageLoc);
+            lhs = make_node_with_expr<SorbetLHSNode>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
+        }
     } else {
         // Handle regular assignment to any other kind of LHS.
         auto nameLoc = translateLoc(node->name_loc);
