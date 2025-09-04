@@ -616,15 +616,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         receiverExpr = receiver->takeDesugaredExpr();
                     }
 
-                    // Unsupported nodes are desugared to an empty tree.
-                    // Treat them as if they were `self` to match `Desugar.cc`.
-                    // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-                    if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
-                        receiverExpr = MK::Self(loc.copyWithZeroLength());
-                        flags.isPrivateOk = true;
-                    } else {
-                        flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-                    }
+                    flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
                     int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
 
@@ -890,13 +882,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Can be multiple statements separated by `;`.
             auto embeddedStmtsNode = down_cast<pm_embedded_statements_node>(node);
 
-            auto stmtsNode = embeddedStmtsNode->statements;
-            if (stmtsNode == nullptr) {
-                return make_node_with_expr<parser::Begin>(MK::Nil(location), location, NodeVec{});
+            if (auto stmtsNode = embeddedStmtsNode->statements; stmtsNode != nullptr) {
+                auto inlineIfSingle = false;
+                return translateStatements(stmtsNode, inlineIfSingle);
+            } else {
+                return make_unique<parser::Begin>(location, NodeVec{});
             }
-
-            auto inlineIfSingle = false;
-            return translateStatements(stmtsNode, inlineIfSingle);
         }
         case PM_EMBEDDED_VARIABLE_NODE: {
             auto embeddedVariableNode = down_cast<pm_embedded_variable_node>(node);
@@ -1492,16 +1483,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_PARENTHESES_NODE: { // A parethesized expression, e.g. `(a)`
             auto parensNode = down_cast<pm_parentheses_node>(node);
 
-            auto stmtsNode = parensNode->body;
-
-            if (stmtsNode == nullptr) {
-                return make_node_with_expr<parser::Begin>(MK::Nil(location), location, NodeVec{});
+            if (auto stmtsNode = parensNode->body; stmtsNode != nullptr) {
+                auto inlineIfSingle = false;
+                // Override the begin node location to be the parentheses location instead of the statements location
+                return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle,
+                                           parensNode->base.location);
+            } else {
+                return make_unique<parser::Begin>(location, NodeVec{});
             }
-
-            auto inlineIfSingle = false;
-            // Override the begin node location to be the parentheses location instead of the statements location
-            return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle,
-                                       parensNode->base.location);
         }
         case PM_PRE_EXECUTION_NODE: {
             auto preExecutionNode = down_cast<pm_pre_execution_node>(node);
@@ -2172,7 +2161,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             // Sorbet's parser always wraps the pinned expression in a `Begin` node.
             NodeVec statements;
             statements.emplace_back(move(expr));
-            auto beginNode = make_node_with_expr<parser::Begin>(MK::Nil(location), location, move(statements));
+            auto beginNode = make_unique<parser::Begin>(location, move(statements));
 
             return make_unique<Pin>(location, move(beginNode));
         }
@@ -2519,29 +2508,8 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     // For multiple statements, convert each statement and add them to the body of a Begin node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
-    auto beginLoc = translateLoc(overrideLocation.value_or(stmtsNode->base.location));
-
-    if (sorbetStmts.empty()) {
-        return make_node_with_expr<parser::Begin>(MK::Nil(beginLoc), beginLoc, NodeVec{});
-    }
-
-    if (!directlyDesugar || !hasExpr(sorbetStmts)) {
-        return make_unique<parser::Begin>(beginLoc, move(sorbetStmts));
-    }
-
-    ast::InsSeq::STATS_store statements;
-    statements.reserve(sorbetStmts.size() - 1); // -1 because the `Begin` node stores the last element separately.
-
-    auto end = sorbetStmts.end();
-    --end; // Chop one off the end, so we iterate over all but the last element.
-    for (auto it = sorbetStmts.begin(); it != end; ++it) {
-        auto &statement = *it;
-        statements.emplace_back(statement->takeDesugaredExpr());
-    };
-    auto finalExpr = sorbetStmts.back()->takeDesugaredExpr(); // Process the last element separately.
-
-    auto instructionSequence = MK::InsSeq(beginLoc, move(statements), move(finalExpr));
-    return make_node_with_expr<parser::Begin>(move(instructionSequence), beginLoc, move(sorbetStmts));
+    pm_location_t beginLocation = overrideLocation.value_or(stmtsNode->base.location);
+    return make_unique<parser::Begin>(translateLoc(beginLocation), move(sorbetStmts));
 }
 
 // Helper function for creating if nodes with optional desugaring
