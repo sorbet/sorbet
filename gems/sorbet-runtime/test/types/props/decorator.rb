@@ -105,8 +105,12 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
 
     it 'Validates prop options are recognize' do
-      assert_prop_error(/At least one invalid prop arg/) do
+      assert_prop_error(/Invalid prop arg /) do
         prop :foo, String, nosucharg: :llamas
+      end
+
+      assert_prop_error(/Invalid prop args /) do
+        prop :foo, String, nosucharg: :llamas, alsoinvalid: :morellamas
       end
     end
 
