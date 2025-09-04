@@ -15,6 +15,6 @@ class B
   def self.foo
     @foo = T.cast(new, T.nilable(T.attached_class))
     #      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Use `T.let` to specify the type of instance variables
-    #      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.cast` is useless because `T.attached_class (of B)` is already a subtype of `T.attached_class (of B)`
+    #      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.cast` is useless because `T.attached_class (of B)` is already a subtype of `T.nilable(T.attached_class (of B))`
   end
 end
