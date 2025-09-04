@@ -245,8 +245,7 @@ bool literal::nest_and_try_closing(std::string_view delimiter, const char *ts, c
             emit(token_type::tSTRING_END, end_delim, ts, te);
         }
         // TODO(jez) Make error message good
-        this->_lexer.diagnostics.emplace_back(dlevel::ERROR, dclass::EscapeEofHint,
-                                              diagnostic::range(ts - buffer_s, te - buffer_s), "end");
+        this->_lexer.diagnostics.emplace_back(dlevel::ERROR, dclass::EscapeEofHint, this->_lexer.range(ts, te), "end");
         return true;
     }
 
