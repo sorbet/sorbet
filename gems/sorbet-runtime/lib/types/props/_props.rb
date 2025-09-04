@@ -134,13 +134,12 @@ module T::Props
     # Shorthand helper to define a `prop` with `immutable => true`
     sig { params(name: Symbol, cls: T.untyped, rules: T.untyped).void }
     def const(name, cls, **rules)
-      cls = T::Utils.coerce(cls) if !cls.is_a?(Module)
       if rules.key?(:immutable)
         Kernel.raise ArgumentError.new("Cannot pass 'immutable' argument when using 'const' keyword to define a prop")
       end
 
       rules[:immutable] = true
-      decorator.prop_defined(name, cls, rules)
+      self.prop(name, cls, **rules)
     end
 
     def included(child)
