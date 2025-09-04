@@ -2986,8 +2986,9 @@ public:
                 if (replaceLoc.adjustLen(gs, -2, 1).source(gs) == "=") {
                     // Defensive; might be an ivar assignment from `attr_accessor` or `prop`, which
                     // we don't want an autocorrect for.
+                    auto opts = ShowOptions().withUseValidSyntax();
                     e.replaceWith(title, replaceLoc, "T.let({}, {})", replaceLoc.source(gs).value(),
-                                  suggestType.show(gs));
+                                  suggestType.show(gs, opts));
                 }
             }
         }
@@ -3505,8 +3506,9 @@ public:
                             auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
 
                             if (loc.has_value() && loc->exists()) {
+                                auto opts = ShowOptions().withUseValidSyntax();
                                 e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs).value(),
-                                              Types::any(gs, expectedType, actualType.type).show(gs));
+                                              Types::any(gs, expectedType, actualType.type).show(gs, opts));
                             }
                         }
                     }

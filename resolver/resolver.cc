@@ -2489,7 +2489,8 @@ class ResolveTypeMembersAndFieldsWalk {
                 e.setHeader("Use `{}` to specify the type of {} variables", "T.let", desc);
                 auto rhsLoc = ctx.locAt(asgn.rhs.loc());
                 auto argSource = ctx.locAt(cast->arg.loc()).source(ctx).value();
-                e.replaceWith("Replace with `T.let`", rhsLoc, "T.let({}, {})", argSource, cast->type.show(ctx));
+                auto typeSource = ctx.locAt(cast->typeExpr.loc()).source(ctx).value();
+                e.replaceWith("Replace with `T.let`", rhsLoc, "T.let({}, {})", argSource, typeSource);
                 if (cast->cast == core::Names::cast()) {
                     e.addErrorNote("If you really want to use `{}`, assign to an intermediate variable first and then "
                                    "assign that variable to `{}`",
