@@ -143,8 +143,6 @@ private:
 
     bool traceLexer;
 
-    bool singleLineStrings = true;
-
     size_t line_start(token_type type, size_t beginPos);
     void check_stack_capacity();
     int stack_pop();
@@ -195,6 +193,7 @@ public:
     Context context;
 
     bool collect_comments = false;
+    bool singleLineStrings = false;
     std::vector<std::pair<size_t, size_t>> comment_locations;
 
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
