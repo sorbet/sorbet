@@ -1,0 +1,56 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    If{
+      cond = EmptyTree
+      thenp = Literal{ value = "body 1" }
+      elsep = EmptyTree
+    }
+
+    If{
+      cond = EmptyTree
+      thenp = Literal{ value = "body 2" }
+      elsep = EmptyTree
+    }
+
+    If{
+      cond = EmptyTree
+      thenp = Literal{ value = "body 3" }
+      elsep = EmptyTree
+    }
+
+    If{
+      cond = EmptyTree
+      thenp = EmptyTree
+      elsep = Literal{ value = "body 4" }
+    }
+
+    If{
+      cond = EmptyTree
+      thenp = EmptyTree
+      elsep = Literal{ value = "body 5" }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U b>
+      }
+      rhs = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U !>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+  ]
+}
