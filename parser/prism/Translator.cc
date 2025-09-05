@@ -1290,8 +1290,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // ... like `target1, target2 = 1, 2`, `rescue => target`, etc.
             auto localVarTargetNode = down_cast<pm_local_variable_target_node>(node);
             auto name = translateConstantName(localVarTargetNode->name);
+            auto expr = MK::Local(location, name);
 
-            return make_unique<parser::LVarLhs>(location, name);
+            return make_node_with_expr<parser::LVarLhs>(move(expr), location, name);
         }
         case PM_LOCAL_VARIABLE_WRITE_NODE: { // Regular assignment to a local variable, e.g. `local = 1`
             return translateAssignment<pm_local_variable_write_node, parser::LVarLhs>(node);
