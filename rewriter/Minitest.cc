@@ -243,7 +243,11 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                                 const ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee,
                                 bool insideDescribe) {
     // this statement must be a send
-    if (auto send = ast::cast_tree<ast::Send>(stmt)) {
+    auto send = ast::cast_tree<ast::Send>(stmt);
+    if (send == nullptr) {
+        return invalidUnderTestEach(ctx, eachName, move(stmt));
+    }
+
         auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
         if ((send->fun == core::Names::it() && send->numPosArgs() == 1 && correctBlockArity) ||
@@ -311,7 +315,6 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 return constantMover.addConstantsToExpression(send->loc, move(method));
             }
         }
-    }
 
     return invalidUnderTestEach(ctx, eachName, move(stmt));
 }
