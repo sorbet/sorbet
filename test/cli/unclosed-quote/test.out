@@ -59,9 +59,9 @@ end
     11 |
     12 |
 
-./unclosed_quote_2.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
-     5 |def foo
-        ^^^
+./unclosed_quote_2.rb:6: Hint: this string literal might be missing a closing `"` at the end of the line https://srb.help/2003
+     6 |  x = "some string
+                          ^
 Errors: 3
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def before<<todo method>>(&<blk>)
@@ -69,7 +69,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def foo<<todo method>>(&<blk>)
-    x = <emptyTree>::<C <ErrorNode>>
+    x = "some string"
+  end
+
+  def after<<todo method>>(&<blk>)
+    <emptyTree>
   end
 end
 
@@ -97,17 +101,35 @@ end
     12 |
     13 |
 
-./unclosed_quote_3.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
-     5 |def foo
+./unclosed_quote_3.rb:6: Hint: this string literal might be missing a closing `"` at the end of the line https://srb.help/2003
+     6 |  x = "valid
+                    ^
+
+./unclosed_quote_3.rb:7: Hint: this "if" token might not be properly closed https://srb.help/2003
+     7 |  if x
+          ^^
+    ./unclosed_quote_3.rb:8: Matching `end` found here but is not indented as far
+     8 |end
         ^^^
-Errors: 3
+Errors: 4
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def before<<todo method>>(&<blk>)
     <emptyTree>
   end
 
   def foo<<todo method>>(&<blk>)
-    x = <emptyTree>::<C <ErrorNode>>
+    begin
+      x = "valid"
+      if x
+        <emptyTree>
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  def after<<todo method>>(&<blk>)
+    <emptyTree>
   end
 end
 
@@ -136,13 +158,20 @@ end
     15 |end
     16 |
 
-./unclosed_quote_4.rb:6: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
-     6 |  def foo
-          ^^^
+./unclosed_quote_4.rb:7: Hint: this string literal might be missing a closing `"` at the end of the line https://srb.help/2003
+     7 |    xyz = "
+                   ^
 
-./unclosed_quote_4.rb:5: Hint: this "class" token is not closed before the end of the file https://srb.help/2003
-     5 |class A
-        ^^^^^
+./unclosed_quote_4.rb:9: Changing the type of a variable is not permitted in loops and blocks https://srb.help/7001
+     9 |      xyz = nil
+                    ^^^
+  Existing variable has type: `String("")`
+  Attempting to change type to: `NilClass`
+
+  Autocorrect: Done
+    ./unclosed_quote_4.rb:7: Replaced with `T.let(", T.nilable(String))`
+     7 |    xyz = "
+                  ^
 Errors: 4
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def before<<todo method>>(&<blk>)
@@ -151,8 +180,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
     def foo<<todo method>>(&<blk>)
-      xyz = <emptyTree>::<C <ErrorNode>>
+      begin
+        xyz = ""
+        1.times() do ||
+          xyz = nil
+        end
+      end
     end
+  end
+
+  def after<<todo method>>(&<blk>)
+    <emptyTree>
   end
 end
 
@@ -164,7 +202,7 @@ def before; end
 
 class A
   def foo
-    xyz = "
+    xyz = T.let(", T.nilable(String))
     1.times do
       xyz = nil
     end
@@ -184,16 +222,32 @@ end
     16 |
     17 |
 
-./unclosed_quote_5.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
-     5 |def main
-        ^^^
-Errors: 3
+./unclosed_quote_5.rb:6: Hint: this string literal might be missing a closing `)` at the end of the line https://srb.help/2003
+     6 |  %w(we are the people
+                              ^
+
+./unclosed_quote_5.rb:8: Hint: this string literal might be missing a closing `'` at the end of the line https://srb.help/2003
+     8 |  'foo
+              ^
+
+./unclosed_quote_5.rb:10: Hint: this string literal might be missing a closing `)` at the end of the line https://srb.help/2003
+    10 |  %r(foo
+                ^
+Errors: 5
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def before<<todo method>>(&<blk>)
     <emptyTree>
   end
 
   def main<<todo method>>(&<blk>)
+    begin
+      ["we", "are", "the"]
+      "foo"
+      ::Regexp.new("", 0)
+    end
+  end
+
+  def after<<todo method>>(&<blk>)
     <emptyTree>
   end
 end
@@ -227,13 +281,20 @@ end
     16 |
     17 |
 
-./unclosed_quote_6.rb:6: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
-     6 |  def foo
-          ^^^
+./unclosed_quote_6.rb:7: Hint: this string literal might be missing a closing `"` at the end of the line https://srb.help/2003
+     7 |    xyz = "#{}
+                      ^
 
-./unclosed_quote_6.rb:5: Hint: this "class" token is not closed before the end of the file https://srb.help/2003
-     5 |class A
-        ^^^^^
+./unclosed_quote_6.rb:9: Changing the type of a variable is not permitted in loops and blocks https://srb.help/7001
+     9 |      xyz = nil
+                    ^^^
+  Existing variable has type: `String`
+  Attempting to change type to: `NilClass`
+
+  Autocorrect: Done
+    ./unclosed_quote_6.rb:7: Replaced with `T.let("#{}, T.nilable(String))`
+     7 |    xyz = "#{}
+                  ^^^^
 Errors: 4
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def before<<todo method>>(&<blk>)
@@ -242,8 +303,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
     def foo<<todo method>>(&<blk>)
-      xyz = <emptyTree>::<C <ErrorNode>>
+      begin
+        xyz = ::<Magic>.<string-interpolate>(nil)
+        1.times() do ||
+          xyz = nil
+        end
+      end
     end
+  end
+
+  def after<<todo method>>(&<blk>)
+    <emptyTree>
   end
 end
 
@@ -255,7 +325,7 @@ def before; end
 
 class A
   def foo
-    xyz = "#{}
+    xyz = T.let("#{}, T.nilable(String))
     1.times do
       xyz = nil
     end
@@ -276,10 +346,18 @@ end
     12 |def after; end
     13 |
 
-./unclosed_quote_7.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
-     5 |def foo
-        ^^^
-Errors: 3
+./unclosed_quote_7.rb:6: Hint: this string literal might be missing a closing `"` at the end of the line https://srb.help/2003
+     6 |  x = "first line
+                         ^
+
+./unclosed_quote_7.rb:7: Hint: this string literal might be missing a closing `"` at the end of the line https://srb.help/2003
+     7 |  second line"
+                      ^
+
+./unclosed_quote_7.rb:9: Hint: this string literal might be missing a closing `"` at the end of the line https://srb.help/2003
+     9 |  x = "unclosed string
+                              ^
+Errors: 5
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def before<<todo method>>(&<blk>)
     <emptyTree>
@@ -287,9 +365,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def foo<<todo method>>(&<blk>)
     begin
-      x = "first line\n  second line"
-      x = <emptyTree>::<C <ErrorNode>>
+      x = "first line"
+      <self>.second(<self>.line(""))
+      x = "unclosed string"
     end
+  end
+
+  def after<<todo method>>(&<blk>)
+    <emptyTree>
   end
 end
 
