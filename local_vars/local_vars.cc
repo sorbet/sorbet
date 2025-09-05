@@ -1,4 +1,5 @@
 #include "local_vars.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
@@ -304,6 +305,9 @@ class LocalNameInserter {
         // We'll also look for the block arg, which should always be present at the end of the args.
         ast::ExpressionPtr blockArg;
 
+        core::NameRef newFun = original.fun;
+        ast::Send::Flags newFlags = original.flags;
+
         for (const auto &arg : enclosingMethodScopeStack.args) {
             ENFORCE(blockArg == nullptr, "Block arg was not in final position");
 
@@ -376,19 +380,24 @@ class LocalNameInserter {
         auto shouldForwardBlockArg =
             blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict;
 
+        ast::ExpressionPtr newRecv = std::move(original.recv);
+        ast::Send::ARGS_store newArgs;
+        uint16_t newNumPosArgs = 0;
+
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
             // a hack, but 'super' is currently treated as untyped anyway.
             // TODO(neil): this probably blames to unsafe, we should find a way to blame to super maybe?
-            original.addPosArg(ast::MK::Unsafe(original.loc, std::move(original.recv)));
-            original.addPosArg(std::move(method));
+            newArgs.push_back(ast::MK::Unsafe(original.loc, std::move(newRecv)));
+            newRecv = ast::MK::Magic(original.loc);
+            newArgs.push_back(std::move(method));
 
             // For <call-with-splat> and <call-with-splat-and-block> posargs are always passed in an array.
             if (posArgsArray == nullptr) {
                 posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
             }
-            original.addPosArg(std::move(posArgsArray));
+            newArgs.push_back(std::move(posArgsArray));
 
             // For <call-with-splat> and <call-with-splat-and-block>, the kwargs array can either be a
             // [:key, val, :key, val, ...] array or a one-element [kwargshash] array, depending on whether splatting
@@ -411,76 +420,80 @@ class LocalNameInserter {
             } else {
                 boxedKwArgs = ast::MK::Nil(original.loc);
             }
-            original.addPosArg(std::move(boxedKwArgs));
-
-            original.recv = ast::MK::Magic(original.loc);
+            newArgs.push_back(std::move(boxedKwArgs));
+            newNumPosArgs = newArgs.size();
 
             if (originalBlock != nullptr) {
                 // <call-with-splat> and "do"
-                original.fun = core::Names::callWithSplat();
+                newFun = core::Names::callWithSplat();
                 // Re-add block argument
-                original.setBlock(std::move(originalBlock));
+                newFlags.hasBlock = true;
+                newArgs.push_back(std::move(originalBlock));
             } else if (shouldForwardBlockArg) {
                 // <call-with-splat-and-block>(..., &blk)
-                original.fun = core::Names::callWithSplatAndBlock();
-                original.addPosArg(std::move(blockArg));
+                newFun = core::Names::callWithSplatAndBlock();
+                newArgs.push_back(std::move(blockArg));
+                newNumPosArgs++;
             } else {
                 // <call-with-splat>(...)
-                original.fun = core::Names::callWithSplat();
+                newFun = core::Names::callWithSplat();
             }
         } else if (originalBlock == nullptr && shouldForwardBlockArg) {
-            // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
-            original.reserveArguments(3 + posArgsEntries.size(), kwArgKeyEntries.size(),
-                                      /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
-            original.addPosArg(std::move(original.recv));
-            original.addPosArg(std::move(method));
-            original.addPosArg(std::move(blockArg));
+            newArgs.reserve(3 + posArgsEntries.size() + kwArgKeyEntries.size() * 2 +
+                            /* hasKwSplat */ int(kwArgsHash != nullptr));
+            newArgs.push_back(std::move(newRecv));
+            newRecv = ast::MK::Magic(original.loc);
+            newArgs.push_back(std::move(method));
+            newArgs.push_back(std::move(blockArg));
 
-            for (auto &arg : posArgsEntries) {
-                original.addPosArg(std::move(arg));
-            }
+            absl::c_move(std::move(posArgsEntries), std::back_inserter(newArgs));
             posArgsEntries.clear();
 
+            newNumPosArgs = newArgs.size();
+
             if (kwArgsHash != nullptr) {
-                original.setKwSplat(std::move(kwArgsHash));
+                newArgs.push_back(std::move(kwArgsHash));
             } else {
                 ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
                 for (size_t i = 0; i < kwArgKeyEntries.size(); i++) {
-                    original.addKwArg(std::move(kwArgKeyEntries[i]), std::move(kwArgValueEntries[i]));
+                    newArgs.push_back(std::move(kwArgKeyEntries[i]));
+                    newArgs.push_back(std::move(kwArgValueEntries[i]));
                 }
             }
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
 
-            original.recv = ast::MK::Magic(original.loc);
-            original.fun = core::Names::callWithBlock();
+            newFun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
-            original.reserveArguments(posArgsEntries.size(), kwArgKeyEntries.size(),
-                                      /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
+            newArgs.reserve(posArgsEntries.size() + kwArgKeyEntries.size() * 2 + /* hasKwSplat */
+                            int(kwArgsHash != nullptr) + /* hasBlock */ int(originalBlock != nullptr));
 
-            for (auto &arg : posArgsEntries) {
-                original.addPosArg(std::move(arg));
-            }
+            absl::c_move(std::move(posArgsEntries), std::back_inserter(newArgs));
             posArgsEntries.clear();
 
+            newNumPosArgs = newArgs.size();
+
             if (kwArgsHash != nullptr) {
-                original.setKwSplat(std::move(kwArgsHash));
+                newArgs.push_back(std::move(kwArgsHash));
             } else {
                 ENFORCE(kwArgKeyEntries.size() == kwArgValueEntries.size());
                 for (size_t i = 0; i < kwArgKeyEntries.size(); i++) {
-                    original.addKwArg(std::move(kwArgKeyEntries[i]), std::move(kwArgValueEntries[i]));
+                    newArgs.push_back(std::move(kwArgKeyEntries[i]));
+                    newArgs.push_back(std::move(kwArgValueEntries[i]));
                 }
             }
             // Re-add original block
             if (originalBlock) {
-                original.setBlock(std::move(originalBlock));
+                newFlags.hasBlock = true;
+                newArgs.push_back(std::move(originalBlock));
             }
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
         }
 
-        return tree;
+        return ast::make_expression<ast::Send>(original.loc, std::move(newRecv), newFun, original.funLoc, newNumPosArgs,
+                                               std::move(newArgs), newFlags);
     }
 
     void walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
