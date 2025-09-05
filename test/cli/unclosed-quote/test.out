@@ -1,0 +1,309 @@
+
+----- ./unclosed_quote_1.rb ---------------------------------------
+
+./unclosed_quote_1.rb:13: unexpected token "end of file" https://srb.help/2001
+    13 |end
+    14 |
+
+./unclosed_quote_1.rb:8: Hint: this "if" token might not be properly closed https://srb.help/2003
+     8 |  if x
+          ^^
+    ./unclosed_quote_1.rb:9: Matching `end` found here but is not indented as far
+     9 |end
+        ^^^
+Errors: 2
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def before<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def foo<<todo method>>(&<blk>)
+    begin
+      x = "\n    valid"
+      if x
+        <emptyTree>
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  def after<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+end
+
+--------------------------------------------------------------------------
+
+# typed: false
+
+def before; end
+
+def foo
+  x = "
+    valid"
+  if x
+end
+
+
+def after
+end
+
+----- ./unclosed_quote_2.rb ---------------------------------------
+
+./unclosed_quote_2.rb:6: escape sequence meets end of file https://srb.help/2001
+     6 |  x = "some string
+              ^
+
+./unclosed_quote_2.rb:11: unexpected token "end of file" https://srb.help/2001
+    11 |
+    12 |
+
+./unclosed_quote_2.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
+     5 |def foo
+        ^^^
+Errors: 3
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def before<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def foo<<todo method>>(&<blk>)
+    x = <emptyTree>::<C <ErrorNode>>
+  end
+end
+
+--------------------------------------------------------------------------
+
+# typed: false
+
+def before; end
+
+def foo
+  x = "some string
+end
+
+def after
+end
+
+
+----- ./unclosed_quote_3.rb ---------------------------------------
+
+./unclosed_quote_3.rb:6: escape sequence meets end of file https://srb.help/2001
+     6 |  x = "valid
+              ^
+
+./unclosed_quote_3.rb:12: unexpected token "end of file" https://srb.help/2001
+    12 |
+    13 |
+
+./unclosed_quote_3.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
+     5 |def foo
+        ^^^
+Errors: 3
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def before<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def foo<<todo method>>(&<blk>)
+    x = <emptyTree>::<C <ErrorNode>>
+  end
+end
+
+--------------------------------------------------------------------------
+
+# typed: false
+
+def before; end
+
+def foo
+  x = "valid
+  if x
+end
+
+def after
+end
+
+
+----- ./unclosed_quote_4.rb ---------------------------------------
+
+./unclosed_quote_4.rb:7: escape sequence meets end of file https://srb.help/2001
+     7 |    xyz = "
+                  ^
+
+./unclosed_quote_4.rb:15: unexpected token "end of file" https://srb.help/2001
+    15 |end
+    16 |
+
+./unclosed_quote_4.rb:6: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
+     6 |  def foo
+          ^^^
+
+./unclosed_quote_4.rb:5: Hint: this "class" token is not closed before the end of the file https://srb.help/2003
+     5 |class A
+        ^^^^^
+Errors: 4
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def before<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(&<blk>)
+      xyz = <emptyTree>::<C <ErrorNode>>
+    end
+  end
+end
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+def before; end
+
+class A
+  def foo
+    xyz = "
+    1.times do
+      xyz = nil
+    end
+  end
+end
+
+def after
+end
+
+----- ./unclosed_quote_5.rb ---------------------------------------
+
+./unclosed_quote_5.rb:6: escape sequence meets end of file https://srb.help/2001
+     6 |  %w(we are the people
+          ^
+
+./unclosed_quote_5.rb:16: unexpected token tSTRING_CONTENT https://srb.help/2001
+    16 |
+    17 |
+
+./unclosed_quote_5.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
+     5 |def main
+        ^^^
+Errors: 3
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def before<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def main<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+end
+
+--------------------------------------------------------------------------
+
+# typed: false
+
+def before; end
+
+def main
+  %w(we are the people
+
+  'foo
+
+  %r(foo
+
+end
+
+def after
+end
+
+
+----- ./unclosed_quote_6.rb ---------------------------------------
+
+./unclosed_quote_6.rb:7: escape sequence meets end of file https://srb.help/2001
+     7 |    xyz = "#{}
+                  ^
+
+./unclosed_quote_6.rb:16: unexpected token "end of file" https://srb.help/2001
+    16 |
+    17 |
+
+./unclosed_quote_6.rb:6: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
+     6 |  def foo
+          ^^^
+
+./unclosed_quote_6.rb:5: Hint: this "class" token is not closed before the end of the file https://srb.help/2003
+     5 |class A
+        ^^^^^
+Errors: 4
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def before<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def foo<<todo method>>(&<blk>)
+      xyz = <emptyTree>::<C <ErrorNode>>
+    end
+  end
+end
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+def before; end
+
+class A
+  def foo
+    xyz = "#{}
+    1.times do
+      xyz = nil
+    end
+  end
+end
+
+def after
+end
+
+
+----- ./unclosed_quote_7.rb ---------------------------------------
+
+./unclosed_quote_7.rb:9: escape sequence meets end of file https://srb.help/2001
+     9 |  x = "unclosed string
+              ^
+
+./unclosed_quote_7.rb:12: unexpected token "end of file" https://srb.help/2001
+    12 |def after; end
+    13 |
+
+./unclosed_quote_7.rb:5: Hint: this "def" token is not closed before the end of the file https://srb.help/2003
+     5 |def foo
+        ^^^
+Errors: 3
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def before<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def foo<<todo method>>(&<blk>)
+    begin
+      x = "first line\n  second line"
+      x = <emptyTree>::<C <ErrorNode>>
+    end
+  end
+end
+
+--------------------------------------------------------------------------
+
+# typed: false
+
+def before; end
+
+def foo
+  x = "first line
+  second line"
+
+  x = "unclosed string
+end
+
+def after; end
