@@ -289,7 +289,13 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             if (argLiteral.isName()) {
                 auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
                 auto methodName = argLiteral.asName();
-                return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(send->block()->body));
+
+                ConstantMover constantMover;
+                auto body = move(send->block()->body);
+                ast::TreeWalk::apply(ctx, constantMover, body);
+
+                auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(body));
+                return constantMover.addConstantsToExpression(send->loc, move(method));
             }
         }
     }
