@@ -193,6 +193,11 @@ public:
     Context context;
 
     bool collect_comments = false;
+
+    // Whether to run in a mode where string literals are only allowed to span a single line,
+    // for better error recovery.
+    bool singleLineStrings = false;
+
     std::vector<std::pair<size_t, size_t>> comment_locations;
 
     lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,

@@ -203,7 +203,7 @@ static bool lookahead_quoted_label(std::string_view lookahead) {
 }
 
 bool literal::nest_and_try_closing(std::string_view delimiter, const char *ts, const char *te,
-                                   std::string_view lookahead) {
+                                   std::string_view lookahead, bool singleLineStrings) {
     if (start_delim.size() > 0 && start_delim == delimiter) {
         _nesting++;
     } else if (is_delimiter(delimiter)) {
@@ -235,6 +235,35 @@ bool literal::nest_and_try_closing(std::string_view delimiter, const char *ts, c
             emit(token_type::tSTRING_END, end_delim, ts, te);
             return true;
         }
+    }
+
+    if (singleLineStrings && !this->heredoc()) {
+        ENFORCE(_nesting > 0, "Should only run if something is unclosed");
+
+        // These two cases mirror the cases above. Does not handle heredocs.
+        //
+        // In this case, [ts, te) points at the location of the eol token. By using `ts` for the
+        // *end* location of the token we emit, the entire String literal's location does *not*
+        // include the trailing newline character.
+        //
+        // The string value itself does not include the "\n" character in the string, because
+        // (1) `buffer` was not extended to include it, and
+        // (2) tSTRING_END tokens are not used to splice together the contents of a String AST node
+        if (monolithic) {
+            emit(token_type::tSTRING, buffer, str_s, ts);
+        } else {
+            emit(token_type::tSTRING_END, end_delim, ts, ts);
+        }
+        // Report this hint error as a zero-length error on the start of the tNL character, so that
+        // Sorbet shows a single `^` at the end of the line, instead of an error location that spans
+        // two lines (i.e., starts before the newline and ends after the newline).
+        //
+        // (Maybe Sorbet could be changed to never show the second line in error messages where the
+        // error location ends on the newline character, inclusive.)
+        auto end_of_line = this->_lexer.range(ts, ts);
+        // end_delim is pre-populated to be the end delimiter we're looking for, not that we found
+        this->_lexer.diagnostics.emplace_back(dlevel::ERROR, dclass::EscapeEofHint, end_of_line, this->end_delim);
+        return true;
     }
 
     return false;

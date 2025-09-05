@@ -37,6 +37,7 @@ core::ErrorClass dclassToErrorClass(ruby_parser::dclass diagClass) {
         case ruby_parser::dclass::BlockArgsUnexpectedNewline:
         case ruby_parser::dclass::EOFInsteadOfEnd:
         case ruby_parser::dclass::DefMissingName:
+        case ruby_parser::dclass::EscapeEofHint:
             return core::errors::Parser::ErrorRecoveryHint;
         case ruby_parser::dclass::InternalError:
             return core::errors::Internal::InternalError;
@@ -102,7 +103,8 @@ void reportDiagnostics(core::GlobalState &gs, core::FileRef file, ruby_parser::d
 }
 
 unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, string_view buffer,
-                                                StableStringStorage<> &scratch, const vector<string> &initialLocals) {
+                                                StableStringStorage<> &scratch, const vector<string> &initialLocals,
+                                                bool singleLineStrings) {
     unique_ptr<ruby_parser::base_driver> driver;
     if (settings.traceParser) {
         driver = make_unique<ruby_parser::typedruby_debug>(buffer, scratch, Builder::interface, !!settings.traceLexer,
@@ -113,6 +115,7 @@ unique_ptr<ruby_parser::base_driver> makeDriver(Parser::Settings settings, strin
     }
 
     driver->lex.collect_comments = settings.collectComments;
+    driver->lex.singleLineStrings = singleLineStrings;
 
     for (string local : initialLocals) {
         driver->lex.declare(local);
@@ -144,7 +147,8 @@ ParseResult Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Setti
     buffer += "\0\0"sv;
     StableStringStorage<> scratch;
 
-    auto driver = makeDriver(settings, buffer, scratch, initialLocals);
+    auto singleLineStrings = false;
+    auto driver = makeDriver(settings, buffer, scratch, initialLocals, singleLineStrings);
     auto ast = builder.build(driver.get(), settings.traceParser);
 
     // Always report the original parse errors. If we need to run the parser again, we'll only
@@ -162,7 +166,15 @@ ParseResult Parser::run(core::GlobalState &gs, core::FileRef file, Parser::Setti
 
     Timer timeit(gs.tracer(), "withIndentationAware");
 
-    auto driverRetry = makeDriver(settings.withIndentationAware(), buffer, scratch, initialLocals);
+    // Only use the single line strings recovery strategy if we suspect that it might help. Turning
+    // it on will prevent programs with valid multi-line strings from parsing--but we only get here
+    // if we got a failing parse on the first try, so this single line strings strategy might be
+    // useful if the file doesn't already have multi-line strings and we got the EscapeEof error for
+    // an unclosed literal.
+    singleLineStrings = absl::c_any_of(
+        driver->diagnostics, [](const auto &diag) { return diag.error_class() == ruby_parser::dclass::EscapeEof; });
+
+    auto driverRetry = makeDriver(settings.withIndentationAware(), buffer, scratch, initialLocals, singleLineStrings);
     auto astRetry = builder.build(driverRetry.get(), settings.traceParser);
 
     if (astRetry == nullptr) {
