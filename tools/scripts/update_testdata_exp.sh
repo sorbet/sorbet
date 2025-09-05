@@ -60,7 +60,7 @@ EOF
 
 BUILD=1
 if [ $# -eq 0 ]; then
-  paths=(test/testdata)
+  paths=(test/testdata test/prism_regression)
 else
   while true; do
     case $1 in
@@ -122,6 +122,14 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ -n "$basename" ]; then
+    case "${srcs[0]}" in
+      test/prism_regression/*)
+        uses_prism=true
+        ;;
+      *)
+        uses_prism=false
+    esac
+
     needs_stripe_packages=false
     if grep -q '^# enable-packager: true' "${srcs[@]}"; then
       needs_stripe_packages=true
@@ -251,6 +259,10 @@ for this_src in "${rb_src[@]}" DUMMY; do
         fi
       fi
 
+      if $uses_prism; then
+        args+=("--parser=prism")
+      fi
+
       case "$pass" in
         document-symbols)
           # See above for why this case is weird.
@@ -297,5 +309,6 @@ fi
 if [ "${EMIT_SYNCBACK:-}" != "" ]; then
   echo '### BEGIN SYNCBACK ###'
   echo 'test/testdata/'
+  echo 'test/prism_regression/'
   echo '### END SYNCBACK ###'
 fi
