@@ -1212,6 +1212,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::DString>(location, move(sorbetParts));
             }
 
+            // Desugar `"a #{b} c"` to `::Magic.<string-interpolate>("a ", b, " c")`
             auto desugared = desugarDString(location, interpolatedStringNode->parts);
             return make_node_with_expr<parser::DString>(move(desugared), location, move(sorbetParts));
         }
@@ -1224,8 +1225,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::DSymbol>(location, move(sorbetParts));
             }
 
+            // Desugar `:"a #{b} c"` to `::Magic.<string-interpolate>("a ", b, " c").intern()`
             auto desugared = desugarDString(location, interpolatedSymbolNode->parts);
-            return make_node_with_expr<parser::DSymbol>(move(desugared), location, move(sorbetParts));
+            auto interned = MK::Send0(location, move(desugared), core::Names::intern(), location.copyWithZeroLength());
+            return make_node_with_expr<parser::DSymbol>(move(interned), location, move(sorbetParts));
         }
         case PM_INTERPOLATED_X_STRING_NODE: { // An executable string with backticks, like `echo "Hello, world!"`
             auto interpolatedXStringNode = down_cast<pm_interpolated_x_string_node>(node);
