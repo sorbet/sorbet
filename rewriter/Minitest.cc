@@ -223,6 +223,19 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe);
 
+ast::ExpressionPtr invalidUnderTestEach(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr stmt) {
+    // if any of the above tests were not satisfied, then mark this statement as being invalid here
+    if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
+        e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
+                    "describe", eachName.show(ctx));
+        e.addErrorNote("For other things, like constant and variable assignments,"
+                       "    hoist them to constants or methods defined outside the `{}` block.",
+                       eachName.show(ctx));
+    }
+
+    return stmt;
+}
+
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
 ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
@@ -300,16 +313,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         }
     }
 
-    // if any of the above tests were not satisfied, then mark this statement as being invalid here
-    if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
-        e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
-                    "describe", eachName.show(ctx));
-        e.addErrorNote("For other things, like constant and variable assignments,"
-                       "    hoist them to constants or methods defined outside the `{}` block.",
-                       eachName.show(ctx));
-    }
-
-    return stmt;
+    return invalidUnderTestEach(ctx, eachName, move(stmt));
 }
 
 bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, const ast::ExpressionPtr &expr) {
