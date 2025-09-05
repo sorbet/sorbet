@@ -835,12 +835,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         }
         case PM_CONSTANT_AND_WRITE_NODE: { // And-assignment to a constant, e.g. `C &&= false`
             return translateOpAssignment<pm_constant_and_write_node, parser::AndAsgn, parser::ConstLhs>(node);
+
+            if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
+                e.setHeader("Constant reassignment is not supported");
+            }
+            auto constantAndWriteNode = down_cast<pm_constant_and_write_node>(node);
+            auto lhs = translateConst<pm_constant_and_write_node, parser::ConstLhs>(constantAndWriteNode);
+            auto rhs = translate(constantAndWriteNode->value);
+            return make_node_with_expr<parser::AndAsgn>(MK::EmptyTree(), location, move(lhs), move(rhs));
         }
         case PM_CONSTANT_OPERATOR_WRITE_NODE: { // Compound assignment to a constant, e.g. `C += 1`
             return translateOpAssignment<pm_constant_operator_write_node, parser::OpAsgn, parser::ConstLhs>(node);
         }
         case PM_CONSTANT_OR_WRITE_NODE: { // Or-assignment to a constant, e.g. `C ||= true`
-            return translateOpAssignment<pm_constant_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
+            // return translateOpAssignment<pm_constant_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
+            auto constantOrWriteNode = down_cast<pm_constant_or_write_node>(node);
+            return translateConst<pm_constant_or_write_node, parser::Const>(constantOrWriteNode);
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like `Foo`
             auto constantReadNode = down_cast<pm_constant_read_node>(node);
@@ -2857,7 +2867,9 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
         // Check if this is a dynamic constant assignment (SyntaxError at runtime)
         // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
         // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
-        return make_unique<LVarLhs>(location, core::Names::dynamicConstAssign());
+        auto expr = MK::Local(location, core::Names::dynamicConstAssign());
+        return make_node_with_expr<LVarLhs>(move(expr), location, core::Names::dynamicConstAssign());
+        // return make_unique<LVarLhs>(location, core::Names::dynamicConstAssign());
     }
 
     auto constantName = ctx.state.enterNameConstant(name);
@@ -2907,7 +2919,11 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
         ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
         return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
     } else {
-        return make_unique<SorbetLHSNode>(location, move(parent), constantName);
+        // ENFORCE(false, "Failed to translate constant");
+        // return make_unique<SorbetLHSNode>(location, move(parent), constantName);
+
+        ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, MK::EmptyTree(), constantName);
+        return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
     }
 }
 
