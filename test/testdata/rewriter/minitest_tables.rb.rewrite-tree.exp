@@ -486,7 +486,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def hoists_in_let_too<<todo method>>(&<blk>)
-        <emptyTree>::<C C4> = 10
+        ::Module.const_set(:C4, 10)
       end
 
       <self>.test_each([]) do |val|
@@ -503,7 +503,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
             <runtime method definition of <it 'hoists path constants inside of it'>>
           end
-          <runtime method definition of hoists_in_let_too>
+          begin
+            <emptyTree>::<C C4> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            <runtime method definition of hoists_in_let_too>
+          end
         end
       end
     end
