@@ -466,10 +466,8 @@ class LocalNameInserter {
             newFun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
-            newArgs.reserve(posArgsEntries.size() +
-                            kwArgKeyEntries.size() * 2
-                            /* hasKwSplat */
-                            + int(kwArgsHash != nullptr) + /* hasBlock */ int(originalBlock != nullptr));
+            newArgs.reserve(posArgsEntries.size() + kwArgKeyEntries.size() * 2 + /* hasKwSplat */
+                            int(kwArgsHash != nullptr) + /* hasBlock */ int(originalBlock != nullptr));
 
             absl::c_move(std::move(posArgsEntries), std::back_inserter(newArgs));
             posArgsEntries.clear();
