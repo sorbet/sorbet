@@ -890,17 +890,9 @@ private:
             return;
         }
 
-        // Check if this is a Magic.requires_ancestor call
-        bool isMagicCall = false;
-        if (auto recv = ast::cast_tree<ast::ConstantLit>(send->recv)) {
-            if (recv->symbol() == core::Symbols::Magic()) {
-                isMagicCall = true;
-            }
-        }
-
         auto *block = send->block();
 
-        if (send->numPosArgs() > 0 && !isMagicCall) {
+        if (send->numPosArgs() > 0) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("`{}` only accepts a block", send->fun.show(gs));
                 e.addErrorNote("Use {} to auto-correct using the new syntax",
@@ -925,82 +917,6 @@ private:
                     core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", send->fun.show(gs), replacement),
                                                 {core::AutocorrectSuggestion::Edit{loc, replacement}}});
             }
-            return;
-        }
-
-        // Handle Magic.requires_ancestor calls
-        if (isMagicCall) {
-            const auto numPosArgs = send->numPosArgs();
-            if (numPosArgs < 1) {
-                // Should have at least self argument
-                return;
-            }
-
-            // Magic.requires_ancestor(self) { Ancestor } - get ancestor from block
-            if (block != nullptr && block->body) {
-                auto blockLoc = core::Loc(todo.file, block->body.loc());
-                core::ClassOrModuleRef symbol = core::Symbols::StubModule();
-
-                if (auto constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
-                    auto sym = constant->symbol();
-                    if (sym.exists() && sym.isClassOrModule()) {
-                        symbol = sym.asClassOrModuleRef();
-                    }
-                }
-
-                if (symbol == core::Symbols::StubModule()) {
-                    if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
-                        e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
-                                    send->fun.show(gs));
-                    }
-                    return;
-                }
-
-                if (symbol == owner) {
-                    if (auto e = gs.beginError(blockLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
-                        e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
-                    }
-                    return;
-                }
-
-                owner.data(gs)->recordRequiredAncestor(gs, symbol, blockLoc);
-                return;
-            }
-
-            // If no block, check if there are positional arguments (fallback)
-            if (numPosArgs >= 2) {
-                // Skip the first argument (self) and process the second argument (ancestor)
-                auto &ancestorArg = send->getPosArg(1);
-                auto ancestorLoc = core::Loc(todo.file, ancestorArg.loc());
-                core::ClassOrModuleRef symbol = core::Symbols::StubModule();
-
-                if (auto constant = ast::cast_tree<ast::ConstantLit>(ancestorArg)) {
-                    auto sym = constant->symbol();
-                    if (sym.exists() && sym.isClassOrModule()) {
-                        symbol = sym.asClassOrModuleRef();
-                    }
-                }
-
-                if (symbol == core::Symbols::StubModule()) {
-                    if (auto e = gs.beginError(ancestorLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
-                        e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
-                                    send->fun.show(gs));
-                    }
-                    return;
-                }
-
-                if (symbol == owner) {
-                    if (auto e = gs.beginError(ancestorLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
-                        e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
-                    }
-                    return;
-                }
-
-                owner.data(gs)->recordRequiredAncestor(gs, symbol, ancestorLoc);
-                return;
-            }
-
-            // Invalid Magic.requires_ancestor call
             return;
         }
 

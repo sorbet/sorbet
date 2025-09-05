@@ -832,9 +832,7 @@ void GlobalState::initEmpty() {
                  .buildWithResult(Types::void_());
 
     // Synthesize <Magic>.requires_ancestor(self: T.untyped) => Void
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::requiresAncestor())
-                 .untypedArg(Names::selfLocal())
-                 .buildWithResult(Types::void_());
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::requiresAncestor()).buildWithResult(Types::void_());
 
     // Synthesize <Magic>.<check-match-array>(pattern: T.untyped, splatArray: T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::checkMatchArray())

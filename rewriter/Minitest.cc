@@ -630,7 +630,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ast::ClassDef::RHS_store filteredModuleRhs;
             auto flattenedRhs = flattenDescribeBody(move(rhs));
 
-            // Add Magic.requires_ancestor for RSpec::Core::ExampleGroup - all shared examples need this
+            // Add <Magic>.requires_ancestor for RSpec::Core::ExampleGroup - all shared examples need this
             // to be includable in RSpec contexts regardless of how they're called
             auto magic = ast::MK::Magic(send->loc);
 
@@ -648,9 +648,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ast::MethodDef::ARGS_store blockArgs;
             auto blockForRequires = ast::MK::Block(send->loc, std::move(blockBody), std::move(blockArgs));
 
-            // Create Magic.requires_ancestor(self) { block }
+            // Create <Magic>.requires_ancestor { block }
             ast::Send::ARGS_store args;
-            args.emplace_back(ast::MK::Self(send->loc));    // positional arg: self
             args.emplace_back(std::move(blockForRequires)); // block arg
             ast::Send::Flags flags;
             flags.hasBlock = true;
