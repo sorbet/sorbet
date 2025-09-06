@@ -219,6 +219,14 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
 }
 
 optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::Send &send) {
+    if (send.numPosArgs() == 0) {
+        if (send.fun != core::Names::subject()) {
+            return nullopt;
+        }
+
+        return pair{core::Names::subject(), send.funLoc};
+    }
+
     if (send.numPosArgs() != 1) {
         return nullopt;
     }
@@ -320,8 +328,11 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1) {
         return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts, iteratee,
                                    /* insideDescribe */ true);
-    } else if (insideDescribe && send->fun == core::Names::let() && send->numPosArgs() == 1 &&
-               ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+    } else if (insideDescribe &&
+               ((send->fun == core::Names::let() && send->numPosArgs() == 1) ||
+                (send->fun == core::Names::let_bang() && send->numPosArgs() == 1) ||
+                (send->fun == core::Names::subject() && send->numPosArgs() <= 1)) &&
+               (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0)))) {
         auto maybeDecl = getLetNameAndDeclLoc(*send);
         if (maybeDecl.has_value()) {
             auto [methodName, declLoc] = maybeDecl.value();
@@ -538,7 +549,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
 
-        case core::Names::let().rawId(): {
+        case core::Names::let().rawId():
+        case core::Names::let_bang().rawId():
+        case core::Names::subject().rawId(): {
             if (!insideDescribe) {
                 return nullptr;
             }
