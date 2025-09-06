@@ -1,0 +1,275 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <call-with-splat-and-block>>
+      block = nullptr
+      pos_args = 5
+      args = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U receiver>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+        Literal{ value = :foo }
+        Send{
+          flags = {}
+          recv = Array{
+            elems = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+            ]
+          }
+          fun = <U concat>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <splat>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Array{
+                  elems = [
+                    Literal{ value = 3 }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Array{
+          elems = [
+            Literal{ value = :d }
+            Literal{ value = 4 }
+            Literal{ value = :e }
+            Literal{ value = 5 }
+            Literal{ value = :f }
+            Literal{ value = 6 }
+          ]
+        }
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U forwarded_block>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <call-with-splat>>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U a>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U b>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U c>
+          }
+          KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U d>
+          } }
+          KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          } }
+          KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U f>
+          } }
+          BlockArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U block>
+          } }
+        ]
+        body = Literal{ value = "inline block" }
+      }
+      pos_args = 4
+      args = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U receiver>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+        Literal{ value = :foo }
+        Send{
+          flags = {}
+          recv = Array{
+            elems = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+            ]
+          }
+          fun = <U concat>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <splat>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Array{
+                  elems = [
+                    Literal{ value = 3 }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Array{
+          elems = [
+            Literal{ value = :d }
+            Literal{ value = 4 }
+            Literal{ value = :e }
+            Literal{ value = 5 }
+            Literal{ value = :f }
+            Literal{ value = 6 }
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <call-with-splat>>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U a>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U b>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U c>
+          }
+          KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U d>
+          } }
+          KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          } }
+          KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U f>
+          } }
+          BlockArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U block>
+          } }
+        ]
+        body = Literal{ value = "do-end block" }
+      }
+      pos_args = 4
+      args = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U receiver>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+        Literal{ value = :foo }
+        Send{
+          flags = {}
+          recv = Array{
+            elems = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+            ]
+          }
+          fun = <U concat>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <splat>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Array{
+                  elems = [
+                    Literal{ value = 3 }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        Array{
+          elems = [
+            Literal{ value = :d }
+            Literal{ value = 4 }
+            Literal{ value = :e }
+            Literal{ value = 5 }
+            Literal{ value = :f }
+            Literal{ value = 6 }
+          ]
+        }
+      ]
+    }
+  ]
+}

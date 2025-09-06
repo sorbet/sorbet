@@ -1,0 +1,2145 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $2>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U foo>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {rewriterSynthesized}
+          recv = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (module ::T)
+              orig = nullptr
+            }
+            fun = <U unsafe>
+            block = nullptr
+            pos_args = 1
+            args = [
+              ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+            ]
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+          ]
+        }
+        thenp = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U puts>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "one!" }
+          ]
+        }
+        elsep = If{
+          cond = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+          thenp = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "two!" }
+            ]
+          }
+          elsep = If{
+            cond = Send{
+              flags = {rewriterSynthesized}
+              recv = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (module ::T)
+                  orig = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  ConstantLit{
+                    symbol = (module ::Kernel)
+                    orig = nullptr
+                  }
+                ]
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
+            thenp = Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U puts>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "three or four!" }
+              ]
+            }
+            elsep = Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U puts>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Who knows!" }
+              ]
+            }
+          }
+        }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $3>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U array_like_thing>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {rewriterSynthesized}
+          recv = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (module ::T)
+              orig = nullptr
+            }
+            fun = <U unsafe>
+            block = nullptr
+            pos_args = 1
+            args = [
+              ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+            ]
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+          ]
+        }
+        thenp = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U a>
+              }
+              rhs = Send{
+                flags = {rewriterSynthesized}
+                recv = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      symbol = (module ::Kernel)
+                      orig = nullptr
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+            }
+          ],
+          expr = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "empty!" }
+            ]
+          }
+        }
+        elsep = If{
+          cond = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+          thenp = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "one and two!" }
+            ]
+          }
+          elsep = If{
+            cond = Send{
+              flags = {rewriterSynthesized}
+              recv = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (module ::T)
+                  orig = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  ConstantLit{
+                    symbol = (module ::Kernel)
+                    orig = nullptr
+                  }
+                ]
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
+            thenp = Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U puts>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "three and four!" }
+              ]
+            }
+            elsep = If{
+              cond = Send{
+                flags = {rewriterSynthesized}
+                recv = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      symbol = (module ::Kernel)
+                      orig = nullptr
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+              thenp = Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U puts>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "starts with five!" }
+                ]
+              }
+              elsep = If{
+                cond = Send{
+                  flags = {rewriterSynthesized}
+                  recv = Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (module ::Kernel)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                  fun = <U raise>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  ]
+                }
+                thenp = Send{
+                  flags = {privateOk}
+                  recv = Self
+                  fun = <U puts>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "ends with six!" }
+                  ]
+                }
+                elsep = If{
+                  cond = Send{
+                    flags = {rewriterSynthesized}
+                    recv = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        ConstantLit{
+                          symbol = (module ::Kernel)
+                          orig = nullptr
+                        }
+                      ]
+                    }
+                    fun = <U raise>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                    ]
+                  }
+                  thenp = Send{
+                    flags = {privateOk}
+                    recv = Self
+                    fun = <U puts>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "contains a seven!" }
+                    ]
+                  }
+                  elsep = If{
+                    cond = Send{
+                      flags = {rewriterSynthesized}
+                      recv = Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (module ::T)
+                          orig = nullptr
+                        }
+                        fun = <U unsafe>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          ConstantLit{
+                            symbol = (module ::Kernel)
+                            orig = nullptr
+                          }
+                        ]
+                      }
+                      fun = <U raise>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                      ]
+                    }
+                    thenp = Send{
+                      flags = {privateOk}
+                      recv = Self
+                      fun = <U puts>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (class ::<Magic>)
+                            orig = nullptr
+                          }
+                          fun = <U <string-interpolate>>
+                          block = nullptr
+                          pos_args = 4
+                          args = [
+                            Literal{ value = "An Array with first: " }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U first>
+                            }
+                            Literal{ value = " and second: " }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U second>
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                    elsep = If{
+                      cond = Send{
+                        flags = {rewriterSynthesized}
+                        recv = Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (module ::T)
+                            orig = nullptr
+                          }
+                          fun = <U unsafe>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            ConstantLit{
+                              symbol = (module ::Kernel)
+                              orig = nullptr
+                            }
+                          ]
+                        }
+                        fun = <U raise>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                        ]
+                      }
+                      thenp = Send{
+                        flags = {privateOk}
+                        recv = Self
+                        fun = <U puts>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (class ::<Magic>)
+                              orig = nullptr
+                            }
+                            fun = <U <string-interpolate>>
+                            block = nullptr
+                            pos_args = 4
+                            args = [
+                              Literal{ value = "A Point with x: " }
+                              UnresolvedIdent{
+                                kind = Local
+                                name = <U x>
+                              }
+                              Literal{ value = " and y: " }
+                              UnresolvedIdent{
+                                kind = Local
+                                name = <U y>
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                      elsep = If{
+                        cond = Send{
+                          flags = {rewriterSynthesized}
+                          recv = Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (module ::T)
+                              orig = nullptr
+                            }
+                            fun = <U unsafe>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              ConstantLit{
+                                symbol = (module ::Kernel)
+                                orig = nullptr
+                              }
+                            ]
+                          }
+                          fun = <U raise>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                          ]
+                        }
+                        thenp = InsSeq{
+                          stats = [
+                            Assign{
+                              lhs = UnresolvedIdent{
+                                kind = Local
+                                name = <U i>
+                              }
+                              rhs = Send{
+                                flags = {rewriterSynthesized}
+                                recv = Send{
+                                  flags = {}
+                                  recv = ConstantLit{
+                                    symbol = (module ::T)
+                                    orig = nullptr
+                                  }
+                                  fun = <U unsafe>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    ConstantLit{
+                                      symbol = (module ::Kernel)
+                                      orig = nullptr
+                                    }
+                                  ]
+                                }
+                                fun = <U raise>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                ]
+                              }
+                            }
+                          ],
+                          expr = Send{
+                            flags = {privateOk}
+                            recv = Self
+                            fun = <U puts>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              Literal{ value = "An array with an element and maybe other stuff" }
+                            ]
+                          }
+                        }
+                        elsep = EmptyTree
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $4>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U hash_like_thing>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {rewriterSynthesized}
+          recv = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (module ::T)
+              orig = nullptr
+            }
+            fun = <U unsafe>
+            block = nullptr
+            pos_args = 1
+            args = [
+              ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+            ]
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+          ]
+        }
+        thenp = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U puts>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "empty!" }
+          ]
+        }
+        elsep = If{
+          cond = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+          thenp = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U h>
+                }
+                rhs = Send{
+                  flags = {rewriterSynthesized}
+                  recv = Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (module ::Kernel)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                  fun = <U raise>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  ]
+                }
+              }
+            ],
+            expr = Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U puts>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <string-interpolate>>
+                  block = nullptr
+                  pos_args = 2
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U h>
+                    }
+                    Literal{ value = " contains a and b, and maybe other stuff!" }
+                  ]
+                }
+              ]
+            }
+          }
+          elsep = If{
+            cond = Send{
+              flags = {rewriterSynthesized}
+              recv = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (module ::T)
+                  orig = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  ConstantLit{
+                    symbol = (module ::Kernel)
+                    orig = nullptr
+                  }
+                ]
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
+            thenp = InsSeq{
+              stats = [
+                Assign{
+                  lhs = UnresolvedIdent{
+                    kind = Local
+                    name = <U h>
+                  }
+                  rhs = Send{
+                    flags = {rewriterSynthesized}
+                    recv = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        ConstantLit{
+                          symbol = (module ::Kernel)
+                          orig = nullptr
+                        }
+                      ]
+                    }
+                    fun = <U raise>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                    ]
+                  }
+                }
+              ],
+              expr = Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U puts>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (class ::<Magic>)
+                      orig = nullptr
+                    }
+                    fun = <U <string-interpolate>>
+                    block = nullptr
+                    pos_args = 2
+                    args = [
+                      UnresolvedIdent{
+                        kind = Local
+                        name = <U h>
+                      }
+                      Literal{ value = " has c, and maybe other stuff!" }
+                    ]
+                  }
+                ]
+              }
+            }
+            elsep = If{
+              cond = Send{
+                flags = {rewriterSynthesized}
+                recv = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      symbol = (module ::Kernel)
+                      orig = nullptr
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <U h>
+                    }
+                    rhs = Send{
+                      flags = {rewriterSynthesized}
+                      recv = Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (module ::T)
+                          orig = nullptr
+                        }
+                        fun = <U unsafe>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          ConstantLit{
+                            symbol = (module ::Kernel)
+                            orig = nullptr
+                          }
+                        ]
+                      }
+                      fun = <U raise>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {privateOk}
+                  recv = Self
+                  fun = <U puts>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <string-interpolate>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <U h>
+                        }
+                        Literal{ value = " has d and nothing else!" }
+                      ]
+                    }
+                  ]
+                }
+              }
+              elsep = If{
+                cond = Send{
+                  flags = {rewriterSynthesized}
+                  recv = Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (module ::Kernel)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                  fun = <U raise>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  ]
+                }
+                thenp = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <U m>
+                      }
+                      rhs = Send{
+                        flags = {rewriterSynthesized}
+                        recv = Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (module ::T)
+                            orig = nullptr
+                          }
+                          fun = <U unsafe>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            ConstantLit{
+                              symbol = (module ::Kernel)
+                              orig = nullptr
+                            }
+                          ]
+                        }
+                        fun = <U raise>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                        ]
+                      }
+                    }
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <U j>
+                      }
+                      rhs = Send{
+                        flags = {rewriterSynthesized}
+                        recv = Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (module ::T)
+                            orig = nullptr
+                          }
+                          fun = <U unsafe>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            ConstantLit{
+                              symbol = (module ::Kernel)
+                              orig = nullptr
+                            }
+                          ]
+                        }
+                        fun = <U raise>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                        ]
+                      }
+                    }
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <U l>
+                      }
+                      rhs = Send{
+                        flags = {rewriterSynthesized}
+                        recv = Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (module ::T)
+                            orig = nullptr
+                          }
+                          fun = <U unsafe>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            ConstantLit{
+                              symbol = (module ::Kernel)
+                              orig = nullptr
+                            }
+                          ]
+                        }
+                        fun = <U raise>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                        ]
+                      }
+                    }
+                  ],
+                  expr = Send{
+                    flags = {privateOk}
+                    recv = Self
+                    fun = <U puts>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (class ::<Magic>)
+                          orig = nullptr
+                        }
+                        fun = <U <string-interpolate>>
+                        block = nullptr
+                        pos_args = 2
+                        args = [
+                          UnresolvedIdent{
+                            kind = Local
+                            name = <U m>
+                          }
+                          Literal{ value = " has j or l!" }
+                        ]
+                      }
+                    ]
+                  }
+                }
+                elsep = If{
+                  cond = Send{
+                    flags = {rewriterSynthesized}
+                    recv = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        ConstantLit{
+                          symbol = (module ::Kernel)
+                          orig = nullptr
+                        }
+                      ]
+                    }
+                    fun = <U raise>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                    ]
+                  }
+                  thenp = InsSeq{
+                    stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U n4>
+                        }
+                        rhs = Send{
+                          flags = {rewriterSynthesized}
+                          recv = Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (module ::T)
+                              orig = nullptr
+                            }
+                            fun = <U unsafe>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              ConstantLit{
+                                symbol = (module ::Kernel)
+                                orig = nullptr
+                              }
+                            ]
+                          }
+                          fun = <U raise>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                          ]
+                        }
+                      }
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U n1>
+                        }
+                        rhs = Send{
+                          flags = {rewriterSynthesized}
+                          recv = Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (module ::T)
+                              orig = nullptr
+                            }
+                            fun = <U unsafe>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              ConstantLit{
+                                symbol = (module ::Kernel)
+                                orig = nullptr
+                              }
+                            ]
+                          }
+                          fun = <U raise>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                          ]
+                        }
+                      }
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U n2>
+                        }
+                        rhs = Send{
+                          flags = {rewriterSynthesized}
+                          recv = Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (module ::T)
+                              orig = nullptr
+                            }
+                            fun = <U unsafe>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              ConstantLit{
+                                symbol = (module ::Kernel)
+                                orig = nullptr
+                              }
+                            ]
+                          }
+                          fun = <U raise>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                          ]
+                        }
+                      }
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U n3>
+                        }
+                        rhs = Send{
+                          flags = {rewriterSynthesized}
+                          recv = Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (module ::T)
+                              orig = nullptr
+                            }
+                            fun = <U unsafe>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              ConstantLit{
+                                symbol = (module ::Kernel)
+                                orig = nullptr
+                              }
+                            ]
+                          }
+                          fun = <U raise>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                          ]
+                        }
+                      }
+                    ],
+                    expr = Send{
+                      flags = {privateOk}
+                      recv = Self
+                      fun = <U puts>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (class ::<Magic>)
+                            orig = nullptr
+                          }
+                          fun = <U <string-interpolate>>
+                          block = nullptr
+                          pos_args = 2
+                          args = [
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U n4>
+                            }
+                            Literal{ value = " has n1, n2, and n3!" }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                  elsep = If{
+                    cond = Send{
+                      flags = {rewriterSynthesized}
+                      recv = Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (module ::T)
+                          orig = nullptr
+                        }
+                        fun = <U unsafe>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          ConstantLit{
+                            symbol = (module ::Kernel)
+                            orig = nullptr
+                          }
+                        ]
+                      }
+                      fun = <U raise>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                      ]
+                    }
+                    thenp = Send{
+                      flags = {privateOk}
+                      recv = Self
+                      fun = <U puts>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (class ::<Magic>)
+                            orig = nullptr
+                          }
+                          fun = <U <string-interpolate>>
+                          block = nullptr
+                          pos_args = 2
+                          args = [
+                            Literal{ value = "A Hash with e: " }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U e>
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                    elsep = If{
+                      cond = Send{
+                        flags = {rewriterSynthesized}
+                        recv = Send{
+                          flags = {}
+                          recv = ConstantLit{
+                            symbol = (module ::T)
+                            orig = nullptr
+                          }
+                          fun = <U unsafe>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            ConstantLit{
+                              symbol = (module ::Kernel)
+                              orig = nullptr
+                            }
+                          ]
+                        }
+                        fun = <U raise>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                        ]
+                      }
+                      thenp = Send{
+                        flags = {privateOk}
+                        recv = Self
+                        fun = <U puts>
+                        block = nullptr
+                        pos_args = 1
+                        args = [
+                          Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (class ::<Magic>)
+                              orig = nullptr
+                            }
+                            fun = <U <string-interpolate>>
+                            block = nullptr
+                            pos_args = 4
+                            args = [
+                              Literal{ value = "A Point with x: " }
+                              UnresolvedIdent{
+                                kind = Local
+                                name = <U x>
+                              }
+                              Literal{ value = " and y: " }
+                              UnresolvedIdent{
+                                kind = Local
+                                name = <U y>
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                      elsep = If{
+                        cond = Send{
+                          flags = {rewriterSynthesized}
+                          recv = Send{
+                            flags = {}
+                            recv = ConstantLit{
+                              symbol = (module ::T)
+                              orig = nullptr
+                            }
+                            fun = <U unsafe>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              ConstantLit{
+                                symbol = (module ::Kernel)
+                                orig = nullptr
+                              }
+                            ]
+                          }
+                          fun = <U raise>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                          ]
+                        }
+                        thenp = InsSeq{
+                          stats = [
+                            Assign{
+                              lhs = UnresolvedIdent{
+                                kind = Local
+                                name = <U o>
+                              }
+                              rhs = Send{
+                                flags = {rewriterSynthesized}
+                                recv = Send{
+                                  flags = {}
+                                  recv = ConstantLit{
+                                    symbol = (module ::T)
+                                    orig = nullptr
+                                  }
+                                  fun = <U unsafe>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    ConstantLit{
+                                      symbol = (module ::Kernel)
+                                      orig = nullptr
+                                    }
+                                  ]
+                                }
+                                fun = <U raise>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                ]
+                              }
+                            }
+                          ],
+                          expr = Send{
+                            flags = {privateOk}
+                            recv = Self
+                            fun = <U puts>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              Literal{ value = "splat!" }
+                            ]
+                          }
+                        }
+                        elsep = If{
+                          cond = Send{
+                            flags = {rewriterSynthesized}
+                            recv = Send{
+                              flags = {}
+                              recv = ConstantLit{
+                                symbol = (module ::T)
+                                orig = nullptr
+                              }
+                              fun = <U unsafe>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                ConstantLit{
+                                  symbol = (module ::Kernel)
+                                  orig = nullptr
+                                }
+                              ]
+                            }
+                            fun = <U raise>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                            ]
+                          }
+                          thenp = Send{
+                            flags = {privateOk}
+                            recv = Self
+                            fun = <U puts>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              Literal{ value = "splat nil!" }
+                            ]
+                          }
+                          elsep = EmptyTree
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $5>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U foo>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {rewriterSynthesized}
+          recv = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (module ::T)
+              orig = nullptr
+            }
+            fun = <U unsafe>
+            block = nullptr
+            pos_args = 1
+            args = [
+              ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+            ]
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+          ]
+        }
+        thenp = InsSeq{
+          stats = [
+            Literal{ value = "one!" }
+          ],
+          expr = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "surprise, multi-line!" }
+            ]
+          }
+        }
+        elsep = EmptyTree
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $6>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U bar>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {rewriterSynthesized}
+          recv = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (module ::T)
+              orig = nullptr
+            }
+            fun = <U unsafe>
+            block = nullptr
+            pos_args = 1
+            args = [
+              ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+            ]
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+          ]
+        }
+        thenp = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U x>
+              }
+              rhs = Send{
+                flags = {rewriterSynthesized}
+                recv = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      symbol = (module ::Kernel)
+                      orig = nullptr
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+            }
+          ],
+          expr = Literal{ value = "in with if" }
+        }
+        elsep = If{
+          cond = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+          thenp = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U a>
+                }
+                rhs = Send{
+                  flags = {rewriterSynthesized}
+                  recv = Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (module ::Kernel)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                  fun = <U raise>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  ]
+                }
+              }
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U b>
+                }
+                rhs = Send{
+                  flags = {rewriterSynthesized}
+                  recv = Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (module ::Kernel)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                  fun = <U raise>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  ]
+                }
+              }
+            ],
+            expr = Literal{ value = "in with 2 args and if" }
+          }
+          elsep = If{
+            cond = Send{
+              flags = {rewriterSynthesized}
+              recv = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (module ::T)
+                  orig = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  ConstantLit{
+                    symbol = (module ::Kernel)
+                    orig = nullptr
+                  }
+                ]
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
+            thenp = InsSeq{
+              stats = [
+                Assign{
+                  lhs = UnresolvedIdent{
+                    kind = Local
+                    name = <U c>
+                  }
+                  rhs = Send{
+                    flags = {rewriterSynthesized}
+                    recv = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        ConstantLit{
+                          symbol = (module ::Kernel)
+                          orig = nullptr
+                        }
+                      ]
+                    }
+                    fun = <U raise>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                    ]
+                  }
+                }
+                Assign{
+                  lhs = UnresolvedIdent{
+                    kind = Local
+                    name = <U d>
+                  }
+                  rhs = Send{
+                    flags = {rewriterSynthesized}
+                    recv = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        ConstantLit{
+                          symbol = (module ::Kernel)
+                          orig = nullptr
+                        }
+                      ]
+                    }
+                    fun = <U raise>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                    ]
+                  }
+                }
+              ],
+              expr = InsSeq{
+                stats = [
+                  If{
+                    cond = Send{
+                      flags = {}
+                      recv = UnresolvedIdent{
+                        kind = Local
+                        name = <U c>
+                      }
+                      fun = <U ==>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Literal{ value = 3 }
+                      ]
+                    }
+                    thenp = UnresolvedIdent{
+                      kind = Local
+                      name = <U c>
+                    }
+                    elsep = EmptyTree
+                  }
+                ],
+                expr = Literal{ value = "in with 2 args, semicolon, and if" }
+              }
+            }
+            elsep = EmptyTree
+          }
+        }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $7>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U baz>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {rewriterSynthesized}
+          recv = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (module ::T)
+              orig = nullptr
+            }
+            fun = <U unsafe>
+            block = nullptr
+            pos_args = 1
+            args = [
+              ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+            ]
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+          ]
+        }
+        thenp = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U x>
+              }
+              rhs = Send{
+                flags = {rewriterSynthesized}
+                recv = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      symbol = (module ::Kernel)
+                      orig = nullptr
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+            }
+          ],
+          expr = Literal{ value = "in with unless" }
+        }
+        elsep = If{
+          cond = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+          thenp = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U a>
+                }
+                rhs = Send{
+                  flags = {rewriterSynthesized}
+                  recv = Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (module ::Kernel)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                  fun = <U raise>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  ]
+                }
+              }
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U b>
+                }
+                rhs = Send{
+                  flags = {rewriterSynthesized}
+                  recv = Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U unsafe>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (module ::Kernel)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                  fun = <U raise>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  ]
+                }
+              }
+            ],
+            expr = Literal{ value = "in with 2 args and unless" }
+          }
+          elsep = If{
+            cond = Send{
+              flags = {rewriterSynthesized}
+              recv = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (module ::T)
+                  orig = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  ConstantLit{
+                    symbol = (module ::Kernel)
+                    orig = nullptr
+                  }
+                ]
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
+            thenp = InsSeq{
+              stats = [
+                Assign{
+                  lhs = UnresolvedIdent{
+                    kind = Local
+                    name = <U c>
+                  }
+                  rhs = Send{
+                    flags = {rewriterSynthesized}
+                    recv = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        ConstantLit{
+                          symbol = (module ::Kernel)
+                          orig = nullptr
+                        }
+                      ]
+                    }
+                    fun = <U raise>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                    ]
+                  }
+                }
+                Assign{
+                  lhs = UnresolvedIdent{
+                    kind = Local
+                    name = <U d>
+                  }
+                  rhs = Send{
+                    flags = {rewriterSynthesized}
+                    recv = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        ConstantLit{
+                          symbol = (module ::Kernel)
+                          orig = nullptr
+                        }
+                      ]
+                    }
+                    fun = <U raise>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                    ]
+                  }
+                }
+              ],
+              expr = InsSeq{
+                stats = [
+                  If{
+                    cond = Send{
+                      flags = {}
+                      recv = UnresolvedIdent{
+                        kind = Local
+                        name = <U c>
+                      }
+                      fun = <U ==>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        Literal{ value = 3 }
+                      ]
+                    }
+                    thenp = EmptyTree
+                    elsep = UnresolvedIdent{
+                      kind = Local
+                      name = <U c>
+                    }
+                  }
+                ],
+                expr = Literal{ value = "in with 2 args, semicolon, and unless" }
+              }
+            }
+            elsep = EmptyTree
+          }
+        }
+      }
+    }
+  ]
+}

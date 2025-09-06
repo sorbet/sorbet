@@ -1,0 +1,139 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U local_var>
+      }
+      rhs = Literal{ value = 1 }
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U defined?>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = "Constant" }
+        Literal{ value = "Path" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U defined?>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U defined?>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U defined?>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <defined-instance-var>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :@ivar }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <defined-class-var>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :@@cvar }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U defined?>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U defined?>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U defined?>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+  ]
+}

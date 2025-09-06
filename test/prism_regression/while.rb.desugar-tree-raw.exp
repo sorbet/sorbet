@@ -1,0 +1,136 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    While{
+      cond = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U foo>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      body = Literal{ value = 5 }
+    }
+
+    While{
+      cond = Literal{ value = true }
+      body = EmptyTree
+    }
+
+    While{
+      cond = Literal{ value = true }
+      body = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U x>
+            }
+            rhs = Send{
+              flags = {}
+              recv = Literal{ value = 3 }
+              fun = <U +>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 2 }
+              ]
+            }
+          }
+        ],
+        expr = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U puts>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "hi" }
+          ]
+        }
+      }
+    }
+
+    While{
+      cond = Literal{ value = true }
+      body = InsSeq{
+        stats = [
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 4 }
+            ]
+          }
+        ],
+        expr = If{
+          cond = Send{
+            flags = {}
+            recv = Literal{ value = false }
+            fun = <U !>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+          thenp = Break{ expr = EmptyTree }
+          elsep = EmptyTree
+        }
+      }
+    }
+
+    While{
+      cond = Literal{ value = false }
+      body = Assign{
+        lhs = UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }
+        rhs = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U puts>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = 5 }
+          ]
+        }
+      }
+    }
+
+    While{
+      cond = Literal{ value = false }
+      body = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U foo>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 6 }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

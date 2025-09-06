@@ -1,0 +1,22 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    If{
+      cond = Literal{ value = true }
+      thenp = InsSeq{
+        stats = [
+          Literal{ value = true }
+          Literal{ value = 4 }
+        ],
+        expr = Literal{ value = "string" }
+      }
+      elsep = EmptyTree
+    }
+  ]
+}

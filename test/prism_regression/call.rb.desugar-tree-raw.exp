@@ -1,0 +1,87 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U foo>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U foo>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U foo>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U call>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U foo>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U []>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :bar }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U foo>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U []=>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = :baz }
+        Literal{ value = 1 }
+      ]
+    }
+  ]
+}

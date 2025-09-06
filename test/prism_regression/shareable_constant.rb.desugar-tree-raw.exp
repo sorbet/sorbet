@@ -1,0 +1,25 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Assign{
+      lhs = UnresolvedConstantLit{
+        cnst = <C <U Constant>>
+        scope = EmptyTree
+      }
+      rhs = Hash{
+        pairs = [
+          [
+            key = Literal{ value = :k }
+            value = Literal{ value = "v" }
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Literal{ value = :basic_symbol }
+
+    Literal{ value = :"quoted symbol" }
+
+    Literal{ value = :"symbol in pipes" }
+
+    Literal{ value = :"symbol in curly braces" }
+
+    Literal{ value = :"symbol in square brackets" }
+
+    Literal{ value = :"symbol in angle brackets" }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <string-interpolate>>
+        block = nullptr
+        pos_args = 2
+        args = [
+          Literal{ value = "symbol with interpolation " }
+          Send{
+            flags = {}
+            recv = Literal{ value = 1 }
+            fun = <U +>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 2 }
+            ]
+          }
+        ]
+      }
+      fun = <U intern>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+  ]
+}

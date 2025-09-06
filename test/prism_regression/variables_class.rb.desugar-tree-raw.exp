@@ -1,0 +1,23 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Class
+        name = <U @@class_variable>
+      }
+      rhs = Literal{ value = "value" }
+    }
+
+    UnresolvedIdent{
+      kind = Class
+      name = <U @@class_variable>
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U Parent>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        Literal{ value = 1 }
+
+        Literal{ value = 2 }
+
+        Literal{ value = 3 }
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U Child>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [UnresolvedConstantLit{
+          cnst = <C <U Parent>>
+          scope = EmptyTree
+        }]
+      rhs = [
+        EmptyTree
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedIdent{
+        kind = Class
+        name = <U <singleton class>>
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = []
+      rhs = [
+        Literal{ value = 4 }
+
+        Literal{ value = 5 }
+
+        Literal{ value = 6 }
+      ]
+    }
+
+    EmptyTree
+  ]
+}

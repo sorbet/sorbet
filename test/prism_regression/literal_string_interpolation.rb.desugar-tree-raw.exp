@@ -1,0 +1,122 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <string-interpolate>>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = "Empty interpolation: " }
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <string-interpolate>>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = "Interpolated expression: " }
+        Literal{ value = 123 }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <string-interpolate>>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = "class variable " }
+        UnresolvedIdent{
+          kind = Class
+          name = <U @@class_1>
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <string-interpolate>>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = "instance variable " }
+        UnresolvedIdent{
+          kind = Instance
+          name = <U @ivar_1>
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <string-interpolate>>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = "global variable " }
+        UnresolvedIdent{
+          kind = Global
+          name = <U $global_1>
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <string-interpolate>>
+      block = nullptr
+      pos_args = 6
+      args = [
+        Literal{ value = "multiple variables " }
+        UnresolvedIdent{
+          kind = Instance
+          name = <U @ivar_2>
+        }
+        Literal{ value = " " }
+        UnresolvedIdent{
+          kind = Global
+          name = <U $global_2>
+        }
+        Literal{ value = " " }
+        UnresolvedIdent{
+          kind = Class
+          name = <U @@class_2>
+        }
+      ]
+    }
+  ]
+}

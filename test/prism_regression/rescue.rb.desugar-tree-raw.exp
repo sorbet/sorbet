@@ -1,0 +1,572 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Rescue{
+      body = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U bar>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $2>
+          }
+          body = Literal{ value = "rescued" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U method_with_rescue><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Rescue{
+        body = Literal{ value = 123 }
+        rescueCases = [
+          RescueCase{
+            exceptions = [
+            ]
+            var = UnresolvedIdent{
+              kind = Local
+              name = <D <U <rescueTemp>> $2>
+            }
+            body = Literal{ value = "rescued" }
+          }
+        ]
+        else = EmptyTree
+        ensure = EmptyTree
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "string1" }
+        ],
+        expr = Literal{ value = "string2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $3>
+          }
+          body = Literal{ value = "rescued" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "string1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U RuntimeError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $4>
+          }
+          body = Literal{ value = "rescued Foo" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "string1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U RuntimeError>>
+              scope = EmptyTree
+            }
+            UnresolvedConstantLit{
+              cnst = <C <U NotImplementedError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "rescued Foo " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U e>
+              }
+            ]
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "string1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U RuntimeError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $5>
+          }
+          body = Literal{ value = "rescued Foo" }
+        }
+      ]
+      else = Literal{ value = "rescued else" }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "string1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U RuntimeError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "rescued Foo " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U e>
+              }
+            ]
+          }
+        }
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U NotImplementedError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "rescued Bar " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U e>
+              }
+            ]
+          }
+        }
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "rescued " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U e>
+              }
+            ]
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "string1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U RuntimeError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "rescued Foo " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U e>
+              }
+            ]
+          }
+        }
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U NotImplementedError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "rescued Bar " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U e>
+              }
+            ]
+          }
+        }
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "rescued " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U e>
+              }
+            ]
+          }
+        }
+      ]
+      else = Literal{ value = "rescued else" }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "string1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $6>
+          }
+          body = Literal{ value = "rescued rescue" }
+        }
+      ]
+      else = Literal{ value = "rescued else" }
+      ensure = Literal{ value = "ensure" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U StandardError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = Literal{ value = "rescued" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U StandardError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "something" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+            UnresolvedConstantLit{
+              cnst = <C <U StandardError>>
+              scope = EmptyTree
+            }
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <U e>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U index><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Rescue{
+        body = EmptyTree
+        rescueCases = [
+          RescueCase{
+            exceptions = [
+              UnresolvedConstantLit{
+                cnst = <C <U StandardError>>
+                scope = EmptyTree
+              }
+            ]
+            var = UnresolvedIdent{
+              kind = Local
+              name = <U e>
+            }
+            body = Literal{ value = "rescued" }
+          }
+        ]
+        else = EmptyTree
+        ensure = EmptyTree
+      }
+    }
+
+    Rescue{
+      body = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U problematic_code>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $7>
+          }
+          body = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "rescued" }
+            ]
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U problematic_code>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $8>
+          }
+          body = Literal{ value = nil }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Rescue{
+        body = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U problematic_code>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+        rescueCases = [
+          RescueCase{
+            exceptions = [
+            ]
+            var = UnresolvedIdent{
+              kind = Local
+              name = <D <U <rescueTemp>> $10>
+            }
+            body = Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U raise>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+        ]
+        else = EmptyTree
+        ensure = EmptyTree
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $9>
+          }
+          body = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "rescued again" }
+            ]
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+  ]
+}

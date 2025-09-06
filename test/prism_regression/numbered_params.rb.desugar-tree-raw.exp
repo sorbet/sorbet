@@ -1,0 +1,87 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U proc>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+        ]
+        body = Send{
+          flags = {}
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          fun = <U +>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _2>
+            }
+          ]
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+        ]
+        body = Send{
+          flags = {}
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          fun = <U +>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _2>
+            }
+          ]
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+  ]
+}

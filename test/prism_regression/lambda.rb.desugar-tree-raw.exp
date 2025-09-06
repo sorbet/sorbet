@@ -1,0 +1,270 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+        ]
+        body = Literal{ value = 123 }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U param>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U param>
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+          OptionalArg{
+            expr = UnresolvedIdent{
+              kind = Local
+              name = <U optional_param>
+            }
+            default_ = Literal{ value = 123 }
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U optional_param>
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {}
+        recv = UnresolvedConstantLit{
+          cnst = <C <U Kernel>>
+          scope = EmptyTree
+        }
+        fun = <U lambda>
+        block = Block {
+          args = [
+          ]
+          body = Literal{ value = 456 }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U call>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U lambda>
+      block = Block {
+        args = [
+        ]
+        body = Literal{ value = 789 }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U lambda>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U param>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U param>
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U method_with_lambda_arg>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = :arg1 }
+        Send{
+          flags = {}
+          recv = UnresolvedConstantLit{
+            cnst = <C <U Kernel>>
+            scope = EmptyTree
+          }
+          fun = <U lambda>
+          block = Block {
+            args = [
+            ]
+            body = Literal{ value = 123 }
+          }
+          pos_args = 0
+          args = [
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+        ]
+        body = Send{
+          flags = {}
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          fun = <U +>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _2>
+            }
+          ]
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U C>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        MethodDef{
+          flags = {}
+          name = <U method_returning_lambda><<U <todo method>>>
+          args = [BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {}
+            recv = UnresolvedConstantLit{
+              cnst = <C <U Kernel>>
+              scope = EmptyTree
+            }
+            fun = <U lambda>
+            block = Block {
+              args = [
+              ]
+              body = Literal{ value = 123 }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        args = [
+        ]
+        body = Send{
+          flags = {}
+          recv = Literal{ value = 1 }
+          fun = <U +>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = 2 }
+          ]
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {rewriterSynthesized}
+        recv = Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (module ::T)
+            orig = nullptr
+          }
+          fun = <U unsafe>
+          block = nullptr
+          pos_args = 1
+          args = [
+            ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
+            }
+          ]
+        }
+        fun = <U raise>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+        ]
+      }
+      fun = <U call>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {rewriterSynthesized}
+        recv = Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (module ::T)
+            orig = nullptr
+          }
+          fun = <U unsafe>
+          block = nullptr
+          pos_args = 1
+          args = [
+            ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
+            }
+          ]
+        }
+        fun = <U raise>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+        ]
+      }
+      fun = <U call>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = 123 }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {rewriterSynthesized}
+        recv = Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (module ::T)
+            orig = nullptr
+          }
+          fun = <U unsafe>
+          block = nullptr
+          pos_args = 1
+          args = [
+            ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
+            }
+          ]
+        }
+        fun = <U raise>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+        ]
+      }
+      fun = <U call>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = "multiple" }
+        Literal{ value = "values" }
+      ]
+    }
+  ]
+}

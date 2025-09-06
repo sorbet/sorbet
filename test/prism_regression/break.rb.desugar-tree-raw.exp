@@ -1,0 +1,28 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    While{
+      cond = Literal{ value = true }
+      body = Break{ expr = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U foo>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        } }
+    }
+
+    While{
+      cond = Literal{ value = true }
+      body = Break{ expr = EmptyTree }
+    }
+  ]
+}

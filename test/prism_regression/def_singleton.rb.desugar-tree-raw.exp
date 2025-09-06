@@ -1,0 +1,57 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {self}
+      name = <U foo><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {self}
+      name = <U foo><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {self}
+      name = <U foo><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U blk>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-block>>
+        block = nullptr
+        pos_args = 3
+        args = [
+          Self
+          Literal{ value = :<super> }
+          UnresolvedIdent{
+            kind = Local
+            name = <U blk>
+          }
+        ]
+      }
+    }
+  ]
+}

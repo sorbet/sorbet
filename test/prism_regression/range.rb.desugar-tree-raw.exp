@@ -1,0 +1,107 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    ClassDef{
+      kind = module
+      name = UnresolvedConstantLit{
+        cnst = <C <U T>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = []
+      rhs = [
+        ClassDef{
+          kind = class
+          name = UnresolvedConstantLit{
+            cnst = <C <U Bar>>
+            scope = EmptyTree
+          }
+          symbol = <C <U <todo sym>>>
+          ancestors = [ConstantLit{
+              symbol = (class ::<todo sym>)
+              orig = nullptr
+            }]
+          rhs = [
+            EmptyTree
+          ]
+        }
+
+        ClassDef{
+          kind = class
+          name = UnresolvedConstantLit{
+            cnst = <C <U Foo>>
+            scope = EmptyTree
+          }
+          symbol = <C <U <todo sym>>>
+          ancestors = [ConstantLit{
+              symbol = (class ::<todo sym>)
+              orig = nullptr
+            }]
+          rhs = [
+            EmptyTree
+          ]
+        }
+      ]
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U foo><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Assign{
+        lhs = UnresolvedIdent{
+          kind = Local
+          name = <U tr1>
+        }
+        rhs = Send{
+          flags = {}
+          recv = UnresolvedConstantLit{
+            cnst = <C <U Foo>>
+            scope = UnresolvedConstantLit{
+              cnst = <C <U T>>
+              scope = EmptyTree
+            }
+          }
+          fun = <U new>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U bar><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedConstantLit{
+          cnst = <C <U Bar>>
+          scope = UnresolvedConstantLit{
+            cnst = <C <U T>>
+            scope = EmptyTree
+          }
+        }
+        fun = <U new>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+  ]
+}

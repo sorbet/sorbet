@@ -1,0 +1,132 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Rescue{
+      body = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U foo>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U bar>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U method_with_ensure><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Rescue{
+        body = InsSeq{
+          stats = [
+            Literal{ value = "string1" }
+          ],
+          expr = Literal{ value = "string2" }
+        }
+        rescueCases = [
+        ]
+        else = EmptyTree
+        ensure = Literal{ value = "ensured" }
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U empty_method_with_ensure><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Rescue{
+        body = EmptyTree
+        rescueCases = [
+        ]
+        else = EmptyTree
+        ensure = Literal{ value = "ensured" }
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U method_with_begin_and_ensure><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Rescue{
+        body = InsSeq{
+          stats = [
+            Literal{ value = "string1" }
+          ],
+          expr = Literal{ value = "string2" }
+        }
+        rescueCases = [
+        ]
+        else = EmptyTree
+        ensure = Literal{ value = "ensured" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "string1" }
+        ],
+        expr = Literal{ value = "string2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensured1" }
+        ],
+        expr = Literal{ value = "ensured2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "string1" }
+        ],
+        expr = Literal{ value = "string2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $2>
+          }
+          body = Literal{ value = "rescued rescue" }
+        }
+      ]
+      else = Literal{ value = "rescued else" }
+      ensure = Literal{ value = "ensure" }
+    }
+  ]
+}

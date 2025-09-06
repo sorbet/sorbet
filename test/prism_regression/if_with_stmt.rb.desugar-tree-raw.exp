@@ -1,0 +1,16 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    If{
+      cond = Literal{ value = false }
+      thenp = Literal{ value = 5 }
+      elsep = EmptyTree
+    }
+  ]
+}

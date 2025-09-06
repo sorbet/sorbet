@@ -1,0 +1,337 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @regular>
+      }
+      rhs = Literal{ value = 1 }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @bitwise_and>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @bitwise_and>
+        }
+        fun = <U &>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 2 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @bitwise_xor>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @bitwise_xor>
+        }
+        fun = <U ^>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 4 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @shift_right>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @shift_right>
+        }
+        fun = <U >>>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 5 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @shift_left>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @shift_left>
+        }
+        fun = <U <<>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 6 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @subtract_assign>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @subtract_assign>
+        }
+        fun = <U ->
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 7 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @module_assign>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @module_assign>
+        }
+        fun = <U %>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 8 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @bitwise_or>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @bitwise_or>
+        }
+        fun = <U |>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 9 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @divide_assign>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @divide_assign>
+        }
+        fun = <U />
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 10 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @multiply_assign>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @multiply_assign>
+        }
+        fun = <U *>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 11 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Instance
+        name = <U @exponentiate_assign>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Instance
+          name = <U @exponentiate_assign>
+        }
+        fun = <U **>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 12 }
+        ]
+      }
+    }
+
+    If{
+      cond = UnresolvedIdent{
+        kind = Instance
+        name = <U @lazy_and_assign>
+      }
+      thenp = Assign{
+        lhs = UnresolvedIdent{
+          kind = Instance
+          name = <U @lazy_and_assign>
+        }
+        rhs = Literal{ value = 13 }
+      }
+      elsep = UnresolvedIdent{
+        kind = Instance
+        name = <U @lazy_and_assign>
+      }
+    }
+
+    If{
+      cond = UnresolvedIdent{
+        kind = Instance
+        name = <U @lazy_or_assgin>
+      }
+      thenp = UnresolvedIdent{
+        kind = Instance
+        name = <U @lazy_or_assgin>
+      }
+      elsep = Assign{
+        lhs = UnresolvedIdent{
+          kind = Instance
+          name = <U @lazy_or_assgin>
+        }
+        rhs = Literal{ value = 14 }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $2>
+          }
+          rhs = Array{
+            elems = [
+              Literal{ value = 15 }
+              Literal{ value = 16 }
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $3>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <expand-splat>>
+            block = nullptr
+            pos_args = 3
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $2>
+              }
+              Literal{ value = 2 }
+              Literal{ value = 0 }
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Instance
+            name = <U @target1>
+          }
+          rhs = Send{
+            flags = {}
+            recv = UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $3>
+            }
+            fun = <U []>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 0 }
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Instance
+            name = <U @target2>
+          }
+          rhs = Send{
+            flags = {}
+            recv = UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $3>
+            }
+            fun = <U []>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 1 }
+            ]
+          }
+        }
+      ],
+      expr = UnresolvedIdent{
+        kind = Local
+        name = <D <U <assignTemp>> $2>
+      }
+    }
+  ]
+}
