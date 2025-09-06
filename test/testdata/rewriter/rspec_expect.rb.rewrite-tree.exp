@@ -1,0 +1,64 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C RSpecExpectTest><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    class <emptyTree>::<C <describe 'expect functionality'>><<C <todo sym>>> < (<self>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it 'can use expect blocks'><<todo method>>(&<blk>)
+        begin
+          <self>.expect() do ||
+            <self>.puts("testing expect block")
+          end
+          <self>.puts("test completed")
+        end
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it 'can use change blocks'><<todo method>>(&<blk>)
+        begin
+          <self>.change() do ||
+            <self>.puts("testing change block")
+          end
+          <self>.puts("change test completed")
+        end
+      end
+
+      begin
+        "can use expect blocks"
+        <runtime method definition of <it 'can use expect blocks'>>
+      end
+
+      begin
+        "can use change blocks"
+        <runtime method definition of <it 'can use change blocks'>>
+      end
+    end
+
+    class <emptyTree>::<C <describe 'nested expect usage'>><<C <todo sym>>> < (<self>)
+      class <emptyTree>::<C <describe 'with expect in context'>><<C <todo sym>>> < (<self>)
+        ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+          <self>.void()
+        end
+
+        def <it 'works in nested structure'><<todo method>>(&<blk>)
+          begin
+            <self>.expect() do ||
+              <self>.puts("nested expect")
+            end
+            <self>.puts("nested test")
+          end
+        end
+
+        "works in nested structure"
+
+        <runtime method definition of <it 'works in nested structure'>>
+      end
+    end
+  end
+end

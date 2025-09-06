@@ -266,6 +266,7 @@ NameDef names[] = {
     {"classAttribute", "class_attribute"},
 
     {"describe"},
+    {"xdescribe"},
     {"it"},
     {"before"},
     {"beforeAngles", "<before>"},
@@ -275,6 +276,21 @@ NameDef names[] = {
     {"testEachHash", "test_each_hash"},
     {"constSet", "const_set"},
     {"collect"},
+    {"RSpec", "RSpec", true},
+    {"Core", "Core", true},
+    {"ExampleGroup", "ExampleGroup", true},
+    {"context"},
+    {"xcontext"},
+    {"subject"},
+    {"sharedExamples", "shared_examples"},
+    {"sharedContext", "shared_context"},
+    {"letBang", "let!"},
+    {"its"},
+    {"xit"},
+    {"includeContext", "include_context"},
+    {"expect"},
+    {"change"},
+    {"itBehavesLike", "it_behaves_like"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
@@ -356,6 +372,8 @@ NameDef names[] = {
     {"blkArg", "<blk>"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
+    {"anonymousIt", "<anonymous-it>"},
+    {"anonymousXit", "<anonymous-xit>"},
 
     // Method names known to Data
     {"define"},

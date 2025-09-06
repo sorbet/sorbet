@@ -38,16 +38,32 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C X> = "hello"
 
   class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it '::<Magic>.<string-interpolate>("outside test_each ", x)'><<todo method>>(&<blk>)
       <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def <it '::<Magic>.<string-interpolate>("outside test_each ", <self>.y())'><<todo method>>(&<blk>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it '::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)'><<todo method>>(&<blk>)
       <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def <it '::<Magic>.<string-interpolate>("bar ", x)'><<todo method>>(&<blk>)
@@ -60,17 +76,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     begin
       ::<Magic>.<string-interpolate>("outside test_each ", x)
-      <emptyTree>
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("outside test_each ", x)'>>
     end
 
     begin
       ::<Magic>.<string-interpolate>("outside test_each ", <self>.y())
-      <emptyTree>
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("outside test_each ", <self>.y())'>>
     end
 
     begin
       ::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)
-      <emptyTree>
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)'>>
     end
 
     <self>.test_each(["foo"]) do |x|
