@@ -156,6 +156,8 @@ NameDef names[] = {
     {"assertType", "assert_type!"},
     {"cast"},
     {"let"},
+    {"let_bang", "let!"},
+    {"subject"},
     {"uncheckedLet", "<unchecked_let>"},
     {"syntheticBind", "<synthetic bind>"},
     {"assumeType", "<assume type>"},
