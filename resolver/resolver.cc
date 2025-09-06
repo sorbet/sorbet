@@ -807,7 +807,7 @@ private:
             if (arg.isSelfReference()) {
                 auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
                 if (recv != nullptr && recv->symbol() == core::Symbols::Magic()) {
-                    // This is the first argument of a Magic.mixes_in_class_methods() or Magic.requires_ancestor() call
+                    // This is the first argument of a Magic.mixes_in_class_methods()
                     continue;
                 }
             }
