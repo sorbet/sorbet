@@ -218,6 +218,25 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
     }
 }
 
+optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::Send &send) {
+    if (send.numPosArgs() != 1) {
+        return nullopt;
+    }
+
+    auto &arg = send.getPosArg(0);
+    if (!ast::isa_tree<ast::Literal>(arg)) {
+        return nullopt;
+    }
+    auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
+    if (!argLiteral.isName()) {
+        return nullopt;
+    }
+
+    auto declLoc = send.loc.copyWithZeroLength().join(argLiteral.loc);
+    auto methodName = argLiteral.asName();
+    return pair{methodName, declLoc};
+}
+
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                        const ast::MethodDef::ARGS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
@@ -303,10 +322,9 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                                    /* insideDescribe */ true);
     } else if (insideDescribe && send->fun == core::Names::let() && send->numPosArgs() == 1 &&
                ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
-        auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
-        if (argLiteral.isName()) {
-            auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
-            auto methodName = argLiteral.asName();
+        auto maybeDecl = getLetNameAndDeclLoc(*send);
+        if (maybeDecl.has_value()) {
+            auto [methodName, declLoc] = maybeDecl.value();
 
             ConstantMover constantMover;
             auto body = move(send->block()->body);
@@ -521,23 +539,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
 
         case core::Names::let().rawId(): {
-            if (!insideDescribe || send->numPosArgs() != 1) {
-                return nullptr;
-            }
-            auto &arg = send->getPosArg(0);
-            if (!ast::isa_tree<ast::Literal>(arg)) {
-                return nullptr;
-            }
-            auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
-            if (!argLiteral.isName()) {
+            if (!insideDescribe) {
                 return nullptr;
             }
 
             ConstantMover constantMover;
             ast::TreeWalk::apply(ctx, constantMover, block->body);
 
-            auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
-            auto methodName = argLiteral.asName();
+            auto maybeDecl = getLetNameAndDeclLoc(*send);
+            if (!maybeDecl.has_value()) {
+                return nullptr;
+            }
+
+            auto [methodName, declLoc] = maybeDecl.value();
             auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
