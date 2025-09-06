@@ -224,4 +224,26 @@ class MyTest
     end
   end
 
+
+  module Mod; class C; end; end
+  describe 'foo' do
+    test_each([]) do |val|
+      it "hoists constants inside of it" do
+        CONST = 10
+      end
+
+      it "hoists let-ed constants inside of it" do
+        C2 = T.let(10, Integer)
+      end
+
+      it "hoists path constants inside of it" do
+        C3 = Mod::C
+        C3.new
+      end
+
+      let(:hoists_in_let_too) do
+        C4 = 10
+      end
+    end
+  end
 end

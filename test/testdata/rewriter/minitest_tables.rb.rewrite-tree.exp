@@ -460,5 +460,55 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
     end
+
+    module <emptyTree>::<C Mod><<C <todo sym>>> < ()
+      class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+
+    class <emptyTree>::<C <describe 'foo'>><<C <todo sym>>> < (<self>)
+      def <it 'hoists constants inside of it'><<todo method>>(&<blk>)
+        [].each() do |val|
+          ::Module.const_set(:CONST, 10)
+        end
+      end
+
+      def <it 'hoists let-ed constants inside of it'><<todo method>>(&<blk>)
+        [].each() do |val|
+          ::Module.const_set(:C2, <cast:let>(10, <todo sym>, <emptyTree>::<C Integer>))
+        end
+      end
+
+      def <it 'hoists path constants inside of it'><<todo method>>(&<blk>)
+        [].each() do |val|
+          <emptyTree>::<C C3>.new()
+        end
+      end
+
+      def hoists_in_let_too<<todo method>>(&<blk>)
+        ::Module.const_set(:C4, 10)
+      end
+
+      <self>.test_each([]) do |val|
+        begin
+          begin
+            <emptyTree>::<C CONST> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            <runtime method definition of <it 'hoists constants inside of it'>>
+          end
+          begin
+            <emptyTree>::<C C2> = <cast:let>(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented"), <todo sym>, <emptyTree>::<C Integer>)
+            <runtime method definition of <it 'hoists let-ed constants inside of it'>>
+          end
+          begin
+            <emptyTree>::<C C3> = <emptyTree>::<C Mod>::<C C>
+            <runtime method definition of <it 'hoists path constants inside of it'>>
+          end
+          begin
+            <emptyTree>::<C C4> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            <runtime method definition of hoists_in_let_too>
+          end
+        end
+      end
+    end
   end
 end

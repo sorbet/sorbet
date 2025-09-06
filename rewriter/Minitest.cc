@@ -218,82 +218,39 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
     }
 }
 
+optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::Send &send) {
+    if (send.numPosArgs() == 0) {
+        if (send.fun != core::Names::subject()) {
+            return nullopt;
+        }
+
+        return pair{core::Names::subject(), send.funLoc};
+    }
+
+    if (send.numPosArgs() != 1) {
+        return nullopt;
+    }
+
+    auto &arg = send.getPosArg(0);
+    if (!ast::isa_tree<ast::Literal>(arg)) {
+        return nullopt;
+    }
+    auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
+    if (!argLiteral.isName()) {
+        return nullopt;
+    }
+
+    auto declLoc = send.loc.copyWithZeroLength().join(argLiteral.loc);
+    auto methodName = argLiteral.asName();
+    return pair{methodName, declLoc};
+}
+
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                        const ast::MethodDef::ARGS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe);
 
-// this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
-// otherwise flag an error about it
-ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
-                                absl::Span<const ast::ExpressionPtr> destructuringStmts, ast::ExpressionPtr stmt,
-                                const ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee,
-                                bool insideDescribe) {
-    // this statement must be a send
-    if (auto send = ast::cast_tree<ast::Send>(stmt)) {
-        auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
-        // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
-        if ((send->fun == core::Names::it() && send->numPosArgs() == 1 && correctBlockArity) ||
-            ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0 &&
-             correctBlockArity)) {
-            core::NameRef name;
-            if (send->fun == core::Names::before()) {
-                name = core::Names::beforeAngles();
-            } else if (send->fun == core::Names::after()) {
-                name = core::Names::afterAngles();
-            } else {
-                // we use this for the name of our test
-                auto argString = to_s(ctx, send->getPosArg(0));
-                name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-            }
-
-            // pull constants out of the block
-            ConstantMover constantMover;
-            ast::ExpressionPtr body = move(send->block()->body);
-
-            // we don't need to make a new body if the original one was empty
-            if (!ast::isa_tree<ast::EmptyTree>(body)) {
-                ast::TreeWalk::apply(ctx, constantMover, body);
-
-                // add the destructuring statements to the block if they're present
-                if (!destructuringStmts.empty()) {
-                    ast::InsSeq::STATS_store stmts;
-                    for (auto &stmt : destructuringStmts) {
-                        stmts.emplace_back(stmt.deepCopy());
-                    }
-                    body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
-                }
-            }
-
-            // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
-            ast::MethodDef::ARGS_store new_args;
-            for (auto &arg : args) {
-                new_args.emplace_back(arg.deepCopy());
-            }
-
-            auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
-            auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
-                                            send->loc.copyWithZeroLength(), move(blk));
-            // put that into a method def named the appropriate thing
-            auto declLoc = declLocForSendWithBlock(*send);
-            auto method = addSigVoid(ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
-            // add back any moved constants
-            return constantMover.addConstantsToExpression(send->loc, move(method));
-        } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && correctBlockArity) {
-            return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
-                                       iteratee,
-                                       /* insideDescribe */ true);
-        } else if (insideDescribe && send->fun == core::Names::let() && send->numPosArgs() == 1 && correctBlockArity &&
-                   ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
-            auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
-            if (argLiteral.isName()) {
-                auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
-                auto methodName = argLiteral.asName();
-                return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(send->block()->body));
-            }
-        }
-    }
-
+ast::ExpressionPtr invalidUnderTestEach(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr stmt) {
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
@@ -304,6 +261,92 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     }
 
     return stmt;
+}
+
+// this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
+// otherwise flag an error about it
+ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
+                                absl::Span<const ast::ExpressionPtr> destructuringStmts, ast::ExpressionPtr stmt,
+                                const ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee,
+                                bool insideDescribe) {
+    // this statement must be a send
+    auto send = ast::cast_tree<ast::Send>(stmt);
+    if (send == nullptr) {
+        return invalidUnderTestEach(ctx, eachName, move(stmt));
+    }
+
+    if (send->hasBlock() && send->block()->args.size() != 0) {
+        return invalidUnderTestEach(ctx, eachName, move(stmt));
+    }
+
+    // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
+    if ((send->fun == core::Names::it() && send->numPosArgs() == 1) ||
+        ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0)) {
+        core::NameRef name;
+        if (send->fun == core::Names::before()) {
+            name = core::Names::beforeAngles();
+        } else if (send->fun == core::Names::after()) {
+            name = core::Names::afterAngles();
+        } else {
+            // we use this for the name of our test
+            auto argString = to_s(ctx, send->getPosArg(0));
+            name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+        }
+
+        // pull constants out of the block
+        ConstantMover constantMover;
+        ast::ExpressionPtr body = move(send->block()->body);
+
+        // we don't need to make a new body if the original one was empty
+        if (!ast::isa_tree<ast::EmptyTree>(body)) {
+            ast::TreeWalk::apply(ctx, constantMover, body);
+
+            // add the destructuring statements to the block if they're present
+            if (!destructuringStmts.empty()) {
+                ast::InsSeq::STATS_store stmts;
+                for (auto &stmt : destructuringStmts) {
+                    stmts.emplace_back(stmt.deepCopy());
+                }
+                body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+            }
+        }
+
+        // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
+        ast::MethodDef::ARGS_store new_args;
+        for (auto &arg : args) {
+            new_args.emplace_back(arg.deepCopy());
+        }
+
+        auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
+        auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
+                                        send->loc.copyWithZeroLength(), move(blk));
+        // put that into a method def named the appropriate thing
+        auto declLoc = declLocForSendWithBlock(*send);
+        auto method = addSigVoid(ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
+        // add back any moved constants
+        return constantMover.addConstantsToExpression(send->loc, move(method));
+    } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1) {
+        return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts, iteratee,
+                                   /* insideDescribe */ true);
+    } else if (insideDescribe &&
+               ((send->fun == core::Names::let() && send->numPosArgs() == 1) ||
+                (send->fun == core::Names::let_bang() && send->numPosArgs() == 1) ||
+                (send->fun == core::Names::subject() && send->numPosArgs() <= 1)) &&
+               (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0)))) {
+        auto maybeDecl = getLetNameAndDeclLoc(*send);
+        if (maybeDecl.has_value()) {
+            auto [methodName, declLoc] = maybeDecl.value();
+
+            ConstantMover constantMover;
+            auto body = move(send->block()->body);
+            ast::TreeWalk::apply(ctx, constantMover, body);
+
+            auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(body));
+            return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+    }
+
+    return invalidUnderTestEach(ctx, eachName, move(stmt));
 }
 
 bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, const ast::ExpressionPtr &expr) {
@@ -506,21 +549,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
 
-        case core::Names::let().rawId(): {
-            if (!insideDescribe || send->numPosArgs() != 1) {
-                return nullptr;
-            }
-            auto &arg = send->getPosArg(0);
-            if (!ast::isa_tree<ast::Literal>(arg)) {
-                return nullptr;
-            }
-            auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
-            if (!argLiteral.isName()) {
+        case core::Names::let().rawId():
+        case core::Names::let_bang().rawId():
+        case core::Names::subject().rawId(): {
+            if (!insideDescribe) {
                 return nullptr;
             }
 
-            auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
-            auto methodName = argLiteral.asName();
+            auto maybeDecl = getLetNameAndDeclLoc(*send);
+            if (!maybeDecl.has_value()) {
+                return nullptr;
+            }
+
+            auto [methodName, declLoc] = maybeDecl.value();
             return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
         }
     }
