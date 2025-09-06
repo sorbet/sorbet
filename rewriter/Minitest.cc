@@ -248,11 +248,13 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
-    auto correctBlockArity = send->hasBlock() && send->block()->args.size() == 0;
+    if (send->hasBlock() && send->block()->args.size() != 0) {
+        return invalidUnderTestEach(ctx, eachName, move(stmt));
+    }
+
     // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
-    if ((send->fun == core::Names::it() && send->numPosArgs() == 1 && correctBlockArity) ||
-        ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0 &&
-         correctBlockArity)) {
+    if ((send->fun == core::Names::it() && send->numPosArgs() == 1) ||
+        ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0)) {
         core::NameRef name;
         if (send->fun == core::Names::before()) {
             name = core::Names::beforeAngles();
@@ -296,10 +298,10 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         auto method = addSigVoid(ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
         // add back any moved constants
         return constantMover.addConstantsToExpression(send->loc, move(method));
-    } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && correctBlockArity) {
+    } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1) {
         return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts, iteratee,
                                    /* insideDescribe */ true);
-    } else if (insideDescribe && send->fun == core::Names::let() && send->numPosArgs() == 1 && correctBlockArity &&
+    } else if (insideDescribe && send->fun == core::Names::let() && send->numPosArgs() == 1 &&
                ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
         auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
         if (argLiteral.isName()) {
