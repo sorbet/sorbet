@@ -908,10 +908,6 @@ public:
     ExpressionPtr *kwSplat();
 
     void setBlock(ExpressionPtr block);
-    void setKwSplat(ExpressionPtr splat);
-
-    // Add the given keyword argument to the end of the list of keyword arguments.
-    void addKwArg(ExpressionPtr key, ExpressionPtr value);
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;

@@ -1137,15 +1137,6 @@ void Send::setBlock(ExpressionPtr block) {
     }
 }
 
-void Send::setKwSplat(ExpressionPtr splat) {
-    this->args.emplace(this->args.begin() + numPosArgs_, move(splat));
-}
-
-void Send::addKwArg(ExpressionPtr key, ExpressionPtr value) {
-    auto it = this->args.emplace(this->args.end() - (hasBlock() ? 1 : 0) - (hasKwSplat() ? 1 : 0), move(key));
-    this->args.emplace(it + 1, move(value));
-}
-
 ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun) {
     auto rv = make_expression<Send>(loc, move(recv), fun, funLoc, numPosArgs_, std::move(args), flags);
 
