@@ -327,6 +327,33 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
   end
 
+  # Testing that overrides work correctly.
+  class PropDefinitionOverrides
+    include T::Props
+
+    def self.prop(name, cls, kind: nil, **rules)
+      super(name, cls, **rules)
+    end
+
+    # We are relying here on T::Props::ClassMethods.const to coalesce `kind:` into `rules`,
+    # which will then be passed to the `self.prop` override above, which will then break
+    # out the `kind:` argument.  The `kind:` argument should not make its way down into
+    # T::Props::Decorator#prop_defined.
+    def self.const(name, cls, kind: nil, **rules)
+      super(name, cls, kind: kind, **rules)
+    end
+  end
+
+  it 'calls overrides properly' do
+    Class.new(PropDefinitionOverrides) do
+      # This is essentially ensuring that `const` goes through `prop` and doesn't do any
+      # short-circuiting.  See the above comment.
+      const :theprop, String, kind: :something
+    end
+    # This is effectively "the above should not have raised".
+    assert(true)
+  end
+
   # Testing the matrix in chalk/odm/doc/chalk-odm.md
   class MatrixStruct
     include T::Props::Serializable
