@@ -1,0 +1,25 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Literal{ value = nil }
+
+    Literal{ value = 123 }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 1 }
+      fun = <U +>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = 2 }
+      ]
+    }
+  ]
+}

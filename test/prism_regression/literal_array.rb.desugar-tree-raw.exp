@@ -1,0 +1,128 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Array{
+      elems = [
+      ]
+    }
+
+    Array{
+      elems = [
+        Literal{ value = 1 }
+        Literal{ value = 2 }
+        Literal{ value = 3 }
+      ]
+    }
+
+    Array{
+      elems = [
+        Literal{ value = :symbol1 }
+        Literal{ value = :symbol2 }
+        Literal{ value = :symbol3 }
+      ]
+    }
+
+    Array{
+      elems = [
+        Literal{ value = :symbol4 }
+        Literal{ value = :symbol5 }
+        Literal{ value = :symbol6 }
+      ]
+    }
+
+    Array{
+      elems = [
+        Literal{ value = "string4" }
+        Literal{ value = "string5" }
+        Literal{ value = "string6" }
+      ]
+    }
+
+    Array{
+      elems = [
+        Literal{ value = "string7" }
+        Literal{ value = "string8" }
+        Literal{ value = "string9" }
+      ]
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U has_named_rest_args><<U <todo method>>>
+      args = [RestArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U args>
+        } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {}
+        recv = Send{
+          flags = {}
+          recv = Array{
+            elems = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+            ]
+          }
+          fun = <U concat>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <splat>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {privateOk}
+                  recv = Self
+                  fun = <U rest>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        fun = <U concat>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Array{
+            elems = [
+              Literal{ value = 3 }
+            ]
+          }
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U has_anonymous_rest_args><<U <todo method>>>
+      args = [RestArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U *>
+        } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+  ]
+}

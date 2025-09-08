@@ -1,0 +1,53 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {privateOk}
+      recv = ConstantLit{
+        symbol = (module ::Kernel)
+        orig = nullptr
+      }
+      fun = <U undef>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :m1 }
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = ConstantLit{
+        symbol = (module ::Kernel)
+        orig = nullptr
+      }
+      fun = <U undef>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :m2 }
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = ConstantLit{
+        symbol = (module ::Kernel)
+        orig = nullptr
+      }
+      fun = <U undef>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = :m3 }
+        Literal{ value = :m4 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U foo><<U <todo method>>>
+      args = [RestArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-args>>
+        } }, RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-kwargs>>
+        } } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-block>>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-splat-and-block>>
+        block = nullptr
+        pos_args = 5
+        args = [
+          Self
+          Literal{ value = :bar }
+          Send{
+            flags = {}
+            recv = Send{
+              flags = {}
+              recv = Array{
+                elems = [
+                ]
+              }
+              fun = <U concat>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {}
+                  recv = UnresolvedIdent{
+                    kind = Local
+                    name = <U <fwd-args>>
+                  }
+                  fun = <U to_a>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+              ]
+            }
+            fun = <U concat>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Array{
+                elems = [
+                  Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (class ::<Magic>)
+                      orig = nullptr
+                    }
+                    fun = <U <to-hash-dup>>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedIdent{
+                        kind = Local
+                        name = <U <fwd-kwargs>>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+          Literal{ value = nil }
+          UnresolvedIdent{
+            kind = Local
+            name = <U <fwd-block>>
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Hash{
+      pairs = [
+        [
+          key = Literal{ value = :k1 }
+          value = Literal{ value = "v1" }
+        ]
+      ]
+    }
+
+    Hash{
+      pairs = [
+        [
+          key = Literal{ value = :k2 }
+          value = Literal{ value = "v2" }
+        ]
+      ]
+    }
+
+    Hash{
+      pairs = [
+        [
+          key = Literal{ value = "k3" }
+          value = Literal{ value = "v3" }
+        ]
+      ]
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U has_named_kwargs><<U <todo method>>>
+      args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U kwargs>
+        } } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+            rhs = Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :before }
+                  value = Literal{ value = "value before" }
+                ]
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+            rhs = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <merge-hash>>
+              block = nullptr
+              pos_args = 2
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <hashTemp>> $2>
+                }
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <to-hash-nodup>>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U kwargs>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+            rhs = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <merge-hash-values>>
+              block = nullptr
+              pos_args = 3
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <hashTemp>> $2>
+                }
+                Literal{ value = :after }
+                Literal{ value = "value after" }
+              ]
+            }
+          }
+        ],
+        expr = UnresolvedIdent{
+          kind = Local
+          name = <D <U <hashTemp>> $2>
+        }
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U has_anonymous_kwargs><<U <todo method>>>
+      args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <P <U **> $2>
+        } } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+            rhs = Hash{
+              pairs = [
+                [
+                  key = Literal{ value = :before }
+                  value = Literal{ value = "value before" }
+                ]
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+            rhs = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <merge-hash>>
+              block = nullptr
+              pos_args = 2
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <hashTemp>> $2>
+                }
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <to-hash-nodup>>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <U <fwd-kwargs>>
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+            rhs = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <merge-hash-values>>
+              block = nullptr
+              pos_args = 3
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <hashTemp>> $2>
+                }
+                Literal{ value = :after }
+                Literal{ value = "value after" }
+              ]
+            }
+          }
+        ],
+        expr = UnresolvedIdent{
+          kind = Local
+          name = <D <U <hashTemp>> $2>
+        }
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U v4>
+      }
+      rhs = Literal{ value = "v4" }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U k4>
+      }
+      rhs = Hash{
+        pairs = [
+          [
+            key = Literal{ value = :v4 }
+            value = UnresolvedIdent{
+              kind = Local
+              name = <U v4>
+            }
+          ]
+        ]
+      }
+    }
+  ]
+}

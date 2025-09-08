@@ -1,0 +1,58 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Literal{ value = -0.001000 }
+
+    Literal{ value = -0.000000 }
+
+    Literal{ value = -1.732000 }
+
+    Literal{ value = -100.000000 }
+
+    Literal{ value = -2.710000 }
+
+    Literal{ value = -299792458.000000 }
+
+    Literal{ value = -42.010000 }
+
+    Literal{ value = -6.020000 }
+
+    Literal{ value = -9.810000 }
+
+    Literal{ value = -987.654000 }
+
+    Literal{ value = 0.577000 }
+
+    Literal{ value = 0.000000 }
+
+    Literal{ value = 123.456000 }
+
+    Literal{ value = 3.140000 }
+
+    Literal{ value = 42.010000 }
+
+    Literal{ value = 42.123000 }
+
+    Literal{ value = 42.195000 }
+
+    Literal{ value = 0.000000 }
+
+    Literal{ value = 0.000000 }
+
+    Literal{ value = 1.618000 }
+
+    Literal{ value = 2.718280 }
+
+    Literal{ value = 3.141593 }
+
+    Literal{ value = 3.333000 }
+
+    Literal{ value = 5.333333 }
+  ]
+}

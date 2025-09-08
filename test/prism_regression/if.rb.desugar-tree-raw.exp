@@ -1,0 +1,38 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    If{
+      cond = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U condition>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      thenp = EmptyTree
+      elsep = EmptyTree
+    }
+
+    If{
+      cond = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U condition>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      thenp = Literal{ value = "value" }
+      elsep = EmptyTree
+    }
+  ]
+}

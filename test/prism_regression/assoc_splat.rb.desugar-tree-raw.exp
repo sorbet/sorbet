@@ -1,0 +1,172 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <hashTemp>> $2>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <to-hash-dup>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U foo>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      expr = UnresolvedIdent{
+        kind = Local
+        name = <D <U <hashTemp>> $2>
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <hashTemp>> $3>
+          }
+          rhs = Hash{
+            pairs = [
+              [
+                key = Literal{ value = :a }
+                value = Literal{ value = 1 }
+              ]
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <hashTemp>> $3>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <merge-hash>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U <hashTemp>> $3>
+              }
+              Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <to-hash-nodup>>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Send{
+                    flags = {privateOk}
+                    recv = Self
+                    fun = <U foo>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      expr = UnresolvedIdent{
+        kind = Local
+        name = <D <U <hashTemp>> $3>
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <hashTemp>> $4>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <to-hash-dup>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U foo>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <hashTemp>> $4>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <merge-hash-values>>
+            block = nullptr
+            pos_args = 3
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U <hashTemp>> $4>
+              }
+              Literal{ value = :a }
+              Literal{ value = 1 }
+            ]
+          }
+        }
+      ],
+      expr = UnresolvedIdent{
+        kind = Local
+        name = <D <U <hashTemp>> $4>
+      }
+    }
+  ]
+}

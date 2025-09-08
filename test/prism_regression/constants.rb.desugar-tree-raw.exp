@@ -1,0 +1,42 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    UnresolvedConstantLit{
+      cnst = <C <U SimpleConstant>>
+      scope = EmptyTree
+    }
+
+    UnresolvedConstantLit{
+      cnst = <C <U Constant>>
+      scope = UnresolvedConstantLit{
+        cnst = <C <U Nested>>
+        scope = EmptyTree
+      }
+    }
+
+    UnresolvedConstantLit{
+      cnst = <C <U FullyQualifiedConstant>>
+      scope = ConstantLit{
+        symbol = (class ::<root>)
+        orig = nullptr
+      }
+    }
+
+    UnresolvedConstantLit{
+      cnst = <C <U NestedConstant>>
+      scope = UnresolvedConstantLit{
+        cnst = <C <U FullyQualified>>
+        scope = ConstantLit{
+          symbol = (class ::<root>)
+          orig = nullptr
+        }
+      }
+    }
+  ]
+}

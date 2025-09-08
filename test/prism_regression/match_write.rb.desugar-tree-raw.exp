@@ -1,0 +1,74 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {}
+        recv = ConstantLit{
+          symbol = (class ::Regexp)
+          orig = nullptr
+        }
+        fun = <U new>
+        block = nullptr
+        pos_args = 2
+        args = [
+          Literal{ value = "(?<new_local_var1> foo)" }
+          Literal{ value = 0 }
+        ]
+      }
+      fun = <U =~>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U input1>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {}
+        recv = ConstantLit{
+          symbol = (class ::Regexp)
+          orig = nullptr
+        }
+        fun = <U new>
+        block = nullptr
+        pos_args = 2
+        args = [
+          Literal{ value = "(?<new_local_var2> bar) (?<new_local_var3> baz)" }
+          Literal{ value = 0 }
+        ]
+      }
+      fun = <U =~>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U input2>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      ]
+    }
+  ]
+}

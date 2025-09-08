@@ -1,0 +1,26 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U foo><<U <todo method>>>
+      args = [RestArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-args>>
+        } }, RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-kwargs>>
+        } } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-block>>
+        } }]
+      rhs = EmptyTree
+    }
+  ]
+}

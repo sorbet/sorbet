@@ -1,0 +1,124 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U has_named_kwargs><<U <todo method>>>
+      args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U kwargs>
+        } } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U delegate>
+        block = nullptr
+        pos_args = 0
+        args = [
+          InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <hashTemp>> $2>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <to-hash-dup>>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U kwargs>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+          }
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U has_anonymous_kwargs><<U <todo method>>>
+      args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <P <U **> $2>
+        } } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U delegate>
+        block = nullptr
+        pos_args = 0
+        args = [
+          InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <hashTemp>> $2>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <to-hash-dup>>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (module ::T)
+                        orig = nullptr
+                      }
+                      fun = <U unsafe>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <U <fwd-kwargs>>
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = UnresolvedIdent{
+              kind = Local
+              name = <D <U <hashTemp>> $2>
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

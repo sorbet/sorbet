@@ -1,0 +1,128 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <regex-backref>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :$& }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <regex-backref>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :$` }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <regex-backref>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :$' }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <regex-backref>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = :$+ }
+      ]
+    }
+
+    If{
+      cond = Send{
+        flags = {}
+        recv = Literal{ value = "foobar" }
+        fun = <U =~>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::Regexp)
+              orig = nullptr
+            }
+            fun = <U new>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "foo(.*)" }
+              Literal{ value = 0 }
+            ]
+          }
+        ]
+      }
+      thenp = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U puts>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "The last matching word was " }
+              Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <regex-backref>>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = :$+ }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+      elsep = EmptyTree
+    }
+  ]
+}

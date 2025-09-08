@@ -1,0 +1,56 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U &&> $2>
+          }
+          rhs = Literal{ value = true }
+        }
+      ],
+      expr = If{
+        cond = UnresolvedIdent{
+          kind = Local
+          name = <D <U &&> $2>
+        }
+        thenp = Literal{ value = false }
+        elsep = UnresolvedIdent{
+          kind = Local
+          name = <D <U &&> $2>
+        }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U &&> $3>
+          }
+          rhs = Literal{ value = false }
+        }
+      ],
+      expr = If{
+        cond = UnresolvedIdent{
+          kind = Local
+          name = <D <U &&> $3>
+        }
+        thenp = Literal{ value = true }
+        elsep = UnresolvedIdent{
+          kind = Local
+          name = <D <U &&> $3>
+        }
+      }
+    }
+  ]
+}

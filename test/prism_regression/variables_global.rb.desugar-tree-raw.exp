@@ -1,0 +1,23 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Global
+        name = <U $global_variable_or_write>
+      }
+      rhs = Literal{ value = 1 }
+    }
+
+    UnresolvedIdent{
+      kind = Global
+      name = <U $global_variable_or_write>
+    }
+  ]
+}

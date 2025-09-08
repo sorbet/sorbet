@@ -1,0 +1,168 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "ruby -e \'puts \"Hello, world!\"\'" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "ruby -e \'puts \"Hello, parentheses!\"\'" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "ruby -e \'puts \"Hello, braces!\"\'" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "ruby -e \'puts \"Hello, square brackets!\"\'" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "ruby -e \'puts \"Hello, slashes!\"\'" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (class ::<Magic>)
+            orig = nullptr
+          }
+          fun = <U <string-interpolate>>
+          block = nullptr
+          pos_args = 3
+          args = [
+            Literal{ value = "ruby -e \'puts \"Hello, " }
+            Literal{ value = nil }
+            Literal{ value = "\"\'" }
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "ruby -e \'puts \"Hello, interpolation\"\'" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (class ::<Magic>)
+            orig = nullptr
+          }
+          fun = <U <string-interpolate>>
+          block = nullptr
+          pos_args = 3
+          args = [
+            Literal{ value = "ruby -e \'puts \"Hello, " }
+            Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U foo>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+            Literal{ value = "\"\'" }
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U `>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (class ::<Magic>)
+            orig = nullptr
+          }
+          fun = <U <string-interpolate>>
+          block = nullptr
+          pos_args = 3
+          args = [
+            Literal{ value = "ruby -e \'puts \"Hello, " }
+            Send{
+              flags = {}
+              recv = Self
+              fun = <U `>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "echo \"backticks\"" }
+              ]
+            }
+            Literal{ value = "\"\'" }
+          ]
+        }
+      ]
+    }
+  ]
+}

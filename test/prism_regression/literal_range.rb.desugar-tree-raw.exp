@@ -1,0 +1,106 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <build-range>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        Literal{ value = 1 }
+        Literal{ value = 2 }
+        Literal{ value = false }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <build-range>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        Literal{ value = 3 }
+        Literal{ value = 4 }
+        Literal{ value = true }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <build-range>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        Literal{ value = "Has no end.." }
+        EmptyTree
+        Literal{ value = false }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <build-range>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        Literal{ value = "Has no end..." }
+        EmptyTree
+        Literal{ value = true }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <build-range>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        EmptyTree
+        Literal{ value = "..Has no begin" }
+        Literal{ value = false }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <build-range>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        EmptyTree
+        Literal{ value = "...Has no begin" }
+        Literal{ value = true }
+      ]
+    }
+  ]
+}

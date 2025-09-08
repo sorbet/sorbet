@@ -1,0 +1,67 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U one_statement><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Literal{ value = 1 }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U two_statements><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Literal{ value = 2 }
+        ],
+        expr = Literal{ value = 3 }
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U three_statements><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Literal{ value = 4 }
+          Literal{ value = 5 }
+        ],
+        expr = Literal{ value = 6 }
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U begin_block><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Literal{ value = 7 }
+          Literal{ value = 8 }
+        ],
+        expr = Literal{ value = 9 }
+      }
+    }
+  ]
+}

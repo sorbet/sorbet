@@ -1,0 +1,32 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U test_bad_assign><<U <todo method>>>
+      args = [UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Assign{
+        lhs = UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }
+        rhs = UnresolvedConstantLit{
+          cnst = <C <U <ErrorNode>>>
+          scope = EmptyTree
+        }
+      }
+    }
+  ]
+}

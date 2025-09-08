@@ -1,0 +1,20 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    InsSeq{
+      stats = [
+        Literal{ value = 1 }
+        Literal{ value = 2 }
+      ],
+      expr = Literal{ value = 3 }
+    }
+
+    Literal{ value = nil }
+  ]
+}

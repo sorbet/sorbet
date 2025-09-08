@@ -1,0 +1,52 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U alias_method>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = :new_method1 }
+        Literal{ value = :new_method1 }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U alias_method>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = :new_method2 }
+        Literal{ value = :new_method2 }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Self
+      fun = <U alias_method>
+      block = nullptr
+      pos_args = 2
+      args = [
+        UnresolvedIdent{
+          kind = Global
+          name = <U $new_global>
+        }
+        UnresolvedIdent{
+          kind = Global
+          name = <U $old_global>
+        }
+      ]
+    }
+  ]
+}

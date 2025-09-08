@@ -1,0 +1,160 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $2>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U foo>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {}
+          recv = Literal{ value = 1 }
+          fun = <U ===>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $2>
+            }
+          ]
+        }
+        thenp = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U puts>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "one!" }
+          ]
+        }
+        elsep = If{
+          cond = If{
+            cond = Send{
+              flags = {}
+              recv = Literal{ value = 3 }
+              fun = <U ===>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $2>
+                }
+              ]
+            }
+            thenp = Literal{ value = true }
+            elsep = Send{
+              flags = {}
+              recv = Literal{ value = 2 }
+              fun = <U ===>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $2>
+                }
+              ]
+            }
+          }
+          thenp = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "two or three!" }
+            ]
+          }
+          elsep = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Who knows!" }
+            ]
+          }
+        }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $3>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U foo>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {}
+          recv = UnresolvedConstantLit{
+            cnst = <C <U Integer>>
+            scope = EmptyTree
+          }
+          fun = <U ===>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $3>
+            }
+          ]
+        }
+        thenp = InsSeq{
+          stats = [
+            Literal{ value = 4 }
+          ],
+          expr = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U puts>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "surprise, multi-line!" }
+            ]
+          }
+        }
+        elsep = EmptyTree
+      }
+    }
+  ]
+}

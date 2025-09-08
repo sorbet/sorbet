@@ -1,0 +1,103 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U m><<U <todo method>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              ZSuperArgs{ }
+            ]
+          }
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 3
+            args = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+              Literal{ value = 3 }
+            ]
+          }
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U <super>>
+            block = Block {
+              args = [
+              ]
+              body = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
+                }
+                fun = <U call>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        ],
+        expr = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U <super>>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = UnresolvedIdent{
+                kind = Local
+                name = <U <blk>>
+              }
+              fun = <U call>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            ZSuperArgs{ }
+          ]
+        }
+      }
+    }
+  ]
+}
