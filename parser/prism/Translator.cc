@@ -232,7 +232,7 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
                          is_same_v<PrismAssignmentNode, pm_constant_path_or_write_node>) {
         // Handle operator assignment to a constant path, like `A::B::C += 1` or `::C += 1`
         lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target);
-    } else if constexpr (is_same_v<SorbetLHSNode, parser::Send> || is_same_v<SorbetLHSNode, parser::CSend>) {
+    } else if constexpr (is_same_v<SorbetLHSNode, parser::Send>) {
         // Handle operator assignment to the result of a method call, like `a.b += 1`
         auto name = translateConstantName(node->read_name);
         auto receiver = translate(node->receiver);
@@ -241,9 +241,24 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
             lhs = make_unique<SorbetLHSNode>(location, move(receiver), name, messageLoc, NodeVec{});
         } else {
             auto receiverExpr = receiver->takeDesugaredExpr();
-            auto send = MK::Send0(location, move(receiverExpr), name, messageLoc);
+
+            // It is okay to call private methods on self
+            // Is this the best place for this logic?
+            ast::Send::Flags flags;
+            if (ast::isa_tree<ast::Self>(receiverExpr)) {
+                flags.isPrivateOk = true;
+            }
+
+            auto send = MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
             lhs = make_node_with_expr<SorbetLHSNode>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
         }
+    } else if constexpr (is_same_v<SorbetLHSNode, parser::CSend>) {
+        // Handle operator assignment to the result of a safe method call, like `a&.b += 1`
+        // TODO: this requires usage of nextUniqueDesugarName
+        auto name = translateConstantName(node->read_name);
+        auto receiver = translate(node->receiver);
+        auto messageLoc = translateLoc(node->message_loc);
+        lhs = make_unique<SorbetLHSNode>(location, move(receiver), name, messageLoc, NodeVec{});
     } else {
         // Handle regular assignment to any other kind of LHS.
         auto nameLoc = translateLoc(node->name_loc);
@@ -630,6 +645,37 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         default:
                             break;
                     }
+<<<<<<< HEAD
+=======
+
+                    // Unsupported nodes are desugared to an empty tree.
+                    // Treat them as if they were `self` to match `Desugar.cc`.
+                    // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+                    if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
+                        receiverExpr = MK::Self(loc.copyWithZeroLength());
+                        flags.isPrivateOk = true;
+                        // TODO: is this needed?
+                        // } else if (ast::isa_tree<ast::Self>(receiverExpr)) {
+                        //     flags.isPrivateOk = true;
+                    } else {
+                        flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+                    }
+
+                    int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
+
+                    ast::Send::ARGS_store sendArgs{};
+                    sendArgs.reserve(args.size());
+                    for (auto &arg : args) {
+                        sendArgs.emplace_back(arg->takeDesugaredExpr());
+                    }
+
+                    auto expr =
+                        MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
+                    sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc,
+                                                                 move(args));
+                } else {
+                    sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
+>>>>>>> 2f22f991b (Handle isPrivaeOk in some translateOpAssignment self nodes)
                 }
             }
 
