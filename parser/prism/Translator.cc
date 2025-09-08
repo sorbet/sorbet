@@ -315,8 +315,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto left = translate(andNode->left);
             auto right = translate(andNode->right);
 
-            // TODO: remove `peekDesugaredExpr` once those cases can all be handled
-            if (!directlyDesugar || !hasExpr(left, right) || !isa_reference(left->peekDesugaredExpr())) {
+            if (!directlyDesugar || !hasExpr(left, right)) {
                 return make_unique<parser::And>(location, move(left), move(right));
             }
 
@@ -336,18 +335,43 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::And>(move(if_), location, move(left), move(right));
             }
 
-            ENFORCE(false, "all nextUniqueDesugarName must be handled at the same time");
-
             // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
             // E.g. `x = 1 && 2` becomes `x = (temp = 1; temp ? temp : 2)`
             core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::andAnd());
+
+            bool checkAndAnd = ast::isa_tree<ast::Send>(lhsExpr) && ast::isa_tree<ast::Send>(rhsExpr);
+            ExpressionPtr thenp;
+            if (checkAndAnd) {
+                auto lhsSend = ast::cast_tree<ast::Send>(lhsExpr);
+                auto rhsSend = ast::cast_tree<ast::Send>(rhsExpr);
+                auto lhsSource = ctx.locAt(lhsSend->loc).source(ctx);
+                auto rhsRecvSource = ctx.locAt(rhsSend->recv.loc()).source(ctx);
+                if (lhsSource.has_value() && lhsSource == rhsRecvSource) {
+                    // Create the magic <check-and-and> call
+
+                    // Modify rhsSend in place to create the magic <check-and-and> call
+                    // This matches the legacy desugaring approach
+                    rhsSend->insertPosArg(0, move(rhsSend->recv));
+                    rhsSend->insertPosArg(1, MK::Symbol(rhsSend->funLoc.copyWithZeroLength(), rhsSend->fun));
+                    rhsSend->insertPosArg(2, MK::Local(location.copyWithZeroLength(), tempLocalName));
+                    rhsSend->recv = MK::Magic(location.copyWithZeroLength());
+                    rhsSend->fun = core::Names::checkAndAnd();
+                    thenp = move(rhsExpr);
+                } else {
+                    thenp = move(rhsExpr);
+                }
+            } else {
+                thenp = move(rhsExpr);
+            }
+
             auto lhsLoc = left->loc;
             auto rhsLoc = right->loc;
             auto condLoc =
                 lhsLoc.exists() && rhsLoc.exists() ? core::LocOffsets{lhsLoc.endPos(), rhsLoc.beginPos()} : lhsLoc;
             auto temp = MK::Assign(location, tempLocalName, move(lhsExpr));
-            auto if_ =
-                MK::If(location, MK::Local(condLoc, tempLocalName), move(rhsExpr), MK::Local(lhsLoc, tempLocalName));
+            auto elsep = MK::Local(lhsLoc, tempLocalName);
+            auto cond = MK::Local(condLoc, tempLocalName);
+            auto if_ = MK::If(location, move(cond), move(thenp), move(elsep));
             auto wrapped = MK::InsSeq1(location, move(temp), move(if_));
             return make_node_with_expr<parser::And>(move(wrapped), location, move(left), move(right));
         }
@@ -1697,8 +1721,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto left = translate(orNode->left);
             auto right = translate(orNode->right);
 
-            // TODO: remove `peekDesugaredExpr` once those cases can all be handled
-            if (!directlyDesugar || !hasExpr(left, right) || !isa_reference(left->peekDesugaredExpr())) {
+            if (!directlyDesugar || !hasExpr(left, right)) {
                 return make_unique<parser::Or>(location, move(left), move(right));
             }
 
@@ -1718,8 +1741,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::Or>(move(if_), location, move(left), move(right));
             }
 
-            ENFORCE(false, "all nextUniqueDesugarName must be handled at the same time");
-
             // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
             // E.g. `x = 1 || 2` becomes `x = (temp = 1; temp ? temp : 2)`
             core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::orOr());
@@ -1727,10 +1748,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto rhsLoc = right->loc;
             auto condLoc =
                 lhsLoc.exists() && rhsLoc.exists() ? core::LocOffsets{lhsLoc.endPos(), rhsLoc.beginPos()} : lhsLoc;
-            auto temp = MK::Assign(location, tempLocalName, move(lhsExpr));
-            auto if_ =
-                MK::If(location, MK::Local(condLoc, tempLocalName), MK::Local(lhsLoc, tempLocalName), move(rhsExpr));
-            auto wrapped = MK::InsSeq1(location, move(temp), move(if_));
+            auto tempAssign = MK::Assign(location, tempLocalName, move(lhsExpr));
+            auto cond = MK::Local(condLoc, tempLocalName);
+            auto thenp = MK::Local(lhsLoc, tempLocalName);
+            auto if_ = MK::If(location, move(cond), move(thenp), move(rhsExpr));
+            auto wrapped = MK::InsSeq1(location, move(tempAssign), move(if_));
             return make_node_with_expr<parser::Or>(move(wrapped), location, move(left), move(right));
         }
         case PM_PARAMETERS_NODE: { // The parameters declared at the top of a PM_DEF_NODE
