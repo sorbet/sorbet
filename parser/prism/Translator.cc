@@ -263,7 +263,22 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         // Handle regular assignment to any other kind of LHS.
         auto nameLoc = translateLoc(node->name_loc);
         auto name = translateConstantName(node->name);
-        lhs = make_unique<SorbetLHSNode>(nameLoc, name);
+
+        ast::UnresolvedIdent::Kind kind;
+        if constexpr (is_same_v<SorbetLHSNode, parser::IVarLhs>) {
+            kind = ast::UnresolvedIdent::Kind::Instance;
+        } else if constexpr (is_same_v<SorbetLHSNode, parser::CVarLhs>) {
+            kind = ast::UnresolvedIdent::Kind::Class;
+        } else if constexpr (is_same_v<SorbetLHSNode, parser::GVarLhs>) {
+            kind = ast::UnresolvedIdent::Kind::Global;
+        } else if constexpr (is_same_v<SorbetLHSNode, parser::LVarLhs>) {
+            kind = ast::UnresolvedIdent::Kind::Local;
+        } else {
+            unreachable("Invalid LHS type. Must be one of `IVarLhs`, `CVarLhs`, `GVarLhs`, or `LVarLhs`.");
+        }
+
+        auto expr = ast::make_expression<ast::UnresolvedIdent>(nameLoc, kind, name);
+        lhs = make_node_with_expr<SorbetLHSNode>(move(expr), nameLoc, name);
     }
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
@@ -271,7 +286,20 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         auto opLoc = translateLoc(node->binary_operator_loc);
         auto op = translateConstantName(node->binary_operator);
 
-        return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+        if (!directlyDesugar || !hasExpr(lhs, rhs)) {
+            return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+        }
+
+        auto lhsExpr = lhs->takeDesugaredExpr();
+        auto rhsExpr = rhs->takeDesugaredExpr();
+
+        auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
+        auto assign = MK::Assign(location, move(lhsExpr), move(callOp));
+
+        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+
+        // return make_node_with_expr<parser::OpAsgn>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+        // return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
     } else {
         // `AndAsgn` and `OrAsgn` are specific to a single operator, so don't need any extra information like `OpAsgn`.
         static_assert(is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
