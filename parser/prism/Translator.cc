@@ -848,9 +848,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateOpAssignment<pm_constant_operator_write_node, parser::OpAsgn, parser::ConstLhs>(node);
         }
         case PM_CONSTANT_OR_WRITE_NODE: { // Or-assignment to a constant, e.g. `C ||= true`
-            // return translateOpAssignment<pm_constant_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
-            auto constantOrWriteNode = down_cast<pm_constant_or_write_node>(node);
-            return translateConst<pm_constant_or_write_node, parser::Const>(constantOrWriteNode);
+            return translateOpAssignment<pm_constant_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
+            // auto constantOrWriteNode = down_cast<pm_constant_or_write_node>(node);
+            // return translateConst<pm_constant_or_write_node, parser::Const>(constantOrWriteNode);
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like `Foo`
             auto constantReadNode = down_cast<pm_constant_read_node>(node);
