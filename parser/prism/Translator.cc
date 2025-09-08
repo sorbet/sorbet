@@ -2740,7 +2740,7 @@ core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
 
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
     ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++parserUniqueCounter);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++desugarUniqueCounter);
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
