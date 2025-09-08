@@ -293,7 +293,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 // This AST would have been desugared deirectly by Prism::Translator
                 auto directlyDesugaredAST = ast::prismDesugar::node2Tree(ctx, move(directlyDesugaredTree));
 
-                if (!ast.exactlyEqual(gs, directlyDesugaredAST, file)) {
+                if (!ast.prismDesugarEqual(gs, directlyDesugaredAST, file)) {
                     auto expected = ast.showRawWithLocs(gs, file);
                     auto actual = directlyDesugaredAST.showRawWithLocs(gs, file);
 
