@@ -525,9 +525,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 return nullptr;
             }
 
+            ConstantMover constantMover;
+            ast::TreeWalk::apply(ctx, constantMover, block->body);
+
             auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
             auto methodName = argLiteral.asName();
-            return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
+            auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
+            return constantMover.addConstantsToExpression(send->loc, move(method));
         }
     }
 
