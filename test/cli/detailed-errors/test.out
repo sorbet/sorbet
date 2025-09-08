@@ -350,3 +350,68 @@ attached_class.rb:17: Expected `T::Array[T.attached_class (of AttachedClassB)]` 
     `AttachedClassB` is not a subtype of `T.attached_class (of AttachedClassB)` for covariant type member `Array::Elem`
       `AttachedClassB` is incompatible with `T.attached_class (of AttachedClassB)` because when this method is called on a subclass `T.attached_class (of AttachedClassB)` will represent a more specific subclass, meaning `AttachedClassB` will not be specific enough. See https://sorbet.org/docs/attached-class for more.
 Errors: 28
+
+--------------------------------------------------------------------------
+
+union.rb:38: Argument does not have asserted type `M1` https://srb.help/7007
+    38 |T.let(C1_or_C2, M1)
+        ^^^^^^^^^^^^^^^^^^^
+  Got `T.any(C1, C2)` originating from:
+    union.rb:37:
+    37 |C1_or_C2 = T.let(C1.new, T.any(C1, C2))
+        ^^^^^^^^
+  Detailed explanation:
+    `C2` (the right side of the `T.any`) is not a subtype of `M1`
+
+union.rb:39: Argument does not have asserted type `M2` https://srb.help/7007
+    39 |T.let(C1_or_C2, M2)
+        ^^^^^^^^^^^^^^^^^^^
+  Got `T.any(C1, C2)` originating from:
+    union.rb:37:
+    37 |C1_or_C2 = T.let(C1.new, T.any(C1, C2))
+        ^^^^^^^^
+  Detailed explanation:
+    `C1` (the left side of the `T.any`) is not a subtype of `M2`
+
+union.rb:43: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
+    43 |T.let(C12_or_C13, T.all(M1, M2));
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.any(C12, C13)` originating from:
+    union.rb:42:
+    42 |C12_or_C13 = T.let(C12.new, T.any(C12, C13))
+        ^^^^^^^^^^
+  Detailed explanation:
+    `C13` is not a subtype of `M2` (the right side of the `T.all`)
+    `C13` (the right side of the `T.any`) is not a subtype of `T.all(M1, M2)`
+
+union.rb:44: Argument does not have asserted type `T.all(M1, M3)` https://srb.help/7007
+    44 |T.let(C12_or_C13, T.all(M1, M3));
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.any(C12, C13)` originating from:
+    union.rb:42:
+    42 |C12_or_C13 = T.let(C12.new, T.any(C12, C13))
+        ^^^^^^^^^^
+  Detailed explanation:
+    `C12` is not a subtype of `M3` (the right side of the `T.all`)
+    `C12` (the left side of the `T.any`) is not a subtype of `T.all(M1, M3)`
+
+union.rb:47: Argument does not have asserted type `T.any(C1, C3)` https://srb.help/7007
+    47 |T.let(C1_or_C2, T.any(C1, C3))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.any(C1, C2)` originating from:
+    union.rb:37:
+    37 |C1_or_C2 = T.let(C1.new, T.any(C1, C2))
+        ^^^^^^^^
+  Detailed explanation:
+    `C2` (the right side of the `T.any`) is not a subtype of `T.any(C1, C3)`
+
+union.rb:48: Argument does not have asserted type `T.any(C2, C3)` https://srb.help/7007
+    48 |T.let(C1_or_C2, T.any(C2, C3))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.any(C1, C2)` originating from:
+    union.rb:37:
+    37 |C1_or_C2 = T.let(C1.new, T.any(C1, C2))
+        ^^^^^^^^
+  Detailed explanation:
+    `C1` (the left side of the `T.any`) is not a subtype of `T.any(C2, C3)`
+Errors: 6
