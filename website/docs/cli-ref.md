@@ -161,6 +161,9 @@ Usage:
                                 Ensure that every class and module only defines
                                 'behavior' in one file. Ensures that every class or
                                 module can be autoloaded by loading exactly one file.
+      --default-strictness-level [ignore|false|true|strict|strong]
+                                Set the default strictness level for files without a `#
+                                typed:` sigil. (default: false)
       --stop-after <phase>      Stop after completing <phase>. Can be useful for
                                 debugging. Also useful when overwhelmed with errors,
                                 because errors from earlier phases (like resolver) can

@@ -478,6 +478,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Ensure that every class and module only defines 'behavior' in one file. Ensures "
                                  "that every class or module can be autoloaded by loading exactly one file.",
                                  cxxopts::value<bool>());
+    options.add_options(section)("default-strictness-level",
+                                 "Set the default strictness level for files without a `# typed:` sigil.",
+                                 cxxopts::value<string>()->default_value("false"), "[ignore|false|true|strict|strong]");
     fmt::memory_buffer all_stop_after;
     fmt::format_to(
         std::back_inserter(all_stop_after),
@@ -978,6 +981,9 @@ void readOptions(Options &opts,
         }
 
         opts.cacheSensitiveOptions.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
+
+        opts.cacheSensitiveOptions.defaultStrictnessLevel =
+            text2StrictLevel(raw["default-strictness-level"].as<string>(), logger);
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
