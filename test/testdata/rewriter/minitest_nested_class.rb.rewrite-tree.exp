@@ -1,0 +1,11 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+    def <it 'foo'><<todo method>>(&<blk>)
+      <self>.p(<emptyTree>::<C X>)
+    end
+
+    class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+      <emptyTree>::<C X> = 1
+    end
+  end
+end
