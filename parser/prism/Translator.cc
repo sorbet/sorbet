@@ -290,16 +290,20 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
             return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
         }
 
+        // Only handle simple reference expressions here; let desugar phase handle Send expressions
+        if (!isa_reference(lhs->peekDesugaredExpr())) {
+            return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+        }
+
         auto lhsExpr = lhs->takeDesugaredExpr();
         auto rhsExpr = rhs->takeDesugaredExpr();
 
+        auto lhsCopy = MK::cpRef(lhsExpr);
         auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
-        auto assign = MK::Assign(location, move(lhsExpr), move(callOp));
+        auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
 
-        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
-
-        // return make_node_with_expr<parser::OpAsgn>(move(assign), location, move(lhs), op, opLoc, move(rhs));
-        // return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+        auto node = make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+        return unique_ptr<SorbetAssignmentNode>(static_cast<SorbetAssignmentNode *>(node.release()));
     } else {
         // `AndAsgn` and `OrAsgn` are specific to a single operator, so don't need any extra information like `OpAsgn`.
         static_assert(is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
