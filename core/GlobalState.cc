@@ -959,6 +959,9 @@ void GlobalState::initEmpty() {
             .build();
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
 
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::preludePackage()).build();
+    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_preludePackage());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

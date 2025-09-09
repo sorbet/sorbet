@@ -23,7 +23,7 @@ namespace sorbet::core::packages {
 
 class PackageDB;
 
-enum class ImportType {
+enum class ImportType : uint8_t {
     Normal,
     TestHelper,
     TestUnit,
@@ -56,16 +56,36 @@ struct FullyQualifiedName {
     std::string show(const core::GlobalState &gs) const;
 };
 
+class PackageInfo;
+
 struct Import {
     MangledName mangledName;
     ImportType type;
+    bool isPrelude_;
     core::LocOffsets loc;
 
     Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), loc(loc) {}
+        : mangledName(mangledName), type(type), isPrelude_{false}, loc(loc) {}
+
+    // Generate a prelude import, with the given origin.
+    // NOTE: the origin must point to something to hang any errors related to the implicit import off of. Currently this
+    // is the declLoc_ of the package that is getting the implicit import, and because of this it's important to not use
+    // these locs when computing locations for autocorrects.
+    static Import prelude(MangledName mangledName, core::LocOffsets implicitLoc);
+
+    Import(Import &&other) = default;
+    Import(const Import &other) = default;
+    Import &operator=(Import &&other) = default;
+    Import &operator=(const Import &other) = default;
 
     bool isTestImport() const {
         return type != ImportType::Normal;
+    }
+
+    // Prelude imports don't correspond to an import definition in a package source, and as such their location
+    // should not be relied on for autocorrects.
+    bool isPrelude() const {
+        return this->isPrelude_;
     }
 };
 
@@ -246,6 +266,14 @@ public:
     // Returns a string representing the path to the given package from this package, if it exists. Note: this only
     // looks at non-test imports.
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;
+
+    bool isPreludePackage_ = false;
+
+    // True when the package is marked with a `prelude_package` annotation. This requires that the package only import
+    // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
+    bool isPreludePackage() const {
+        return this->isPreludePackage_;
+    }
 };
 
 } // namespace sorbet::core::packages

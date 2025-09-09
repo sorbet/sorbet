@@ -27,6 +27,12 @@ string FullyQualifiedName::show(const core::GlobalState &gs) const {
     return absl::StrJoin(parts, "::", NameFormatter(gs));
 }
 
+Import Import::prelude(MangledName mangledName, core::LocOffsets declLoc) {
+    Import res{mangledName, ImportType::Normal, declLoc};
+    res.isPrelude_ = true;
+    return res;
+}
+
 bool Export::lexCmp(const Export &a, const Export &b) {
     return absl::c_lexicographical_compare(a.parts(), b.parts(),
                                            [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
@@ -171,9 +177,17 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                                                              ImportType importType) const {
     auto insertionLoc = core::Loc::none(loc.file());
     optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
-    if (!importedPackageNames.empty()) {
+
+    // Find the first non-prelude import (if one exists) so that we don't recommend inserting near an implicit import
+    // of a prelude package.
+    auto firstImport = absl::c_find_if_not(importedPackageNames, [](auto &i) { return i.isPrelude(); });
+    if (firstImport != importedPackageNames.end()) {
         core::LocOffsets importToInsertAfter;
         for (auto &import : importedPackageNames) {
+            if (import.isPrelude()) {
+                continue;
+            }
+
             if (import.mangledName == info.mangledName()) {
                 if ((importType == ImportType::Normal && import.type != ImportType::Normal) ||
                     (importType == ImportType::TestHelper && import.type == ImportType::TestUnit)) {
@@ -220,7 +234,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         }
         if (!importToInsertAfter.exists()) {
             // Insert before the first import
-            core::Loc beforePackageName = {loc.file(), importedPackageNames.front().loc};
+            core::Loc beforePackageName = {loc.file(), firstImport->loc};
             auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
             auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
             insertionLoc = endOfPrevLine.copyWithZeroLength();
