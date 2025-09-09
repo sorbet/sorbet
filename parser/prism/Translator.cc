@@ -876,9 +876,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             ast::MethodDef::ARGS_store argsStore;
             ast::InsSeq::STATS_store statsStore;
-            bool didDesugarParams; // ...and by impliciation, everything else (see  `attemptToDesugarParams`)
-            std::tie(argsStore, statsStore, didDesugarParams) =
-                desugarParametersNode(params.get(), attemptToDesugarParams);
+            bool didDesugarParams = false; // ...and by impliciation, everything else (see `attemptToDesugarParams`)
+            if (params != nullptr) {
+                std::tie(argsStore, statsStore, didDesugarParams) =
+                    desugarParametersNode(params->args, attemptToDesugarParams);
+            } else {
+                didDesugarParams = attemptToDesugarParams;
+            }
 
             if (!didDesugarParams) {
                 if (isSingletonMethod) {
@@ -2344,16 +2348,12 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
 }
 
 tuple<ast::MethodDef::ARGS_store, ast::InsSeq::STATS_store, bool /* didDesugarParams */>
-Translator::desugarParametersNode(parser::Args *paramsNode, bool attemptToDesugarParams) {
+Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) {
     if (!attemptToDesugarParams) {
         return make_tuple(ast::MethodDef::ARGS_store{}, ast::InsSeq::STATS_store{}, false);
     }
 
-    if (paramsNode == nullptr) {
-        return make_tuple(ast::MethodDef::ARGS_store{}, ast::InsSeq::STATS_store{}, true);
-    }
-
-    auto supportedParams = absl::c_all_of(paramsNode->args, [](auto &param) {
+    auto supportedParams = absl::c_all_of(params, [](auto &param) {
         return param->hasDesugaredExpr() ||
                // These other block types don't have their own dedicated desugared
                // representation, so they won't be directly translated.
@@ -2371,7 +2371,7 @@ Translator::desugarParametersNode(parser::Args *paramsNode, bool attemptToDesuga
     ast::MethodDef::ARGS_store argsStore;
     ast::InsSeq::STATS_store statsStore;
 
-    for (auto &param : paramsNode->args) {
+    for (auto &param : params) {
         auto loc = param->loc;
 
         if (parser::NodeWithExpr::isa_node<parser::Mlhs>(param.get())) { // `def f((a, b))`
