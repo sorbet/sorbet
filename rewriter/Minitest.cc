@@ -528,8 +528,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 // Minitest::Spec is an ancestor for RSpec tests.
             }
 
-            const bool bodyIsClass = true;
-            auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
+            auto rhs = prepareBody(ctx, /* isClass */ true, std::move(block->body), /* insideDescribe */ true);
 
             auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                     ctx.state.enterNameConstant("<describe '" + argString + "'>"));
@@ -548,11 +547,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ConstantMover constantMover;
             ast::TreeWalk::apply(ctx, constantMover, block->body);
             auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-            const bool bodyIsClass = false;
             auto declLoc = declLocForSendWithBlock(*send);
-            auto method =
-                ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                          prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
+            auto method = ast::MK::SyntheticMethod0(
+                send->loc, declLoc, std::move(name),
+                prepareBody(ctx, /* isClass */ false, std::move(block->body), insideDescribe));
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
             // omitting it saves memory.
