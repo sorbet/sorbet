@@ -245,9 +245,7 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
             // It is okay to call private methods on self
             // Is this the best place for this logic?
             ast::Send::Flags flags;
-            if (ast::isa_tree<ast::Self>(receiverExpr)) {
-                flags.isPrivateOk = true;
-            }
+            flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
             auto send = MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
             lhs = make_node_with_expr<SorbetLHSNode>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
@@ -686,9 +684,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
                         receiverExpr = MK::Self(loc.copyWithZeroLength());
                         flags.isPrivateOk = true;
-                        // TODO: is this needed?
-                        // } else if (ast::isa_tree<ast::Self>(receiverExpr)) {
-                        //     flags.isPrivateOk = true;
                     } else {
                         flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
                     }
