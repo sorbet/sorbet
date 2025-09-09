@@ -167,7 +167,7 @@ ast::ClassDef::RHS_store flattenDescribeBody(ast::ExpressionPtr body) {
     return rhs;
 }
 
-string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
+string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
     string argString;
     if (argLit != nullptr && argLit->isName()) {
@@ -245,6 +245,28 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
     return pair{methodName, declLoc};
 }
 
+// Returns a method name for the method definition to create, or no name if this is not a valid
+// method-defining test helper.
+core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send &send) {
+    auto arity = send.numPosArgs();
+    switch (send.fun.rawId()) {
+        case core::Names::before().rawId():
+            return arity == 0 ? core::Names::beforeAngles() : core::NameRef::noName();
+
+        case core::Names::after().rawId():
+            return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
+
+        case core::Names::it().rawId(): {
+            if (arity != 1) {
+                return core::NameRef::noName();
+            }
+            return ctx.state.enterNameUTF8("<it '" + to_s(ctx, send.getPosArg(0)) + "'>");
+        }
+    }
+
+    return core::NameRef::noName();
+}
+
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                        const ast::MethodDef::ARGS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
@@ -279,19 +301,9 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
-    // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
-    if ((send->fun == core::Names::it() && send->numPosArgs() == 1) ||
-        ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0)) {
-        core::NameRef name;
-        if (send->fun == core::Names::before()) {
-            name = core::Names::beforeAngles();
-        } else if (send->fun == core::Names::after()) {
-            name = core::Names::afterAngles();
-        } else {
-            // we use this for the name of our test
-            auto argString = to_s(ctx, send->getPosArg(0));
-            name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-        }
+    auto maybeName = nameForTestHelperMethod(ctx, *send);
+    if (maybeName.exists()) {
+        auto name = maybeName;
 
         // pull constants out of the block
         ConstantMover constantMover;
