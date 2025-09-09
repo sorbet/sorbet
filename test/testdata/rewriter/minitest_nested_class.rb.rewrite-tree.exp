@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+    def <it 'foo'><<todo method>>(&<blk>)
+      <self>.p(<emptyTree>::<C X>)
+    end
+
+    <emptyTree>::<C X> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+
+    class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+      ::Module.const_set(:X, 1)
+    end
+  end
+end
