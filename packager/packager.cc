@@ -1189,6 +1189,44 @@ void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Impo
     }
 }
 
+void validatePreludePackage(const core::GlobalState &gs, core::FileRef file, PackageInfo &info) {
+    auto &packageDB = gs.packageDB();
+
+    // Prelude packages must be in the lowest possible layer, as that's the only way to ensure that the implicit
+    // imports of them are valid.
+    auto enforceLayering = gs.packageDB().enforceLayering();
+    if (enforceLayering) {
+        if (auto layer = info.layer()) {
+            if (packageDB.layerIndex(layer->first) != 0) {
+                core::Loc layerLoc(file, layer->second);
+                if (auto e = gs.beginError(layerLoc, core::errors::Packager::PreludeLowestLayer)) {
+                    auto layers = packageDB.layers();
+                    e.setHeader("Prelude package `{}` must be in the lowest layer, `{}`", info.show(gs),
+                                layers.front().toString(gs));
+                }
+
+                // Overwrite the invalid layer to ensure that we don't see additional errors from other packages.
+                info.layer_->first = packageDB.layers().front();
+            }
+        }
+    }
+
+    // We disallow `visible_to` annotations in prelude packages, as they're implicitly imported by all non-prelude
+    // packages.
+    for (auto &v : info.visibleTo()) {
+        if (auto e = gs.beginError(core::Loc(file, v.loc), core::errors::Packager::NoPreludeVisibleTo)) {
+            e.setHeader("Prelude package `{}` may not include `{}` annotations", info.show(gs), "visible_to");
+            e.addErrorNote("Prelude packages are implicitly imported by all other packages, which would\n"
+                           "mean that `{}` annotations would have to be added to for every package to be\n"
+                           "valid.",
+                           "visible_to");
+        }
+    }
+
+    // Ensure that there aren't any `visible_to` annotations present, as they will cause errors with all other packages.
+    info.visibleTo_.clear();
+}
+
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
@@ -1210,39 +1248,11 @@ void validatePackage(core::Context ctx) {
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
 
-    bool pkgIsPrelude = pkgInfo.isPreludePackage();
-    if (pkgIsPrelude) {
-        // Prelude packages must be in the lowest possible layer, as that's the only way to ensure that the implicit
-        // imports of them are valid.
-        if (enforceLayering) {
-            if (auto layer = pkgInfo.layer()) {
-                if (packageDB.layerIndex(layer->first) != 0) {
-                    if (auto e = ctx.beginError(layer->second, core::errors::Packager::PreludeLowestLayer)) {
-                        auto layers = packageDB.layers();
-                        e.setHeader("Prelude package `{}` must be in the lowest layer, `{}`", pkgInfo.show(ctx),
-                                    layers.front().toString(ctx));
-                    }
-                }
-            }
-        }
-
-        // We disallow `visible_to` annotations in prelude packages, as they're implicitly imported by all non-prelude
-        // packages.
-        for (auto &v : pkgInfo.visibleTo()) {
-            if (auto e = ctx.beginError(v.loc, core::errors::Packager::NoPreludeVisibleTo)) {
-                e.setHeader("Prelude package `{}` may not include `{}` annotations", pkgInfo.show(ctx), "visible_to");
-                e.addErrorNote("Prelude packages are implicitly imported by all other packages, which would\n"
-                               "mean that `{}` annotations would have to be added to for every package to be\n"
-                               "valid.",
-                               "visible_to");
-            }
-        }
-    }
-
     if (skipImportVisibilityCheck && !enforceLayering) {
         return;
     }
 
+    bool pkgIsPrelude = pkgInfo.isPreludePackage();
     for (auto &i : pkgInfo.importedPackageNames) {
         auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
 
@@ -1400,6 +1410,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
             if (info.isPreludePackage()) {
                 preludePackages.emplace_back(pkgName);
+                validatePreludePackage(gs, file.file, info);
             }
         }
 
@@ -1607,6 +1618,10 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 // errors on the fast path.
                 PackageInfo copy{info.mangledName_, info.loc, info.declLoc_};
                 rewritePackageSpec(gs, file, copy);
+
+                if (info.isPreludePackage()) {
+                    validatePreludePackage(gs, file.file, copy);
+                }
             }
             validatePackage(ctx);
         } else {

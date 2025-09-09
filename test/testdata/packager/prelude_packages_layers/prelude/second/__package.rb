@@ -9,7 +9,6 @@ class Prelude::Second < PackageSpec
   strict_dependencies "dag"
 
   import Prelude::First
-# ^^^^^^^^^^^^^^^^^^^^^ error: Layering violation: cannot import `Prelude::First`
 
   export Prelude::Second::B
 end
