@@ -17,7 +17,6 @@ class ConstantMover {
     uint32_t classDepth = 0;
     vector<ast::ExpressionPtr> movedConstants = {};
 
-public:
     ast::ExpressionPtr createConstAssign(ast::Assign &asgn) {
         auto loc = asgn.loc;
         auto raiseUnimplemented = ast::MK::RaiseUnimplemented(loc);
@@ -31,6 +30,7 @@ public:
         return ast::MK::Assign(asgn.loc, move(asgn.lhs), move(raiseUnimplemented));
     }
 
+public:
     void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto asgn = ast::cast_tree<ast::Assign>(tree);
         if (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
