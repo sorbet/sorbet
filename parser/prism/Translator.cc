@@ -186,8 +186,10 @@ unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode)
     return make_node_with_expr<parser::Assign>(move(exp), location, move(lhs), move(rhs));
 }
 
+// widen the type from `parser::OpAsgn` to `parser::Node` to handle `make_node_with_expr` correctly.
+// TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *untypedNode) {
+unique_ptr<parser::Node> Translator::translateOpAssignment(pm_node_t *untypedNode) {
     static_assert(
         is_same_v<SorbetAssignmentNode, parser::OpAsgn> || is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
             is_same_v<SorbetAssignmentNode, parser::OrAsgn>,
@@ -300,8 +302,7 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
         auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
 
-        auto node = make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
-        return unique_ptr<SorbetAssignmentNode>(static_cast<SorbetAssignmentNode *>(node.release()));
+        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
     } else {
         // `AndAsgn` and `OrAsgn` are specific to a single operator, so don't need any extra information like `OpAsgn`.
         static_assert(is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||

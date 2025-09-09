@@ -119,7 +119,7 @@ private:
     std::unique_ptr<parser::Node> translateAssignment(pm_node_t *node);
 
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-    std::unique_ptr<SorbetAssignmentNode> translateOpAssignment(pm_node_t *node);
+    std::unique_ptr<parser::Node> translateOpAssignment(pm_node_t *node);
 
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
