@@ -754,32 +754,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
         auto methodName = argLiteral.asName();
         return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
-    } else if (insideDescribe && (send->fun == core::Names::expect() || send->fun == core::Names::change()) &&
-               send->hasBlock()) {
-        // Handle expect { ... } and change { ... } blocks
-        // Process the block body in the current context so it has access to the same scope as the it block
-        const bool bodyIsClass = false;
-        auto processedBlockBody = prepareBody(ctx, bodyIsClass, std::move(send->block()->body), insideDescribe);
-
-        // Create a new block with the processed body
-        auto newBlock =
-            ast::MK::Block(send->block()->loc, std::move(processedBlockBody), std::move(send->block()->args));
-
-        // Create args store with positional arguments
-        ast::Send::ARGS_store args;
-        for (uint16_t i = 0; i < send->numPosArgs(); i++) {
-            args.emplace_back(send->getPosArg(i).deepCopy());
-        }
-
-        // Add the processed block
-        args.emplace_back(std::move(newBlock));
-
-        // Create new send with block flag
-        ast::Send::Flags flags = send->flags;
-        flags.hasBlock = true;
-
-        return ast::MK::Send(send->loc, send->recv.deepCopy(), send->fun, send->funLoc, send->numPosArgs(),
-                             std::move(args), flags);
     }
 
     return nullptr;
@@ -809,5 +783,4 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
     }
     return stats;
 }
-
 }; // namespace sorbet::rewriter
