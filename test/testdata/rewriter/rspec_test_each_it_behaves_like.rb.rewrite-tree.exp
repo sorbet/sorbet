@@ -1,0 +1,72 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
+    def self.test_each<<todo method>>(iter, &blk)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'has the value'><<todo method>>(&<blk>)
+      [1, 2, 3].each() do |value|
+        <emptyTree>::<C T>.reveal_type(value)
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.test_each>
+
+    module <emptyTree>::<C <shared_examples_module 'common behavior'>><<C <todo sym>>> < ()
+      ::<Magic>.requires_ancestor(<self>) do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    <self>.test_each([1, 2, 3]) do |value|
+      begin
+        <self>.include(<emptyTree>::<C <shared_examples_module 'common behavior'>>)
+        <runtime method definition of <it 'has the value'>>
+      end
+    end
+  end
+
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    def self.describe<<todo method>>(name, &block)
+      ::<Magic>.<call-with-block>(<emptyTree>::<C Core>::<C ExampleGroup>, :describe, block, name)
+    end
+
+    def self.shared_examples<<todo method>>(name, &block)
+      <emptyTree>
+    end
+
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def self.describe<<todo method>>(name, &block)
+          <emptyTree>
+        end
+
+        def expect<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of self.describe>
+
+        <runtime method definition of expect>
+
+        <runtime method definition of eq>
+      end
+    end
+
+    <runtime method definition of self.describe>
+
+    <runtime method definition of self.shared_examples>
+  end
+end
