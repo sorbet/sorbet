@@ -29,7 +29,7 @@ string FullyQualifiedName::show(const core::GlobalState &gs) const {
 
 Import Import::prelude(MangledName mangledName, core::LocOffsets declLoc) {
     Import res{mangledName, ImportType::Normal, declLoc};
-    res.synthetic = true;
+    res.isPrelude_ = true;
     return res;
 }
 
@@ -178,13 +178,13 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
     auto insertionLoc = core::Loc::none(loc.file());
     optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
 
-    // Find the first non-synthetic import (if one exists) so that we don't recommend inserting near an implicit import
+    // Find the first non-prelude import (if one exists) so that we don't recommend inserting near an implicit import
     // of a prelude package.
-    auto firstImport = absl::c_find_if_not(importedPackageNames, [](auto &i) { return i.isSynthetic(); });
+    auto firstImport = absl::c_find_if_not(importedPackageNames, [](auto &i) { return i.isPrelude(); });
     if (firstImport != importedPackageNames.end()) {
         core::LocOffsets importToInsertAfter;
         for (auto &import : importedPackageNames) {
-            if (import.isSynthetic()) {
+            if (import.isPrelude()) {
                 continue;
             }
 

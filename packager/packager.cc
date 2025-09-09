@@ -641,7 +641,7 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() == 0) {
                 info.exportAll_ = true;
             }
-        } else if (send.fun == core::Names::preludePackage() && send.numPosArgs() == 0) {
+        } else if (send.fun == core::Names::preludePackage() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             info.isPreludePackage_ = true;
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
@@ -1219,7 +1219,7 @@ void validatePackage(core::Context ctx) {
                 if (packageDB.layerIndex(layer->first) != 0) {
                     if (auto e = ctx.beginError(layer->second, core::errors::Packager::PreludeLowestLayer)) {
                         auto layers = packageDB.layers();
-                        e.setHeader("Prelude package `{}` must be in layer `{}`", pkgInfo.show(ctx),
+                        e.setHeader("Prelude package `{}` must be in the lowest layer, `{}`", pkgInfo.show(ctx),
                                     layers.front().toString(ctx));
                     }
                 }
@@ -1231,6 +1231,10 @@ void validatePackage(core::Context ctx) {
         for (auto &v : pkgInfo.visibleTo()) {
             if (auto e = ctx.beginError(v.loc, core::errors::Packager::NoPreludeVisibleTo)) {
                 e.setHeader("Prelude package `{}` may not include `{}` annotations", pkgInfo.show(ctx), "visible_to");
+                e.addErrorNote("Prelude packages are implicitly imported by all other packages, which would\n"
+                               "mean that `{}` annotations would have to be added to for every package to be\n"
+                               "valid.",
+                               "visible_to");
             }
         }
     }
@@ -1249,7 +1253,7 @@ void validatePackage(core::Context ctx) {
 
         if (pkgIsPrelude) {
             // Prelude packages may only import other prelude packages
-            ENFORCE(!i.isSynthetic(), "Prelude packages shouldn't have implicit imports");
+            ENFORCE(!i.isPrelude(), "Prelude packages shouldn't have implicit imports");
             if (!otherPkg.isPreludePackage()) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
                     string_view import;
@@ -1268,7 +1272,7 @@ void validatePackage(core::Context ctx) {
             }
         } else {
             // Implicit imports of prelude packages are all added with locs that don't exist.
-            if (!i.isSynthetic() && otherPkg.isPreludePackage()) {
+            if (!i.isPrelude() && otherPkg.isPreludePackage()) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoExplicitPreludeImport)) {
                     e.setHeader("Prelude package `{}` may not be explicitly imported", otherPkg.show(ctx));
                 }

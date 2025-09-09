@@ -61,11 +61,11 @@ class PackageInfo;
 struct Import {
     MangledName mangledName;
     ImportType type;
-    bool synthetic;
+    bool isPrelude_;
     core::LocOffsets loc;
 
     Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), synthetic{false}, loc(loc) {}
+        : mangledName(mangledName), type(type), isPrelude_{false}, loc(loc) {}
 
     // Generate a prelude import, with the given origin.
     // NOTE: the origin must point to something to hang any errors related to the implicit import off of. Currently this
@@ -82,10 +82,10 @@ struct Import {
         return type != ImportType::Normal;
     }
 
-    // Synthetic imports don't correspond to an import definition in a package source, and as such their location
+    // Prelude imports don't correspond to an import definition in a package source, and as such their location
     // should not be relied on for autocorrects.
-    bool isSynthetic() const {
-        return this->synthetic;
+    bool isPrelude() const {
+        return this->isPrelude_;
     }
 };
 
