@@ -332,8 +332,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                (send->fun == core::Names::let() || send->fun == core::Names::let_bang() ||
                 send->fun == core::Names::subject()) &&
                (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0)))) {
-        auto maybeDecl = getLetNameAndDeclLoc(*send);
-        if (maybeDecl.has_value()) {
+        if (auto maybeDecl = getLetNameAndDeclLoc(*send)) {
             auto [methodName, declLoc] = maybeDecl.value();
 
             ConstantMover constantMover;
