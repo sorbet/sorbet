@@ -188,6 +188,97 @@ ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list
                     static_cast<uint16_t>(interpArgs.size()), move(interpArgs));
 }
 
+// Desugar multiple left hand side assignments into a sequence of assignments
+//
+// Considering this example:
+// ```rb
+// arr = [1, 2, 3]
+// a, *b = arr
+// ```
+//
+// We desugar the assignment `a, *b = arr` into:
+// ```rb
+// tmp = ::<Magic>.expandSplat(arr, 1, 0)
+// a = tmp[0]
+// b = tmp.to_ary
+// ```
+//
+// While calling `to_ary` doesn't return the correct value if we were to execute this code,
+// it returns the correct type from a static point of view.
+ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *lhs, ast::ExpressionPtr rhs) {
+    ast::InsSeq::STATS_store stats;
+
+    core::NameRef tempRhs = nextUniqueDesugarName(core::Names::assignTemp());
+    core::NameRef tempExpanded = nextUniqueDesugarName(core::Names::assignTemp());
+
+    int i = 0;
+    int before = 0, after = 0;
+    bool didSplat = false;
+    auto zloc = loc.copyWithZeroLength();
+
+    for (auto &c : lhs->exprs) {
+        if (auto *splat = parser::NodeWithExpr::cast_node<parser::SplatLhs>(c.get())) {
+            ENFORCE(!didSplat, "did splat already");
+            didSplat = true;
+
+            ast::ExpressionPtr lh = splat->takeDesugaredExpr();
+
+            int left = i;
+            int right = lhs->exprs.size() - left - 1;
+
+            if (!ast::isa_tree<ast::EmptyTree>(lh)) {
+                if (right == 0) {
+                    right = 1;
+                }
+                auto lhloc = lh.loc();
+                auto zlhloc = lhloc.copyWithZeroLength();
+                // Calling `to_ary` is not faithful to the runtime behavior,
+                // but that it is faithful to the expected static type-checking behavior.
+                auto ary = MK::Send0(loc, MK::Local(loc, tempExpanded), core::Names::toAry(), zlhloc);
+                stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
+            }
+            i = -right;
+        } else {
+            if (didSplat) {
+                ++after;
+            } else {
+                ++before;
+            }
+
+            auto zcloc = c->loc.copyWithZeroLength();
+            auto val =
+                MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
+
+            if (auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(c.get())) {
+                stats.emplace_back(desugarMlhs(mlhs->loc, mlhs, move(val)));
+            } else {
+                ast::ExpressionPtr lh = c->takeDesugaredExpr();
+                if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
+                    if (auto e =
+                            ctx.beginIndexerError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
+                        e.setHeader("Unsupported rest args in destructure");
+                    }
+                    lh = move(restParam->expr);
+                }
+
+                auto lhloc = lh.loc();
+                stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
+            }
+
+            i++;
+        }
+    }
+
+    auto expanded = MK::Send3(loc, MK::Magic(loc), core::Names::expandSplat(), zloc, MK::Local(loc, tempRhs),
+                              MK::Int(loc, before), MK::Int(loc, after));
+    stats.insert(stats.begin(), MK::Assign(loc, tempExpanded, move(expanded)));
+    stats.insert(stats.begin(), MK::Assign(loc, tempRhs, move(rhs)));
+
+    // Regardless of how we destructure an assignment, Ruby evaluates the expression to the entire right hand side,
+    // not any individual component of the destructured assignment.
+    return MK::InsSeq(loc, move(stats), MK::Local(loc, tempRhs));
+}
+
 // Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
@@ -1953,7 +2044,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto multiLhsNode = translateMultiTargetLhs(multiWriteNode);
             auto rhsValue = translate(multiWriteNode->value);
 
-            return make_unique<parser::Masgn>(location, move(multiLhsNode), move(rhsValue));
+            if (!directlyDesugar || !hasExpr(rhsValue, multiLhsNode->exprs)) {
+                return make_unique<parser::Masgn>(location, move(multiLhsNode), move(rhsValue));
+            }
+
+            auto rhsExpr = rhsValue->takeDesugaredExpr();
+            auto expr = desugarMlhs(location, multiLhsNode.get(), move(rhsExpr));
+            return make_node_with_expr<parser::Masgn>(move(expr), location, move(multiLhsNode), move(rhsValue));
         }
         case PM_NEXT_NODE: { // A `next` statement, e.g. `next`, `next 1, 2, 3`
             auto nextNode = down_cast<pm_next_node>(node);
