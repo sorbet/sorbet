@@ -47,6 +47,12 @@ class MyTestHelper < Minitest::Spec
       'not an int' # error: Expected `Integer` but found
     }
 
+    sig { returns(Integer) }
+    let(:has_constant_definitions) {
+      X = T.let(1, Integer)
+      X
+    }
+
     it 'example' do
       res = untyped_helper()
       T.reveal_type(res) # error: `T.untyped`
