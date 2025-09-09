@@ -13,6 +13,8 @@ class Minitest::Spec < Minitest::Test
   module DSL
     if T.unsafe(false)
       def let(name, &block); end # error: does not have a `sig`
+      def let!(name, &blk); end # error: does not have a `sig`
+      def subject(name=:subject, &block); end # error: does not have a `sig`
     end
   end
   extend DSL
@@ -35,6 +37,16 @@ class MyTestHelper < Minitest::Spec
     let(:untyped_helper) {
   # ^^^^^^^^^^^^^^^^^^^ error: does not have a `sig`
       'hello'
+    }
+
+    let(:untyped_helper!) {
+  # ^^^^^^^^^^^^^^^^^^^^ error: does not have a `sig`
+      'hello'
+    }
+
+    subject {
+  # ^^^^^^^ error: does not have a `sig`
+      puts('still works')
     }
 
     sig { returns(String) }
@@ -61,6 +73,9 @@ class MyTestHelper < Minitest::Spec
       res = let_with_sig()
       T.reveal_type(res) # error: `String`
       puts(res)
+
+      untyped_helper!
+      subject
 
       begin
         res = let_with_bad_sig()
@@ -93,6 +108,10 @@ class MyTestHelper < Minitest::Spec
     describe("for #{test_case}") do
       sig { returns(NilClass) } # error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
       let(:another_helper) { puts('another') }
+      sig { returns(NilClass) } # error: Only valid `it`
+      let(:another_helper!) { puts('another') }
+      sig { returns(NilClass) } # error: Only valid `it`
+      subject { puts('another') }
       it 'does the thing' do
         begin
           # This one is from the other describe block, not ours
@@ -103,6 +122,9 @@ class MyTestHelper < Minitest::Spec
 
         res = another_helper
         T.reveal_type(res) # error: `NilClass`
+
+        another_helper!
+        subject
 
         begin
           # `let`-defined methods which are defined outside describe are not supported (out of caution in rewriter)
