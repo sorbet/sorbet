@@ -132,6 +132,9 @@ private:
     template <typename PrismConstantPathNode, typename SorbetAssignmentNode>
     std::unique_ptr<parser::Node> handleConstantPathAssignment(pm_node_t *node, core::LocOffsets location);
 
+    template <typename PrismVariableNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
+    std::unique_ptr<parser::Node> translateVariableAssignment(pm_node_t *node, core::LocOffsets location);
+
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
