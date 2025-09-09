@@ -329,9 +329,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts, iteratee,
                                    /* insideDescribe */ true);
     } else if (insideDescribe &&
-               ((send->fun == core::Names::let() && send->numPosArgs() == 1) ||
-                (send->fun == core::Names::let_bang() && send->numPosArgs() == 1) ||
-                (send->fun == core::Names::subject() && send->numPosArgs() <= 1)) &&
+               (send->fun == core::Names::let() || send->fun == core::Names::let_bang() ||
+                send->fun == core::Names::subject()) &&
                (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0)))) {
         auto maybeDecl = getLetNameAndDeclLoc(*send);
         if (maybeDecl.has_value()) {
