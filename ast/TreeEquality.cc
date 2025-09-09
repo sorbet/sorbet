@@ -37,7 +37,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::Send: {
             auto *a = reinterpret_cast<const Send *>(tree);
             auto *b = reinterpret_cast<const Send *>(other);
-            if (a->fun != b->fun) {
+            if (!Comparator::compareNames(gs, a->fun, b->fun)) {
                 return false;
             }
 
@@ -86,7 +86,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (a->symbol != b->symbol) {
                 return false;
             }
-            if (a->name != b->name) {
+            if (!Comparator::compareNames(gs, a->name, b->name)) {
                 return false;
             }
             if (a->flags != b->flags) {
@@ -174,7 +174,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::UnresolvedIdent: {
             auto *a = reinterpret_cast<const UnresolvedIdent *>(tree);
             auto *b = reinterpret_cast<const UnresolvedIdent *>(other);
-            return a->kind == b->kind && a->name == b->name;
+            return a->kind == b->kind && Comparator::compareNames(gs, a->name, b->name);
         }
 
         case Tag::RestArg: {
@@ -221,7 +221,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (a->type != b->type) {
                 return false;
             }
-            if (a->cast != b->cast) {
+            if (!Comparator::compareNames(gs, a->cast, b->cast)) {
                 return false;
             }
             return Comparator::compareNodes(gs, avoid, a->arg, b->arg, file) &&
@@ -258,7 +258,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
                 auto named_literal_a = core::cast_type_nonnull<core::NamedLiteralType>(aType);
                 auto named_literal_b = core::cast_type_nonnull<core::NamedLiteralType>(bType);
                 return named_literal_a.literalKind == named_literal_b.literalKind &&
-                       named_literal_a.asName() == named_literal_b.asName();
+                       Comparator::compareNames(gs, named_literal_a.asName(), named_literal_b.asName());
             } else if (aType.tag() == core::TypePtr::Tag::ClassType) {
                 auto class_type_a = core::cast_type_nonnull<core::ClassType>(aType);
                 auto class_type_b = core::cast_type_nonnull<core::ClassType>(bType);
@@ -272,7 +272,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::UnresolvedConstantLit: {
             auto *a = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             auto *b = reinterpret_cast<const UnresolvedConstantLit *>(other);
-            if (a->cnst != b->cnst) {
+            if (!Comparator::compareNames(gs, a->cnst, b->cnst)) {
                 return false;
             }
             return Comparator::compareNodes(gs, avoid, a->scope, b->scope, file);
@@ -321,7 +321,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::RuntimeMethodDefinition: {
             auto *a = reinterpret_cast<const RuntimeMethodDefinition *>(tree);
             auto *b = reinterpret_cast<const RuntimeMethodDefinition *>(other);
-            return a->name == b->name && a->isSelfMethod == b->isSelfMethod;
+            return Comparator::compareNames(gs, a->name, b->name) && a->isSelfMethod == b->isSelfMethod;
         }
 
         case Tag::Self: {
@@ -363,6 +363,10 @@ struct StructurallyEqualComparator {
                              absl::Span<const ExpressionPtr> b, const core::FileRef file) {
         return compareTreeSpans<StructurallyEqualComparator>(gs, avoid, a, b, file);
     }
+
+    static bool compareNames(const core::GlobalState &gs, const core::NameRef &a, const core::NameRef &b) {
+        return a == b;
+    }
 };
 
 // TODO: Clean up after Prism work is done. https://github.com/sorbet/sorbet/issues/9065
@@ -379,6 +383,26 @@ struct PrismDesugarComparator {
     static bool compareSpans(const core::GlobalState &gs, const void *avoid, absl::Span<const ExpressionPtr> a,
                              absl::Span<const ExpressionPtr> b, const core::FileRef file) {
         return compareTreeSpans<PrismDesugarComparator>(gs, avoid, a, b, file);
+    }
+
+    static bool compareNames(const core::GlobalState &gs, const core::NameRef &a, const core::NameRef &b) {
+        if (a == b) {
+            return true;
+        }
+
+        // During the migration, unqiue names are generated from two sources:
+        //   1. `Translator.desugarUniqueCounter` in `parser/prism/Translator.cc`
+        //   2. `DesugarContext.uniqueCounter`    in `ast/desugar/PrismDesugar.cc`
+        //
+        // There's no easy way to synchronize them:
+        //    * Any nodes that get directly desugared directly by the translator will cause the `PrismDesugar.cc`
+        //      counter to *not* increment, causing all of its subsequent unique names to be wrong.
+        //    * Conversly, any nodes that hit the fallback path will cause increment the `PrismDesugar.cc` counter,
+        //      but have no easy way to incrementing all the alraady-created names.
+        //
+        // So for now, we'll ignore the difference between uniquely generated names.
+        return a.hasUniqueNameKind(gs, core::UniqueNameKind::Desugar) &&
+               b.hasUniqueNameKind(gs, core::UniqueNameKind::Desugar);
     }
 };
 
