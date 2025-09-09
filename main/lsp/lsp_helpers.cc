@@ -47,9 +47,9 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
 
-    if (name == core::Names::requiredAncestorsLin()) {
-        return true;
-    }
+    // if (name == core::Names::requiredAncestorsLin()) {
+    //     return true;
+    // }
 
     return false;
 }

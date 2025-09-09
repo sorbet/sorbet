@@ -110,6 +110,7 @@ public:
     FieldRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     FieldRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
+    ArgInfo &enterMethodArgumentSymbolWithDupes(Loc loc, MethodRef owner, NameRef name);
 
     SymbolRef lookupSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::ClassOrModule, Symbols::noSymbol(),

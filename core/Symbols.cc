@@ -1911,7 +1911,7 @@ bool ClassOrModule::hasSingleSealedSubclass(const GlobalState &gs) const {
 }
 
 // Record a required ancestor for this class of module
-//
+// TODO: Edit
 // Each RequiredAncestor is stored into a magic method referenced by `prop` where:
 // * RequiredAncestor.symbol goes into the return type tuple
 // * RequiredAncestor.origin goes into the first argument type tuple
@@ -1924,37 +1924,31 @@ void ClassOrModule::recordRequiredAncestorInternal(GlobalState &gs, ClassOrModul
     if (!ancestors.exists()) {
         ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
-
-        // Create the return type tuple to store RequiredAncestor.symbol
-        vector<TypePtr> tsymbols;
-        ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
-
-        // Create the first argument typed as a tuple to store RequiredAncestor.origin
-        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
-        vector<TypePtr> torigins;
-        arg.type = make_type<TupleType>(move(torigins));
     }
 
     // Do not require the same ancestor twice
-    auto &elems = (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems;
-    bool alreadyRecorded = absl::c_any_of(elems, [ancestor](auto elem) {
-        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
-        return cast_type_nonnull<ClassType>(elem).symbol == ancestor.symbol;
-    });
-    if (alreadyRecorded) {
-        return;
+    for (auto &arg : ancestors.data(gs)->arguments) {
+        auto type = arg.type;
+        ENFORCE(isa_type<TupleType>(type), "Something in requiredAncestors that's not a TupleType");
+        auto &tupleType = cast_type_nonnull<TupleType>(type);
+        ENFORCE(isa_type<ClassType>(tupleType.elems[0]), "TupleType for requiredAncestors doesn't contain ClassType");
+        auto classType = cast_type_nonnull<ClassType>(tupleType.elems[0]); // RequiredAncestor.symbol
+
+        if (classType.symbol == ancestor.symbol) {
+            // TODO: Aren't we losing information since origin could be different?
+            return;
+        }
     }
 
-    // Store the RequiredAncestor.symbol
+    // Store the RequiredAncestor.symbol and RequiredAncestor.origin
     auto tSymbol = core::make_type<ClassType>(ancestor.symbol);
-    (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems.emplace_back(tSymbol);
-
-    // Store the RequiredAncestor.origin
     auto tOrigin = core::make_type<ClassType>(ancestor.origin);
-    (cast_type<TupleType>(ancestors.data(gs)->arguments[0].type))->elems.emplace_back(tOrigin);
+    vector<TypePtr> args = {tSymbol, tOrigin};
+    auto tupleType = core::make_type<TupleType>(std::move(args));
 
-    // Store the RequiredAncestor.loc
-    ancestors.data(gs)->locs_.emplace_back(ancestor.loc);
+    // Create a new argument from tupleType and append to ancestor arguments
+    auto &arg = gs.enterMethodArgumentSymbolWithDupes(ancestor.loc, ancestors, core::Names::arg());
+    arg.type = std::move(tupleType);
 }
 
 // Locally required ancestors by this class or module
@@ -1968,19 +1962,22 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::readRequiredAncestorsInte
         return res;
     }
 
-    auto data = ancestors.data(gs);
-    auto tSymbols = cast_type<TupleType>(data->resultType);
-    auto tOrigins = cast_type<TupleType>(data->arguments[0].type);
-    auto index = 0;
-    for (auto elem : tSymbols->elems) {
-        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
-        ENFORCE(isa_type<ClassType>(tOrigins->elems[index]), "Bad origin in requiredAncestors");
-        ENFORCE(index < data->locs().size(), "Missing loc in requiredAncestors");
-        auto &origin = cast_type_nonnull<ClassType>(tOrigins->elems[index]).symbol;
-        auto &symbol = cast_type_nonnull<ClassType>(elem).symbol;
-        auto &loc = data->locs()[index];
-        res.emplace_back(origin, symbol, loc);
-        index++;
+    // iterate over ancestors.data(gs)->arguments
+    for (auto &arg : ancestors.data(gs)->arguments) {
+        ENFORCE(isa_type<TupleType>(arg.type), "Something in requiredAncestors that's not a TupleType");
+        auto &tupleType = cast_type_nonnull<TupleType>(arg.type);
+
+        auto symbol = tupleType.elems[0];
+        ENFORCE(isa_type<ClassType>(symbol),
+                "TupleType for requiredAncestors doesn't contain ClassType in first index");
+        auto tSymbol = cast_type_nonnull<ClassType>(symbol);
+
+        auto origin = tupleType.elems[1];
+        ENFORCE(isa_type<ClassType>(origin),
+                "TupleType for requiredAncestors doesn't contain ClassType in second index");
+        auto tOrigin = cast_type_nonnull<ClassType>(origin);
+
+        res.emplace_back(tOrigin.symbol, tSymbol.symbol, arg.loc);
     }
 
     return res;
@@ -2473,8 +2470,8 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
         name == Names::requiredAncestorsLin()) {
         // These are synthetic methods that encode information about the class hierarchy in their types.
         // If the types change, ancestor information changed, and we must take the slow path.
-        ENFORCE(resultType);
-        result = mix(result, resultType.hash(gs));
+        // ENFORCE(resultType);
+        // result = mix(result, resultType.hash(gs));
     }
 
     return result;
