@@ -32,6 +32,11 @@ class ConstantMover {
 
 public:
     void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        if (classDepth != 0) {
+            // These will be moved when we move the whole enclosing class def
+            return;
+        }
+
         auto asgn = ast::cast_tree<ast::Assign>(tree);
         if (auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs)) {
             if (ast::isa_tree<ast::UnresolvedConstantLit>(asgn->rhs)) {

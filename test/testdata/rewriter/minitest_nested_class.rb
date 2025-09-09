@@ -5,6 +5,6 @@ describe 'bar' do
     class A
       X = 1
     end
-    p(X)
+    p(X) # error: Unable to resolve constant `X`
   end
 end

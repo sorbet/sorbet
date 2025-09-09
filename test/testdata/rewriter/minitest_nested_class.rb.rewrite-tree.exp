@@ -4,10 +4,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.p(<emptyTree>::<C X>)
     end
 
-    <emptyTree>::<C X> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-
     class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-      ::Module.const_set(:X, 1)
+      <emptyTree>::<C X> = 1
     end
   end
 end
