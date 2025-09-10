@@ -294,20 +294,20 @@ unique_ptr<parser::Node> Translator::handleOpAsgnDesugaring(PrismAssignmentNode 
 }
 
 template <typename PrismConstantNode, typename SorbetAssignmentNode>
-unique_ptr<parser::Node> Translator::handleConstantAssignment(pm_node_t *node, core::LocOffsets location,
-                                                              bool replaceWithDynamicConstAssign) {
+unique_ptr<parser::Node> Translator::translateConstantAssignment(pm_node_t *node, core::LocOffsets location) {
     if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
         e.setHeader("Constant reassignment is not supported");
     }
 
     auto constantNode = down_cast<PrismConstantNode>(node);
+    auto replaceWithDynamicConstAssign = true;
     auto lhs = translateConst<PrismConstantNode, parser::ConstLhs>(constantNode, replaceWithDynamicConstAssign);
     return handleOpAsgnDesugaring<PrismConstantNode, SorbetAssignmentNode, parser::ConstLhs>(constantNode, location,
                                                                                              move(lhs));
 }
 
 template <typename PrismConstantPathNode, typename SorbetAssignmentNode>
-unique_ptr<parser::Node> Translator::handleConstantPathAssignment(pm_node_t *node, core::LocOffsets location) {
+unique_ptr<parser::Node> Translator::translateConstantPathAssignment(pm_node_t *node, core::LocOffsets location) {
     auto constantPathNode = down_cast<PrismConstantPathNode>(node);
     auto target = constantPathNode->target;
     auto lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(target);
@@ -897,7 +897,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateAssignment<pm_class_variable_write_node, parser::CVarLhs>(node);
         }
         case PM_CONSTANT_PATH_AND_WRITE_NODE: { // And-assignment to a constant path, e.g. `A::B &&= false`
-            return handleConstantPathAssignment<pm_constant_path_and_write_node, parser::AndAsgn>(node, location);
+            return translateConstantPathAssignment<pm_constant_path_and_write_node, parser::AndAsgn>(node, location);
         }
         case PM_CONSTANT_PATH_NODE: { // Part of a constant path, like the `A::B` in `A::B::C`.
             // See`PM_CONSTANT_READ_NODE`, which handles the `::C` part
@@ -906,10 +906,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateConst<pm_constant_path_node, parser::Const>(constantPathNode);
         }
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE: { // Compound assignment to a constant path, e.g. `A::B += 1`
-            return handleConstantPathAssignment<pm_constant_path_operator_write_node, parser::OpAsgn>(node, location);
+            return translateConstantPathAssignment<pm_constant_path_operator_write_node, parser::OpAsgn>(node,
+                                                                                                         location);
         }
         case PM_CONSTANT_PATH_OR_WRITE_NODE: { // Or-assignment to a constant path, e.g. `A::B ||= true`
-            return handleConstantPathAssignment<pm_constant_path_or_write_node, parser::OrAsgn>(node, location);
+            return translateConstantPathAssignment<pm_constant_path_or_write_node, parser::OrAsgn>(node, location);
         }
         case PM_CONSTANT_PATH_TARGET_NODE: { // Target of an indirect write to a constant path
             // ... like `A::TARGET1, A::TARGET2 = 1, 2`, `rescue => A::TARGET`, etc.
@@ -926,19 +927,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateConst<pm_constant_target_node, parser::ConstLhs>(constantTargetNode);
         }
         case PM_CONSTANT_AND_WRITE_NODE: { // And-assignment to a constant, e.g. `C &&= false`
-            auto replaceWithDynamicConstAssign = true;
-            return handleConstantAssignment<pm_constant_and_write_node, parser::AndAsgn>(node, location,
-                                                                                         replaceWithDynamicConstAssign);
+            return translateConstantAssignment<pm_constant_and_write_node, parser::AndAsgn>(node, location);
         }
         case PM_CONSTANT_OPERATOR_WRITE_NODE: { // Compound assignment to a constant, e.g. `C += 1`
-            auto replaceWithDynamicConstAssign = true;
-            return handleConstantAssignment<pm_constant_operator_write_node, parser::OpAsgn>(
-                node, location, replaceWithDynamicConstAssign);
+            return translateConstantAssignment<pm_constant_operator_write_node, parser::OpAsgn>(node, location);
         }
         case PM_CONSTANT_OR_WRITE_NODE: { // Or-assignment to a constant, e.g. `C ||= true`
-            auto replaceWithDynamicConstAssign = true;
-            return handleConstantAssignment<pm_constant_or_write_node, parser::OrAsgn>(node, location,
-                                                                                       replaceWithDynamicConstAssign);
+            return translateConstantAssignment<pm_constant_or_write_node, parser::OrAsgn>(node, location);
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like `Foo`
             auto constantReadNode = down_cast<pm_constant_read_node>(node);
