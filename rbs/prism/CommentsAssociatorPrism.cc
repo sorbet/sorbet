@@ -896,6 +896,7 @@ CommentMapPrismNode CommentsAssociatorPrism::run(pm_node_t *node) {
         }
     }
 
+    fmt::print("FINISHED CommentsAssociatorPrism::run\n");
     return CommentMapPrismNode{signaturesForNode, assertionsForNode};
 }
 
