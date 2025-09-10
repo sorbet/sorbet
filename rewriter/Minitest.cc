@@ -141,7 +141,8 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
 
 } // namespace
 
-ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe);
+ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body,
+                                      bool insideDescribe);
 
 ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
     body = tryRunSingleOnSend(ctx, isClass, std::move(body), insideDescribe);
@@ -586,7 +587,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     return nullptr;
 }
 
-ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
+ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body,
+                                      bool insideDescribe) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
         auto change = runSingle(ctx, isClass, bodySend, insideDescribe);
