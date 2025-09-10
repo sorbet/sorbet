@@ -2,7 +2,7 @@
 
 class ClassA
   it 'first_test' do
-    describe 'BAR' do # error: Method `describe` does not exist on `T.class_of(ClassA)`
+    describe 'BAR' do
     end
   end
 
@@ -16,7 +16,7 @@ end
 
 module ModuleB
   it 'first_test' do
-    describe 'BAR' do # error: Method `describe` does not exist on `T.class_of(ModuleB)`
+    describe 'BAR' do
     end
   end
 
@@ -36,7 +36,7 @@ class StressTest
     one = 1
     Class.new do
       one.times do
-        describe "weird context" do
+        describe "weird context" do # error: Method `describe` does not exist on `T::Class[Object]`
           "" + 1 # error: Expected `String` but found `Integer(1)` for argument `arg0`
         end
       end
@@ -45,9 +45,11 @@ class StressTest
 
   it "bar" do
     one = 1
+    # Note: The `Class.new` rewriter is not running on any classes inside a test.
+    # That might be nice to change at some point, but it would be weird because it would amount to class definitions inside method bodies.
     MyClass = Class.new do
       one.times do
-        describe "weird context" do
+        describe "weird context" do # error: Method `describe` does not exist on `T::Class[Object]`
           "" + 1 # error: Expected `String` but found `Integer(1)` for argument `arg0`
         end
       end

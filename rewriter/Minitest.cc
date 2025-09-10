@@ -70,27 +70,6 @@ public:
         }
     }
 
-    // we move sends if they are other minitest `describe` blocks, as those end up being classes anyway: consequently,
-    // we treat those the same way we treat classes
-    void preTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
-            classDepth++;
-        }
-    }
-
-    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv.isSelfReference() && send->numPosArgs() == 1 && send->fun == core::Names::describe()) {
-            classDepth--;
-            if (classDepth == 0) {
-                movedConstants.emplace_back(move(tree));
-                tree = ast::MK::EmptyTree();
-                return;
-            }
-        }
-    }
-
     vector<ast::ExpressionPtr> getMovedConstants() {
         return move(movedConstants);
     }
@@ -560,9 +539,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ast::TreeWalk::apply(ctx, constantMover, block->body);
             auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
             auto declLoc = declLocForSendWithBlock(*send);
-            auto method = ast::MK::SyntheticMethod0(
-                send->loc, declLoc, std::move(name),
-                prepareBody(ctx, /* isClass */ false, std::move(block->body), insideDescribe));
+            auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                                    prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
             // omitting it saves memory.

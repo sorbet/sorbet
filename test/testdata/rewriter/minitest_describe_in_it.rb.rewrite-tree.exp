@@ -4,11 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    begin
-      <self>.describe("BAR") do ||
-        <emptyTree>
-      end
-      <emptyTree>
+    class <emptyTree>::<C <describe 'BAR'>><<C <todo sym>>> < (<self>)
     end
 
     class <emptyTree>::<C <describe 'OUTER'>><<C <todo sym>>> < (<self>)
@@ -26,11 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    begin
-      <self>.describe("BAR") do ||
-        <emptyTree>
-      end
-      <emptyTree>
+    class <emptyTree>::<C <describe 'BAR'>><<C <todo sym>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'OUTER'>><<C <todo sym>>> < (::<todo sym>)
@@ -55,7 +47,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           begin
             <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
             one.times() do ||
-              <emptyTree>
+              <self>.describe("weird context") do ||
+                "".+(1)
+              end
             end
           end
         end
@@ -69,7 +63,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             begin
               <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
               one.times() do ||
-                <emptyTree>
+                <self>.describe("weird context") do ||
+                  "".+(1)
+                end
               end
             end
           end)
@@ -79,16 +75,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.describe>
 
     begin
-      <self>.describe("weird context") do ||
-        "".+(1)
-      end
-      <emptyTree>
-    end
-
-    begin
-      <self>.describe("weird context") do ||
-        "".+(1)
-      end
       <emptyTree>::<C MyClass> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       <emptyTree>
     end
