@@ -305,10 +305,6 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     CHECK_EQ_DIFF(expected, actual,
                                   fmt::format("Prism desugared tree does not match legacy desugared tree"));
                 }
-
-                // If we get to here, we know the two trees are equivalent, so it doesn't really matter which we use.
-                // Let's just use the directly desugared one.
-                ast = move(directlyDesugaredAST);
             }
 
             desugared = testSerialize(gs, ast::ParsedFile{move(ast), file});
