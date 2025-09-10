@@ -1,6 +1,7 @@
 # typed: strict
 
 class T::Enum
+  extend T::Sig
   extend T::Props::CustomType
 
   # Assume that this is always included (even if it isn't) so that it never
