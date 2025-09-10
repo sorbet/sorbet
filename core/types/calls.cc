@@ -2429,7 +2429,7 @@ public:
 } Magic_expandSplat;
 
 class Magic_callWithSplat : public IntrinsicMethod {
-    friend class Magic_callWithSplatAndBlock;
+    friend class Magic_callWithSplatAndBlockPass;
 
 private:
     static InlinedVector<const TypeAndOrigins *, 2> generateSendArgs(const TupleType *posTuple,
@@ -2550,8 +2550,8 @@ public:
     }
 } Magic_callWithSplat;
 
-class Magic_callWithBlock : public IntrinsicMethod {
-    friend class Magic_callWithSplatAndBlock;
+class Magic_callWithBlockPass : public IntrinsicMethod {
+    friend class Magic_callWithSplatAndBlockPass;
 
 private:
     static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
@@ -2660,14 +2660,14 @@ private:
                 if (auto e = gs.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
                     e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType.show(gs));
                     if (!dispatched.secondary) {
-                        Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                        Magic_callWithBlockPass::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                     }
                 }
 
                 // Create a new proc of correct arity, with everything as untyped,
                 // and then use this type instead of passedInBlockType in later subtype checks.
                 // This allows the generic parameters to be instantiated with untyped rather than bottom.
-                if (optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
+                if (optional<int> procArity = Magic_callWithBlockPass::getArityForBlock(nonNilableBlockType)) {
                     vector<core::TypePtr> targs(*procArity + 1, core::Types::untypedUntracked());
                     auto procWithCorrectArity = core::Symbols::Proc(*procArity);
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
@@ -2676,7 +2676,7 @@ private:
                 e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType.show(gs),
                             passedInBlockType.show(gs));
                 if (!dispatched.secondary) {
-                    Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                    Magic_callWithBlockPass::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                 }
                 e.addErrorSections(move(errorDetailsCollector));
             }
@@ -2782,10 +2782,10 @@ public:
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
         TypePtr finalBlockType =
-            Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
-                                            args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
+            Magic_callWithBlockPass::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
+                                                args.locs.fun, args.originForUninitialized, args.suppressErrors);
+        optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
+        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2801,11 +2801,12 @@ public:
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
 
-        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(2), args.callLoc(), res);
+        Magic_callWithBlockPass::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(2), args.callLoc(),
+                                              res);
     }
-} Magic_callWithBlock;
+} Magic_callWithBlockPass;
 
-class Magic_callWithSplatAndBlock : public IntrinsicMethod {
+class Magic_callWithSplatAndBlockPass : public IntrinsicMethod {
 public:
     vector<NameRef> dispatchesTo() const override {
         // This is in addition to the custom handling that we do in Substitute.cc for the dispatch
@@ -2896,10 +2897,10 @@ public:
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
         TypePtr finalBlockType =
-            Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
-                                            args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlock::argInfoByArity(blockArity)};
+            Magic_callWithBlockPass::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
+                                                args.locs.fun, args.originForUninitialized, args.suppressErrors);
+        optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
+        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::argInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2915,9 +2916,10 @@ public:
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
 
-        Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(4), args.callLoc(), res);
+        Magic_callWithBlockPass::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(4), args.callLoc(),
+                                              res);
     }
-} Magic_callWithSplatAndBlock;
+} Magic_callWithSplatAndBlockPass;
 
 class Magic_suggestUntypedConstantType : public IntrinsicMethod {
 public:
@@ -4588,8 +4590,9 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
-    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
-    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlockPass(), &Magic_callWithBlockPass},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlockPass(),
+     &Magic_callWithSplatAndBlockPass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestConstantType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestFieldType(), &Magic_suggestUntypedFieldType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},

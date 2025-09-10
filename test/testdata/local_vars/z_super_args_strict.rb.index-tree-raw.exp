@@ -1119,7 +1119,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-block>>
+            fun = <U <call-with-block-pass>>
             block = nullptr
             pos_args = 3
             args = [

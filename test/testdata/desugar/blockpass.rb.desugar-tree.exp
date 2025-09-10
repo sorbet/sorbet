@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def calls_with_object<<todo method>>(&blk)
-    ::<Magic>.<call-with-block>(<self>, :calls_arg_with_object, blk, <emptyTree>::<C HasMeth>.new())
+    ::<Magic>.<call-with-block-pass>(<self>, :calls_arg_with_object, blk, <emptyTree>::<C HasMeth>.new())
   end
 
   class <emptyTree>::<C CallsWithObject><<C <todo sym>>> < (::<todo sym>)
@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C CallsWithObjectChild><<C <todo sym>>> < (<emptyTree>::<C CallsWithObject>)
     def self.calls_with_object<<todo method>>(&blk)
-      ::<Magic>.<call-with-block>(<self>, :<super>, blk)
+      ::<Magic>.<call-with-block-pass>(<self>, :<super>, blk)
     end
   end
 
@@ -51,9 +51,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.calls_with_object() do |x|
         x.meth()
       end
-      ::<Magic>.<call-with-block>(<self>, :calls_with_object, blk)
-      ::<Magic>.<call-with-block>(<self>, :calls_with_object, <self>.returns_lambda())
-      ::<Magic>.<call-with-block>(<self>, :calls_with_object, <emptyTree>::<C HasToProc>.new())
+      ::<Magic>.<call-with-block-pass>(<self>, :calls_with_object, blk)
+      ::<Magic>.<call-with-block-pass>(<self>, :calls_with_object, <self>.returns_lambda())
+      ::<Magic>.<call-with-block-pass>(<self>, :calls_with_object, <emptyTree>::<C HasToProc>.new())
       <self>.calls_with_object() do |*args|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C HasToProc>.new().to_proc(), :call, ::<Magic>.<splat>(args), nil)
       end

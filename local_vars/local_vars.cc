@@ -286,9 +286,9 @@ class LocalNameInserter {
         //    Posarg splat? | "do" attached? | Lower to...
         //    --------------+----------------+------------
         //    Yes           | Yes            | ::<Magic>::<call-with-splat>(..., :super, ...) do <foo> end
-        //    Yes           | No             | ::<Magic>::<call-with-splat-and-block>(..., :super, ..., &<blkvar>)
+        //    Yes           | No             | ::<Magic>::<call-with-splat-and-block-pass>(..., :super, ..., &<blkvar>)
         //    No            | Yes            | super(...) do <foo> end
-        //    No            | No             | ::<Magic>::<call-with-block>(..., :super, ..., &<blkvar>)
+        //    No            | No             | ::<Magic>::<call-with-block-pass>(..., :super, ..., &<blkvar>)
         //
         // (In particular, note that the <blkvar> is thrown on the floor when a "do" is present.)
 
@@ -386,20 +386,20 @@ class LocalNameInserter {
 
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
-            // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
-            // a hack, but 'super' is currently treated as untyped anyway.
+            // <call-with-splat-and-block-pass> that the shapes of the splatted hashes be known statically. This is a
+            // bit of a hack, but 'super' is currently treated as untyped anyway.
             // TODO(neil): this probably blames to unsafe, we should find a way to blame to super maybe?
             newArgs.push_back(ast::MK::Unsafe(original.loc, std::move(newRecv)));
             newRecv = ast::MK::Magic(original.loc);
             newArgs.push_back(std::move(method));
 
-            // For <call-with-splat> and <call-with-splat-and-block> posargs are always passed in an array.
+            // For <call-with-splat> and <call-with-splat-and-block-pass> posargs are always passed in an array.
             if (posArgsArray == nullptr) {
                 posArgsArray = ast::MK::Array(original.loc, std::move(posArgsEntries));
             }
             newArgs.push_back(std::move(posArgsArray));
 
-            // For <call-with-splat> and <call-with-splat-and-block>, the kwargs array can either be a
+            // For <call-with-splat> and <call-with-splat-and-block-pass>, the kwargs array can either be a
             // [:key, val, :key, val, ...] array or a one-element [kwargshash] array, depending on whether splatting
             // has taken place, or nil (if no kwargs at all).
             ast::ExpressionPtr boxedKwArgs;
@@ -430,8 +430,8 @@ class LocalNameInserter {
                 newFlags.hasBlock = true;
                 newArgs.push_back(std::move(originalBlock));
             } else if (shouldForwardBlockArg) {
-                // <call-with-splat-and-block>(..., &blk)
-                newFun = core::Names::callWithSplatAndBlock();
+                // <call-with-splat-and-block-pass>(..., &blk)
+                newFun = core::Names::callWithSplatAndBlockPass();
                 newArgs.push_back(std::move(blockArg));
                 newNumPosArgs++;
             } else {
@@ -463,7 +463,7 @@ class LocalNameInserter {
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
 
-            newFun = core::Names::callWithBlock();
+            newFun = core::Names::callWithBlockPass();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
             newArgs.reserve(posArgsEntries.size() + kwArgKeyEntries.size() * 2 + /* hasKwSplat */
