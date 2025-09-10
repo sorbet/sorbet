@@ -480,22 +480,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                  send->flags);
         }
 
-        case core::Names::after().rawId():
-        case core::Names::before().rawId(): {
-            if (send->numPosArgs() != 0) {
-                return nullptr;
-            }
-
-            auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
-            ConstantMover constantMover;
-            ast::TreeWalk::apply(ctx, constantMover, block->body);
-            auto declLoc = declLocForSendWithBlock(*send);
-            auto method = addSigVoid(
-                ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, name,
-                                               prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
-            return constantMover.addConstantsToExpression(send->loc, move(method));
-        }
-
         case core::Names::describe().rawId(): {
             if (send->numPosArgs() != 1) {
                 return nullptr;
@@ -528,6 +512,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                   flattenDescribeBody(move(rhs)));
         }
 
+        case core::Names::after().rawId():
+        case core::Names::before().rawId():
         case core::Names::it().rawId(): {
             auto name = nameForTestHelperMethod(ctx, *send);
             if (!name.exists()) {
@@ -539,6 +525,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             auto declLoc = declLocForSendWithBlock(*send);
             auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
                                                     prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
+
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
             // omitting it saves memory.
