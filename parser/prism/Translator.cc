@@ -302,40 +302,36 @@ unique_ptr<parser::Node> Translator::translateVariableAssignment(pm_node_t *node
                                                                                           move(lhs));
 }
 
-template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-unique_ptr<parser::Node> Translator::translateSendAssignment(PrismAssignmentNode *node, core::LocOffsets location) {
-    unique_ptr<parser::Node> lhs;
+template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, core::LocOffsets location) {
+    auto callNode = down_cast<PrismAssignmentNode>(node);
+    auto name = translateConstantName(callNode->read_name);
+    auto receiver = translate(callNode->receiver);
+    auto messageLoc = translateLoc(callNode->message_loc);
 
-    if constexpr (is_same_v<SorbetLHSNode, parser::Send>) {
-        // Handle operator assignment to the result of a method call, like `a.b += 1`
-        auto name = translateConstantName(node->read_name);
-        auto receiver = translate(node->receiver);
-        auto messageLoc = translateLoc(node->message_loc);
-        if (!directlyDesugar || !hasExpr(receiver)) {
-            lhs = make_unique<SorbetLHSNode>(location, move(receiver), name, messageLoc, NodeVec{});
-        } else {
-            auto receiverExpr = receiver->takeDesugaredExpr();
-
-            // It is okay to call private methods on self
-            // Is this the best place for this logic?
-            ast::Send::Flags flags;
-            flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-
-            auto send = MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
-            lhs = make_node_with_expr<SorbetLHSNode>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
-        }
-    } else if constexpr (is_same_v<SorbetLHSNode, parser::CSend>) {
+    if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
         // Handle operator assignment to the result of a safe method call, like `a&.b += 1`
         // TODO: this requires usage of nextUniqueDesugarName
-        auto name = translateConstantName(node->read_name);
-        auto receiver = translate(node->receiver);
-        auto messageLoc = translateLoc(node->message_loc);
-        lhs = make_unique<SorbetLHSNode>(location, move(receiver), name, messageLoc, NodeVec{});
-    } else {
-        static_assert(false && sizeof(SorbetLHSNode), "Invalid LHS type. Must be `Send` or `CSend`.");
+        auto lhs = make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
+        return handleOpAsgnDesugaring<PrismAssignmentNode, SorbetAssignmentNode, parser::CSend>(callNode, location,
+                                                                                                move(lhs));
     }
+    // Handle operator assignment to the result of a method call, like `a.b += 1`
+    if (!directlyDesugar || !hasExpr(receiver)) {
+        auto lhs = make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{});
+        return handleOpAsgnDesugaring<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(callNode, location,
+                                                                                               move(lhs));
+    }
+    auto receiverExpr = receiver->takeDesugaredExpr();
 
-    return handleOpAsgnDesugaring<PrismAssignmentNode, SorbetAssignmentNode, SorbetLHSNode>(node, location, move(lhs));
+    ast::Send::Flags flags;
+    flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+
+    auto send = MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
+    auto lhs = make_node_with_expr<parser::Send>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
+
+    return handleOpAsgnDesugaring<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(callNode, location,
+                                                                                           move(lhs));
 }
 
 unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveConcreteSyntax) {
@@ -586,14 +582,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_node_with_expr<parser::Break>(move(expr), location, move(arguments));
         }
         case PM_CALL_AND_WRITE_NODE: { // And-assignment to a method call, e.g. `a.b &&= false`
-            auto callNode = down_cast<pm_call_and_write_node>(node);
-            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                return translateSendAssignment<pm_call_and_write_node, parser::AndAsgn, parser::CSend>(callNode,
-                                                                                                       location);
-            } else {
-                return translateSendAssignment<pm_call_and_write_node, parser::AndAsgn, parser::Send>(callNode,
-                                                                                                      location);
-            }
+            return translateSendAssignment<pm_call_and_write_node, parser::AndAsgn>(node, location);
         }
         case PM_CALL_NODE: { // A method call like `a.b()` or `a&.b()`
             auto callNode = down_cast<pm_call_node>(node);
@@ -799,23 +788,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return sendNode;
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
-            auto callNode = down_cast<pm_call_operator_write_node>(node);
-            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                return translateSendAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::CSend>(callNode,
-                                                                                                           location);
-            } else {
-                return translateSendAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::Send>(callNode,
-                                                                                                          location);
-            }
+            return translateSendAssignment<pm_call_operator_write_node, parser::OpAsgn>(node, location);
         }
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
-            auto callNode = down_cast<pm_call_or_write_node>(node);
-            if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                return translateSendAssignment<pm_call_or_write_node, parser::OrAsgn, parser::CSend>(callNode,
-                                                                                                     location);
-            } else {
-                return translateSendAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(callNode, location);
-            }
+            return translateSendAssignment<pm_call_or_write_node, parser::OrAsgn>(node, location);
         }
         case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
             // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
