@@ -4,7 +4,7 @@ module Sorbet::Private::Static
     sig { params(arg0: T.class_of(PackageSpec)).void }
     def self.import(arg0); end
 
-    sig { params(arg0: T.class_of(PackageSpec), only: T.untyped).void }
+    sig { params(arg0: T.class_of(PackageSpec), only: T.nilable(String)).void }
     def self.test_import(arg0, only: nil); end
 
     sig { params(arg0: T.untyped).void }
