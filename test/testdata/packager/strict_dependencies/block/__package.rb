@@ -4,6 +4,8 @@
 # packager-layers: a
 
 class Block < PackageSpec
-  strict_dependencies 'false' do end # error: Invalid expression in package: `Block` not allowed
+  strict_dependencies 'false' do end
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
+  #                          ^^^^^^^ error: does not take a block
   layer 'a'
 end
