@@ -529,15 +529,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
 
         case core::Names::it().rawId(): {
-            if (send->numPosArgs() != 1) {
+            auto name = nameForTestHelperMethod(ctx, *send);
+            if (!name.exists()) {
                 return nullptr;
             }
-            auto &arg = send->getPosArg(0);
 
-            auto argString = to_s(ctx, arg);
             ConstantMover constantMover;
             ast::TreeWalk::apply(ctx, constantMover, block->body);
-            auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
             auto declLoc = declLocForSendWithBlock(*send);
             auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
                                                     prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
@@ -546,7 +544,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             // omitting it saves memory.
             ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
             method = addSigVoid(ctx, move(method));
-            if (!ast::isa_tree<ast::Literal>(arg)) {
+            if (send->numPosArgs() > 0 && !ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
                 method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
             }
             return constantMover.addConstantsToExpression(send->loc, move(method));
