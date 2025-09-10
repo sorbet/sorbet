@@ -1024,92 +1024,56 @@ public:
         return ClassOrModuleRef::fromRaw(86);
     }
 
-    static ClassOrModuleRef PackageSpecSingleton() {
+    static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(87);
     }
 
-    static MethodRef PackageSpec_import() {
-        return MethodRef::fromRaw(10);
-    }
-
-    static MethodRef PackageSpec_test_import() {
-        return MethodRef::fromRaw(11);
-    }
-
-    static MethodRef PackageSpec_export() {
-        return MethodRef::fromRaw(12);
-    }
-
-    static ClassOrModuleRef Encoding() {
+    static ClassOrModuleRef Thread() {
         return ClassOrModuleRef::fromRaw(88);
     }
 
-    static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(89);
-    }
-
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(13);
+        return MethodRef::fromRaw(10);
     }
 
     static MethodRef todoMethod() {
-        return MethodRef::fromRaw(14);
+        return MethodRef::fromRaw(11);
     }
 
     static MethodRef rootStaticInit() {
-        return MethodRef::fromRaw(15);
-    }
-
-    static MethodRef PackageSpec_visible_to() {
-        return MethodRef::fromRaw(16);
-    }
-
-    static MethodRef PackageSpec_export_all() {
-        return MethodRef::fromRaw(17);
-    }
-
-    static MethodRef PackageSpec_strict_dependencies() {
-        return MethodRef::fromRaw(18);
-    }
-
-    static MethodRef PackageSpec_layer() {
-        return MethodRef::fromRaw(19);
-    }
-
-    static MethodRef PackageSpec_sorbet() {
-        return MethodRef::fromRaw(20);
+        return MethodRef::fromRaw(12);
     }
 
     static ClassOrModuleRef MagicBindToAttachedClass() {
-        return ClassOrModuleRef::fromRaw(90);
+        return ClassOrModuleRef::fromRaw(89);
     }
 
     static ClassOrModuleRef MagicBindToSelfType() {
-        return ClassOrModuleRef::fromRaw(91);
+        return ClassOrModuleRef::fromRaw(90);
     }
 
     static ClassOrModuleRef T_Types() {
-        return ClassOrModuleRef::fromRaw(92);
+        return ClassOrModuleRef::fromRaw(91);
     }
 
     static ClassOrModuleRef T_Types_Base() {
-        return ClassOrModuleRef::fromRaw(93);
+        return ClassOrModuleRef::fromRaw(92);
     }
 
     static ClassOrModuleRef Data() {
-        return ClassOrModuleRef::fromRaw(94);
+        return ClassOrModuleRef::fromRaw(93);
     }
 
     static ClassOrModuleRef T_Class() {
-        return ClassOrModuleRef::fromRaw(95);
+        return ClassOrModuleRef::fromRaw(94);
     }
 
     static MethodRef T_Generic_squareBrackets() {
-        return MethodRef::fromRaw(21);
+        return MethodRef::fromRaw(13);
     }
 
     static MethodRef Kernel_lambda() {
-        return MethodRef::fromRaw(22);
+        return MethodRef::fromRaw(14);
     }
 
     static TypeArgumentRef Kernel_lambda_returnType() {
@@ -1117,11 +1081,19 @@ public:
     }
 
     static MethodRef Kernel_lambdaTLet() {
-        return MethodRef::fromRaw(23);
+        return MethodRef::fromRaw(15);
     }
 
     static MethodRef Kernel_proc() {
-        return MethodRef::fromRaw(24);
+        return MethodRef::fromRaw(16);
+    }
+
+    static MethodRef Module_syntheticSquareBrackets() {
+        return MethodRef::fromRaw(17);
+    }
+
+    static MethodRef Sorbet_Private_Static_typeMember() {
+        return MethodRef::fromRaw(18);
     }
 
     static TypeArgumentRef Kernel_proc_returnType() {
@@ -1129,19 +1101,7 @@ public:
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
-        return ClassOrModuleRef::fromRaw(96);
-    }
-
-    static MethodRef Module_syntheticSquareBrackets() {
-        return MethodRef::fromRaw(57);
-    }
-
-    static MethodRef Sorbet_Private_Static_typeMember() {
-        return MethodRef::fromRaw(58);
-    }
-
-    static MethodRef PackageSpec_preludePackage() {
-        return MethodRef::fromRaw(59);
+        return ClassOrModuleRef::fromRaw(95);
     }
 
     static FieldRef Magic_UntypedSource_super() {

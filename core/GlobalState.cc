@@ -619,23 +619,6 @@ void GlobalState::initEmpty() {
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpec());
 
-    klass = klass.data(*this)->singletonClass(*this);
-    ENFORCE_NO_TIMER(klass == Symbols::PackageSpecSingleton());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::import())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
-                 .build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_import());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::testImport())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
-                 .defaultKeywordArg(Names::only())
-                 .build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_test_import());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_export());
-
     klass = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE_NO_TIMER(klass == Symbols::Encoding());
 
@@ -652,28 +635,6 @@ void GlobalState::initEmpty() {
 
     method = this->staticInitForClass(core::Symbols::root(), Loc::none());
     ENFORCE_NO_TIMER(method == Symbols::rootStaticInit());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::visibleTo()).arg(Names::arg0()).build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_visible_to());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportAll()).build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_export_all());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::strictDependencies())
-                 .typedArg(Names::arg0(), Types::String())
-                 .build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_strict_dependencies());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::layer())
-                 .typedArg(Names::arg0(), Types::String())
-                 .build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_layer());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::sorbet())
-                 .keywordArg(Names::min_typed_level(), Types::String())
-                 .keywordArg(Names::tests_min_typed_level(), Types::String())
-                 .build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_sorbet());
 
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
@@ -711,6 +672,17 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::Kernel(), Names::proc()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_proc());
+
+    method = enterMethod(*this, Symbols::Module(), Names::syntheticSquareBrackets())
+                 .repeatedUntypedArg(Names::arg())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::Module_syntheticSquareBrackets());
+
+    method =
+        enterMethod(*this, Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this), Names::typeMember())
+            .repeatedTopArg(Names::args())
+            .build();
+    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
 
     typeArgument = enterTypeArgument(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_proc_returnType());
@@ -947,20 +919,6 @@ void GlobalState::initEmpty() {
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
-
-    method = enterMethod(*this, Symbols::Module(), Names::syntheticSquareBrackets())
-                 .repeatedUntypedArg(Names::arg())
-                 .build();
-    ENFORCE_NO_TIMER(method == Symbols::Module_syntheticSquareBrackets());
-
-    method =
-        enterMethod(*this, Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this), Names::typeMember())
-            .repeatedTopArg(Names::args())
-            .build();
-    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::preludePackage()).build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_preludePackage());
 
     int reservedCount = 0;
 
