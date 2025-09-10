@@ -1024,22 +1024,6 @@ public:
         return ClassOrModuleRef::fromRaw(86);
     }
 
-    static ClassOrModuleRef PackageSpecSingleton() {
-        return ClassOrModuleRef::fromRaw(87);
-    }
-
-    static MethodRef PackageSpec_import() {
-        return MethodRef::fromRaw(10);
-    }
-
-    static MethodRef PackageSpec_test_import() {
-        return MethodRef::fromRaw(11);
-    }
-
-    static MethodRef PackageSpec_export() {
-        return MethodRef::fromRaw(12);
-    }
-
     static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(88);
     }
@@ -1049,35 +1033,15 @@ public:
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(13);
+        return MethodRef::fromRaw(10);
     }
 
     static MethodRef todoMethod() {
-        return MethodRef::fromRaw(14);
+        return MethodRef::fromRaw(11);
     }
 
     static MethodRef rootStaticInit() {
-        return MethodRef::fromRaw(15);
-    }
-
-    static MethodRef PackageSpec_visible_to() {
-        return MethodRef::fromRaw(16);
-    }
-
-    static MethodRef PackageSpec_export_all() {
-        return MethodRef::fromRaw(17);
-    }
-
-    static MethodRef PackageSpec_strict_dependencies() {
-        return MethodRef::fromRaw(18);
-    }
-
-    static MethodRef PackageSpec_layer() {
-        return MethodRef::fromRaw(19);
-    }
-
-    static MethodRef PackageSpec_sorbet() {
-        return MethodRef::fromRaw(20);
+        return MethodRef::fromRaw(12);
     }
 
     static ClassOrModuleRef MagicBindToAttachedClass() {
@@ -1105,11 +1069,11 @@ public:
     }
 
     static MethodRef T_Generic_squareBrackets() {
-        return MethodRef::fromRaw(21);
+        return MethodRef::fromRaw(13);
     }
 
     static MethodRef Kernel_lambda() {
-        return MethodRef::fromRaw(22);
+        return MethodRef::fromRaw(14);
     }
 
     static TypeArgumentRef Kernel_lambda_returnType() {
@@ -1117,23 +1081,19 @@ public:
     }
 
     static MethodRef Kernel_lambdaTLet() {
-        return MethodRef::fromRaw(23);
+        return MethodRef::fromRaw(15);
     }
 
     static MethodRef Kernel_proc() {
-        return MethodRef::fromRaw(24);
+        return MethodRef::fromRaw(16);
     }
 
     static MethodRef Module_syntheticSquareBrackets() {
-        return MethodRef::fromRaw(25);
+        return MethodRef::fromRaw(17);
     }
 
     static MethodRef Sorbet_Private_Static_typeMember() {
-        return MethodRef::fromRaw(26);
-    }
-
-    static MethodRef PackageSpec_preludePackage() {
-        return MethodRef::fromRaw(27);
+        return MethodRef::fromRaw(18);
     }
 
     static TypeArgumentRef Kernel_proc_returnType() {
