@@ -78,6 +78,10 @@ class MyTest
         end
       end
     end
+
+    it do
+      puts("anonymous it blocks")
+    end
 end
 
 describe 'extends T::Sig' do

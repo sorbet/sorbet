@@ -226,14 +226,19 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
             return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
 
         case core::Names::it().rawId(): {
-            if (arity != 1) {
-                return core::NameRef::noName();
+            switch (arity) {
+                case 0:
+                    return core::Names::itAngles();
+                case 1:
+                    return ctx.state.enterNameUTF8("<it '" + to_s(ctx, send.getPosArg(0)) + "'>");
+                default:
+                    return core::NameRef::noName();
             }
-            return ctx.state.enterNameUTF8("<it '" + to_s(ctx, send.getPosArg(0)) + "'>");
         }
-    }
 
-    return core::NameRef::noName();
+        default:
+            return core::NameRef::noName();
+    }
 }
 
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
@@ -480,22 +485,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                  send->flags);
         }
 
-        case core::Names::after().rawId():
-        case core::Names::before().rawId(): {
-            if (send->numPosArgs() != 0) {
-                return nullptr;
-            }
-
-            auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
-            ConstantMover constantMover;
-            ast::TreeWalk::apply(ctx, constantMover, block->body);
-            auto declLoc = declLocForSendWithBlock(*send);
-            auto method = addSigVoid(
-                ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, name,
-                                               prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
-            return constantMover.addConstantsToExpression(send->loc, move(method));
-        }
-
         case core::Names::describe().rawId(): {
             if (send->numPosArgs() != 1) {
                 return nullptr;
@@ -528,25 +517,26 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                   flattenDescribeBody(move(rhs)));
         }
 
+        case core::Names::after().rawId():
+        case core::Names::before().rawId():
         case core::Names::it().rawId(): {
-            if (send->numPosArgs() != 1) {
+            auto name = nameForTestHelperMethod(ctx, *send);
+            if (!name.exists()) {
                 return nullptr;
             }
-            auto &arg = send->getPosArg(0);
 
-            auto argString = to_s(ctx, arg);
             ConstantMover constantMover;
             ast::TreeWalk::apply(ctx, constantMover, block->body);
-            auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
             auto declLoc = declLocForSendWithBlock(*send);
             auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
                                                     prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
+
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
             // omitting it saves memory.
             ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
             method = addSigVoid(ctx, move(method));
-            if (!ast::isa_tree<ast::Literal>(arg)) {
+            if (send->numPosArgs() > 0 && !ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
                 method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
             }
             return constantMover.addConstantsToExpression(send->loc, move(method));

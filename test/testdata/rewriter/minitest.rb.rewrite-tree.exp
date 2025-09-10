@@ -61,6 +61,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    def <it><<todo method>>(&<blk>)
+      <self>.puts("anonymous it blocks")
+    end
+
     <runtime method definition of outside_method>
 
     begin
@@ -99,10 +103,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <runtime method definition of instance_helper>
-
-    <runtime method definition of <before>>
-
-    <runtime method definition of <after>>
 
     <runtime method definition of self.random_method>
 
