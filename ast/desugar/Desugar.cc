@@ -929,7 +929,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 sendargs.emplace_back(move(arg));
                             }
 
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlock(), send->methodLoc,
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), send->methodLoc,
                                            numPosArgs, move(sendargs), flags);
                         }
                     }

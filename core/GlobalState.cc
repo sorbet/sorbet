@@ -743,7 +743,7 @@ void GlobalState::initEmpty() {
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<call-with-block>(args: *T.untyped) => T.untyped
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithBlock())
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithBlockPass())
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<call-with-splat-and-block>(args: *T.untyped) => T.untyped

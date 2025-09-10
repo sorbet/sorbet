@@ -463,7 +463,7 @@ class LocalNameInserter {
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
 
-            newFun = core::Names::callWithBlock();
+            newFun = core::Names::callWithBlockPass();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
             newArgs.reserve(posArgsEntries.size() + kwArgKeyEntries.size() * 2 + /* hasKwSplat */
