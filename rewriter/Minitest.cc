@@ -141,22 +141,6 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
 
 } // namespace
 
-ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body,
-                                      bool insideDescribe);
-
-ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
-    body = tryRunSingleOnSend(ctx, isClass, std::move(body), insideDescribe);
-
-    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
-        for (auto &exp : bodySeq->stats) {
-            exp = tryRunSingleOnSend(ctx, isClass, std::move(exp), insideDescribe);
-        }
-
-        bodySeq->expr = tryRunSingleOnSend(ctx, isClass, std::move(bodySeq->expr), insideDescribe);
-    }
-    return body;
-}
-
 // Namer only looks at ancestors at the ClassDef top-level. If a `describe` block has ancestor items
 // at the top level inside the InsSeq of the Block body, that should count as a an ancestor in namer.
 // But if we just plop the whole InsSeq as a single element inside the the ClassDef rhs, they won't
@@ -438,6 +422,33 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
     return body;
 }
 
+ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe);
+
+ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body,
+                                      bool insideDescribe) {
+    auto bodySend = ast::cast_tree<ast::Send>(body);
+    if (bodySend) {
+        auto change = runSingle(ctx, isClass, bodySend, insideDescribe);
+        if (change) {
+            return change;
+        }
+    }
+    return body;
+}
+
+ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
+    body = tryRunSingleOnSend(ctx, isClass, std::move(body), insideDescribe);
+
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
+        for (auto &exp : bodySeq->stats) {
+            exp = tryRunSingleOnSend(ctx, isClass, std::move(exp), insideDescribe);
+        }
+
+        bodySeq->expr = tryRunSingleOnSend(ctx, isClass, std::move(bodySeq->expr), insideDescribe);
+    }
+    return body;
+}
+
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe) {
     if (!send->hasBlock()) {
         return nullptr;
@@ -585,18 +596,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     }
 
     return nullptr;
-}
-
-ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body,
-                                      bool insideDescribe) {
-    auto bodySend = ast::cast_tree<ast::Send>(body);
-    if (bodySend) {
-        auto change = runSingle(ctx, isClass, bodySend, insideDescribe);
-        if (change) {
-            return change;
-        }
-    }
-    return body;
 }
 
 vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
