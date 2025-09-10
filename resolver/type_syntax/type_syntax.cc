@@ -112,18 +112,16 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
         return false;
     }
 
-    if (send.recv.isSelfReference()) {
-        return send.numPosArgs() <= 1;
-    }
-
-    auto nargs = send.numPosArgs();
-    if (!(nargs == 1 || nargs == 2)) {
+    if (send.numPosArgs() > 1) {
         return false;
     }
 
-    auto recv = ast::cast_tree<ast::ConstantLit>(send.recv);
-    if (recv != nullptr && recv->symbol() == core::Symbols::Sorbet_Private_Static()) {
+    if (send.recv.isSelfReference()) {
         return true;
+    }
+
+    if (auto recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+        return recv->symbol() == core::Symbols::T_Sig_WithoutRuntime();
     }
 
     return false;
