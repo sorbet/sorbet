@@ -115,7 +115,7 @@ public:
                 }
             }
         } else if (send.fun == core::Names::callWithSplat() || send.fun == core::Names::callWithBlockPass() ||
-                   send.fun == core::Names::callWithSplatAndBlock() || send.fun == core::Names::checkAndAnd()) {
+                   send.fun == core::Names::callWithSplatAndBlockPass() || send.fun == core::Names::checkAndAnd()) {
             ENFORCE(send.numPosArgs() > 2, "These are special desugar methods, should have at least two args");
 
             // We're lucky because all of these methods have the symbol they dispatch to as the

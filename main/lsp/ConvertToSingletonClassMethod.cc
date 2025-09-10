@@ -107,7 +107,7 @@ public:
 
         if (sendResp->originalName == core::Names::callWithSplat() ||
             sendResp->originalName == core::Names::callWithBlockPass() ||
-            sendResp->originalName == core::Names::callWithSplatAndBlock()) {
+            sendResp->originalName == core::Names::callWithSplatAndBlockPass()) {
             // These are too hard... skipping for the time being.
             return;
         }

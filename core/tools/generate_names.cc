@@ -452,7 +452,7 @@ NameDef names[] = {
     {"require"},
     {"callWithSplat", "<call-with-splat>"},
     {"callWithBlockPass", "<call-with-block>"},
-    {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
+    {"callWithSplatAndBlockPass", "<call-with-splat-and-block>"},
     {"enumerableToH", "enumerable_to_h"},
     {"blockBreak", "<block-break>"},
     {"stringInterpolate", "<string-interpolate>"},

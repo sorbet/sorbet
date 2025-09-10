@@ -431,7 +431,7 @@ class LocalNameInserter {
                 newArgs.push_back(std::move(originalBlock));
             } else if (shouldForwardBlockArg) {
                 // <call-with-splat-and-block>(..., &blk)
-                newFun = core::Names::callWithSplatAndBlock();
+                newFun = core::Names::callWithSplatAndBlockPass();
                 newArgs.push_back(std::move(blockArg));
                 newNumPosArgs++;
             } else {

@@ -873,8 +873,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &block)`
 
                             sendargs.emplace_back(move(blockPassArg));
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlock(), send->methodLoc,
-                                           5, move(sendargs), flags);
+                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(),
+                                           send->methodLoc, 5, move(sendargs), flags);
                         }
                     }
                     result = move(res);

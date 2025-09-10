@@ -2429,7 +2429,7 @@ public:
 } Magic_expandSplat;
 
 class Magic_callWithSplat : public IntrinsicMethod {
-    friend class Magic_callWithSplatAndBlock;
+    friend class Magic_callWithSplatAndBlockPass;
 
 private:
     static InlinedVector<const TypeAndOrigins *, 2> generateSendArgs(const TupleType *posTuple,
@@ -2551,7 +2551,7 @@ public:
 } Magic_callWithSplat;
 
 class Magic_callWithBlockPass : public IntrinsicMethod {
-    friend class Magic_callWithSplatAndBlock;
+    friend class Magic_callWithSplatAndBlockPass;
 
 private:
     static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
@@ -2806,7 +2806,7 @@ public:
     }
 } Magic_callWithBlockPass;
 
-class Magic_callWithSplatAndBlock : public IntrinsicMethod {
+class Magic_callWithSplatAndBlockPass : public IntrinsicMethod {
 public:
     vector<NameRef> dispatchesTo() const override {
         // This is in addition to the custom handling that we do in Substitute.cc for the dispatch
@@ -2919,7 +2919,7 @@ public:
         Magic_callWithBlockPass::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(4), args.callLoc(),
                                               res);
     }
-} Magic_callWithSplatAndBlock;
+} Magic_callWithSplatAndBlockPass;
 
 class Magic_suggestUntypedConstantType : public IntrinsicMethod {
 public:
@@ -4591,7 +4591,8 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlockPass(), &Magic_callWithBlockPass},
-    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlockPass(),
+     &Magic_callWithSplatAndBlockPass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestConstantType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestFieldType(), &Magic_suggestUntypedFieldType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},
