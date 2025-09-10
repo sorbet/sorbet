@@ -1023,7 +1023,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_HASH_NODE: { // A hash literal, like `{ a: 1, b: 2 }`
             auto kvPairs = translateKeyValuePairs(down_cast<pm_hash_node>(node)->elements);
 
-            if (!directlyDesugar || !hasExpr(kvPairs)) {
+            auto elementsHaveExprs = absl::c_all_of(kvPairs, [](const auto &node) {
+                // `parser::Pair` nodes never have a desugared expr, because they have no ExpressionPtr equivalent.
+                // Instead, we check their children ourselves.
+                if (auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get())) {
+                    return hasExpr(pair->key, pair->value);
+                }
+
+                return hasExpr(node);
+            });
+
+            if (!directlyDesugar || !elementsHaveExprs) {
                 return make_unique<parser::Hash>(location, false, move(kvPairs));
             }
 
