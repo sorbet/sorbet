@@ -511,14 +511,10 @@ ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::Expr
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe) {
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference()) {
-        return nullptr;
-    }
-
     switch (send->fun.rawId()) {
         case core::Names::testEach().rawId():
         case core::Names::testEachHash().rawId(): {
-            if (!send->hasBlock()) {
+            if (!send->hasBlock() || !send->recv.isSelfReference()) {
                 return nullptr;
             }
 
@@ -561,7 +557,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
 
         case core::Names::describe().rawId(): {
-            if (!send->hasBlock() || send->numPosArgs() != 1) {
+            if (!send->hasBlock() || send->numPosArgs() != 1 || !send->recv.isSelfReference()) {
                 return nullptr;
             }
             auto &arg = send->getPosArg(0);
@@ -606,7 +602,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId(): {
-            if (!send->hasBlock() || (!insideDescribe && requiresSecondFactor(send->fun))) {
+            if (!send->hasBlock() || !send->recv.isSelfReference() ||
+                (!insideDescribe && requiresSecondFactor(send->fun))) {
                 return nullptr;
             }
 
@@ -635,7 +632,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::let().rawId():
         case core::Names::let_bang().rawId():
         case core::Names::subject().rawId(): {
-            if (!send->hasBlock() || !insideDescribe) {
+            if (!send->hasBlock() || !send->recv.isSelfReference() || !insideDescribe) {
                 return nullptr;
             }
 
@@ -655,7 +652,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::sharedExamples().rawId():
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
-            if (!send->hasBlock() || !insideDescribe || send->numPosArgs() != 1) {
+            if (!send->hasBlock() || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
                 return nullptr;
             }
 
@@ -695,7 +692,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (send->hasBlock() || !insideDescribe || send->numPosArgs() != 1) {
+            if (send->hasBlock() || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
                 return nullptr;
             }
 
