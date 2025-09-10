@@ -97,6 +97,9 @@ private:
 
     NodeVec translateArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
     parser::NodeVec translateKeyValuePairs(pm_node_list_t elements);
+
+    ast::ExpressionPtr desugarHash(core::LocOffsets loc, NodeVec &kvPairs);
+
     static bool isKeywordHashElement(sorbet::parser::Node *node);
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                          std::unique_ptr<parser::Node> sendNode);
