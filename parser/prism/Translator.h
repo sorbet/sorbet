@@ -119,11 +119,12 @@ private:
     std::unique_ptr<parser::Node> translateAssignment(pm_node_t *node);
 
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-    std::unique_ptr<parser::Node> translateOpAssignment(pm_node_t *node);
+    std::unique_ptr<parser::Node> translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                        std::unique_ptr<parser::Node> lhs);
 
-    template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-    std::unique_ptr<parser::Node> handleOpAsgnDesugaring(PrismAssignmentNode *node, core::LocOffsets location,
-                                                         std::unique_ptr<parser::Node> lhs);
+    // Helper to translate operator assignment targeting an indexed expression (e.g., `a[0] += 1`).
+    template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+    std::unique_ptr<parser::Node> translateIndexAssignment(pm_node_t *node, core::LocOffsets location);
 
     template <typename PrismConstantNode, typename SorbetAssignmentNode>
     std::unique_ptr<parser::Node> translateConstantAssignment(pm_node_t *node, core::LocOffsets location);
