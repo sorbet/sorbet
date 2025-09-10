@@ -273,6 +273,7 @@ NameDef names[] = {
     {"beforeAngles", "<before>"},
     {"after"},
     {"afterAngles", "<after>"},
+    {"itAngles", "<it>"},
     {"testEach", "test_each"},
     {"testEachHash", "test_each_hash"},
     {"constSet", "const_set"},

@@ -226,14 +226,19 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
             return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
 
         case core::Names::it().rawId(): {
-            if (arity != 1) {
-                return core::NameRef::noName();
+            switch (arity) {
+                case 0:
+                    return core::Names::itAngles();
+                case 1:
+                    return ctx.state.enterNameUTF8("<it '" + to_s(ctx, send.getPosArg(0)) + "'>");
+                default:
+                    return core::NameRef::noName();
             }
-            return ctx.state.enterNameUTF8("<it '" + to_s(ctx, send.getPosArg(0)) + "'>");
         }
-    }
 
-    return core::NameRef::noName();
+        default:
+            return core::NameRef::noName();
+    }
 }
 
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
