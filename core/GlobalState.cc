@@ -712,6 +712,20 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::Kernel(), Names::proc()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_proc());
 
+    method = enterMethod(*this, Symbols::Module(), Names::syntheticSquareBrackets())
+                 .repeatedUntypedArg(Names::arg())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::Module_syntheticSquareBrackets());
+
+    method =
+        enterMethod(*this, Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this), Names::typeMember())
+            .repeatedTopArg(Names::args())
+            .build();
+    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
+
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::preludePackage()).build();
+    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_preludePackage());
+
     typeArgument = enterTypeArgument(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_proc_returnType());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
@@ -947,20 +961,6 @@ void GlobalState::initEmpty() {
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
-
-    method = enterMethod(*this, Symbols::Module(), Names::syntheticSquareBrackets())
-                 .repeatedUntypedArg(Names::arg())
-                 .build();
-    ENFORCE_NO_TIMER(method == Symbols::Module_syntheticSquareBrackets());
-
-    method =
-        enterMethod(*this, Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this), Names::typeMember())
-            .repeatedTopArg(Names::args())
-            .build();
-    ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
-
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::preludePackage()).build();
-    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_preludePackage());
 
     int reservedCount = 0;
 

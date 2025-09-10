@@ -1124,24 +1124,24 @@ public:
         return MethodRef::fromRaw(24);
     }
 
+    static MethodRef Module_syntheticSquareBrackets() {
+        return MethodRef::fromRaw(25);
+    }
+
+    static MethodRef Sorbet_Private_Static_typeMember() {
+        return MethodRef::fromRaw(26);
+    }
+
+    static MethodRef PackageSpec_preludePackage() {
+        return MethodRef::fromRaw(27);
+    }
+
     static TypeArgumentRef Kernel_proc_returnType() {
         return TypeArgumentRef::fromRaw(5);
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
         return ClassOrModuleRef::fromRaw(96);
-    }
-
-    static MethodRef Module_syntheticSquareBrackets() {
-        return MethodRef::fromRaw(57);
-    }
-
-    static MethodRef Sorbet_Private_Static_typeMember() {
-        return MethodRef::fromRaw(58);
-    }
-
-    static MethodRef PackageSpec_preludePackage() {
-        return MethodRef::fromRaw(59);
     }
 
     static FieldRef Magic_UntypedSource_super() {
