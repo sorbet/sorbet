@@ -23,10 +23,10 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 60;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 51;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 71;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 70;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
