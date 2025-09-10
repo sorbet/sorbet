@@ -142,6 +142,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
       end
     end
+
+    <self>.it() do ||
+      <self>.puts("anonymous it blocks")
+    end
   end
 
   class <emptyTree>::<C <describe 'extends T::Sig'>><<C <todo sym>>> < (<self>)

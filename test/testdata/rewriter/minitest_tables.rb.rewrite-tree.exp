@@ -510,5 +510,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
     end
+
+    <self>.test_each([]) do |val|
+      <self>.it() do ||
+        <self>.puts("anonymous it blocks")
+      end
+    end
   end
 end
