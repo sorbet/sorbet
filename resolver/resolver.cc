@@ -1333,9 +1333,14 @@ public:
             }
         } else {
             auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);
-            if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol() == core::Symbols::Magic() &&
-                send.fun == core::Names::mixesInClassMethods()) {
-                this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
+            if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol() == core::Symbols::Magic()) {
+                if (send.fun == core::Names::mixesInClassMethods()) {
+                    this->todoClassMethods_.emplace_back(ctx.file, ctx.owner, &send);
+                } else if (send.fun == core::Names::requiresAncestor()) {
+                    if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
+                        this->todoRequiredAncestors_.emplace_back(ctx.file, ctx.owner.asClassOrModuleRef(), &send);
+                    }
+                }
             }
         }
     }
