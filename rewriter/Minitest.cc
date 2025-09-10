@@ -141,17 +141,17 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
 
 } // namespace
 
-ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe);
+ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe);
 
 ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
-    body = recurse(ctx, isClass, std::move(body), insideDescribe);
+    body = tryRunSingleOnSend(ctx, isClass, std::move(body), insideDescribe);
 
     if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
         for (auto &exp : bodySeq->stats) {
-            exp = recurse(ctx, isClass, std::move(exp), insideDescribe);
+            exp = tryRunSingleOnSend(ctx, isClass, std::move(exp), insideDescribe);
         }
 
-        bodySeq->expr = recurse(ctx, isClass, std::move(bodySeq->expr), insideDescribe);
+        bodySeq->expr = tryRunSingleOnSend(ctx, isClass, std::move(bodySeq->expr), insideDescribe);
     }
     return body;
 }
@@ -586,7 +586,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     return nullptr;
 }
 
-ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
+ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
         auto change = runSingle(ctx, isClass, bodySend, insideDescribe);
