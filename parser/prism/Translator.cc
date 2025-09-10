@@ -228,7 +228,30 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
         static_assert(is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
                       is_same_v<SorbetAssignmentNode, parser::OrAsgn>);
 
-        return make_unique<SorbetAssignmentNode>(location, move(lhs), move(rhs));
+        if (!directlyDesugar || !hasExpr(lhs, rhs)) {
+            return make_unique<SorbetAssignmentNode>(location, move(lhs), move(rhs));
+        }
+
+        // Only handle simple reference expressions here; let desugar phase handle Send expressions
+        if (!isa_reference(lhs->peekDesugaredExpr())) {
+            return make_unique<SorbetAssignmentNode>(location, move(lhs), move(rhs));
+        }
+
+        auto lhsExpr = lhs->takeDesugaredExpr();
+        auto rhsExpr = rhs->takeDesugaredExpr();
+
+        auto lhsCopy = MK::cpRef(lhsExpr);
+        auto cond = MK::cpRef(lhsExpr);
+        auto assignExpr = MK::Assign(location, MK::cpRef(lhsExpr), move(rhsExpr));
+        ExpressionPtr if_;
+
+        if (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
+            if_ = MK::If(location, move(cond), move(assignExpr), move(lhsCopy));
+        } else {
+            if_ = MK::If(location, move(cond), move(lhsCopy), move(assignExpr));
+        }
+
+        return make_node_with_expr<SorbetAssignmentNode>(move(if_), location, move(lhs), move(rhs));
     }
 }
 
