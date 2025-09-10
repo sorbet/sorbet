@@ -1,0 +1,82 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C ClassA><<C <todo sym>>> < (::<todo sym>)
+    def <it 'first_test'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    class <emptyTree>::<C <describe 'BAR'>><<C <todo sym>>> < (<self>)
+    end
+
+    class <emptyTree>::<C <describe 'OUTER'>><<C <todo sym>>> < (<self>)
+      def <it 'second_test'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      class <emptyTree>::<C <describe 'QUX'>><<C <todo sym>>> < (<self>)
+      end
+    end
+  end
+
+  module <emptyTree>::<C ModuleB><<C <todo sym>>> < ()
+    def <it 'first_test'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    class <emptyTree>::<C <describe 'BAR'>><<C <todo sym>>> < (::<todo sym>)
+    end
+
+    class <emptyTree>::<C <describe 'OUTER'>><<C <todo sym>>> < (::<todo sym>)
+      def <it 'second_test'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      class <emptyTree>::<C <describe 'QUX'>><<C <todo sym>>> < (<self>)
+      end
+    end
+  end
+
+  class <emptyTree>::<C StressTest><<C <todo sym>>> < (::<todo sym>)
+    def self.describe<<todo method>>(desc, &block)
+      <emptyTree>
+    end
+
+    def <it 'foo'><<todo method>>(&<blk>)
+      begin
+        one = 1
+        <emptyTree>::<C Class>.new() do ||
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+            one.times() do ||
+              <self>.describe("weird context") do ||
+                "".+(1)
+              end
+            end
+          end
+        end
+      end
+    end
+
+    def <it 'bar'><<todo method>>(&<blk>)
+      begin
+        one = 1
+        ::Module.const_set(:MyClass, <emptyTree>::<C Class>.new() do ||
+            begin
+              <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+              one.times() do ||
+                <self>.describe("weird context") do ||
+                  "".+(1)
+                end
+              end
+            end
+          end)
+      end
+    end
+
+    <runtime method definition of self.describe>
+
+    begin
+      <emptyTree>::<C MyClass> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      <emptyTree>
+    end
+  end
+end

@@ -23,8 +23,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <before><<todo method>>(&<blk>)
       @x = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
     end
-
-    <runtime method definition of <before>>
   end
 
   class <emptyTree>::<C MyTestChild><<C <todo sym>>> < (<emptyTree>::<C MyTestParent>)

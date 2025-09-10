@@ -246,4 +246,10 @@ class MyTest
       end
     end
   end
+
+  test_each([]) do |val|
+    it do
+      puts("anonymous it blocks")
+    end
+  end
 end

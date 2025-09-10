@@ -322,6 +322,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
+    def <it><<todo method>>(&<blk>)
+      [].each() do |val|
+        <self>.puts("anonymous it blocks")
+      end
+    end
+
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <runtime method definition of outside_method>
@@ -509,6 +515,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           end
         end
       end
+    end
+
+    <self>.test_each([]) do |val|
+      <runtime method definition of <it>>
     end
   end
 end
