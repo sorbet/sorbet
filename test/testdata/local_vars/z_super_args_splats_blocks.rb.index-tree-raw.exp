@@ -98,7 +98,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -216,7 +216,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -372,7 +372,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -538,7 +538,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -805,7 +805,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -923,7 +923,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -1079,7 +1079,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -1245,7 +1245,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -1536,7 +1536,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -1680,7 +1680,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -1862,7 +1862,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -2054,7 +2054,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -2377,7 +2377,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -2533,7 +2533,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -2727,7 +2727,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -2931,7 +2931,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -3324,7 +3324,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -3532,7 +3532,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -3778,7 +3778,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -4034,7 +4034,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -4409,7 +4409,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -4553,7 +4553,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -4735,7 +4735,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -4927,7 +4927,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -5250,7 +5250,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -5406,7 +5406,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -5600,7 +5600,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -5804,7 +5804,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -6197,7 +6197,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -6405,7 +6405,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -6651,7 +6651,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [
@@ -6907,7 +6907,7 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat-and-block>>
+            fun = <U <call-with-splat-and-block-pass>>
             block = nullptr
             pos_args = 5
             args = [

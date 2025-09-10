@@ -12,7 +12,7 @@ end
 def forward(&blk)
   args = [1,2,3]
 
-  # this produces a call to `<Magic>.<call-with-splat-and-block>`
+  # this produces a call to `<Magic>.<call-with-splat-and-block-pass>`
   foo(*args, &blk)
 end
 
