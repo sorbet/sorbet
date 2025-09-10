@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def bar<<todo method>>(args, &&$3)
-    ::<Magic>.<call-with-block>(<self>, :baz, &)
+    ::<Magic>.<call-with-block-pass>(<self>, :baz, &)
   end
 
   <self>.foo(1) do ||

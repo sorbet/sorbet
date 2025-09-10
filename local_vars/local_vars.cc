@@ -288,7 +288,7 @@ class LocalNameInserter {
         //    Yes           | Yes            | ::<Magic>::<call-with-splat>(..., :super, ...) do <foo> end
         //    Yes           | No             | ::<Magic>::<call-with-splat-and-block>(..., :super, ..., &<blkvar>)
         //    No            | Yes            | super(...) do <foo> end
-        //    No            | No             | ::<Magic>::<call-with-block>(..., :super, ..., &<blkvar>)
+        //    No            | No             | ::<Magic>::<call-with-block-pass>(..., :super, ..., &<blkvar>)
         //
         // (In particular, note that the <blkvar> is thrown on the floor when a "do" is present.)
 

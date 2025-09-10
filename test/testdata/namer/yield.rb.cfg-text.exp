@@ -137,16 +137,16 @@ bb3[firstDead=15](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfR
     <self>: Main = <selfRestore>$6
     <cfgAlias>$15: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$17: Symbol(:yielder) = :yielder
-    <statTemp>$13: T.untyped = <cfgAlias>$15: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$17: Symbol(:yielder), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <statTemp>$13: T.untyped = <cfgAlias>$15: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$17: Symbol(:yielder), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <cfgAlias>$21: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$23: Symbol(:blockpass) = :blockpass
-    <statTemp>$19: T.untyped = <cfgAlias>$21: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$23: Symbol(:blockpass), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <statTemp>$19: T.untyped = <cfgAlias>$21: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$23: Symbol(:blockpass), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <cfgAlias>$27: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$29: Symbol(:mixed) = :mixed
-    <statTemp>$25: T.untyped = <cfgAlias>$27: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$29: Symbol(:mixed), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <statTemp>$25: T.untyped = <cfgAlias>$27: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$29: Symbol(:mixed), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <cfgAlias>$32: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$34: Symbol(:blockyield) = :blockyield
-    <returnMethodTemp>$2: T.untyped = <cfgAlias>$32: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$34: Symbol(:blockyield), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <returnMethodTemp>$2: T.untyped = <cfgAlias>$32: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$34: Symbol(:blockyield), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 

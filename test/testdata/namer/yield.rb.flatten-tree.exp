@@ -42,10 +42,10 @@ begin
             3
           end
         end
-        ::<Magic>.<call-with-block>(<self>, :yielder, l)
-        ::<Magic>.<call-with-block>(<self>, :blockpass, l)
-        ::<Magic>.<call-with-block>(<self>, :mixed, l)
-        ::<Magic>.<call-with-block>(<self>, :blockyield, l)
+        ::<Magic>.<call-with-block-pass>(<self>, :yielder, l)
+        ::<Magic>.<call-with-block-pass>(<self>, :blockpass, l)
+        ::<Magic>.<call-with-block-pass>(<self>, :mixed, l)
+        ::<Magic>.<call-with-block-pass>(<self>, :blockyield, l)
       end
     end
 

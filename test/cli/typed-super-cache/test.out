@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
     def foo<<todo method>>(&<blk>)
-      ::<Magic>.<call-with-block>(<self>, :<super>, <blk>)
+      ::<Magic>.<call-with-block-pass>(<self>, :<super>, <blk>)
     end
 
     <runtime method definition of foo>
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
     def foo<<todo method>>(&<blk>)
-      ::<Magic>.<call-with-block>(<self>, :<untypedSuper>, <blk>)
+      ::<Magic>.<call-with-block-pass>(<self>, :<untypedSuper>, <blk>)
     end
 
     <runtime method definition of foo>

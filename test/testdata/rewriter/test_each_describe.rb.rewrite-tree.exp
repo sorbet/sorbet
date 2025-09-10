@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C Minitest>::<C Spec><<C <todo sym>>> < (::<todo sym>)
     def self.test_each<<todo method>>(arg, &blk)
-      ::<Magic>.<call-with-block>(arg, :each, blk)
+      ::<Magic>.<call-with-block-pass>(arg, :each, blk)
     end
 
     <runtime method definition of self.test_each>

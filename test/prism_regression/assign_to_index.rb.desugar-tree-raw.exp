@@ -1101,7 +1101,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $32>
+            name = <D <U <call-with-block-pass>> $32>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1111,7 +1111,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $33>
+            name = <D <U <call-with-block-pass>> $33>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1126,14 +1126,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $34>
+            name = <D <U <call-with-block-pass>> $34>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $35>
+            name = <D <U <call-with-block-pass>> $35>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1150,23 +1150,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $32>
+          name = <D <U <call-with-block-pass>> $32>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $33>
+            name = <D <U <call-with-block-pass>> $33>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $34>
+            name = <D <U <call-with-block-pass>> $34>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $35>
+            name = <D <U <call-with-block-pass>> $35>
           }
           Send{
             flags = {}
@@ -1174,23 +1174,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $32>
+                name = <D <U <call-with-block-pass>> $32>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $33>
+                  name = <D <U <call-with-block-pass>> $33>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $34>
+                  name = <D <U <call-with-block-pass>> $34>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $35>
+                  name = <D <U <call-with-block-pass>> $35>
                 }
               ]
             }
@@ -1210,7 +1210,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $36>
+            name = <D <U <call-with-block-pass>> $36>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1220,7 +1220,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $37>
+            name = <D <U <call-with-block-pass>> $37>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1235,14 +1235,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $38>
+            name = <D <U <call-with-block-pass>> $38>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $39>
+            name = <D <U <call-with-block-pass>> $39>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1259,23 +1259,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $36>
+          name = <D <U <call-with-block-pass>> $36>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $37>
+            name = <D <U <call-with-block-pass>> $37>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $38>
+            name = <D <U <call-with-block-pass>> $38>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $39>
+            name = <D <U <call-with-block-pass>> $39>
           }
           Send{
             flags = {}
@@ -1283,23 +1283,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $36>
+                name = <D <U <call-with-block-pass>> $36>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $37>
+                  name = <D <U <call-with-block-pass>> $37>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $38>
+                  name = <D <U <call-with-block-pass>> $38>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $39>
+                  name = <D <U <call-with-block-pass>> $39>
                 }
               ]
             }
@@ -1319,7 +1319,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $40>
+            name = <D <U <call-with-block-pass>> $40>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1329,7 +1329,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $41>
+            name = <D <U <call-with-block-pass>> $41>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1344,14 +1344,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $42>
+            name = <D <U <call-with-block-pass>> $42>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $43>
+            name = <D <U <call-with-block-pass>> $43>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1368,23 +1368,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $40>
+          name = <D <U <call-with-block-pass>> $40>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $41>
+            name = <D <U <call-with-block-pass>> $41>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $42>
+            name = <D <U <call-with-block-pass>> $42>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $43>
+            name = <D <U <call-with-block-pass>> $43>
           }
           Send{
             flags = {}
@@ -1392,23 +1392,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $40>
+                name = <D <U <call-with-block-pass>> $40>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $41>
+                  name = <D <U <call-with-block-pass>> $41>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $42>
+                  name = <D <U <call-with-block-pass>> $42>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $43>
+                  name = <D <U <call-with-block-pass>> $43>
                 }
               ]
             }
@@ -1428,7 +1428,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $44>
+            name = <D <U <call-with-block-pass>> $44>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1438,7 +1438,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $45>
+            name = <D <U <call-with-block-pass>> $45>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1453,14 +1453,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $46>
+            name = <D <U <call-with-block-pass>> $46>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $47>
+            name = <D <U <call-with-block-pass>> $47>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1477,23 +1477,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $44>
+          name = <D <U <call-with-block-pass>> $44>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $45>
+            name = <D <U <call-with-block-pass>> $45>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $46>
+            name = <D <U <call-with-block-pass>> $46>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $47>
+            name = <D <U <call-with-block-pass>> $47>
           }
           Send{
             flags = {}
@@ -1501,23 +1501,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $44>
+                name = <D <U <call-with-block-pass>> $44>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $45>
+                  name = <D <U <call-with-block-pass>> $45>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $46>
+                  name = <D <U <call-with-block-pass>> $46>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $47>
+                  name = <D <U <call-with-block-pass>> $47>
                 }
               ]
             }
@@ -1537,7 +1537,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $48>
+            name = <D <U <call-with-block-pass>> $48>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1547,7 +1547,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $49>
+            name = <D <U <call-with-block-pass>> $49>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1562,14 +1562,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $50>
+            name = <D <U <call-with-block-pass>> $50>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $51>
+            name = <D <U <call-with-block-pass>> $51>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1586,23 +1586,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $48>
+          name = <D <U <call-with-block-pass>> $48>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $49>
+            name = <D <U <call-with-block-pass>> $49>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $50>
+            name = <D <U <call-with-block-pass>> $50>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $51>
+            name = <D <U <call-with-block-pass>> $51>
           }
           Send{
             flags = {}
@@ -1610,23 +1610,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $48>
+                name = <D <U <call-with-block-pass>> $48>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $49>
+                  name = <D <U <call-with-block-pass>> $49>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $50>
+                  name = <D <U <call-with-block-pass>> $50>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $51>
+                  name = <D <U <call-with-block-pass>> $51>
                 }
               ]
             }
@@ -1646,7 +1646,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $52>
+            name = <D <U <call-with-block-pass>> $52>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1656,7 +1656,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $53>
+            name = <D <U <call-with-block-pass>> $53>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1671,14 +1671,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $54>
+            name = <D <U <call-with-block-pass>> $54>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $55>
+            name = <D <U <call-with-block-pass>> $55>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1695,23 +1695,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $52>
+          name = <D <U <call-with-block-pass>> $52>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $53>
+            name = <D <U <call-with-block-pass>> $53>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $54>
+            name = <D <U <call-with-block-pass>> $54>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $55>
+            name = <D <U <call-with-block-pass>> $55>
           }
           Send{
             flags = {}
@@ -1719,23 +1719,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $52>
+                name = <D <U <call-with-block-pass>> $52>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $53>
+                  name = <D <U <call-with-block-pass>> $53>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $54>
+                  name = <D <U <call-with-block-pass>> $54>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $55>
+                  name = <D <U <call-with-block-pass>> $55>
                 }
               ]
             }
@@ -1755,7 +1755,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $56>
+            name = <D <U <call-with-block-pass>> $56>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1765,7 +1765,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $57>
+            name = <D <U <call-with-block-pass>> $57>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1780,14 +1780,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $58>
+            name = <D <U <call-with-block-pass>> $58>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $59>
+            name = <D <U <call-with-block-pass>> $59>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1804,23 +1804,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $56>
+          name = <D <U <call-with-block-pass>> $56>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $57>
+            name = <D <U <call-with-block-pass>> $57>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $58>
+            name = <D <U <call-with-block-pass>> $58>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $59>
+            name = <D <U <call-with-block-pass>> $59>
           }
           Send{
             flags = {}
@@ -1828,23 +1828,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $56>
+                name = <D <U <call-with-block-pass>> $56>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $57>
+                  name = <D <U <call-with-block-pass>> $57>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $58>
+                  name = <D <U <call-with-block-pass>> $58>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $59>
+                  name = <D <U <call-with-block-pass>> $59>
                 }
               ]
             }
@@ -1864,7 +1864,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $60>
+            name = <D <U <call-with-block-pass>> $60>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1874,7 +1874,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $61>
+            name = <D <U <call-with-block-pass>> $61>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1889,14 +1889,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $62>
+            name = <D <U <call-with-block-pass>> $62>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $63>
+            name = <D <U <call-with-block-pass>> $63>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1913,23 +1913,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $60>
+          name = <D <U <call-with-block-pass>> $60>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $61>
+            name = <D <U <call-with-block-pass>> $61>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $62>
+            name = <D <U <call-with-block-pass>> $62>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $63>
+            name = <D <U <call-with-block-pass>> $63>
           }
           Send{
             flags = {}
@@ -1937,23 +1937,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $60>
+                name = <D <U <call-with-block-pass>> $60>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $61>
+                  name = <D <U <call-with-block-pass>> $61>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $62>
+                  name = <D <U <call-with-block-pass>> $62>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $63>
+                  name = <D <U <call-with-block-pass>> $63>
                 }
               ]
             }
@@ -1973,7 +1973,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $64>
+            name = <D <U <call-with-block-pass>> $64>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -1983,7 +1983,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $65>
+            name = <D <U <call-with-block-pass>> $65>
           }
           rhs = Send{
             flags = {privateOk}
@@ -1998,14 +1998,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $66>
+            name = <D <U <call-with-block-pass>> $66>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $67>
+            name = <D <U <call-with-block-pass>> $67>
           }
           rhs = Send{
             flags = {privateOk}
@@ -2022,23 +2022,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $64>
+          name = <D <U <call-with-block-pass>> $64>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $65>
+            name = <D <U <call-with-block-pass>> $65>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $66>
+            name = <D <U <call-with-block-pass>> $66>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $67>
+            name = <D <U <call-with-block-pass>> $67>
           }
           Send{
             flags = {}
@@ -2046,23 +2046,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $64>
+                name = <D <U <call-with-block-pass>> $64>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $65>
+                  name = <D <U <call-with-block-pass>> $65>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $66>
+                  name = <D <U <call-with-block-pass>> $66>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $67>
+                  name = <D <U <call-with-block-pass>> $67>
                 }
               ]
             }
@@ -2082,7 +2082,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $68>
+            name = <D <U <call-with-block-pass>> $68>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -2092,7 +2092,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $69>
+            name = <D <U <call-with-block-pass>> $69>
           }
           rhs = Send{
             flags = {privateOk}
@@ -2107,14 +2107,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $70>
+            name = <D <U <call-with-block-pass>> $70>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $71>
+            name = <D <U <call-with-block-pass>> $71>
           }
           rhs = Send{
             flags = {privateOk}
@@ -2131,23 +2131,23 @@ ClassDef{
         flags = {}
         recv = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $68>
+          name = <D <U <call-with-block-pass>> $68>
         }
-        fun = <U <call-with-block>=>
+        fun = <U <call-with-block-pass>=>
         block = nullptr
         pos_args = 4
         args = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $69>
+            name = <D <U <call-with-block-pass>> $69>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $70>
+            name = <D <U <call-with-block-pass>> $70>
           }
           UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $71>
+            name = <D <U <call-with-block-pass>> $71>
           }
           Send{
             flags = {}
@@ -2155,23 +2155,23 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $68>
+                name = <D <U <call-with-block-pass>> $68>
               }
-              fun = <U <call-with-block>>
+              fun = <U <call-with-block-pass>>
               block = nullptr
               pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $69>
+                  name = <D <U <call-with-block-pass>> $69>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $70>
+                  name = <D <U <call-with-block-pass>> $70>
                 }
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <call-with-block>> $71>
+                  name = <D <U <call-with-block-pass>> $71>
                 }
               ]
             }
@@ -2191,7 +2191,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $72>
+            name = <D <U <call-with-block-pass>> $72>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -2201,7 +2201,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $73>
+            name = <D <U <call-with-block-pass>> $73>
           }
           rhs = Send{
             flags = {privateOk}
@@ -2216,14 +2216,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $74>
+            name = <D <U <call-with-block-pass>> $74>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $75>
+            name = <D <U <call-with-block-pass>> $75>
           }
           rhs = Send{
             flags = {privateOk}
@@ -2238,29 +2238,29 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $76>
+            name = <D <U <call-with-block-pass>> $76>
           }
           rhs = Send{
             flags = {}
             recv = UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $72>
+              name = <D <U <call-with-block-pass>> $72>
             }
-            fun = <U <call-with-block>>
+            fun = <U <call-with-block-pass>>
             block = nullptr
             pos_args = 3
             args = [
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $73>
+                name = <D <U <call-with-block-pass>> $73>
               }
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $74>
+                name = <D <U <call-with-block-pass>> $74>
               }
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $75>
+                name = <D <U <call-with-block-pass>> $75>
               }
             ]
           }
@@ -2269,36 +2269,36 @@ ClassDef{
       expr = If{
         cond = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $76>
+          name = <D <U <call-with-block-pass>> $76>
         }
         thenp = Send{
           flags = {}
           recv = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $72>
+            name = <D <U <call-with-block-pass>> $72>
           }
-          fun = <U <call-with-block>=>
+          fun = <U <call-with-block-pass>=>
           block = nullptr
           pos_args = 4
           args = [
             UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $73>
+              name = <D <U <call-with-block-pass>> $73>
             }
             UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $74>
+              name = <D <U <call-with-block-pass>> $74>
             }
             UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $75>
+              name = <D <U <call-with-block-pass>> $75>
             }
             Literal{ value = 13 }
           ]
         }
         elsep = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $76>
+          name = <D <U <call-with-block-pass>> $76>
         }
       }
     }
@@ -2308,7 +2308,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $77>
+            name = <D <U <call-with-block-pass>> $77>
           }
           rhs = ConstantLit{
             symbol = (class ::<Magic>)
@@ -2318,7 +2318,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $78>
+            name = <D <U <call-with-block-pass>> $78>
           }
           rhs = Send{
             flags = {privateOk}
@@ -2333,14 +2333,14 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $79>
+            name = <D <U <call-with-block-pass>> $79>
           }
           rhs = Literal{ value = :[] }
         }
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $80>
+            name = <D <U <call-with-block-pass>> $80>
           }
           rhs = Send{
             flags = {privateOk}
@@ -2355,29 +2355,29 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $81>
+            name = <D <U <call-with-block-pass>> $81>
           }
           rhs = Send{
             flags = {}
             recv = UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $77>
+              name = <D <U <call-with-block-pass>> $77>
             }
-            fun = <U <call-with-block>>
+            fun = <U <call-with-block-pass>>
             block = nullptr
             pos_args = 3
             args = [
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $78>
+                name = <D <U <call-with-block-pass>> $78>
               }
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $79>
+                name = <D <U <call-with-block-pass>> $79>
               }
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <call-with-block>> $80>
+                name = <D <U <call-with-block-pass>> $80>
               }
             ]
           }
@@ -2386,33 +2386,33 @@ ClassDef{
       expr = If{
         cond = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $81>
+          name = <D <U <call-with-block-pass>> $81>
         }
         thenp = UnresolvedIdent{
           kind = Local
-          name = <D <U <call-with-block>> $81>
+          name = <D <U <call-with-block-pass>> $81>
         }
         elsep = Send{
           flags = {}
           recv = UnresolvedIdent{
             kind = Local
-            name = <D <U <call-with-block>> $77>
+            name = <D <U <call-with-block-pass>> $77>
           }
-          fun = <U <call-with-block>=>
+          fun = <U <call-with-block-pass>=>
           block = nullptr
           pos_args = 4
           args = [
             UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $78>
+              name = <D <U <call-with-block-pass>> $78>
             }
             UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $79>
+              name = <D <U <call-with-block-pass>> $79>
             }
             UnresolvedIdent{
               kind = Local
-              name = <D <U <call-with-block>> $80>
+              name = <D <U <call-with-block-pass>> $80>
             }
             Literal{ value = 14 }
           ]
@@ -2459,7 +2459,7 @@ ClassDef{
             symbol = (class ::<Magic>)
             orig = nullptr
           }
-          fun = <U <call-with-block>>
+          fun = <U <call-with-block-pass>>
           block = nullptr
           pos_args = 4
           args = [
