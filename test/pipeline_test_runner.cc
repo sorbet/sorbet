@@ -245,12 +245,15 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     // `PrismDesugar.cc`. For now, disable direct desugaring, and fallback to `Desugar.cc`.
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
                         realmain::options::Printers print{};
-                        auto prismParseResult = parser::Prism::Parser::parseOnly(ctx);
+                        auto source = ctx.file.data(ctx).source();
+                        parser::Prism::Parser prismParser{source};
+                        bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
+                        auto prismParseResult = prismParser.parse(collectComments);
                         pm_node_t *rewrittenNode =
                             realmain::pipeline::runRBSRewritePrism(gs, file, prismParseResult.getRawNodePointer(),
                                                                    prismParseResult.getCommentLocations(), print, ctx);
                         parseResult = parser::Prism::Parser::translateOnly(
-                            ctx, prismParseResult.getParser(), rewrittenNode, prismParseResult.getParseErrors(),
+                            ctx, prismParser, rewrittenNode, prismParseResult.getParseErrors(),
                             prismParseResult.getCommentLocations(),
                             false); // TODO: preserveConcreteSyntax set to false
                         directlyDesugaredTree = nullptr;
@@ -272,7 +275,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
 
         {
-            if (gs.cacheSensitiveOptions.rbsEnabled) {
+            if (gs.cacheSensitiveOptions.rbsEnabled && parser == realmain::options::Parser::ORIGINAL) {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
                 auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
@@ -744,11 +747,15 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             case realmain::options::Parser::PRISM: {
                 if (gs->cacheSensitiveOptions.rbsEnabled) {
                     realmain::options::Printers print{};
-                    auto prismParseResult = parser::Prism::Parser::parseOnly(ctx);
-                    pm_node_t *rewrittenNode = realmain::pipeline::runRBSRewritePrism(*gs, f.file, prismParseResult.getRawNodePointer(),
-                                                                                     prismParseResult.getCommentLocations(), print, ctx);
+                    auto source = ctx.file.data(ctx).source();
+                    parser::Prism::Parser prismParser{source};
+                    bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
+                    auto prismParseResult = prismParser.parse(collectComments);
+                    pm_node_t *rewrittenNode =
+                        realmain::pipeline::runRBSRewritePrism(*gs, f.file, prismParseResult.getRawNodePointer(),
+                                                               prismParseResult.getCommentLocations(), print, ctx);
                     parseResult = parser::Prism::Parser::translateOnly(
-                        ctx, prismParseResult.getParser(), rewrittenNode, prismParseResult.getParseErrors(),
+                        ctx, prismParser, rewrittenNode, prismParseResult.getParseErrors(),
                         prismParseResult.getCommentLocations(), false); // TODO: preserveConcreteSyntax set to false
                 } else {
                     parseResult = parser::Prism::Parser::run(ctx, false);
@@ -757,7 +764,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
         }
 
-        if (gs->cacheSensitiveOptions.rbsEnabled) {
+        if (gs->cacheSensitiveOptions.rbsEnabled && parser == realmain::options::Parser::ORIGINAL) {
             auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
             auto commentMap = associator.run(parseResult.tree);
 
