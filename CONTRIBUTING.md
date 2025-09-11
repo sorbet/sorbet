@@ -7,6 +7,9 @@ Thanks for taking an interest in improving Sorbet!
   - [... a change to the sorbet.org docs website](#-a-change-to-the-sorbetorg-docs-website)
   - [... a fix or feature already tracked in an issue](#-a-fix-or-feature-already-tracked-in-an-issue)
   - [... a fix or feature that's not been discussed before](#-a-fix-or-feature-thats-not-been-discussed-before)
+- [Design Proposals: Scoping large features](#design-proposals-scoping-large-features)
+  - [How to share a design proposal](#how-to-share-a-design-proposal)
+  - [Tips](#tips)
 - [Choosing what to work on](#choosing-what-to-work-on)
   - [Good first issues](#good-first-issues)
   - [Issues labeled `hard`](#issues-labeled-hard)
@@ -14,7 +17,6 @@ Thanks for taking an interest in improving Sorbet!
   - [Other kinds of changes](#other-kinds-of-changes)
 - [Testing](#testing)
 - [Review expectations](#review-expectations)
-- [Design Proposals: Scoping large features](#design-proposals-scoping-large-features)
 
 
 # I want to contribute...
