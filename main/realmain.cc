@@ -654,7 +654,7 @@ int realmain(int argc, char *argv[]) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
 
-                if (!opts.genPackages) {
+                if (!opts.genPackages && !opts.deleteUnusedImports) {
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
                                         /* presorted */ false, intentionallyLeakASTs);
 

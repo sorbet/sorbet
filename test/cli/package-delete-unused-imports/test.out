@@ -1,0 +1,20 @@
+C/__package.rb:3: C has unused imports https://srb.help/3734
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    C/__package.rb:4: Deleted
+     4 |  import A
+        ^^^^^^^^^^
+    C/__package.rb:6: Deleted
+     6 |  import D
+        ^^^^^^^^^^
+Errors: 1
+# typed: strict
+
+class C < PackageSpec
+
+  import B
+
+  import E
+  import F
+end

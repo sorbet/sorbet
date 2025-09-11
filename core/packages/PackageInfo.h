@@ -3,6 +3,7 @@
 
 #include "absl/types/span.h"
 
+#include "core/AutocorrectSuggestion.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
 #include "core/StrictLevel.h"
@@ -12,7 +13,6 @@
 #include <vector>
 
 namespace sorbet::core {
-struct AutocorrectSuggestion;
 class NameRef;
 class Loc;
 class GlobalState;
@@ -252,6 +252,8 @@ public:
     int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const;
 
     // autocorrects
+
+    core::AutocorrectSuggestion::Edit deleteImport(const core::GlobalState &gs, Import import) const;
 
     std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
                                                          ImportType importType) const;

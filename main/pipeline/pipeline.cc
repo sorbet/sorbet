@@ -114,10 +114,11 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     if (opts.cacheSensitiveOptions.stripePackages) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions(
-            opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-            opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-            opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages);
+        gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                              opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint,
+                              opts.genPackages, opts.deleteUnusedImports);
     }
 #endif
 }
@@ -132,7 +133,8 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
     auto result = from.copyForSlowPath(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages);
+        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint, opts.genPackages,
+        opts.deleteUnusedImports);
 
     core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
 
@@ -704,7 +706,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.cacheSensitiveOptions.stripePackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
-        opts.stripePackagesHint, opts.genPackages);
+        opts.stripePackagesHint, opts.genPackages, opts.deleteUnusedImports);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
