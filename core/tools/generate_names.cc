@@ -268,6 +268,12 @@ NameDef names[] = {
     {"classAttribute", "class_attribute"},
 
     {"describe"},
+    {"exampleGroup", "example_group"},
+    {"context"},
+    {"xdescribe"},
+    {"xcontext"},
+    {"fdescribe"},
+    {"fcontext"},
     {"it"},
     {"fit"},
     {"xit"},
