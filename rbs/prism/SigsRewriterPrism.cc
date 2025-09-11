@@ -6,6 +6,7 @@
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "rbs/SignatureTranslator.h"
+#include "rbs/prism/SignatureTranslatorPrism.h"
 #include "rbs/TypeParamsToParserNodes.h"
 
 using namespace std;
@@ -44,19 +45,19 @@ pm_node_t *signaturesTargetForPrism(pm_node_t *node) {
  *
  * We do not error if the node is not a constant, we just insert it as is and let the pipeline error down the line.
  */
-unique_ptr<parser::Node> extractHelperArgumentPrism(core::MutableContext ctx, Comment annotation, int offset) {
-    while (annotation.string[offset] == ' ') {
-        offset++;
-    }
+// unique_ptr<parser::Node> extractHelperArgumentPrism(core::MutableContext ctx, Comment annotation, int offset) {
+//     while (annotation.string[offset] == ' ') {
+//         offset++;
+//     }
 
-    Comment comment = {
-        core::LocOffsets{annotation.typeLoc.beginPos() + offset, annotation.typeLoc.endPos()},
-        core::LocOffsets{annotation.typeLoc.beginPos() + offset, annotation.typeLoc.endPos()},
-        annotation.string.substr(offset),
-    };
+//     Comment comment = {
+//         core::LocOffsets{annotation.typeLoc.beginPos() + offset, annotation.typeLoc.endPos()},
+//         core::LocOffsets{annotation.typeLoc.beginPos() + offset, annotation.typeLoc.endPos()},
+//         annotation.string.substr(offset),
+//     };
 
-    return rbs::SignatureTranslator(ctx).translateType(RBSDeclaration{vector<Comment>{comment}});
-}
+//     return rbs::SignatureTranslator(ctx).translateType(RBSDeclaration{vector<Comment>{comment}});
+// }
 
 // TODO(Prism migration): helpers extraction is not required for signature translation; keeping for reference.
 // parser::NodeVec extractHelpersPrism(core::MutableContext ctx, vector<Comment> annotations) {
@@ -286,7 +287,8 @@ unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node
     }
 
     auto signatures = make_unique<parser::NodeVec>();
-    auto signatureTranslator = rbs::SignatureTranslator(ctx);
+    auto signatureTranslator = rbs::SignatureTranslatorPrism(ctx);
+    (void)signatureTranslator; // Suppress unused warning until implementation is complete
 
     for (auto &declaration : comments.signatures) {
         switch (node->type) {
@@ -294,8 +296,8 @@ unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node
                 // Both instance and singleton methods use PM_DEF_NODE in Prism
                 // TODO: Pass the correct parser::Node* to translateMethodSignature
                 // For now, this is stubbed until we have proper Prism->Parser node conversion
-                // auto sig = signatureTranslator.translateMethodSignature(prismToParserNode(node), declaration, comments.annotations);
-                // signatures->emplace_back(move(sig));
+                // auto sig = signatureTranslator.translateMethodSignature(prismToParserNode(node), declaration,
+                // comments.annotations); signatures->emplace_back(move(sig));
                 (void)declaration; // Suppress unused warning
                 break;
             }
@@ -304,15 +306,15 @@ unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node
                 // TODO: Implement isVisibilitySend and isAttrAccessorSend for Prism nodes
                 // This requires checking the method name and context like the original:
                 // if (isVisibilitySendPrism(call)) {
-                //     auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0], declaration, comments.annotations);
-                //     signatures->emplace_back(move(sig));
+                //     auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
+                //     declaration, comments.annotations); signatures->emplace_back(move(sig));
                 // } else if (isAttrAccessorSendPrism(call)) {
                 //     auto sig = signatureTranslator.translateAttrSignature(call, declaration, comments.annotations);
                 //     signatures->emplace_back(move(sig));
                 // } else {
                 //     Exception::raise("Unimplemented call node type");
                 // }
-                (void)call; // Suppress unused warning
+                (void)call;        // Suppress unused warning
                 (void)declaration; // Suppress unused warning
                 break;
             }
@@ -423,7 +425,7 @@ pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
             // and insert signature nodes before the target node.
             // This requires:
             // 1. Creating signature parser nodes from RBS comments
-            // 2. Creating a new PM_BEGIN_NODE structure  
+            // 2. Creating a new PM_BEGIN_NODE structure
             // 3. Adding signatures + target node to the begin block
             //
             // For now, just return the node as-is until we implement

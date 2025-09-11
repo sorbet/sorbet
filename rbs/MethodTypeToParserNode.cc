@@ -376,6 +376,7 @@ void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vecto
 
 } // namespace
 
+// TODO: Currently creating WQ nodes
 unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::Node *methodDef,
                                                                  const rbs_method_type_t *methodType,
                                                                  const RBSDeclaration &declaration,
