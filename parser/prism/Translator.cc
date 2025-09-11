@@ -435,7 +435,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_unique<parser::BlockPass>(location, move(expr));
         }
         case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end`
-            unreachable("PM_BLOCK_NODE has special handling in translatecallWithBlockPass, see its docs for details.");
+            unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
         }
         case PM_BLOCK_LOCAL_VARIABLE_NODE: { // A named block local variable, like `baz` in `|bar; baz|`
             auto blockLocalNode = down_cast<pm_block_local_variable_node>(node);
@@ -565,85 +565,108 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
                 sendNode = make_unique<parser::CSend>(loc, move(receiver), name, messageLoc, move(args));
-            } else { // Regular send, e.g. `a.b`
-                // The keyword arguments hash (if there is one) can be the last argument if there is no block,
-                // and is otherwise located in the second-to-last argument, before the block.
-                auto hasBlockArg = prismBlock != nullptr;
-                auto kwargsHashIndex = hasBlockArg ? (args.size() - 2) : (args.size() - 1);
-                auto hasKwargsHash = kwargsHashIndex < args.size() &&
-                                     parser::NodeWithExpr::isa_node<parser::Hash>(args[kwargsHashIndex].get());
 
-                // Detect special arguments that will require the call to be desugared to magic call.
-                auto hasFwdArgs = false;
-                auto hasFwdRestArg = false;
-                auto hasSplat = false;
-                if (auto prismArgsNode = callNode->arguments; prismArgsNode != nullptr) {
-                    for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
-                        switch (PM_NODE_TYPE(arg)) {
-                            case PM_SPLAT_NODE: {
-                                auto splatNode = down_cast<pm_splat_node>(arg);
-                                if (splatNode->expression == nullptr) { // An anonymous splat like `f(*)`
-                                    hasFwdRestArg = true;
-                                } else { // Splatting an expression like `f(*a)`
-                                    hasSplat = true;
-                                }
-                                break;
-                            }
+                // TODO: Direct desugaring support for conditional sends is not implemented yet.
 
-                            case PM_FORWARDING_ARGUMENTS_NODE: {
-                                hasFwdArgs = true;
-                                break;
-                            }
-
-                            default:
-                                break;
-                        }
-                    }
+                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                    // The legacy parser inverts this , with a parent "Block" with a child
+                    // "Send".
+                    return translateCallWithBlock(prismBlock, move(sendNode));
                 }
 
-                // Method calls are really complex, and we're building support for different kinds of arguments bit by
-                // bit. This bool is true when this particular method call is supported by our desugar logic.
-                auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasBlockArg &&
-                                         !hasFwdArgs && !hasFwdRestArg && !hasSplat && hasExpr(receiver) &&
-                                         hasExpr(args);
+                return sendNode;
+            }
 
-                if (supportedCallType) {
-                    ast::Send::Flags flags;
+            // Regular send, e.g. `a.b`
 
-                    ast::ExpressionPtr receiverExpr;
-                    if (receiver == nullptr) { // Convert `foo()` to `self.foo()`
-                        // 0-sized Loc, since `self.` doesn't appear in the original file.
-                        receiverExpr = MK::Self(loc.copyWithZeroLength());
-                    } else {
-                        receiverExpr = receiver->takeDesugaredExpr();
+            // The keyword arguments hash (if there is one) can be the last argument if there is no block,
+            // and is otherwise located in the second-to-last argument, before the block.
+            auto hasBlockArg = prismBlock != nullptr;
+            auto kwargsHashIndex = hasBlockArg ? (args.size() - 2) : (args.size() - 1);
+            auto hasKwargsHash = kwargsHashIndex < args.size() &&
+                                 parser::NodeWithExpr::isa_node<parser::Hash>(args[kwargsHashIndex].get());
+
+            // Detect special arguments that will require the call to be desugared to magic call.
+            auto hasFwdArgs = false;
+            auto hasFwdRestArg = false;
+            auto hasSplat = false;
+            if (auto prismArgsNode = callNode->arguments; prismArgsNode != nullptr) {
+                for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
+                    switch (PM_NODE_TYPE(arg)) {
+                        case PM_SPLAT_NODE: {
+                            auto splatNode = down_cast<pm_splat_node>(arg);
+                            if (splatNode->expression == nullptr) { // An anonymous splat like `f(*)`
+                                hasFwdRestArg = true;
+                            } else { // Splatting an expression like `f(*a)`
+                                hasSplat = true;
+                            }
+                            break;
+                        }
+
+                        case PM_FORWARDING_ARGUMENTS_NODE: {
+                            hasFwdArgs = true;
+                            break;
+                        }
+
+                        default:
+                            break;
                     }
-
-                    // Unsupported nodes are desugared to an empty tree.
-                    // Treat them as if they were `self` to match `Desugar.cc`.
-                    // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-                    if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
-                        receiverExpr = MK::Self(loc.copyWithZeroLength());
-                        flags.isPrivateOk = true;
-                    } else {
-                        flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-                    }
-
-                    int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
-
-                    ast::Send::ARGS_store sendArgs{};
-                    sendArgs.reserve(args.size());
-                    for (auto &arg : args) {
-                        sendArgs.emplace_back(arg->takeDesugaredExpr());
-                    }
-
-                    auto expr =
-                        MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
-                    sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc,
-                                                                 move(args));
-                } else {
-                    sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
                 }
             }
+
+            // Method calls are really complex, and we're building support for different kinds of arguments bit by
+            // bit. This bool is true when this particular method call is supported by our desugar logic.
+            auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasBlockArg &&
+                                     !hasFwdArgs && !hasFwdRestArg && !hasSplat && hasExpr(receiver) && hasExpr(args);
+
+            if (!supportedCallType) {
+                sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
+
+                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                    // The legacy parser inverts this , with a parent "Block" with a child
+                    // "Send".
+                    return translateCallWithBlock(prismBlock, move(sendNode));
+                }
+
+                return sendNode;
+            }
+
+            ast::Send::Flags flags;
+
+            ast::ExpressionPtr receiverExpr;
+            if (receiver == nullptr) { // Convert `foo()` to `self.foo()`
+                // 0-sized Loc, since `self.` doesn't appear in the original file.
+                receiverExpr = MK::Self(loc.copyWithZeroLength());
+            } else {
+                receiverExpr = receiver->takeDesugaredExpr();
+            }
+
+            // Unsupported nodes are desugared to an empty tree.
+            // Treat them as if they were `self` to match `Desugar.cc`.
+            // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+            if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
+                receiverExpr = MK::Self(loc.copyWithZeroLength());
+                flags.isPrivateOk = true;
+            } else {
+                flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+            }
+
+            int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
+
+            ast::Send::ARGS_store sendArgs{};
+            sendArgs.reserve(args.size());
+            for (auto &arg : args) {
+                sendArgs.emplace_back(arg->takeDesugaredExpr());
+            }
+
+            auto expr = MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
+            sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
 
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                 // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
@@ -651,10 +674,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
                 // The legacy parser inverts this , with a parent "Block" with a child
                 // "Send".
-                return translatecallWithBlockPass(prismBlock, move(sendNode));
-            } else {
-                return sendNode;
+                return translateCallWithBlock(prismBlock, move(sendNode));
             }
+
+            return sendNode;
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
             if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
@@ -993,7 +1016,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto blockArgumentNode = forwardingSuperNode->block;
 
             if (blockArgumentNode != nullptr) { // always a PM_BLOCK_NODE
-                return translatecallWithBlockPass(up_cast(blockArgumentNode), move(translatedNode));
+                return translateCallWithBlock(up_cast(blockArgumentNode), move(translatedNode));
             }
 
             return translatedNode;
@@ -1304,7 +1327,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto sendNode = make_unique<parser::Send>(location, move(receiver), core::Names::lambda(),
                                                       translateLoc(lambdaNode->operator_loc), NodeVec{});
 
-            return translatecallWithBlockPass(node, move(sendNode));
+            return translateCallWithBlock(node, move(sendNode));
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a local variable, e.g. `local &&= false`
             return translateOpAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(node);
@@ -1798,7 +1821,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
                 returnValues = translateArguments(superNode->arguments);
                 auto superNode = make_unique<parser::Super>(location, move(returnValues));
-                return translatecallWithBlockPass(blockArgumentNode, move(superNode));
+                return translateCallWithBlock(blockArgumentNode, move(superNode));
             }
 
             returnValues = translateArguments(superNode->arguments, blockArgumentNode);
@@ -2604,8 +2627,8 @@ bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
 //
 // This function translates between the two, creating a `Block` or `NumBlock` node for the given `pm_block_node *`
 // or `pm_lambda_node *`, and wrapping it around the given `Send` node.
-unique_ptr<parser::Node> Translator::translatecallWithBlockPass(pm_node_t *prismBlockOrLambdaNode,
-                                                                unique_ptr<parser::Node> sendNode) {
+unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
+                                                            unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
