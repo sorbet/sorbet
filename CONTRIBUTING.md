@@ -60,9 +60,7 @@ Occasionally, we'll realize that the issue either has already been fixed, is har
 
 ## ... a fix or feature that's not been discussed before
 
-Please follow the [Design Proposals: Scoping large features](#design-proposals-scoping-large-features) section below. We'd love for you to follow the template for proposing new features, so that we can review what your proposing before committing to a particular solution.
-
-We love when people have ideas for how to change Sorbet, because that enthusiasm for making Sorbet better energizes us as well! But we are **very particular** about changes to Sorbet itself, because Sorbet is something that tons of people use and love every day. We need to make sure that changes preserve the good parts and play to Sorbet's strengths.
+Follow the steps in the [Design Proposals: Scoping large features](#design-proposals-scoping-large-features) section below. You will be asked to [follow the checklist](#how-to-share-a-design-proposal) for proposing new features so we can review what you're proposing before committing to a particular solution.
 
 Usually, we want to chat briefly so that we can:
 
@@ -71,7 +69,7 @@ Usually, we want to chat briefly so that we can:
 - Double-check implementation considerations that preclude otherwise-good solutions
 - Estimate difficulty and other nuance in the change itself
 
-Successful contributions happen tend to come when we've helped start people down the right direction.
+Successful contributions happen tend to come when we've helped start people down the right direction. We love when people have ideas for how to change Sorbet, because that enthusiasm for making Sorbet better energizes us as well! But we are **very particular** about changes to Sorbet itself, because Sorbet is something that tons of people use and love every day. We need to make sure that changes preserve the good parts and play to Sorbet's strengths.
 
 It's fine to build a prototype of a change _before_ reaching out to us if you'd like, but it puts us in an awkward position when the first time we hear from you is after you've opened a PR with a few hundred or few thousand lines of new "ready for review" code written in a vacuum, but the PR stems from a fundamental misunderstanding about something that requires going back to the drawing board.
 
