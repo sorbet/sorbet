@@ -126,6 +126,11 @@ private:
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
     std::unique_ptr<parser::Node> translateIndexAssignment(pm_node_t *node, core::LocOffsets location);
 
+    // Helper to translate AndAsgn/OrAsgn operator assignments (e.g., `x &&= y`, `x ||= y`).
+    template <typename SorbetAssignmentNode>
+    std::unique_ptr<parser::Node> translateAndOrAssignment(core::LocOffsets location, std::unique_ptr<parser::Node> lhs,
+                                                           std::unique_ptr<parser::Node> rhs);
+
     template <typename PrismConstantNode, typename SorbetAssignmentNode>
     std::unique_ptr<parser::Node> translateConstantAssignment(pm_node_t *node, core::LocOffsets location);
 
