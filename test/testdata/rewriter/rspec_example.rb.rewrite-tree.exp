@@ -11,19 +11,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
+      def <it><<todo method>>(&<blk>)
+        <self>.my_helper()
+      end
+
       def <it 'example'><<todo method>>(&<blk>)
         <self>.my_helper()
       end
 
+      def <it><<todo method>>(&<blk>)
+        <self>.my_helper()
+      end
+
       <runtime method definition of my_helper>
-
-      <self>.xit() do ||
-        <self>.my_helper()
-      end
-
-      <self>.example() do ||
-        <self>.my_helper()
-      end
     end
 
     <self>.example() do ||
