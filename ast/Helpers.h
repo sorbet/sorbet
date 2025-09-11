@@ -304,9 +304,8 @@ public:
     }
 
     static ExpressionPtr Module(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
-                                ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
-        return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
-                                 ClassDef::Kind::Module);
+                                ClassDef::RHS_store rhs) {
+        return MK::ClassOrModule(loc, declLoc, std::move(name), {}, std::move(rhs), ClassDef::Kind::Module);
     }
 
     static ExpressionPtr Array(core::LocOffsets loc, Array::ENTRY_store entries) {

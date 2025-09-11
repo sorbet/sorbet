@@ -1442,9 +1442,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
                                      dctx.enclosingMethodName, dctx.inAnyBlock, true, dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(module->body));
-                ClassDef::ANCESTORS_store ancestors;
-                ExpressionPtr res = MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, module->name),
-                                               move(ancestors), move(body));
+                ExpressionPtr res =
+                    MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, module->name), move(body));
                 result = move(res);
             },
             [&](parser::Class *klass) {
