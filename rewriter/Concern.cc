@@ -106,7 +106,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     }
                     auto name =
                         ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
-                    classMethodsNode = ast::MK::Module(loc, loc, std::move(name), {}, std::move(rhs));
+                    classMethodsNode = ast::MK::Module(loc, loc, std::move(name), std::move(rhs));
                 }
                 continue;
             }
@@ -122,7 +122,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 } else {
                     // We don't have a ClassMethods module yet. Let's use the defined module (mod)
                     auto loc = mod->loc;
-                    classMethodsNode = ast::MK::Module(loc, loc, std::move(mod->name), {}, std::move(mod->rhs));
+                    classMethodsNode = ast::MK::Module(loc, loc, std::move(mod->name), std::move(mod->rhs));
                 }
                 continue;
             }

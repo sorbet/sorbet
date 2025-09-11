@@ -1409,8 +1409,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto bodyExprs = move(*bodyExprsOpt);
 
             auto nameExpr = name->takeDesugaredExpr();
-            ast::ClassDef::ANCESTORS_store ancestors;
-            auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(ancestors), move(bodyExprs));
+            auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(bodyExprs));
 
             return make_node_with_expr<parser::Module>(move(moduleDef), location, declLoc, move(name), move(body));
         }
