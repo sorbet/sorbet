@@ -3,6 +3,7 @@
 
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
+#include "ast/desugar/DuplicateHashKeyCheck.h"
 #include "core/errors/desugar.h"
 
 #include "absl/strings/str_replace.h"
@@ -12,15 +13,6 @@ template class std::unique_ptr<sorbet::parser::Node>;
 using namespace std;
 
 namespace sorbet::parser::Prism {
-
-// Structure for holding the scaffolding needed for op-assignment desugaring
-struct OpAsgnScaffolding {
-    core::NameRef temporaryName;
-    ast::InsSeq::STATS_store statementBody;
-    uint16_t numPosArgs;
-    ast::Send::ARGS_store readArgs;
-    ast::Send::ARGS_store assgnArgs;
-};
 
 using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
@@ -39,20 +31,6 @@ template <typename... Rest> bool hasExpr(const std::unique_ptr<parser::Node> &fi
 // Check if all nodes in NodeVec are null or have a desugared expr.
 bool hasExpr(const parser::NodeVec &nodes) {
     return absl::c_all_of(nodes, [](const auto &node) { return node == nullptr || node->hasDesugaredExpr(); });
-}
-
-// Helper to check if an ExpressionPtr represents a T.let call
-ast::Send *asTLet(ExpressionPtr &arg) {
-    auto send = ast::cast_tree<ast::Send>(arg);
-    if (send == nullptr || send->fun != core::Names::let() || send->numPosArgs() < 2) {
-        return nullptr;
-    }
-
-    if (!ast::MK::isT(send->recv)) {
-        return nullptr;
-    }
-
-    return send;
 }
 
 // Helper template to convert nodes to any store type with takeDesugaredExpr or EmptyTree for nulls.
@@ -121,22 +99,6 @@ ast::ExpressionPtr mergeStrings(core::MutableContext ctx, core::LocOffsets loc,
     }
 }
 
-// Helper function to get UnresolvedIdent::Kind from SorbetLHSNode type
-template <typename SorbetLHSNode> constexpr ast::UnresolvedIdent::Kind getIdentKind() {
-    if constexpr (is_same_v<SorbetLHSNode, parser::IVarLhs>) {
-        return ast::UnresolvedIdent::Kind::Instance;
-    } else if constexpr (is_same_v<SorbetLHSNode, parser::CVarLhs>) {
-        return ast::UnresolvedIdent::Kind::Class;
-    } else if constexpr (is_same_v<SorbetLHSNode, parser::GVarLhs>) {
-        return ast::UnresolvedIdent::Kind::Global;
-    } else if constexpr (is_same_v<SorbetLHSNode, parser::LVarLhs>) {
-        return ast::UnresolvedIdent::Kind::Local;
-    } else {
-        static_assert(false && sizeof(SorbetLHSNode),
-                      "Invalid LHS type. Must be one of `IVarLhs`, `CVarLhs`, `GVarLhs`, or `LVarLhs`.");
-    }
-}
-
 // Member function implementation for desugarDString
 ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list prismNodeList) {
     if (prismNodeList.size == 0) {
@@ -175,6 +137,45 @@ ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list
     return MK::Send(loc, move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(),
                     static_cast<uint16_t>(interpArgs.size()), move(interpArgs));
 }
+
+// Helper function to get UnresolvedIdent::Kind from SorbetLHSNode type
+template <typename SorbetLHSNode> constexpr ast::UnresolvedIdent::Kind getIdentKind() {
+    if constexpr (is_same_v<SorbetLHSNode, parser::IVarLhs>) {
+        return ast::UnresolvedIdent::Kind::Instance;
+    } else if constexpr (is_same_v<SorbetLHSNode, parser::CVarLhs>) {
+        return ast::UnresolvedIdent::Kind::Class;
+    } else if constexpr (is_same_v<SorbetLHSNode, parser::GVarLhs>) {
+        return ast::UnresolvedIdent::Kind::Global;
+    } else if constexpr (is_same_v<SorbetLHSNode, parser::LVarLhs>) {
+        return ast::UnresolvedIdent::Kind::Local;
+    } else {
+        static_assert(false && sizeof(SorbetLHSNode),
+                      "Invalid LHS type. Must be one of `IVarLhs`, `CVarLhs`, `GVarLhs`, or `LVarLhs`.");
+    }
+}
+
+// Helper to check if an ExpressionPtr represents a T.let call
+ast::Send *asTLet(ExpressionPtr &arg) {
+    auto send = ast::cast_tree<ast::Send>(arg);
+    if (send == nullptr || send->fun != core::Names::let() || send->numPosArgs() < 2) {
+        return nullptr;
+    }
+
+    if (!ast::MK::isT(send->recv)) {
+        return nullptr;
+    }
+
+    return send;
+}
+
+// Structure for holding the scaffolding needed for op-assignment desugaring
+struct OpAsgnScaffolding {
+    core::NameRef temporaryName;
+    ast::InsSeq::STATS_store statementBody;
+    uint16_t numPosArgs;
+    ast::Send::ARGS_store readArgs;
+    ast::Send::ARGS_store assgnArgs;
+};
 
 // Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
@@ -955,35 +956,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         default:
                             break;
                     }
-<<<<<<< HEAD
-=======
-
-                    // Unsupported nodes are desugared to an empty tree.
-                    // Treat them as if they were `self` to match `Desugar.cc`.
-                    // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-                    if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
-                        receiverExpr = MK::Self(loc.copyWithZeroLength());
-                        flags.isPrivateOk = true;
-                    } else {
-                        flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-                    }
-
-                    int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
-
-                    ast::Send::ARGS_store sendArgs{};
-                    sendArgs.reserve(args.size());
-                    for (auto &arg : args) {
-                        sendArgs.emplace_back(arg->takeDesugaredExpr());
-                    }
-
-                    auto expr =
-                        MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
-                    sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc,
-                                                                 move(args));
-                }
-                else {
-                    sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
->>>>>>> 2f22f991b (Handle isPrivaeOk in some translateOpAssignment self nodes)
                 }
             }
 
@@ -1418,7 +1390,24 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         }
         case PM_HASH_NODE: { // A hash literal, like `{ a: 1, b: 2 }`
             auto kvPairs = translateKeyValuePairs(down_cast<pm_hash_node>(node)->elements);
-            return make_unique<parser::Hash>(location, false, move(kvPairs));
+
+            auto elementsHaveExprs = absl::c_all_of(kvPairs, [](const auto &node) {
+                // `parser::Pair` nodes never have a desugared expr, because they have no ExpressionPtr equivalent.
+                // Instead, we check their children ourselves.
+                if (auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get())) {
+                    return hasExpr(pair->key, pair->value);
+                }
+
+                return hasExpr(node);
+            });
+
+            if (!directlyDesugar || !elementsHaveExprs) {
+                return make_unique<parser::Hash>(location, false, move(kvPairs));
+            }
+
+            auto hashExpr = desugarHash(location, kvPairs);
+
+            return make_node_with_expr<parser::Hash>(move(hashExpr), location, false, move(kvPairs));
         }
         case PM_IF_NODE: { // An `if` statement or modifier, like `if cond; ...; end` or `a.b if cond`
             auto ifNode = down_cast<pm_if_node>(node);
@@ -2836,6 +2825,129 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     return sorbetElements;
 }
 
+ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPairs) {
+    auto locZeroLen = loc.copyWithZeroLength();
+
+    ast::InsSeq::STATS_store updateStmts;
+    updateStmts.reserve(kvPairs.size());
+
+    auto acc = nextUniqueDesugarName(core::Names::hashTemp());
+
+    ast::desugar::DuplicateHashKeyCheck hashKeyDupes(ctx);
+    ast::Send::ARGS_store mergeValues;
+    mergeValues.reserve(kvPairs.size() * 2 + 1);
+    mergeValues.emplace_back(MK::Local(loc, acc));
+    bool havePairsToMerge = false;
+
+    // build a hash literal assuming that the argument follows the same format as `mergeValues`:
+    // arg 0: the hash to merge into
+    // arg 1: key
+    // arg 2: value
+    // ...
+    // arg n: key
+    // arg n+1: value
+    auto buildHashLiteral = [loc](ast::Send::ARGS_store &mergeValues) {
+        ast::Hash::ENTRY_store keys;
+        ast::Hash::ENTRY_store values;
+
+        keys.reserve(mergeValues.size() / 2);
+        values.reserve(mergeValues.size() / 2);
+
+        // skip the first positional argument for the accumulator that would have been mutated
+        for (auto it = mergeValues.begin() + 1; it != mergeValues.end();) {
+            keys.emplace_back(move(*it++));
+            values.emplace_back(move(*it++));
+        }
+
+        return MK::Hash(loc, move(keys), move(values));
+    };
+
+    // Desguar
+    //   {**x, a: 'a', **y, remaining}
+    // into
+    //   acc = <Magic>.<to-hash-dup>(x)
+    //   acc = <Magic>.<merge-hash-values>(acc, :a, 'a')
+    //   acc = <Magic>.<merge-hash>(acc, <Magic>.<to-hash-nodup>(y))
+    //   acc = <Magic>.<merge-hash>(acc, remaining)
+    //   acc
+    for (auto &pairAsExpression : kvPairs) {
+        auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(pairAsExpression.get());
+        if (pair != nullptr) {
+            auto key = pair->key->takeDesugaredExpr();
+            hashKeyDupes.check(key);
+            mergeValues.emplace_back(move(key));
+
+            auto value = pair->value->takeDesugaredExpr();
+            mergeValues.emplace_back(move(value));
+
+            havePairsToMerge = true;
+            continue;
+        }
+
+        auto *splat = parser::NodeWithExpr::cast_node<parser::Kwsplat>(pairAsExpression.get());
+
+        ast::ExpressionPtr expr;
+        if (splat != nullptr) {
+            expr = splat->expr->takeDesugaredExpr();
+        } else {
+            auto *fwdKwrestArg = parser::NodeWithExpr::cast_node<parser::ForwardedKwrestArg>(pairAsExpression.get());
+            ENFORCE(fwdKwrestArg != nullptr, "kwsplat and fwdkwrestarg cast failed");
+
+            auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
+            expr = MK::Unsafe(loc, move(fwdKwargs));
+        }
+
+        if (havePairsToMerge) {
+            havePairsToMerge = false;
+
+            // ensure that there's something to update
+            if (updateStmts.empty()) {
+                updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
+            } else {
+                int numPosArgs = mergeValues.size();
+                updateStmts.emplace_back(MK::Assign(loc, acc,
+                                                    MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(),
+                                                             locZeroLen, numPosArgs, move(mergeValues))));
+            }
+
+            mergeValues.clear();
+            mergeValues.emplace_back(MK::Local(loc, acc));
+        }
+
+        // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
+        // intrinsic is assumed to mutate its first argument.
+        if (updateStmts.empty()) {
+            updateStmts.emplace_back(
+                MK::Assign(loc, acc, MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(expr))));
+        } else {
+            updateStmts.emplace_back(MK::Assign(
+                loc, acc,
+                MK::Send2(loc, MK::Magic(loc), core::Names::mergeHash(), locZeroLen, MK::Local(loc, acc),
+                          MK::Send1(loc, MK::Magic(loc), core::Names::toHashNoDup(), locZeroLen, move(expr)))));
+        }
+    };
+
+    if (havePairsToMerge) {
+        // There were only keyword args/values present, so construct a hash literal directly
+        if (updateStmts.empty()) {
+            return buildHashLiteral(mergeValues);
+        }
+
+        // there are already other entries in updateStmts, so append the `merge-hash-values` call and fall
+        // through to the rest of the processing
+        int numPosArgs = mergeValues.size();
+        updateStmts.emplace_back(MK::Assign(
+            loc, acc,
+            MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(), locZeroLen, numPosArgs, move(mergeValues))));
+    }
+
+    if (updateStmts.empty()) {
+        return MK::Hash0(loc);
+    } else {
+        return MK::InsSeq(loc, move(updateStmts), MK::Local(loc, acc));
+    }
+}
+
 // Copied from `Builder::isKeywordHashElement()`
 // Checks if the given node is a keyword hash element based on the standards of Sorbet's legacy parser.
 bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
@@ -3123,16 +3235,12 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
         parentExpr = MK::EmptyTree();
     }
 
-    if (parentExpr != nullptr) {
-        ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
-        return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
-    } else {
-        // ENFORCE(false, "Failed to translate constant");
-        // return make_unique<SorbetLHSNode>(location, move(parent), constantName);
-
-        ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, MK::EmptyTree(), constantName);
-        return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
+    if (parentExpr == nullptr) {
+        parentExpr = MK::EmptyTree();
     }
+
+    ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
+    return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
 }
 
 core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
