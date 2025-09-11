@@ -118,8 +118,6 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
     return send.loc.copyWithZeroLength().join(send.block()->loc.copyWithZeroLength());
 }
 
-} // namespace
-
 // Namer only looks at ancestors at the ClassDef top-level. If a `describe` block has ancestor items
 // at the top level inside the InsSeq of the Block body, that should count as a an ancestor in namer.
 // But if we just plop the whole InsSeq as a single element inside the the ClassDef rhs, they won't
@@ -214,6 +212,24 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
     return pair{methodName, declLoc};
 }
 
+// Some RSpec methods are relatively common method names where we really want to make sure that
+// we're definitely in a test context before we do the translation here.
+//
+// This is kind of vibes based, mostly just to be defensive so that we don't break people who had
+// depended on methods sharing names with RSpec methods not firing.
+bool requiresSecondFactor(core::NameRef fun) {
+    switch (fun.rawId()) {
+        case core::Names::example().rawId():
+        case core::Names::focus().rawId():
+        case core::Names::pending().rawId():
+        case core::Names::skip().rawId():
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 // Returns a method name for the method definition to create, or no name if this is not a valid
 // method-defining test helper.
 core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send &send) {
@@ -225,12 +241,25 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
         case core::Names::after().rawId():
             return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
 
-        case core::Names::it().rawId(): {
+        case core::Names::it().rawId():
+        case core::Names::xit().rawId():
+        case core::Names::fit().rawId():
+        case core::Names::specify().rawId():
+        case core::Names::xspecify().rawId():
+        case core::Names::fspecify().rawId():
+        case core::Names::example().rawId():
+        case core::Names::fexample().rawId():
+        case core::Names::xexample().rawId():
+        case core::Names::focus().rawId():
+        case core::Names::pending().rawId():
+        case core::Names::skip().rawId(): {
             switch (arity) {
                 case 0:
                     return core::Names::itAngles();
-                case 1:
-                    return ctx.state.enterNameUTF8("<it '" + to_s(ctx, send.getPosArg(0)) + "'>");
+                case 1: {
+                    auto name = fmt::format("<{} '{}'>", send.fun.show(ctx), to_s(ctx, send.getPosArg(0)));
+                    return ctx.state.enterNameUTF8(name);
+                }
                 default:
                     return core::NameRef::noName();
             }
@@ -519,7 +548,22 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         case core::Names::after().rawId():
         case core::Names::before().rawId():
-        case core::Names::it().rawId(): {
+        case core::Names::it().rawId():
+        case core::Names::xit().rawId():
+        case core::Names::fit().rawId():
+        case core::Names::specify().rawId():
+        case core::Names::xspecify().rawId():
+        case core::Names::fspecify().rawId():
+        case core::Names::example().rawId():
+        case core::Names::fexample().rawId():
+        case core::Names::xexample().rawId():
+        case core::Names::focus().rawId():
+        case core::Names::pending().rawId():
+        case core::Names::skip().rawId(): {
+            if (!insideDescribe && requiresSecondFactor(send->fun)) {
+                return nullptr;
+            }
+
             auto name = nameForTestHelperMethod(ctx, *send);
             if (!name.exists()) {
                 return nullptr;
@@ -565,6 +609,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     return nullptr;
 }
+
+} // namespace
 
 vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
     vector<ast::ExpressionPtr> stats;
