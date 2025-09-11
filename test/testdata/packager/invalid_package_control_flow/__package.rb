@@ -29,13 +29,13 @@ class MyPackage < PackageSpec
   some_method 1
 
   # Methods defs are not OK
-  sig {void} # error: Invalid expression in package: Arguments to functions must be literals
+  sig {void}
 # ^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
   def package_method; end
 # ^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `MethodDef`
 # ^^^^^^^^^^^^^^^^^^      error: Invalid expression in package: `RuntimeMethodDefinition`
 
-  sig {void} # error: Invalid expression in package: Arguments to functions must be literals
+  sig {void}
 # ^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
   def self.static_method; end
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `MethodDef`

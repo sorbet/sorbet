@@ -32,14 +32,13 @@ bb1[firstDead=-1]():
 method ::<Class:MyEnum>#<static-init> {
 
 bb0[firstDead=-1]():
-    <C X>$30: MyEnum::X = alias <C X>
-    <C Y>$38: MyEnum::Y = alias <C Y>
-    <C Z>$47: MyEnum::Z = alias <C Z>
+    <C X>$28: MyEnum::X = alias <C X>
+    <C Y>$36: MyEnum::Y = alias <C Y>
+    <C Z>$45: MyEnum::Z = alias <C Z>
     <self>: T.class_of(MyEnum) = cast(<self>: NilClass, T.class_of(MyEnum));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$7: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>
-    <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sig(<cfgAlias>$7: T.class_of(T::Sig::WithoutRuntime))
-    <selfRestore>$9: T.class_of(MyEnum) = <self>
+    <cfgAlias>$5: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>
+    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(T::Sig::WithoutRuntime).sig()
+    <selfRestore>$7: T.class_of(MyEnum) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -50,75 +49,75 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$38: MyEnum::Y, <C Z>$47: MyEnum::Z):
+bb2[firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(MyEnum), <C X>$28: MyEnum::X, <C Y>$36: MyEnum::Y, <C Z>$45: MyEnum::Z):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$38: MyEnum::Y, <C Z>$47: MyEnum::Z):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$8, sig>
-    <self>: T.class_of(MyEnum) = <selfRestore>$9
-    <cfgAlias>$18: T.class_of(T::Helpers) = alias <C Helpers>
-    <statTemp>$15: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).extend(<cfgAlias>$18: T.class_of(T::Helpers))
-    <statTemp>$19: Sorbet::Private::Static::Void = <self>: T.class_of(MyEnum).abstract!()
-    <statTemp>$21: Sorbet::Private::Static::Void = <self>: T.class_of(MyEnum).sealed!()
-    <block-pre-call-temp>$25: Sorbet::Private::Static::Void = <self>: T.class_of(MyEnum).enums()
-    <selfRestore>$26: T.class_of(MyEnum) = <self>
+bb3[firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(MyEnum), <C X>$28: MyEnum::X, <C Y>$36: MyEnum::Y, <C Z>$45: MyEnum::Z):
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$6, sig>
+    <self>: T.class_of(MyEnum) = <selfRestore>$7
+    <cfgAlias>$16: T.class_of(T::Helpers) = alias <C Helpers>
+    <statTemp>$13: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).extend(<cfgAlias>$16: T.class_of(T::Helpers))
+    <statTemp>$17: Sorbet::Private::Static::Void = <self>: T.class_of(MyEnum).abstract!()
+    <statTemp>$19: Sorbet::Private::Static::Void = <self>: T.class_of(MyEnum).sealed!()
+    <block-pre-call-temp>$23: Sorbet::Private::Static::Void = <self>: T.class_of(MyEnum).enums()
+    <selfRestore>$24: T.class_of(MyEnum) = <self>
     <unconditional> -> bb6
 
 # backedges
 # - bb2
-bb5[firstDead=4](<self>: T.class_of(MyEnum), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$38: MyEnum::Y, <C Z>$47: MyEnum::Z):
+bb5[firstDead=4](<self>: T.class_of(MyEnum), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(MyEnum), <C X>$28: MyEnum::X, <C Y>$36: MyEnum::Y, <C Z>$45: MyEnum::Z):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <cfgAlias>$13: T.class_of(String) = alias <C String>
-    <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$13: T.class_of(String))
-    <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
+    <cfgAlias>$11: T.class_of(String) = alias <C String>
+    <blockReturnTemp>$8: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$11: T.class_of(String))
+    <blockReturnTemp>$12: T.noreturn = blockreturn<sig> <blockReturnTemp>$8: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 # backedges
 # - bb3
 # - bb9
-bb6[firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$38: MyEnum::Y, <C Z>$47: MyEnum::Z):
+bb6[firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(MyEnum), <C X>$28: MyEnum::X, <C Y>$36: MyEnum::Y, <C Z>$45: MyEnum::Z):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6
-bb7[firstDead=4](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(MyEnum)):
-    <statTemp>$23: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$25, enums>
-    <self>: T.class_of(MyEnum) = <selfRestore>$26
-    <statTemp>$54: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).public()
+bb7[firstDead=4](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(MyEnum)):
+    <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, enums>
+    <self>: T.class_of(MyEnum) = <selfRestore>$24
+    <statTemp>$52: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).public()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb6
-bb9[firstDead=22](<self>: T.class_of(MyEnum), <block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(MyEnum), <C X>$30: MyEnum::X, <C Y>$38: MyEnum::Y, <C Z>$47: MyEnum::Z):
+bb9[firstDead=22](<self>: T.class_of(MyEnum), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(MyEnum), <C X>$28: MyEnum::X, <C Y>$36: MyEnum::Y, <C Z>$45: MyEnum::Z):
     # outerLoops: 1
     <self>: T.class_of(MyEnum) = loadSelf(enums)
-    <cfgAlias>$32: T.class_of(MyEnum::X) = alias <C X$1>
-    keep_for_ide$31: T.class_of(MyEnum::X) = <cfgAlias>$32
-    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
-    <cfgAlias>$35: T.class_of(MyEnum::X) = alias <C X$1>
-    <castTemp>$33: MyEnum::X = <cfgAlias>$35: T.class_of(MyEnum::X).new()
-    <C X>$30: MyEnum::X = <castTemp>$33
-    <cfgAlias>$40: T.class_of(MyEnum::Y) = alias <C Y$1>
-    keep_for_ide$39: T.class_of(MyEnum::Y) = <cfgAlias>$40
-    keep_for_ide$39: T.untyped = <keep-alive> keep_for_ide$39
-    <cfgAlias>$43: T.class_of(MyEnum::Y) = alias <C Y$1>
-    <statTemp>$44: String("y") = "y"
-    <castTemp>$41: MyEnum::Y = <cfgAlias>$43: T.class_of(MyEnum::Y).new(<statTemp>$44: String("y"))
-    <C Y>$38: MyEnum::Y = <castTemp>$41
-    <cfgAlias>$49: T.class_of(MyEnum::Z) = alias <C Z$1>
-    keep_for_ide$48: T.class_of(MyEnum::Z) = <cfgAlias>$49
-    keep_for_ide$48: T.untyped = <keep-alive> keep_for_ide$48
-    <cfgAlias>$52: T.class_of(MyEnum::Z) = alias <C Z$1>
-    <castTemp>$50: MyEnum::Z = <cfgAlias>$52: T.class_of(MyEnum::Z).new()
-    <C Z>$47: MyEnum::Z = <castTemp>$50
-    <blockReturnTemp>$27: NilClass = nil
-    <blockReturnTemp>$53: T.noreturn = blockreturn<enums> <blockReturnTemp>$27: NilClass
+    <cfgAlias>$30: T.class_of(MyEnum::X) = alias <C X$1>
+    keep_for_ide$29: T.class_of(MyEnum::X) = <cfgAlias>$30
+    keep_for_ide$29: T.untyped = <keep-alive> keep_for_ide$29
+    <cfgAlias>$33: T.class_of(MyEnum::X) = alias <C X$1>
+    <castTemp>$31: MyEnum::X = <cfgAlias>$33: T.class_of(MyEnum::X).new()
+    <C X>$28: MyEnum::X = <castTemp>$31
+    <cfgAlias>$38: T.class_of(MyEnum::Y) = alias <C Y$1>
+    keep_for_ide$37: T.class_of(MyEnum::Y) = <cfgAlias>$38
+    keep_for_ide$37: T.untyped = <keep-alive> keep_for_ide$37
+    <cfgAlias>$41: T.class_of(MyEnum::Y) = alias <C Y$1>
+    <statTemp>$42: String("y") = "y"
+    <castTemp>$39: MyEnum::Y = <cfgAlias>$41: T.class_of(MyEnum::Y).new(<statTemp>$42: String("y"))
+    <C Y>$36: MyEnum::Y = <castTemp>$39
+    <cfgAlias>$47: T.class_of(MyEnum::Z) = alias <C Z$1>
+    keep_for_ide$46: T.class_of(MyEnum::Z) = <cfgAlias>$47
+    keep_for_ide$46: T.untyped = <keep-alive> keep_for_ide$46
+    <cfgAlias>$50: T.class_of(MyEnum::Z) = alias <C Z$1>
+    <castTemp>$48: MyEnum::Z = <cfgAlias>$50: T.class_of(MyEnum::Z).new()
+    <C Z>$45: MyEnum::Z = <castTemp>$48
+    <blockReturnTemp>$25: NilClass = nil
+    <blockReturnTemp>$51: T.noreturn = blockreturn<enums> <blockReturnTemp>$25: NilClass
     <unconditional> -> bb6
 
 }
@@ -246,14 +245,13 @@ bb1[firstDead=-1]():
 method ::<Class:EnumsDoEnum>#<static-init> {
 
 bb0[firstDead=-1]():
-    <C X>$30: EnumsDoEnum::X = alias <C X>
-    <C Y>$38: EnumsDoEnum::Y = alias <C Y>
-    <C Z>$47: EnumsDoEnum::Z = alias <C Z>
+    <C X>$28: EnumsDoEnum::X = alias <C X>
+    <C Y>$36: EnumsDoEnum::Y = alias <C Y>
+    <C Z>$45: EnumsDoEnum::Z = alias <C Z>
     <self>: T.class_of(EnumsDoEnum) = cast(<self>: NilClass, T.class_of(EnumsDoEnum));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$7: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>
-    <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sig(<cfgAlias>$7: T.class_of(T::Sig::WithoutRuntime))
-    <selfRestore>$9: T.class_of(EnumsDoEnum) = <self>
+    <cfgAlias>$5: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>
+    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(T::Sig::WithoutRuntime).sig()
+    <selfRestore>$7: T.class_of(EnumsDoEnum) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -264,75 +262,75 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$38: EnumsDoEnum::Y, <C Z>$47: EnumsDoEnum::Z):
+bb2[firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(EnumsDoEnum), <C X>$28: EnumsDoEnum::X, <C Y>$36: EnumsDoEnum::Y, <C Z>$45: EnumsDoEnum::Z):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$38: EnumsDoEnum::Y, <C Z>$47: EnumsDoEnum::Z):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$8, sig>
-    <self>: T.class_of(EnumsDoEnum) = <selfRestore>$9
-    <cfgAlias>$18: T.class_of(T::Helpers) = alias <C Helpers>
-    <statTemp>$15: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).extend(<cfgAlias>$18: T.class_of(T::Helpers))
-    <statTemp>$19: Sorbet::Private::Static::Void = <self>: T.class_of(EnumsDoEnum).abstract!()
-    <statTemp>$21: Sorbet::Private::Static::Void = <self>: T.class_of(EnumsDoEnum).sealed!()
-    <block-pre-call-temp>$25: Sorbet::Private::Static::Void = <self>: T.class_of(EnumsDoEnum).enums()
-    <selfRestore>$26: T.class_of(EnumsDoEnum) = <self>
+bb3[firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(EnumsDoEnum), <C X>$28: EnumsDoEnum::X, <C Y>$36: EnumsDoEnum::Y, <C Z>$45: EnumsDoEnum::Z):
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$6, sig>
+    <self>: T.class_of(EnumsDoEnum) = <selfRestore>$7
+    <cfgAlias>$16: T.class_of(T::Helpers) = alias <C Helpers>
+    <statTemp>$13: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).extend(<cfgAlias>$16: T.class_of(T::Helpers))
+    <statTemp>$17: Sorbet::Private::Static::Void = <self>: T.class_of(EnumsDoEnum).abstract!()
+    <statTemp>$19: Sorbet::Private::Static::Void = <self>: T.class_of(EnumsDoEnum).sealed!()
+    <block-pre-call-temp>$23: Sorbet::Private::Static::Void = <self>: T.class_of(EnumsDoEnum).enums()
+    <selfRestore>$24: T.class_of(EnumsDoEnum) = <self>
     <unconditional> -> bb6
 
 # backedges
 # - bb2
-bb5[firstDead=4](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$38: EnumsDoEnum::Y, <C Z>$47: EnumsDoEnum::Z):
+bb5[firstDead=4](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(EnumsDoEnum), <C X>$28: EnumsDoEnum::X, <C Y>$36: EnumsDoEnum::Y, <C Z>$45: EnumsDoEnum::Z):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <cfgAlias>$13: T.class_of(String) = alias <C String>
-    <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$13: T.class_of(String))
-    <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
+    <cfgAlias>$11: T.class_of(String) = alias <C String>
+    <blockReturnTemp>$8: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$11: T.class_of(String))
+    <blockReturnTemp>$12: T.noreturn = blockreturn<sig> <blockReturnTemp>$8: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 # backedges
 # - bb3
 # - bb9
-bb6[firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$38: EnumsDoEnum::Y, <C Z>$47: EnumsDoEnum::Z):
+bb6[firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(EnumsDoEnum), <C X>$28: EnumsDoEnum::X, <C Y>$36: EnumsDoEnum::Y, <C Z>$45: EnumsDoEnum::Z):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6
-bb7[firstDead=4](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(EnumsDoEnum)):
-    <statTemp>$23: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$25, enums>
-    <self>: T.class_of(EnumsDoEnum) = <selfRestore>$26
-    <statTemp>$55: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).public()
+bb7[firstDead=4](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(EnumsDoEnum)):
+    <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, enums>
+    <self>: T.class_of(EnumsDoEnum) = <selfRestore>$24
+    <statTemp>$53: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).public()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb6
-bb9[firstDead=22](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(EnumsDoEnum), <C X>$30: EnumsDoEnum::X, <C Y>$38: EnumsDoEnum::Y, <C Z>$47: EnumsDoEnum::Z):
+bb9[firstDead=22](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(EnumsDoEnum), <C X>$28: EnumsDoEnum::X, <C Y>$36: EnumsDoEnum::Y, <C Z>$45: EnumsDoEnum::Z):
     # outerLoops: 1
     <self>: T.class_of(EnumsDoEnum) = loadSelf(enums)
-    <cfgAlias>$32: T.class_of(EnumsDoEnum::X) = alias <C X$1>
-    keep_for_ide$31: T.class_of(EnumsDoEnum::X) = <cfgAlias>$32
-    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
-    <cfgAlias>$35: T.class_of(EnumsDoEnum::X) = alias <C X$1>
-    <castTemp>$33: EnumsDoEnum::X = <cfgAlias>$35: T.class_of(EnumsDoEnum::X).new()
-    <C X>$30: EnumsDoEnum::X = <castTemp>$33
-    <cfgAlias>$40: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
-    keep_for_ide$39: T.class_of(EnumsDoEnum::Y) = <cfgAlias>$40
-    keep_for_ide$39: T.untyped = <keep-alive> keep_for_ide$39
-    <cfgAlias>$43: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
-    <statTemp>$44: String("y") = "y"
-    <castTemp>$41: EnumsDoEnum::Y = <cfgAlias>$43: T.class_of(EnumsDoEnum::Y).new(<statTemp>$44: String("y"))
-    <C Y>$38: EnumsDoEnum::Y = <castTemp>$41
-    <cfgAlias>$49: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
-    keep_for_ide$48: T.class_of(EnumsDoEnum::Z) = <cfgAlias>$49
-    keep_for_ide$48: T.untyped = <keep-alive> keep_for_ide$48
-    <cfgAlias>$52: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
-    <castTemp>$50: EnumsDoEnum::Z = <cfgAlias>$52: T.class_of(EnumsDoEnum::Z).new()
-    <C Z>$47: EnumsDoEnum::Z = <castTemp>$50
-    <blockReturnTemp>$27: NilClass = nil
-    <blockReturnTemp>$53: T.noreturn = blockreturn<enums> <blockReturnTemp>$27: NilClass
+    <cfgAlias>$30: T.class_of(EnumsDoEnum::X) = alias <C X$1>
+    keep_for_ide$29: T.class_of(EnumsDoEnum::X) = <cfgAlias>$30
+    keep_for_ide$29: T.untyped = <keep-alive> keep_for_ide$29
+    <cfgAlias>$33: T.class_of(EnumsDoEnum::X) = alias <C X$1>
+    <castTemp>$31: EnumsDoEnum::X = <cfgAlias>$33: T.class_of(EnumsDoEnum::X).new()
+    <C X>$28: EnumsDoEnum::X = <castTemp>$31
+    <cfgAlias>$38: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
+    keep_for_ide$37: T.class_of(EnumsDoEnum::Y) = <cfgAlias>$38
+    keep_for_ide$37: T.untyped = <keep-alive> keep_for_ide$37
+    <cfgAlias>$41: T.class_of(EnumsDoEnum::Y) = alias <C Y$1>
+    <statTemp>$42: String("y") = "y"
+    <castTemp>$39: EnumsDoEnum::Y = <cfgAlias>$41: T.class_of(EnumsDoEnum::Y).new(<statTemp>$42: String("y"))
+    <C Y>$36: EnumsDoEnum::Y = <castTemp>$39
+    <cfgAlias>$47: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
+    keep_for_ide$46: T.class_of(EnumsDoEnum::Z) = <cfgAlias>$47
+    keep_for_ide$46: T.untyped = <keep-alive> keep_for_ide$46
+    <cfgAlias>$50: T.class_of(EnumsDoEnum::Z) = alias <C Z$1>
+    <castTemp>$48: EnumsDoEnum::Z = <cfgAlias>$50: T.class_of(EnumsDoEnum::Z).new()
+    <C Z>$45: EnumsDoEnum::Z = <castTemp>$48
+    <blockReturnTemp>$25: NilClass = nil
+    <blockReturnTemp>$51: T.noreturn = blockreturn<enums> <blockReturnTemp>$25: NilClass
     <unconditional> -> bb6
 
 }
@@ -399,18 +397,17 @@ bb1[firstDead=-1]():
 method ::<Class:BadConsts>#<static-init> {
 
 bb0[firstDead=-1]():
-    <C Before>$24: BadConsts::Before = alias <C Before>
-    <C StaticField1>$31: Integer = alias <C StaticField1>
-    <C Inside>$39: BadConsts::Inside = alias <C Inside>
-    <C StaticField2>$46: Integer = alias <C StaticField2>
-    <C After>$49: BadConsts::After = alias <C After>
-    <C StaticField3>$56: Integer = alias <C StaticField3>
-    <C StaticField4>$58: Integer = alias <C StaticField4>
+    <C Before>$22: BadConsts::Before = alias <C Before>
+    <C StaticField1>$29: Integer = alias <C StaticField1>
+    <C Inside>$37: BadConsts::Inside = alias <C Inside>
+    <C StaticField2>$44: Integer = alias <C StaticField2>
+    <C After>$47: BadConsts::After = alias <C After>
+    <C StaticField3>$54: Integer = alias <C StaticField3>
+    <C StaticField4>$56: Integer = alias <C StaticField4>
     <self>: T.class_of(BadConsts) = cast(<self>: NilClass, T.class_of(BadConsts));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$7: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>
-    <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sig(<cfgAlias>$7: T.class_of(T::Sig::WithoutRuntime))
-    <selfRestore>$9: T.class_of(BadConsts) = <self>
+    <cfgAlias>$5: T.class_of(T::Sig::WithoutRuntime) = alias <C WithoutRuntime>
+    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(T::Sig::WithoutRuntime).sig()
+    <selfRestore>$7: T.class_of(BadConsts) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -421,82 +418,82 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(BadConsts), <C Before>$24: BadConsts::Before, <C StaticField1>$31: Integer, <C Inside>$39: BadConsts::Inside, <C StaticField2>$46: Integer, <C After>$49: BadConsts::After, <C StaticField3>$56: Integer, <C StaticField4>$58: Integer):
+bb2[firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(BadConsts), <C Before>$22: BadConsts::Before, <C StaticField1>$29: Integer, <C Inside>$37: BadConsts::Inside, <C StaticField2>$44: Integer, <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(BadConsts), <C Before>$24: BadConsts::Before, <C StaticField1>$31: Integer, <C Inside>$39: BadConsts::Inside, <C StaticField2>$46: Integer, <C After>$49: BadConsts::After, <C StaticField3>$56: Integer, <C StaticField4>$58: Integer):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$8, sig>
-    <self>: T.class_of(BadConsts) = <selfRestore>$9
-    <cfgAlias>$18: T.class_of(T::Helpers) = alias <C Helpers>
-    <statTemp>$15: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).extend(<cfgAlias>$18: T.class_of(T::Helpers))
-    <statTemp>$19: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).abstract!()
-    <statTemp>$21: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).sealed!()
-    <cfgAlias>$26: T.class_of(BadConsts::Before) = alias <C Before$1>
-    keep_for_ide$25: T.class_of(BadConsts::Before) = <cfgAlias>$26
-    keep_for_ide$25: T.untyped = <keep-alive> keep_for_ide$25
-    <cfgAlias>$29: T.class_of(BadConsts::Before) = alias <C Before$1>
-    <castTemp>$27: BadConsts::Before = <cfgAlias>$29: T.class_of(BadConsts::Before).new()
-    <C Before>$24: BadConsts::Before = <castTemp>$27
-    <C StaticField1>$31: Integer(1) = 1
-    <block-pre-call-temp>$34: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).enums()
-    <selfRestore>$35: T.class_of(BadConsts) = <self>
+bb3[firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(BadConsts), <C Before>$22: BadConsts::Before, <C StaticField1>$29: Integer, <C Inside>$37: BadConsts::Inside, <C StaticField2>$44: Integer, <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$6, sig>
+    <self>: T.class_of(BadConsts) = <selfRestore>$7
+    <cfgAlias>$16: T.class_of(T::Helpers) = alias <C Helpers>
+    <statTemp>$13: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).extend(<cfgAlias>$16: T.class_of(T::Helpers))
+    <statTemp>$17: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).abstract!()
+    <statTemp>$19: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).sealed!()
+    <cfgAlias>$24: T.class_of(BadConsts::Before) = alias <C Before$1>
+    keep_for_ide$23: T.class_of(BadConsts::Before) = <cfgAlias>$24
+    keep_for_ide$23: T.untyped = <keep-alive> keep_for_ide$23
+    <cfgAlias>$27: T.class_of(BadConsts::Before) = alias <C Before$1>
+    <castTemp>$25: BadConsts::Before = <cfgAlias>$27: T.class_of(BadConsts::Before).new()
+    <C Before>$22: BadConsts::Before = <castTemp>$25
+    <C StaticField1>$29: Integer(1) = 1
+    <block-pre-call-temp>$32: Sorbet::Private::Static::Void = <self>: T.class_of(BadConsts).enums()
+    <selfRestore>$33: T.class_of(BadConsts) = <self>
     <unconditional> -> bb6
 
 # backedges
 # - bb2
-bb5[firstDead=4](<self>: T.class_of(BadConsts), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(BadConsts), <C Before>$24: BadConsts::Before, <C StaticField1>$31: Integer, <C Inside>$39: BadConsts::Inside, <C StaticField2>$46: Integer, <C After>$49: BadConsts::After, <C StaticField3>$56: Integer, <C StaticField4>$58: Integer):
+bb5[firstDead=4](<self>: T.class_of(BadConsts), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(BadConsts), <C Before>$22: BadConsts::Before, <C StaticField1>$29: Integer, <C Inside>$37: BadConsts::Inside, <C StaticField2>$44: Integer, <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <cfgAlias>$13: T.class_of(String) = alias <C String>
-    <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$13: T.class_of(String))
-    <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
+    <cfgAlias>$11: T.class_of(String) = alias <C String>
+    <blockReturnTemp>$8: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$11: T.class_of(String))
+    <blockReturnTemp>$12: T.noreturn = blockreturn<sig> <blockReturnTemp>$8: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 # backedges
 # - bb3
 # - bb9
-bb6[firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call-temp>$34: Sorbet::Private::Static::Void, <selfRestore>$35: T.class_of(BadConsts), <C Inside>$39: BadConsts::Inside, <C StaticField2>$46: Integer, <C After>$49: BadConsts::After, <C StaticField3>$56: Integer, <C StaticField4>$58: Integer):
+bb6[firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call-temp>$32: Sorbet::Private::Static::Void, <selfRestore>$33: T.class_of(BadConsts), <C Inside>$37: BadConsts::Inside, <C StaticField2>$44: Integer, <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6
-bb7[firstDead=16](<block-pre-call-temp>$34: Sorbet::Private::Static::Void, <selfRestore>$35: T.class_of(BadConsts), <C After>$49: BadConsts::After, <C StaticField3>$56: Integer, <C StaticField4>$58: Integer):
-    <statTemp>$32: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$34, enums>
-    <self>: T.class_of(BadConsts) = <selfRestore>$35
-    <cfgAlias>$51: T.class_of(BadConsts::After) = alias <C After$1>
-    keep_for_ide$50: T.class_of(BadConsts::After) = <cfgAlias>$51
-    keep_for_ide$50: T.untyped = <keep-alive> keep_for_ide$50
-    <cfgAlias>$54: T.class_of(BadConsts::After) = alias <C After$1>
-    <castTemp>$52: BadConsts::After = <cfgAlias>$54: T.class_of(BadConsts::After).new()
-    <C After>$49: BadConsts::After = <castTemp>$52
-    <C StaticField3>$56: Integer(3) = 3
-    <cfgAlias>$60: T.class_of(Integer) = alias <C Integer>
-    keep_for_ide$59: T.class_of(Integer) = <cfgAlias>$60
-    keep_for_ide$59: T.untyped = <keep-alive> keep_for_ide$59
-    <castTemp>$61: Integer(1) = 1
-    <C StaticField4>$58: Integer = cast(<castTemp>$61: Integer(1), Integer);
-    <statTemp>$62: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).public()
+bb7[firstDead=16](<block-pre-call-temp>$32: Sorbet::Private::Static::Void, <selfRestore>$33: T.class_of(BadConsts), <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
+    <statTemp>$30: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$32, enums>
+    <self>: T.class_of(BadConsts) = <selfRestore>$33
+    <cfgAlias>$49: T.class_of(BadConsts::After) = alias <C After$1>
+    keep_for_ide$48: T.class_of(BadConsts::After) = <cfgAlias>$49
+    keep_for_ide$48: T.untyped = <keep-alive> keep_for_ide$48
+    <cfgAlias>$52: T.class_of(BadConsts::After) = alias <C After$1>
+    <castTemp>$50: BadConsts::After = <cfgAlias>$52: T.class_of(BadConsts::After).new()
+    <C After>$47: BadConsts::After = <castTemp>$50
+    <C StaticField3>$54: Integer(3) = 3
+    <cfgAlias>$58: T.class_of(Integer) = alias <C Integer>
+    keep_for_ide$57: T.class_of(Integer) = <cfgAlias>$58
+    keep_for_ide$57: T.untyped = <keep-alive> keep_for_ide$57
+    <castTemp>$59: Integer(1) = 1
+    <C StaticField4>$56: Integer = cast(<castTemp>$59: Integer(1), Integer);
+    <statTemp>$60: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).public()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb6
-bb9[firstDead=10](<self>: T.class_of(BadConsts), <block-pre-call-temp>$34: Sorbet::Private::Static::Void, <selfRestore>$35: T.class_of(BadConsts), <C Inside>$39: BadConsts::Inside, <C StaticField2>$46: Integer, <C After>$49: BadConsts::After, <C StaticField3>$56: Integer, <C StaticField4>$58: Integer):
+bb9[firstDead=10](<self>: T.class_of(BadConsts), <block-pre-call-temp>$32: Sorbet::Private::Static::Void, <selfRestore>$33: T.class_of(BadConsts), <C Inside>$37: BadConsts::Inside, <C StaticField2>$44: Integer, <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
     # outerLoops: 1
     <self>: T.class_of(BadConsts) = loadSelf(enums)
-    <cfgAlias>$41: T.class_of(BadConsts::Inside) = alias <C Inside$1>
-    keep_for_ide$40: T.class_of(BadConsts::Inside) = <cfgAlias>$41
-    keep_for_ide$40: T.untyped = <keep-alive> keep_for_ide$40
-    <cfgAlias>$44: T.class_of(BadConsts::Inside) = alias <C Inside$1>
-    <castTemp>$42: BadConsts::Inside = <cfgAlias>$44: T.class_of(BadConsts::Inside).new()
-    <C Inside>$39: BadConsts::Inside = <castTemp>$42
-    <C StaticField2>$46: Integer(2) = 2
-    <blockReturnTemp>$36: NilClass = nil
-    <blockReturnTemp>$47: T.noreturn = blockreturn<enums> <blockReturnTemp>$36: NilClass
+    <cfgAlias>$39: T.class_of(BadConsts::Inside) = alias <C Inside$1>
+    keep_for_ide$38: T.class_of(BadConsts::Inside) = <cfgAlias>$39
+    keep_for_ide$38: T.untyped = <keep-alive> keep_for_ide$38
+    <cfgAlias>$42: T.class_of(BadConsts::Inside) = alias <C Inside$1>
+    <castTemp>$40: BadConsts::Inside = <cfgAlias>$42: T.class_of(BadConsts::Inside).new()
+    <C Inside>$37: BadConsts::Inside = <castTemp>$40
+    <C StaticField2>$44: Integer(2) = 2
+    <blockReturnTemp>$34: NilClass = nil
+    <blockReturnTemp>$45: T.noreturn = blockreturn<enums> <blockReturnTemp>$34: NilClass
     <unconditional> -> bb6
 
 }

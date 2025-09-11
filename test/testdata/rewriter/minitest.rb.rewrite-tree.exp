@@ -149,7 +149,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C <describe 'extends T::Sig'>><<C <todo sym>>> < (<self>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 

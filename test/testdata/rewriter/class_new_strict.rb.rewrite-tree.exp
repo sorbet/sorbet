@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 

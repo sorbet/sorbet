@@ -59,9 +59,8 @@ method ::<Class:B>#<static-init> {
 
 bb0[firstDead=-1]():
     <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <block-pre-call-temp>$7: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(B))
-    <selfRestore>$8: T.class_of(B) = <self>
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(B).sig()
+    <selfRestore>$6: T.class_of(B) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -72,35 +71,35 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(B), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(B)):
+bb2[firstDead=-1](<self>: T.class_of(B), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(B)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(B)):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>
-    <self>: T.class_of(B) = <selfRestore>$8
-    <cfgAlias>$24: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$26: T.class_of(T) = alias <C T>
-    <statTemp>$21: T.class_of(B) = <self>: T.class_of(B).extend(<cfgAlias>$24: T.class_of(T::Sig))
+bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(B)):
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
+    <self>: T.class_of(B) = <selfRestore>$6
+    <cfgAlias>$22: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$24: T.class_of(T) = alias <C T>
+    <statTemp>$19: T.class_of(B) = <self>: T.class_of(B).extend(<cfgAlias>$22: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=10](<self>: T.class_of(B), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(B)):
+bb5[firstDead=10](<self>: T.class_of(B), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(B)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <hashTemp>$12: Symbol(:blk) = :blk
-    <cfgAlias>$17: T.class_of(T) = alias <C T>
-    <statTemp>$15: T.class_of(T.proc) = <cfgAlias>$17: T.class_of(T).proc()
-    <cfgAlias>$19: T.class_of(C) = alias <C C>
-    <statTemp>$14: T.class_of(T.proc) = <statTemp>$15: T.class_of(T.proc).bind(<cfgAlias>$19: T.class_of(C))
-    <hashTemp>$13: Runtime object representing type: T.proc.void = <statTemp>$14: T.class_of(T.proc).void()
-    <statTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$12: Symbol(:blk), <hashTemp>$13: Runtime object representing type: T.proc.void)
-    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <statTemp>$10: T::Private::Methods::DeclBuilder.void()
-    <blockReturnTemp>$20: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
+    <hashTemp>$10: Symbol(:blk) = :blk
+    <cfgAlias>$15: T.class_of(T) = alias <C T>
+    <statTemp>$13: T.class_of(T.proc) = <cfgAlias>$15: T.class_of(T).proc()
+    <cfgAlias>$17: T.class_of(C) = alias <C C>
+    <statTemp>$12: T.class_of(T.proc) = <statTemp>$13: T.class_of(T.proc).bind(<cfgAlias>$17: T.class_of(C))
+    <hashTemp>$11: Runtime object representing type: T.proc.void = <statTemp>$12: T.class_of(T.proc).void()
+    <statTemp>$8: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$10: Symbol(:blk), <hashTemp>$11: Runtime object representing type: T.proc.void)
+    <blockReturnTemp>$7: T::Private::Methods::DeclBuilder = <statTemp>$8: T::Private::Methods::DeclBuilder.void()
+    <blockReturnTemp>$18: T.noreturn = blockreturn<sig> <blockReturnTemp>$7: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 }
@@ -123,9 +122,8 @@ method ::<Class:A>#<static-init> {
 
 bb0[firstDead=-1]():
     <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <block-pre-call-temp>$7: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(A))
-    <selfRestore>$8: T.class_of(A) = <self>
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(A).sig()
+    <selfRestore>$6: T.class_of(A) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -136,35 +134,35 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
+bb2[firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(A)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>
-    <self>: T.class_of(A) = <selfRestore>$8
-    <cfgAlias>$24: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$26: T.class_of(T) = alias <C T>
-    <statTemp>$21: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$24: T.class_of(T::Sig))
+bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(A)):
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
+    <self>: T.class_of(A) = <selfRestore>$6
+    <cfgAlias>$22: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$24: T.class_of(T) = alias <C T>
+    <statTemp>$19: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$22: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=10](<self>: T.class_of(A), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
+bb5[firstDead=10](<self>: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(A)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <hashTemp>$12: Symbol(:blk) = :blk
-    <cfgAlias>$17: T.class_of(T) = alias <C T>
-    <statTemp>$15: T.class_of(T.proc) = <cfgAlias>$17: T.class_of(T).proc()
-    <cfgAlias>$19: T.class_of(B) = alias <C B>
-    <statTemp>$14: T.class_of(T.proc) = <statTemp>$15: T.class_of(T.proc).bind(<cfgAlias>$19: T.class_of(B))
-    <hashTemp>$13: Runtime object representing type: T.proc.void = <statTemp>$14: T.class_of(T.proc).void()
-    <statTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$12: Symbol(:blk), <hashTemp>$13: Runtime object representing type: T.proc.void)
-    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <statTemp>$10: T::Private::Methods::DeclBuilder.void()
-    <blockReturnTemp>$20: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
+    <hashTemp>$10: Symbol(:blk) = :blk
+    <cfgAlias>$15: T.class_of(T) = alias <C T>
+    <statTemp>$13: T.class_of(T.proc) = <cfgAlias>$15: T.class_of(T).proc()
+    <cfgAlias>$17: T.class_of(B) = alias <C B>
+    <statTemp>$12: T.class_of(T.proc) = <statTemp>$13: T.class_of(T.proc).bind(<cfgAlias>$17: T.class_of(B))
+    <hashTemp>$11: Runtime object representing type: T.proc.void = <statTemp>$12: T.class_of(T.proc).void()
+    <statTemp>$8: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$10: Symbol(:blk), <hashTemp>$11: Runtime object representing type: T.proc.void)
+    <blockReturnTemp>$7: T::Private::Methods::DeclBuilder = <statTemp>$8: T::Private::Methods::DeclBuilder.void()
+    <blockReturnTemp>$18: T.noreturn = blockreturn<sig> <blockReturnTemp>$7: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 }

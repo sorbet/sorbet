@@ -21,10 +21,7 @@ ClassDef{
       rhs = [
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -52,9 +49,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -82,10 +78,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -113,9 +106,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -143,10 +135,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -179,9 +168,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -227,10 +215,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -263,9 +248,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -311,10 +295,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -350,9 +331,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -380,10 +360,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -419,9 +396,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -449,10 +425,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -496,9 +469,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -524,10 +496,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -542,9 +511,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -606,10 +574,7 @@ ClassDef{
       rhs = [
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -637,9 +602,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -667,10 +631,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -698,9 +659,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -729,10 +689,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -765,9 +722,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -802,10 +758,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -838,9 +791,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -874,10 +826,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -913,9 +862,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -973,10 +921,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -1012,9 +957,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -1054,10 +998,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -1101,9 +1042,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -1134,10 +1074,7 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -1152,9 +1089,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 
@@ -1219,10 +1155,7 @@ ClassDef{
       rhs = [
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
+          recv = Self
           fun = <U sig>
           block = Block {
             args = [
@@ -1237,9 +1170,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Self
           ]
         }
 

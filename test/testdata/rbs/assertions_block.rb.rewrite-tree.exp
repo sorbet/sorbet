@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params(:args, ::<root>::<C T>.untyped(), :&, ::<root>::<C T>.proc().params(:arg0, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C String>)).returns(::<root>::<C T>.untyped())
   end
 

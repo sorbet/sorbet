@@ -118,7 +118,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.sig() do ||
           <self>.params(:f, ::Integer).returns(::Integer)
         end
         <runtime method definition of initialize>

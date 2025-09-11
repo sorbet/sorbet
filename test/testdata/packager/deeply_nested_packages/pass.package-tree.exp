@@ -19,7 +19,7 @@ end
 # -- test/testdata/packager/deeply_nested_packages/mainpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Package::PackageClass<<C PackageClass>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.returns(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
     end
 
@@ -40,7 +40,7 @@ end
 # -- test/testdata/packager/deeply_nested_packages/subdirectory/subpackage/subpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Package::Subpackage::SubpackageClass<<C SubpackageClass>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.returns(<emptyTree>::<C Package>::<C PackageClass>)
     end
 

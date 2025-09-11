@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyParentDocument><<C <todo sym>>> < (<emptyTree>::<C Chalk>::<C ODM>::<C Document>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyChildDocument><<C <todo sym>>> < (<emptyTree>::<C MyParentDocument>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 

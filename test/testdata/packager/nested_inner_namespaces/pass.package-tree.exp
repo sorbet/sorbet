@@ -17,7 +17,7 @@ end
 # -- test/testdata/packager/nested_inner_namespaces/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::RootPackage::Bar<<C Bar>> < ()
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:a, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
     end
 

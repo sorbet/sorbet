@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.type_parameters(:U).params(:arg, <emptyTree>::<C T>::<C Enumerable>.[](<emptyTree>::<C T>.type_parameter(:U)), :blk, <emptyTree>::<C T>.proc().params(:arg0, <emptyTree>::<C T>.type_parameter(:U)).void()).void()
     end
 
@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.type_parameters(:K, :V).params(:arg, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.type_parameter(:K), <emptyTree>::<C T>.type_parameter(:V)), :blk, <emptyTree>::<C T>.proc().params(:arg0, <emptyTree>::<C T>.type_parameter(:K), :arg1, <emptyTree>::<C T>.type_parameter(:V)).void()).void()
     end
 
@@ -34,7 +34,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:name, <emptyTree>::<C String>, :blk, <emptyTree>::<C T>.proc().void()).void()
     end
 
