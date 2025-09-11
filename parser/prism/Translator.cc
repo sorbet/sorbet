@@ -13,6 +13,15 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
+// Structure for holding the scaffolding needed for op-assignment desugaring
+struct OpAsgnScaffolding {
+    core::NameRef temporaryName;
+    ast::InsSeq::STATS_store statementBody;
+    uint16_t numPosArgs;
+    ast::Send::ARGS_store readArgs;
+    ast::Send::ARGS_store assgnArgs;
+};
+
 using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
@@ -223,35 +232,7 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
     }
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
-        // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
-        auto opLoc = translateLoc(node->binary_operator_loc);
-        auto op = translateConstantName(node->binary_operator);
-
-        if (!directlyDesugar || !hasExpr(lhs, rhs)) {
-            return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
-        }
-
-        // Only handle simple reference expressions here; let desugar phase handle Send expressions
-        if (!isa_reference(lhs->peekDesugaredExpr())) {
-            return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
-        }
-
-        auto lhsExpr = lhs->takeDesugaredExpr();
-        auto rhsExpr = rhs->takeDesugaredExpr();
-
-        if (preserveConcreteSyntax) {
-            auto magicName = core::Names::opAsgn();
-            auto locZeroLen = location.copyWithZeroLength();
-            auto magicSend =
-                MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
-            return make_node_with_expr<parser::OpAsgn>(move(magicSend), location, move(lhs), op, opLoc, move(rhs));
-        }
-
-        auto lhsCopy = MK::cpRef(lhsExpr);
-        auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
-        auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
-
-        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+        return translateOpOpAssignment<SorbetAssignmentNode, PrismAssignmentNode>(node, location, move(lhs), move(rhs));
     }
 
     unreachable(
@@ -356,6 +337,139 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
     }
 
     return make_node_with_expr<SorbetAssignmentNode>(move(if_), location, move(lhs), move(rhs));
+}
+
+OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
+    // This is for storing the temporary assignments followed by the final update. In the case that we have other
+    // arguments to the send (e.g. in the case of x.y[z] += 1) we'll want to store the other parameters (z) in a
+    // temporary as well, producing a sequence like
+    //
+    //   { $arg = z; $tmp = x.y[$arg]; x.y[$arg] = $tmp + 1 }
+    //
+    // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
+    // temporary assignment and the last for the actual update we're desugaring.
+    ENFORCE(!s->hasKwArgs() && !s->hasBlock());
+    const auto numPosArgs = s->numPosArgs();
+    ast::InsSeq::STATS_store stats;
+    stats.reserve(numPosArgs + 2);
+    core::NameRef tempRecv = nextUniqueDesugarName(s->fun);
+    stats.emplace_back(MK::Assign(s->loc, tempRecv, move(s->recv)));
+    ast::Send::ARGS_store readArgs;
+    ast::Send::ARGS_store assgnArgs;
+    // these are the arguments for the first send, e.g. x.y(). The number of arguments should be identical to whatever
+    // we saw on the LHS.
+    readArgs.reserve(numPosArgs);
+    // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra argument
+    // here: to accommodate the call to field= instead of just field.
+    assgnArgs.reserve(numPosArgs + 1);
+
+    for (auto &arg : s->posArgs()) {
+        auto argLoc = arg.loc();
+        core::NameRef name = nextUniqueDesugarName(s->fun);
+        stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
+        readArgs.emplace_back(MK::Local(argLoc, name));
+        assgnArgs.emplace_back(MK::Local(argLoc, name));
+    }
+
+    return {tempRecv, move(stats), numPosArgs, move(readArgs), move(assgnArgs)};
+}
+
+template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
+unique_ptr<parser::Node> Translator::translateOpOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                             unique_ptr<parser::Node> lhs,
+                                                             unique_ptr<parser::Node> rhs) {
+    // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
+    auto opLoc = translateLoc(node->binary_operator_loc);
+    auto op = translateConstantName(node->binary_operator);
+    if (!directlyDesugar || !hasExpr(lhs, rhs)) {
+        return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    auto lhsExpr = lhs->takeDesugaredExpr();
+    auto rhsExpr = rhs->takeDesugaredExpr();
+
+    if (preserveConcreteSyntax) {
+        auto magicName = core::Names::opAsgn();
+        auto locZeroLen = location.copyWithZeroLength();
+        auto magicSend =
+            MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
+        return make_node_with_expr<parser::OpAsgn>(move(magicSend), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (ast::isa_tree<ast::Send>(lhsExpr)) {
+        auto s = ast::cast_tree<ast::Send>(lhsExpr);
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+
+        // Create the read operation: obj.method() or obj[index]
+        auto prevValue =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+
+        // Apply the operation: prevValue op rhsExpr
+        auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhsExpr));
+
+        // Add the new value to the assignment arguments
+        assgnArgs.emplace_back(move(newValue));
+        auto numPosAssgnArgs = numPosArgs + 1;
+
+        // Create the assignment operation: obj.method=(newValue) or obj[]=(index, newValue)
+        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                            numPosAssgnArgs, move(assgnArgs), s->flags);
+
+        auto wrapped = MK::InsSeq(location, move(stats), move(res));
+        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (isa_reference(lhsExpr)) {
+        auto lhsCopy = MK::cpRef(lhsExpr);
+        auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
+        auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
+        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (ast::isa_tree<ast::UnresolvedConstantLit>(lhsExpr)) {
+        if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
+            e.setHeader("Constant reassignment is not supported");
+        }
+        ExpressionPtr res = MK::EmptyTree();
+        return make_node_with_expr<SorbetAssignmentNode>(move(res), location, move(lhs), op, opLoc, move(rhs));
+    }
+
+    if (auto i = ast::cast_tree<ast::InsSeq>(lhsExpr)) {
+        // if this is an InsSeq, then is probably the result of a safe send (i.e. an expression of the form
+        // x&.y on the LHS) which means it'll take the rough shape:
+        //   { $temp = x; if $temp == nil then nil else $temp.y }
+        // on the LHS. We want to insert the y= into the if-expression at the end, like:
+        //   { $temp = x; if $temp == nil then nil else { $t2 = $temp.y; $temp.y = $t2 op RHS } }
+        // that means we first need to find out whether the final expression is an If...
+        auto ifExpr = ast::cast_tree<ast::If>(i->expr);
+        if (!ifExpr) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        // and if so, find out whether the else-case is a send...
+        auto s = ast::cast_tree<ast::Send>(ifExpr->elsep);
+        if (!s) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        // Similar to Send handling above but specialized for InsSeq structure modification
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+        auto prevValue =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+        auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhsExpr));
+        auto numPosAssgnArgs = numPosArgs + 1;
+        assgnArgs.emplace_back(move(newValue));
+
+        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                            numPosAssgnArgs, move(assgnArgs), s->flags);
+        auto wrapped = MK::InsSeq(location, move(stats), move(res));
+        ifExpr->elsep = move(wrapped);
+        return make_node_with_expr<SorbetAssignmentNode>(move(lhsExpr), location, move(lhs), op, opLoc, move(rhs));
+
+    } else {
+        auto s = fmt::format("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
+        Exception::raise(s);
+    }
 }
 
 template <typename PrismConstantNode, typename SorbetAssignmentNode>

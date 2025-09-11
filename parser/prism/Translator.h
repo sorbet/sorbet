@@ -14,6 +14,9 @@ extern "C" {
 
 namespace sorbet::parser::Prism {
 
+// Forward declaration for op-assignment scaffolding
+struct OpAsgnScaffolding;
+
 class Translator final {
     const Parser &parser;
     // This context holds a reference to the GlobalState allocated up the call stack, which is why we don't allow
@@ -152,6 +155,15 @@ private:
 
     // Generates a unique name for a directly desugared `ast::ExpressionPtr`.
     core::NameRef nextUniqueDesugarName(core::NameRef original);
+
+    // Helper for copying arguments in op-assignment desugaring
+    OpAsgnScaffolding copyArgsForOpAsgn(ast::Send *s);
+
+    // Helper for translating OpAsgn operator assignments
+    template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
+    std::unique_ptr<parser::Node> translateOpOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                          std::unique_ptr<parser::Node> lhs,
+                                                          std::unique_ptr<parser::Node> rhs);
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
