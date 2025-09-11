@@ -3,7 +3,6 @@
 
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
-#include "ast/desugar/DuplicateHashKeyCheck.h"
 #include "core/errors/desugar.h"
 
 #include "absl/strings/str_replace.h"
@@ -215,31 +214,40 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
 
     auto rhs = translate(node->value);
 
-    if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn> || is_same_v<SorbetAssignmentNode, parser::OrAsgn>) {
+    if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
         return translateAndOrAssignment<parser::AndAsgn>(location, move(lhs), move(rhs));
     }
 
-    // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
-    auto opLoc = translateLoc(node->binary_operator_loc);
-    auto op = translateConstantName(node->binary_operator);
-
-    if (!directlyDesugar || !hasExpr(lhs, rhs)) {
-        return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+    if constexpr (is_same_v<SorbetAssignmentNode, parser::OrAsgn>) {
+        return translateAndOrAssignment<parser::OrAsgn>(location, move(lhs), move(rhs));
     }
 
-    // Only handle simple reference expressions here; let desugar phase handle Send expressions
-    if (!isa_reference(lhs->peekDesugaredExpr())) {
-        return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+    if constexpr (is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
+        // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
+        auto opLoc = translateLoc(node->binary_operator_loc);
+        auto op = translateConstantName(node->binary_operator);
+
+        if (!directlyDesugar || !hasExpr(lhs, rhs)) {
+            return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+        }
+
+        // Only handle simple reference expressions here; let desugar phase handle Send expressions
+        if (!isa_reference(lhs->peekDesugaredExpr())) {
+            return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
+        }
+
+        auto lhsExpr = lhs->takeDesugaredExpr();
+        auto rhsExpr = rhs->takeDesugaredExpr();
+
+        auto lhsCopy = MK::cpRef(lhsExpr);
+        auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
+        auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
+
+        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
     }
 
-    auto lhsExpr = lhs->takeDesugaredExpr();
-    auto rhsExpr = rhs->takeDesugaredExpr();
-
-    auto lhsCopy = MK::cpRef(lhsExpr);
-    auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
-    auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
-
-    return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+    unreachable(
+        "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
 }
 
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
@@ -272,14 +280,6 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
 template <typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets location, unique_ptr<parser::Node> lhs,
                                                               unique_ptr<parser::Node> rhs) {
-    // Combined implementation for comparison with separate methods.
-    // CODE SAVINGS ANALYSIS:
-    // - Separate methods: ~62 lines each (translateAndAssignment + translateOrAssignment) = ~124 lines total
-    // - Combined method: ~64 lines total
-    // - Savings: ~60 lines (~48% reduction) by eliminating duplicate T.let handling logic
-    // - Trade-off: Slightly more complex with constexpr if branching, but significantly less duplication
-
-    // `AndAsgn` and `OrAsgn` are specific to a single operator, so don't need any extra information like `OpAsgn`.
     static_assert(is_same_v<SorbetAssignmentNode, parser::AndAsgn> || is_same_v<SorbetAssignmentNode, parser::OrAsgn>);
 
     if (!directlyDesugar || !hasExpr(lhs, rhs)) {
@@ -792,7 +792,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
                     sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc,
                                                                  move(args));
-                } else {
+                }
+                else {
                     sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
 >>>>>>> 2f22f991b (Handle isPrivaeOk in some translateOpAssignment self nodes)
                 }
@@ -1229,24 +1230,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         }
         case PM_HASH_NODE: { // A hash literal, like `{ a: 1, b: 2 }`
             auto kvPairs = translateKeyValuePairs(down_cast<pm_hash_node>(node)->elements);
-
-            auto elementsHaveExprs = absl::c_all_of(kvPairs, [](const auto &node) {
-                // `parser::Pair` nodes never have a desugared expr, because they have no ExpressionPtr equivalent.
-                // Instead, we check their children ourselves.
-                if (auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get())) {
-                    return hasExpr(pair->key, pair->value);
-                }
-
-                return hasExpr(node);
-            });
-
-            if (!directlyDesugar || !elementsHaveExprs) {
-                return make_unique<parser::Hash>(location, false, move(kvPairs));
-            }
-
-            auto hashExpr = desugarHash(location, kvPairs);
-
-            return make_node_with_expr<parser::Hash>(move(hashExpr), location, false, move(kvPairs));
+            return make_unique<parser::Hash>(location, false, move(kvPairs));
         }
         case PM_IF_NODE: { // An `if` statement or modifier, like `if cond; ...; end` or `a.b if cond`
             auto ifNode = down_cast<pm_if_node>(node);
@@ -2662,129 +2646,6 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     }
 
     return sorbetElements;
-}
-
-ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPairs) {
-    auto locZeroLen = loc.copyWithZeroLength();
-
-    ast::InsSeq::STATS_store updateStmts;
-    updateStmts.reserve(kvPairs.size());
-
-    auto acc = nextUniqueDesugarName(core::Names::hashTemp());
-
-    ast::desugar::DuplicateHashKeyCheck hashKeyDupes(ctx);
-    ast::Send::ARGS_store mergeValues;
-    mergeValues.reserve(kvPairs.size() * 2 + 1);
-    mergeValues.emplace_back(MK::Local(loc, acc));
-    bool havePairsToMerge = false;
-
-    // build a hash literal assuming that the argument follows the same format as `mergeValues`:
-    // arg 0: the hash to merge into
-    // arg 1: key
-    // arg 2: value
-    // ...
-    // arg n: key
-    // arg n+1: value
-    auto buildHashLiteral = [loc](ast::Send::ARGS_store &mergeValues) {
-        ast::Hash::ENTRY_store keys;
-        ast::Hash::ENTRY_store values;
-
-        keys.reserve(mergeValues.size() / 2);
-        values.reserve(mergeValues.size() / 2);
-
-        // skip the first positional argument for the accumulator that would have been mutated
-        for (auto it = mergeValues.begin() + 1; it != mergeValues.end();) {
-            keys.emplace_back(move(*it++));
-            values.emplace_back(move(*it++));
-        }
-
-        return MK::Hash(loc, move(keys), move(values));
-    };
-
-    // Desguar
-    //   {**x, a: 'a', **y, remaining}
-    // into
-    //   acc = <Magic>.<to-hash-dup>(x)
-    //   acc = <Magic>.<merge-hash-values>(acc, :a, 'a')
-    //   acc = <Magic>.<merge-hash>(acc, <Magic>.<to-hash-nodup>(y))
-    //   acc = <Magic>.<merge-hash>(acc, remaining)
-    //   acc
-    for (auto &pairAsExpression : kvPairs) {
-        auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(pairAsExpression.get());
-        if (pair != nullptr) {
-            auto key = pair->key->takeDesugaredExpr();
-            hashKeyDupes.check(key);
-            mergeValues.emplace_back(move(key));
-
-            auto value = pair->value->takeDesugaredExpr();
-            mergeValues.emplace_back(move(value));
-
-            havePairsToMerge = true;
-            continue;
-        }
-
-        auto *splat = parser::NodeWithExpr::cast_node<parser::Kwsplat>(pairAsExpression.get());
-
-        ast::ExpressionPtr expr;
-        if (splat != nullptr) {
-            expr = splat->expr->takeDesugaredExpr();
-        } else {
-            auto *fwdKwrestArg = parser::NodeWithExpr::cast_node<parser::ForwardedKwrestArg>(pairAsExpression.get());
-            ENFORCE(fwdKwrestArg != nullptr, "kwsplat and fwdkwrestarg cast failed");
-
-            auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
-            expr = MK::Unsafe(loc, move(fwdKwargs));
-        }
-
-        if (havePairsToMerge) {
-            havePairsToMerge = false;
-
-            // ensure that there's something to update
-            if (updateStmts.empty()) {
-                updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
-            } else {
-                int numPosArgs = mergeValues.size();
-                updateStmts.emplace_back(MK::Assign(loc, acc,
-                                                    MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(),
-                                                             locZeroLen, numPosArgs, move(mergeValues))));
-            }
-
-            mergeValues.clear();
-            mergeValues.emplace_back(MK::Local(loc, acc));
-        }
-
-        // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
-        // intrinsic is assumed to mutate its first argument.
-        if (updateStmts.empty()) {
-            updateStmts.emplace_back(
-                MK::Assign(loc, acc, MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(expr))));
-        } else {
-            updateStmts.emplace_back(MK::Assign(
-                loc, acc,
-                MK::Send2(loc, MK::Magic(loc), core::Names::mergeHash(), locZeroLen, MK::Local(loc, acc),
-                          MK::Send1(loc, MK::Magic(loc), core::Names::toHashNoDup(), locZeroLen, move(expr)))));
-        }
-    };
-
-    if (havePairsToMerge) {
-        // There were only keyword args/values present, so construct a hash literal directly
-        if (updateStmts.empty()) {
-            return buildHashLiteral(mergeValues);
-        }
-
-        // there are already other entries in updateStmts, so append the `merge-hash-values` call and fall
-        // through to the rest of the processing
-        int numPosArgs = mergeValues.size();
-        updateStmts.emplace_back(MK::Assign(
-            loc, acc,
-            MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(), locZeroLen, numPosArgs, move(mergeValues))));
-    }
-
-    if (updateStmts.empty()) {
-        return MK::Hash0(loc);
-    } else {
-        return MK::InsSeq(loc, move(updateStmts), MK::Local(loc, acc));
-    }
 }
 
 // Copied from `Builder::isKeywordHashElement()`
