@@ -11,13 +11,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+  class <emptyTree>::<C <describe 'A'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
     def self.test_each<<todo method>>(arg, &blk)
       ::<Magic>.<call-with-block-pass>(arg, :each, blk)
     end
 
     def outer_helper<<todo method>>(&<blk>)
       <emptyTree>
+    end
+
+    def <it><<todo method>>(&<blk>)
+      <self>.outer_helper()
     end
 
     <runtime method definition of self.test_each>
@@ -30,7 +34,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def <it><<todo method>>(&<blk>)
-        <self>.my_helper()
+        begin
+          <self>.my_helper()
+          <self>.described_class()
+        end
       end
 
       def <it 'example'><<todo method>>(&<blk>)
@@ -79,10 +86,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <runtime method definition of <it 'has access to defined_in_shared_examples'>>
         end
       end
-    end
-
-    <self>.example() do ||
-      <self>.outer_helper()
     end
   end
 end

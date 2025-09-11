@@ -212,6 +212,15 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
     return pair{methodName, declLoc};
 }
 
+bool isRSpec(const ast::ExpressionPtr &recv) {
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(recv);
+    if (cnst == nullptr) {
+        return false;
+    }
+
+    return cnst->cnst == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope);
+}
+
 // Some RSpec methods are relatively common method names where we really want to make sure that
 // we're definitely in a test context before we do the translation here.
 //
@@ -219,10 +228,14 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
 // depended on methods sharing names with RSpec methods not firing.
 bool requiresSecondFactor(core::NameRef fun) {
     switch (fun.rawId()) {
+        // Example names
         case core::Names::example().rawId():
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId():
+        // ExampleGroup names
+        case core::Names::context().rawId():
+        case core::Names::exampleGroup().rawId():
             return true;
 
         default:
@@ -351,7 +364,13 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     }
 
     switch (send->fun.rawId()) {
-        case core::Names::describe().rawId(): {
+        case core::Names::describe().rawId():
+        case core::Names::xdescribe().rawId():
+        case core::Names::fdescribe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xcontext().rawId():
+        case core::Names::fcontext().rawId():
+        case core::Names::exampleGroup().rawId(): {
             if (send->numPosArgs() != 1 || !send->hasBlock()) {
                 break;
             }
@@ -556,16 +575,37 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                  send->flags);
         }
 
-        case core::Names::describe().rawId(): {
+        case core::Names::describe().rawId():
+        case core::Names::xdescribe().rawId():
+        case core::Names::fdescribe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xcontext().rawId():
+        case core::Names::fcontext().rawId():
+        case core::Names::exampleGroup().rawId(): {
             if (!send->hasBlock() || send->numPosArgs() != 1 || !send->recv.isSelfReference()) {
                 return nullptr;
             }
+
+            auto recvIsRSpec = isRSpec(send->recv);
+            if (!send->recv.isSelfReference() && !recvIsRSpec) {
+                return nullptr;
+            }
+
+            if (requiresSecondFactor(send->fun) && !recvIsRSpec) {
+                return nullptr;
+            }
+
             auto &arg = send->getPosArg(0);
             auto argString = to_s(ctx, arg);
             ast::ClassDef::ANCESTORS_store ancestors;
 
             // First ancestor is the superclass
-            if (isClass) {
+            if (recvIsRSpec) {
+                auto parts = vector<core::NameRef>{core::Names::Constants::RSpec(), core::Names::Constants::Core(),
+                                                   core::Names::Constants::ExampleGroup()};
+                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(send->recv.loc(), parts));
+
+            } else if (isClass) {
                 ancestors.emplace_back(ast::MK::Self(arg.loc()));
             } else {
                 // Avoid subclassing self when it's a module, as that will produce an error.
@@ -581,8 +621,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             auto rhs = prepareBody(ctx, /* isClass */ true, std::move(block->body), /* insideDescribe */ true);
 
-            auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
-                                                    ctx.state.enterNameConstant("<describe '" + argString + "'>"));
+            auto testName = fmt::format("<{} '{}'>", send->fun.show(ctx), argString);
+            auto name = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
             auto declLoc = declLocForSendWithBlock(*send);
             return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                                   flattenDescribeBody(move(rhs)));
