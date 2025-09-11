@@ -239,6 +239,14 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
         auto lhsExpr = lhs->takeDesugaredExpr();
         auto rhsExpr = rhs->takeDesugaredExpr();
 
+        if (preserveConcreteSyntax) {
+            auto magicName = core::Names::opAsgn();
+            auto locZeroLen = location.copyWithZeroLength();
+            auto magicSend =
+                MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
+            return make_node_with_expr<parser::OpAsgn>(move(magicSend), location, move(lhs), op, opLoc, move(rhs));
+        }
+
         auto lhsCopy = MK::cpRef(lhsExpr);
         auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
         auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
@@ -293,6 +301,15 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
 
     auto lhsExpr = lhs->takeDesugaredExpr();
     auto rhsExpr = rhs->takeDesugaredExpr();
+
+    if (preserveConcreteSyntax) {
+        auto magicName =
+            (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) ? core::Names::andAsgn() : core::Names::orAsgn();
+        auto locZeroLen = location.copyWithZeroLength();
+        auto magicSend =
+            MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
+        return make_node_with_expr<SorbetAssignmentNode>(move(magicSend), location, move(lhs), move(rhs));
+    }
 
     auto lhsCopy = MK::cpRef(lhsExpr);
     auto cond = MK::cpRef(lhsExpr);
