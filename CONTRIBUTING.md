@@ -2,11 +2,11 @@
 
 Thanks for taking an interest in improving Sorbet!
 
-- [I want to contribute...](#i-want-to-contribute)
-  - [... an improvement to Sorbet's RBIs](#-an-improvement-to-sorbets-rbis)
-  - [... a change to the sorbet.org docs website](#-a-change-to-the-sorbetorg-docs-website)
-  - [... a fix or feature already tracked in an issue](#-a-fix-or-feature-already-tracked-in-an-issue)
-  - [... a fix or feature that's not been discussed before](#-a-fix-or-feature-thats-not-been-discussed-before)
+- [I want to...](#i-want-to)
+  - [... improve Sorbet's RBIs](#-improve-sorbets-rbis)
+  - [... change the sorbet.org docs website](#-change-the-sorbetorg-docs-website)
+  - [... fix or improve something already tracked in an issue](#-fix-or-improve-something-already-tracked-in-an-issue)
+  - [... propose something new, that's never been discussed](#-propose-something-new-thats-never-been-discussed)
 - [Design Proposals: Scoping large features](#design-proposals-scoping-large-features)
   - [How to share a design proposal](#how-to-share-a-design-proposal)
   - [Tips](#tips)
@@ -19,10 +19,10 @@ Thanks for taking an interest in improving Sorbet!
 - [Review expectations](#review-expectations)
 
 
-# I want to contribute...
+# I want to...
 
 
-## ... an improvement to Sorbet's RBIs
+## ... improve Sorbet's RBIs
 
 Great, thanks!
 
@@ -40,14 +40,14 @@ No, but you can if you want to. All changes (RBI changes included) are tested by
 If you want to write tests, find an example test file in `test/testdata/rbi/` and either add to it or create a new such file. See the [README](README.md#writing-tests) for how to write these tests.
 
 
-## ... a change to the sorbet.org docs website
+## ... change the sorbet.org docs website
 
 Awesome!
 
 Please refer to our [website style guide](website/style-guide.md).
 
 
-## ... a fix or feature already tracked in an issue
+## ... fix or improve something already tracked in an issue
 
 If you've already picked out an existing issue to work on (especially a [good first issue](#good-first-issues)!) the best next step is to **introduce yourself** and your intention to start working on that issue.
 
@@ -58,7 +58,7 @@ Someone from the Sorbet team will ask whether you already have a solution in min
 Occasionally, we'll realize that the issue either has already been fixed, is harder than expected, or isn't actually scoped well enough (and would need a [Design Proposal](#design-proposals-scoping-large-features)). Introducing your intention to fix an issue lets someone from the Sorbet team catch these things before they become a time sink.
 
 
-## ... a fix or feature that's not been discussed before
+## ... propose something new, that's never been discussed
 
 Follow the steps in the [Design Proposals: Scoping large features](#design-proposals-scoping-large-features) section below. You will be asked to [follow the checklist](#how-to-share-a-design-proposal) for proposing new features so we can review what you're proposing before committing to a particular solution.
 
@@ -112,7 +112,7 @@ To create a new proposal:
 
 1.  Visit <https://hackmd.io/new> to create a new, blank doc, or open a GitHub Issue with the proposal template.
 
-    HackMD is a free, real-time collaborative editor that supports Markdown and in-line commenting, and is preferred for lengthier proposals or those which would benefit from multiple, threaded discussions. You may also open a GitHub Issue with the proposal template, especially for short proposals. 
+    HackMD is a free, real-time collaborative editor that supports Markdown and in-line commenting, and is preferred for lengthier proposals or those which would benefit from multiple, threaded discussions. You may also open a GitHub Issue with the proposal template, especially for short proposals.
 
 1.  Follow the instructions in the template to fill it out.
 
@@ -143,7 +143,7 @@ Every one of these issues has been hand-curated by a member of the Sorbet team:
 - They're already "scoped" meaning that it's unlikely unknown blockers will come up in the course of implementing the feature.
 - They're bite-sized: it would take someone on the Sorbet team anywhere from a few hours to a few days to fully build the feature.
 
-If you [introduce yourself](#https://git.corp.stripe.com/gist/#-a-fix-or-feature-already-tracked-in-an-issue) and say you want to work on a `good first issue`, we'll usually say hi, offer help if you want it, and otherwise be eager to see what you come up with!
+If you [introduce yourself](#-fix-or-improve-something-already-tracked-in-an-issue) and say you want to work on a `good first issue`, we'll usually say hi, offer help if you want it, and otherwise be eager to see what you come up with!
 
 
 ## Issues labeled `hard`
@@ -172,7 +172,7 @@ Changes to user-facing syntax **always** require a [design proposal](#design-pro
 
 ## Other kinds of changes
 
-Please [introduce yourself](#https://git.corp.stripe.com/gist/#-a-bug-fix-new-feature-or-refactor-of-sorbet-itself) and we'll be happy to help you figure out what the best first step for making a change would be.
+Please [introduce yourself](#-fix-or-improve-something-already-tracked-in-an-issue) and we'll be happy to help you figure out what the best first step for making a change would be.
 
 There are many kinds of changes that Sorbet sees, from tiny bug fixes, error message improvements, and variable name changes, to large new features and backwards-incompatible type system improvements—it's hard to give advice for all of them. If the kind of change you want to make doesn't align with any of the previous sections, please reach out.
 
