@@ -435,7 +435,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_unique<parser::BlockPass>(location, move(expr));
         }
         case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end`
-            unreachable("PM_BLOCK_NODE has special handling in translatecallWithBlockPass, see its docs for details.");
+            unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
         }
         case PM_BLOCK_LOCAL_VARIABLE_NODE: { // A named block local variable, like `baz` in `|bar; baz|`
             auto blockLocalNode = down_cast<pm_block_local_variable_node>(node);
@@ -993,7 +993,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto blockArgumentNode = forwardingSuperNode->block;
 
             if (blockArgumentNode != nullptr) { // always a PM_BLOCK_NODE
-                return translatecallWithBlockPass(up_cast(blockArgumentNode), move(translatedNode));
+                return translateCallWithBlock(up_cast(blockArgumentNode), move(translatedNode));
             }
 
             return translatedNode;
@@ -1304,7 +1304,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto sendNode = make_unique<parser::Send>(location, move(receiver), core::Names::lambda(),
                                                       translateLoc(lambdaNode->operator_loc), NodeVec{});
 
-            return translatecallWithBlockPass(node, move(sendNode));
+            return translateCallWithBlock(node, move(sendNode));
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a local variable, e.g. `local &&= false`
             return translateOpAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(node);
@@ -1798,7 +1798,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
                 returnValues = translateArguments(superNode->arguments);
                 auto superNode = make_unique<parser::Super>(location, move(returnValues));
-                return translatecallWithBlockPass(blockArgumentNode, move(superNode));
+                return translateCallWithBlock(blockArgumentNode, move(superNode));
             }
 
             returnValues = translateArguments(superNode->arguments, blockArgumentNode);
@@ -2604,8 +2604,8 @@ bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
 //
 // This function translates between the two, creating a `Block` or `NumBlock` node for the given `pm_block_node *`
 // or `pm_lambda_node *`, and wrapping it around the given `Send` node.
-unique_ptr<parser::Node> Translator::translatecallWithBlockPass(pm_node_t *prismBlockOrLambdaNode,
-                                                                unique_ptr<parser::Node> sendNode) {
+unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
+                                                            unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
