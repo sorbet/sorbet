@@ -165,6 +165,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
         if (!error->autocorrects.empty()) {
             diagnostic->message += " (fix available)";
         }
+        bool alreadyAppendedToMessage = false;
 
         vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
         for (auto &section : error->sections) {
@@ -214,7 +215,13 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                 if (location == nullptr) {
                     // This was probably from an addErrorNote call. Still want to report the note,
                     // but let's put it in the message instead of the related information.
-                    diagnostic->message += fmt::format("\n\n{}", message);
+                    if (!alreadyAppendedToMessage) {
+                        diagnostic->message += "\n\n";
+                        alreadyAppendedToMessage = true;
+                    } else {
+                        diagnostic->message += "\n";
+                    }
+                    diagnostic->message += message;
                 } else {
                     relatedInformation.push_back(
                         make_unique<DiagnosticRelatedInformation>(move(location), move(message)));
