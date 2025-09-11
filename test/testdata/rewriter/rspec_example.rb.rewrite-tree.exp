@@ -1,0 +1,33 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def outer_helper<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of outer_helper>
+
+    class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
+      def my_helper<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      def <it 'example'><<todo method>>(&<blk>)
+        <self>.my_helper()
+      end
+
+      <runtime method definition of my_helper>
+
+      <self>.xit() do ||
+        <self>.my_helper()
+      end
+
+      <self>.example() do ||
+        <self>.my_helper()
+      end
+    end
+
+    <self>.example() do ||
+      <self>.outer_helper()
+    end
+  end
+end
