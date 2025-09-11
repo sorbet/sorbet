@@ -174,6 +174,16 @@ int PackageInfo::orderByAlphabetical(const core::GlobalState &gs, const PackageI
 
 // autocorrects
 
+core::AutocorrectSuggestion::Edit PackageInfo::deleteImport(const core::GlobalState &gs, Import import) const {
+    auto importLoc = core::Loc(fullLoc().file(), import.loc);
+    auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
+    auto beginPos = lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
+    auto endPos = importLoc.endPos();
+    core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
+
+    return {replaceLoc, ""};
+}
+
 optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalState &gs, const PackageInfo &info,
                                                              ImportType importType) const {
     auto insertionLoc = core::Loc::none(loc.file());

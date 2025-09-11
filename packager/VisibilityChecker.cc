@@ -641,6 +641,31 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
                 }
             }
         }
+    } else if (gs.packageDB().deleteUnusedImports()) {
+        for (auto package : gs.packageDB().packages()) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(package);
+            ENFORCE(pkgInfo.exists());
+            std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+            for (auto &i : pkgInfo.importedPackageNames) {
+                if (i.isPrelude()) {
+                    // Prelude imports aren't actually in the __package.rb file, so we can't delete them.
+                    continue;
+                }
+
+                // Technically, this check is not fully accurate. If the import is a normal import, but the reference is
+                // in a test file, you could argue that this is an unused import and can be downgraded to a test_import.
+                // To minimize edits to the __package.rb file, we won't do this.
+                if (!pkgInfo.referencedPackages.contains(i.mangledName)) {
+                    allEdits.push_back(pkgInfo.deleteImport(gs, i));
+                }
+            }
+            if (!allEdits.empty()) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{} has unused imports", pkgInfo.show(gs));
+                    e.addAutocorrect(core::AutocorrectSuggestion{"Delete unused imports", allEdits});
+                }
+            }
+        }
     }
 
     return result;
