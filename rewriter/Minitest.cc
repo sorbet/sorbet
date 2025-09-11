@@ -118,8 +118,6 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
     return send.loc.copyWithZeroLength().join(send.block()->loc.copyWithZeroLength());
 }
 
-} // namespace
-
 // Namer only looks at ancestors at the ClassDef top-level. If a `describe` block has ancestor items
 // at the top level inside the InsSeq of the Block body, that should count as a an ancestor in namer.
 // But if we just plop the whole InsSeq as a single element inside the the ClassDef rhs, they won't
@@ -565,6 +563,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     return nullptr;
 }
+
+} // namespace
 
 vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
     vector<ast::ExpressionPtr> stats;
