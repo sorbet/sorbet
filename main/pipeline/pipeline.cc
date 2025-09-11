@@ -68,9 +68,9 @@ pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileR
             rbs::CommentsAssociatorPrism(ctx, const_cast<std::vector<core::LocOffsets> &>(commentLocations));
         auto commentMap = associator.run(node);
 
-        // fmt::print("TRIGGERING SIGS REWRITER PRISM\n");
-        // auto sigsRewriter = rbs::SigsRewriterPrism(ctx, commentMap.signaturesForNode);
-        // node = sigsRewriter.run(node);
+        fmt::print("TRIGGERING SIGS REWRITER PRISM\n");
+        auto sigsRewriter = rbs::SigsRewriterPrism(ctx, commentMap.signaturesForNode);
+        node = sigsRewriter.run(node);
 
         // auto assertionsRewriter = rbs::AssertionsRewriterPrism(ctx, commentMap.assertionsForNode);
         // node = assertionsRewriter.run(node);

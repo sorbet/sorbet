@@ -34,24 +34,22 @@ struct CommentsPrism {
 
 class SigsRewriterPrism {
 public:
-    SigsRewriterPrism(core::MutableContext ctx, std::map<parser::Node *, std::vector<rbs::CommentNodePrism>> &commentsByNode)
-        : ctx(ctx), legacyCommentsByNode(&commentsByNode), prismCommentsByNode(nullptr){};
-    SigsRewriterPrism(core::MutableContext ctx, std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> &commentsByNode)
-        : ctx(ctx), legacyCommentsByNode(nullptr), prismCommentsByNode(&commentsByNode){};
-    pm_node_t * run(pm_node_t *node);
+    SigsRewriterPrism(core::MutableContext ctx,
+                      std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> &commentsByNode)
+        : ctx(ctx), commentsByNode(&commentsByNode){};
+    pm_node_t *run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
-    std::map<parser::Node *, std::vector<rbs::CommentNodePrism>> *legacyCommentsByNode;
-    [[maybe_unused]] std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> *prismCommentsByNode;
+    std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> *commentsByNode;
 
-    std::unique_ptr<parser::Node> rewriteBegin(std::unique_ptr<parser::Node> tree);
-    std::unique_ptr<parser::Node> rewriteBody(std::unique_ptr<parser::Node> tree);
-    std::unique_ptr<parser::Node> rewriteNode(std::unique_ptr<parser::Node> tree);
-    std::unique_ptr<parser::Node> rewriteClass(std::unique_ptr<parser::Node> tree);
-    parser::NodeVec rewriteNodes(parser::NodeVec nodes);
-    std::unique_ptr<parser::NodeVec> signaturesForNode(parser::Node *node);
-    CommentsPrism commentsForNode(parser::Node *node);
+    pm_node_t *rewriteBegin(pm_node_t *node);
+    pm_node_t *rewriteBody(pm_node_t *node);
+    pm_node_t *rewriteNode(pm_node_t *node);
+    void rewriteNodes(pm_node_list_t &nodes);
+    pm_node_t *rewriteClass(pm_node_t *node);
+    std::unique_ptr<parser::NodeVec> signaturesForNode(pm_node_t *node);
+    CommentsPrism commentsForNode(pm_node_t *node);
     void insertTypeParams(parser::Node *node, std::unique_ptr<parser::Node> *body);
     std::unique_ptr<parser::Node> replaceSyntheticTypeAlias(std::unique_ptr<parser::Node> node);
 };
