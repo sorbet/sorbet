@@ -423,6 +423,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "directory passed to Sorbet, if any.",
                                  cxxopts::value<string>()->default_value(empty.pathPrefix), "<prefix>");
     options.add_options(section)("gen-packages", "Generate package information", cxxopts::value<bool>());
+    options.add_options(section)("delete-unused-imports", "Delete unused imports", cxxopts::value<bool>());
     // }}}
 
     // ----- AUTOCORRECTS ------------------------------------------------- {{{
@@ -1255,6 +1256,11 @@ void readOptions(Options &opts,
         opts.genPackages = raw["gen-packages"].as<bool>();
         if (opts.genPackages && !opts.cacheSensitiveOptions.stripePackages) {
             logger->error("--gen-packages can only be used when --stripe-packages is also enabled");
+            throw EarlyReturnWithCode(1);
+        }
+        opts.deleteUnusedImports = raw["delete-unused-imports"].as<bool>();
+        if (opts.deleteUnusedImports && !opts.cacheSensitiveOptions.stripePackages) {
+            logger->error("--delete-unused-imports can only be used when --stripe-packages is also enabled");
             throw EarlyReturnWithCode(1);
         }
         if (raw.count("allow-relaxed-packager-checks-for")) {
