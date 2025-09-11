@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:test, <emptyTree>::<C T>.untyped()).returns(<emptyTree>::<C T>::<C Boolean>)
     end
 
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:args, <emptyTree>::<C T>.untyped(), :block, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>.proc().void())).void()
     end
 
@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -39,7 +39,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.assert(true)
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -50,7 +50,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.bar()
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -66,7 +66,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.fiz()
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -112,7 +112,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C NoMatchTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
     end
 
@@ -120,7 +120,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
     end
 
@@ -144,7 +144,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C NoParentClass><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
     end
 
@@ -152,7 +152,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:block, <emptyTree>::<C T>.proc().void()).void()
     end
 
@@ -160,7 +160,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:a, <emptyTree>::<C T>.untyped(), :b, <emptyTree>::<C T>.untyped()).void()
     end
 
@@ -168,7 +168,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -176,7 +176,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.assert_equal(1, @a)
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 
@@ -184,7 +184,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @a = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
     end
 

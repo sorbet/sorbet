@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:x, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       x.to_s()
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:x, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
     end
 
@@ -30,7 +30,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C MyCommand>.new().call(12)
 
   class <emptyTree>::<C OtherCommand><<C <todo sym>>> < (::<root>::<C Opus>::<C Command>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -38,7 +38,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.Integer(x)
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <cast:assert_type!>(<emptyTree>::<C OtherCommand>.call("8"), <todo sym>, <emptyTree>::<C Integer>)
 
   class <emptyTree>::<C NotACommand><<C <todo sym>>> < (<emptyTree>::<C Llamas>::<C Opus>::<C Command>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -82,7 +82,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C CallNoSig>.call()
 
   module <emptyTree>::<C AbstractMixin><<C <todo sym>>> < ()
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.abstract().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -100,7 +100,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C ConcreteCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.override().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -116,7 +116,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C AbstractMixin><<C <todo sym>>> < ()
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.abstract().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -134,7 +134,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C ConcreteCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.override().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -150,7 +150,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C NotACommand><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.override().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -164,7 +164,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C CommandWithCallAndMixin><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -172,7 +172,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.Integer(x)
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -180,7 +180,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.override().params(:z, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 

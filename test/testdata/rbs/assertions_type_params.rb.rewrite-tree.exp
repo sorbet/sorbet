@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.type_parameters(:A, :B, :C).params(:a, ::<root>::<C T>.type_parameter(:A), :b, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:B)), :c, ::<root>::<C T>.type_parameter(:C)).void()
   end
 
@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.type_parameters(:A).params(:a, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:A))).returns(::<root>::<C T>.type_parameter(:A))
   end
 
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <cast:cast>(a, <todo sym>, ::<root>::<C T>.type_parameter(:A))
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.type_parameters(:A).params(:a, ::<root>::<C T>.nilable(::<root>::<C T>.type_parameter(:A))).returns(::<root>::<C T>.type_parameter(:A))
   end
 

@@ -66,7 +66,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class ::A::AClass<<C AClass>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.returns(<emptyTree>::<C AClass>)
       end
 
@@ -80,7 +80,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     module ::A::AModule<<C AModule>> < ()
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
@@ -98,7 +98,7 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::B<<C B>> < ()
     class ::B::BClass<<C BClass>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
@@ -112,7 +112,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     module ::B::BModule<<C BModule>> < ()
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.returns(<emptyTree>::<C A>::<C AClass>)
       end
 

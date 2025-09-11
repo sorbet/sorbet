@@ -13,7 +13,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.sig() do ||
           <self>.returns(::T2)
         end
         <runtime method definition of test_resolve>
