@@ -275,11 +275,6 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
         return make_unique<SorbetAssignmentNode>(location, move(lhs), move(rhs));
     }
 
-    // Only handle simple reference expressions here; let desugar phase handle Send expressions
-    if (!isa_reference(lhs->peekDesugaredExpr())) {
-        return make_unique<SorbetAssignmentNode>(location, move(lhs), move(rhs));
-    }
-
     auto lhsExpr = lhs->takeDesugaredExpr();
     auto rhsExpr = rhs->takeDesugaredExpr();
 
@@ -292,51 +287,114 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
         return make_node_with_expr<SorbetAssignmentNode>(move(magicSend), location, move(lhs), move(rhs));
     }
 
-    auto lhsCopy = MK::cpRef(lhsExpr);
-    auto cond = MK::cpRef(lhsExpr);
-
-    // Check for T.let handling for instance and class variables
-    auto lhsIsIvar = parser::NodeWithExpr::isa_node<parser::IVarLhs>(lhs.get());
-    auto lhsIsCvar = parser::NodeWithExpr::isa_node<parser::CVarLhs>(lhs.get());
-    ast::Send *tlet;
-
-    ExpressionPtr assignExpr;
-    if ((lhsIsIvar || lhsIsCvar) && (tlet = asTLet(rhsExpr))) {
-        // Special handling for T.let with instance/class variables
-        // Extract the original value from T.let's first argument
-        auto val = move(tlet->getPosArg(0));
-        // Replace T.let's first argument with the LHS variable
-        tlet->getPosArg(0) = MK::cpRef(lhsExpr);
-
-        auto tempLocalName = nextUniqueDesugarName(core::Names::statTemp());
-        auto tempLocal = MK::Local(location, tempLocalName);
-        auto value = MK::Assign(location, MK::cpRef(tempLocal), move(val));
-
-        // Create the T.let assignment: @z = T.let(@z, T.nilable(...))
-        // Note: rhsExpr has been modified by asTLet, so we use it directly
-        auto decl = MK::Assign(location, MK::cpRef(lhsExpr), move(rhsExpr));
-        // Create the final assignment: @z = <statTemp>$1
-        auto assign = MK::Assign(location, MK::cpRef(lhsExpr), move(tempLocal));
-
-        ast::InsSeq::STATS_store stats;
-        stats.emplace_back(move(decl));
-        stats.emplace_back(move(value));
-
-        assignExpr = MK::InsSeq(location, move(stats), move(assign));
-    } else {
-        assignExpr = MK::Assign(location, MK::cpRef(lhsExpr), move(rhsExpr));
+    if (auto s = ast::cast_tree<ast::Send>(lhsExpr)) {
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+        auto numPosAssgnArgs = numPosArgs + 1;
+        assgnArgs.emplace_back(move(rhsExpr));
+        auto cond =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+        auto tempResult = nextUniqueDesugarName(s->fun);
+        stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
+        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                             numPosAssgnArgs, move(assgnArgs), s->flags);
+        auto elsep = MK::Local(sendLoc, tempResult);
+        ExpressionPtr if_;
+        if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
+            // AndAsgn: if (lhs) { lhs = rhs } else { lhs }
+            if_ = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+        } else {
+            // OrAsgn: if (lhs) { lhs } else { lhs = rhs }
+            if_ = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(elsep), move(body));
+        }
+        auto wrapped = MK::InsSeq(location, move(stats), move(if_));
+        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), move(rhs));
     }
 
-    ExpressionPtr if_;
-    if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
-        // AndAsgn: if (lhs) { lhs = rhs } else { lhs }
-        if_ = MK::If(location, move(cond), move(assignExpr), move(lhsCopy));
-    } else {
-        // OrAsgn: if (lhs) { lhs } else { lhs = rhs }
-        if_ = MK::If(location, move(cond), move(lhsCopy), move(assignExpr));
+    if (isa_reference(lhsExpr)) {
+        auto lhsCopy = MK::cpRef(lhsExpr);
+        auto cond = MK::cpRef(lhsExpr);
+
+        // Check for T.let handling for instance and class variables
+        auto lhsIsIvar = parser::NodeWithExpr::isa_node<parser::IVarLhs>(lhs.get());
+        auto lhsIsCvar = parser::NodeWithExpr::isa_node<parser::CVarLhs>(lhs.get());
+        ast::Send *tlet;
+
+        ExpressionPtr assignExpr;
+        if ((lhsIsIvar || lhsIsCvar) && (tlet = asTLet(rhsExpr))) {
+            // Special handling for T.let with instance/class variables
+            // Extract the original value from T.let's first argument
+            auto val = move(tlet->getPosArg(0));
+            // Replace T.let's first argument with the LHS variable
+            tlet->getPosArg(0) = MK::cpRef(lhsExpr);
+
+            auto tempLocalName = nextUniqueDesugarName(core::Names::statTemp());
+            auto tempLocal = MK::Local(location, tempLocalName);
+            auto value = MK::Assign(location, MK::cpRef(tempLocal), move(val));
+
+            // Create the T.let assignment: @z = T.let(@z, T.nilable(...))
+            // Note: rhsExpr has been modified by asTLet, so we use it directly
+            auto decl = MK::Assign(location, MK::cpRef(lhsExpr), move(rhsExpr));
+            // Create the final assignment: @z = <statTemp>$1
+            auto assign = MK::Assign(location, MK::cpRef(lhsExpr), move(tempLocal));
+
+            ast::InsSeq::STATS_store stats;
+            stats.emplace_back(move(decl));
+            stats.emplace_back(move(value));
+
+            assignExpr = MK::InsSeq(location, move(stats), move(assign));
+        } else {
+            assignExpr = MK::Assign(location, MK::cpRef(lhsExpr), move(rhsExpr));
+        }
+
+        ExpressionPtr if_;
+        if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
+            // AndAsgn: if (lhs) { lhs = rhs } else { lhs }
+            if_ = MK::If(location, move(cond), move(assignExpr), move(lhsCopy));
+        } else {
+            // OrAsgn: if (lhs) { lhs } else { lhs = rhs }
+            if_ = MK::If(location, move(cond), move(lhsCopy), move(assignExpr));
+        }
+
+        return make_node_with_expr<SorbetAssignmentNode>(move(if_), location, move(lhs), move(rhs));
     }
 
-    return make_node_with_expr<SorbetAssignmentNode>(move(if_), location, move(lhs), move(rhs));
+    if (ast::isa_tree<ast::UnresolvedConstantLit>(lhsExpr)) {
+        if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
+            e.setHeader("Constant reassignment is not supported");
+        }
+        ExpressionPtr res = MK::EmptyTree();
+        return make_node_with_expr<SorbetAssignmentNode>(move(res), location, move(lhs), move(rhs));
+    }
+
+    if (ast::isa_tree<ast::InsSeq>(lhsExpr)) {
+        auto i = ast::cast_tree<ast::InsSeq>(lhsExpr);
+        auto ifExpr = ast::cast_tree<ast::If>(i->expr);
+        if (!ifExpr) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        auto s = ast::cast_tree<ast::Send>(ifExpr->elsep);
+        if (!s) {
+            Exception::raise("Unexpected left-hand side of op=: please file an issue");
+        }
+        auto sendLoc = s->loc;
+        auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
+        auto numPosAssgnArgs = numPosArgs + 1;
+        assgnArgs.emplace_back(move(rhsExpr));
+        auto cond =
+            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+        auto tempResult = nextUniqueDesugarName(s->fun);
+        stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
+        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+                             numPosAssgnArgs, move(assgnArgs), s->flags);
+        auto elsep = MK::Local(sendLoc, tempResult);
+        auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+        auto wrapped = MK::InsSeq(location, move(stats), move(iff));
+        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), move(rhs));
+    }
+
+    auto s = fmt::format("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
+    Exception::raise(s);
 }
 
 OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
@@ -465,11 +523,10 @@ unique_ptr<parser::Node> Translator::translateOpOpAssignment(PrismAssignmentNode
         auto wrapped = MK::InsSeq(location, move(stats), move(res));
         ifExpr->elsep = move(wrapped);
         return make_node_with_expr<SorbetAssignmentNode>(move(lhsExpr), location, move(lhs), op, opLoc, move(rhs));
-
-    } else {
-        auto s = fmt::format("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
-        Exception::raise(s);
     }
+
+    auto s = fmt::format("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
+    Exception::raise(s);
 }
 
 template <typename PrismConstantNode, typename SorbetAssignmentNode>
