@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:name, <emptyTree>::<C String>, :age, <emptyTree>::<C Integer>, :"foo \'bar", <emptyTree>::<C Integer>).void()
     end
 
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @name
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @age
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @age = arg0
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @foo 'bar
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 

@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def self.<static-init><<static-init>$CENSORED>(<blk>)
     begin
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.params(:blk, ::T.proc().params(:a, ::Integer, :b, ::String).void()).void()
       end
       <self>.extend(::T::Sig)

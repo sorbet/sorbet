@@ -112,15 +112,16 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
         return false;
     }
 
-    auto recv = ast::cast_tree<ast::ConstantLit>(send.recv);
-
-    auto nargs = send.numPosArgs();
-    if (!(nargs == 1 || nargs == 2)) {
+    if (send.numPosArgs() > 1) {
         return false;
     }
 
-    if (recv != nullptr && recv->symbol() == core::Symbols::Sorbet_Private_Static()) {
+    if (send.recv.isSelfReference()) {
         return true;
+    }
+
+    if (auto recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+        return recv->symbol() == core::Symbols::T_Sig_WithoutRuntime();
     }
 
     return false;
@@ -220,8 +221,8 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
     }
     ENFORCE(send != nullptr);
 
-    if (sigSend.numPosArgs() == 2) {
-        auto lit = ast::cast_tree<ast::Literal>(sigSend.getPosArg(1));
+    if (sigSend.numPosArgs() == 1) {
+        auto lit = ast::cast_tree<ast::Literal>(sigSend.getPosArg(0));
         if (lit != nullptr && lit->isSymbol() && lit->asSymbol() == core::Names::final_()) {
             sig.seen.final = lit->loc;
         }

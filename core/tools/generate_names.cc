@@ -574,7 +574,6 @@ NameDef names[] = {
     {"Subclasses", "SUBCLASSES", true},
     {"Sorbet", "Sorbet", true},
     {"ReturnTypeInference", "ReturnTypeInference", true},
-    {"ResolvedSig", "ResolvedSig", true},
     {"InferredReturnType", "INFERRED_RETURN_TYPE", true},
     {"InferredArgumentType", "INFERRED_ARGUMENT_TYPE", true},
     {"ImplicitModuleSuperclass", "ImplicitModuleSuperclass", true},

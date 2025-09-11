@@ -33,7 +33,7 @@ end
 # -- test/testdata/packager/extra_package_paths/bar/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::Bar::Bar<<C Bar>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 
@@ -67,7 +67,7 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Project::Baz::Package<<C Package>> < ()
     class ::Project::Baz::Package::C<<C C>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.void()
       end
 
@@ -84,7 +84,7 @@ end
 # -- test/testdata/packager/extra_package_paths/extra/Project_Foo/b.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::Foo::B<<C B>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 
@@ -101,7 +101,7 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Project::Baz::Package<<C Package>> < ()
     class ::Project::Baz::Package::E<<C E>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.void()
       end
 
@@ -118,7 +118,7 @@ end
 # -- test/testdata/packager/extra_package_paths/extra_slash/Project/Foo/D.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::Foo::D<<C D>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 
@@ -134,7 +134,7 @@ end
 # -- test/testdata/packager/extra_package_paths/extra_slash/Project/FooBar/Z.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::FooBar::Z<<C Z>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 
@@ -151,7 +151,7 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Project::Baz::Package<<C Package>> < ()
     class ::Project::Baz::Package::E<<C E>> < (::<todo sym>)
-      ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.sig() do ||
         <self>.void()
       end
 
@@ -168,7 +168,7 @@ end
 # -- test/testdata/packager/extra_package_paths/extra_slash_deprecated/Project/Foo/D.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::Foo::D<<C D>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 
@@ -184,7 +184,7 @@ end
 # -- test/testdata/packager/extra_package_paths/extra_slash_deprecated/Project/Foo_bar/Z.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::FooBar::Z<<C Z>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    <self>.sig() do ||
       <self>.void()
     end
 

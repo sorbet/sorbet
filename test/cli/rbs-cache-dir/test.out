@@ -1,7 +1,7 @@
 No errors! Great job.
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 

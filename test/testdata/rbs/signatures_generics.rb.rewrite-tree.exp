@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params(:g1, <emptyTree>::<C G1>).void()
   end
 
@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(g1)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params(:g1, <emptyTree>::<C G1>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>)).void()
   end
 
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(g1)
   end
 
-  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params(:g12, <emptyTree>::<C G12>.<syntheticSquareBrackets>(<emptyTree>::<C Object>)).void()
   end
 
@@ -71,7 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.take_g1_2(g1_3)
 
   class <emptyTree>::<C G2><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C U>)
     end
 
@@ -79,7 +79,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @u
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C V>)
     end
 
@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @v
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:v, <emptyTree>::<C V>).returns(<emptyTree>::<C V>)
     end
 
@@ -95,7 +95,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @v = v
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:u, <emptyTree>::<C U>, :v, <emptyTree>::<C V>).void()
     end
 
@@ -134,7 +134,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g2_3)
 
   class <emptyTree>::<C G3><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.returns(<emptyTree>::<C U>)
     end
 
@@ -142,7 +142,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @u
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:v, <emptyTree>::<C V>).returns(<emptyTree>::<C V>)
     end
 
@@ -150,7 +150,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @v = v
     end
 
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:u, <emptyTree>::<C U>, :v, <emptyTree>::<C V>).void()
     end
 
@@ -273,7 +273,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of take_g12>
 
   class <emptyTree>::<C G13><<C <todo sym>>> < (::<todo sym>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    ::T::Sig::WithoutRuntime.sig() do ||
       <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C A>, <emptyTree>::<C B>)).void()
     end
 
