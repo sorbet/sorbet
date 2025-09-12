@@ -1,6 +1,18 @@
 # typed: true
+# enable-experimental-requires-ancestor: true
+
+module RSpec
+  module Core
+    class ExampleGroup
+      def described_class
+      end
+    end
+  end
+end
 
 class A
+  def self.test_each(arg, &blk) = arg.each(&blk)
+
   def outer_helper; end
 
   describe "inside describe" do
@@ -16,6 +28,34 @@ class A
 
     example do
       my_helper
+    end
+
+    shared_examples "some examples" do # error: does not exist
+      let(:defined_in_shared_examples) { "foo" } # error: does not exist
+
+      it("a shared example") do # error: does not exist
+        described_class # error: does not exist
+      end
+    end
+
+    describe "will include shared examples" do
+      include_examples("some examples") # error: does not exist
+
+      it "has access to defined_in_shared_examples" do
+        defined_in_shared_examples # error: does not exist
+      end
+    end
+
+    test_each([]) do |x|
+      describe("shared examples in test_each") do
+        include_examples("some examples")
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only valid `it`
+      # ^^^^^^^^^^^^^^^^ error: does not exist
+
+        it "has access to defined_in_shared_examples" do
+          defined_in_shared_examples # error: does not exist
+        end
+      end
     end
   end
 
