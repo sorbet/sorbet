@@ -81,10 +81,10 @@ vector<core::ParsedParam> ArgParsing::parseParams(const ast::MethodDef::PARAMS_s
 }
 
 // This has to match the implementation of Method::methodArityHash
-core::ArityHash ArgParsing::hashArgs(core::Context ctx, const vector<core::ParsedParam> &args) {
+core::ArityHash ArgParsing::hashParams(core::Context ctx, const vector<core::ParsedParam> &params) {
     uint32_t result = 0;
-    result = core::mix(result, args.size());
-    for (const auto &e : args) {
+    result = core::mix(result, params.size());
+    for (const auto &e : params) {
         if (e.flags.isKeyword) {
             if (e.flags.isRepeated && e.local._name != core::Names::fwdKwargs()) {
                 auto name = core::Names::kwargs();

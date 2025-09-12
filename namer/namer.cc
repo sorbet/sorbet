@@ -313,7 +313,7 @@ public:
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
         foundMethod.parsedArgs = ast::ArgParsing::parseParams(method.params);
-        foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
+        foundMethod.arityHash = ast::ArgParsing::hashParams(ctx, foundMethod.parsedArgs);
         auto def = foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
@@ -1805,7 +1805,7 @@ public:
         auto owner = methodOwner(ctx, ctx.owner, method.flags.isSelfMethod);
         auto parsedParams = ast::ArgParsing::parseParams(method.params);
         auto sym =
-            ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedParams));
+            ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashParams(ctx, parsedParams));
         ENFORCE(sym.exists());
         method.symbol = sym;
         method.params = fillInParams(move(parsedParams), move(method.params));
