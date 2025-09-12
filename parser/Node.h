@@ -30,6 +30,10 @@ public:
         return nullptr;
     }
 
+    virtual ast::ExpressionPtr copyDesugaredExpr() {
+        return nullptr;
+    }
+
     virtual bool hasDesugaredExpr() {
         return false;
     }
@@ -109,6 +113,10 @@ public:
         // Because of this, we don't need to make any copies here. Just move this value out,
         // and hand exclusive ownership to the caller.
         return std::move(this->desugaredExpr);
+    }
+
+    virtual ast::ExpressionPtr copyDesugaredExpr() final {
+        return this->desugaredExpr.deepCopy();
     }
 
     virtual bool hasDesugaredExpr() final {
