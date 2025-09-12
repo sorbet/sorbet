@@ -1,5 +1,5 @@
-#include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
+#include "ast/ParamParsing.h"
 #include "cfg/builder/builder.h"
 #include "common/typecase.h"
 #include "core/Names.h"
@@ -628,7 +628,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 if (auto *block = s.block()) {
                     auto &blockParams = block->params;
-                    vector<core::ParsedParam> blockArgFlags = ast::ArgParsing::parseParams(blockParams);
+                    vector<core::ParsedParam> blockArgFlags = ast::ParamParsing::parseParams(blockParams);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);

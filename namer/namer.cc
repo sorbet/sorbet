@@ -2,8 +2,8 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
-#include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
+#include "ast/ParamParsing.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -312,8 +312,8 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
-        foundMethod.parsedArgs = ast::ArgParsing::parseParams(method.params);
-        foundMethod.arityHash = ast::ArgParsing::hashParams(ctx, foundMethod.parsedArgs);
+        foundMethod.parsedArgs = ast::ParamParsing::parseParams(method.params);
+        foundMethod.arityHash = ast::ParamParsing::hashParams(ctx, foundMethod.parsedArgs);
         auto def = foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
@@ -1725,8 +1725,8 @@ class TreeSymbolizer {
     ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
         ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
-            localExpr =
-                ast::MK::OptionalArg(parsedArg.loc, move(localExpr), ast::ArgParsing::getDefault(parsedArg, move(arg)));
+            localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr),
+                                             ast::ParamParsing::getDefault(parsedArg, move(arg)));
         }
         return localExpr;
     }
@@ -1803,9 +1803,9 @@ public:
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         auto owner = methodOwner(ctx, ctx.owner, method.flags.isSelfMethod);
-        auto parsedParams = ast::ArgParsing::parseParams(method.params);
+        auto parsedParams = ast::ParamParsing::parseParams(method.params);
         auto sym =
-            ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashParams(ctx, parsedParams));
+            ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ParamParsing::hashParams(ctx, parsedParams));
         ENFORCE(sym.exists());
         method.symbol = sym;
         method.params = fillInParams(move(parsedParams), move(method.params));

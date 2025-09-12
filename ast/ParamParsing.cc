@@ -1,4 +1,4 @@
-#include "ast/ArgParsing.h"
+#include "ast/ParamParsing.h"
 #include "common/typecase.h"
 #include "core/Context.h"
 #include "core/hashing/hashing.h"
@@ -45,8 +45,8 @@ core::ParsedParam parseParam(const ast::ExpressionPtr &param) {
     return parsedParam;
 }
 
-ExpressionPtr getDefaultValue(ExpressionPtr arg) {
-    auto *cursor = &arg;
+ExpressionPtr getDefaultValue(ExpressionPtr param) {
+    auto *cursor = &param;
     bool done = false;
     while (!done) {
         typecase(
@@ -62,13 +62,13 @@ ExpressionPtr getDefaultValue(ExpressionPtr arg) {
                 // No default.
             });
     }
-    ENFORCE(cursor != &arg);
+    ENFORCE(cursor != &param);
     return std::move(*cursor);
 }
 
 } // namespace
 
-vector<core::ParsedParam> ArgParsing::parseParams(const ast::MethodDef::PARAMS_store &params) {
+vector<core::ParsedParam> ParamParsing::parseParams(const ast::MethodDef::PARAMS_store &params) {
     vector<core::ParsedParam> parsedParams;
     for (auto &param : params) {
         if (!ast::isa_reference(param)) {
@@ -81,7 +81,7 @@ vector<core::ParsedParam> ArgParsing::parseParams(const ast::MethodDef::PARAMS_s
 }
 
 // This has to match the implementation of Method::methodArityHash
-core::ArityHash ArgParsing::hashParams(core::Context ctx, const vector<core::ParsedParam> &params) {
+core::ArityHash ParamParsing::hashParams(core::Context ctx, const vector<core::ParsedParam> &params) {
     uint32_t result = 0;
     result = core::mix(result, params.size());
     for (const auto &e : params) {
@@ -99,7 +99,7 @@ core::ArityHash ArgParsing::hashParams(core::Context ctx, const vector<core::Par
     return core::ArityHash(result);
 }
 
-ExpressionPtr ArgParsing::getDefault(const core::ParsedParam &parsedArg, ExpressionPtr arg) {
+ExpressionPtr ParamParsing::getDefault(const core::ParsedParam &parsedArg, ExpressionPtr arg) {
     if (!parsedArg.flags.isDefault) {
         return nullptr;
     }

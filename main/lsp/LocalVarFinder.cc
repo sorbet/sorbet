@@ -1,5 +1,5 @@
 #include "LocalVarFinder.h"
-#include "ast/ArgParsing.h"
+#include "ast/ParamParsing.h"
 #include "core/GlobalState.h"
 
 using namespace std;
@@ -18,7 +18,7 @@ void LocalVarFinder::preTransformBlock(core::Context ctx, const ast::Block &bloc
         return;
     }
 
-    auto parsedParams = ast::ArgParsing::parseParams(block.params);
+    auto parsedParams = ast::ParamParsing::parseParams(block.params);
     for (const auto &parsedParam : parsedParams) {
         this->result_.emplace_back(parsedParam.local._name);
     }
@@ -44,7 +44,7 @@ void LocalVarFinder::preTransformMethodDef(core::Context ctx, const ast::MethodD
     auto currentMethod = methodDef.symbol;
 
     if (currentMethod == this->targetMethod) {
-        auto parsedParams = ast::ArgParsing::parseParams(methodDef.params);
+        auto parsedParams = ast::ParamParsing::parseParams(methodDef.params);
         for (const auto &parsedParam : parsedParams) {
             this->result_.emplace_back(parsedParam.local._name);
         }

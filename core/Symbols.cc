@@ -2494,7 +2494,7 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
     return result;
 }
 
-// This has to match the implementation of ArgParsing::hashParams
+// This has to match the implementation of ParamParsing::hashParams
 ArityHash Method::methodArityHash(const GlobalState &gs) const {
     uint32_t result = 0;
     result = mix(result, arguments.size());

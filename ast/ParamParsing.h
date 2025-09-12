@@ -1,9 +1,10 @@
-#ifndef SORBET_AST_ARG_PARSING_H
-#define SORBET_AST_ARG_PARSING_H
+#ifndef SORBET_AST_PARAM_PARSING_H
+#define SORBET_AST_PARAM_PARSING_H
 #include "ast/ast.h"
 #include "core/ArityHash.h"
+
 namespace sorbet::ast {
-class ArgParsing {
+class ParamParsing {
 public:
     static std::vector<core::ParsedParam> parseParams(const ast::MethodDef::PARAMS_store &params);
     static core::ArityHash hashParams(core::Context ctx, const std::vector<core::ParsedParam> &params);
