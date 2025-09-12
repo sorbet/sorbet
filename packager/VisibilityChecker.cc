@@ -761,8 +761,23 @@ public:
             core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
             files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        Parallel::iterate(workers, "VisibilityChecker", absl::MakeSpan(files), [&gs, resultq](ast::ParsedFile &f) {
-            if (!f.file.data(gs).isPackage(gs)) {
+        auto filesSpan = absl::MakeSpan(files);
+        auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(filesSpan.size());
+        for (size_t i = 0; i < filesSpan.size(); ++i) {
+            taskq->push(i, 1);
+        }
+
+        workers.multiplexJob("VisibilityChecker", [&taskq, &filesSpan, &gs, &resultq]() {
+            size_t idx;
+            for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
+                if (!result.gotItem()) {
+                    continue;
+                }
+                auto &f = filesSpan[idx];
+                if (f.file.data(gs).isPackage(gs)) {
+                    resultq->push(std::nullopt, 1);
+                    continue;
+                }
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                 if (pkgName.exists()) {
                     core::Context ctx{gs, core::Symbols::root(), f.file};
@@ -772,14 +787,9 @@ public:
                 } else {
                     resultq->push(std::nullopt, 1);
                 }
-            } else {
-                resultq->push(std::nullopt, 1);
             }
         });
 
-        // TODO: Parallel::iterate uses multiplexJobWait, so this loop won't start consuming from resultq until every
-        // file is visited, but that's not necessary, we can start consuming them before that. Make the above use
-        // multiplexJob.
         std::optional<
             std::pair<core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
             threadResult;
