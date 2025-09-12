@@ -300,7 +300,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
-    if (send->hasBlock() && send->block()->args.size() != 0) {
+    if (!send->hasBlock() || send->block()->args.size() != 0) {
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
