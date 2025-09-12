@@ -23,6 +23,12 @@ for runtime_version in "${runtime_versions[@]}"; do
 
   failed=
 
+  # Our Rubocop version doesn't understand Ruby 3.1 as a valid Ruby version
+  echo "+++ rubocop ($runtime_version)"
+  if ! rbenv exec bundle exec rake rubocop; then
+    failed=1
+  fi
+
   echo "+++ tests ($runtime_version)"
   if ! rbenv exec bundle exec rake test; then
     failed=1
