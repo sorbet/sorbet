@@ -1,6 +1,7 @@
 #include "packager/VisibilityChecker.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
+#include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/Parallel.h"
 #include "core/Context.h"
@@ -767,7 +768,10 @@ public:
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&taskq, &filesSpan, &gs, &resultq]() {
+        // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
+        // `BlockingCounter`.
+        absl::BlockingCounter barrier(std::max(workers.size(), 1));
+        workers.multiplexJob("VisibilityChecker", [&taskq, &filesSpan, &gs, &resultq, &barrier]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 if (!result.gotItem()) {
@@ -788,27 +792,31 @@ public:
                 ast::TreeWalk::apply(ctx, pass, f.tree);
                 resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
             }
+            barrier.DecrementCount();
         });
 
-        std::optional<
-            std::pair<core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
-            threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem() && threadResult.has_value()) {
-                auto file = threadResult.value().first;
-                auto pkgName = gs.packageDB().getPackageNameForFile(file);
-                if (!pkgName.exists()) {
-                    continue;
-                }
-                auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
-                nonConstPackageInfo->untrackPackageReferencesFor(file);
-                for (auto [p, packageReferenceInfo] : threadResult.value().second) {
-                    nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
+        if (gs.packageDB().genPackages()) {
+            std::optional<std::pair<core::FileRef,
+                                    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
+                threadResult;
+            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+                 !result.done();
+                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+                if (result.gotItem() && threadResult.has_value()) {
+                    auto file = threadResult.value().first;
+                    auto pkgName = gs.packageDB().getPackageNameForFile(file);
+                    if (!pkgName.exists()) {
+                        continue;
+                    }
+                    auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
+                    nonConstPackageInfo->untrackPackageReferencesFor(file);
+                    for (auto [p, packageReferenceInfo] : threadResult.value().second) {
+                        nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
+                    }
                 }
             }
         }
+        barrier.Wait();
 
         return files;
     }
