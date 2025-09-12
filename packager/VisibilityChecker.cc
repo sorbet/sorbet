@@ -779,14 +779,14 @@ public:
                     continue;
                 }
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-                if (pkgName.exists()) {
-                    core::Context ctx{gs, core::Symbols::root(), f.file};
-                    VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
-                    ast::TreeWalk::apply(ctx, pass, f.tree);
-                    resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
-                } else {
+                if (!pkgName.exists()) {
                     resultq->push(std::nullopt, 1);
+                    continue;
                 }
+                core::Context ctx{gs, core::Symbols::root(), f.file};
+                VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                ast::TreeWalk::apply(ctx, pass, f.tree);
+                resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
             }
         });
 
