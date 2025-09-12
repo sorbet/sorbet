@@ -277,6 +277,9 @@ module T::Private::Methods::SignatureValidation
     end
   end
 
+  ALLOW_INCOMPATIBLE_VISIBILITY = [:visibility, true]
+  private_constant :ALLOW_INCOMPATIBLE_VISIBILITY
+
   def self.validate_override_visibility(signature, super_signature)
     return if super_signature.mode == Modes.untyped
     # This departs from the behavior of other `validate_override_whatever` functions in that it
@@ -284,8 +287,8 @@ module T::Private::Methods::SignatureValidation
     # done because the primary method for silencing these errors (`allow_incompatible: :visibility`)
     # requires an `override` node to attach to. Once we have static override checking for implicitly
     # overridden methods, we can remove this.
-    return unless [Modes.override, Modes.overridable_override].include?(signature.mode)
-    return if [:visibility, true].include?(signature.override_allow_incompatible)
+    return unless Modes::OVERRIDE_MODES.include?(signature.mode)
+    return if ALLOW_INCOMPATIBLE_VISIBILITY.include?(signature.override_allow_incompatible)
     method = signature.method
     super_method = super_signature.method
     mode_noun = super_signature.mode == Modes.abstract ? 'implementation' : 'override'
@@ -305,8 +308,11 @@ module T::Private::Methods::SignatureValidation
   end
 
   # Higher = more restrictive.
+  METHOD_VISIBILITIES = %i[public protected private]
+  private_constant :METHOD_VISIBILITIES
+
   private_class_method def self.visibility_strength(vis)
-    %i[public protected private].find_index(vis)
+    METHOD_VISIBILITIES.find_index(vis)
   end
 
   private_class_method def self.base_override_loc_str(signature, super_signature)
