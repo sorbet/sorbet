@@ -21,6 +21,18 @@ namespace {
 // Forward declarations
 core::LocOffsets translateLocation(pm_location_t location);
 
+core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
+    auto range = node->location->rg;
+
+    auto nameRange = node->location->children->entries[0].rg;
+    if (nameRange.start != -1 && nameRange.end != -1) {
+        range.start.char_pos = nameRange.start;
+        range.end.char_pos = nameRange.end;
+    }
+
+    return declaration.typeLocFromRange(range);
+}
+
 struct RBSArg {
     core::LocOffsets loc;
     core::LocOffsets nameLoc;
@@ -40,17 +52,26 @@ struct RBSArg {
     Kind kind;
 };
 
-core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
-    auto range = node->location->rg;
-
-    auto nameRange = node->location->children->entries[0].rg;
-    if (nameRange.start != -1 && nameRange.end != -1) {
-        range.start.char_pos = nameRange.start;
-        range.end.char_pos = nameRange.end;
+/* TODO: Add back when parameter validation is implemented
+string argKindToString(RBSArg::Kind kind) {
+    switch (kind) {
+        case RBSArg::Kind::Positional:
+            return "positional";
+        case RBSArg::Kind::OptionalPositional:
+            return "optional positional";
+        case RBSArg::Kind::RestPositional:
+            return "rest positional";
+        case RBSArg::Kind::Keyword:
+            return "keyword";
+        case RBSArg::Kind::OptionalKeyword:
+            return "optional keyword";
+        case RBSArg::Kind::RestKeyword:
+            return "rest keyword";
+        case RBSArg::Kind::Block:
+            return "block";
     }
-
-    return declaration.typeLocFromRange(range);
 }
+*/
 
 /* TODO: Implement when needed
 bool isSelfOrKernelPrism(pm_node_t *node) {
@@ -97,7 +118,7 @@ core::AutocorrectSuggestion autocorrectAbstractBodyPrism(core::MutableContext ct
 
 void ensureAbstractMethodRaisesPrism(core::MutableContext ctx, const pm_node_t *node) {
     if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
-        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t*>(node));
+        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t *>(node));
         if (def->body && isRaisePrism(def->body)) {
             // Method raises properly, remove body to not error later
             // TODO: Implement body nulling for Prism nodes
@@ -144,10 +165,9 @@ core::LocOffsets translateLocation(pm_location_t location) {
     return core::LocOffsets{start, end};
 }
 
-/* TODO: Implement when needed
 parser::Args *getMethodArgsPrism(const pm_node_t *node) {
     if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
-        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t*>(node));
+        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t *>(node));
         // TODO: Convert Prism parameters to parser::Args
         // For now, return nullptr to indicate no args
         (void)def; // Suppress unused warning
@@ -155,7 +175,6 @@ parser::Args *getMethodArgsPrism(const pm_node_t *node) {
     }
     return nullptr;
 }
-*/
 
 void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vector<RBSArg> &args, RBSArg::Kind kind) {
     if (field == nullptr || field->length == 0) {
@@ -172,6 +191,29 @@ void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vect
 
         auto *param = (rbs_types_function_param_t *)list_node->node;
         auto arg = RBSArg{loc, nameLoc, param->name, param->type, kind};
+        args.emplace_back(arg);
+    }
+}
+
+void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vector<RBSArg> &args, RBSArg::Kind kind) {
+    if (field == nullptr) {
+        return;
+    }
+
+    for (rbs_hash_node_t *hash_node = field->head; hash_node != nullptr; hash_node = hash_node->next) {
+        ENFORCE(hash_node->key->type == RBS_AST_SYMBOL,
+                "Unexpected node type `{}` in keyword argument name, expected `{}`", rbs_node_type_name(hash_node->key),
+                "Symbol");
+
+        ENFORCE(hash_node->value->type == RBS_TYPES_FUNCTION_PARAM,
+                "Unexpected node type `{}` in keyword argument value, expected `{}`",
+                rbs_node_type_name(hash_node->value), "FunctionParam");
+
+        auto nameLoc = declaration.typeLocFromRange(hash_node->key->location->rg);
+        auto loc = nameLoc.join(declaration.typeLocFromRange(hash_node->value->location->rg));
+        rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
+        rbs_types_function_param_t *valueNode = (rbs_types_function_param_t *)hash_node->value;
+        auto arg = RBSArg{loc, nameLoc, keyNode, valueNode->type, kind};
         args.emplace_back(arg);
     }
 }
@@ -209,23 +251,87 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::methodSignature(const pm_n
         typeParams.emplace_back(loc, ctx.state.enterNameUTF8(str));
     }
 
-    // Collect arguments (simplified - just positional for now)
+    // Collect arguments (following the same pattern as original)
     vector<RBSArg> args;
-    collectArgs(declaration, functionType->required_positionals, args, RBSArg::Kind::Positional);
 
-    // Build basic signature parameters
+    collectArgs(declaration, functionType->required_positionals, args, RBSArg::Kind::Positional);
+    collectArgs(declaration, functionType->optional_positionals, args, RBSArg::Kind::OptionalPositional);
+
+    rbs_node_t *restPositionals = functionType->rest_positionals;
+    if (restPositionals) {
+        ENFORCE(restPositionals->type == RBS_TYPES_FUNCTION_PARAM,
+                "Unexpected node type `{}` in rest positional argument, expected `{}`",
+                rbs_node_type_name(restPositionals), "FunctionParam");
+
+        auto loc = declaration.typeLocFromRange(restPositionals->location->rg);
+        auto nameLoc = adjustNameLoc(declaration, restPositionals);
+        auto node = (rbs_types_function_param_t *)restPositionals;
+        auto arg = RBSArg{loc, nameLoc, node->name, node->type, RBSArg::Kind::RestPositional};
+        args.emplace_back(arg);
+    }
+
+    collectArgs(declaration, functionType->trailing_positionals, args, RBSArg::Kind::Positional);
+
+    // Collect keywords
+    collectKeywords(declaration, functionType->required_keywords, args, RBSArg::Kind::Keyword);
+    collectKeywords(declaration, functionType->optional_keywords, args, RBSArg::Kind::OptionalKeyword);
+
+    rbs_node_t *restKeywords = functionType->rest_keywords;
+    if (restKeywords) {
+        ENFORCE(restKeywords->type == RBS_TYPES_FUNCTION_PARAM,
+                "Unexpected node type `{}` in rest keyword argument, expected `{}`", rbs_node_type_name(restKeywords),
+                "FunctionParam");
+
+        auto loc = declaration.typeLocFromRange(restKeywords->location->rg);
+        auto nameLoc = adjustNameLoc(declaration, restKeywords);
+        auto node = (rbs_types_function_param_t *)restKeywords;
+        auto arg = RBSArg{loc, nameLoc, node->name, node->type, RBSArg::Kind::RestKeyword};
+        args.emplace_back(arg);
+    }
+
+    // Collect block
+    auto *block = node.block;
+    if (block) {
+        auto loc = declaration.typeLocFromRange(block->base.location->rg);
+        auto arg = RBSArg{loc, loc, nullptr, (rbs_node_t *)block, RBSArg::Kind::Block};
+        args.emplace_back(arg);
+    }
+
     auto sigParams = parser::NodeVec();
+    sigParams.reserve(args.size());
     auto typeToParserNode = TypeToParserNode(ctx, typeParams, parser);
 
-    for (auto &arg : args) {
+    auto methodArgs = getMethodArgsPrism(methodDef);
+    for (int i = 0; i < args.size(); i++) {
+        auto &arg = args[i];
         auto type = typeToParserNode.toParserNode(arg.type, declaration);
+
+        if (!methodArgs || i >= methodArgs->args.size()) {
+            if (auto e = ctx.beginIndexerError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
+                e.setHeader("RBS signature has more parameters than in the method definition");
+            }
+            return nullptr;
+        }
+
+        auto methodArg = methodArgs->args[i].get();
+        (void)methodArg; // Suppress unused warning
+
+        // TODO: Implement parameter kind validation
+        // For now, skip validation to get basic functionality working
+        // if (!checkParameterKindMatch(arg, methodArg)) {
+        //     validation code...
+        // }
+
         if (auto nameSymbol = arg.name) {
+            // The RBS arg is named in the signature, so we use the explicit name used
             auto nameStr = parser.resolveConstant(nameSymbol);
             auto name = ctx.state.enterNameUTF8(nameStr);
             sigParams.emplace_back(
                 make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.nameLoc, name), move(type)));
         } else {
-            // For now, use a default name since we don't have method args extraction
+            // The RBS arg is not named in the signature, so we get it from the method definition
+            // TODO: Implement nodeName extraction from methodArg
+            // For now, use a generic name
             auto name = ctx.state.enterNameUTF8("arg");
             sigParams.emplace_back(make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.loc, name), move(type)));
         }
@@ -234,6 +340,19 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::methodSignature(const pm_n
     // Build the sig
     auto sigBuilder = parser::MK::Self(fullTypeLoc);
     sigBuilder = handleAnnotationsPrism(ctx, methodDef, move(sigBuilder), annotations);
+
+    if (typeParams.size() > 0) {
+        auto typeParamsVector = parser::NodeVec();
+        typeParamsVector.reserve(typeParams.size());
+
+        for (auto &param : typeParams) {
+            typeParamsVector.emplace_back(parser::MK::Symbol(param.first, param.second));
+        }
+
+        auto typeParamsArg = parser::MK::Array(fullTypeLoc, move(typeParamsVector));
+        sigBuilder = parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::typeParameters(), fullTypeLoc,
+                                       move(typeParamsArg));
+    }
 
     // Build the signature following the same pattern as the original
     if (sigParams.size() > 0) {

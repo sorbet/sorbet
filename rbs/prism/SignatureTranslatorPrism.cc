@@ -3,6 +3,7 @@
 #include "rbs/MethodTypeToParserNode.h"
 #include "rbs/TypeParamsToParserNodes.h"
 #include "rbs/TypeToParserNode.h"
+#include "rbs/prism/MethodTypeToParserNodePrism.h"
 #include "rbs/rbs_common.h"
 
 using namespace std;
@@ -98,12 +99,8 @@ unique_ptr<parser::Node> SignatureTranslatorPrism::translateMethodSignature(cons
         return nullptr;
     }
 
-    // TODO: This will error because MethodTypeToParserNode.methodSignature expects parser::Node*
-    // but we're passing pm_node_t*. This is expected for now until we implement the Prism version.
-    // For now, we cast the Prism node to parser::Node* to match the interface.
-    // This will likely crash at runtime, but allows compilation to proceed.
-    auto methodTypeToParserNode = MethodTypeToParserNode(ctx, move(parser));
-    return methodTypeToParserNode.methodSignature((const parser::Node*)methodDef, rbsMethodType, declaration, annotations);
+    auto methodTypeToParserNodePrism = MethodTypeToParserNodePrism(ctx, move(parser));
+    return methodTypeToParserNodePrism.methodSignature(methodDef, rbsMethodType, declaration, annotations);
 }
 
 // unique_ptr<parser::Node> SignatureTranslatorPrism::translateType(const RBSDeclaration &declaration) {

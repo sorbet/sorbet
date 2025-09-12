@@ -396,6 +396,7 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
     if (node == nullptr) {
         return;
     }
+    fmt::print("WALKING NODE, TYPE: {}\n", PM_NODE_TYPE(node));
 
     switch (PM_NODE_TYPE(node)) {
         case PM_AND_NODE: {
@@ -864,6 +865,11 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
                 walkNode(up_cast(while_->statements));
             }
             consumeCommentsInsideNode(node, "while");
+            break;
+        }
+        case PM_PROGRAM_NODE: {
+            auto *program = down_cast<pm_program_node_t>(node);
+            walkStatements(program->statements->body);
             break;
         }
         default: {

@@ -7,8 +7,8 @@
 #include "parser/helper.h"
 #include "parser/prism/Helpers.h"
 #include "rbs/SignatureTranslator.h"
-#include "rbs/prism/SignatureTranslatorPrism.h"
 #include "rbs/TypeParamsToParserNodes.h"
+#include "rbs/prism/SignatureTranslatorPrism.h"
 
 using namespace std;
 using namespace sorbet::parser::Prism;
@@ -290,38 +290,28 @@ unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node
 
     auto signatures = make_unique<parser::NodeVec>();
     auto signatureTranslator = rbs::SignatureTranslatorPrism(ctx);
-    (void)signatureTranslator; // Suppress unused warning until implementation is complete
 
     for (auto &declaration : comments.signatures) {
-        switch (PM_NODE_TYPE(node)) {
-            case PM_DEF_NODE: {
-                // Both instance and singleton methods use PM_DEF_NODE in Prism
-                // TODO: Pass the correct parser::Node* to translateMethodSignature
-                // For now, this is stubbed until we have proper Prism->Parser node conversion
-                // auto sig = signatureTranslator.translateMethodSignature(prismToParserNode(node), declaration,
-                // comments.annotations); signatures->emplace_back(move(sig));
-                (void)declaration; // Suppress unused warning
-                break;
-            }
-            case PM_CALL_NODE: {
-                auto *call = down_cast<pm_call_node_t>(node);
-                // TODO: Implement isVisibilitySend and isAttrAccessorSend for Prism nodes
-                // This requires checking the method name and context like the original:
-                // if (isVisibilitySendPrism(call)) {
-                //     auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
-                //     declaration, comments.annotations); signatures->emplace_back(move(sig));
-                // } else if (isAttrAccessorSendPrism(call)) {
-                //     auto sig = signatureTranslator.translateAttrSignature(call, declaration, comments.annotations);
-                //     signatures->emplace_back(move(sig));
-                // } else {
-                //     Exception::raise("Unimplemented call node type");
-                // }
-                (void)call;        // Suppress unused warning
-                (void)declaration; // Suppress unused warning
-                break;
-            }
-            default:
-                Exception::raise("Unimplemented node type for signatures: {}", (int)PM_NODE_TYPE(node));
+        if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
+            auto sig = signatureTranslator.translateMethodSignature(node, declaration, comments.annotations);
+            signatures->emplace_back(move(sig));
+        } else if (PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
+            auto *call = down_cast<pm_call_node_t>(node);
+            // TODO: Implement isVisibilitySend and isAttrAccessorSend for Prism nodes
+            // This requires checking the method name and context like the original:
+            // if (isVisibilitySendPrism(call)) {
+            //     auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
+            //     declaration, comments.annotations); signatures->emplace_back(move(sig));
+            // } else if (isAttrAccessorSendPrism(call)) {
+            //     auto sig = signatureTranslator.translateAttrSignature(call, declaration, comments.annotations);
+            //     signatures->emplace_back(move(sig));
+            // } else {
+            //     Exception::raise("Unimplemented call node type");
+            // }
+            (void)call;        // Suppress unused warning
+            (void)declaration; // Suppress unused warning
+        } else {
+            Exception::raise("Unimplemented node type for signatures: {}", (int)PM_NODE_TYPE(node));
         }
     }
 
@@ -661,6 +651,11 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
         case PM_SPLAT_NODE: {
             auto *s = down_cast<pm_splat_node_t>(node);
             s->expression = rewriteNode(s->expression);
+            return node;
+        }
+        case PM_PROGRAM_NODE: {
+            auto *program = down_cast<pm_program_node_t>(node);
+            rewriteNodes(program->statements->body);
             return node;
         }
         default:
