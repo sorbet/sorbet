@@ -10,7 +10,7 @@ module RSpec
   end
 end
 
-class A
+RSpec.describe("A") do
   def self.test_each(arg, &blk) = arg.each(&blk)
 
   def outer_helper; end
@@ -20,6 +20,7 @@ class A
 
     xit do
       my_helper
+      described_class
     end
 
     it "example", focus: true do
@@ -57,7 +58,7 @@ class A
     end
   end
 
-  example do # error: Method `example` does not exist
-    outer_helper # error: Method `outer_helper` does not exist
+  example do
+    outer_helper
   end
 end
