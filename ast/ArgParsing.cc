@@ -8,41 +8,41 @@ using namespace std;
 namespace sorbet::ast {
 
 namespace {
-core::ParsedParam parseArg(const ast::ExpressionPtr &arg) {
-    core::ParsedParam parsedArg;
-    auto *cursor = &arg;
+core::ParsedParam parseParam(const ast::ExpressionPtr &param) {
+    core::ParsedParam parsedParam;
+    auto *cursor = &param;
 
     while (cursor != nullptr) {
         typecase(
             *cursor,
             [&](const ast::RestArg &rest) {
-                parsedArg.flags.isRepeated = true;
+                parsedParam.flags.isRepeated = true;
                 cursor = &rest.expr;
             },
             [&](const ast::KeywordArg &kw) {
-                parsedArg.flags.isKeyword = true;
+                parsedParam.flags.isKeyword = true;
                 cursor = &kw.expr;
             },
             [&](const ast::OptionalArg &opt) {
-                parsedArg.flags.isDefault = true;
+                parsedParam.flags.isDefault = true;
                 cursor = &opt.expr;
             },
             [&](const ast::BlockArg &blk) {
-                parsedArg.flags.isBlock = true;
+                parsedParam.flags.isBlock = true;
                 cursor = &blk.expr;
             },
             [&](const ast::ShadowArg &shadow) {
-                parsedArg.flags.isShadow = true;
+                parsedParam.flags.isShadow = true;
                 cursor = &shadow.expr;
             },
             [&](const ast::Local &local) {
-                parsedArg.local = local.localVariable;
-                parsedArg.loc = local.loc;
+                parsedParam.local = local.localVariable;
+                parsedParam.loc = local.loc;
                 cursor = nullptr;
             });
     }
 
-    return parsedArg;
+    return parsedParam;
 }
 
 ExpressionPtr getDefaultValue(ExpressionPtr arg) {
@@ -68,16 +68,16 @@ ExpressionPtr getDefaultValue(ExpressionPtr arg) {
 
 } // namespace
 
-vector<core::ParsedParam> ArgParsing::parseArgs(const ast::MethodDef::PARAMS_store &args) {
-    vector<core::ParsedParam> parsedArgs;
-    for (auto &arg : args) {
-        if (!ast::isa_reference(arg)) {
+vector<core::ParsedParam> ArgParsing::parseParams(const ast::MethodDef::PARAMS_store &params) {
+    vector<core::ParsedParam> parsedParams;
+    for (auto &param : params) {
+        if (!ast::isa_reference(param)) {
             Exception::raise("Must be a reference!");
         }
-        parsedArgs.emplace_back(parseArg(arg));
+        parsedParams.emplace_back(parseParam(param));
     }
 
-    return parsedArgs;
+    return parsedParams;
 }
 
 // This has to match the implementation of Method::methodArityHash

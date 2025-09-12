@@ -18,9 +18,9 @@ void LocalVarFinder::preTransformBlock(core::Context ctx, const ast::Block &bloc
         return;
     }
 
-    auto parsedArgs = ast::ArgParsing::parseArgs(block.params);
-    for (const auto &parsedArg : parsedArgs) {
-        this->result_.emplace_back(parsedArg.local._name);
+    auto parsedParams = ast::ArgParsing::parseParams(block.params);
+    for (const auto &parsedParam : parsedParams) {
+        this->result_.emplace_back(parsedParam.local._name);
     }
 }
 
@@ -44,9 +44,9 @@ void LocalVarFinder::preTransformMethodDef(core::Context ctx, const ast::MethodD
     auto currentMethod = methodDef.symbol;
 
     if (currentMethod == this->targetMethod) {
-        auto parsedArgs = ast::ArgParsing::parseArgs(methodDef.params);
-        for (const auto &parsedArg : parsedArgs) {
-            this->result_.emplace_back(parsedArg.local._name);
+        auto parsedParams = ast::ArgParsing::parseParams(methodDef.params);
+        for (const auto &parsedParam : parsedParams) {
+            this->result_.emplace_back(parsedParam.local._name);
         }
     }
 

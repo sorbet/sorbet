@@ -312,7 +312,7 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
-        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.params);
+        foundMethod.parsedArgs = ast::ArgParsing::parseParams(method.params);
         foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         auto def = foundDefs->addMethod(move(foundMethod));
 
@@ -1803,7 +1803,7 @@ public:
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         auto owner = methodOwner(ctx, ctx.owner, method.flags.isSelfMethod);
-        auto parsedParams = ast::ArgParsing::parseArgs(method.params);
+        auto parsedParams = ast::ArgParsing::parseParams(method.params);
         auto sym =
             ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedParams));
         ENFORCE(sym.exists());
