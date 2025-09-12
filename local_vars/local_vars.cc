@@ -209,10 +209,10 @@ class LocalNameInserter {
 
     // Enter names from parameters into the current frame,
     // building a new parameter list back up for the original context.
-    ast::MethodDef::PARAMS_store fillInArgs(vector<NamedParam> namedArgs) {
+    ast::MethodDef::PARAMS_store fillInParams(vector<NamedParam> namedParams) {
         ast::MethodDef::PARAMS_store params;
 
-        for (auto &param : namedArgs) {
+        for (auto &param : namedParams) {
             params.emplace_back(move(param.expr));
             auto &frame = scopeStack.back();
             frame.locals[param.name] = param.local;
@@ -526,7 +526,7 @@ public:
         enterMethod();
 
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        method.params = fillInArgs(nameParams(ctx, method.params));
+        method.params = fillInParams(nameParams(ctx, method.params));
     }
 
     void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
@@ -554,7 +554,7 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        blk.params = fillInArgs(nameParams(ctx, blk.params));
+        blk.params = fillInParams(nameParams(ctx, blk.params));
     }
 
     void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {

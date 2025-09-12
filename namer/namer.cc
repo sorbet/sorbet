@@ -1777,8 +1777,8 @@ public:
     }
 #endif
 
-    ast::MethodDef::PARAMS_store fillInArgs(const vector<core::ParsedArg> &parsedArgs,
-                                            ast::MethodDef::PARAMS_store oldParams) {
+    ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedArg> &parsedArgs,
+                                              ast::MethodDef::PARAMS_store oldParams) {
         ast::MethodDef::PARAMS_store params;
         int i = -1;
         for (auto &param : parsedArgs) {
@@ -1807,7 +1807,7 @@ public:
             ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedParams));
         ENFORCE(sym.exists());
         method.symbol = sym;
-        method.params = fillInArgs(move(parsedParams), std::move(method.params));
+        method.params = fillInParams(move(parsedParams), move(method.params));
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
