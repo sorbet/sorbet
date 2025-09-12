@@ -11,6 +11,14 @@ module Opus::Types::Test
     module Mixin1Child; include Mixin1; end
     class ReloadedClass; end
 
+    class ::MyEnum < ::T::Enum
+      enums do
+        A = new
+        B = new
+        C = new
+      end
+    end
+
     private def counting_allocations
       before = GC.stat[:total_allocated_objects]
       yield
@@ -1229,19 +1237,6 @@ module Opus::Types::Test
     end
 
     describe "TEnum" do
-      before do
-        class ::MyEnum < ::T::Enum
-          enums do
-            A = new
-            B = new
-            C = new
-          end
-        end
-      end
-
-      after do
-        ::Object.send(:remove_const, :MyEnum)
-      end
 
       it 'allows T::Enum values when coercing' do
         a = T::Utils.coerce(::MyEnum::A)
@@ -1810,6 +1805,15 @@ module Opus::Types::Test
           assert_subtype(T.deprecated_enum(["A", "B"]), T.deprecated_enum(["A", "B"]))
           refute_subtype(T.deprecated_enum(["A", "B"]), T.deprecated_enum(["A"]))
           refute_subtype(T.deprecated_enum(["A", "B"]), T.deprecated_enum(["C"]))
+        end
+      end
+
+      describe 'T::Enum' do
+        it 'treats individual values as subtype of the respective class' do
+          assert_subtype(MyEnum::A, MyEnum)
+          assert_subtype(MyEnum::B, MyEnum)
+          refute_subtype(MyEnum::A, Integer)
+          refute_subtype(MyEnum::A, String)
         end
       end
     end

@@ -34,6 +34,8 @@ module T::Types
       case other
       when TEnum
         @val == other.val
+      when Simple
+        other.raw_type.===(@val)
       else
         false
       end
