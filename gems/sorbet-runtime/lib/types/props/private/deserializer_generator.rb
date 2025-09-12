@@ -16,7 +16,7 @@ module T::Props
     module DeserializerGenerator
       extend T::Sig
 
-      CAN_USE_SYMBOL_NAME = RUBY_VERSION >= "3.3.0"
+      CAN_USE_SYMBOL_NAME = T.let(RUBY_VERSION >= "3.3.0", T::Boolean)
 
       # Generate a method that takes a T::Hash[String, T.untyped] representing
       # serialized props, sets instance variables for each prop found in the

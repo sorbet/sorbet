@@ -16,7 +16,7 @@ module T::Props
     module SerializerGenerator
       extend T::Sig
 
-      CAN_USE_SYMBOL_NAME = RUBY_VERSION >= "3.3.0"
+      CAN_USE_SYMBOL_NAME = T.let(RUBY_VERSION >= "3.3.0", T::Boolean)
 
       sig do
         params(
