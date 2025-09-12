@@ -477,8 +477,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         abstract!
 
         sig { abstract.returns(Integer) }
-        private def foo
-        end
+        private def foo; end
       end
 
       class B < T::Struct

@@ -1237,7 +1237,6 @@ module Opus::Types::Test
     end
 
     describe "TEnum" do
-
       it 'allows T::Enum values when coercing' do
         a = T::Utils.coerce(::MyEnum::A)
         assert_instance_of(T::Types::TEnum, a)
