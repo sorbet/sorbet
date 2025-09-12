@@ -981,7 +981,7 @@ end
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-This error occurs in the `--gen-packages` mode, and is reported on `__package.rb` files that are missing imports.
+When running in `--gen-packages` mode, this error indicates that a `__package.rb` file is missing imports.
 
 ## 4001
 
