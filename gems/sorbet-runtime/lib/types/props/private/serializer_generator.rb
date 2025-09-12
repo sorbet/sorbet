@@ -16,6 +16,8 @@ module T::Props
     module SerializerGenerator
       extend T::Sig
 
+      CAN_USE_SYMBOL_NAME = RUBY_VERSION >= "3.3.0"
+
       sig do
         params(
           props: T::Hash[Symbol, T::Hash[Symbol, T.untyped]],
@@ -30,12 +32,15 @@ module T::Props
           # indirectly) in `validate_prop_name`, so we don't bother with a nice
           # error message, but we double check here to prevent a refactoring
           # from introducing a security vulnerability.
-          raise unless T::Props::Decorator::SAFE_NAME.match?(prop.to_s)
+          raise unless T::Props::Decorator::SAFE_NAME.match?(CAN_USE_SYMBOL_NAME ? prop.name : prop.to_s)
 
           hash_key = rules.fetch(:serialized_form)
           raise unless T::Props::Decorator::SAFE_NAME.match?(hash_key)
 
-          ivar_name = rules.fetch(:accessor_key).to_s
+          ivar_name = begin
+                        key = rules.fetch(:accessor_key)
+                        CAN_USE_SYMBOL_NAME ? key.name : key.to_s
+                      end
           raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_ACCESSOR_KEY_NAME.match?(ivar_name)
 
           transformed_val = SerdeTransform.generate(
