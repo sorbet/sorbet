@@ -1279,6 +1279,10 @@ void readOptions(Options &opts,
             logger->error("--gen-packages can only be used when --stripe-packages is also enabled");
             throw EarlyReturnWithCode(1);
         }
+        if (opts.genPackages && opts.runLSP) {
+            logger->error("--gen-packages can not be used when --lsp is also enabled");
+            throw EarlyReturnWithCode(1);
+        }
         if (raw.count("allow-relaxed-packager-checks-for")) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
                 logger->error("--allow-relaxed-packager-checks-for can only be specified in --sorbet-packages mode");
