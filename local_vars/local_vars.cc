@@ -526,7 +526,7 @@ public:
         enterMethod();
 
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        method.args = fillInArgs(nameArgs(ctx, method.args));
+        method.params = fillInArgs(nameArgs(ctx, method.params));
     }
 
     void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {

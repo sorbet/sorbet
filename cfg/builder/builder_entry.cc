@@ -38,24 +38,24 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
 
-        auto &argInfos = md.symbol.data(ctx)->arguments;
+        auto &paramInfos = md.symbol.data(ctx)->arguments;
         bool isAbstract = md.symbol.data(ctx)->flags.isAbstract;
         bool seenKeyword = false;
         int i = -1;
-        for (auto &argExpr : md.args) {
+        for (auto &paramExpr : md.params) {
             i++;
-            auto *a = ast::MK::arg2Local(argExpr);
-            auto local = res->enterLocal(a->localVariable);
-            auto &argInfo = argInfos[i];
+            auto *p = ast::MK::arg2Local(paramExpr);
+            auto local = res->enterLocal(p->localVariable);
+            auto &paramInfo = paramInfos[i];
 
-            seenKeyword = seenKeyword || argInfo.flags.isKeyword;
+            seenKeyword = seenKeyword || paramInfo.flags.isKeyword;
 
             // If defaultCont is non-null, that means that the previous argument had a default. If the current argument
             // has a default and also is not a keyword, block or repeated arg, then we can continue by extending that
             // fall-through case. However if any of those conditions fail, we must merge the two paths back together,
             // and break out of the fast-path for defaulting.
             if (defaultCont &&
-                (seenKeyword || argInfo.flags.isBlock || argInfo.flags.isRepeated || !argInfo.flags.isDefault)) {
+                (seenKeyword || paramInfo.flags.isBlock || paramInfo.flags.isRepeated || !paramInfo.flags.isDefault)) {
                 presentCont = joinBlocks(cctx, presentCont, defaultCont);
                 defaultCont = nullptr;
             }
@@ -63,18 +63,18 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             // Ignore defaults for abstract methods, because abstract methods do not have bodies and are not called.
             if (!isAbstract) {
                 // Only emit conditional arg loading if the arg has a default
-                if (auto opt = ast::cast_tree<ast::OptionalArg>(argExpr)) {
+                if (auto opt = ast::cast_tree<ast::OptionalArg>(paramExpr)) {
                     auto [result, presentNext, defaultNext] =
-                        walkDefault(cctx, i, argInfo, local, a->loc, opt->default_, presentCont, defaultCont);
+                        walkDefault(cctx, i, paramInfo, local, p->loc, opt->default_, presentCont, defaultCont);
 
-                    synthesizeExpr(defaultNext, local, a->loc, make_insn<Ident>(result));
+                    synthesizeExpr(defaultNext, local, p->loc, make_insn<Ident>(result));
 
                     presentCont = presentNext;
                     defaultCont = defaultNext;
                 }
             }
 
-            synthesizeExpr(presentCont, local, a->loc, make_insn<LoadArg>(md.symbol, i));
+            synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(md.symbol, i));
         }
 
         // Join the presentCont and defaultCont paths together

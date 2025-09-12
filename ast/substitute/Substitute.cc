@@ -66,8 +66,8 @@ public:
     void preTransformMethodDef(core::Context ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<MethodDef>(tree);
         original.name = subst.substituteSymbolName(original.name);
-        for (auto &arg : original.args) {
-            substArg(arg);
+        for (auto &param : original.params) {
+            substArg(param);
         }
     }
 

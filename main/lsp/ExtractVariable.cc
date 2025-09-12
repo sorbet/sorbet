@@ -229,8 +229,8 @@ public:
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         enclosingMethodStack.push_back(&tree);
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        if (!methodDef.args.empty()) {
-            skipLocRange(methodDef.args.front().loc().join(methodDef.args.back().loc()));
+        if (!methodDef.params.empty()) {
+            skipLocRange(methodDef.params.front().loc().join(methodDef.params.back().loc()));
         }
         if (methodDef.loc.endPos() == methodDef.rhs.loc().endPos()) {
             // methodDef.loc.endPos() represent the location right after the `end`,

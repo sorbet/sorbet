@@ -441,7 +441,7 @@ public:
     ExpressionPtr rhs;
 
     using PARAMS_store = InlinedVector<ExpressionPtr, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
-    PARAMS_store args;
+    PARAMS_store params;
 
     core::NameRef name;
 
@@ -449,7 +449,7 @@ public:
     Flags flags;
 
     MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
-              PARAMS_store args, ExpressionPtr rhs, Flags flags);
+              PARAMS_store params, ExpressionPtr rhs, Flags flags);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;

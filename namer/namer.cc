@@ -312,7 +312,7 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
-        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
+        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.params);
         foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         auto def = foundDefs->addMethod(move(foundMethod));
 
@@ -1802,19 +1802,20 @@ public:
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         auto owner = methodOwner(ctx, ctx.owner, method.flags.isSelfMethod);
-        auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
-        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
+        auto parsedParams = ast::ArgParsing::parseArgs(method.params);
+        auto sym =
+            ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedParams));
         ENFORCE(sym.exists());
         method.symbol = sym;
-        method.args = fillInArgs(move(parsedArgs), std::move(method.args));
+        method.params = fillInArgs(move(parsedParams), std::move(method.params));
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(method.symbol != core::Symbols::todoMethod());
 
-        ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
-                method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
+        ENFORCE(method.params.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
+                method.name.showRaw(ctx), method.params.size(), method.symbol.data(ctx)->arguments.size());
     }
 
     ast::ExpressionPtr handleAssignment(core::Context ctx, ast::ExpressionPtr tree) {

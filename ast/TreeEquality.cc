@@ -95,7 +95,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (!Comparator::compareNodes(gs, avoid, a->rhs, b->rhs, file)) {
                 return false;
             }
-            if (!Comparator::compareSpans(gs, avoid, a->args, b->args, file)) {
+            if (!Comparator::compareSpans(gs, avoid, a->params, b->params, file)) {
                 return false;
             }
             return true;

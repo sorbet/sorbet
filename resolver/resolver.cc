@@ -3214,7 +3214,7 @@ private:
     static ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef,
                                          int pos, bool isOverloaded) {
         if (!isOverloaded) {
-            return ast::MK::arg2Local(mdef.args[pos]);
+            return ast::MK::arg2Local(mdef.params[pos]);
         }
 
         // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
@@ -3224,7 +3224,7 @@ private:
                                              [&](const auto &arg) { return arg.name == internalNameToLookFor; });
         ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
         auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
-        return ast::MK::arg2Local(mdef.args[realPos]);
+        return ast::MK::arg2Local(mdef.params[realPos]);
     }
 
     static bool usesArgumentForwardingSyntax(core::Context ctx, core::MethodData methodInfo, const ast::MethodDef &mdef,
@@ -3283,7 +3283,7 @@ private:
                                                             core::LocOffsets exprLoc, ParsedSig &sig, bool isOverloaded,
                                                             const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
-        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
+        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.params.size());
 
         if (!sig.seen.returns.exists() && !sig.seen.void_.exists()) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -3648,18 +3648,18 @@ private:
                         InlinedVector<OverloadedMethodSignature, 2> sigs;
                         for (auto &lastSig : lastSigs) {
                             auto sig = parseSig(ctx, sigOwner, *lastSig, mdef);
-                            vector<bool> argsToKeep;
+                            vector<bool> paramsToKeep;
                             if (isOverloaded) {
-                                for (auto &argTree : mdef.args) {
-                                    const auto local = ast::MK::arg2Local(argTree);
-                                    auto treeArgName = local->localVariable._name;
+                                for (auto &paramTree : mdef.params) {
+                                    const auto local = ast::MK::arg2Local(paramTree);
+                                    auto treeParamName = local->localVariable._name;
                                     ENFORCE(local != nullptr);
-                                    argsToKeep.emplace_back(absl::c_find_if(sig.argTypes, [&](auto &spec) {
-                                                                return spec.name == treeArgName;
-                                                            }) != sig.argTypes.end());
+                                    paramsToKeep.emplace_back(absl::c_find_if(sig.argTypes, [&](auto &spec) {
+                                                                  return spec.name == treeParamName;
+                                                              }) != sig.argTypes.end());
                                 }
                             }
-                            sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
+                            sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(paramsToKeep)});
                         }
 
                         multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{ctx.owner.asClassOrModuleRef(), &mdef,

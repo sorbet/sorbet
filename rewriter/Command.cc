@@ -33,7 +33,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     }
 
     int i = 0;
-    ast::MethodDef *call = nullptr;
+    ast::MethodDef *call = nullptr; // TODO: why is this called "call" not "def"?
     ast::ExpressionPtr *callptr = nullptr;
     auto instanceMethods = InlinedVector<pair<core::NameRef, core::LocOffsets>, 4>();
 
@@ -67,10 +67,10 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
             return;
         }
 
-        ast::MethodDef::PARAMS_store newArgs;
-        newArgs.reserve(call->args.size());
-        for (auto &arg : call->args) {
-            newArgs.emplace_back(arg.deepCopy());
+        ast::MethodDef::PARAMS_store newParams;
+        newParams.reserve(call->params.size());
+        for (auto &param : call->params) {
+            newParams.emplace_back(param.deepCopy());
         }
 
         // This method is only for type checking. It doesn't actually exist at runtime, and instead all
@@ -78,7 +78,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         ast::MethodDef::Flags flags;
         flags.isSelfMethod = true;
         flags.discardDef = true;
-        auto selfCall = ast::MK::SyntheticMethod(call->loc, call->declLoc, call->name, std::move(newArgs),
+        auto selfCall = ast::MK::SyntheticMethod(call->loc, call->declLoc, call->name, std::move(newParams),
                                                  ast::MK::RaiseTypedUnimplemented(call->declLoc), flags);
 
         // We are now in the weird situation where we have an actual method that
@@ -88,7 +88,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         // the location(s) on the non-synthetic method so that LSP only sees the
         // synthetic method.
         auto hiddenCall = ast::MK::Method(call->loc.copyWithZeroLength(), call->declLoc.copyWithZeroLength(),
-                                          call->name, std::move(call->args), std::move(call->rhs), call->flags);
+                                          call->name, std::move(call->params), std::move(call->rhs), call->flags);
 
         // We need to make sure we assign into `callptr` prior to inserting into
         // `klass->rhs`, otherwise our pointer might not be live anymore.

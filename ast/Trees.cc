@@ -182,10 +182,10 @@ ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOr
 
 MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
                      PARAMS_store params, ExpressionPtr rhs, Flags flags)
-    : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(params)), name(name),
+    : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), params(std::move(params)), name(name),
       flags(flags) {
     categoryCounterInc("trees", "methoddef");
-    histogramInc("trees.methodDef.args", this->args.size());
+    histogramInc("trees.methodDef.params", this->params.size());
     _sanityCheck();
 }
 
@@ -580,12 +580,12 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     fmt::format_to(std::back_inserter(buf), "(");
     bool first = true;
     if (this->symbol == core::Symbols::todoMethod()) {
-        for (auto &a : this->args) {
+        for (auto &p : this->params) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
             first = false;
-            fmt::format_to(std::back_inserter(buf), "{}", a.toStringWithTabs(gs, tabs + 1));
+            fmt::format_to(std::back_inserter(buf), "{}", p.toStringWithTabs(gs, tabs + 1));
         }
     } else {
         for (auto &a : data->arguments) {
@@ -625,20 +625,20 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::format_to(std::back_inserter(buf), "params = [");
     bool first = true;
     if (this->symbol == core::Symbols::todoMethod()) {
-        for (auto &a : this->args) {
+        for (auto &p : this->params) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
             first = false;
-            fmt::format_to(std::back_inserter(buf), "{}", a.showRaw(gs, tabs + 2));
+            fmt::format_to(std::back_inserter(buf), "{}", p.showRaw(gs, tabs + 2));
         }
     } else {
-        for (auto &a : this->args) {
+        for (auto &p : this->params) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
             first = false;
-            fmt::format_to(std::back_inserter(buf), "{}", a.showRaw(gs, tabs + 2));
+            fmt::format_to(std::back_inserter(buf), "{}", p.showRaw(gs, tabs + 2));
         }
     }
     fmt::format_to(std::back_inserter(buf), "]\n");
@@ -1586,20 +1586,20 @@ string MethodDef::showRawWithLocs(const core::GlobalState &gs, core::FileRef fil
     fmt::format_to(std::back_inserter(buf), "args = [");
     bool first = true;
     if (this->symbol == core::Symbols::todoMethod()) {
-        for (auto &a : this->args) {
+        for (auto &p : this->params) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
             first = false;
-            fmt::format_to(std::back_inserter(buf), "{}", a.showRawWithLocs(gs, file, tabs + 2));
+            fmt::format_to(std::back_inserter(buf), "{}", p.showRawWithLocs(gs, file, tabs + 2));
         }
     } else {
-        for (auto &a : this->args) {
+        for (auto &p : this->params) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
             first = false;
-            fmt::format_to(std::back_inserter(buf), "{}", a.showRawWithLocs(gs, file, tabs + 2));
+            fmt::format_to(std::back_inserter(buf), "{}", p.showRawWithLocs(gs, file, tabs + 2));
         }
     }
     fmt::format_to(std::back_inserter(buf), "]\n");
