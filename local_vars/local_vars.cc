@@ -38,7 +38,7 @@ class LocalNameInserter {
     };
     CheckSize(ArgFlags, 1, 1);
 
-    struct NamedArg {
+    struct NamedParam {
         core::NameRef name;
         ArgFlags flags;
         core::LocalVariable local;
@@ -47,7 +47,7 @@ class LocalNameInserter {
     };
 
     // Handle the mangling of keyword argument names, if the name passed has already been seen in the argument list.
-    core::NameRef mangleKeyword(core::MutableContext ctx, const vector<NamedArg> &seen, core::LocOffsets loc,
+    core::NameRef mangleKeyword(core::MutableContext ctx, const vector<NamedParam> &seen, core::LocOffsets loc,
                                 bool isKeyword, core::NameRef name, uint32_t pos) const {
         if (!isKeyword) {
             return name;
@@ -76,8 +76,8 @@ class LocalNameInserter {
 
     // Map through the reference structure, naming the locals, and preserving
     // the outer structure for the namer proper.
-    NamedArg nameArg(core::MutableContext ctx, const vector<NamedArg> &seen, ast::ExpressionPtr arg, uint32_t pos) {
-        NamedArg named;
+    NamedParam nameArg(core::MutableContext ctx, const vector<NamedParam> &seen, ast::ExpressionPtr arg, uint32_t pos) {
+        NamedParam named;
         auto *cursor = &arg;
 
         while (cursor != nullptr) {
@@ -115,8 +115,8 @@ class LocalNameInserter {
         return named;
     }
 
-    vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::PARAMS_store &methodArgs) {
-        vector<NamedArg> namedArgs;
+    vector<NamedParam> nameArgs(core::MutableContext ctx, ast::MethodDef::PARAMS_store &methodArgs) {
+        vector<NamedParam> namedArgs;
         int pos = -1;
         for (auto &arg : methodArgs) {
             ++pos;
@@ -209,7 +209,7 @@ class LocalNameInserter {
 
     // Enter names from parameters into the current frame,
     // building a new parameter list back up for the original context.
-    ast::MethodDef::PARAMS_store fillInArgs(vector<NamedArg> namedArgs) {
+    ast::MethodDef::PARAMS_store fillInArgs(vector<NamedParam> namedArgs) {
         ast::MethodDef::PARAMS_store params;
 
         for (auto &param : namedArgs) {
