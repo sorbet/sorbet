@@ -17,20 +17,16 @@ namespace sorbet::parser::Prism {
 using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
-// Returns true if all nodes have a desugared expr or are null.
-// Call this with all of a node's children, to check if that node can be desugared.
-template <typename... Rest> bool hasExpr(const std::unique_ptr<parser::Node> &first, const Rest &...rest) {
-    bool firstHasExpr = first == nullptr || first->hasDesugaredExpr();
-    if constexpr (sizeof...(rest) == 0) {
-        return firstHasExpr;
-    } else {
-        return firstHasExpr && hasExpr(rest...);
-    }
+bool hasExpr(const std::unique_ptr<parser::Node> &node) {
+    return node == nullptr || node->hasDesugaredExpr();
 }
 
-// Check if all nodes in NodeVec are null or have a desugared expr.
 bool hasExpr(const parser::NodeVec &nodes) {
-    return absl::c_all_of(nodes, [](const auto &node) { return node == nullptr || node->hasDesugaredExpr(); });
+    return absl::c_all_of(nodes, [](const auto &node) { return hasExpr(node); });
+}
+
+template <typename... Tail> bool hasExpr(const std::unique_ptr<parser::Node> &head, const Tail &...tail) {
+    return hasExpr(head) && hasExpr(tail...);
 }
 
 // Helper template to convert nodes to any store type with takeDesugaredExpr or EmptyTree for nulls.
@@ -620,7 +616,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Method calls are really complex, and we're building support for different kinds of arguments bit by
             // bit. This bool is true when this particular method call is supported by our desugar logic.
             auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasBlockArg &&
-                                     !hasFwdArgs && !hasFwdRestArg && !hasSplat && hasExpr(receiver) && hasExpr(args);
+                                     !hasFwdArgs && !hasFwdRestArg && !hasSplat && hasExpr(receiver, args);
 
             if (!supportedCallType) {
                 sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
