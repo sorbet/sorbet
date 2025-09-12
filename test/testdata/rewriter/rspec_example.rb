@@ -30,11 +30,11 @@ class A
       my_helper
     end
 
-    shared_examples "some examples" do # error: does not exist
-      let(:defined_in_shared_examples) { "foo" } # error: does not exist
+    shared_examples "some examples" do
+      let(:defined_in_shared_examples) { "foo" }
 
-      it("a shared example") do # error: does not exist
-        described_class # error: does not exist
+      it("a shared example") do
+        described_class
       end
     end
 
@@ -49,8 +49,6 @@ class A
     test_each([]) do |x|
       describe("shared examples in test_each") do
         include_examples("some examples")
-      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only valid `it`
-      # ^^^^^^^^^^^^^^^^ error: does not exist
 
         it "has access to defined_in_shared_examples" do
           defined_in_shared_examples # error: does not exist
