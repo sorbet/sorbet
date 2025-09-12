@@ -115,20 +115,20 @@ class LocalNameInserter {
         return named;
     }
 
-    vector<NamedParam> nameArgs(core::MutableContext ctx, ast::MethodDef::PARAMS_store &methodArgs) {
-        vector<NamedParam> namedArgs;
+    vector<NamedParam> nameParams(core::MutableContext ctx, ast::MethodDef::PARAMS_store &methodParams) {
+        vector<NamedParam> namedParams;
         int pos = -1;
-        for (auto &arg : methodArgs) {
+        for (auto &param : methodParams) {
             ++pos;
 
-            if (!ast::isa_reference(arg)) {
+            if (!ast::isa_reference(param)) {
                 Exception::raise("Must be a reference!");
             }
-            auto named = nameArg(ctx, namedArgs, move(arg), pos);
-            namedArgs.emplace_back(move(named));
+            auto named = nameArg(ctx, namedParams, move(param), pos);
+            namedParams.emplace_back(move(named));
         }
 
-        return namedArgs;
+        return namedParams;
     }
 
     struct LocalFrame {
@@ -526,7 +526,7 @@ public:
         enterMethod();
 
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        method.params = fillInArgs(nameArgs(ctx, method.params));
+        method.params = fillInArgs(nameParams(ctx, method.params));
     }
 
     void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
@@ -554,7 +554,7 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        blk.params = fillInArgs(nameArgs(ctx, blk.params));
+        blk.params = fillInArgs(nameParams(ctx, blk.params));
     }
 
     void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
