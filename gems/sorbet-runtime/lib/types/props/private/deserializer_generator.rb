@@ -96,7 +96,7 @@ module T::Props
 
         <<~RUBY
           def __t_props_generated_deserialize(hash)
-            found = #{stored_props.size}
+            found = #{parts.size}
             #{parts.join("\n\n")}
             found
           end
