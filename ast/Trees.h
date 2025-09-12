@@ -1471,10 +1471,10 @@ EXPRESSION(Block) {
 public:
     const core::LocOffsets loc;
 
-    MethodDef::PARAMS_store args;
+    MethodDef::PARAMS_store params;
     ExpressionPtr body;
 
-    Block(core::LocOffsets loc, MethodDef::PARAMS_store args, ExpressionPtr body);
+    Block(core::LocOffsets loc, MethodDef::PARAMS_store params, ExpressionPtr body);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;

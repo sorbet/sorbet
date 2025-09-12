@@ -627,8 +627,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 if (auto *block = s.block()) {
-                    auto &blockArgs = block->args;
-                    vector<core::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
+                    auto &blockParams = block->params;
+                    vector<core::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockParams);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);
@@ -672,7 +672,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 continue;
                             }
 
-                            if (auto opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
+                            if (auto opt = ast::cast_tree<ast::OptionalArg>(blockParams[i])) {
                                 auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops);
                                 auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops);
 

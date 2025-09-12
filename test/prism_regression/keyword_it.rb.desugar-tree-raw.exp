@@ -15,7 +15,7 @@ ClassDef{
       }
       fun = <U new>
       block = Block {
-        args = [
+        params = [
         ]
         body = Send{
           flags = {privateOk}
@@ -40,7 +40,7 @@ ClassDef{
       }
       fun = <U new>
       block = Block {
-        args = [
+        params = [
         ]
         body = InsSeq{
           stats = [

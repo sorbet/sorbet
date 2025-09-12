@@ -24,7 +24,7 @@ core::MethodRef enclosingMethod(core::Context ctx) {
 void LocalVarSaver::postTransformBlock(core::Context ctx, const ast::Block &block) {
     auto method = enclosingMethod(ctx);
 
-    for (auto &arg : block.args) {
+    for (auto &arg : block.params) {
         if (auto *localExp = ast::MK::arg2Local(arg)) {
             bool lspQueryMatch = ctx.state.lspQuery.matchesVar(method, localExp->localVariable);
             if (lspQueryMatch) {

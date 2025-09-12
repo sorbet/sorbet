@@ -554,7 +554,7 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        blk.args = fillInArgs(nameArgs(ctx, blk.args));
+        blk.params = fillInArgs(nameArgs(ctx, blk.params));
     }
 
     void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {

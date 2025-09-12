@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U foo><<U <todo method>>>
-      args = [RestArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <fwd-args>>
         } }, RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{

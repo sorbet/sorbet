@@ -510,9 +510,9 @@ private:
     return_type mapBlock(arg_type v, CTX ctx) {
         CALL_PRE(Block);
 
-        for (auto &arg : cast_tree_nonnull<Block>(v).args) {
+        for (auto &param : cast_tree_nonnull<Block>(v).params) {
             // Only OptionalArgs have subexpressions within them.
-            if (auto optArg = cast_tree<OptionalArg>(arg)) {
+            if (auto optArg = cast_tree<OptionalArg>(param)) {
                 CALL_MAP(optArg->default_, ctx);
             }
         }

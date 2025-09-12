@@ -41,7 +41,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}

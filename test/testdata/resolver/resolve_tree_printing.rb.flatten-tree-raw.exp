@@ -14,7 +14,7 @@ InsSeq{
         MethodDef{
           flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = EmptyTree
@@ -39,7 +39,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_while><<U has_while>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = While{
@@ -59,7 +59,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_constant_with_resolution_scope><<U has_constant_with_resolution_scope>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = ConstantLit{
@@ -75,7 +75,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_global_field><<U has_global_field>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = UnresolvedIdent{
@@ -87,7 +87,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_class_field><<U has_class_field>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = UnresolvedIdent{
@@ -99,7 +99,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_next><<U has_next>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = Send{
@@ -107,7 +107,7 @@ InsSeq{
             recv = Self
             fun = <U loop>
             block = Block {
-              args = [
+              params = [
               ]
               body = Next{ expr = EmptyTree }
             }
@@ -120,7 +120,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_break><<U has_break>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = Send{
@@ -128,7 +128,7 @@ InsSeq{
             recv = Self
             fun = <U loop>
             block = Block {
-              args = [
+              params = [
               ]
               body = Break{ expr = EmptyTree }
             }
@@ -141,7 +141,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_return><<U has_return>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = Return{ expr = Literal{ value = 1 } }
@@ -150,7 +150,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U has_cast><<U has_cast>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = Cast{
@@ -186,7 +186,7 @@ InsSeq{
         MethodDef{
           flags = {self}
           name = <U <static-init>><<U <static-init>>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = InsSeq{

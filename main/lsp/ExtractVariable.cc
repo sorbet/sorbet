@@ -248,8 +248,8 @@ public:
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
-        if (!block.args.empty()) {
-            skipLocRange(block.args.front().loc().join(block.args.back().loc()));
+        if (!block.params.empty()) {
+            skipLocRange(block.params.front().loc().join(block.params.back().loc()));
         }
         updateEnclosingScope(tree, block.body.loc());
     }

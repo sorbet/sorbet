@@ -177,7 +177,7 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::Block: {
             auto *exp = reinterpret_cast<const Block *>(tree);
-            return make_expression<Block>(exp->loc, deepCopyVec(avoid, exp->args), deepCopy(avoid, exp->body));
+            return make_expression<Block>(exp->loc, deepCopyVec(avoid, exp->params), deepCopy(avoid, exp->body));
         }
 
         case Tag::InsSeq: {

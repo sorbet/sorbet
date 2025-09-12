@@ -18,7 +18,7 @@ void LocalVarFinder::preTransformBlock(core::Context ctx, const ast::Block &bloc
         return;
     }
 
-    auto parsedArgs = ast::ArgParsing::parseArgs(block.args);
+    auto parsedArgs = ast::ArgParsing::parseArgs(block.params);
     for (const auto &parsedArg : parsedArgs) {
         this->result_.emplace_back(parsedArg.local._name);
     }

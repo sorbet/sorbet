@@ -61,7 +61,7 @@ void Assign::_sanityCheck() {
 }
 
 void Block::_sanityCheck() {
-    for (auto &node : args) {
+    for (auto &node : params) {
         ENFORCE(node);
     }
     ENFORCE(body);

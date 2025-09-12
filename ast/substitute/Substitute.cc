@@ -73,8 +73,8 @@ public:
 
     void preTransformBlock(core::Context ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<Block>(tree);
-        for (auto &arg : original.args) {
-            substArg(arg);
+        for (auto &param : original.params) {
+            substArg(param);
         }
     }
 

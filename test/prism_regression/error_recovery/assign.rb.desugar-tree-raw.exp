@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U test_bad_assign><<U <todo method>>>
-      args = [UnresolvedIdent{
+      params = [UnresolvedIdent{
           kind = Local
           name = <U x>
         }, BlockArg{ expr = UnresolvedIdent{

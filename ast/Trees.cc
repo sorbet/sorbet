@@ -365,9 +365,9 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
 }
 
 Block::Block(core::LocOffsets loc, MethodDef::PARAMS_store params, ExpressionPtr body)
-    : loc(loc), args(std::move(params)), body(std::move(body)) {
+    : loc(loc), params(std::move(params)), body(std::move(body)) {
     categoryCounterInc("trees", "block");
-    histogramInc("trees.block.args", this->args.size());
+    histogramInc("trees.block.params", this->params.size());
     _sanityCheck();
 };
 
@@ -622,7 +622,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::format_to(std::back_inserter(buf), "name = {}<{}>\n", name.showRaw(gs),
                    this->symbol.data(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "args = [");
+    fmt::format_to(std::back_inserter(buf), "params = [");
     bool first = true;
     if (this->symbol == core::Symbols::todoMethod()) {
         for (auto &a : this->args) {
@@ -1257,7 +1257,7 @@ string Array::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 string Block::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), " do |");
-    printElems(gs, buf, this->args, tabs + 1);
+    printElems(gs, buf, this->params, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "|\n");
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "{}\n", this->body.toStringWithTabs(gs, tabs + 1));
@@ -1270,10 +1270,10 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{} {{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "args = [\n");
-    for (auto &a : this->args) {
+    fmt::format_to(std::back_inserter(buf), "params = [\n");
+    for (auto &p : this->params) {
         printTabs(buf, tabs + 2);
-        fmt::format_to(std::back_inserter(buf), "{}\n", a.showRaw(gs, tabs + 2));
+        fmt::format_to(std::back_inserter(buf), "{}\n", p.showRaw(gs, tabs + 2));
     }
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "]\n");
@@ -1787,10 +1787,10 @@ string Block::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, i
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, this->loc).fileShortPosToString(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "args = [\n");
-    for (auto &a : this->args) {
+    fmt::format_to(std::back_inserter(buf), "params = [\n");
+    for (auto &p : this->params) {
         printTabs(buf, tabs + 2);
-        fmt::format_to(std::back_inserter(buf), "{}\n", a.showRawWithLocs(gs, file, tabs + 2));
+        fmt::format_to(std::back_inserter(buf), "{}\n", p.showRawWithLocs(gs, file, tabs + 2));
     }
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "]\n");

@@ -35,7 +35,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U method_with_rescue><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -427,7 +427,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U index><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]

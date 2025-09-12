@@ -14,7 +14,7 @@ InsSeq{
         MethodDef{
           flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = EmptyTree
@@ -39,7 +39,7 @@ InsSeq{
         MethodDef{
           flags = {}
           name = <U take_arguments><<U take_arguments>>
-          args = [Local{
+          params = [Local{
               localVariable = <U a>
             }, OptionalArg{
               expr = Local{
@@ -99,7 +99,7 @@ InsSeq{
               recv = Self
               fun = <U proc>
               block = Block {
-                args = [
+                params = [
                   Local{
                     localVariable = <U a>$1
                   }
@@ -170,7 +170,7 @@ InsSeq{
         MethodDef{
           flags = {self}
           name = <U <static-init>><<U <static-init>>>
-          args = [Local{
+          params = [Local{
               localVariable = <U <blk>>
             }]
           rhs = <runtime method definition of take_arguments>

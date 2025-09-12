@@ -1217,10 +1217,10 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
         case ast::Tag::Block: {
             auto &a = ast::cast_tree_nonnull<ast::Block>(what);
             pickle(p, a.loc);
-            p.putU4(a.args.size());
+            p.putU4(a.params.size());
             pickle(p, a.body);
-            for (auto &arg : a.args) {
-                pickle(p, arg);
+            for (auto &param : a.params) {
+                pickle(p, param);
             }
             break;
         }

@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -53,7 +53,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -85,7 +85,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -146,7 +146,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -199,7 +199,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -282,7 +282,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -353,7 +353,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -441,7 +441,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -515,7 +515,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -625,7 +625,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -717,7 +717,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -760,7 +760,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -792,7 +792,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -853,7 +853,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -906,7 +906,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -989,7 +989,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1060,7 +1060,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -1148,7 +1148,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1222,7 +1222,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -1332,7 +1332,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1424,7 +1424,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_kw><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -1479,7 +1479,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1519,7 +1519,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -1595,7 +1595,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1659,7 +1659,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -1757,7 +1757,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1839,7 +1839,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_kw><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -1942,7 +1942,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -2027,7 +2027,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos_kw><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -2152,7 +2152,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -2255,7 +2255,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_kwsplat><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -2315,7 +2315,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -2362,7 +2362,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kwsplat><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
@@ -2443,7 +2443,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -2514,7 +2514,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kwsplat><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -2617,7 +2617,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -2706,7 +2706,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_kwsplat><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -2814,7 +2814,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -2906,7 +2906,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos_kwsplat><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -3036,7 +3036,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -3146,7 +3146,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_kw_kwsplat><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -3234,7 +3234,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -3305,7 +3305,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw_kwsplat><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -3414,7 +3414,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -3509,7 +3509,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw_kwsplat><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -3640,7 +3640,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -3753,7 +3753,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_kw_kwsplat><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -3889,7 +3889,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -4005,7 +4005,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos_kw_kwsplat><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -4163,7 +4163,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -4297,7 +4297,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_kw_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -4352,7 +4352,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -4392,7 +4392,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -4468,7 +4468,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -4532,7 +4532,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -4630,7 +4630,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -4712,7 +4712,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_kw_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -4815,7 +4815,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -4900,7 +4900,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos_kw_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -5025,7 +5025,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -5128,7 +5128,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_kwsplat_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -5188,7 +5188,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -5235,7 +5235,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kwsplat_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
@@ -5316,7 +5316,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -5387,7 +5387,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kwsplat_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -5490,7 +5490,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -5579,7 +5579,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_kwsplat_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -5687,7 +5687,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -5779,7 +5779,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos_kwsplat_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -5909,7 +5909,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -6019,7 +6019,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_kw_kwsplat_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -6107,7 +6107,7 @@ ClassDef{
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -6178,7 +6178,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw_kwsplat_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -6287,7 +6287,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -6382,7 +6382,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw_kwsplat_blk><<U <todo method>>>
-      args = [RestArg{ expr = Local{
+      params = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -6513,7 +6513,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -6626,7 +6626,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_kw_kwsplat_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -6762,7 +6762,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -6878,7 +6878,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U pos_possplat_pos_kw_kwsplat_blk><<U <todo method>>>
-      args = [Local{
+      params = [Local{
           localVariable = <U x>
         }, Local{
           localVariable = <U y>
@@ -7036,7 +7036,7 @@ ClassDef{
           }
           fun = <U <call-with-splat>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
