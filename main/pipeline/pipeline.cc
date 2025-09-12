@@ -63,12 +63,12 @@ pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileR
     if (gs.cacheSensitiveOptions.rbsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewritePrism", {{"file", string(file.data(gs).path())}});
 
-        fmt::print("TRIGGERING COMMENTS ASSOCIATOR PRISM\n");
+        // fmt::print("TRIGGERING COMMENTS ASSOCIATOR PRISM\n");
         auto associator =
             rbs::CommentsAssociatorPrism(ctx, const_cast<std::vector<core::LocOffsets> &>(commentLocations));
         auto commentMap = associator.run(node);
 
-        fmt::print("TRIGGERING SIGS REWRITER PRISM\n");
+        // fmt::print("TRIGGERING SIGS REWRITER PRISM\n");
         auto sigsRewriter = rbs::SigsRewriterPrism(ctx, commentMap.signaturesForNode);
         node = sigsRewriter.run(node);
 

@@ -7,10 +7,12 @@
 #include "core/errors/internal.h"
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
+#include "parser/prism/Helpers.h"
 #include "rbs/TypeToParserNode.h"
 #include "rewriter/util/Util.h"
 
 using namespace std;
+using namespace sorbet::parser::Prism;
 
 namespace sorbet::rbs {
 
@@ -52,12 +54,12 @@ core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *no
 
 /* TODO: Implement when needed
 bool isSelfOrKernelPrism(pm_node_t *node) {
-    if (node->type == PM_SELF_NODE) {
+    if (PM_NODE_TYPE_P(node, PM_SELF_NODE)) {
         return true;
     }
 
-    if (node->type == PM_CONSTANT_READ_NODE) {
-        auto *constant = (pm_constant_read_node_t *)node;
+    if (PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE)) {
+        auto *constant = down_cast<pm_constant_read_node_t>(node);
         // TODO: Check if the constant name is "Kernel" and has no scope
         // For now, simplified check
         (void)constant; // Suppress unused warning
@@ -69,11 +71,11 @@ bool isSelfOrKernelPrism(pm_node_t *node) {
 */
 
 bool isRaisePrism(pm_node_t *node) {
-    if (node->type != PM_CALL_NODE) {
+    if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
         return false;
     }
 
-    auto *call = (pm_call_node_t *)node;
+    auto *call = down_cast<pm_call_node_t>(node);
     // TODO: Check if method name is 'raise' and receiver is nil or self/Kernel
     // For now, simplified implementation
     (void)call; // Suppress unused warning
@@ -94,8 +96,8 @@ core::AutocorrectSuggestion autocorrectAbstractBodyPrism(core::MutableContext ct
 */
 
 void ensureAbstractMethodRaisesPrism(core::MutableContext ctx, const pm_node_t *node) {
-    if (node->type == PM_DEF_NODE) {
-        auto *def = (pm_def_node_t *)node;
+    if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
+        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t*>(node));
         if (def->body && isRaisePrism(def->body)) {
             // Method raises properly, remove body to not error later
             // TODO: Implement body nulling for Prism nodes
@@ -144,8 +146,8 @@ core::LocOffsets translateLocation(pm_location_t location) {
 
 /* TODO: Implement when needed
 parser::Args *getMethodArgsPrism(const pm_node_t *node) {
-    if (node->type == PM_DEF_NODE) {
-        auto *def = (pm_def_node_t *)node;
+    if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
+        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t*>(node));
         // TODO: Convert Prism parameters to parser::Args
         // For now, return nullptr to indicate no args
         (void)def; // Suppress unused warning

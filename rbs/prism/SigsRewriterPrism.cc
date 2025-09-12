@@ -5,11 +5,13 @@
 #include "common/typecase.h"
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
+#include "parser/prism/Helpers.h"
 #include "rbs/SignatureTranslator.h"
 #include "rbs/prism/SignatureTranslatorPrism.h"
 #include "rbs/TypeParamsToParserNodes.h"
 
 using namespace std;
+using namespace sorbet::parser::Prism;
 
 namespace sorbet::rbs {
 
@@ -21,7 +23,7 @@ pm_node_t *signaturesTargetForPrism(pm_node_t *node) {
         return nullptr;
     }
 
-    switch (node->type) {
+    switch (PM_NODE_TYPE(node)) {
         case PM_DEF_NODE:
             // Both instance methods and singleton methods use PM_DEF_NODE in Prism
             // (singleton methods have a receiver field set)
@@ -291,7 +293,7 @@ unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node
     (void)signatureTranslator; // Suppress unused warning until implementation is complete
 
     for (auto &declaration : comments.signatures) {
-        switch (node->type) {
+        switch (PM_NODE_TYPE(node)) {
             case PM_DEF_NODE: {
                 // Both instance and singleton methods use PM_DEF_NODE in Prism
                 // TODO: Pass the correct parser::Node* to translateMethodSignature
@@ -302,7 +304,7 @@ unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node
                 break;
             }
             case PM_CALL_NODE: {
-                auto *call = (pm_call_node_t *)node;
+                auto *call = down_cast<pm_call_node_t>(node);
                 // TODO: Implement isVisibilitySend and isAttrAccessorSend for Prism nodes
                 // This requires checking the method name and context like the original:
                 // if (isVisibilitySendPrism(call)) {
@@ -319,7 +321,7 @@ unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node
                 break;
             }
             default:
-                Exception::raise("Unimplemented node type for signatures: {}", (int)node->type);
+                Exception::raise("Unimplemented node type for signatures: {}", (int)PM_NODE_TYPE(node));
         }
     }
 
@@ -368,11 +370,11 @@ void SigsRewriterPrism::rewriteNodes(pm_node_list_t &nodes) {
 }
 
 pm_node_t *SigsRewriterPrism::rewriteBegin(pm_node_t *node) {
-    if (node->type != PM_BEGIN_NODE) {
+    if (!PM_NODE_TYPE_P(node, PM_BEGIN_NODE)) {
         return node;
     }
 
-    auto *begin = (pm_begin_node_t *)node;
+    auto *begin = down_cast<pm_begin_node_t>(node);
     if (begin->statements == nullptr) {
         return node;
     }
@@ -414,7 +416,7 @@ pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
         return node;
     }
 
-    if (node->type == PM_BEGIN_NODE) {
+    if (PM_NODE_TYPE_P(node, PM_BEGIN_NODE)) {
         return rewriteBegin(node);
     }
 
@@ -450,9 +452,9 @@ pm_node_t *SigsRewriterPrism::rewriteClass(pm_node_t *node) {
         return node;
     }
 
-    switch (node->type) {
+    switch (PM_NODE_TYPE(node)) {
         case PM_CLASS_NODE: {
-            auto *klass = (pm_class_node_t *)node;
+            auto *klass = down_cast<pm_class_node_t>(node);
             (void)klass; // Suppress unused variable warning
             // TODO: Implement body wrapping and helper insertion for Prism
             // This should follow the same pattern as the original:
@@ -465,19 +467,19 @@ pm_node_t *SigsRewriterPrism::rewriteClass(pm_node_t *node) {
             break;
         }
         case PM_MODULE_NODE: {
-            auto *module = (pm_module_node_t *)node;
+            auto *module = down_cast<pm_module_node_t>(node);
             (void)module; // Suppress unused variable warning
             // TODO: Same implementation as class case
             break;
         }
         case PM_SINGLETON_CLASS_NODE: {
-            auto *sclass = (pm_singleton_class_node_t *)node;
+            auto *sclass = down_cast<pm_singleton_class_node_t>(node);
             (void)sclass; // Suppress unused variable warning
             // TODO: Same implementation as class case
             break;
         }
         default:
-            Exception::raise("Unimplemented node type for rewriteClass: {}", (int)node->type);
+            Exception::raise("Unimplemented node type for rewriteClass: {}", (int)PM_NODE_TYPE(node));
     }
 
     return node;
@@ -487,9 +489,9 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
     if (node == nullptr) {
         return node;
     }
-    switch (node->type) {
+    switch (PM_NODE_TYPE(node)) {
         case PM_BLOCK_NODE: {
-            auto *block = (pm_block_node_t *)node;
+            auto *block = down_cast<pm_block_node_t>(node);
             block->body = rewriteBody(block->body);
             return node;
         }
@@ -497,96 +499,96 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             return rewriteBegin(node);
         }
         case PM_LOCAL_VARIABLE_WRITE_NODE: {
-            auto *n = (pm_local_variable_write_node_t *)node;
+            auto *n = down_cast<pm_local_variable_write_node_t>(node);
             n->value = rewriteNode(n->value);
             return node;
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: {
-            auto *n = (pm_local_variable_and_write_node_t *)node;
+            auto *n = down_cast<pm_local_variable_and_write_node_t>(node);
             n->value = rewriteNode(n->value);
             return node;
         }
         case PM_LOCAL_VARIABLE_OR_WRITE_NODE: {
-            auto *n = (pm_local_variable_or_write_node_t *)node;
+            auto *n = down_cast<pm_local_variable_or_write_node_t>(node);
             n->value = rewriteNode(n->value);
             return node;
         }
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE: {
-            auto *n = (pm_local_variable_operator_write_node_t *)node;
+            auto *n = down_cast<pm_local_variable_operator_write_node_t>(node);
             n->value = rewriteNode(n->value);
             return node;
         }
         case PM_MODULE_NODE: {
-            auto *mod = (pm_module_node_t *)node;
+            auto *mod = down_cast<pm_module_node_t>(node);
             mod->body = rewriteBody(mod->body);
             return node;
         }
         case PM_CLASS_NODE: {
-            auto *cls = (pm_class_node_t *)node;
+            auto *cls = down_cast<pm_class_node_t>(node);
             cls->body = rewriteBody(cls->body);
             return node;
         }
         case PM_DEF_NODE: {
-            auto *def = (pm_def_node_t *)node;
+            auto *def = down_cast<pm_def_node_t>(node);
             def->body = rewriteBody(def->body);
             return node;
         }
         case PM_SINGLETON_CLASS_NODE: {
-            auto *sclass = (pm_singleton_class_node_t *)node;
+            auto *sclass = down_cast<pm_singleton_class_node_t>(node);
             sclass->body = rewriteBody(sclass->body);
             return node;
         }
         case PM_FOR_NODE: {
-            auto *for_ = (pm_for_node_t *)node;
+            auto *for_ = down_cast<pm_for_node_t>(node);
             if (for_->statements) {
-                for_->statements = (pm_statements_node *)rewriteBody((pm_node_t *)for_->statements);
+                for_->statements = down_cast<pm_statements_node>(rewriteBody(up_cast(for_->statements)));
             }
             return node;
         }
         case PM_ARRAY_NODE: {
-            auto *array = (pm_array_node_t *)node;
+            auto *array = down_cast<pm_array_node_t>(node);
             rewriteNodes(array->elements);
             return node;
         }
         case PM_HASH_NODE: {
-            auto *hash = (pm_hash_node_t *)node;
+            auto *hash = down_cast<pm_hash_node_t>(node);
             rewriteNodes(hash->elements);
             return node;
         }
         case PM_ASSOC_NODE: {
-            auto *pair = (pm_assoc_node_t *)node;
+            auto *pair = down_cast<pm_assoc_node_t>(node);
             pair->key = rewriteNode(pair->key);
             pair->value = rewriteNode(pair->value);
             return node;
         }
         case PM_RESCUE_NODE: {
-            auto *rescue = (pm_rescue_node_t *)node;
+            auto *rescue = down_cast<pm_rescue_node_t>(node);
             if (rescue->statements) {
-                rescue->statements = (pm_statements_node *)rewriteBody((pm_node_t *)rescue->statements);
+                rescue->statements = down_cast<pm_statements_node>(rewriteBody(up_cast(rescue->statements)));
             }
             if (rescue->subsequent) {
-                rescue->subsequent = (pm_rescue_node_t *)rewriteNode((pm_node_t *)rescue->subsequent);
+                rescue->subsequent = down_cast<pm_rescue_node_t>(rewriteNode(up_cast(rescue->subsequent)));
             }
             return node;
         }
         case PM_ELSE_NODE: {
-            auto *else_ = (pm_else_node_t *)node;
+            auto *else_ = down_cast<pm_else_node_t>(node);
             if (else_->statements) {
-                else_->statements = (pm_statements_node *)rewriteBody((pm_node_t *)else_->statements);
+                else_->statements = down_cast<pm_statements_node>(rewriteBody(up_cast(else_->statements)));
             }
             return node;
         }
         case PM_ENSURE_NODE: {
-            auto *ensure = (pm_ensure_node_t *)node;
+            auto *ensure = down_cast<pm_ensure_node_t>(node);
             if (ensure->statements) {
-                ensure->statements = (pm_statements_node *)rewriteBody((pm_node_t *)ensure->statements);
+                ensure->statements = down_cast<pm_statements_node>(rewriteBody(up_cast(ensure->statements)));
             }
             return node;
         }
         case PM_IF_NODE: {
-            auto *if_ = (pm_if_node_t *)node;
+            auto *if_ = down_cast<pm_if_node_t>(node);
             if (if_->statements) {
-                if_->statements = (pm_statements_node *)rewriteBody((pm_node_t *)if_->statements);
+                if_->statements = down_cast<pm_statements_node>(rewriteBody(up_cast(if_->statements)));
             }
             if (if_->subsequent) {
                 if_->subsequent = rewriteBody(if_->subsequent);
@@ -594,70 +596,70 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             return node;
         }
         case PM_MULTI_WRITE_NODE: {
-            auto *masgn = (pm_multi_write_node_t *)node;
+            auto *masgn = down_cast<pm_multi_write_node_t>(node);
             masgn->value = rewriteNode(masgn->value);
             return node;
         }
         case PM_CASE_NODE: {
-            auto *case_ = (pm_case_node_t *)node;
+            auto *case_ = down_cast<pm_case_node_t>(node);
             rewriteNodes(case_->conditions);
             if (case_->else_clause) {
-                case_->else_clause = (pm_else_node_t *)rewriteBody((pm_node_t *)case_->else_clause);
+                case_->else_clause = down_cast<pm_else_node_t>(rewriteBody(up_cast(case_->else_clause)));
             }
             return node;
         }
         case PM_CASE_MATCH_NODE: {
-            auto *case_ = (pm_case_match_node_t *)node;
+            auto *case_ = down_cast<pm_case_match_node_t>(node);
             rewriteNodes(case_->conditions);
             if (case_->else_clause) {
-                case_->else_clause = (pm_else_node_t *)rewriteBody((pm_node_t *)case_->else_clause);
+                case_->else_clause = down_cast<pm_else_node_t>(rewriteBody(up_cast(case_->else_clause)));
             }
             return node;
         }
         case PM_WHEN_NODE: {
-            auto *when = (pm_when_node_t *)node;
+            auto *when = down_cast<pm_when_node_t>(node);
             if (when->statements) {
-                when->statements = (pm_statements_node *)rewriteBody((pm_node_t *)when->statements);
+                when->statements = down_cast<pm_statements_node>(rewriteBody(up_cast(when->statements)));
             }
             return node;
         }
         case PM_CALL_NODE: {
-            auto *call = (pm_call_node_t *)node;
+            auto *call = down_cast<pm_call_node_t>(node);
             if (call->arguments) {
                 rewriteNodes(call->arguments->arguments);
             }
             return node;
         }
         case PM_SUPER_NODE: {
-            auto *sup = (pm_super_node_t *)node;
+            auto *sup = down_cast<pm_super_node_t>(node);
             if (sup->arguments) {
                 rewriteNodes(sup->arguments->arguments);
             }
             return node;
         }
         case PM_RETURN_NODE: {
-            auto *ret = (pm_return_node_t *)node;
+            auto *ret = down_cast<pm_return_node_t>(node);
             if (ret->arguments) {
                 rewriteNodes(ret->arguments->arguments);
             }
             return node;
         }
         case PM_NEXT_NODE: {
-            auto *n = (pm_next_node_t *)node;
+            auto *n = down_cast<pm_next_node_t>(node);
             if (n->arguments) {
                 rewriteNodes(n->arguments->arguments);
             }
             return node;
         }
         case PM_BREAK_NODE: {
-            auto *b = (pm_break_node_t *)node;
+            auto *b = down_cast<pm_break_node_t>(node);
             if (b->arguments) {
                 rewriteNodes(b->arguments->arguments);
             }
             return node;
         }
         case PM_SPLAT_NODE: {
-            auto *s = (pm_splat_node_t *)node;
+            auto *s = down_cast<pm_splat_node_t>(node);
             s->expression = rewriteNode(s->expression);
             return node;
         }
