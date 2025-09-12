@@ -36,7 +36,7 @@ module T::Props
           raise unless T::Props::Decorator::SAFE_NAME.match?(hash_key)
 
           ivar_name = rules.fetch(:accessor_key).to_s
-          raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_NAME.match?(ivar_name[1..-1])
+          raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_ACCESSOR_KEY_NAME.match?(ivar_name)
 
           transformed_val = SerdeTransform.generate(
             T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
