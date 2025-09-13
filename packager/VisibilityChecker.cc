@@ -585,7 +585,7 @@ public:
         // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
         // `BlockingCounter`.
         absl::BlockingCounter barrier(std::max(workers.size(), 1));
-        workers.multiplexJob("VisibilityChecker", [&taskq, &filesSpan, &gs, &resultq, &barrier]() mutable {
+        workers.multiplexJob("VisibilityChecker", [&taskq, &filesSpan, &gs, &resultq, &barrier]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 if (!result.gotItem()) {
