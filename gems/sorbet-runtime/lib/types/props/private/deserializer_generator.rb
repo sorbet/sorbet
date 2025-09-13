@@ -16,6 +16,8 @@ module T::Props
     module DeserializerGenerator
       extend T::Sig
 
+      CAN_USE_SYMBOL_NAME = T.let(RUBY_VERSION >= "3.3.0", T::Boolean)
+
       # Generate a method that takes a T::Hash[String, T.untyped] representing
       # serialized props, sets instance variables for each prop found in the
       # input, and returns the count of we props set (which we can use to check
@@ -29,19 +31,21 @@ module T::Props
         .checked(:never)
       end
       def self.generate(props, defaults)
-        stored_props = props.reject { |_, rules| rules[:dont_store] }
-        parts = stored_props.map do |prop, rules|
+        parts = props.filter_map do |prop, rules|
+          next if rules[:dont_store]
+
           # All of these strings should already be validated (directly or
           # indirectly) in `validate_prop_name`, so we don't bother with a nice
           # error message, but we double check here to prevent a refactoring
           # from introducing a security vulnerability.
-          raise unless T::Props::Decorator::SAFE_NAME.match?(prop.to_s)
+          raise unless T::Props::Decorator::SAFE_NAME.match?(CAN_USE_SYMBOL_NAME ? prop.name : prop.to_s)
 
           hash_key = rules.fetch(:serialized_form)
           raise unless T::Props::Decorator::SAFE_NAME.match?(hash_key)
 
-          ivar_name = rules.fetch(:accessor_key).to_s
-          raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_NAME.match?(ivar_name[1..-1])
+          key = rules.fetch(:accessor_key)
+          ivar_name = CAN_USE_SYMBOL_NAME ? key.name : key.to_s
+          raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_ACCESSOR_KEY_NAME.match?(ivar_name)
 
           transformation = SerdeTransform.generate(
             T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object)),
@@ -90,7 +94,7 @@ module T::Props
 
         <<~RUBY
           def __t_props_generated_deserialize(hash)
-            found = #{stored_props.size}
+            found = #{parts.size}
             #{parts.join("\n\n")}
             found
           end
