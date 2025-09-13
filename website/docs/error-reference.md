@@ -977,6 +977,12 @@ class B < PackageSpec
 end
 ```
 
+## 3734
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+When running in `--gen-packages` mode, this error indicates that a `__package.rb` file is missing imports.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
