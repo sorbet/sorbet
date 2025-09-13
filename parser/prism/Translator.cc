@@ -578,12 +578,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             // Regular send, e.g. `a.b`
 
-            // The keyword arguments hash (if there is one) can be the last argument if there is no block,
-            // and is otherwise located in the second-to-last argument, before the block.
-            auto hasBlockArg = prismBlock != nullptr;
-            auto kwargsHashIndex = hasBlockArg ? (args.size() - 2) : (args.size() - 1);
-            auto hasKwargsHash = kwargsHashIndex < args.size() &&
-                                 parser::NodeWithExpr::isa_node<parser::Hash>(args[kwargsHashIndex].get());
+            // The keyword arguments Hash, if there is one, will always be the last argument.
+            auto hasKwargsHash = !args.empty() && parser::NodeWithExpr::isa_node<parser::Hash>(args.back().get());
 
             // Detect special arguments that will require the call to be desugared to magic call.
             auto hasFwdArgs = false;
@@ -613,10 +609,116 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 }
             }
 
-            // Method calls are really complex, and we're building support for different kinds of arguments bit by
-            // bit. This bool is true when this particular method call is supported by our desugar logic.
-            auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasBlockArg &&
-                                     !hasFwdArgs && !hasFwdRestArg && !hasSplat && hasExpr(receiver, args);
+            // Method defs are really complex, and we're building support for different kinds of arguments bit
+            // by bit. This bool is true when this particular method call is supported by our desugar logic.
+            auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasFwdArgs &&
+                                     !hasFwdRestArg && !hasSplat && hasExpr(receiver, args);
+
+            unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
+            unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
+            ast::MethodDef::ARGS_store blockArgsStore;
+            ast::InsSeq::STATS_store blockStatsStore;
+            bool supportedBlock;
+            if (prismBlock != nullptr) {
+                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                    auto blockNode = down_cast<pm_block_node>(prismBlock);
+
+                    blockBody = this->enterBlockContext().translate(blockNode->body);
+
+                    supportedCallType &= hasExpr(blockBody);
+
+                    auto attemptToDesugarBlockParams = supportedCallType;
+                    bool didDesugarBlockParams = false;
+
+                    if (blockNode->parameters != nullptr) {
+                        switch (PM_NODE_TYPE(blockNode->parameters)) {
+                            case PM_BLOCK_PARAMETERS_NODE: { // The params declared at the top of a PM_BLOCK_NODE
+                                // Like the `|x|` in `foo { |x| ... }`
+                                auto paramsNode = down_cast<pm_block_parameters_node>(blockNode->parameters);
+
+                                if (paramsNode->parameters == nullptr) {
+                                    // This can happen if the block declares block-local variables, but no parameters.
+                                    // e.g. `foo { |; block_local_var| ... }`
+
+                                    auto location = translateLoc(paramsNode->base.location);
+
+                                    // TODO: future follow up, ensure we add the block local variables ("shadowargs"),
+                                    // if any.
+                                    blockParameters = make_unique<parser::Args>(location, NodeVec{});
+                                    didDesugarBlockParams = true;
+                                } else {
+                                    unique_ptr<parser::Args> params;
+                                    std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters);
+
+                                    // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's
+                                    // Args node, after all other parameters.
+                                    auto sorbetShadowParams = translateMulti(paramsNode->locals);
+                                    params->args.insert(params->args.end(),
+                                                        make_move_iterator(sorbetShadowParams.begin()),
+                                                        make_move_iterator(sorbetShadowParams.end()));
+
+                                    std::tie(blockArgsStore, blockStatsStore, didDesugarBlockParams) =
+                                        desugarParametersNode(params->args, attemptToDesugarBlockParams);
+
+                                    blockParameters = move(params);
+                                }
+
+                                break;
+                            }
+
+                            case PM_NUMBERED_PARAMETERS_NODE: { // The params in a PM_BLOCK_NODE with numbered params
+                                // Like the implicit `|_1, _2, _3|` in `foo { _3 }`
+                                auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(blockNode->parameters);
+                                auto location = translateLoc(numberedParamsNode->base.location);
+
+                                auto paramCount = numberedParamsNode->maximum;
+
+                                NodeVec params;
+                                params.reserve(paramCount);
+
+                                for (auto i = 1; i <= paramCount; i++) {
+                                    auto name = ctx.state.enterNameUTF8("_" + to_string(i));
+
+                                    // The location is arbitrary and not really used, since these aren't explicitly
+                                    // written in the source.
+                                    auto expr = MK::Local(location, name);
+                                    auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
+                                    params.emplace_back(move(paramNode));
+                                }
+
+                                std::tie(blockArgsStore, blockStatsStore, didDesugarBlockParams) =
+                                    desugarParametersNode(params, attemptToDesugarBlockParams);
+
+                                blockParameters = make_unique<parser::NumParams>(location, move(params));
+
+                                break;
+                            }
+
+                            case PM_IT_PARAMETERS_NODE: {
+                                unreachable("PM_IT_PARAMETERS_NODE is not implemented yet");
+                            }
+
+                            default: {
+                                unreachable("Found a {} block parameter type, which is not implemented yet ",
+                                            pm_node_type_to_str(PM_NODE_TYPE(blockNode->parameters)));
+                            }
+                        }
+
+                        supportedBlock = didDesugarBlockParams;
+
+                    } else {
+                        supportedBlock = true;
+                    }
+                } else {
+                    // `PM_BLOCK_ARGUMENT_NODE` is not supported yet.
+                    supportedBlock = false;
+                }
+            } else {
+                // If there's no block, we support the call
+                supportedBlock = true;
+            }
+
+            supportedCallType &= supportedBlock;
 
             if (!supportedCallType) {
                 sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
@@ -653,7 +755,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
-            int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0) - (hasBlockArg ? 1 : 0);
+            int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0);
 
             ast::Send::ARGS_store sendArgs{};
             sendArgs.reserve(args.size());
@@ -661,16 +763,47 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 sendArgs.emplace_back(arg->takeDesugaredExpr());
             }
 
+            if (prismBlock != nullptr) {
+                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                    auto blockBodyExpr = blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
+                    auto blockExpr = MK::Block(location, move(blockBodyExpr), move(blockArgsStore));
+                    sendArgs.emplace_back(move(blockExpr));
+
+                    flags.hasBlock = true;
+                } else {
+                    unreachable("Found a {} block type, which is not implemented yet ",
+                                pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
+                }
+            }
+
             auto expr = MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
             sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
 
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
-                // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
-                // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
-                // The legacy parser inverts this , with a parent "Block" with a child
-                // "Send".
-                return translateCallWithBlock(prismBlock, move(sendNode));
+            if (prismBlock != nullptr) {
+                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                    auto blockNode = down_cast<pm_block_node>(prismBlock);
+
+                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                    // The legacy parser inverts this , with a parent "Block" with a child
+                    // "Send".
+
+                    if (blockNode->parameters == nullptr ||
+                        PM_NODE_TYPE_P(blockNode->parameters, PM_BLOCK_PARAMETERS_NODE)) {
+                        return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc,
+                                                                  move(sendNode), move(blockParameters),
+                                                                  move(blockBody));
+                    } else {
+                        ENFORCE(PM_NODE_TYPE_P(blockNode->parameters, PM_NUMBERED_PARAMETERS_NODE));
+                        return make_node_with_expr<parser::NumBlock>(sendNode->takeDesugaredExpr(), sendNode->loc,
+                                                                     move(sendNode), move(blockParameters),
+                                                                     move(blockBody));
+                    }
+                } else {
+                    unreachable("Found a {} block type, which is not implemented yet ",
+                                pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
+                }
             }
 
             return sendNode;
@@ -2637,6 +2770,10 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
 
+    // There was a TODO in the original Desugarer: "the send->block's loc is too big and includes the whole send."
+    // We'll keep this behaviour for parity for now.
+    // TODO: Switch to using the fixed sendNode loc below after direct desugaring is complete
+    // https://github.com/Shopify/sorbet/issues/671
     auto blockLoc = sendNode->loc;
 
     // Modify send node's endLoc to be position before first space
