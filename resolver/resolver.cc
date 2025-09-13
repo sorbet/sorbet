@@ -3371,6 +3371,22 @@ private:
         bool seenOptional = false;
 
         methodInfo->resultType = sig.returns;
+        methodInfo->narrowsTo = sig.narrowsTo;
+
+        if (sig.narrowsTo != nullptr) {
+            // Validate that the return type is boolean-like when using narrows_to
+            if (sig.returns != nullptr) {
+                bool isValidReturnType = sig.returns.isUntyped() || core::Types::isSubType(ctx, sig.returns, core::Types::Boolean());
+
+                if (!isValidReturnType) {
+                    if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: `narrows_to({})` can only be used with methods that return `T::Boolean`, `TrueClass`, or `FalseClass`, not `{}`",
+                                   "sig", sig.narrowsTo.show(ctx), sig.returns.show(ctx));
+                        e.addErrorNote("Type narrowing only applies to predicate methods that return boolean values");
+                    }
+                }
+            }
+        }
         int i = -1;
         for (auto &arg : methodInfo->arguments) {
             ++i;

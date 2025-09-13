@@ -556,6 +556,30 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
             }
             case core::Names::onFailure().rawId():
                 break;
+            case core::Names::narrowsTo().rawId(): {
+                if (send->hasKwArgs()) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
+                    }
+                    break;
+                }
+
+                if (send->numPosArgs() != 1) {
+                    // As dispatchCallSymbol in calls.cc adds an error for this case, we don't need to add an error here.
+                    break;
+                }
+
+                auto maybeReturns = getResultTypeWithSelfTypeParams(ctx, send->getPosArg(0), *parent, args);
+                if (!maybeReturns.has_value()) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("`{}` must be given a class or module as its argument", "narrows_to");
+                    }
+                } else {
+                    sig.narrowsTo = move(maybeReturns.value());
+                    sig.narrowsToLoc = ctx.locAt(send->loc);
+                }
+                break;
+            }
             case core::Names::final_().rawId():
                 if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                     reportedInvalidMethod = true;

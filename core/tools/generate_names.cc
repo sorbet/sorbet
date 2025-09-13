@@ -133,6 +133,7 @@ NameDef names[] = {
     {"checked"},
     {"never"},
     {"onFailure", "on_failure"},
+    {"narrowsTo", "narrows_to"},
 
     {"all"},
     {"any"},
