@@ -1534,13 +1534,13 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         }
         case ast::Tag::Block: {
             auto loc = unpickleLocOffsets(p);
-            auto argsSize = p.getU4();
+            auto paramsSize = p.getU4();
             auto body = unpickleExpr(p, gs);
-            ast::MethodDef::ARGS_store args(argsSize);
-            for (auto &arg : args) {
-                arg = unpickleExpr(p, gs);
+            ast::MethodDef::PARAMS_store params(paramsSize);
+            for (auto &param : params) {
+                param = unpickleExpr(p, gs);
             }
-            return ast::MK::Block(loc, std::move(body), std::move(args));
+            return ast::MK::Block(loc, std::move(body), std::move(params));
         }
         case ast::Tag::Literal: {
             auto loc = unpickleLocOffsets(p);
@@ -1681,11 +1681,11 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto symbol = MethodRef::fromRaw(p.getU4());
             auto argsSize = p.getU4();
             auto rhs = unpickleExpr(p, gs);
-            ast::MethodDef::ARGS_store args(argsSize);
-            for (auto &arg : args) {
-                arg = unpickleExpr(p, gs);
+            ast::MethodDef::PARAMS_store params(argsSize);
+            for (auto &param : params) {
+                param = unpickleExpr(p, gs);
             }
-            auto ret = ast::MK::Method(loc, declLoc, name, std::move(args), std::move(rhs));
+            auto ret = ast::MK::Method(loc, declLoc, name, std::move(params), std::move(rhs));
 
             {
                 auto &method = ast::cast_tree_nonnull<ast::MethodDef>(ret);

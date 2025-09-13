@@ -115,7 +115,7 @@ class LocalNameInserter {
         return named;
     }
 
-    vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
+    vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::PARAMS_store &methodArgs) {
         vector<NamedArg> namedArgs;
         int pos = -1;
         for (auto &arg : methodArgs) {
@@ -207,19 +207,19 @@ class LocalNameInserter {
         return core::LocalVariable(name, frame.localId);
     }
 
-    // Enter names from arguments into the current frame, building a new
-    // argument list back up for the original context.
-    ast::MethodDef::ARGS_store fillInArgs(vector<NamedArg> namedArgs) {
-        ast::MethodDef::ARGS_store args;
+    // Enter names from parameters into the current frame,
+    // building a new parameter list back up for the original context.
+    ast::MethodDef::PARAMS_store fillInArgs(vector<NamedArg> namedArgs) {
+        ast::MethodDef::PARAMS_store params;
 
-        for (auto &named : namedArgs) {
-            args.emplace_back(move(named.expr));
+        for (auto &param : namedArgs) {
+            params.emplace_back(move(param.expr));
             auto &frame = scopeStack.back();
-            frame.locals[named.name] = named.local;
-            frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags});
+            frame.locals[param.name] = param.local;
+            frame.args.emplace_back(LocalFrame::Arg{param.local, param.flags});
         }
 
-        return args;
+        return params;
     }
 
     core::ClassOrModuleRef methodOwner(core::MutableContext ctx) {

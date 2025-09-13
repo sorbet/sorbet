@@ -68,7 +68,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
 
     auto loc = asgn->loc;
 
-    ast::MethodDef::ARGS_store newArgs;
+    ast::MethodDef::PARAMS_store newArgs;
     ast::Send::ARGS_store sigArgs;
     ast::ClassDef::RHS_store body;
 

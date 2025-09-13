@@ -1777,25 +1777,25 @@ public:
     }
 #endif
 
-    ast::MethodDef::ARGS_store fillInArgs(const vector<core::ParsedArg> &parsedArgs,
-                                          ast::MethodDef::ARGS_store oldArgs) {
-        ast::MethodDef::ARGS_store args;
+    ast::MethodDef::PARAMS_store fillInArgs(const vector<core::ParsedArg> &parsedArgs,
+                                            ast::MethodDef::PARAMS_store oldParams) {
+        ast::MethodDef::PARAMS_store params;
         int i = -1;
-        for (auto &arg : parsedArgs) {
+        for (auto &param : parsedArgs) {
             i++;
-            auto localVariable = arg.local;
+            auto localVariable = param.local;
 
-            if (arg.flags.isShadow) {
-                auto localExpr = ast::make_expression<ast::Local>(arg.loc, localVariable);
-                args.emplace_back(move(localExpr));
+            if (param.flags.isShadow) {
+                auto localExpr = ast::make_expression<ast::Local>(param.loc, localVariable);
+                params.emplace_back(move(localExpr));
             } else {
-                ENFORCE(i < oldArgs.size());
-                auto expr = arg2Symbol(i, arg, move(oldArgs[i]));
-                args.emplace_back(move(expr));
+                ENFORCE(i < oldParams.size());
+                auto expr = arg2Symbol(i, param, move(oldParams[i]));
+                params.emplace_back(move(expr));
             }
         }
 
-        return args;
+        return params;
     }
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {

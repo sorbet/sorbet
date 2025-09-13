@@ -96,12 +96,12 @@ public:
         // methods and block arguments before us.
         auto blkLoc = core::LocOffsets::none();
         core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
-        ast::MethodDef::ARGS_store args;
-        args.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
+        ast::MethodDef::PARAMS_store params;
+        params.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
 
         auto init =
             ast::make_expression<ast::MethodDef>(classDef->declLoc, classDef->declLoc, sym, core::Names::staticInit(),
-                                                 std::move(args), std::move(inits), ast::MethodDef::Flags());
+                                                 std::move(params), std::move(inits), ast::MethodDef::Flags());
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 

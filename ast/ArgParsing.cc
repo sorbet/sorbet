@@ -68,7 +68,7 @@ ExpressionPtr getDefaultValue(ExpressionPtr arg) {
 
 } // namespace
 
-vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) {
+vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::PARAMS_store &args) {
     vector<core::ParsedArg> parsedArgs;
     for (auto &arg : args) {
         if (!ast::isa_reference(arg)) {

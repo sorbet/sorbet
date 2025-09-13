@@ -181,8 +181,9 @@ ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOr
 }
 
 MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
-                     ARGS_store args, ExpressionPtr rhs, Flags flags)
-    : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
+                     PARAMS_store params, ExpressionPtr rhs, Flags flags)
+    : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(params)), name(name),
+      flags(flags) {
     categoryCounterInc("trees", "methoddef");
     histogramInc("trees.methodDef.args", this->args.size());
     _sanityCheck();
@@ -363,8 +364,8 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     return make_pair(prefix, move(namesFailedToResolve));
 }
 
-Block::Block(core::LocOffsets loc, MethodDef::ARGS_store args, ExpressionPtr body)
-    : loc(loc), args(std::move(args)), body(std::move(body)) {
+Block::Block(core::LocOffsets loc, MethodDef::PARAMS_store params, ExpressionPtr body)
+    : loc(loc), args(std::move(params)), body(std::move(body)) {
     categoryCounterInc("trees", "block");
     histogramInc("trees.block.args", this->args.size());
     _sanityCheck();
