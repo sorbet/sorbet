@@ -43,10 +43,8 @@ module T::Props
           hash_key = rules.fetch(:serialized_form)
           raise unless T::Props::Decorator::SAFE_NAME.match?(hash_key)
 
-          ivar_name = begin
-                        key = rules.fetch(:accessor_key)
-                        CAN_USE_SYMBOL_NAME ? key.name : key.to_s
-                      end
+          key = rules.fetch(:accessor_key)
+          ivar_name = CAN_USE_SYMBOL_NAME ? key.name : key.to_s
           raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_ACCESSOR_KEY_NAME.match?(ivar_name)
 
           transformation = SerdeTransform.generate(
