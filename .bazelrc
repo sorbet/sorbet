@@ -148,6 +148,9 @@ build:cross-to-darwin-arm64 --copt=-stdlib=libc++ --linkopt=-lc++
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common
 
+build:release-debug-linux-aarch64 --config=release-linux-aarch64
+build:release-debug-linux-aarch64 --config=release-debug-common
+
 build:release-debug-mac --config=release-mac
 build:release-debug-mac --config=release-debug-common
 
