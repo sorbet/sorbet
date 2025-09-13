@@ -38,7 +38,7 @@ class LocalNameInserter {
     };
     CheckSize(ArgFlags, 1, 1);
 
-    struct NamedArg {
+    struct NamedParam {
         core::NameRef name;
         ArgFlags flags;
         core::LocalVariable local;
@@ -47,7 +47,7 @@ class LocalNameInserter {
     };
 
     // Handle the mangling of keyword argument names, if the name passed has already been seen in the argument list.
-    core::NameRef mangleKeyword(core::MutableContext ctx, const vector<NamedArg> &seen, core::LocOffsets loc,
+    core::NameRef mangleKeyword(core::MutableContext ctx, const vector<NamedParam> &seen, core::LocOffsets loc,
                                 bool isKeyword, core::NameRef name, uint32_t pos) const {
         if (!isKeyword) {
             return name;
@@ -76,8 +76,8 @@ class LocalNameInserter {
 
     // Map through the reference structure, naming the locals, and preserving
     // the outer structure for the namer proper.
-    NamedArg nameArg(core::MutableContext ctx, const vector<NamedArg> &seen, ast::ExpressionPtr arg, uint32_t pos) {
-        NamedArg named;
+    NamedParam nameArg(core::MutableContext ctx, const vector<NamedParam> &seen, ast::ExpressionPtr arg, uint32_t pos) {
+        NamedParam named;
         auto *cursor = &arg;
 
         while (cursor != nullptr) {
@@ -115,20 +115,20 @@ class LocalNameInserter {
         return named;
     }
 
-    vector<NamedArg> nameArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &methodArgs) {
-        vector<NamedArg> namedArgs;
+    vector<NamedParam> nameParams(core::MutableContext ctx, ast::MethodDef::PARAMS_store &methodParams) {
+        vector<NamedParam> namedParams;
         int pos = -1;
-        for (auto &arg : methodArgs) {
+        for (auto &param : methodParams) {
             ++pos;
 
-            if (!ast::isa_reference(arg)) {
+            if (!ast::isa_reference(param)) {
                 Exception::raise("Must be a reference!");
             }
-            auto named = nameArg(ctx, namedArgs, move(arg), pos);
-            namedArgs.emplace_back(move(named));
+            auto named = nameArg(ctx, namedParams, move(param), pos);
+            namedParams.emplace_back(move(named));
         }
 
-        return namedArgs;
+        return namedParams;
     }
 
     struct LocalFrame {
@@ -207,19 +207,19 @@ class LocalNameInserter {
         return core::LocalVariable(name, frame.localId);
     }
 
-    // Enter names from arguments into the current frame, building a new
-    // argument list back up for the original context.
-    ast::MethodDef::ARGS_store fillInArgs(vector<NamedArg> namedArgs) {
-        ast::MethodDef::ARGS_store args;
+    // Enter names from parameters into the current frame,
+    // building a new parameter list back up for the original context.
+    ast::MethodDef::PARAMS_store fillInParams(vector<NamedParam> namedParams) {
+        ast::MethodDef::PARAMS_store params;
 
-        for (auto &named : namedArgs) {
-            args.emplace_back(move(named.expr));
+        for (auto &param : namedParams) {
+            params.emplace_back(move(param.expr));
             auto &frame = scopeStack.back();
-            frame.locals[named.name] = named.local;
-            frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags});
+            frame.locals[param.name] = param.local;
+            frame.args.emplace_back(LocalFrame::Arg{param.local, param.flags});
         }
 
-        return args;
+        return params;
     }
 
     core::ClassOrModuleRef methodOwner(core::MutableContext ctx) {
@@ -526,7 +526,7 @@ public:
         enterMethod();
 
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        method.args = fillInArgs(nameArgs(ctx, method.args));
+        method.params = fillInParams(nameParams(ctx, method.params));
     }
 
     void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
@@ -554,7 +554,7 @@ public:
 
         // If any of our arguments shadow our parent, fillInArgs will overwrite
         // them in `frame.locals`
-        blk.args = fillInArgs(nameArgs(ctx, blk.args));
+        blk.params = fillInParams(nameParams(ctx, blk.params));
     }
 
     void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {

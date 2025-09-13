@@ -95,7 +95,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (!Comparator::compareNodes(gs, avoid, a->rhs, b->rhs, file)) {
                 return false;
             }
-            if (!Comparator::compareSpans(gs, avoid, a->args, b->args, file)) {
+            if (!Comparator::compareSpans(gs, avoid, a->params, b->params, file)) {
                 return false;
             }
             return true;
@@ -307,7 +307,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::Block: {
             auto *a = reinterpret_cast<const Block *>(tree);
             auto *b = reinterpret_cast<const Block *>(other);
-            return Comparator::compareSpans(gs, avoid, a->args, b->args, file) &&
+            return Comparator::compareSpans(gs, avoid, a->params, b->params, file) &&
                    Comparator::compareNodes(gs, avoid, a->body, b->body, file);
         }
 

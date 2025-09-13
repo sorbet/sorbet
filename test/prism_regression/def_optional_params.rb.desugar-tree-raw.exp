@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U foo><<U <todo method>>>
-      args = [OptionalArg{
+      params = [OptionalArg{
           expr = UnresolvedIdent{
             kind = Local
             name = <U a>
@@ -26,7 +26,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U bar><<U <todo method>>>
-      args = [OptionalArg{
+      params = [OptionalArg{
           expr = UnresolvedIdent{
             kind = Local
             name = <U a>

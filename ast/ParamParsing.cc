@@ -1,4 +1,4 @@
-#include "ast/ArgParsing.h"
+#include "ast/ParamParsing.h"
 #include "common/typecase.h"
 #include "core/Context.h"
 #include "core/hashing/hashing.h"
@@ -8,45 +8,45 @@ using namespace std;
 namespace sorbet::ast {
 
 namespace {
-core::ParsedArg parseArg(const ast::ExpressionPtr &arg) {
-    core::ParsedArg parsedArg;
-    auto *cursor = &arg;
+core::ParsedParam parseParam(const ast::ExpressionPtr &param) {
+    core::ParsedParam parsedParam;
+    auto *cursor = &param;
 
     while (cursor != nullptr) {
         typecase(
             *cursor,
             [&](const ast::RestArg &rest) {
-                parsedArg.flags.isRepeated = true;
+                parsedParam.flags.isRepeated = true;
                 cursor = &rest.expr;
             },
             [&](const ast::KeywordArg &kw) {
-                parsedArg.flags.isKeyword = true;
+                parsedParam.flags.isKeyword = true;
                 cursor = &kw.expr;
             },
             [&](const ast::OptionalArg &opt) {
-                parsedArg.flags.isDefault = true;
+                parsedParam.flags.isDefault = true;
                 cursor = &opt.expr;
             },
             [&](const ast::BlockArg &blk) {
-                parsedArg.flags.isBlock = true;
+                parsedParam.flags.isBlock = true;
                 cursor = &blk.expr;
             },
             [&](const ast::ShadowArg &shadow) {
-                parsedArg.flags.isShadow = true;
+                parsedParam.flags.isShadow = true;
                 cursor = &shadow.expr;
             },
             [&](const ast::Local &local) {
-                parsedArg.local = local.localVariable;
-                parsedArg.loc = local.loc;
+                parsedParam.local = local.localVariable;
+                parsedParam.loc = local.loc;
                 cursor = nullptr;
             });
     }
 
-    return parsedArg;
+    return parsedParam;
 }
 
-ExpressionPtr getDefaultValue(ExpressionPtr arg) {
-    auto *cursor = &arg;
+ExpressionPtr getDefaultValue(ExpressionPtr param) {
+    auto *cursor = &param;
     bool done = false;
     while (!done) {
         typecase(
@@ -62,29 +62,29 @@ ExpressionPtr getDefaultValue(ExpressionPtr arg) {
                 // No default.
             });
     }
-    ENFORCE(cursor != &arg);
+    ENFORCE(cursor != &param);
     return std::move(*cursor);
 }
 
 } // namespace
 
-vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) {
-    vector<core::ParsedArg> parsedArgs;
-    for (auto &arg : args) {
-        if (!ast::isa_reference(arg)) {
+vector<core::ParsedParam> ParamParsing::parseParams(const ast::MethodDef::PARAMS_store &params) {
+    vector<core::ParsedParam> parsedParams;
+    for (auto &param : params) {
+        if (!ast::isa_reference(param)) {
             Exception::raise("Must be a reference!");
         }
-        parsedArgs.emplace_back(parseArg(arg));
+        parsedParams.emplace_back(parseParam(param));
     }
 
-    return parsedArgs;
+    return parsedParams;
 }
 
 // This has to match the implementation of Method::methodArityHash
-core::ArityHash ArgParsing::hashArgs(core::Context ctx, const vector<core::ParsedArg> &args) {
+core::ArityHash ParamParsing::hashParams(core::Context ctx, const vector<core::ParsedParam> &params) {
     uint32_t result = 0;
-    result = core::mix(result, args.size());
-    for (const auto &e : args) {
+    result = core::mix(result, params.size());
+    for (const auto &e : params) {
         if (e.flags.isKeyword) {
             if (e.flags.isRepeated && e.local._name != core::Names::fwdKwargs()) {
                 auto name = core::Names::kwargs();
@@ -99,7 +99,7 @@ core::ArityHash ArgParsing::hashArgs(core::Context ctx, const vector<core::Parse
     return core::ArityHash(result);
 }
 
-ExpressionPtr ArgParsing::getDefault(const core::ParsedArg &parsedArg, ExpressionPtr arg) {
+ExpressionPtr ParamParsing::getDefault(const core::ParsedParam &parsedArg, ExpressionPtr arg) {
     if (!parsedArg.flags.isDefault) {
         return nullptr;
     }

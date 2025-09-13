@@ -90,17 +90,17 @@ ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls)
 
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what);
 
-pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
-                                                             parser::Node *argnode) {
-    MethodDef::ARGS_store args;
+pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
+                                                               parser::Node *argnode) {
+    MethodDef::PARAMS_store params;
     InsSeq::STATS_store destructures;
 
     if (auto *oargs = parser::cast_node<parser::Args>(argnode)) {
-        args.reserve(oargs->args.size());
+        params.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
             if (parser::isa_node<parser::Mlhs>(arg.get())) {
                 core::NameRef temporary = dctx.freshNameUnique(core::Names::destructureArg());
-                args.emplace_back(MK::Local(arg->loc, temporary));
+                params.emplace_back(MK::Local(arg->loc, temporary));
                 unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
                 unique_ptr<parser::Node> destructure = make_unique<parser::Masgn>(arg->loc, move(arg), move(lvarNode));
                 destructures.emplace_back(node2TreeImpl(dctx, destructure));
@@ -111,22 +111,22 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
                 // add `*<fwd-args>`
                 unique_ptr<parser::Node> rest =
                     make_unique<parser::Restarg>(fargs->loc, core::Names::fwdArgs(), fargs->loc);
-                args.emplace_back(node2TreeImpl(dctx, rest));
+                params.emplace_back(node2TreeImpl(dctx, rest));
                 // add `**<fwd-kwargs>`
                 unique_ptr<parser::Node> kwrest = make_unique<parser::Kwrestarg>(fargs->loc, core::Names::fwdKwargs());
-                args.emplace_back(node2TreeImpl(dctx, kwrest));
+                params.emplace_back(node2TreeImpl(dctx, kwrest));
                 // add `&<fwd-block>`
                 unique_ptr<parser::Node> block = make_unique<parser::Blockarg>(fargs->loc, core::Names::fwdBlock());
-                args.emplace_back(node2TreeImpl(dctx, block));
+                params.emplace_back(node2TreeImpl(dctx, block));
             } else {
-                args.emplace_back(node2TreeImpl(dctx, arg));
+                params.emplace_back(node2TreeImpl(dctx, arg));
             }
         }
     } else if (auto *numparams = parser::cast_node<parser::NumParams>(argnode)) {
         // The block uses numbered parameters like `_1` or `_9` so we add them as parameters
         // from _1 to the highest number used.
         for (int i = 1; i <= numparamMax(dctx, &numparams->decls); i++) {
-            args.emplace_back(numparamTree(dctx, i, &numparams->decls));
+            params.emplace_back(numparamTree(dctx, i, &numparams->decls));
         }
     } else if (argnode == nullptr) {
         // do nothing
@@ -134,7 +134,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
         Exception::raise("not implemented: {}", argnode->nodeName());
     }
 
-    return make_pair(move(args), move(destructures));
+    return make_pair(move(params), move(destructures));
 }
 
 ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &bodynode,
@@ -153,7 +153,7 @@ ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<
 
 // It's not possible to use an anonymous rest parameter in a block, as it always refers to the forwarded arguments
 // from the method. This function raises an error if the anonymous rest arg is present in a parameter list.
-void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
+void checkBlockRestArg(DesugarContext dctx, const MethodDef::PARAMS_store &args) {
     auto it = absl::c_find_if(args, [](const auto &arg) { return isa_tree<RestArg>(arg); });
     if (it == args.end()) {
         return;
@@ -1682,7 +1682,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::ZSuper *zuper) { result = MK::ZSuper(loc, maybeTypedSuper(dctx)); },
             [&](parser::For *for_) {
-                MethodDef::ARGS_store args;
+                MethodDef::PARAMS_store params;
                 bool canProvideNiceDesugar = true;
                 auto mlhsNode = move(for_->vars);
                 if (auto *mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get())) {
@@ -1694,14 +1694,14 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     if (canProvideNiceDesugar) {
                         for (auto &c : mlhs->exprs) {
-                            args.emplace_back(node2TreeImpl(dctx, c));
+                            params.emplace_back(node2TreeImpl(dctx, c));
                         }
                     }
                 } else {
                     canProvideNiceDesugar = parser::isa_node<parser::LVarLhs>(mlhsNode.get());
                     if (canProvideNiceDesugar) {
                         ExpressionPtr lhs = node2TreeImpl(dctx, mlhsNode);
-                        args.emplace_back(move(lhs));
+                        params.emplace_back(move(lhs));
                     } else {
                         parser::NodeVec vars;
                         vars.emplace_back(move(mlhsNode));
@@ -1713,7 +1713,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 ExpressionPtr block;
                 if (canProvideNiceDesugar) {
-                    block = MK::Block(loc, move(body), move(args));
+                    block = MK::Block(loc, move(body), move(params));
                 } else {
                     auto temp = dctx.freshNameUnique(core::Names::forTemp());
 
@@ -1721,7 +1721,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         make_unique<parser::Masgn>(loc, move(mlhsNode), make_unique<parser::LVar>(loc, temp));
 
                     body = MK::InsSeq1(loc, node2TreeImpl(dctx, masgn), move(body));
-                    block = MK::Block(loc, move(body), move(args));
+                    block = MK::Block(loc, move(body), move(params));
                 }
 
                 auto res =

@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U m><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -52,7 +52,7 @@ ClassDef{
             recv = Self
             fun = <U <super>>
             block = Block {
-              args = [
+              params = [
               ]
               body = Send{
                 flags = {}
@@ -77,7 +77,7 @@ ClassDef{
           recv = Self
           fun = <U <super>>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}

@@ -2,8 +2,8 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
-#include "ast/ArgParsing.h"
 #include "ast/Helpers.h"
+#include "ast/ParamParsing.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -312,8 +312,8 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
-        foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
-        foundMethod.arityHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
+        foundMethod.parsedArgs = ast::ParamParsing::parseParams(method.params);
+        foundMethod.arityHash = ast::ParamParsing::hashParams(ctx, foundMethod.parsedArgs);
         auto def = foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
@@ -773,7 +773,8 @@ private:
         emitRedefinedConstantError(ctx, errorLoc, symbol.name(ctx), symbol.kind(), prevSymbol);
     }
 
-    void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos, const core::ParsedArg &parsedArg) {
+    void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos,
+                   const core::ParsedParam &parsedArg) {
         if (pos < methodData->arguments.size()) {
             // TODO: check that flags match;
             if (parsedArg.loc.exists()) {
@@ -808,7 +809,7 @@ private:
         argInfo.flags = parsedArg.flags;
     }
 
-    void defineArgs(core::MutableContext ctx, const vector<core::ParsedArg> &parsedArgs) {
+    void defineArgs(core::MutableContext ctx, const vector<core::ParsedParam> &parsedArgs) {
         auto methodData = ctx.owner.asMethodRef().data(ctx);
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
@@ -841,7 +842,7 @@ private:
         }
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedArg> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedParam> &parsedArgs) {
         auto sym = method.data(ctx)->dealiasMethod(ctx);
         return absl::c_equal(parsedArgs, sym.data(ctx)->arguments, [](const auto &methodArg, const auto &symArg) {
             return symArg.flags.isKeyword == methodArg.flags.isKeyword &&
@@ -851,7 +852,7 @@ private:
         });
     }
 
-    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedArg> &parsedArgs) {
+    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedParam> &parsedArgs) {
         auto sym = ctx.owner.dealias(ctx);
         if (!sym.isMethod()) {
             return;
@@ -1721,11 +1722,11 @@ class TreeSymbolizer {
         return squashNamesInner(ctx, owner, node, firstName);
     }
 
-    ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedArg &parsedArg, ast::ExpressionPtr arg) {
+    ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
         ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
-            localExpr =
-                ast::MK::OptionalArg(parsedArg.loc, move(localExpr), ast::ArgParsing::getDefault(parsedArg, move(arg)));
+            localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr),
+                                             ast::ParamParsing::getDefault(parsedArg, move(arg)));
         }
         return localExpr;
     }
@@ -1777,44 +1778,45 @@ public:
     }
 #endif
 
-    ast::MethodDef::ARGS_store fillInArgs(const vector<core::ParsedArg> &parsedArgs,
-                                          ast::MethodDef::ARGS_store oldArgs) {
-        ast::MethodDef::ARGS_store args;
+    ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedArgs,
+                                              ast::MethodDef::PARAMS_store oldParams) {
+        ast::MethodDef::PARAMS_store params;
         int i = -1;
-        for (auto &arg : parsedArgs) {
+        for (auto &param : parsedArgs) {
             i++;
-            auto localVariable = arg.local;
+            auto localVariable = param.local;
 
-            if (arg.flags.isShadow) {
-                auto localExpr = ast::make_expression<ast::Local>(arg.loc, localVariable);
-                args.emplace_back(move(localExpr));
+            if (param.flags.isShadow) {
+                auto localExpr = ast::make_expression<ast::Local>(param.loc, localVariable);
+                params.emplace_back(move(localExpr));
             } else {
-                ENFORCE(i < oldArgs.size());
-                auto expr = arg2Symbol(i, arg, move(oldArgs[i]));
-                args.emplace_back(move(expr));
+                ENFORCE(i < oldParams.size());
+                auto expr = arg2Symbol(i, param, move(oldParams[i]));
+                params.emplace_back(move(expr));
             }
         }
 
-        return args;
+        return params;
     }
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         auto owner = methodOwner(ctx, ctx.owner, method.flags.isSelfMethod);
-        auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
-        auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
+        auto parsedParams = ast::ParamParsing::parseParams(method.params);
+        auto sym =
+            ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ParamParsing::hashParams(ctx, parsedParams));
         ENFORCE(sym.exists());
         method.symbol = sym;
-        method.args = fillInArgs(move(parsedArgs), std::move(method.args));
+        method.params = fillInParams(move(parsedParams), move(method.params));
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(method.symbol != core::Symbols::todoMethod());
 
-        ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
-                method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments.size());
+        ENFORCE(method.params.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
+                method.name.showRaw(ctx), method.params.size(), method.symbol.data(ctx)->arguments.size());
     }
 
     ast::ExpressionPtr handleAssignment(core::Context ctx, ast::ExpressionPtr tree) {

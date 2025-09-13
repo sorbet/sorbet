@@ -24,7 +24,7 @@ core::MethodRef enclosingMethod(core::Context ctx) {
 void LocalVarSaver::postTransformBlock(core::Context ctx, const ast::Block &block) {
     auto method = enclosingMethod(ctx);
 
-    for (auto &arg : block.args) {
+    for (auto &arg : block.params) {
         if (auto *localExp = ast::MK::arg2Local(arg)) {
             bool lspQueryMatch = ctx.state.lspQuery.matchesVar(method, localExp->localVariable);
             if (lspQueryMatch) {
@@ -58,10 +58,10 @@ void LocalVarSaver::preTransformMethodDef(core::Context ctx, const ast::MethodDe
 void LocalVarSaver::postTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
     this->enclosingMethodDefLoc.pop_back();
 
-    // Check args.
-    for (auto &arg : methodDef.args) {
+    // Check params.
+    for (auto &param : methodDef.params) {
         // nullptrs should never happen, but guard against it anyway.
-        if (auto *localExp = ast::MK::arg2Local(arg)) {
+        if (auto *localExp = ast::MK::arg2Local(param)) {
             bool lspQueryMatch = ctx.state.lspQuery.matchesVar(methodDef.symbol, localExp->localVariable);
             if (lspQueryMatch) {
                 auto methodDefLoc = ctx.locAt(methodDef.loc);

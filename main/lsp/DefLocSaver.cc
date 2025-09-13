@@ -15,17 +15,17 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
         auto symbolData = methodDef.symbol.data(ctx);
-        auto &argTypes = symbolData->arguments;
+        auto &paramTypes = symbolData->arguments;
         core::TypeAndOrigins tp;
 
-        // Check if it matches against a specific argument. If it does, send that instead;
+        // Check if it matches against a specific parameter. If it does, send that instead;
         // it's more specific.
-        const int numArgs = methodDef.args.size();
+        const int numParams = methodDef.params.size();
 
-        ENFORCE(numArgs == argTypes.size());
-        for (int i = 0; i < numArgs; i++) {
-            auto &arg = methodDef.args[i];
-            auto &argType = argTypes[i];
+        ENFORCE(numParams == paramTypes.size());
+        for (int i = 0; i < numParams; i++) {
+            auto &arg = methodDef.params[i];
+            auto &argType = paramTypes[i];
             auto *localExp = ast::MK::arg2Local(arg);
             // localExp should never be null, but guard against the possibility.
             if (localExp && lspQuery.matchesLoc(ctx.locAt(localExp->loc))) {

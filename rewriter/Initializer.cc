@@ -175,35 +175,35 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
     }
 
     // build a lookup table that maps from names to the types they have
-    UnorderedMap<core::NameRef, const ast::ExpressionPtr *> argTypeMap;
+    UnorderedMap<core::NameRef, const ast::ExpressionPtr *> paramTypeMap;
     for (auto [key, value] : params->kwArgPairs()) {
-        auto argName = ast::cast_tree<ast::Literal>(key);
-        if (argName->isSymbol()) {
-            argTypeMap[argName->asSymbol()] = &value;
+        auto paramName = ast::cast_tree<ast::Literal>(key);
+        if (paramName->isSymbol()) {
+            paramTypeMap[paramName->asSymbol()] = &value;
         }
     }
 
-    UnorderedMap<core::NameRef, ArgKind> argKindMap;
-    for (const auto &arg : methodDef->args) {
-        const auto restArg = ast::cast_tree<ast::RestArg>(arg);
+    UnorderedMap<core::NameRef, ArgKind> paramKindMap;
+    for (const auto &param : methodDef->params) {
+        const auto restArg = ast::cast_tree<ast::RestArg>(param);
         if (restArg == nullptr) {
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;
+            paramKindMap[ast::MK::arg2Name(param)] = ArgKind::Plain;
         } else if (ast::isa_tree<ast::KeywordArg>(restArg->expr)) {
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::KeywordRestArg;
+            paramKindMap[ast::MK::arg2Name(param)] = ArgKind::KeywordRestArg;
         } else {
             ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::RestArg;
+            paramKindMap[ast::MK::arg2Name(param)] = ArgKind::RestArg;
         }
     }
 
     // look through the rhs to find statements of the form `@var = local`
     if (auto stmts = ast::cast_tree<ast::InsSeq>(methodDef->rhs)) {
         for (auto &s : stmts->stats) {
-            maybeAddLet(ctx, s, argTypeMap, argKindMap);
+            maybeAddLet(ctx, s, paramTypeMap, paramKindMap);
         }
-        maybeAddLet(ctx, stmts->expr, argTypeMap, argKindMap);
+        maybeAddLet(ctx, stmts->expr, paramTypeMap, paramKindMap);
     } else {
-        maybeAddLet(ctx, methodDef->rhs, argTypeMap, argKindMap);
+        maybeAddLet(ctx, methodDef->rhs, paramTypeMap, paramKindMap);
     }
 }
 

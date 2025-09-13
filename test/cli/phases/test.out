@@ -124,7 +124,7 @@ ClassDef{
     MethodDef{
       flags = {self}
       name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-      args = [Local{
+      params = [Local{
           localVariable = <U <blk>>
         }]
       rhs = Literal{ value = 1 }
@@ -152,7 +152,7 @@ ClassDef{
     MethodDef{
       flags = {self}
       name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-      args = [Local{
+      params = [Local{
           localVariable = <U <blk>>
         }]
       rhs = Literal{ value = 1 }
@@ -254,10 +254,10 @@ class <C <U <root>>> < <C <U Object>> ()
 < 
 <           localVariable = <U <blk>>
 <         }]
-<       args = [Local{
 <       flags = {self}
 <       name = <U <static-init>><<N <U <static-init>> $CENSORED>>
 <       orig = nullptr
+<       params = [Local{
 <       rhs = Literal{ value = 1 }
 <       symbol = (class ::<todo sym>)
 <     1

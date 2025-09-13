@@ -616,7 +616,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
-            ast::MethodDef::ARGS_store blockArgsStore;
+            ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
             bool supportedBlock;
             if (prismBlock != nullptr) {
@@ -657,7 +657,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                                         make_move_iterator(sorbetShadowParams.begin()),
                                                         make_move_iterator(sorbetShadowParams.end()));
 
-                                    std::tie(blockArgsStore, blockStatsStore, didDesugarBlockParams) =
+                                    std::tie(blockParamsStore, blockStatsStore, didDesugarBlockParams) =
                                         desugarParametersNode(params->args, attemptToDesugarBlockParams);
 
                                     blockParameters = move(params);
@@ -686,7 +686,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                     params.emplace_back(move(paramNode));
                                 }
 
-                                std::tie(blockArgsStore, blockStatsStore, didDesugarBlockParams) =
+                                std::tie(blockParamsStore, blockStatsStore, didDesugarBlockParams) =
                                     desugarParametersNode(params, attemptToDesugarBlockParams);
 
                                 blockParameters = make_unique<parser::NumParams>(location, move(params));
@@ -766,7 +766,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             if (prismBlock != nullptr) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                     auto blockBodyExpr = blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
-                    auto blockExpr = MK::Block(location, move(blockBodyExpr), move(blockArgsStore));
+                    auto blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
                     sendArgs.emplace_back(move(blockExpr));
 
                     flags.hasBlock = true;
@@ -1026,11 +1026,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // bit. This bool is true when this particular method def is supported by our desugar logic.
             auto attemptToDesugarParams = directlyDesugar && hasExpr(receiver, body);
 
-            ast::MethodDef::ARGS_store argsStore;
+            ast::MethodDef::PARAMS_store paramsStore;
             ast::InsSeq::STATS_store statsStore;
             bool didDesugarParams = false; // ...and by impliciation, everything else (see `attemptToDesugarParams`)
             if (params != nullptr) {
-                std::tie(argsStore, statsStore, didDesugarParams) =
+                std::tie(paramsStore, statsStore, didDesugarParams) =
                     desugarParametersNode(params->args, attemptToDesugarParams);
             } else {
                 didDesugarParams = attemptToDesugarParams;
@@ -1046,7 +1046,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto methodBody = body == nullptr ? MK::EmptyTree() : body->takeDesugaredExpr();
 
-            auto methodExpr = MK::Method(location, declLoc, name, move(argsStore), move(methodBody));
+            auto methodExpr = MK::Method(location, declLoc, name, move(paramsStore), move(methodBody));
 
             if (isSingletonMethod) {
                 ast::cast_tree<ast::MethodDef>(methodExpr)->flags.isSelfMethod = true;
@@ -2498,10 +2498,10 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
     return {make_unique<parser::Args>(location, move(params)), enclosingBlockParamName};
 }
 
-tuple<ast::MethodDef::ARGS_store, ast::InsSeq::STATS_store, bool /* didDesugarParams */>
+tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool /* didDesugarParams */>
 Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) {
     if (!attemptToDesugarParams) {
-        return make_tuple(ast::MethodDef::ARGS_store{}, ast::InsSeq::STATS_store{}, false);
+        return make_tuple(ast::MethodDef::PARAMS_store{}, ast::InsSeq::STATS_store{}, false);
     }
 
     auto supportedParams = absl::c_all_of(params, [](auto &param) {
@@ -2516,10 +2516,10 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
     });
 
     if (!supportedParams) {
-        return make_tuple(ast::MethodDef::ARGS_store{}, ast::InsSeq::STATS_store{}, false);
+        return make_tuple(ast::MethodDef::PARAMS_store{}, ast::InsSeq::STATS_store{}, false);
     }
 
-    ast::MethodDef::ARGS_store argsStore;
+    ast::MethodDef::PARAMS_store paramsStore;
     ast::InsSeq::STATS_store statsStore;
 
     for (auto &param : params) {
@@ -2534,19 +2534,19 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
             // `def foo(m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)`
 
             // add `*<fwd-args>`
-            argsStore.emplace_back(MK::RestArg(loc, MK::Local(loc, core::Names::fwdArgs())));
+            paramsStore.emplace_back(MK::RestArg(loc, MK::Local(loc, core::Names::fwdArgs())));
 
             // add `**<fwd-kwargs>`
-            argsStore.emplace_back(MK::RestArg(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
+            paramsStore.emplace_back(MK::RestArg(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
 
             // add `&<fwd-block>`
-            argsStore.emplace_back(MK::BlockArg(loc, MK::Local(loc, core::Names::fwdBlock())));
+            paramsStore.emplace_back(MK::BlockArg(loc, MK::Local(loc, core::Names::fwdBlock())));
         } else {
-            argsStore.emplace_back(param->takeDesugaredExpr());
+            paramsStore.emplace_back(param->takeDesugaredExpr());
         }
     }
 
-    return make_tuple(move(argsStore), move(statsStore), true);
+    return make_tuple(move(paramsStore), move(statsStore), true);
 }
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array

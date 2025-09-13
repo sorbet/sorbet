@@ -32,7 +32,7 @@ class PosArgs
   end
 end
 
-class NamedArgs
+class NamedParams
   extend T::Sig
 
   sig {params(x: Integer, y: String).void}
@@ -40,12 +40,12 @@ class NamedArgs
 
   sig {returns(T.attached_class)}
   def self.make
-    T.reveal_type(self.new(x: 10, y: "foo")) # error: Revealed type: `T.attached_class (of NamedArgs)`
+    T.reveal_type(self.new(x: 10, y: "foo")) # error: Revealed type: `T.attached_class (of NamedParams)`
 
     # Not matching initialize
     T.reveal_type(self.new(x: 10))
     #                      ^^^^^ error: Missing required keyword argument `y`
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of NamedArgs)`
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of NamedParams)`
   end
 end
 

@@ -611,9 +611,9 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
 
 vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
                                              core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
-    ast::MethodDef::ARGS_store args;
+    ast::MethodDef::PARAMS_store params;
     ast::Send::ARGS_store sigArgs;
-    args.reserve(props.size());
+    params.reserve(props.size());
     sigArgs.reserve(props.size() * 2);
 
     // add all the required props first.
@@ -622,7 +622,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
             continue;
         }
         auto loc = prop.loc;
-        args.emplace_back(ast::MK::KeywordArg(loc, prop.name));
+        params.emplace_back(ast::MK::KeywordArg(loc, prop.name));
         sigArgs.emplace_back(ast::MK::Symbol(loc, prop.name));
         sigArgs.emplace_back(prop.type.deepCopy());
     }
@@ -633,7 +633,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
             continue;
         }
         auto loc = prop.loc;
-        args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, prop.name), prop.default_.deepCopy()));
+        params.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, prop.name), prop.default_.deepCopy()));
         sigArgs.emplace_back(ast::MK::Symbol(loc, prop.name));
         sigArgs.emplace_back(prop.type.deepCopy());
     }
@@ -649,8 +649,8 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
 
     vector<ast::ExpressionPtr> result;
     result.emplace_back(ast::MK::SigVoid(klassDeclLoc, std::move(sigArgs)));
-    result.emplace_back(
-        ast::MK::SyntheticMethod(klassLoc, klassDeclLoc, core::Names::initialize(), std::move(args), std::move(body)));
+    result.emplace_back(ast::MK::SyntheticMethod(klassLoc, klassDeclLoc, core::Names::initialize(), std::move(params),
+                                                 std::move(body)));
     return result;
 }
 

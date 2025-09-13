@@ -6,7 +6,7 @@
 #include "common/counters/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
-#include "core/ParsedArg.h"
+#include "core/ParsedParam.h"
 #include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include "core/TypeConstraint.h"
@@ -29,7 +29,7 @@ class TypeAndOrigins;
 
 class ArgInfo {
 public:
-    using ArgFlags = core::ParsedArg::ArgFlags;
+    using ArgFlags = core::ParsedParam::ArgFlags;
     ArgFlags flags;
     NameRef name;
     // Stores the `.bind(...)` symbol if the `&blk` arg's type had one

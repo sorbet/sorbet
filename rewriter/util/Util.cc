@@ -339,7 +339,7 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
         return nullptr;
     }
     auto *block = send->block();
-    if (!block->args.empty()) {
+    if (!block->params.empty()) {
         return nullptr;
     }
     return std::move(block->body);

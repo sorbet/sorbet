@@ -22,7 +22,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U take_arguments><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U a>
             }, OptionalArg{
@@ -97,7 +97,7 @@ ClassDef{
               recv = Self
               fun = <U proc>
               block = Block {
-                args = [
+                params = [
                   UnresolvedIdent{
                     kind = Local
                     name = <U a>

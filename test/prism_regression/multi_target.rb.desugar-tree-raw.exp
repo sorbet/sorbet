@@ -178,7 +178,7 @@ ClassDef{
       }
       fun = <U new>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U p1>
@@ -292,7 +292,7 @@ ClassDef{
       }
       fun = <U each>
       block = Block {
-        args = [
+        params = [
         ]
         body = InsSeq{
           stats = [
@@ -1224,7 +1224,7 @@ ClassDef{
       }
       fun = <U each>
       block = Block {
-        args = [
+        params = [
         ]
         body = InsSeq{
           stats = [

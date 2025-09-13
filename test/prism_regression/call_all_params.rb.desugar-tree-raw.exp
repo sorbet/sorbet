@@ -88,7 +88,7 @@ ClassDef{
       }
       fun = <U <call-with-splat>>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U a>
@@ -184,7 +184,7 @@ ClassDef{
       }
       fun = <U <call-with-splat>>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U a>

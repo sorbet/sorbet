@@ -13,7 +13,7 @@ cc_library(
         ],
     ),
     hdrs = [
-        "ArgParsing.h",
+        "ParamParsing.h",
         "ast.h",
     ],
     linkstatic = select({

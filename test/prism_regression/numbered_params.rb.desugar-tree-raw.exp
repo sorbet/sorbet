@@ -12,7 +12,7 @@ ClassDef{
       recv = Self
       fun = <U proc>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -52,7 +52,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
