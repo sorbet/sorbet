@@ -2114,6 +2114,16 @@ public:
     }
 } T_proc_void;
 
+class T_proc_narrows_to: public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto sym = core::Symbols::Proc(0);
+        vector<core::TypePtr> targs;
+        targs.emplace_back(core::Types::void_());
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+    }
+} T_proc_narrows_to;
+
 class T_proc_returns : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4525,6 +4535,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::proc(), &T_proc},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::params(), &T_proc_params},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::void_(), &T_proc_void},
+    {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::narrowsTo(), &T_proc_narrows_to},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::returns(), &T_proc_returns},
     {Symbols::DeclBuilderForProcs(), Intrinsic::Kind::Singleton, Names::bind(), &DeclBuilderForProcs_bind},
 

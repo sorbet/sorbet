@@ -517,6 +517,49 @@ bool isSingleton(core::Context ctx, const core::TypePtr &ty, bool includeSinglet
 
 } // namespace
 
+core::TypePtr Environment::findNarrowsToType(core::Context ctx, const core::TypePtr &recvType, core::NameRef methodName) {
+    if (core::isa_type<core::ClassType>(recvType)) {
+        auto classType = core::cast_type_nonnull<core::ClassType>(recvType);
+        auto methodSymbol = classType.symbol.data(ctx)->findMethod(ctx, methodName);
+        if (methodSymbol.exists() && methodSymbol.data(ctx)->narrowsTo != nullptr) {
+            return methodSymbol.data(ctx)->narrowsTo;
+        }
+    } else if (core::isa_type<core::OrType>(recvType)) {
+        // Use stack-based iteration instead of recursion for better performance
+        std::vector<core::TypePtr> typesToCheck;
+        typesToCheck.push_back(recvType);
+
+        while (!typesToCheck.empty()) {
+            auto type = typesToCheck.back();
+            typesToCheck.pop_back();
+
+            if (core::isa_type<core::ClassType>(type)) {
+                auto classType = core::cast_type_nonnull<core::ClassType>(type);
+                auto methodSymbol = classType.symbol.data(ctx)->findMethod(ctx, methodName);
+                if (methodSymbol.exists() && methodSymbol.data(ctx)->narrowsTo != nullptr) {
+                    return methodSymbol.data(ctx)->narrowsTo;
+                }
+            } else if (core::isa_type<core::OrType>(type)) {
+                auto &orType = core::cast_type_nonnull<core::OrType>(type);
+                // Push both branches to the stack
+                typesToCheck.push_back(orType.right);
+                typesToCheck.push_back(orType.left);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+void Environment::updateKnowledgeNarrowsTo(core::Context ctx, cfg::LocalRef local, const cfg::Send *send,
+                                           const core::TypePtr &narrowsToType) {
+    auto recv = send->recv.variable;
+    auto &whoKnows = getKnowledge(local);
+    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, recv, narrowsToType);
+    whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, recv, narrowsToType);
+    whoKnows.sanityCheck();
+}
+
 void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc,
                                         const core::TypePtr &klassType, cfg::LocalRef ref,
                                         KnowledgeFilter &knowledgeFilter, core::NameRef fun) {
@@ -553,14 +596,26 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
 
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
+    if (!knowledgeFilter.isNeeded(local)) {
+        return;
+    }
+
+    // Check if method has narrowsTo annotation
+    // Methods annotated with narrows_to annotation are dynamic, and are not in isUpdateKnowledgeName list,
+    // so we need to do this before short circuiting using isUpdateKnowledgeName
+    auto &recvType = send->recv.type;
+    auto narrowsToType = findNarrowsToType(ctx, recvType, send->fun);
+
+    if (narrowsToType != nullptr && !narrowsToType.isUntyped()) {
+        updateKnowledgeNarrowsTo(ctx, local, send, narrowsToType);
+
+        return;
+    }
+
     if (!send->fun.isUpdateKnowledgeName()) {
         // We short circuit here (1) for an honestly negligible performance improvement, but
         // importantly (2) so that if a new method is added to this method, you'll be forced to add it
         // to the above list, as that list of names is special more than just inside this method.
-        return;
-    }
-
-    if (!knowledgeFilter.isNeeded(local)) {
         return;
     }
 

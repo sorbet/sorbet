@@ -181,6 +181,7 @@ public:
     const static uint16_t FIRST_VALID_INTRINSIC_OFFSET = 1;
     uint16_t intrinsicOffset = INVALID_INTRINSIC_OFFSET;
     TypePtr resultType;
+    TypePtr narrowsTo;
     ArgumentsStore arguments;
 
     InlinedVector<TypeArgumentRef, 4> &getOrCreateTypeArguments() {
@@ -207,7 +208,7 @@ private:
     SymbolRef::LOC_store locs_;
     std::unique_ptr<InlinedVector<TypeArgumentRef, 4>> typeArgs;
 };
-CheckSize(Method, 136, 8);
+CheckSize(Method, 144, 8);
 
 // Contains a field or a static field
 class Field final {
