@@ -407,15 +407,6 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     assert_nil(MatrixStruct.new.e)
   end
 
-  it 'raises if the word secret appears in a prop without a sensitivity annotation' do
-    e = assert_raises do
-      Class.new(T::Struct) do
-        prop :secret, String
-      end
-    end
-    assert_match(/has the word 'secret' in its name/, e.message)
-  end
-
   it 'applies the supplied sensitivity and PII handler' do
 
     T::Configuration.normalize_sensitivity_and_pii_handler = lambda do |meta|

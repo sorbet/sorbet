@@ -406,8 +406,6 @@ class T::Props::Decorator
 
     # extra arbitrary metadata attached by the code defining this property
 
-    validate_not_missing_sensitivity(name, rules)
-
     # for backcompat (the `:array` key is deprecated but because the name is
     # so generic it's really hard to be sure it's not being relied on anymore)
     if type.is_a?(T::Types::TypedArray)
@@ -479,35 +477,6 @@ class T::Props::Decorator
         T.unsafe(T.nilable(T.all(T.unsafe(nonnil_type), T.deprecated_enum(enum))))
       else
         T.unsafe(T.all(T.unsafe(type), T.deprecated_enum(enum)))
-      end
-    end
-  end
-
-  # checked(:never) - Rules hash is expensive to check
-  sig { params(prop_name: Symbol, rules: Rules).void.checked(:never) }
-  private def validate_not_missing_sensitivity(prop_name, rules)
-    if rules[:sensitivity].nil?
-      if rules[:redaction]
-        T::Configuration.hard_assert_handler(
-          "#{@class}##{prop_name} has a 'redaction:' annotation but no " \
-          "'sensitivity:' annotation. This is probably wrong, because if a " \
-          "prop needs redaction then it is probably sensitive. Add a " \
-          "sensitivity annotation like 'sensitivity: Opus::Sensitivity::PII." \
-          "whatever', or explicitly override this check with 'sensitivity: []'."
-        )
-      end
-      # TODO(PRIVACYENG-982) Ideally we'd also check for 'password' and possibly
-      # other terms, but this interacts badly with ProtoDefinedDocument because
-      # the proto syntax currently can't declare "sensitivity: []"
-      if /\bsecret\b/.match?(prop_name)
-        T::Configuration.hard_assert_handler(
-          "#{@class}##{prop_name} has the word 'secret' in its name, but no " \
-          "'sensitivity:' annotation. This is probably wrong, because if a " \
-          "prop is named 'secret' then it is probably sensitive. Add a " \
-          "sensitivity annotation like 'sensitivity: Opus::Sensitivity::NonPII." \
-          "security_token', or explicitly override this check with " \
-          "'sensitivity: []'."
-        )
       end
     end
   end
