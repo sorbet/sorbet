@@ -1,12 +1,12 @@
-#ifndef SORBET_PARSED_ARG_H
-#define SORBET_PARSED_ARG_H
+#ifndef SORBET_PARSED_PARAM_H
+#define SORBET_PARSED_PARAM_H
 
 #include "core/Loc.h"
 #include "core/LocalVariable.h"
 
 namespace sorbet::core {
 
-struct ParsedArg {
+struct ParsedParam {
     struct ArgFlags {
         bool isKeyword : 1;
         bool isRepeated : 1;

@@ -628,7 +628,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 if (auto *block = s.block()) {
                     auto &blockParams = block->params;
-                    vector<core::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockParams);
+                    vector<core::ParsedParam> blockArgFlags = ast::ArgParsing::parseArgs(blockParams);
                     vector<core::ArgInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);

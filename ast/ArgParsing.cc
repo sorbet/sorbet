@@ -8,8 +8,8 @@ using namespace std;
 namespace sorbet::ast {
 
 namespace {
-core::ParsedArg parseArg(const ast::ExpressionPtr &arg) {
-    core::ParsedArg parsedArg;
+core::ParsedParam parseArg(const ast::ExpressionPtr &arg) {
+    core::ParsedParam parsedArg;
     auto *cursor = &arg;
 
     while (cursor != nullptr) {
@@ -68,8 +68,8 @@ ExpressionPtr getDefaultValue(ExpressionPtr arg) {
 
 } // namespace
 
-vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::PARAMS_store &args) {
-    vector<core::ParsedArg> parsedArgs;
+vector<core::ParsedParam> ArgParsing::parseArgs(const ast::MethodDef::PARAMS_store &args) {
+    vector<core::ParsedParam> parsedArgs;
     for (auto &arg : args) {
         if (!ast::isa_reference(arg)) {
             Exception::raise("Must be a reference!");
@@ -81,7 +81,7 @@ vector<core::ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::PARAMS_store
 }
 
 // This has to match the implementation of Method::methodArityHash
-core::ArityHash ArgParsing::hashArgs(core::Context ctx, const vector<core::ParsedArg> &args) {
+core::ArityHash ArgParsing::hashArgs(core::Context ctx, const vector<core::ParsedParam> &args) {
     uint32_t result = 0;
     result = core::mix(result, args.size());
     for (const auto &e : args) {
@@ -99,7 +99,7 @@ core::ArityHash ArgParsing::hashArgs(core::Context ctx, const vector<core::Parse
     return core::ArityHash(result);
 }
 
-ExpressionPtr ArgParsing::getDefault(const core::ParsedArg &parsedArg, ExpressionPtr arg) {
+ExpressionPtr ArgParsing::getDefault(const core::ParsedParam &parsedArg, ExpressionPtr arg) {
     if (!parsedArg.flags.isDefault) {
         return nullptr;
     }
