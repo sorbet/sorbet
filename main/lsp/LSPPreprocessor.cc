@@ -283,6 +283,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
             case LSPMethod::SorbetShowSymbol:
                 return make_unique<SorbetShowSymbolTask>(*config, id,
                                                          move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
+            case LSPMethod::SorbetQuerySends:
+                return make_unique<SorbetQuerySendsTask>(*config, id,
+                                                         move(get<unique_ptr<QuerySendsParams>>(rawParams)));
             case LSPMethod::Shutdown:
                 return make_unique<ShutdownTask>(*config, id);
             case LSPMethod::SorbetError:
