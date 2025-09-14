@@ -127,6 +127,14 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     return false;
 }
 
+// Take all the top-level elements that can appear in a `sig` block, join them together, and find
+// the start location.
+core::LocOffsets TypeSyntax::sigSpecStart(const ParsedSig &sig) {
+    auto seen = sig.seen;
+    // XXX: ew
+    return seen.params.join(seen.abstract.join(seen.returns.join(seen.void_.join(seen.checked)))).copyWithZeroLength();
+}
+
 namespace {
 
 // When a sig was given with multiple statements, autocorrect it to a single chained send.

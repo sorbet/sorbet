@@ -92,6 +92,7 @@ public:
     };
     static core::TypePtr getResultType(core::Context ctx, const ast::ExpressionPtr &expr, const ParsedSig &,
                                        TypeSyntaxArgs args);
+    static core::LocOffsets sigSpecStart(const ParsedSig &);
 
     TypeSyntax() = delete;
 };
