@@ -551,9 +551,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 adjustedLoc.end++; // Bump the end to point just past the `=`.
 
                 messageLoc = translateLoc(adjustedLoc);
-            } else if (constantNameString == "[]=") { // Subscript assignment operator, like `foo[i] = 1`
-                messageLoc.endLoc += 2;               // The message should include the closing bracket and equals sign
-            } else if (constantNameString == "[]") {  // Subscript operator, like `foo[i]`
+            } else if (constantNameString == "[]") { // Subscript operator, like `foo[i]`
                 messageLoc.endLoc = messageLoc.beginLoc;
             }
 
