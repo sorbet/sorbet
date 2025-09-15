@@ -403,6 +403,7 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
     int i = 0;
     int before = 0, after = 0;
     bool didSplat = false;
+    auto zloc = loc.copyWithZeroLength();
 
     for (auto &c : lhs->exprs) {
         if (auto *splat = parser::NodeWithExpr::cast_node<parser::SplatLhs>(c.get())) {
@@ -421,7 +422,7 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
                 auto zlhloc = lhloc.copyWithZeroLength();
                 // Calling `to_ary` is not faithful to the runtime behavior,
                 // but that it is faithful to the expected static type-checking behavior.
-                auto ary = MK::Send0(loc, MK::Local(loc, tempExpanded), core::Names::toAry(), zlhloc);
+                auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
                 stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
             }
             i = -right;
@@ -431,8 +432,9 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
             } else {
                 ++before;
             }
-            auto val = MK::Send1(c->loc, MK::Local(c->loc, tempExpanded), core::Names::squareBrackets(),
-                                 loc.copyWithZeroLength(), MK::Int(loc, i));
+            auto zcloc = c->loc.copyWithZeroLength();
+            auto val =
+                MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
 
             if (auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(c.get())) {
                 stats.emplace_back(desugarMlhs(dctx, mlhs->loc, mlhs, move(val)));
