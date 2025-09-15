@@ -277,7 +277,7 @@ module T::Private::Methods::SignatureValidation
     end
   end
 
-  ALLOW_INCOMPATIBLE_VISIBILITY = [:visibility, true]
+  ALLOW_INCOMPATIBLE_VISIBILITY = [:visibility, true].freeze
   private_constant :ALLOW_INCOMPATIBLE_VISIBILITY
 
   def self.validate_override_visibility(signature, super_signature)
@@ -308,7 +308,7 @@ module T::Private::Methods::SignatureValidation
   end
 
   # Higher = more restrictive.
-  METHOD_VISIBILITIES = %i[public protected private]
+  METHOD_VISIBILITIES = %i[public protected private].freeze
   private_constant :METHOD_VISIBILITIES
 
   private_class_method def self.visibility_strength(vis)
