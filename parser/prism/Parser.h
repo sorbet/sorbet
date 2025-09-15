@@ -76,6 +76,9 @@ public:
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
     std::string_view extractString(pm_string_t *string) const;
 
+    // Access to internal parser for node creation
+    pm_parser_t* getInternalParser() const { return const_cast<pm_parser_t*>(&parser); }
+
 private:
     std::vector<ParseError> collectErrors();
     std::vector<core::LocOffsets> collectCommentLocations();

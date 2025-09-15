@@ -8,6 +8,10 @@
 #include "parser/prism/Helpers.h"
 #include "rbs/SignatureTranslator.h"
 #include "rbs/TypeParamsToParserNodes.h"
+
+extern "C" {
+#include "prism.h"
+}
 #include "rbs/prism/SignatureTranslatorPrism.h"
 
 using namespace std;
@@ -479,6 +483,14 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
     if (node == nullptr) {
         return node;
     }
+
+    // Check if this node is a signature target and add signatures if needed
+    if (auto target = signaturesTargetForPrism(node)) {
+        if (auto signatures = signaturesForNode(target)) {
+            return createStatementsWithSignatures(node, std::move(signatures));
+        }
+    }
+
     switch (PM_NODE_TYPE(node)) {
         case PM_BLOCK_NODE: {
             auto *block = down_cast<pm_block_node_t>(node);
@@ -666,5 +678,96 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
 pm_node_t *SigsRewriterPrism::run(pm_node_t *node) {
     return rewriteBody(node);
 }
+
+// Helper method to create statements nodes with signatures
+pm_node_t *SigsRewriterPrism::createStatementsWithSignatures(pm_node_t *originalNode,
+                                                             std::unique_ptr<parser::NodeVec> signatures) {
+    if (!signatures || signatures->empty()) {
+        return originalNode;  // No signatures, return original node
+    }
+
+    // Create a statements node that wraps the signature + original method
+    pm_parser_t* p = parser.getInternalParser();
+
+    // Create the statements node
+    pm_statements_node_t *stmts = (pm_statements_node_t*) calloc(1, sizeof(pm_statements_node_t));
+    if (!stmts) return originalNode;
+
+    *stmts = (pm_statements_node_t) {
+        .base = {
+            .type = PM_STATEMENTS_NODE,
+            .flags = 0,
+            .node_id = ++p->node_id,
+            .location = {
+                .start = originalNode->location.start,
+                .end = originalNode->location.end
+            }
+        },
+        .body = { .size = 0, .capacity = 0, .nodes = nullptr }
+    };
+
+    // Create signature nodes using SignatureTranslatorPrism
+    auto signatureTranslator = rbs::SignatureTranslatorPrism(ctx, parser);
+    for (auto &signature : *signatures) {
+        (void)signature; // Suppress unused warning - TODO: Use signature to extract RBS content
+
+        // For now, use a placeholder since we need to convert parser::Node to pm_node_t
+        // TODO: Implement proper conversion from parser signatures to Prism signature nodes
+        // This would involve parsing the signature's RBS content and creating proper Prism nodes
+
+        // Create a placeholder sig call for each signature
+        pm_node_t* sigCall = signatureTranslator.createPrismMethodSignature(
+            originalNode,
+            RBSDeclaration{std::vector<Comment>{}}, // TODO: Extract RBS declaration from parser::Node
+            {}  // TODO: Extract annotations
+        );
+        if (sigCall) {
+            addNodeToStatements(stmts, sigCall);
+        }
+    }
+
+    // Add the original method
+    addNodeToStatements(stmts, originalNode);
+
+    return up_cast(stmts);
+}
+
+
+// Helper to add a node to a statements node
+bool SigsRewriterPrism::addNodeToStatements(pm_statements_node_t* stmts, pm_node_t* node) {
+    if (!stmts || !node) return false;
+
+    // Grow the node list if needed
+    if (stmts->body.size >= stmts->body.capacity) {
+        size_t new_capacity = stmts->body.capacity == 0 ? 4 : stmts->body.capacity * 2;
+        pm_node_t** new_nodes = (pm_node_t**) realloc(stmts->body.nodes,
+                                                       sizeof(pm_node_t*) * new_capacity);
+        if (!new_nodes) return false;
+
+        stmts->body.nodes = new_nodes;
+        stmts->body.capacity = new_capacity;
+    }
+
+    // Add the node
+    stmts->body.nodes[stmts->body.size++] = node;
+
+    // Update the statements location to encompass the new node
+    if (stmts->body.size == 1) {
+        // First node - set the statements bounds
+        stmts->base.location.start = node->location.start;
+        stmts->base.location.end = node->location.end;
+    } else {
+        // Expand bounds to include new node
+        if (node->location.start < stmts->base.location.start) {
+            stmts->base.location.start = node->location.start;
+        }
+        if (node->location.end > stmts->base.location.end) {
+            stmts->base.location.end = node->location.end;
+        }
+    }
+
+    return true;
+}
+
 
 } // namespace sorbet::rbs

@@ -54,6 +54,10 @@ private:
     CommentsPrism commentsForNode(pm_node_t *node);
     void insertTypeParams(parser::Node *node, std::unique_ptr<parser::Node> *body);
     std::unique_ptr<parser::Node> replaceSyntheticTypeAlias(std::unique_ptr<parser::Node> node);
+    pm_node_t *createStatementsWithSignatures(pm_node_t *originalNode, std::unique_ptr<parser::NodeVec> signatures);
+
+    // Helper methods for statements management
+    bool addNodeToStatements(pm_statements_node_t* stmts, pm_node_t* node);
 };
 
 } // namespace sorbet::rbs
