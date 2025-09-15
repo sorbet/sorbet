@@ -18,7 +18,7 @@ __package.rb:5: Argument to `layer` must be one of: `a`, `b`, or `c` https://srb
      5 |  layer 'fake'
                 ^^^^^^
 Errors: 1
---packager-layers can only be specified in --stripe-packages mode
+--packager-layers can only be specified in --sorbet-packages mode
 __package.rb:4: Found `strict_dependencies` annotation, but `--packager-layers` was not passed https://srb.help/3724
      4 |  strict_dependencies 'false'
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
