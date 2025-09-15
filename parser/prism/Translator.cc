@@ -547,12 +547,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 args = translateArguments(callNode->arguments);
             }
 
-            if (constantNameString == "[]=") {
-                messageLoc.endLoc += 2; // The message includes the closing bracket and equals sign
-            } else if (constantNameString == "[]") {
+            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_ATTRIBUTE_WRITE)) { // like `self.foo = 1`
+                // The `callNode->name` will be `foo=`, but the `message_loc` will be just the `foo` part,
+                // so we need to scan ahead to find the correct spot to end (just after the `=`).
+
+                auto adjustedLoc = callNode->message_loc;
+
+                // Invalid (or incomplete) code might have `=` immediately before `end`, EOF, etc.,
+                // so we limit our search to the end of this method call.
+                auto endOfCall = callNode->base.location;
+                while (*adjustedLoc.end != '=' && adjustedLoc.end <= endOfCall.end) {
+                    adjustedLoc.end++;
+                }
+                adjustedLoc.end++; // Bump the end to point just past the `=`.
+
+                messageLoc = translateLoc(adjustedLoc);
+            } else if (constantNameString == "[]=") { // Subscript assignment operator, like `foo[i] = 1`
+                messageLoc.endLoc += 2;               // The message should include the closing bracket and equals sign
+            } else if (constantNameString == "[]") {  // Subscript operator, like `foo[i]`
                 messageLoc.endLoc = messageLoc.beginLoc;
-            } else if (constantNameString.back() == '=') {
-                messageLoc.endLoc = args.front()->loc.beginPos() - 1; // The message ends right before the equals sign
             }
 
             unique_ptr<parser::Node> sendNode;
