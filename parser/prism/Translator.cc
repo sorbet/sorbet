@@ -536,6 +536,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::Integer>(move(sendNode), location, move(valueString));
             }
 
+            if (constantNameString == "[]" || constantNameString == "[]=") {
+                // Empty funLoc implies that errors should use the callLoc
+                messageLoc.endLoc = messageLoc.beginLoc;
+            }
+
             pm_node_t *prismBlock = callNode->block;
 
             NodeVec args;
@@ -545,11 +550,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 args = translateArguments(callNode->arguments, callNode->block);
             } else {
                 args = translateArguments(callNode->arguments);
-            }
-
-            if (constantNameString == "[]" || constantNameString == "[]=") {
-                // Empty funLoc implies that errors should use the callLoc
-                messageLoc.endLoc = messageLoc.beginLoc;
             }
 
             unique_ptr<parser::Node> sendNode;
