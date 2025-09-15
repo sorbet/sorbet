@@ -5,5 +5,5 @@ module Lib
   MyStaticField = 1
 
   # a comment
-  MyPrivateStaticField = 1
+  MyPrivateStaticField = 2
 end
