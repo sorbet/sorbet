@@ -552,7 +552,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 messageLoc = translateLoc(adjustedLoc);
             } else if (constantNameString == "[]") { // Subscript operator, like `foo[i]`
-                messageLoc.endLoc = messageLoc.beginLoc;
+                // Sorbet's parser treats the subscript operator as zero-length.
+                messageLoc = messageLoc.copyWithZeroLength();
             }
 
             pm_node_t *prismBlock = callNode->block;
