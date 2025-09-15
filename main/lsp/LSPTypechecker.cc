@@ -459,7 +459,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 Timer timeit(config->logger, "reIndexFromFileSystem");
 
                 auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
-                if (this->config->opts.cacheSensitiveOptions.stripePackages) {
+                if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
                     auto numPackageFiles = pipeline::partitionPackageFiles(*this->gs, workspaceFilesSpan);
                     auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
                     workspaceFilesSpan = workspaceFilesSpan.subspan(numPackageFiles);

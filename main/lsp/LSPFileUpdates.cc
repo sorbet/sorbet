@@ -132,7 +132,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // path logic in LSPPreprocessor.
         ENFORCE(fref.exists());
         ENFORCE(updatedFile->getFileHash() != nullptr);
-        if (config.opts.cacheSensitiveOptions.stripePackages && updatedFile->isPackage(gs)) {
+        if (config.opts.cacheSensitiveOptions.sorbetPackages && updatedFile->isPackage(gs)) {
             // Only relevant in --stripe-packages mode. Package declarations do not have method
             // hashes. Instead we rely on recomputing packages if any __package.rb source
             // changes.
@@ -191,7 +191,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             continue;
         }
 
-        if (config.opts.cacheSensitiveOptions.stripePackages && oldFile->isPackage(gs)) {
+        if (config.opts.cacheSensitiveOptions.sorbetPackages && oldFile->isPackage(gs)) {
             continue; // See note above about --stripe-packages.
         }
 

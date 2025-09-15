@@ -563,7 +563,7 @@ int realmain(int argc, char *argv[]) {
 
         // ----- build the package DB -----
 
-        if (opts.cacheSensitiveOptions.stripePackages) {
+        if (opts.cacheSensitiveOptions.sorbetPackages) {
             auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
             auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
             inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
@@ -681,7 +681,7 @@ int realmain(int argc, char *argv[]) {
             auto optsForMinimize = opts.clone();
             // Explicitly turn off the packager, because it doesn't make sense when the whole
             // project is a single RBI file.
-            optsForMinimize.cacheSensitiveOptions.stripePackages = false;
+            optsForMinimize.cacheSensitiveOptions.sorbetPackages = false;
 
             unique_ptr<core::GlobalState> gsForMinimize = make_unique<core::GlobalState>(gs->errorQueue);
             auto kvstore = nullptr;

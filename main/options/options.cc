@@ -37,7 +37,7 @@ enum class Group {
     LSP,
     LSP_FEATURE,
     PERFORMANCE,
-    STRIPE_PACKAGES_MODE,
+    SORBET_PACKAGES_MODE,
     STRIPE_AUTOGEN,
     DEBUGGING,
     INTERNAL,
@@ -62,8 +62,8 @@ string groupToString(Group group) {
             return "LSP FEATURE";
         case Group::PERFORMANCE:
             return "PERFORMANCE";
-        case Group::STRIPE_PACKAGES_MODE:
-            return "STRIPE PACKAGES MODE";
+        case Group::SORBET_PACKAGES_MODE:
+            return "SORBET PACKAGES MODE";
         case Group::STRIPE_AUTOGEN:
             return "STRIPE AUTOGEN";
         case Group::DEBUGGING:
@@ -80,7 +80,7 @@ string groupToString(Group group) {
 const vector<string> groupSections{
     groupToString(Group::INPUT),          groupToString(Group::OUTPUT),      groupToString(Group::AUTOCORRECT),
     groupToString(Group::ERROR),          groupToString(Group::METRIC),      groupToString(Group::LSP),
-    groupToString(Group::LSP_FEATURE),    groupToString(Group::PERFORMANCE), groupToString(Group::STRIPE_PACKAGES_MODE),
+    groupToString(Group::LSP_FEATURE),    groupToString(Group::PERFORMANCE), groupToString(Group::SORBET_PACKAGES_MODE),
     groupToString(Group::STRIPE_AUTOGEN), groupToString(Group::DEBUGGING),   groupToString(Group::INTERNAL),
     groupToString(Group::OTHER),
 };
@@ -620,11 +620,16 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // }}}
 
     // ----- STRIPE PACKAGES ---------------------------------------------- {{{
-    section = groupToString(Group::STRIPE_PACKAGES_MODE);
+    section = groupToString(Group::SORBET_PACKAGES_MODE);
     options.add_options(section)("stripe-packages", "Enable support for Stripe's internal Ruby package system",
                                  cxxopts::value<bool>());
     options.add_options(section)("stripe-packages-hint-message",
                                  "Optional hint message to add to packaging related errors",
+                                 cxxopts::value<string>()->default_value(""));
+    options.add_options(section)("sorbet-packages", "Enable support for Sorbet's experimental Ruby package system",
+                                 cxxopts::value<bool>());
+    options.add_options(section)("sorbet-packages-hint-message",
+                                 "Optional hint message to add to all packaging related errors",
                                  cxxopts::value<string>()->default_value(""));
     options.add_options(section)("extra-package-files-directory-prefix-underscore",
                                  "Extra parent directories which contain package files. Files are associated to a "
@@ -1208,10 +1213,11 @@ void readOptions(Options &opts,
         opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
-        opts.cacheSensitiveOptions.stripePackages = raw["stripe-packages"].as<bool>();
+        opts.cacheSensitiveOptions.sorbetPackages =
+            raw["sorbet-packages"].as<bool>() || raw["stripe-packages"].as<bool>();
 
         opts.packageDirected = raw["experimental-package-directed"].as<bool>();
-        if (opts.packageDirected && !opts.cacheSensitiveOptions.stripePackages) {
+        if (opts.packageDirected && !opts.cacheSensitiveOptions.sorbetPackages) {
             logger->error("--experimental-package-directed can only be specified in --stripe-packages mode");
             throw EarlyReturnWithCode(1);
         }
@@ -1252,8 +1258,8 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("allow-relaxed-packager-checks-for")) {
-            if (!opts.cacheSensitiveOptions.stripePackages) {
-                logger->error("--allow-relaxed-packager-checks-for can only be specified in --stripe-packages mode");
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--allow-relaxed-packager-checks-for can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
             std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
@@ -1268,7 +1274,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("packager-layers")) {
-            if (opts.cacheSensitiveOptions.stripePackages) {
+            if (opts.cacheSensitiveOptions.sorbetPackages) {
                 // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
                 // on feedback/usecases.
                 std::regex layerValid("[a-zA-Z0-9]+");
@@ -1280,21 +1286,24 @@ void readOptions(Options &opts,
                     opts.packagerLayers.emplace_back(layer);
                 }
             } else {
-                logger->error("--packager-layers can only be specified in --stripe-packages mode");
+                logger->error("--packager-layers can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
         }
 
-        opts.stripePackagesHint = raw["stripe-packages-hint-message"].as<string>();
-        if (!opts.stripePackagesHint.empty() && !opts.cacheSensitiveOptions.stripePackages) {
-            if (!opts.cacheSensitiveOptions.stripePackages) {
-                logger->error("--stripe-packages-hint-message can only be specified in --stripe-packages mode");
+        opts.sorbetPackagesHint = raw["sorbet-packages-hint-message"].as<string>();
+        if (opts.sorbetPackagesHint.empty()) {
+            opts.sorbetPackagesHint = raw["stripe-packages-hint-message"].as<string>();
+        }
+        if (!opts.sorbetPackagesHint.empty() && !opts.cacheSensitiveOptions.sorbetPackages) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--sorbet-packages-hint-message can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
         }
 
         if (raw.count("package-skip-rbi-export-enforcement")) {
-            if (!opts.cacheSensitiveOptions.stripePackages) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
                 logger->error("--package-skip-rbi-export-enforcement can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }

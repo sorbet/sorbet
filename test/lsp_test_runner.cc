@@ -605,7 +605,7 @@ TEST_CASE("LSPTest") {
             auto responses = getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(make_unique<NotificationMessage>(
                                                                  "2.0", LSPMethod::TextDocumentDidOpen, move(params))));
             // Sorbet will complain about missing packages in packaging mode. Ignore them.
-            if (!lspWrapper->opts->cacheSensitiveOptions.stripePackages) {
+            if (!lspWrapper->opts->cacheSensitiveOptions.sorbetPackages) {
                 INFO("Should not receive any response to opening an empty file.");
                 CHECK_EQ(0, countNonTestMessages(responses));
             }

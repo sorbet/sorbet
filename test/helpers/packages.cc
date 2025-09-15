@@ -41,7 +41,7 @@ string PackageHelpers::makePackageRB(string name, string strictDeps, string laye
 void PackageHelpers::makeDefaultPackagerGlobalState(core::GlobalState &gs, const vector<string> &packagerLayers) {
     gs.initEmpty();
     realmain::options::Options opts;
-    opts.cacheSensitiveOptions.stripePackages = true;
+    opts.cacheSensitiveOptions.sorbetPackages = true;
     opts.packagerLayers = packagerLayers;
     realmain::pipeline::setGlobalStateOptions(gs, opts);
 }

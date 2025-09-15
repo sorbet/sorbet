@@ -161,7 +161,7 @@ struct Options {
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
-    std::string stripePackagesHint = "";
+    std::string sorbetPackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
@@ -202,7 +202,7 @@ struct Options {
 
         bool runningUnderAutogen : 1;
 
-        bool stripePackages : 1;
+        bool sorbetPackages : 1;
 
         // HELLO! adding/removing MUST also change this number!!
         constexpr static uint8_t NUMBER_OF_FLAGS = 6;
@@ -210,7 +210,7 @@ struct Options {
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
             : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
-              runningUnderAutogen(false), stripePackages(false) {}
+              runningUnderAutogen(false), sorbetPackages(false) {}
 
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
