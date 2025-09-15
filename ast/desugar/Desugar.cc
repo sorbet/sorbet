@@ -451,6 +451,7 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
     int i = 0;
     int before = 0, after = 0;
     bool didSplat = false;
+    auto zloc = loc.copyWithZeroLength();
 
     for (auto &c : lhs->exprs) {
         if (auto *splat = parser::cast_node<parser::SplatLhs>(c.get())) {
@@ -480,7 +481,7 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
                 ++before;
             }
             auto val = MK::Send1(c->loc, MK::Local(c->loc, tempExpanded), core::Names::squareBrackets(),
-                                 loc.copyWithZeroLength(), MK::Int(loc, i));
+                                 zloc, MK::Int(loc, i));
 
             if (auto *mlhs = parser::cast_node<parser::Mlhs>(c.get())) {
                 stats.emplace_back(desugarMlhs(dctx, mlhs->loc, mlhs, move(val)));
