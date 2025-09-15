@@ -1,0 +1,265 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Literal{ value = -1 }
+
+    Literal{ value = 2 }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 3 }
+      fun = <U ~>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 4 }
+      fun = <U !>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 5 }
+      fun = <U !=>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 6 }
+      fun = <U !~>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 7 }
+      fun = <U =~>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 8 }
+      fun = <U ==>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 9 }
+      fun = <U ===>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 10 }
+      fun = <U <=>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 11 }
+      fun = <U >>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 12 }
+      fun = <U >=>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 13 }
+      fun = <U <>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 14 }
+      fun = <U <=>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 15 }
+      fun = <U &>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 16 }
+      fun = <U |>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 17 }
+      fun = <U ^>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 18 }
+      fun = <U >>>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 19 }
+      fun = <U <<>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 20 }
+      fun = <U ->
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 21 }
+      fun = <U +>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 22 }
+      fun = <U %>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 23 }
+      fun = <U />
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 24 }
+      fun = <U *>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Literal{ value = 25 }
+      fun = <U **>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = nil }
+      ]
+    }
+  ]
+}

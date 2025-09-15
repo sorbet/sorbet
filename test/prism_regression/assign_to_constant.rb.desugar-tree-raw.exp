@@ -39,6 +39,8 @@ ClassDef{
 
     EmptyTree
 
+    EmptyTree
+
     InsSeq{
       stats = [
         Assign{
@@ -48,8 +50,8 @@ ClassDef{
           }
           rhs = Array{
             elems = [
-              Literal{ value = 29 }
-              Literal{ value = 30 }
+              Literal{ value = 15 }
+              Literal{ value = 16 }
             ]
           }
         }
@@ -130,25 +132,10 @@ ClassDef{
           scope = EmptyTree
         }
       }
-      rhs = Literal{ value = 15 }
+      rhs = Literal{ value = 101 }
     }
 
-    Assign{
-      lhs = UnresolvedConstantLit{
-        cnst = <C <U REGULAR>>
-        scope = UnresolvedConstantLit{
-          cnst = <C <U ConstantPath>>
-          scope = UnresolvedConstantLit{
-            cnst = <C <U FullyQualified>>
-            scope = ConstantLit{
-              symbol = (class ::<root>)
-              orig = nullptr
-            }
-          }
-        }
-      }
-      rhs = Literal{ value = 16 }
-    }
+    EmptyTree
 
     EmptyTree
 
@@ -183,8 +170,8 @@ ClassDef{
           }
           rhs = Array{
             elems = [
-              Literal{ value = 31 }
-              Literal{ value = 32 }
+              Literal{ value = 115 }
+              Literal{ value = 116 }
             ]
           }
         }
@@ -263,6 +250,49 @@ ClassDef{
       }
     }
 
+    Assign{
+      lhs = UnresolvedConstantLit{
+        cnst = <C <U REGULAR>>
+        scope = UnresolvedConstantLit{
+          cnst = <C <U ConstantPath>>
+          scope = UnresolvedConstantLit{
+            cnst = <C <U FullyQualified>>
+            scope = ConstantLit{
+              symbol = (class ::<root>)
+              orig = nullptr
+            }
+          }
+        }
+      }
+      rhs = Literal{ value = 201 }
+    }
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
+    EmptyTree
+
     InsSeq{
       stats = [
         Assign{
@@ -272,8 +302,8 @@ ClassDef{
           }
           rhs = Array{
             elems = [
-              Literal{ value = 33 }
-              Literal{ value = 34 }
+              Literal{ value = 315 }
+              Literal{ value = 316 }
             ]
           }
         }
@@ -306,9 +336,12 @@ ClassDef{
             cnst = <C <U TARGET1>>
             scope = UnresolvedConstantLit{
               cnst = <C <U ConstantPath>>
-              scope = ConstantLit{
-                symbol = (class ::<root>)
-                orig = nullptr
+              scope = UnresolvedConstantLit{
+                cnst = <C <U FullyQualified>>
+                scope = ConstantLit{
+                  symbol = (class ::<root>)
+                  orig = nullptr
+                }
               }
             }
           }
@@ -331,9 +364,12 @@ ClassDef{
             cnst = <C <U TARGET2>>
             scope = UnresolvedConstantLit{
               cnst = <C <U ConstantPath>>
-              scope = ConstantLit{
-                symbol = (class ::<root>)
-                orig = nullptr
+              scope = UnresolvedConstantLit{
+                cnst = <C <U FullyQualified>>
+                scope = ConstantLit{
+                  symbol = (class ::<root>)
+                  orig = nullptr
+                }
               }
             }
           }
@@ -390,6 +426,25 @@ ClassDef{
               pos_args = 1
               args = [
                 Literal{ value = 2 }
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U <dynamic-const-assign>>
+            }
+            rhs = Send{
+              flags = {}
+              recv = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              fun = <U |>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 3 }
               ]
             }
           }
@@ -461,7 +516,7 @@ ClassDef{
                 kind = Local
                 name = <U <dynamic-const-assign>>
               }
-              fun = <U ->
+              fun = <U +>
               block = nullptr
               pos_args = 1
               args = [
@@ -480,7 +535,7 @@ ClassDef{
                 kind = Local
                 name = <U <dynamic-const-assign>>
               }
-              fun = <U %>
+              fun = <U ->
               block = nullptr
               pos_args = 1
               args = [
@@ -499,7 +554,7 @@ ClassDef{
                 kind = Local
                 name = <U <dynamic-const-assign>>
               }
-              fun = <U |>
+              fun = <U %>
               block = nullptr
               pos_args = 1
               args = [
@@ -618,6 +673,40 @@ ClassDef{
             }
             rhs = Literal{ value = 1 }
           }
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+          EmptyTree
+        ],
+        expr = EmptyTree
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U method3><<U <todo method>>>
+      params = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U <dynamic-const-assign>>
+            }
+            rhs = Literal{ value = 1 }
+          }
+          EmptyTree
           EmptyTree
           EmptyTree
           EmptyTree

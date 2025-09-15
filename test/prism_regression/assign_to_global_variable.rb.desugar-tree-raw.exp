@@ -38,6 +38,26 @@ ClassDef{
     Assign{
       lhs = UnresolvedIdent{
         kind = Global
+        name = <U $bitwise_or>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Global
+          name = <U $bitwise_or>
+        }
+        fun = <U |>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 3 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Global
         name = <U $bitwise_xor>
       }
       rhs = Send{
@@ -98,6 +118,26 @@ ClassDef{
     Assign{
       lhs = UnresolvedIdent{
         kind = Global
+        name = <U $add_assign>
+      }
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Global
+          name = <U $add_assign>
+        }
+        fun = <U +>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = 7 }
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Global
         name = <U $subtract_assign>
       }
       rhs = Send{
@@ -110,26 +150,6 @@ ClassDef{
         block = nullptr
         pos_args = 1
         args = [
-          Literal{ value = 7 }
-        ]
-      }
-    }
-
-    Assign{
-      lhs = UnresolvedIdent{
-        kind = Global
-        name = <U $module_assign>
-      }
-      rhs = Send{
-        flags = {}
-        recv = UnresolvedIdent{
-          kind = Global
-          name = <U $module_assign>
-        }
-        fun = <U %>
-        block = nullptr
-        pos_args = 1
-        args = [
           Literal{ value = 8 }
         ]
       }
@@ -138,15 +158,15 @@ ClassDef{
     Assign{
       lhs = UnresolvedIdent{
         kind = Global
-        name = <U $bitwise_or>
+        name = <U $modulo_assign>
       }
       rhs = Send{
         flags = {}
         recv = UnresolvedIdent{
           kind = Global
-          name = <U $bitwise_or>
+          name = <U $modulo_assign>
         }
-        fun = <U |>
+        fun = <U %>
         block = nullptr
         pos_args = 1
         args = [

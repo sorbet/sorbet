@@ -5,12 +5,13 @@ $regular = 1
 
 # Compound assignment operators
 $bitwise_and &= 2
+$bitwise_or |= 3
 $bitwise_xor ^= 4
 $shift_right >>= 5
 $shift_left <<= 6
-$subtract_assign -= 7
-$module_assign %= 8
-$bitwise_or |= 9
+$add_assign += 7
+$subtract_assign -= 8
+$modulo_assign %= 9
 $divide_assign /= 10
 $multiply_assign *= 11
 $exponentiate_assign **= 12
