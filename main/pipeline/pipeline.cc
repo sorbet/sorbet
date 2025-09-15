@@ -117,7 +117,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
         gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
                               opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                               opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
+                              opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.sorbetPackagesHint);
     }
 #endif
 }
@@ -132,7 +132,7 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
     auto result = from.copyForSlowPath(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.stripePackagesHint);
+        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.sorbetPackagesHint);
 
     core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
 
@@ -704,7 +704,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
-        opts.stripePackagesHint);
+        opts.sorbetPackagesHint);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");

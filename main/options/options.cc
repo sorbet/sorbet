@@ -1217,7 +1217,7 @@ void readOptions(Options &opts,
             raw["sorbet-packages"].as<bool>() || raw["stripe-packages"].as<bool>();
 
         opts.packageDirected = raw["experimental-package-directed"].as<bool>();
-        if (opts.packageDirected && !opts.cacheSensitiveOptions.stripePackages) {
+        if (opts.packageDirected && !opts.cacheSensitiveOptions.sorbetPackages) {
             logger->error("--experimental-package-directed can only be specified in --stripe-packages mode");
             throw EarlyReturnWithCode(1);
         }
