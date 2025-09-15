@@ -127,13 +127,13 @@ TEST_CASE("CountTrees") {
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
     auto rhs(ast::MK::Int(loc.offsets(), 5));
-    auto arg = ast::make_expression<ast::Local>(loc.offsets(), argumentSym);
-    ast::MethodDef::ARGS_store args;
-    args.emplace_back(std::move(arg));
+    auto param = ast::make_expression<ast::Local>(loc.offsets(), argumentSym);
+    ast::MethodDef::PARAMS_store params;
+    params.emplace_back(std::move(param));
 
     ast::MethodDef::Flags flags;
     auto methodDef = ast::make_expression<ast::MethodDef>(loc.offsets(), loc.offsets(), methodSym, name,
-                                                          std::move(args), std::move(rhs), flags);
+                                                          std::move(params), std::move(rhs), flags);
     auto emptyTree = ast::MK::EmptyTree();
     auto cnst = ast::make_expression<ast::UnresolvedConstantLit>(loc.offsets(), std::move(emptyTree), name);
 

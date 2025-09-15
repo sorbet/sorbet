@@ -271,7 +271,7 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
 }
 
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                       const ast::MethodDef::ARGS_store &args,
+                                       const ast::MethodDef::PARAMS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe);
 
@@ -292,7 +292,7 @@ ast::ExpressionPtr invalidUnderTestEach(core::MutableContext ctx, core::NameRef 
 // otherwise flag an error about it
 ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
                                 absl::Span<const ast::ExpressionPtr> destructuringStmts, ast::ExpressionPtr stmt,
-                                const ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee,
+                                const ast::MethodDef::PARAMS_store &args, ast::ExpressionPtr &iteratee,
                                 bool insideDescribe) {
     // this statement must be a send
     auto send = ast::cast_tree<ast::Send>(stmt);
@@ -300,7 +300,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
-    if (!send->hasBlock() || send->block()->args.size() != 0) {
+    if (!send->hasBlock() || send->block()->params.size() != 0) {
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
@@ -327,7 +327,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         }
 
         // pull the arg and the iteratee in and synthesize `iterate.each { |arg| body }`
-        ast::MethodDef::ARGS_store new_args;
+        ast::MethodDef::PARAMS_store new_args;
         for (auto &arg : args) {
             new_args.emplace_back(arg.deepCopy());
         }
@@ -362,7 +362,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     return invalidUnderTestEach(ctx, eachName, move(stmt));
 }
 
-bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, const ast::ExpressionPtr &expr) {
+bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::PARAMS_store &args,
+                        const ast::ExpressionPtr &expr) {
     auto local = ast::cast_tree<ast::UnresolvedIdent>(expr);
     if (local == nullptr || local->kind != ast::UnresolvedIdent::Kind::Local) {
         return false;
@@ -398,7 +399,7 @@ bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store 
 //
 // Because this case is so common, we have special handling to detect "contains only valid it-blocks
 // plus desugared destruturing assignments."
-bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, ast::InsSeq *body) {
+bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::PARAMS_store &args, ast::InsSeq *body) {
     return absl::c_all_of(body->stats, [&gs, &args](auto &stat) {
         auto insSeq = ast::cast_tree<ast::InsSeq>(stat);
         if (insSeq == nullptr) {
@@ -412,7 +413,7 @@ bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_sto
 
 // this just walks the body of a `test_each` and tries to transform every statement
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                       const ast::MethodDef::ARGS_store &args,
+                                       const ast::MethodDef::PARAMS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe) {
     if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
@@ -492,12 +493,12 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 return nullptr;
             }
 
-            if ((send->fun == core::Names::testEach() && block->args.size() < 1) ||
-                (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
+            if ((send->fun == core::Names::testEach() && block->params.size() < 1) ||
+                (send->fun == core::Names::testEachHash() && block->params.size() != 2)) {
                 if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
                     e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`",
                                 send->fun.show(ctx), send->fun == core::Names::testEach() ? "at least 1" : "2",
-                                block->args.size());
+                                block->params.size());
                 }
                 return nullptr;
             }
@@ -506,11 +507,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             // we can freely copy into methoddef scope
             auto iteratee = getIteratee(send->getPosArg(0));
             // and then reconstruct the send but with a modified body
-            auto body =
-                prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, {}, iteratee, insideDescribe);
+            auto body = prepareTestEachBody(ctx, send->fun, std::move(block->body), block->params, {}, iteratee,
+                                            insideDescribe);
             return ast::MK::Send(send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
-                                 ast::MK::SendArgs(move(send->getPosArg(0)),
-                                                   ast::MK::Block(block->loc, std::move(body), std::move(block->args))),
+                                 ast::MK::SendArgs(move(send->getPosArg(0)), ast::MK::Block(block->loc, std::move(body),
+                                                                                            std::move(block->params))),
                                  send->flags);
         }
 

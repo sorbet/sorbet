@@ -5,7 +5,7 @@
 #include "core/ArityHash.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
-#include "core/ParsedArg.h"
+#include "core/ParsedParam.h"
 #include "core/SymbolRef.h"
 #include <vector>
 
@@ -150,7 +150,7 @@ struct FoundMethod final {
     core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
-    std::vector<core::ParsedArg> parsedArgs;
+    std::vector<core::ParsedParam> parsedArgs;
     core::ArityHash arityHash;
     struct Flags {
         bool isSelfMethod : 1;

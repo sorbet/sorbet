@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U main><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -1076,7 +1076,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U prop><<U <todo method>>>
-          args = [RestArg{ expr = UnresolvedIdent{
+          params = [RestArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U args>
             } }, BlockArg{ expr = UnresolvedIdent{
@@ -1332,7 +1332,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1356,7 +1356,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foo><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1383,7 +1383,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1420,7 +1420,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foo=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -1447,7 +1447,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1483,7 +1483,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foo2><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1528,7 +1528,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1565,7 +1565,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foo2=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -1678,7 +1678,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1702,7 +1702,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U default><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1729,7 +1729,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1766,7 +1766,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U default=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -1796,7 +1796,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1832,7 +1832,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U t_nilable><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1859,7 +1859,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1920,7 +1920,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U t_nilable=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -1950,7 +1950,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1974,7 +1974,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U array><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2001,7 +2001,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2038,7 +2038,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U array=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -2068,7 +2068,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2107,7 +2107,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U t_array><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2134,7 +2134,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2201,7 +2201,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U t_array=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -2231,7 +2231,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2274,7 +2274,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U hash_of><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2301,7 +2301,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2376,7 +2376,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U hash_of=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -2406,7 +2406,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2430,7 +2430,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U const_explicit><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2457,7 +2457,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2481,7 +2481,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U const><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2508,7 +2508,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2532,7 +2532,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U enum_prop><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2559,7 +2559,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2596,7 +2596,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U enum_prop=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -2626,7 +2626,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2650,7 +2650,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2677,7 +2677,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2714,7 +2714,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -2744,7 +2744,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2808,7 +2808,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -2841,7 +2841,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2893,7 +2893,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_!><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -2926,7 +2926,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -2950,7 +2950,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_lazy><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2977,7 +2977,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3014,7 +3014,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_lazy=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -3044,7 +3044,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3108,7 +3108,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_lazy_><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3141,7 +3141,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3193,7 +3193,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_lazy_!><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3226,7 +3226,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3250,7 +3250,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_proc><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3277,7 +3277,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3314,7 +3314,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_proc=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -3344,7 +3344,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3408,7 +3408,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_proc_><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3441,7 +3441,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3493,7 +3493,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_proc_!><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3526,7 +3526,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3550,7 +3550,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_invalid><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3577,7 +3577,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3614,7 +3614,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_invalid=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -3644,7 +3644,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3704,7 +3704,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_invalid_><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3737,7 +3737,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3797,7 +3797,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_invalid_!><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3830,7 +3830,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3854,7 +3854,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U ifunset><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3881,7 +3881,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3918,7 +3918,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U ifunset=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -3948,7 +3948,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -3984,7 +3984,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U ifunset_nilable><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4011,7 +4011,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4072,7 +4072,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U ifunset_nilable=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -4102,7 +4102,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4126,7 +4126,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U empty_hash_rules><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4153,7 +4153,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4190,7 +4190,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U empty_hash_rules=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -4220,7 +4220,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4244,7 +4244,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U hash_rules><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4271,7 +4271,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4308,7 +4308,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U hash_rules=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -4597,7 +4597,7 @@ ClassDef{
               }
               fun = <U lambda>
               block = Block {
-                args = [
+                params = [
                 ]
                 body = UnresolvedConstantLit{
                   cnst = <C <U ForeignClass>>
@@ -4633,7 +4633,7 @@ ClassDef{
               recv = Self
               fun = <U proc>
               block = Block {
-                args = [
+                params = [
                 ]
                 body = UnresolvedConstantLit{
                   cnst = <C <U ForeignClass>>
@@ -4669,7 +4669,7 @@ ClassDef{
               recv = Self
               fun = <U proc>
               block = Block {
-                args = [
+                params = [
                 ]
                 body = Literal{ value = :not_a_type }
               }
@@ -4810,7 +4810,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U token_prop><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -4829,7 +4829,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U created_prop><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -4853,7 +4853,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4877,7 +4877,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U token><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4904,7 +4904,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4941,7 +4941,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U token=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -4971,7 +4971,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -4995,7 +4995,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U created><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5022,7 +5022,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5059,7 +5059,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U created=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -5147,7 +5147,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U timestamped_token_prop><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -5166,7 +5166,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U created_prop><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -5190,7 +5190,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5214,7 +5214,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U token><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5241,7 +5241,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5278,7 +5278,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U token=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -5308,7 +5308,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5332,7 +5332,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U created><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5474,7 +5474,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U encrypted_prop><<U <todo method>>>
-          args = [OptionalArg{
+          params = [OptionalArg{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -5498,7 +5498,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5534,7 +5534,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foo><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5573,7 +5573,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5624,7 +5624,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U encrypted_foo><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5663,7 +5663,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5724,7 +5724,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foo=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -5766,7 +5766,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5857,7 +5857,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U encrypted_foo=><<U <todo method>>>
-          args = [UnresolvedIdent{
+          params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
@@ -5899,7 +5899,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -5935,7 +5935,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U bar><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5974,7 +5974,7 @@ ClassDef{
           }
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -6025,7 +6025,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U encrypted_bar><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]

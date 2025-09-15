@@ -34,7 +34,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U method_with_ensure><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -55,7 +55,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U empty_method_with_ensure><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -71,7 +71,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U method_with_begin_and_ensure><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]

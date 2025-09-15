@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U foo><<U <todo method>>>
-      args = [RestArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U a>
         } }, BlockArg{ expr = UnresolvedIdent{
@@ -23,7 +23,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U foo><<U <todo method>>>
-      args = [RestArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U *>
         } }, BlockArg{ expr = UnresolvedIdent{
@@ -36,7 +36,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U foo><<U <todo method>>>
-      args = [RestArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U a>
         } }, UnresolvedIdent{

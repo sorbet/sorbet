@@ -15,7 +15,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
         ]
         body = Literal{ value = 123 }
       }
@@ -32,7 +32,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U param>
@@ -56,7 +56,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           OptionalArg{
             expr = UnresolvedIdent{
               kind = Local
@@ -85,7 +85,7 @@ ClassDef{
         }
         fun = <U lambda>
         block = Block {
-          args = [
+          params = [
           ]
           body = Literal{ value = 456 }
         }
@@ -105,7 +105,7 @@ ClassDef{
       recv = Self
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
         ]
         body = Literal{ value = 789 }
       }
@@ -119,7 +119,7 @@ ClassDef{
       recv = Self
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U param>
@@ -151,7 +151,7 @@ ClassDef{
           }
           fun = <U lambda>
           block = Block {
-            args = [
+            params = [
             ]
             body = Literal{ value = 123 }
           }
@@ -170,7 +170,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -217,7 +217,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U method_returning_lambda><<U <todo method>>>
-          args = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -229,7 +229,7 @@ ClassDef{
             }
             fun = <U lambda>
             block = Block {
-              args = [
+              params = [
               ]
               body = Literal{ value = 123 }
             }
@@ -249,7 +249,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
         ]
         body = Send{
           flags = {}

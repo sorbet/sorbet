@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U has_named_kwargs><<U <todo method>>>
-      args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U kwargs>
         } } }, BlockArg{ expr = UnresolvedIdent{
@@ -61,7 +61,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U has_anonymous_kwargs><<U <todo method>>>
-      args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
           kind = Local
           name = <P <U **> $2>
         } } }, BlockArg{ expr = UnresolvedIdent{

@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U foo><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -22,7 +22,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -43,7 +43,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -96,7 +96,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -133,7 +133,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -154,7 +154,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -207,7 +207,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -247,7 +247,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -271,7 +271,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -327,7 +327,7 @@ ClassDef{
       }
       fun = <U lambda>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>
@@ -364,7 +364,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U _1>

@@ -12,7 +12,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
         ]
         body = EmptyTree
       }
@@ -26,7 +26,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
         ]
         body = EmptyTree
       }
@@ -40,7 +40,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
         ]
         body = Literal{ value = "inline block" }
       }
@@ -54,7 +54,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
         ]
         body = Literal{ value = "do-end block" }
       }
@@ -68,7 +68,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U positional>
@@ -94,7 +94,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U positional>
@@ -120,7 +120,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U positional>
@@ -226,7 +226,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U bar>
@@ -252,7 +252,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U positional>
@@ -366,7 +366,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U bar>
@@ -470,7 +470,7 @@ ClassDef{
           }
           fun = <U bar>
           block = Block {
-            args = [
+            params = [
             ]
             body = EmptyTree
           }
@@ -486,7 +486,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <D <U <destructure>> $9>
@@ -569,7 +569,7 @@ ClassDef{
       recv = Self
       fun = <U foo>
       block = Block {
-        args = [
+        params = [
           RestArg{ expr = UnresolvedIdent{
             kind = Local
             name = <U args>

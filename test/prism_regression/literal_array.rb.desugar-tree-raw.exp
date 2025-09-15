@@ -55,7 +55,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U has_named_rest_args><<U <todo method>>>
-      args = [RestArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U args>
         } }, BlockArg{ expr = UnresolvedIdent{
@@ -115,7 +115,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U has_anonymous_rest_args><<U <todo method>>>
-      args = [RestArg{ expr = UnresolvedIdent{
+      params = [RestArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U *>
         } }, BlockArg{ expr = UnresolvedIdent{

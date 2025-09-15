@@ -24,7 +24,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -57,7 +57,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_positional><<U <todo method>>>
-          args = [Local{
+          params = [Local{
               localVariable = <U arg0>
             }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -81,7 +81,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -114,7 +114,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_keyword><<U <todo method>>>
-          args = [KeywordArg{ expr = Local{
+          params = [KeywordArg{ expr = Local{
               localVariable = <U arg0>
             } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -138,7 +138,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -176,7 +176,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_two_keyword><<U <todo method>>>
-          args = [KeywordArg{ expr = Local{
+          params = [KeywordArg{ expr = Local{
               localVariable = <U arg0>
             } }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
@@ -218,7 +218,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -256,7 +256,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_positional_then_keyword><<U <todo method>>>
-          args = [Local{
+          params = [Local{
               localVariable = <U arg0>
             }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
@@ -298,7 +298,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -339,7 +339,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_rest><<U <todo method>>>
-          args = [RestArg{ expr = Local{
+          params = [RestArg{ expr = Local{
               localVariable = <U args>
             } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -363,7 +363,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -404,7 +404,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_keyword_rest><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
+          params = [RestArg{ expr = KeywordArg{ expr = Local{
               localVariable = <U args>
             } } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -428,7 +428,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -477,7 +477,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_block><<U <todo method>>>
-          args = [BlockArg{ expr = Local{
+          params = [BlockArg{ expr = Local{
               localVariable = <U blk>
             } }]
           rhs = Send{
@@ -499,7 +499,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -519,7 +519,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U zsuper_inside_block><<U <todo method>>>
-          args = [BlockArg{ expr = Local{
+          params = [BlockArg{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = EmptyTree
@@ -577,7 +577,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -610,7 +610,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_positional><<U <todo method>>>
-          args = [Local{
+          params = [Local{
               localVariable = <U arg0>
             }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -634,7 +634,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -667,7 +667,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_keyword><<U <todo method>>>
-          args = [KeywordArg{ expr = Local{
+          params = [KeywordArg{ expr = Local{
               localVariable = <U arg0>
             } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -692,7 +692,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -730,7 +730,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_two_keyword><<U <todo method>>>
-          args = [KeywordArg{ expr = Local{
+          params = [KeywordArg{ expr = Local{
               localVariable = <U arg0>
             } }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
@@ -761,7 +761,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -799,7 +799,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_positional_then_keyword><<U <todo method>>>
-          args = [Local{
+          params = [Local{
               localVariable = <U arg0>
             }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
@@ -829,7 +829,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -870,7 +870,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_rest><<U <todo method>>>
-          args = [RestArg{ expr = Local{
+          params = [RestArg{ expr = Local{
               localVariable = <U args>
             } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -924,7 +924,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -965,7 +965,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_keyword_rest><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = Local{
+          params = [RestArg{ expr = KeywordArg{ expr = Local{
               localVariable = <U args>
             } } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -1001,7 +1001,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {}
@@ -1050,7 +1050,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_block><<U <todo method>>>
-          args = [BlockArg{ expr = Local{
+          params = [BlockArg{ expr = Local{
               localVariable = <U blk>
             } }]
           rhs = Send{
@@ -1077,7 +1077,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1097,7 +1097,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U zsuper_inside_block><<U <todo method>>>
-          args = [BlockArg{ expr = Local{
+          params = [BlockArg{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -1105,7 +1105,7 @@ ClassDef{
             recv = Literal{ value = 1 }
             fun = <U times>
             block = Block {
-              args = [
+              params = [
                 Local{
                   localVariable = <U i>$1
                 }
@@ -1158,7 +1158,7 @@ ClassDef{
           recv = Self
           fun = <U sig>
           block = Block {
-            args = [
+            params = [
             ]
             body = Send{
               flags = {privateOk}
@@ -1178,7 +1178,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U super_inside_module><<U <todo method>>>
-          args = [BlockArg{ expr = Local{
+          params = [BlockArg{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{

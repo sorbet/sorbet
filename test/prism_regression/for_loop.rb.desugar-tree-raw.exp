@@ -20,7 +20,7 @@ ClassDef{
       }
       fun = <U each>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U x>
@@ -46,7 +46,7 @@ ClassDef{
       }
       fun = <U each>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U x>
@@ -72,7 +72,7 @@ ClassDef{
       }
       fun = <U each>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U x>
@@ -103,7 +103,7 @@ ClassDef{
       }
       fun = <U each>
       block = Block {
-        args = [
+        params = [
           UnresolvedIdent{
             kind = Local
             name = <U x>
@@ -129,7 +129,7 @@ ClassDef{
       }
       fun = <U each>
       block = Block {
-        args = [
+        params = [
         ]
         body = InsSeq{
           stats = [

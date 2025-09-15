@@ -92,7 +92,7 @@ private:
     std::pair<std::unique_ptr<parser::Args>, core::NameRef /* enclosingBlockParamName */>
     translateParametersNode(pm_parameters_node *paramsNode);
 
-    std::tuple<ast::MethodDef::ARGS_store, ast::InsSeq::STATS_store, bool>
+    std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool>
     desugarParametersNode(NodeVec &params, bool attemptToDesugarParams);
 
     NodeVec translateArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);

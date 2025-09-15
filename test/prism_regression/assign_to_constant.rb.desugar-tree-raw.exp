@@ -361,7 +361,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U method1><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -605,7 +605,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U method2><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]

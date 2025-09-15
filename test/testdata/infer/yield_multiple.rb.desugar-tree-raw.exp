@@ -29,7 +29,7 @@ ClassDef{
       recv = Self
       fun = <U sig>
       block = Block {
-        args = [
+        params = [
         ]
         body = Send{
           flags = {}
@@ -100,7 +100,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U yield_two><<U <todo method>>>
-      args = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U blk>
         } }]
