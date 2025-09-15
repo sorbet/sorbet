@@ -480,8 +480,9 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
             } else {
                 ++before;
             }
-            auto val = MK::Send1(c->loc, MK::Local(c->loc, tempExpanded), core::Names::squareBrackets(),
-                                 zloc, MK::Int(zloc, i));
+            auto zcloc = c->loc.copyWithZeroLength();
+            auto val =
+                MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
 
             if (auto *mlhs = parser::cast_node<parser::Mlhs>(c.get())) {
                 stats.emplace_back(desugarMlhs(dctx, mlhs->loc, mlhs, move(val)));
