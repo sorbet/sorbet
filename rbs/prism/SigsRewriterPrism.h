@@ -35,12 +35,14 @@ struct CommentsPrism {
 class SigsRewriterPrism {
 public:
     SigsRewriterPrism(core::MutableContext ctx,
+                      const parser::Prism::Parser& parser,
                       std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> &commentsByNode)
-        : ctx(ctx), commentsByNode(&commentsByNode){};
+        : ctx(ctx), parser(parser), commentsByNode(&commentsByNode){};
     pm_node_t *run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
+    const parser::Prism::Parser& parser;
     std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> *commentsByNode;
 
     pm_node_t *rewriteBegin(pm_node_t *node);

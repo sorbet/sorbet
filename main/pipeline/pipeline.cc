@@ -59,7 +59,8 @@ namespace sorbet::realmain::pipeline {
 
 pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileRef file, pm_node_t *node,
                               const std::vector<sorbet::core::LocOffsets> &commentLocations,
-                              const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx) {
+                              const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx,
+                              const parser::Prism::Parser& parser) {
     if (gs.cacheSensitiveOptions.rbsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewritePrism", {{"file", string(file.data(gs).path())}});
 
@@ -69,7 +70,7 @@ pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileR
         auto commentMap = associator.run(node);
 
         // fmt::print("TRIGGERING SIGS REWRITER PRISM\n");
-        auto sigsRewriter = rbs::SigsRewriterPrism(ctx, commentMap.signaturesForNode);
+        auto sigsRewriter = rbs::SigsRewriterPrism(ctx, parser, commentMap.signaturesForNode);
         node = sigsRewriter.run(node);
 
         // auto assertionsRewriter = rbs::AssertionsRewriterPrism(ctx, commentMap.assertionsForNode);
@@ -323,7 +324,7 @@ parser::ParseResult runPrismParserPrism(core::GlobalState &gs, core::FileRef fil
 
         // Step 2: Run RBS rewrite on the raw Prism nodes
         pm_node_t *rewrittenNode = runRBSRewritePrism(gs, file, prismParseResult.getRawNodePointer(),
-                                                      prismParseResult.getCommentLocations(), print, ctx);
+                                                      prismParseResult.getCommentLocations(), print, ctx, parser);
 
         // Step 3: Translate the (possibly RBS-rewritten) Prism nodes to Sorbet nodes
         parseResult =
