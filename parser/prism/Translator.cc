@@ -536,17 +536,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::Integer>(move(sendNode), location, move(valueString));
             }
 
-            pm_node_t *prismBlock = callNode->block;
-
-            NodeVec args;
-            // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
-            // but not an explicit block with `{ ... }` or `do ... end`
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                args = translateArguments(callNode->arguments, callNode->block);
-            } else {
-                args = translateArguments(callNode->arguments);
-            }
-
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_ATTRIBUTE_WRITE)) { // like `self.foo = 1`
                 // The `callNode->name` will be `foo=`, but the `message_loc` will be just the `foo` part,
                 // so we need to scan ahead to find the correct spot to end (just after the `=`).
@@ -566,6 +555,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 messageLoc.endLoc += 2;               // The message should include the closing bracket and equals sign
             } else if (constantNameString == "[]") {  // Subscript operator, like `foo[i]`
                 messageLoc.endLoc = messageLoc.beginLoc;
+            }
+
+            pm_node_t *prismBlock = callNode->block;
+
+            NodeVec args;
+            // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+            // but not an explicit block with `{ ... }` or `do ... end`
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                args = translateArguments(callNode->arguments, callNode->block);
+            } else {
+                args = translateArguments(callNode->arguments);
             }
 
             unique_ptr<parser::Node> sendNode;
