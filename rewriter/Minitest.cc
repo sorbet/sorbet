@@ -340,14 +340,29 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         auto method = addSigVoid(ctx, ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
         // add back any moved constants
         return constantMover.addConstantsToExpression(send->loc, move(method));
-    } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1) {
-        return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts, iteratee,
-                                   /* insideDescribe */ true);
-    } else if (insideDescribe &&
-               (send->fun == core::Names::let() || send->fun == core::Names::let_bang() ||
-                send->fun == core::Names::subject()) &&
-               (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0)))) {
-        if (auto maybeDecl = getLetNameAndDeclLoc(*send)) {
+    }
+
+    switch (send->fun.rawId()) {
+        case core::Names::describe().rawId(): {
+            if (send->numPosArgs() != 1) {
+                return invalidUnderTestEach(ctx, eachName, move(stmt));
+            }
+
+            return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
+                                       iteratee, /* insideDescribe */ true);
+        }
+
+        case core::Names::let().rawId():
+        case core::Names::let_bang().rawId():
+        case core::Names::subject().rawId(): {
+            if (!(insideDescribe && (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0))))) {
+                return invalidUnderTestEach(ctx, eachName, move(stmt));
+            }
+
+            auto maybeDecl = getLetNameAndDeclLoc(*send);
+            if (!maybeDecl.has_value()) {
+                return invalidUnderTestEach(ctx, eachName, move(stmt));
+            }
             auto [methodName, declLoc] = maybeDecl.value();
 
             ConstantMover constantMover;
