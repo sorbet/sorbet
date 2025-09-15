@@ -621,10 +621,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     // ----- STRIPE PACKAGES ---------------------------------------------- {{{
     section = groupToString(Group::SORBET_PACKAGES_MODE);
-    options.add_options(section)("stripe-packages", "Enable support for Stripe's internal Ruby package system",
+    options.add_options(section)("stripe-packages", "Enable support for Sorbet's experimental Ruby package system",
                                  cxxopts::value<bool>());
     options.add_options(section)("stripe-packages-hint-message",
-                                 "Optional hint message to add to packaging related errors",
+                                 "Optional hint message to add to all packaging related errors",
                                  cxxopts::value<string>()->default_value(""));
     options.add_options(section)("sorbet-packages", "Enable support for Sorbet's experimental Ruby package system",
                                  cxxopts::value<bool>());
@@ -1218,7 +1218,7 @@ void readOptions(Options &opts,
 
         opts.packageDirected = raw["experimental-package-directed"].as<bool>();
         if (opts.packageDirected && !opts.cacheSensitiveOptions.sorbetPackages) {
-            logger->error("--experimental-package-directed can only be specified in --stripe-packages mode");
+            logger->error("--experimental-package-directed can only be specified in --sorbet-packages mode");
             throw EarlyReturnWithCode(1);
         }
 
@@ -1304,7 +1304,7 @@ void readOptions(Options &opts,
 
         if (raw.count("package-skip-rbi-export-enforcement")) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
-                logger->error("--package-skip-rbi-export-enforcement can only be specified in --stripe-packages mode");
+                logger->error("--package-skip-rbi-export-enforcement can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
             for (const string &ns : raw["package-skip-rbi-export-enforcement"].as<vector<string>>()) {
