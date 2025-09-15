@@ -796,6 +796,17 @@ public:
         });
 
         if (gs.packageDB().genPackages()) {
+            for (auto &parsedFile : filesSpan) {
+                // TODO(neil): we can skip this loop on the slow path since the package references sets will be empty
+                auto file = parsedFile.file;
+                auto pkgName = gs.packageDB().getPackageNameForFile(file);
+                if (!pkgName.exists()) {
+                    continue;
+                }
+                auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
+                nonConstPackageInfo->untrackPackageReferencesFor(file);
+            }
+
             std::optional<std::pair<core::FileRef,
                                     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
                 threadResult;
@@ -809,7 +820,6 @@ public:
                         continue;
                     }
                     auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
-                    nonConstPackageInfo->untrackPackageReferencesFor(file);
                     for (auto [p, packageReferenceInfo] : threadResult.value().second) {
                         nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
                     }
