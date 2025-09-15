@@ -1,10 +1,12 @@
 # typed: strict
-# exclude-from-file-update: true
+# spacer for exclude-from-file-update
 
 module Root
   class Main
-    p(Lib::MyStaticField)
+    T.reveal_type(Lib::MyStaticField) # error: `Integer`
 
-    p(Lib::MyPrivateStaticField) # error: resolves but is not exported
+    T.reveal_type(Lib::MyPrivateStaticField)
+    #             ^^^^^^^^^^^^^^^^^^^^^^^^^ error: resolves but is not exported
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Integer`
   end
 end

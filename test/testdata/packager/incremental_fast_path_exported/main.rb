@@ -3,8 +3,10 @@
 
 module Root
   class Main
-    p(Lib::MyStaticField)
+    T.reveal_type(Lib::MyStaticField) # error: `Integer`
 
-    p(Lib::MyPrivateStaticField) # error: resolves but is not exported
+    T.reveal_type(Lib::MyPrivateStaticField)
+    #             ^^^^^^^^^^^^^^^^^^^^^^^^^ error: resolves but is not exported
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Integer`
   end
 end

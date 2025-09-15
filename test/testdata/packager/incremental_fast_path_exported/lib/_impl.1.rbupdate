@@ -1,9 +1,8 @@
 # typed: strict
-# assert-fast-path: lib/_impl.rb
+# assert-fast-path: lib/_impl.rb,main.rb
 
 module Lib
   MyStaticField = 1
 
-  # a comment
   MyPrivateStaticField = 2
 end
