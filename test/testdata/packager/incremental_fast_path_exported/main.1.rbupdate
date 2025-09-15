@@ -1,5 +1,5 @@
 # typed: strict
-# spacer for exclude-from-file-update
+# exclude-from-file-update: true
 
 module Root
   class Main

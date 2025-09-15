@@ -1,0 +1,9 @@
+# typed: strict
+# assert-fast-path: lib/_impl.rb
+
+module Lib
+  MyStaticField = 1
+
+  # a comment
+  MyPrivateStaticField = 1
+end

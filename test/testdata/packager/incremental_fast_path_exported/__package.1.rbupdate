@@ -1,6 +1,6 @@
 # typed: strict
 # enable-packager: true
-# spacer for exclude-from-file-update
+# exclude-from-file-update: true
 
 class Root < PackageSpec
   import Lib
