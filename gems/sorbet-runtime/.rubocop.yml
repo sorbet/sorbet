@@ -5,6 +5,8 @@ AllCops:
   NewCops: disable
   SuggestExtensions: false
   TargetRubyVersion: 2.7
+  Exclude:
+    - 'vendor/**/*'
 
 
 # Stripe in-house styles that are prevalent in the codebase already.
