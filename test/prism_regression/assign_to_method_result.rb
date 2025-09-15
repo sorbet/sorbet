@@ -23,3 +23,9 @@ self.m ||= 14
 # Multi-target assignment
 self.target1, self.target2 = 15, 16
 self&.target1, self&.target2 = 17, 18 # Not valid Ruby, but the parser needs to support it for the diagnostics to work
+
+# Test different locations
+receiver.method1 = "value1"
+receiver.method2   ="value2"
+receiver.method3=   "value3"
+receiver.method4="value4"

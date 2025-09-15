@@ -892,5 +892,81 @@ ClassDef{
         name = <D <U <assignTemp>> $19>
       }
     }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U receiver>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U method1=>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "value1" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U receiver>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U method2=>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "value2" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U receiver>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U method3=>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "value3" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U receiver>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U method4=>
+      block = nullptr
+      pos_args = 1
+      args = [
+        Literal{ value = "value4" }
+      ]
+    }
   ]
 }

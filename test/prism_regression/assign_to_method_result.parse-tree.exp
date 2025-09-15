@@ -237,5 +237,61 @@ Begin {
         ]
       }
     }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U receiver>
+        args = [
+        ]
+      }
+      method = <U method1=>
+      args = [
+        String {
+          val = <U value1>
+        }
+      ]
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U receiver>
+        args = [
+        ]
+      }
+      method = <U method2=>
+      args = [
+        String {
+          val = <U value2>
+        }
+      ]
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U receiver>
+        args = [
+        ]
+      }
+      method = <U method3=>
+      args = [
+        String {
+          val = <U value3>
+        }
+      ]
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U receiver>
+        args = [
+        ]
+      }
+      method = <U method4=>
+      args = [
+        String {
+          val = <U value4>
+        }
+      ]
+    }
   ]
 }
