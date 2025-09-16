@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U foo>
       args = Params {
-        args = [
+        params = [
           Blockarg {
             name = <U my_block_param>
           }
@@ -14,7 +14,7 @@ Begin {
     DefMethod {
       name = <U foo>
       args = Params {
-        args = [
+        params = [
           Blockarg {
             name = <P <U &> $2>
           }

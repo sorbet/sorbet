@@ -23,7 +23,7 @@ Begin {
             ]
           }
           args = Params {
-            args = [
+            params = [
               Arg {
                 name = <U n>
               }

@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U foo>
       args = Params {
-        args = [
+        params = [
           Kwoptarg {
             name = <U a>
             default_ = Integer {
@@ -17,7 +17,7 @@ Begin {
     DefMethod {
       name = <U bar>
       args = Params {
-        args = [
+        params = [
           Kwoptarg {
             name = <U a>
             default_ = Integer {

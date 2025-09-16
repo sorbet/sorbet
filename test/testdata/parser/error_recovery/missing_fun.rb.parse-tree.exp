@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U test_method_without_fun_name>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -21,7 +21,7 @@ Begin {
     DefMethod {
       name = <U test_method_without_fun_name_plus_before>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -51,7 +51,7 @@ Begin {
     DefMethod {
       name = <U test_method_without_fun_name_plus_after>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -72,7 +72,7 @@ Begin {
     DefMethod {
       name = <U test_method_without_fun_name_before_and_after>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }

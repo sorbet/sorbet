@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U foo>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U a>
           }
@@ -14,7 +14,7 @@ Begin {
     DefMethod {
       name = <U bar>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U a>
           }

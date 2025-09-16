@@ -54,7 +54,7 @@ Begin {
         ]
       }
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U p1>
           }

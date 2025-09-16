@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U method_named_alias>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -49,7 +49,7 @@ Begin {
     DefMethod {
       name = <U method_named_and>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -91,7 +91,7 @@ Begin {
     DefMethod {
       name = <U method_named_begin>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -133,7 +133,7 @@ Begin {
     DefMethod {
       name = <U method_named_break>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -175,7 +175,7 @@ Begin {
     DefMethod {
       name = <U method_named_case>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -231,7 +231,7 @@ Begin {
     DefMethod {
       name = <U method_named_class>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -242,7 +242,7 @@ Begin {
     DefMethod {
       name = <U method_named_defined?>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -253,7 +253,7 @@ Begin {
     DefMethod {
       name = <U method_named_do>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -264,7 +264,7 @@ Begin {
     DefMethod {
       name = <U method_named_else>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -294,7 +294,7 @@ Begin {
     DefMethod {
       name = <U method_named_elsif>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -305,7 +305,7 @@ Begin {
     DefMethod {
       name = <U method_named_ensure>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -346,7 +346,7 @@ Begin {
     DefMethod {
       name = <U method_named_false>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -386,7 +386,7 @@ Begin {
     DefMethod {
       name = <U method_named_for>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -397,7 +397,7 @@ Begin {
     DefMethod {
       name = <U method_named_if>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -443,7 +443,7 @@ Begin {
     DefMethod {
       name = <U method_named_in>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -454,7 +454,7 @@ Begin {
     DefMethod {
       name = <U method_named_module>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -465,7 +465,7 @@ Begin {
     DefMethod {
       name = <U method_named_next>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -507,7 +507,7 @@ Begin {
     DefMethod {
       name = <U method_named_nil>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -547,7 +547,7 @@ Begin {
     DefMethod {
       name = <U method_named_not>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -558,7 +558,7 @@ Begin {
     DefMethod {
       name = <U method_named_or>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -569,7 +569,7 @@ Begin {
     DefMethod {
       name = <U method_named_redo>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -609,7 +609,7 @@ Begin {
     DefMethod {
       name = <U method_named_rescue>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -657,7 +657,7 @@ Begin {
     DefMethod {
       name = <U method_named_retry>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -697,7 +697,7 @@ Begin {
     DefMethod {
       name = <U method_named_return>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -739,7 +739,7 @@ Begin {
     DefMethod {
       name = <U method_named_self>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -779,7 +779,7 @@ Begin {
     DefMethod {
       name = <U method_named_super>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -819,7 +819,7 @@ Begin {
     DefMethod {
       name = <U method_named_then>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -830,7 +830,7 @@ Begin {
     DefMethod {
       name = <U method_named_true>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -870,7 +870,7 @@ Begin {
     DefMethod {
       name = <U method_named_unless>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -916,7 +916,7 @@ Begin {
     DefMethod {
       name = <U method_named_until>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -961,7 +961,7 @@ Begin {
     DefMethod {
       name = <U method_named_when>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -972,7 +972,7 @@ Begin {
     DefMethod {
       name = <U method_named_while>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -1017,7 +1017,7 @@ Begin {
     DefMethod {
       name = <U method_named_yield>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }
@@ -1059,7 +1059,7 @@ Begin {
     DefMethod {
       name = <U method_named_end>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U x>
           }

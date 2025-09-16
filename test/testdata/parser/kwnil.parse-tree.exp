@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U f1>
       args = Params {
-        args = [
+        params = [
           Kwnilarg {
           }
         ]
@@ -13,7 +13,7 @@ Begin {
     DefMethod {
       name = <U f2>
       args = Params {
-        args = [
+        params = [
           Restarg {
             name = <U args>
           }
@@ -26,7 +26,7 @@ Begin {
     DefMethod {
       name = <U f3>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U a>
           }
@@ -45,7 +45,7 @@ Begin {
     DefMethod {
       name = <U f4>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U a>
           }
@@ -64,7 +64,7 @@ Begin {
     DefMethod {
       name = <U f5>
       args = Params {
-        args = [
+        params = [
           Kwnilarg {
           }
           Blockarg {
@@ -77,7 +77,7 @@ Begin {
     DefMethod {
       name = <U f6>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U a>
           }
@@ -99,7 +99,7 @@ Begin {
     DefMethod {
       name = <U f7>
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U a>
           }

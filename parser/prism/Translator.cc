@@ -457,8 +457,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's Params node,
             // after all other parameters.
             auto sorbetShadowParams = translateMulti(paramsNode->locals);
-            params->args.insert(params->args.end(), make_move_iterator(sorbetShadowParams.begin()),
-                                make_move_iterator(sorbetShadowParams.end()));
+            params->params.insert(params->params.end(), make_move_iterator(sorbetShadowParams.begin()),
+                                  make_move_iterator(sorbetShadowParams.end()));
 
             return params;
         }
@@ -653,12 +653,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                     // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's
                                     // Params node, after all other parameters.
                                     auto sorbetShadowParams = translateMulti(paramsNode->locals);
-                                    params->args.insert(params->args.end(),
-                                                        make_move_iterator(sorbetShadowParams.begin()),
-                                                        make_move_iterator(sorbetShadowParams.end()));
+                                    params->params.insert(params->params.end(),
+                                                          make_move_iterator(sorbetShadowParams.begin()),
+                                                          make_move_iterator(sorbetShadowParams.end()));
 
                                     std::tie(blockParamsStore, blockStatsStore, didDesugarBlockParams) =
-                                        desugarParametersNode(params->args, attemptToDesugarBlockParams);
+                                        desugarParametersNode(params->params, attemptToDesugarBlockParams);
 
                                     blockParameters = move(params);
                                 }
@@ -1020,7 +1020,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             bool didDesugarParams = false; // ...and by impliciation, everything else (see `attemptToDesugarParams`)
             if (params != nullptr) {
                 std::tie(paramsStore, statsStore, didDesugarParams) =
-                    desugarParametersNode(params->args, attemptToDesugarParams);
+                    desugarParametersNode(params->params, attemptToDesugarParams);
             } else {
                 didDesugarParams = attemptToDesugarParams;
             }

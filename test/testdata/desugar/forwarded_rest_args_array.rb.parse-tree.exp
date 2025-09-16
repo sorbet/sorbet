@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U forwarded_rest_args>
       args = Params {
-        args = [
+        params = [
           Restarg {
             name = <U *>
           }
@@ -46,7 +46,7 @@ Begin {
     DefMethod {
       name = <U start_dotdotdot>
       args = Params {
-        args = [
+        params = [
           Restarg {
             name = <U *>
           }

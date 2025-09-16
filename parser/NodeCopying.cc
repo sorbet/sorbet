@@ -35,7 +35,7 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         },
         [&](const parser::Arg *arg) { result = std::make_unique<Arg>(arg->loc, arg->name); },
         [&](const parser::Params *params) {
-            result = std::make_unique<Params>(params->loc, deepCopyVec(params->args));
+            result = std::make_unique<Params>(params->loc, deepCopyVec(params->params));
         },
         [&](const parser::Array *array) { result = std::make_unique<Array>(array->loc, deepCopyVec(array->elts)); },
         [&](const parser::ArrayPattern *arrayPattern) {
