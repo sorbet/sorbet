@@ -88,11 +88,12 @@ NodeDef nodes[] = {
         "begin",
         vector<FieldDef>({{"stmts", FieldType::NodeVec}}),
     },
-    // Node is always a send, which is previous call, args is arguments of body
+    // A method call with a blockis modelled as a Send node with a Block as a parent.
+    // The `send` is always a `parser::Send` node, and the `params` models the parameters of the block.
     {
         "Block",
         "block",
-        vector<FieldDef>({{"send", FieldType::Node}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"send", FieldType::Node}, {"params", FieldType::Node}, {"body", FieldType::Node}}),
     },
     // Wraps a `&foo` argument in an argument list
     {

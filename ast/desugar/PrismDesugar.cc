@@ -1038,7 +1038,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
             [&](parser::Block *block) {
-                result = desugarBlock(dctx, loc, block->loc, block->send, block->args.get(), block->body);
+                result = desugarBlock(dctx, loc, block->loc, block->send, block->params.get(), block->body);
             },
             [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
