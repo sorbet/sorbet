@@ -21,9 +21,9 @@ namespace sorbet::definition_validator {
 namespace {
 struct Signature {
     struct {
-        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
-        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> optional;
-        std::optional<reference_wrapper<const core::ArgInfo>> rest;
+        absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> required;
+        absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> optional;
+        std::optional<reference_wrapper<const core::ParamInfo>> rest;
     } pos, kw;
     bool syntheticBlk;
 } left, right;
@@ -38,7 +38,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 
         auto &dst = param.flags.isKeyword ? sig.kw : sig.pos;
         if (param.flags.isRepeated) {
-            dst.rest = optional<reference_wrapper<const core::ArgInfo>>{param};
+            dst.rest = optional<reference_wrapper<const core::ParamInfo>>{param};
         } else if (param.flags.isDefault) {
             dst.optional.push_back(param);
         } else {
@@ -129,7 +129,7 @@ string implementationOf(const core::Context ctx, core::MethodRef method) {
 
 enum class SplatKind { ARG, KWARG };
 
-pair<std::string, std::string> formatSplat(const core::ArgInfo &arg, SplatKind kd, const core::GlobalState &gs) {
+pair<std::string, std::string> formatSplat(const core::ParamInfo &arg, SplatKind kd, const core::GlobalState &gs) {
     auto rendered = arg.show(gs);
 
     std::string left;
@@ -217,9 +217,9 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
 void matchPositional(const core::Context ctx, core::TypeConstraint &constr, const ast::ExpressionPtr &tree,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
+                     absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
+                     absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &methodArgs,
                      const ast::MethodDef &methodDef, bool &reportedAutocorrect) {
     auto method = methodDef.symbol;
     auto idx = 0;

@@ -239,7 +239,7 @@ string LoadArg::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) c
     return fmt::format("LoadArg {{ argument = {} }}", this->argument(gs).argumentName(gs));
 }
 
-const core::ArgInfo &LoadArg::argument(const core::GlobalState &gs) const {
+const core::ParamInfo &LoadArg::argument(const core::GlobalState &gs) const {
     return this->method.data(gs)->parameters[this->argId];
 }
 
@@ -251,7 +251,7 @@ string ArgPresent::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs
     return fmt::format("ArgPresent {{ argument = {} }}", this->argument(gs).argumentName(gs));
 }
 
-const core::ArgInfo &ArgPresent::argument(const core::GlobalState &gs) const {
+const core::ParamInfo &ArgPresent::argument(const core::GlobalState &gs) const {
     return this->method.data(gs)->parameters[this->argId];
 }
 

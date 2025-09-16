@@ -3216,7 +3216,7 @@ public:
     vector<ResolveMultiSignatureJob> multiSignatureJobs;
 
 private:
-    static ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef,
+    static ast::Local const *getArgLocal(core::Context ctx, const core::ParamInfo &argSym, const ast::MethodDef &mdef,
                                          int pos, bool isOverloaded) {
         if (!isOverloaded) {
             return ast::MK::arg2Local(mdef.params[pos]);
@@ -3260,9 +3260,9 @@ private:
     }
 
     struct OverloadedMethodArgInformation {
-        vector<core::ArgInfo> posArgs;
-        vector<core::ArgInfo> kwArgs;
-        optional<core::ArgInfo> blkArg;
+        vector<core::ParamInfo> posArgs;
+        vector<core::ParamInfo> kwArgs;
+        optional<core::ParamInfo> blkArg;
     };
 
     // This structure serves double duty: it holds information about a single sig and the
