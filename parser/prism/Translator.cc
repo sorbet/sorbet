@@ -1415,24 +1415,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
-            auto kvPairs = translateKeyValuePairs(down_cast<pm_keyword_hash_node>(node)->elements);
-            auto isKwargs = absl::c_all_of(kvPairs, [](const auto &node) {
-                // Checks if the given node is a keyword hash element based on the standards of Sorbet's legacy parser.
+            auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
 
-                if (parser::NodeWithExpr::isa_node<Kwsplat>(node.get())) {
-                    return true;
-                }
+            auto kvPairs = translateKeyValuePairs(keywordHashNode->elements);
 
-                if (parser::NodeWithExpr::isa_node<ForwardedKwrestArg>(node.get())) {
-                    return true;
-                }
+            auto isKwargs = PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
+                            absl::c_all_of(kvPairs, [](const auto &node) {
+                                // Checks if the given node is a keyword hash element based on the standards of Sorbet's
+                                // legacy parser. Based on `Builder::isKeywordHashElement()`
 
-                if (auto *pair = parser::NodeWithExpr::cast_node<Pair>(node.get())) {
-                    return parser::NodeWithExpr::isa_node<Symbol>(pair->key.get());
-                }
+                                if (parser::NodeWithExpr::isa_node<Kwsplat>(node.get())) {
+                                    return true;
+                                }
 
-                return false;
-            });
+                                if (parser::NodeWithExpr::isa_node<ForwardedKwrestArg>(node.get())) {
+                                    return true;
+                                }
+
+                                return false;
+                            });
 
             return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
         }
