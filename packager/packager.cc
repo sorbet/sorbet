@@ -758,25 +758,25 @@ struct PackageSpecBodyWalk {
             }
         } else if (send.fun == core::Names::sorbet()) {
             // TODO(neil): enforce the minimum sigil declared here
-            if (info.min_typed_level_.has_value()) {
+            if (info.minTypedLevel_.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.min_typed_level_.value().first.second), "Previously declared here");
+                    e.addErrorLine(ctx.locAt(info.minTypedLevel_.value().first.second), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
             }
 
             if (send.numKwArgs() >= 2) {
-                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> min_typed_level;
-                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> tests_min_typed_level;
+                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> minTypedLevel;
+                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> testsMinTypedLevel;
                 for (const auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
                     auto typedLevel = parseTypedLevelOption(ctx, value);
                     if (!typedLevel.has_value()) {
-                        if (keyLit->asSymbol() == core::Names::min_typed_level() ||
-                            keyLit->asSymbol() == core::Names::tests_min_typed_level()) {
+                        if (keyLit->asSymbol() == core::Names::minTypedLevel() ||
+                            keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
                             if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidMinTypedLevel)) {
                                 e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, `{}`, or `{}`",
                                             keyLit->asSymbol().show(ctx), "ignore", "false", "true", "strict",
@@ -785,16 +785,16 @@ struct PackageSpecBodyWalk {
                         }
                         continue;
                     }
-                    if (keyLit->asSymbol() == core::Names::min_typed_level()) {
-                        min_typed_level = make_pair(typedLevel.value(), value.loc());
-                    } else if (keyLit->asSymbol() == core::Names::tests_min_typed_level()) {
-                        tests_min_typed_level = make_pair(typedLevel.value(), value.loc());
+                    if (keyLit->asSymbol() == core::Names::minTypedLevel()) {
+                        minTypedLevel = make_pair(typedLevel.value(), value.loc());
+                    } else if (keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
+                        testsMinTypedLevel = make_pair(typedLevel.value(), value.loc());
                     } else {
                         // Handled elsewhere
                     }
                 }
-                if (min_typed_level.has_value() && tests_min_typed_level.has_value()) {
-                    info.min_typed_level_ = make_pair(min_typed_level.value(), tests_min_typed_level.value());
+                if (minTypedLevel.has_value() && testsMinTypedLevel.has_value()) {
+                    info.minTypedLevel_ = make_pair(minTypedLevel.value(), testsMinTypedLevel.value());
                 }
             }
         } else {
