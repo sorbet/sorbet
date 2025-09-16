@@ -8,7 +8,7 @@ Class {
     stmts = [
       DefMethod {
         name = <U i_like_ifs>
-        args = Args {
+        args = Params {
           args = [
           ]
         }
@@ -33,7 +33,7 @@ Class {
       }
       DefMethod {
         name = <U i_like_exps>
-        args = Args {
+        args = Params {
           args = [
           ]
         }
@@ -54,7 +54,7 @@ Class {
       }
       DefMethod {
         name = <U return_in_one_branch1>
-        args = Args {
+        args = Params {
           args = [
           ]
         }
@@ -79,7 +79,7 @@ Class {
       }
       DefMethod {
         name = <U return_in_one_branch2>
-        args = Args {
+        args = Params {
           args = [
           ]
         }
@@ -104,7 +104,7 @@ Class {
       }
       DefMethod {
         name = <U variables>
-        args = Args {
+        args = Params {
           args = [
           ]
         }
@@ -174,7 +174,7 @@ Class {
       }
       DefMethod {
         name = <U variables_and_loop>
-        args = Args {
+        args = Params {
           args = [
             Arg {
               name = <U cond>
@@ -244,7 +244,7 @@ Class {
       }
       DefMethod {
         name = <U variables_loop_if>
-        args = Args {
+        args = Params {
           args = [
             Arg {
               name = <U cond>
@@ -290,7 +290,7 @@ Class {
       }
       DefMethod {
         name = <U take_arguments>
-        args = Args {
+        args = Params {
           args = [
             Arg {
               name = <U i>

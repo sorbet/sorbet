@@ -36,7 +36,7 @@
       "type" : "DefMethod",
       "name" : "baz",
       "args" : {
-        "type" : "Args",
+        "type" : "Params",
         "args" : [
           {
             "type" : "Arg",

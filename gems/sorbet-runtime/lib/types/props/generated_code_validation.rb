@@ -23,7 +23,7 @@ module T::Props
       assert_equal(:def, parsed.type)
       name, args, body = parsed.children
       assert_equal(:__t_props_generated_deserialize, name)
-      assert_equal(s(:args, s(:arg, :hash)), args)
+      assert_equal(s(:params, s(:arg, :hash)), args)
 
       assert_equal(:begin, body.type)
       init, *prop_clauses, ret = body.children
@@ -55,7 +55,7 @@ module T::Props
       assert_equal(:def, parsed.type)
       name, args, body = parsed.children
       assert_equal(:__t_props_generated_serialize, name)
-      assert_equal(s(:args, s(:arg, :strict)), args)
+      assert_equal(s(:params, s(:arg, :strict)), args)
 
       assert_equal(:begin, body.type)
       init, *prop_clauses, ret = body.children

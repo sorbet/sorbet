@@ -1,6 +1,6 @@
 s(:block,
   s(:send,
     s(:const, nil, :Kernel), :lambda),
-  s(:args,
+  s(:params,
     s(:optarg, :arg,
       s(:hash))), nil)

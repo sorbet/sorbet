@@ -25,7 +25,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U param>
@@ -46,7 +46,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Optarg {
             name = <U optional_param>
@@ -99,7 +99,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U param>
@@ -202,7 +202,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
         ]
       }

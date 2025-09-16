@@ -3,5 +3,5 @@ s(:dstr,
     s(:block,
       s(:send,
         s(:const, nil, :Kernel), :lambda),
-      s(:args,
+      s(:params,
         s(:arg, :foo)), nil)))

@@ -1,4 +1,4 @@
 s(:def, :a,
-  s(:args,
+  s(:params,
     s(:kwarg, :b)),
   s(:return))
