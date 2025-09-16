@@ -1416,7 +1416,23 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto kvPairs = translateKeyValuePairs(down_cast<pm_keyword_hash_node>(node)->elements);
-            auto isKwargs = absl::c_all_of(kvPairs, [](const auto &node) { return isKeywordHashElement(node.get()); });
+            auto isKwargs = absl::c_all_of(kvPairs, [](const auto &node) {
+                // Checks if the given node is a keyword hash element based on the standards of Sorbet's legacy parser.
+
+                if (parser::NodeWithExpr::isa_node<Kwsplat>(node.get())) {
+                    return true;
+                }
+
+                if (parser::NodeWithExpr::isa_node<ForwardedKwrestArg>(node.get())) {
+                    return true;
+                }
+
+                if (auto *pair = parser::NodeWithExpr::cast_node<Pair>(node.get())) {
+                    return parser::NodeWithExpr::isa_node<Symbol>(pair->key.get());
+                }
+
+                return false;
+            });
 
             return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
         }
@@ -2716,24 +2732,6 @@ ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPair
     } else {
         return MK::InsSeq(loc, move(updateStmts), MK::Local(loc, acc));
     }
-}
-
-// Copied from `Builder::isKeywordHashElement()`
-// Checks if the given node is a keyword hash element based on the standards of Sorbet's legacy parser.
-bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
-    if (NodeWithExpr::isa_node<Kwsplat>(node)) {
-        return true;
-    }
-
-    if (NodeWithExpr::isa_node<ForwardedKwrestArg>(node)) {
-        return true;
-    }
-
-    if (auto *pair = NodeWithExpr::cast_node<Pair>(node)) {
-        return NodeWithExpr::isa_node<Symbol>(pair->key.get());
-    }
-
-    return false;
 }
 
 // Prism models a call with an explicit block argument as a `pm_call_node` that contains a `pm_block_node`.
