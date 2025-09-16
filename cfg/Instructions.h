@@ -239,11 +239,11 @@ CheckSize(YieldParamPresent, 8, 8);
 
 INSN(YieldLoadArg) : public Instruction {
 public:
-    core::ParamInfo::ArgFlags flags;
+    core::ParamInfo::Flags flags;
     uint16_t argId;
     VariableUseSite yieldParam;
 
-    YieldLoadArg(uint16_t argId, core::ParamInfo::ArgFlags flags, LocalRef yieldParam)
+    YieldLoadArg(uint16_t argId, core::ParamInfo::Flags flags, LocalRef yieldParam)
         : flags(flags), argId(argId), yieldParam(yieldParam) {
         categoryCounterInc("cfg", "yieldloadarg");
     }

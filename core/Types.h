@@ -29,8 +29,8 @@ class TypeAndOrigins;
 
 class ParamInfo {
 public:
-    using ArgFlags = core::ParsedParam::ArgFlags;
-    ArgFlags flags;
+    using Flags = core::ParsedParam::Flags;
+    Flags flags;
     NameRef name;
     // Stores the `.bind(...)` symbol if the `&blk` arg's type had one
     ClassOrModuleRef rebind;
@@ -926,11 +926,11 @@ class SendAndBlockLink {
 
 public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
-    std::vector<ParamInfo::ArgFlags> argFlags;
+    std::vector<ParamInfo::Flags> argFlags;
     core::NameRef fun;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ParamInfo::ArgFlags> &&argFlags);
+    SendAndBlockLink(NameRef fun, std::vector<ParamInfo::Flags> &&argFlags);
     std::optional<int> fixedArity() const;
 };
 

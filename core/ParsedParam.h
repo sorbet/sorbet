@@ -7,7 +7,7 @@
 namespace sorbet::core {
 
 struct ParsedParam {
-    struct ArgFlags {
+    struct Flags {
         bool isKeyword : 1;
         bool isRepeated : 1;
         bool isDefault : 1;
@@ -15,14 +15,14 @@ struct ParsedParam {
         bool isBlock : 1;
 
         // In C++20 we can replace this with bit field initialzers
-        ArgFlags() : isKeyword(false), isRepeated(false), isDefault(false), isShadow(false), isBlock(false) {}
+        Flags() : isKeyword(false), isRepeated(false), isDefault(false), isShadow(false), isBlock(false) {}
 
         void setFromU1(uint8_t flags);
         uint8_t toU1() const;
     };
     core::LocOffsets loc;
     core::LocalVariable local;
-    ArgFlags flags;
+    Flags flags;
 };
 
 } // namespace sorbet::core

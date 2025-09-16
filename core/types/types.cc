@@ -801,7 +801,7 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ParamInfo::ArgFlags> &&argFlags)
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ParamInfo::Flags> &&argFlags)
     : argFlags(move(argFlags)), fun(fun) {}
 
 optional<int> SendAndBlockLink::fixedArity() const {

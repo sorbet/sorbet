@@ -2581,8 +2581,8 @@ private:
         return nullopt;
     }
 
-    static vector<ParamInfo::ArgFlags> paramInfoByArity(optional<int> fixedArity) {
-        vector<ParamInfo::ArgFlags> res;
+    static vector<ParamInfo::Flags> paramInfoByArity(optional<int> fixedArity) {
+        vector<ParamInfo::Flags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();

@@ -2098,7 +2098,7 @@ ParamInfo ParamInfo::deepCopy() const {
     return result;
 }
 
-uint8_t ParamInfo::ArgFlags::toU1() const {
+uint8_t ParamInfo::Flags::toU1() const {
     uint8_t flags = 0;
     if (isKeyword) {
         flags += 1;
@@ -2118,7 +2118,7 @@ uint8_t ParamInfo::ArgFlags::toU1() const {
     return flags;
 }
 
-void ParamInfo::ArgFlags::setFromU1(uint8_t flags) {
+void ParamInfo::Flags::setFromU1(uint8_t flags) {
     isKeyword = flags & 1;
     isRepeated = flags & 2;
     isDefault = flags & 4;
