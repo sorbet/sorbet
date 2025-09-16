@@ -926,11 +926,11 @@ class SendAndBlockLink {
 
 public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
-    std::vector<ParamInfo::Flags> argFlags;
+    std::vector<ParamInfo::Flags> paramFlags;
     core::NameRef fun;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ParamInfo::Flags> &&argFlags);
+    SendAndBlockLink(NameRef fun, std::vector<ParamInfo::Flags> &&paramFlags);
     std::optional<int> fixedArity() const;
 };
 

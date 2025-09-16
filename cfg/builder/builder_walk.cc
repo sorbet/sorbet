@@ -279,10 +279,11 @@ BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b
     return join;
 }
 
-tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int argIndex,
-                                                                    const core::ParamInfo &argInfo, LocalRef argLocal,
-                                                                    core::LocOffsets argLoc, ast::ExpressionPtr &def,
-                                                                    BasicBlock *presentCont, BasicBlock *defaultCont) {
+tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int paramIndex,
+                                                                    const core::ParamInfo &paramInfo,
+                                                                    LocalRef paramLocal, core::LocOffsets paramLoc,
+                                                                    ast::ExpressionPtr &def, BasicBlock *presentCont,
+                                                                    BasicBlock *defaultCont) {
     auto defLoc = def.loc();
 
     auto *presentNext = cctx.inWhat.freshBlock(cctx.loops);
@@ -290,8 +291,8 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
 
     auto present = cctx.newTemporary(core::Names::argPresent());
     auto methodSymbol = cctx.inWhat.symbol;
-    synthesizeExpr(presentCont, present, argLoc, make_insn<ArgPresent>(methodSymbol, argIndex));
-    conditionalJump(presentCont, present, presentNext, defaultNext, cctx.inWhat, argLoc);
+    synthesizeExpr(presentCont, present, paramLoc, make_insn<ArgPresent>(methodSymbol, paramIndex));
+    conditionalJump(presentCont, present, presentNext, defaultNext, cctx.inWhat, paramLoc);
 
     if (defaultCont != nullptr) {
         unconditionalJump(defaultCont, defaultNext, cctx.inWhat, core::LocOffsets::none());
@@ -302,9 +303,9 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
     auto result = cctx.newTemporary(core::Names::statTemp());
     defaultNext = walk(cctx.withTarget(result), def, defaultNext);
 
-    if (argInfo.type != nullptr) {
+    if (paramInfo.type != nullptr) {
         auto tmp = cctx.newTemporary(core::Names::castTemp());
-        synthesizeExpr(defaultNext, tmp, defLoc, make_insn<Cast>(result, defLoc, argInfo.type, core::Names::let()));
+        synthesizeExpr(defaultNext, tmp, defLoc, make_insn<Cast>(result, defLoc, paramInfo.type, core::Names::let()));
         cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
     }
 
@@ -628,12 +629,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 if (auto *block = s.block()) {
                     auto &blockParams = block->params;
-                    vector<core::ParsedParam> blockArgFlags = ast::ParamParsing::parseParams(blockParams);
-                    vector<core::ParamInfo::Flags> argFlags;
-                    for (auto &e : blockArgFlags) {
-                        argFlags.emplace_back(e.flags);
+                    vector<core::ParsedParam> blockParamFlags = ast::ParamParsing::parseParams(blockParams);
+                    vector<core::ParamInfo::Flags> paramFlags;
+                    for (auto &e : blockParamFlags) {
+                        paramFlags.emplace_back(e.flags);
                     }
-                    auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags));
+                    auto link = make_shared<core::SendAndBlockLink>(s.fun, move(paramFlags));
                     auto send = make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), args,
                                                 std::move(argLocs), !!s.flags.isPrivateOk, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
@@ -655,12 +656,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                                   make_insn<LoadSelf>(link, LocalRef::selfVariable()));
 
                     auto *argBlock = bodyBlock;
-                    if (!blockArgFlags.empty()) {
+                    if (!blockParamFlags.empty()) {
                         LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
                         bodyBlock->exprs.emplace_back(argTemp, s.block()->loc, make_insn<LoadYieldParams>(link));
 
-                        for (int i = 0; i < blockArgFlags.size(); ++i) {
-                            auto &arg = blockArgFlags[i];
+                        for (int i = 0; i < blockParamFlags.size(); ++i) {
+                            auto &arg = blockParamFlags[i];
                             LocalRef argLoc = cctx.inWhat.enterLocal(arg.local);
 
                             if (arg.flags.isRepeated) {

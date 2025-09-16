@@ -1395,9 +1395,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                auto &blkArgs = insn.link->argFlags;
+                auto &blkParams = insn.link->paramFlags;
                 auto tuple = core::cast_type<core::TupleType>(params);
-                if (blkArgs.size() > 1 && !blkArgs.front().isRepeated && tuple && tuple->elems.size() == 1 &&
+                if (blkParams.size() > 1 && !blkParams.front().isRepeated && tuple && tuple->elems.size() == 1 &&
                     tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
