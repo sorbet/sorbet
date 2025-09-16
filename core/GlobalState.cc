@@ -1465,9 +1465,9 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRe
     ENFORCE_NO_TIMER(name.exists(), "entering symbol with non-existing name");
     MethodData ownerScope = owner.data(*this);
 
-    for (auto &arg : ownerScope->parameters) {
-        if (arg.name == name) {
-            return arg;
+    for (auto &param : ownerScope->parameters) {
+        if (param.name == name) {
+            return param;
         }
     }
     auto &store = ownerScope->parameters.emplace_back();
