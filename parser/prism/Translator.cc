@@ -575,9 +575,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             // Regular send, e.g. `a.b`
 
-            auto hasKwargsHash = callNode->arguments != nullptr &&
-                                 PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORDS);
-
             // Detect special arguments that will require the call to be desugared to magic call.
 
             // true if the call contains a forwarded argument like `foo(...)`
@@ -603,6 +600,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
                 }
             }
+
+            auto hasKwargsHash = callNode->arguments != nullptr &&
+                                 PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORDS);
 
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
