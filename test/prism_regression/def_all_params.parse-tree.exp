@@ -7,7 +7,7 @@ Begin {
           Param {
             name = <U a>
           }
-          Optarg {
+          OptParam {
             name = <U b>
             default_ = Integer {
               val = "2"

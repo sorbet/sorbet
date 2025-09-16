@@ -672,7 +672,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 continue;
                             }
 
-                            if (auto opt = ast::cast_tree<ast::OptionalArg>(blockParams[i])) {
+                            if (auto opt = ast::cast_tree<ast::OptionalParam>(blockParams[i])) {
                                 auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops);
                                 auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops);
 

@@ -25,7 +25,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U a>
-            }, OptionalArg{
+            }, OptionalParam{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U b>
@@ -37,7 +37,7 @@ ClassDef{
             } }, KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U d>
-            } }, OptionalArg{
+            } }, OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U e>
@@ -102,7 +102,7 @@ ClassDef{
                     kind = Local
                     name = <U a>
                   }
-                  OptionalArg{
+                  OptionalParam{
                     expr = UnresolvedIdent{
                       kind = Local
                       name = <U b>
@@ -117,7 +117,7 @@ ClassDef{
                     kind = Local
                     name = <U d>
                   } }
-                  OptionalArg{
+                  OptionalParam{
                     expr = KeywordArg{ expr = UnresolvedIdent{
                       kind = Local
                       name = <U e>

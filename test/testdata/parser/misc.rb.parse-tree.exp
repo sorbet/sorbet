@@ -416,7 +416,7 @@ Begin {
       name = <U optfoo>
       params = Params {
         params = [
-          Optarg {
+          OptParam {
             name = <U x>
             default_ = Integer {
               val = "1"

@@ -63,7 +63,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             // Ignore defaults for abstract methods, because abstract methods do not have bodies and are not called.
             if (!isAbstract) {
                 // Only emit conditional arg loading if the arg has a default
-                if (auto opt = ast::cast_tree<ast::OptionalArg>(paramExpr)) {
+                if (auto opt = ast::cast_tree<ast::OptionalParam>(paramExpr)) {
                     auto [result, presentNext, defaultNext] =
                         walkDefault(cctx, i, paramInfo, local, p->loc, opt->default_, presentCont, defaultCont);
 

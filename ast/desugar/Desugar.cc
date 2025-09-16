@@ -1536,12 +1536,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::Kwoptarg *arg) {
                 ExpressionPtr res =
-                    MK::OptionalArg(loc, MK::KeywordArg(arg->nameLoc, arg->name), node2TreeImpl(dctx, arg->default_));
+                    MK::OptionalParam(loc, MK::KeywordArg(arg->nameLoc, arg->name), node2TreeImpl(dctx, arg->default_));
                 result = move(res);
             },
-            [&](parser::Optarg *arg) {
-                ExpressionPtr res =
-                    MK::OptionalArg(loc, MK::Local(arg->nameLoc, arg->name), node2TreeImpl(dctx, arg->default_));
+            [&](parser::OptParam *param) {
+                ExpressionPtr res = MK::OptionalParam(loc, MK::Local(param->nameLoc, param->name),
+                                                      node2TreeImpl(dctx, param->default_));
                 result = move(res);
             },
             [&](parser::Shadowarg *arg) {

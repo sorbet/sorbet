@@ -48,7 +48,7 @@ Begin {
       }
       params = Params {
         params = [
-          Optarg {
+          OptParam {
             name = <U optional_param>
             default_ = Integer {
               val = "123"

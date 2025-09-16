@@ -2808,7 +2808,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -2893,7 +2893,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_!><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3108,7 +3108,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_lazy_><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3193,7 +3193,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_lazy_!><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3408,7 +3408,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_proc_><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3493,7 +3493,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_proc_!><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3704,7 +3704,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_invalid_><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -3797,7 +3797,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foreign_invalid_!><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
                 name = <U allow_direct_mutation>
@@ -4810,7 +4810,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U token_prop><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -4829,7 +4829,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U created_prop><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -5147,7 +5147,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U timestamped_token_prop><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -5166,7 +5166,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U created_prop><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>
@@ -5474,7 +5474,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U encrypted_prop><<U <todo method>>>
-          params = [OptionalArg{
+          params = [OptionalParam{
               expr = UnresolvedIdent{
                 kind = Local
                 name = <U opts>

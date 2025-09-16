@@ -4,7 +4,7 @@ Begin {
       name = <U foo>
       params = Params {
         params = [
-          Optarg {
+          OptParam {
             name = <U a>
             default_ = Integer {
               val = "1"
@@ -18,13 +18,13 @@ Begin {
       name = <U bar>
       params = Params {
         params = [
-          Optarg {
+          OptParam {
             name = <U a>
             default_ = Integer {
               val = "1"
             }
           }
-          Optarg {
+          OptParam {
             name = <U b>
             default_ = Integer {
               val = "2"

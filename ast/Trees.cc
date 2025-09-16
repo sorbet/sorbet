@@ -34,7 +34,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, UnresolvedIdent)         \
         CASE_STATEMENT(CASE_BODY, RestArg)                 \
         CASE_STATEMENT(CASE_BODY, KeywordArg)              \
-        CASE_STATEMENT(CASE_BODY, OptionalArg)             \
+        CASE_STATEMENT(CASE_BODY, OptionalParam)           \
         CASE_STATEMENT(CASE_BODY, BlockArg)                \
         CASE_STATEMENT(CASE_BODY, ShadowArg)               \
         CASE_STATEMENT(CASE_BODY, Assign)                  \
@@ -139,7 +139,7 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
 
 bool isa_reference(const ExpressionPtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
-           isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
+           isa_tree<KeywordArg>(what) || isa_tree<OptionalParam>(what) || isa_tree<BlockArg>(what) ||
            isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
 }
 
@@ -289,9 +289,9 @@ KeywordArg::KeywordArg(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), exp
     _sanityCheck();
 }
 
-OptionalArg::OptionalArg(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_)
+OptionalParam::OptionalParam(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_)
     : loc(loc), expr(std::move(expr)), default_(std::move(default_)) {
-    categoryCounterInc("trees", "optionalarg");
+    categoryCounterInc("trees", "optionalparam");
     _sanityCheck();
 }
 
@@ -1292,7 +1292,7 @@ string KeywordArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const
     return this->expr.toStringWithTabs(gs, tabs) + ":";
 }
 
-string OptionalArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string OptionalParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}", this->expr.toStringWithTabs(gs, tabs));
     if (this->default_) {
@@ -1457,7 +1457,7 @@ string_view KeywordArg::nodeName() const {
     return "KeywordArg";
 }
 
-string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) const {
+string OptionalParam::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
@@ -1472,8 +1472,8 @@ string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string_view OptionalArg::nodeName() const {
-    return "OptionalArg";
+string_view OptionalParam::nodeName() const {
+    return "OptionalParam";
 }
 
 string ShadowArg::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -1991,7 +1991,7 @@ string RestArg::showRawWithLocs(const core::GlobalState &gs, core::FileRef file,
                        expr.showRawWithLocs(gs, file, tabs));
 }
 
-string OptionalArg::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) const {
+string OptionalParam::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);

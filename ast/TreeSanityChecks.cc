@@ -30,7 +30,7 @@ void ExpressionPtr::_sanityCheck() const {
         SANITY_CHECK(UnresolvedIdent)
         SANITY_CHECK(RestArg)
         SANITY_CHECK(KeywordArg)
-        SANITY_CHECK(OptionalArg)
+        SANITY_CHECK(OptionalParam)
         SANITY_CHECK(BlockArg)
         SANITY_CHECK(ShadowArg)
         SANITY_CHECK(Assign)
@@ -69,7 +69,7 @@ void Block::_sanityCheck() {
 
 void BlockArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalParam>(expr), "OptionalParams must be at the top-level of an arg.");
 }
 
 void Break::_sanityCheck() {
@@ -147,7 +147,7 @@ void InsSeq::_sanityCheck() {
 
 void KeywordArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalParam>(expr), "OptionalParams must be at the top-level of an arg.");
 }
 
 void Local::_sanityCheck() {
@@ -169,10 +169,10 @@ void Next::_sanityCheck() {
     ENFORCE(expr);
 }
 
-void OptionalArg::_sanityCheck() {
+void OptionalParam::_sanityCheck() {
     ENFORCE(expr);
     ENFORCE(default_);
-    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalParam>(expr), "OptionalParams must be at the top-level of an arg.");
 }
 
 void Return::_sanityCheck() {
@@ -198,7 +198,7 @@ void RescueCase::_sanityCheck() {
 
 void RestArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalParam>(expr), "OptionalParams must be at the top-level of an arg.");
 }
 
 void Retry::_sanityCheck() {}
@@ -229,7 +229,7 @@ void Send::_sanityCheck() {
 
 void ShadowArg::_sanityCheck() {
     ENFORCE(expr);
-    ENFORCE(!isa_tree<OptionalArg>(expr), "OptionalArgs must be at the top-level of an arg.");
+    ENFORCE(!isa_tree<OptionalParam>(expr), "OptionalParams must be at the top-level of an arg.");
 }
 
 void UnresolvedIdent::_sanityCheck() {

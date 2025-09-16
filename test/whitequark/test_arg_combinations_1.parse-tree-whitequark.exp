@@ -1,7 +1,7 @@
 s(:def, :f,
   s(:params,
     s(:param, :a),
-    s(:optarg, :o,
+    s(:optparam, :o,
       s(:int, "1")),
     s(:restarg, :r),
     s(:param, :p),

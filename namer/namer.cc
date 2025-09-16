@@ -1727,8 +1727,8 @@ class TreeSymbolizer {
     ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
         ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
-            localExpr = ast::MK::OptionalArg(parsedArg.loc, move(localExpr),
-                                             ast::ParamParsing::getDefault(parsedArg, move(arg)));
+            localExpr = ast::MK::OptionalParam(parsedArg.loc, move(localExpr),
+                                               ast::ParamParsing::getDefault(parsedArg, move(arg)));
         }
         return localExpr;
     }

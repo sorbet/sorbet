@@ -91,7 +91,7 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
         auto arg = ast::MK::Local(nameLoc, name);
         if (implied) {
             auto default_ = ast::MK::UntypedNil(loc);
-            arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
+            arg = ast::MK::OptionalParam(loc, move(arg), move(default_));
         }
         auto defSelfProp = ast::MK::SyntheticMethod1(loc, loc, name, move(arg), ast::MK::EmptyTree(), flags);
         ast::cast_tree<ast::MethodDef>(defSelfProp)->flags.isSelfMethod = true;

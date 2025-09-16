@@ -99,7 +99,7 @@ class LocalNameInserter {
                     named.flags.keyword = true;
                     cursor = &kw.expr;
                 },
-                [&](ast::OptionalArg &opt) { cursor = &opt.expr; },
+                [&](ast::OptionalParam &opt) { cursor = &opt.expr; },
                 [&](ast::BlockArg &blk) {
                     named.flags.block = true;
                     cursor = &blk.expr;
