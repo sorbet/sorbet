@@ -70,7 +70,7 @@ module T::Private::Sealed
 
   def self.validate_inheritance(caller_loc, parent, child, verb)
     this_file = caller_loc&.path
-    decl_file = parent.instance_variable_get(:@sorbet_sealed_module_decl_file) if sealed_module?(parent)
+    decl_file = parent.instance_variable_get(:@sorbet_sealed_module_decl_file)
 
     if !this_file
       raise "Could not use backtrace to determine file for #{verb} child #{child}"

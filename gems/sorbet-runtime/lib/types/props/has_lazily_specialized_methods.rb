@@ -37,7 +37,7 @@ module T::Props
 
     sig { returns(T::Boolean) }
     def self.lazy_evaluation_enabled?
-      !defined?(@lazy_evaluation_disabled) || !@lazy_evaluation_disabled
+      !@lazy_evaluation_disabled
     end
 
     module DecoratorMethods
