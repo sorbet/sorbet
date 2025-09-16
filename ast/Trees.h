@@ -440,7 +440,7 @@ public:
 
     ExpressionPtr rhs;
 
-    using PARAMS_store = InlinedVector<ExpressionPtr, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    using PARAMS_store = InlinedVector<ExpressionPtr, core::SymbolRef::EXPECTED_METHOD_PARAMS_COUNT>;
     PARAMS_store params;
 
     core::NameRef name;

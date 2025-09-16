@@ -482,7 +482,7 @@ public:
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
     // Placed here so it can be used across packages for common case optimizations.
-    static constexpr int EXPECTED_METHOD_ARGS_COUNT = 2;
+    static constexpr int EXPECTED_METHOD_PARAMS_COUNT = 2;
 
     static SymbolRef fromRaw(uint32_t raw) {
         auto ref = SymbolRef();

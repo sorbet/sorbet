@@ -150,7 +150,7 @@ public:
         return resultType != nullptr;
     }
 
-    using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    using ParametersStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_PARAMS_COUNT>;
 
     // if dealiasing fails here, then we return a bad alias method stub instead
     MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const;
@@ -181,7 +181,7 @@ public:
     const static uint16_t FIRST_VALID_INTRINSIC_OFFSET = 1;
     uint16_t intrinsicOffset = INVALID_INTRINSIC_OFFSET;
     TypePtr resultType;
-    ArgumentsStore parameters;
+    ParametersStore parameters;
 
     InlinedVector<TypeArgumentRef, 4> &getOrCreateTypeArguments() {
         if (typeArgs) {
