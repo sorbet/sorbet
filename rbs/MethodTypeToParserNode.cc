@@ -165,10 +165,10 @@ core::NameRef nodeName(const parser::Node *node) {
     core::NameRef name;
 
     typecase(
-        node, [&](const parser::Param *a) { name = a->name; }, [&](const parser::Restarg *a) { name = a->name; },
-        [&](const parser::Kwarg *a) { name = a->name; }, [&](const parser::Blockarg *a) { name = a->name; },
-        [&](const parser::Kwoptarg *a) { name = a->name; }, [&](const parser::Optarg *a) { name = a->name; },
-        [&](const parser::Kwrestarg *a) { name = a->name; }, [&](const parser::Shadowarg *a) { name = a->name; },
+        node, [&](const parser::Param *p) { name = p->name; }, [&](const parser::Restarg *p) { name = p->name; },
+        [&](const parser::Kwarg *p) { name = p->name; }, [&](const parser::Blockarg *p) { name = p->name; },
+        [&](const parser::Kwoptarg *p) { name = p->name; }, [&](const parser::Optarg *p) { name = p->name; },
+        [&](const parser::Kwrestarg *p) { name = p->name; }, [&](const parser::Shadowarg *p) { name = p->name; },
         [&](const parser::Symbol *s) { name = s->val; },
         [&](const parser::Node *other) {
             Exception::raise("Unexpected expression type: {}", ((parser::Node *)node)->nodeName());
@@ -200,13 +200,13 @@ string nodeKindToString(const parser::Node *node) {
     string kind;
 
     typecase(
-        node, [&](const parser::Param *parserArg) { kind = "positional"; },
-        [&](const parser::Optarg *parserArg) { kind = "optional positional"; },
-        [&](const parser::Restarg *parserArg) { kind = "rest positional"; },
-        [&](const parser::Kwarg *parserArg) { kind = "keyword"; },
-        [&](const parser::Kwoptarg *parserArg) { kind = "optional keyword"; },
-        [&](const parser::Kwrestarg *parserArg) { kind = "rest keyword"; },
-        [&](const parser::Blockarg *parserArg) { kind = "block"; },
+        node, [&](const parser::Param *_p) { kind = "positional"; },
+        [&](const parser::Optarg *_p) { kind = "optional positional"; },
+        [&](const parser::Restarg *_p) { kind = "rest positional"; },
+        [&](const parser::Kwarg *_p) { kind = "keyword"; },
+        [&](const parser::Kwoptarg *_p) { kind = "optional keyword"; },
+        [&](const parser::Kwrestarg *_p) { kind = "rest keyword"; },
+        [&](const parser::Blockarg *_p) { kind = "block"; },
         [&](const parser::Node *other) {
             Exception::raise("Unexpected expression type: {}", ((parser::Node *)node)->nodeName());
         });
@@ -294,13 +294,13 @@ bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
     auto kindMatch = false;
 
     typecase(
-        methodArg, [&](const parser::Param *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
-        [&](const parser::Optarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
-        [&](const parser::Restarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestPositional; },
-        [&](const parser::Kwarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Keyword; },
-        [&](const parser::Kwoptarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalKeyword; },
-        [&](const parser::Kwrestarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestKeyword; },
-        [&](const parser::Blockarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Block; },
+        methodArg, [&](const parser::Param *_p) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
+        [&](const parser::Optarg *_p) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
+        [&](const parser::Restarg *_p) { kindMatch = arg.kind == RBSArg::Kind::RestPositional; },
+        [&](const parser::Kwarg *_p) { kindMatch = arg.kind == RBSArg::Kind::Keyword; },
+        [&](const parser::Kwoptarg *_p) { kindMatch = arg.kind == RBSArg::Kind::OptionalKeyword; },
+        [&](const parser::Kwrestarg *_p) { kindMatch = arg.kind == RBSArg::Kind::RestKeyword; },
+        [&](const parser::Blockarg *_p) { kindMatch = arg.kind == RBSArg::Kind::Block; },
         [&](const parser::Node *other) { Exception::raise("Unexpected expression type: {}", methodArg->nodeName()); });
 
     return kindMatch;
