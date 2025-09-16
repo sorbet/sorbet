@@ -582,9 +582,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto hasKwargsHash = !args.empty() && parser::NodeWithExpr::isa_node<parser::Hash>(args.back().get());
 
             // Detect special arguments that will require the call to be desugared to magic call.
-            auto hasFwdArgs = false;
-            auto hasFwdRestArg = false;
-            auto hasSplat = false;
+
+            // true if the call contains a forwarded argument like `foo(...)`
+            auto hasFwdArgs = callNode->arguments != nullptr &&
+                              PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
+            auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*rest)`
+            auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             if (auto prismArgsNode = callNode->arguments; prismArgsNode != nullptr) {
                 for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
                     switch (PM_NODE_TYPE(arg)) {
@@ -595,11 +598,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             } else { // Splatting an expression like `f(*a)`
                                 hasSplat = true;
                             }
-                            break;
-                        }
-
-                        case PM_FORWARDING_ARGUMENTS_NODE: {
-                            hasFwdArgs = true;
                             break;
                         }
 
