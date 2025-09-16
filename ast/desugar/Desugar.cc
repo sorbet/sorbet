@@ -1514,8 +1514,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                               move(ancestors), move(body));
                 result = move(res);
             },
-            [&](parser::Param *arg) {
-                ExpressionPtr res = MK::Local(loc, arg->name);
+            [&](parser::Param *param) {
+                ExpressionPtr res = MK::Local(loc, param->name);
                 result = move(res);
             },
             [&](parser::Restarg *arg) {

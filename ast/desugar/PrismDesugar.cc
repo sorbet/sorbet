@@ -1462,7 +1462,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                               move(ancestors), move(body));
                 result = move(res);
             },
-            [&](parser::Param *arg) { desugaredByPrismTranslator(arg); },
+            [&](parser::Param *param) { desugaredByPrismTranslator(param); },
             [&](parser::Restarg *arg) {
                 ExpressionPtr res = MK::RestArg(loc, MK::Local(arg->nameLoc, arg->name));
                 result = move(res);

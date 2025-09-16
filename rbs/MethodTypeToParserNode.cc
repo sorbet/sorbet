@@ -228,9 +228,9 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, c
     typecase(
         methodArg,
         // Should be: `Type name`
-        [&](const parser::Param *a) {
+        [&](const parser::Param *p) {
             if (arg.name) {
-                auto nameString = nodeName(a).toString(ctx.state);
+                auto nameString = nodeName(p).toString(ctx.state);
                 corrected = fmt::format("{} {}", typeString, nameString);
             } else {
                 corrected = fmt::format("{}", typeString);
