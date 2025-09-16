@@ -181,7 +181,7 @@ public:
     const static uint16_t FIRST_VALID_INTRINSIC_OFFSET = 1;
     uint16_t intrinsicOffset = INVALID_INTRINSIC_OFFSET;
     TypePtr resultType;
-    ArgumentsStore arguments;
+    ArgumentsStore parameters;
 
     InlinedVector<TypeArgumentRef, 4> &getOrCreateTypeArguments() {
         if (typeArgs) {
