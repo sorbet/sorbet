@@ -86,9 +86,9 @@ public:
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
         }
-        ENFORCE(!sym.data(ctx)->arguments.empty(), "<static-init> method should already have a block arg symbol: {}",
+        ENFORCE(!sym.data(ctx)->parameters.empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.show(ctx));
-        ENFORCE(sym.data(ctx)->arguments.back().flags.isBlock, "Last argument symbol is not a block arg: {}",
+        ENFORCE(sym.data(ctx)->parameters.back().flags.isBlock, "Last argument symbol is not a block arg: {}",
                 sym.show(ctx));
 
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,

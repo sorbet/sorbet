@@ -1362,11 +1362,11 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     auto owner = original.data(*this)->owner;
     auto res = enterMethodSymbol(sigLoc, owner, name);
     bool newMethod = res != original;
-    const auto &resArguments = res.data(*this)->arguments;
+    const auto &resArguments = res.data(*this)->parameters;
     ENFORCE_NO_TIMER(newMethod || !resArguments.empty(), "must be at least the block arg");
     auto resInitialArgSize = resArguments.size();
-    ENFORCE_NO_TIMER(original.data(*this)->arguments.size() == argsToKeep.size());
-    const auto &originalArguments = original.data(*this)->arguments;
+    ENFORCE_NO_TIMER(original.data(*this)->parameters.size() == argsToKeep.size());
+    const auto &originalArguments = original.data(*this)->parameters;
     int i = -1;
     for (auto &arg : originalArguments) {
         i += 1;
@@ -1465,12 +1465,12 @@ ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRe
     ENFORCE_NO_TIMER(name.exists(), "entering symbol with non-existing name");
     MethodData ownerScope = owner.data(*this);
 
-    for (auto &arg : ownerScope->arguments) {
+    for (auto &arg : ownerScope->parameters) {
         if (arg.name == name) {
             return arg;
         }
     }
-    auto &store = ownerScope->arguments.emplace_back();
+    auto &store = ownerScope->parameters.emplace_back();
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
 

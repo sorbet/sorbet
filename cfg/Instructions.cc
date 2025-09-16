@@ -240,7 +240,7 @@ string LoadArg::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) c
 }
 
 const core::ArgInfo &LoadArg::argument(const core::GlobalState &gs) const {
-    return this->method.data(gs)->arguments[this->argId];
+    return this->method.data(gs)->parameters[this->argId];
 }
 
 string ArgPresent::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -252,7 +252,7 @@ string ArgPresent::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs
 }
 
 const core::ArgInfo &ArgPresent::argument(const core::GlobalState &gs) const {
-    return this->method.data(gs)->arguments[this->argId];
+    return this->method.data(gs)->parameters[this->argId];
 }
 
 string LoadYieldParams::toString(const core::GlobalState &gs, const CFG &cfg) const {

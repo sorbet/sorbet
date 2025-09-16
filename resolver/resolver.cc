@@ -3225,10 +3225,10 @@ private:
         // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
         // we roundtrip through original symbol that is stored in mdef.
         auto internalNameToLookFor = argSym.name;
-        auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
+        auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->parameters,
                                              [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-        ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
-        auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
+        ENFORCE(originalArgIt != mdef.symbol.data(ctx)->parameters.end());
+        auto realPos = originalArgIt - mdef.symbol.data(ctx)->parameters.begin();
         return ast::MK::arg2Local(mdef.params[realPos]);
     }
 
@@ -3236,22 +3236,22 @@ private:
                                              bool isOverloaded) {
         // To match, the definition must have been desugared with at least 3 parameters named
         // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
-        auto len = methodInfo->arguments.size();
+        auto len = methodInfo->parameters.size();
         if (len < 3) {
             return false;
         }
 
-        auto l1 = getArgLocal(ctx, methodInfo->arguments[len - 3], mdef, len - 3, isOverloaded)->localVariable;
+        auto l1 = getArgLocal(ctx, methodInfo->parameters[len - 3], mdef, len - 3, isOverloaded)->localVariable;
         if (l1._name != core::Names::fwdArgs()) {
             return false;
         }
 
-        auto l2 = getArgLocal(ctx, methodInfo->arguments[len - 2], mdef, len - 2, isOverloaded)->localVariable;
+        auto l2 = getArgLocal(ctx, methodInfo->parameters[len - 2], mdef, len - 2, isOverloaded)->localVariable;
         if (l2._name != core::Names::fwdKwargs()) {
             return false;
         }
 
-        auto l3 = getArgLocal(ctx, methodInfo->arguments[len - 1], mdef, len - 1, isOverloaded)->localVariable;
+        auto l3 = getArgLocal(ctx, methodInfo->parameters[len - 1], mdef, len - 1, isOverloaded)->localVariable;
         if (l3._name != core::Names::fwdBlock()) {
             return false;
         }
@@ -3288,7 +3288,7 @@ private:
                                                             core::LocOffsets exprLoc, ParsedSig &sig, bool isOverloaded,
                                                             const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
-        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.params.size());
+        ENFORCE(isOverloaded || method.data(ctx)->parameters.size() == mdef.params.size());
 
         if (!sig.seen.returns.exists() && !sig.seen.void_.exists()) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -3377,7 +3377,7 @@ private:
 
         methodInfo->resultType = sig.returns;
         int i = -1;
-        for (auto &arg : methodInfo->arguments) {
+        for (auto &arg : methodInfo->parameters) {
             ++i;
             auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;

@@ -15,7 +15,7 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
         auto symbolData = methodDef.symbol.data(ctx);
-        auto &paramTypes = symbolData->arguments;
+        auto &paramTypes = symbolData->parameters;
         core::TypeAndOrigins tp;
 
         // Check if it matches against a specific parameter. If it does, send that instead;

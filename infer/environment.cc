@@ -1541,7 +1541,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         e.setHeader("Expected `{}` but found `{}` for block result type", expectedType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
 
-                        const auto &bspec = i.link->result->main.method.data(ctx)->arguments.back();
+                        const auto &bspec = i.link->result->main.method.data(ctx)->parameters.back();
                         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg");
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));

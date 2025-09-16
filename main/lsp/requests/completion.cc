@@ -343,7 +343,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
 
     auto method = maybeAlias.data(gs)->dealiasMethod(gs);
     vector<string> typeAndArgNames;
-    for (auto &argSym : method.data(gs)->arguments) {
+    for (auto &argSym : method.data(gs)->parameters) {
         fmt::memory_buffer argBuf;
         if (argSym.flags.isBlock) {
             // Blocks are handled below
@@ -371,8 +371,8 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         fmt::format_to(std::back_inserter(result), "({})", fmt::join(typeAndArgNames, ", "));
     }
 
-    ENFORCE(!method.data(gs)->arguments.empty());
-    auto &blkArg = method.data(gs)->arguments.back();
+    ENFORCE(!method.data(gs)->parameters.empty());
+    auto &blkArg = method.data(gs)->parameters.back();
     ENFORCE(blkArg.flags.isBlock);
 
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();
@@ -811,7 +811,7 @@ unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerDelegate &typeche
     }
     bool firstAfterSummary = true;
 
-    const auto &arguments = method.data(gs)->arguments;
+    const auto &arguments = method.data(gs)->parameters;
     auto resultType = method.data(gs)->resultType;
 
     // 0 is final tabstop. 1 is initial tabstop (for summary)
@@ -1241,8 +1241,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         }
 
         vector<core::NameRef> allKwargs;
-        allKwargs.reserve(params.kwargsMethod.data(gs)->arguments.size());
-        for (auto &param : params.kwargsMethod.data(gs)->arguments) {
+        allKwargs.reserve(params.kwargsMethod.data(gs)->parameters.size());
+        for (auto &param : params.kwargsMethod.data(gs)->parameters) {
             if (param.flags.isKeyword && !param.flags.isRepeated && hasSimilarName(gs, param.name, params.prefix)) {
                 allKwargs.emplace_back(param.name);
             }

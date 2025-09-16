@@ -15,7 +15,7 @@ namespace {
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
                              optional<core::NameRef> keyword, int argId) {
     ENFORCE(component.method.exists());
-    const auto &args = component.method.data(ctx)->arguments;
+    const auto &args = component.method.data(ctx)->parameters;
     if (argId >= args.size()) {
         return nullptr;
     }
@@ -354,7 +354,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             // sometimes variable does not have a name e.g. `def initialize (*)`
             arg.name.shortName(ctx).empty();
     };
-    bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments, isBadArg);
+    bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->parameters, isBadArg);
     if (hasBadArg) {
         return nullopt;
     }
@@ -371,7 +371,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             guessedReturnType = closestReturnType;
         }
 
-        for (const auto &arg : closestMethod.data(ctx)->arguments) {
+        for (const auto &arg : closestMethod.data(ctx)->parameters) {
             if (arg.type && !arg.type.isUntyped()) {
                 guessedArgumentTypes[arg.name] = arg.type;
             }
@@ -391,9 +391,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
     fmt::format_to(std::back_inserter(ss), " {{ ");
 
-    ENFORCE(!methodSymbol.data(ctx)->arguments.empty(), "There should always be at least one arg (the block arg).");
-    bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->arguments.size() == 1 &&
-                                methodSymbol.data(ctx)->arguments[0].isSyntheticBlockArgument();
+    ENFORCE(!methodSymbol.data(ctx)->parameters.empty(), "There should always be at least one arg (the block arg).");
+    bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->parameters.size() == 1 &&
+                                methodSymbol.data(ctx)->parameters[0].isSyntheticBlockArgument();
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
         // Only need override / implementation if the parent has a sig
@@ -408,7 +408,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         fmt::format_to(std::back_inserter(ss), "params(");
 
         bool first = true;
-        for (auto &argSym : methodSymbol.data(ctx)->arguments) {
+        for (auto &argSym : methodSymbol.data(ctx)->parameters) {
             // WARNING: This is doing raw string equality--don't cargo cult this!
             // You almost certainly want to compare NameRef's for equality instead.
             // We need to compare strings here because we're running with a frozen global state

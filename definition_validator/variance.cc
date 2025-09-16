@@ -165,7 +165,7 @@ public:
         // Negate the polarity for checking arguments in a ContraVariant context.
         const core::Polarity negated = core::Polarities::negatePolarity(polarity);
 
-        for (auto &arg : methodData->arguments) {
+        for (auto &arg : methodData->parameters) {
             if (arg.type != nullptr) {
                 validatePolarity(arg.loc, ctx, negated, arg.type);
             }

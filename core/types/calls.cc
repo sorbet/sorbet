@@ -347,16 +347,16 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc
 }
 
 size_t getArity(const GlobalState &gs, MethodRef method) {
-    ENFORCE(!method.data(gs)->arguments.empty(), "Every method should have at least a block arg.");
-    ENFORCE(method.data(gs)->arguments.back().flags.isBlock, "Last arg should be the block arg.");
+    ENFORCE(!method.data(gs)->parameters.empty(), "Every method should have at least a block arg.");
+    ENFORCE(method.data(gs)->parameters.back().flags.isBlock, "Last arg should be the block arg.");
 
-    const auto &arguments = method.data(gs)->arguments;
+    const auto &arguments = method.data(gs)->parameters;
     if (absl::c_any_of(arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; })) {
         return SIZE_MAX;
     };
 
     // Don't count the block arg in the arity
-    return method.data(gs)->arguments.size() - 1;
+    return method.data(gs)->parameters.size() - 1;
 }
 
 struct GuessOverloadCandidate {
@@ -431,7 +431,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 const auto &[candidate, arity, constr] = *it;
-                const auto &arguments = candidate.data(gs)->arguments;
+                const auto &arguments = candidate.data(gs)->parameters;
                 TypePtr argTypeRaw;
                 if (i < arguments.size() - 1) {
                     argTypeRaw = arguments[i].type;
@@ -481,7 +481,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     { // keep only candidates that have a block iff we are passing one
         auto it = std::remove_if(leftCandidates.begin(), leftCandidates.end(), [&gs, hasBlock](auto &c) -> bool {
             const auto &[candidate, _arity, constr] = c;
-            const auto &args = candidate.data(gs)->arguments;
+            const auto &args = candidate.data(gs)->parameters;
             ENFORCE(!args.empty(), "Should at least have a block argument.");
             const auto &lastArg = args.back();
             auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
@@ -536,7 +536,7 @@ struct ArityComponents {
 ArityComponents arityComponents(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
-    for (const auto &arg : method.data(gs)->arguments) {
+    for (const auto &arg : method.data(gs)->parameters) {
         if (arg.flags.isKeyword || arg.flags.isBlock) {
             // ignore
         } else if (arg.flags.isDefault) {
@@ -969,14 +969,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr->defineDomain(gs, methodData->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwparams = absl::c_any_of(methodData->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwparams = absl::c_any_of(methodData->parameters, [](const auto &arg) { return arg.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
 
     // p -> params, i.e., what was mentioned in the definition
-    auto pit = methodData->arguments.begin();
-    auto pend = methodData->arguments.end();
+    auto pit = methodData->parameters.begin();
+    auto pend = methodData->parameters.end();
 
     ENFORCE(pit != pend, "Should at least have the block arg.");
     ENFORCE((pend - 1)->flags.isBlock, "Last arg should be the block arg: {}", (pend - 1)->show(gs));
@@ -1162,7 +1162,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             const ArgInfo *kwSplatParam = nullptr;
             auto hasRequiredKwParam = false;
             auto kwParams = vector<const ArgInfo *>{};
-            for (auto &param : methodData->arguments) {
+            for (auto &param : methodData->parameters) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
                     ENFORCE(kwSplatParam == nullptr);
                     kwSplatParam = &param;
@@ -1309,7 +1309,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             pend = kwit;
 
             bool sawKwSplat = false;
-            while (kwit != methodData->arguments.end()) {
+            while (kwit != methodData->parameters.end()) {
                 const ArgInfo &kwParam = *kwit;
                 if (kwParam.flags.isBlock) {
                     break;
@@ -1425,7 +1425,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         } else if (kwargs == nullptr) {
             // The method has keyword arguments, but none were provided. Report an error for each missing argument.
-            for (auto &param : methodData->arguments) {
+            for (auto &param : methodData->parameters) {
                 if (!param.flags.isKeyword || param.flags.isDefault || param.flags.isRepeated) {
                     continue;
                 }
@@ -1486,10 +1486,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(methodData->arguments, [&consumed](const ArgInfo &arg) {
+                auto firstKeyword = absl::c_find_if(methodData->parameters, [&consumed](const ArgInfo &arg) {
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
-                if (firstKeyword != methodData->arguments.end()) {
+                if (firstKeyword != methodData->parameters.end()) {
                     auto possibleArg = firstKeyword->argumentName(gs);
                     e.addErrorLine(args.argLoc(maxPossiblePositional),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
@@ -1508,8 +1508,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (args.block != nullptr) {
-        ENFORCE(!methodData->arguments.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
-        const auto &blockParam = methodData->arguments.back();
+        ENFORCE(!methodData->parameters.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
+        const auto &blockParam = methodData->parameters.back();
         ENFORCE(blockParam.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
@@ -1581,9 +1581,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // This mimics the behavior of the SolveConstraint case in processBinding
             resultType = Types::untypedUntracked();
         }
-        ENFORCE(!methodData->arguments.empty(), "Every method should at least have a block arg.");
-        ENFORCE(methodData->arguments.back().flags.isBlock, "The last arg should be the block arg.");
-        auto blockType = methodData->arguments.back().type;
+        ENFORCE(!methodData->parameters.empty(), "Every method should at least have a block arg.");
+        ENFORCE(methodData->parameters.back().flags.isBlock, "The last arg should be the block arg.");
+        auto blockType = methodData->parameters.back().type;
         // TODO(jez) Highlight untyped code for this error
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
@@ -1616,8 +1616,8 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
     auto data = method.data(gs);
 
     vector<TypePtr> args;
-    args.reserve(data->arguments.size());
-    for (const auto &arg : data->arguments) {
+    args.reserve(data->parameters.size());
+    for (const auto &arg : data->parameters) {
         if (arg.flags.isRepeated) {
             ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     method.toString(gs));
@@ -2593,7 +2593,7 @@ private:
             return;
         }
 
-        const auto &methodArgs = dispatchComp.method.data(gs)->arguments;
+        const auto &methodArgs = dispatchComp.method.data(gs)->parameters;
         ENFORCE(!methodArgs.empty());
         const auto &blockParam = methodArgs.back();
         ENFORCE(blockParam.flags.isBlock);

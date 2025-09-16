@@ -118,7 +118,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             }
         } else {
             auto method = sym.asMethodRef();
-            for (auto &thing : method.data(gs)->arguments) {
+            for (auto &thing : method.data(gs)->parameters) {
                 *symbolProto.add_arguments() = toProto(gs, thing);
             }
         }

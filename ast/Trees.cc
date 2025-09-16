@@ -588,7 +588,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
             fmt::format_to(std::back_inserter(buf), "{}", p.toStringWithTabs(gs, tabs + 1));
         }
     } else {
-        for (auto &a : data->arguments) {
+        for (auto &a : data->parameters) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }

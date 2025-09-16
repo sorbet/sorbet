@@ -649,8 +649,8 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     for (auto s : what.typeArguments()) {
         p.putU4(s.id());
     }
-    p.putU4(what.arguments.size());
-    for (const auto &a : what.arguments) {
+    p.putU4(what.parameters.size());
+    for (const auto &a : what.parameters) {
         pickle(p, a);
     }
     pickle(p, what.resultType);
@@ -683,7 +683,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
 
     int argsSize = p.getU4();
     for (int i = 0; i < argsSize; i++) {
-        result.arguments.emplace_back(unpickleArgInfo(p, gs));
+        result.parameters.emplace_back(unpickleArgInfo(p, gs));
     }
 
     result.resultType = unpickleType(p, gs);

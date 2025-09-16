@@ -30,7 +30,7 @@ struct Signature {
 
 Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method) {
     Signature sig;
-    for (auto &arg : method.data(gs)->arguments) {
+    for (auto &arg : method.data(gs)->parameters) {
         if (arg.flags.isBlock) {
             sig.syntheticBlk = arg.isSyntheticBlockArgument();
             continue;
@@ -526,8 +526,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                 constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
         }
     } else {
-        const auto &methodBlkArg = method.data(ctx)->arguments.back();
-        const auto &superMethodBlkArg = superMethod.data(ctx)->arguments.back();
+        const auto &methodBlkArg = method.data(ctx)->parameters.back();
+        const auto &superMethodBlkArg = superMethod.data(ctx)->parameters.back();
 
         core::ErrorSection::Collector errorDetailsCollector;
         if (!checkSubtype(ctx, *constr, methodBlkArg.type, method, superMethodBlkArg.type, superMethod,
