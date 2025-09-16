@@ -21,28 +21,28 @@ namespace sorbet::definition_validator {
 namespace {
 struct Signature {
     struct {
-        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
-        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> optional;
-        std::optional<reference_wrapper<const core::ArgInfo>> rest;
+        absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> required;
+        absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> optional;
+        std::optional<reference_wrapper<const core::ParamInfo>> rest;
     } pos, kw;
     bool syntheticBlk;
 } left, right;
 
 Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method) {
     Signature sig;
-    for (auto &arg : method.data(gs)->arguments) {
-        if (arg.flags.isBlock) {
-            sig.syntheticBlk = arg.isSyntheticBlockArgument();
+    for (auto &param : method.data(gs)->parameters) {
+        if (param.flags.isBlock) {
+            sig.syntheticBlk = param.isSyntheticBlockParameter();
             continue;
         }
 
-        auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
-        if (arg.flags.isRepeated) {
-            dst.rest = optional<reference_wrapper<const core::ArgInfo>>{arg};
-        } else if (arg.flags.isDefault) {
-            dst.optional.push_back(arg);
+        auto &dst = param.flags.isKeyword ? sig.kw : sig.pos;
+        if (param.flags.isRepeated) {
+            dst.rest = optional<reference_wrapper<const core::ParamInfo>>{param};
+        } else if (param.flags.isDefault) {
+            dst.optional.push_back(param);
         } else {
-            dst.required.push_back(arg);
+            dst.required.push_back(param);
         }
     }
     return sig;
@@ -129,7 +129,7 @@ string implementationOf(const core::Context ctx, core::MethodRef method) {
 
 enum class SplatKind { ARG, KWARG };
 
-pair<std::string, std::string> formatSplat(const core::ArgInfo &arg, SplatKind kd, const core::GlobalState &gs) {
+pair<std::string, std::string> formatSplat(const core::ParamInfo &arg, SplatKind kd, const core::GlobalState &gs) {
     auto rendered = arg.show(gs);
 
     std::string left;
@@ -217,9 +217,9 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
 void matchPositional(const core::Context ctx, core::TypeConstraint &constr, const ast::ExpressionPtr &tree,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
+                     absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
+                     absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &methodArgs,
                      const ast::MethodDef &methodDef, bool &reportedAutocorrect) {
     auto method = methodDef.symbol;
     auto idx = 0;
@@ -526,19 +526,19 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                 constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
         }
     } else {
-        const auto &methodBlkArg = method.data(ctx)->arguments.back();
-        const auto &superMethodBlkArg = superMethod.data(ctx)->arguments.back();
+        const auto &methodBlkParam = method.data(ctx)->parameters.back();
+        const auto &superMethodBlkParam = superMethod.data(ctx)->parameters.back();
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodBlkArg.type, method, superMethodBlkArg.type, superMethod,
+        if (!checkSubtype(ctx, *constr, methodBlkParam.type, method, superMethodBlkParam.type, superMethod,
                           core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodBlkArg.argumentName(ctx), methodBlkArg.type.show(ctx),
+                            methodBlkParam.parameterName(ctx), methodBlkParam.type.show(ctx),
                             superMethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
-                               superMethodBlkArg.show(ctx), superMethodBlkArg.type.show(ctx));
+                               superMethodBlkParam.show(ctx), superMethodBlkParam.type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
                 e.maybeAddAutocorrect(

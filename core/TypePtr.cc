@@ -278,6 +278,9 @@ core::SymbolRef TypePtr::untypedBlame() const {
 // into this:
 //   [Integer, Integer]
 // for use with LoadYieldParams
+//
+// Currently, this method is never called with `name` set to anything other than `Names::call()`,
+// which is where the `getCallArguments` comes from.
 TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
     switch (tag()) {
         case Tag::MetaType:

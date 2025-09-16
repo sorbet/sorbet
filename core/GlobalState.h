@@ -106,10 +106,10 @@ public:
     TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, uint32_t num,
-                                     const std::vector<bool> &argsToKeep);
+                                     const std::vector<bool> &paramsToKeep);
     FieldRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     FieldRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
-    ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
+    ParamInfo &enterMethodParameter(Loc loc, MethodRef owner, NameRef name);
 
     SymbolRef lookupSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithKind(owner, name, SymbolRef::Kind::ClassOrModule, Symbols::noSymbol(),

@@ -75,7 +75,7 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     return protoName;
 }
 
-com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &gs, const ArgInfo &arg) {
+com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &gs, const ParamInfo &arg) {
     com::stripe::rubytyper::Symbol::ArgumentInfo argProto;
     *argProto.mutable_name() = toProto(gs, arg.name);
     argProto.set_iskeyword(arg.flags.isKeyword);
@@ -118,7 +118,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             }
         } else {
             auto method = sym.asMethodRef();
-            for (auto &thing : method.data(gs)->arguments) {
+            for (auto &thing : method.data(gs)->parameters) {
                 *symbolProto.add_arguments() = toProto(gs, thing);
             }
         }

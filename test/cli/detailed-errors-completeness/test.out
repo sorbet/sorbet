@@ -165,7 +165,7 @@ test.rb:17: Expected `[Integer]` for keyword parameter `x` but found `[String]` 
 test.rb:24: Expected `T.proc.params(arg0: [Integer]).returns([Integer])` but found `T.proc.params(arg0: [String]).returns([String])` for block argument https://srb.help/7002
     24 |baz(&p)
         ^^^^^^^
-  Expected `T.proc.params(arg0: [Integer]).returns([Integer])` for block argument `blk` of method `Object#baz`:
+  Expected `T.proc.params(arg0: [Integer]).returns([Integer])` for block parameter `blk` of method `Object#baz`:
     test.rb:19:
     19 |sig {params(blk: T.proc.params(x: [Integer]).returns([Integer])).void}
                     ^^^

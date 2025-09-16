@@ -312,8 +312,8 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
-        foundMethod.parsedArgs = ast::ParamParsing::parseParams(method.params);
-        foundMethod.arityHash = ast::ParamParsing::hashParams(ctx, foundMethod.parsedArgs);
+        foundMethod.parsedParams = ast::ParamParsing::parseParams(method.params);
+        foundMethod.arityHash = ast::ParamParsing::hashParams(ctx, foundMethod.parsedParams);
         auto def = foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
@@ -451,7 +451,7 @@ public:
             return;
         }
 
-        auto parsedArgs = InlinedVector<core::NameRef, 2>{};
+        auto parsedParams = InlinedVector<core::NameRef, 2>{};
 
         for (const auto &arg : send.posArgs()) {
             auto lit = ast::cast_tree<ast::Literal>(arg);
@@ -460,14 +460,14 @@ public:
             }
             core::NameRef name = lit->asSymbol();
 
-            parsedArgs.emplace_back(name);
+            parsedParams.emplace_back(name);
         }
 
-        if (parsedArgs.size() != 2) {
+        if (parsedParams.size() != 2) {
             return;
         }
 
-        auto fromName = parsedArgs[0];
+        auto fromName = parsedParams[0];
 
         core::FoundMethod foundMethod;
         foundMethod.owner = getOwner();
@@ -774,57 +774,57 @@ private:
     }
 
     void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos,
-                   const core::ParsedParam &parsedArg) {
-        if (pos < methodData->arguments.size()) {
+                   const core::ParsedParam &parsedParam) {
+        if (pos < methodData->parameters.size()) {
             // TODO: check that flags match;
-            if (parsedArg.loc.exists()) {
-                methodData->arguments[pos].loc = ctx.locAt(parsedArg.loc);
+            if (parsedParam.loc.exists()) {
+                methodData->parameters[pos].loc = ctx.locAt(parsedParam.loc);
             }
             return;
         }
 
         core::NameRef name;
-        if (parsedArg.flags.isKeyword) {
-            if (parsedArg.flags.isRepeated) {
-                if (parsedArg.local._name == core::Names::fwdKwargs()) {
+        if (parsedParam.flags.isKeyword) {
+            if (parsedParam.flags.isRepeated) {
+                if (parsedParam.local._name == core::Names::fwdKwargs()) {
                     name = core::Names::fwdKwargs();
                 } else {
                     name = core::Names::kwargs();
                 }
             } else {
-                name = parsedArg.local._name;
+                name = parsedParam.local._name;
             }
-        } else if (parsedArg.flags.isBlock) {
+        } else if (parsedParam.flags.isBlock) {
             name = core::Names::blkArg();
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo = ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
+        auto &paramInfo = ctx.state.enterMethodParameter(ctx.locAt(parsedParam.loc), ctx.owner.asMethodRef(), name);
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
-        // from enterMethodArgumentSymbol
-        ENFORCE(methodData->arguments.size() >= pos + 1);
+        // from enterMethodParameter
+        ENFORCE(methodData->parameters.size() >= pos + 1);
 
-        argInfo.flags = parsedArg.flags;
+        paramInfo.flags = parsedParam.flags;
     }
 
-    void defineArgs(core::MutableContext ctx, const vector<core::ParsedParam> &parsedArgs) {
+    void defineArgs(core::MutableContext ctx, const vector<core::ParsedParam> &parsedParams) {
         auto methodData = ctx.owner.asMethodRef().data(ctx);
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
-        bool swapArgs = intrinsic && (methodData->arguments.size() == 1);
-        core::ArgInfo swappedArg;
+        bool swapArgs = intrinsic && (methodData->parameters.size() == 1);
+        core::ParamInfo swappedArg;
         if (swapArgs) {
             // When we're filling in an intrinsic method, we want to overwrite the block arg that used
             // to exist with the block arg that we got from desugaring the method def in the RBI files.
-            ENFORCE(methodData->arguments[0].flags.isBlock);
-            swappedArg = move(methodData->arguments[0]);
-            methodData->arguments.clear();
+            ENFORCE(methodData->parameters[0].flags.isBlock);
+            swappedArg = move(methodData->parameters[0]);
+            methodData->parameters.clear();
         }
 
         int i = -1;
-        for (auto &arg : parsedArgs) {
+        for (auto &arg : parsedParams) {
             i++;
             if (arg.flags.isShadow) {
                 inShadows = true;
@@ -833,63 +833,66 @@ private:
 
                 if (swapArgs && arg.flags.isBlock) {
                     // see comment on if (swapArgs) above
-                    methodData->arguments.emplace_back(move(swappedArg));
+                    methodData->parameters.emplace_back(move(swappedArg));
                 }
 
                 defineArg(ctx, methodData, i, arg);
-                ENFORCE(i < methodData->arguments.size());
+                ENFORCE(i < methodData->parameters.size());
             }
         }
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedParam> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedParam> &parsedParams) {
         auto sym = method.data(ctx)->dealiasMethod(ctx);
-        return absl::c_equal(parsedArgs, sym.data(ctx)->arguments, [](const auto &methodArg, const auto &symArg) {
-            return symArg.flags.isKeyword == methodArg.flags.isKeyword &&
-                   symArg.flags.isBlock == methodArg.flags.isBlock &&
-                   symArg.flags.isRepeated == methodArg.flags.isRepeated &&
-                   (!symArg.flags.isKeyword || symArg.name == methodArg.local._name);
-        });
+        return absl::c_equal(parsedParams, sym.data(ctx)->parameters,
+                             [](const auto &methodParam, const auto &symParam) {
+                                 return symParam.flags.isKeyword == methodParam.flags.isKeyword &&
+                                        symParam.flags.isBlock == methodParam.flags.isBlock &&
+                                        symParam.flags.isRepeated == methodParam.flags.isRepeated &&
+                                        (!symParam.flags.isKeyword || symParam.name == methodParam.local._name);
+                             });
     }
 
-    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedParam> &parsedArgs) {
+    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedParam> &parsedParams) {
         auto sym = ctx.owner.dealias(ctx);
         if (!sym.isMethod()) {
             return;
         }
         auto symMethod = sym.asMethodRef();
-        if (symMethod.data(ctx)->arguments.size() != parsedArgs.size()) {
+        if (symMethod.data(ctx)->parameters.size() != parsedParams.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                        ctx.owner.show(ctx), symMethod.data(ctx)->arguments.size() - 1, parsedArgs.size() - 1);
+                        ctx.owner.show(ctx), symMethod.data(ctx)->parameters.size() - 1, parsedParams.size() - 1);
                     e.addErrorLine(ctx.owner.loc(ctx), "Previous alias definition");
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Dealiased definition");
                 } else {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                                symMethod.show(ctx), symMethod.data(ctx)->arguments.size() - 1, parsedArgs.size() - 1);
+                                symMethod.show(ctx), symMethod.data(ctx)->parameters.size() - 1,
+                                parsedParams.size() - 1);
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Previous definition");
                 }
             }
             return;
         }
-        for (int i = 0; i < parsedArgs.size(); i++) {
-            auto &methodArg = parsedArgs[i];
-            auto &symArg = symMethod.data(ctx)->arguments[i];
+        for (int i = 0; i < parsedParams.size(); i++) {
+            auto &methodParam = parsedParams[i];
+            auto &symParam = symMethod.data(ctx)->parameters[i];
 
-            if (symArg.flags.isKeyword != methodArg.flags.isKeyword) {
+            if (symParam.flags.isKeyword != methodParam.flags.isKeyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
-                                methodArg.local.toString(ctx), methodArg.flags.isKeyword ? "keyword" : "non-keyword");
+                                methodParam.local.toString(ctx),
+                                methodParam.flags.isKeyword ? "keyword" : "non-keyword");
                     e.addErrorLine(
                         sym.loc(ctx),
                         "The corresponding argument `{}` in the previous definition was {}a keyword argument",
-                        symArg.show(ctx), symArg.flags.isKeyword ? "" : "not ");
+                        symParam.show(ctx), symParam.flags.isKeyword ? "" : "not ");
                 }
                 return;
             }
@@ -901,22 +904,22 @@ private:
             // already with the "without matching argument count" error above. So, as long as we have maintained the
             // intended invariants around methods and arguments, we do not need to ever issue an error about
             // non-matching isBlock-ness.
-            ENFORCE(symArg.flags.isBlock == methodArg.flags.isBlock);
-            if (symArg.flags.isRepeated != methodArg.flags.isRepeated) {
+            ENFORCE(symParam.flags.isBlock == methodParam.flags.isBlock);
+            if (symParam.flags.isRepeated != methodParam.flags.isRepeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
-                                methodArg.local.toString(ctx), methodArg.flags.isRepeated ? "splat" : "non-splat");
+                                methodParam.local.toString(ctx), methodParam.flags.isRepeated ? "splat" : "non-splat");
                     e.addErrorLine(sym.loc(ctx),
                                    "The corresponding argument `{}` in the previous definition was {}a splat argument",
-                                   symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
+                                   symParam.show(ctx), symParam.flags.isRepeated ? "" : "not ");
                 }
                 return;
             }
-            if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
+            if (symParam.flags.isKeyword && symParam.name != methodParam.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                        sym.show(ctx), symParam.name.show(ctx), methodParam.local._name.show(ctx));
                     e.addErrorLine(sym.loc(ctx), "Previous definition");
                 }
                 return;
@@ -945,7 +948,7 @@ private:
         // then-current symbol. If we weren't running in incremental mode, then `sym` wouldn't exist yet (we would
         // be about to create it!) and `currentSym` would be `def f()`, because we have not yet progressed far
         // enough in the file to see any other definition of `f`.
-        auto &parsedArgs = method.parsedArgs;
+        auto &parsedParams = method.parsedParams;
         auto symTableSize = ctx.state.methodsUsed();
         auto declLoc = ctx.locAt(method.declLoc);
         auto sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
@@ -957,7 +960,7 @@ private:
                 // we don't have a method definition with the right argument structure, so we need to mangle the
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedParams);
                     ctx.state.mangleRenameMethod(sym, method.name);
                     // Re-enter a new symbol.
                     sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
@@ -970,15 +973,15 @@ private:
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
                 // the previously defined equivalent to re-report any errors
                 auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym); // OK, this is a method
-                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedArgs) &&
+                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedParams) &&
                     !isIntrinsic(replacedSym.asMethodRef().data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedParams);
                 }
                 sym = matchingSym;
             }
         }
 
-        defineArgs(ctx.withOwner(sym), parsedArgs);
+        defineArgs(ctx.withOwner(sym), parsedParams);
         sym.data(ctx)->addLoc(ctx, declLoc);
         if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->flags.isRewriterSynthesized = true;
@@ -1216,8 +1219,7 @@ private:
             auto loc = ctx.locAt(mod.loc);
             auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
             sealedSubclasses.data(ctx)->addLoc(ctx, loc);
-            auto &blkArg =
-                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
+            auto &blkArg = ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
 
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
@@ -1778,11 +1780,11 @@ public:
     }
 #endif
 
-    ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedArgs,
+    ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedParams,
                                               ast::MethodDef::PARAMS_store oldParams) {
         ast::MethodDef::PARAMS_store params;
         int i = -1;
-        for (auto &param : parsedArgs) {
+        for (auto &param : parsedParams) {
             i++;
             auto localVariable = param.local;
 
@@ -1815,8 +1817,8 @@ public:
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(method.symbol != core::Symbols::todoMethod());
 
-        ENFORCE(method.params.size() == method.symbol.data(ctx)->arguments.size(), "{}: {} != {}",
-                method.name.showRaw(ctx), method.params.size(), method.symbol.data(ctx)->arguments.size());
+        ENFORCE(method.params.size() == method.symbol.data(ctx)->parameters.size(), "{}: {} != {}",
+                method.name.showRaw(ctx), method.params.size(), method.symbol.data(ctx)->parameters.size());
     }
 
     ast::ExpressionPtr handleAssignment(core::Context ctx, ast::ExpressionPtr tree) {

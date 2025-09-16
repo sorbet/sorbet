@@ -657,7 +657,7 @@ private:
         auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
 
         // Add a fake block argument so that this method symbol passes sanity checks
-        auto &arg = ctx.state.enterMethodArgumentSymbol(core::Loc::none(), uaSym, core::Names::blkArg());
+        auto &arg = ctx.state.enterMethodParameter(core::Loc::none(), uaSym, core::Names::blkArg());
         arg.flags.isBlock = true;
 
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
@@ -863,7 +863,7 @@ private:
                 mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{});
 
                 // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
-                auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod, core::Names::blkArg());
+                auto &arg = gs.enterMethodParameter(core::Loc::none(), mixMethod, core::Names::blkArg());
                 arg.flags.isBlock = true;
             } else {
                 mixMethod.data(gs)->addLoc(gs, loc);
@@ -2435,7 +2435,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
                     // Add a fake keyword argument to remember the toName (for fast path hashing).
                     // It has to be a keyword arg, because names of positional args are ignored in hashing.
-                    auto &arg = ctx.state.enterMethodArgumentSymbol(ctx.locAt(job.toNameLoc), fromMethod, job.toName);
+                    auto &arg = ctx.state.enterMethodParameter(ctx.locAt(job.toNameLoc), fromMethod, job.toName);
                     arg.flags.isKeyword = true;
                 }
             }
@@ -2454,7 +2454,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
         // Add a fake keyword argument to remember the toName (for fast path hashing).
         // It has to be a keyword arg, because names of positional args are ignored in hashing.
-        auto &arg = ctx.state.enterMethodArgumentSymbol(ctx.locAt(job.toNameLoc), alias, job.toName);
+        auto &arg = ctx.state.enterMethodParameter(ctx.locAt(job.toNameLoc), alias, job.toName);
         arg.flags.isKeyword = true;
     }
 
@@ -3216,7 +3216,7 @@ public:
     vector<ResolveMultiSignatureJob> multiSignatureJobs;
 
 private:
-    static ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef,
+    static ast::Local const *getArgLocal(core::Context ctx, const core::ParamInfo &argSym, const ast::MethodDef &mdef,
                                          int pos, bool isOverloaded) {
         if (!isOverloaded) {
             return ast::MK::arg2Local(mdef.params[pos]);
@@ -3225,10 +3225,10 @@ private:
         // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
         // we roundtrip through original symbol that is stored in mdef.
         auto internalNameToLookFor = argSym.name;
-        auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments,
-                                             [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-        ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
-        auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
+        auto originalParamIt = absl::c_find_if(mdef.symbol.data(ctx)->parameters,
+                                               [&](const auto &param) { return param.name == internalNameToLookFor; });
+        ENFORCE(originalParamIt != mdef.symbol.data(ctx)->parameters.end());
+        auto realPos = originalParamIt - mdef.symbol.data(ctx)->parameters.begin();
         return ast::MK::arg2Local(mdef.params[realPos]);
     }
 
@@ -3236,22 +3236,22 @@ private:
                                              bool isOverloaded) {
         // To match, the definition must have been desugared with at least 3 parameters named
         // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
-        auto len = methodInfo->arguments.size();
+        auto len = methodInfo->parameters.size();
         if (len < 3) {
             return false;
         }
 
-        auto l1 = getArgLocal(ctx, methodInfo->arguments[len - 3], mdef, len - 3, isOverloaded)->localVariable;
+        auto l1 = getArgLocal(ctx, methodInfo->parameters[len - 3], mdef, len - 3, isOverloaded)->localVariable;
         if (l1._name != core::Names::fwdArgs()) {
             return false;
         }
 
-        auto l2 = getArgLocal(ctx, methodInfo->arguments[len - 2], mdef, len - 2, isOverloaded)->localVariable;
+        auto l2 = getArgLocal(ctx, methodInfo->parameters[len - 2], mdef, len - 2, isOverloaded)->localVariable;
         if (l2._name != core::Names::fwdKwargs()) {
             return false;
         }
 
-        auto l3 = getArgLocal(ctx, methodInfo->arguments[len - 1], mdef, len - 1, isOverloaded)->localVariable;
+        auto l3 = getArgLocal(ctx, methodInfo->parameters[len - 1], mdef, len - 1, isOverloaded)->localVariable;
         if (l3._name != core::Names::fwdBlock()) {
             return false;
         }
@@ -3260,9 +3260,9 @@ private:
     }
 
     struct OverloadedMethodArgInformation {
-        vector<core::ArgInfo> posArgs;
-        vector<core::ArgInfo> kwArgs;
-        optional<core::ArgInfo> blkArg;
+        vector<core::ParamInfo> posArgs;
+        vector<core::ParamInfo> kwArgs;
+        optional<core::ParamInfo> blkArg;
     };
 
     // This structure serves double duty: it holds information about a single sig and the
@@ -3288,7 +3288,7 @@ private:
                                                             core::LocOffsets exprLoc, ParsedSig &sig, bool isOverloaded,
                                                             const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
-        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.params.size());
+        ENFORCE(isOverloaded || method.data(ctx)->parameters.size() == mdef.params.size());
 
         if (!sig.seen.returns.exists() && !sig.seen.void_.exists()) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -3377,21 +3377,21 @@ private:
 
         methodInfo->resultType = sig.returns;
         int i = -1;
-        for (auto &arg : methodInfo->arguments) {
+        for (auto &param : methodInfo->parameters) {
             ++i;
-            auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
+            auto local = getArgLocal(ctx, param, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;
             ENFORCE(local != nullptr);
 
             // Check that optional keyword parameters are after all the required ones
-            bool isKwd = arg.flags.isKeyword;
-            bool isReq = !arg.flags.isBlock && !arg.flags.isRepeated && !arg.flags.isDefault;
+            bool isKwd = param.flags.isKeyword;
+            bool isReq = !param.flags.isBlock && !param.flags.isRepeated && !param.flags.isDefault;
             if (isKwd) {
                 info.hasKwArgs = true;
                 if (!isReq) {
                     seenOptional = true;
                 } else if (seenOptional && isReq) {
-                    if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
+                    if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::BadParameterOrdering)) {
                         e.setHeader(
                             "Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
                             "sig", treeArgName.show(ctx));
@@ -3403,8 +3403,8 @@ private:
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
-            bool isSyntheticBlkArg = arg.isSyntheticBlockArgument();
-            bool isBlkArg = arg.flags.isBlock;
+            bool isSyntheticBlkArg = param.isSyntheticBlockParameter();
+            bool isBlkArg = param.flags.isBlock;
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
@@ -3416,10 +3416,10 @@ private:
                     }
                 }
 
-                arg.type = std::move(spec->type);
+                param.type = std::move(spec->type);
                 // Passing in a noOp collector even though this call is used for error reporting,
                 // because it's unlikely we'll add more details to a subtype check for T.nilable(Proc)
-                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass())) {
+                if (isBlkArg && !core::Types::isSubType(ctx, param.type, core::Types::nilableProcClass())) {
                     if (auto e = ctx.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Block argument type must be either `{}` or a `{}` type (and possibly nilable)",
                                     "Proc", "T.proc");
@@ -3431,10 +3431,10 @@ private:
                         e.replaceWith("Change block type to `T.nilable(Proc)`", ctx.locAt(spec->typeLoc),
                                       "T.nilable(Proc)");
                     }
-                    arg.type = core::Types::untypedUntracked();
+                    param.type = core::Types::untypedUntracked();
                 }
-                arg.loc = ctx.locAt(spec->nameLoc);
-                arg.rebind = spec->rebind;
+                param.loc = ctx.locAt(spec->nameLoc);
+                param.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
                 // Since methods always have (synthesized if necessary) block arguments,
                 // we need to record the explicit presence of a block arg from the sig here.
@@ -3443,7 +3443,7 @@ private:
                         info.args.emplace();
                     }
                     if (!info.args->blkArg.has_value()) {
-                        info.args->blkArg.emplace(arg.deepCopy());
+                        info.args->blkArg.emplace(param.deepCopy());
                     }
                 }
             } else {
@@ -3451,17 +3451,17 @@ private:
                     info.hasMissingArgument = true;
                 }
 
-                if (arg.type == nullptr) {
-                    arg.type = core::Types::untyped(method);
+                if (param.type == nullptr) {
+                    param.type = core::Types::untyped(method);
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
                 if (!isOverloaded && !isSyntheticBlkArg &&
                     (sig.seen.params.exists() || sig.seen.returns.exists() || sig.seen.void_.exists())) {
                     // Only error if we have any types
-                    if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
-                                    arg.argumentName(ctx.state));
+                                    param.parameterName(ctx.state));
                         e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                     }
                 }
@@ -3471,10 +3471,10 @@ private:
                 if (!info.args.has_value()) {
                     info.args.emplace();
                 }
-                if (arg.flags.isKeyword) {
-                    info.args->kwArgs.emplace_back(arg.deepCopy());
-                } else if (!arg.flags.isBlock) {
-                    info.args->posArgs.emplace_back(arg.deepCopy());
+                if (param.flags.isKeyword) {
+                    info.args->kwArgs.emplace_back(param.deepCopy());
+                } else if (!param.flags.isBlock) {
+                    info.args->posArgs.emplace_back(param.deepCopy());
                 }
             }
         }

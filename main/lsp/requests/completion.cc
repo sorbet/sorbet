@@ -343,23 +343,23 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
 
     auto method = maybeAlias.data(gs)->dealiasMethod(gs);
     vector<string> typeAndArgNames;
-    for (auto &argSym : method.data(gs)->arguments) {
+    for (auto &paramInfo : method.data(gs)->parameters) {
         fmt::memory_buffer argBuf;
-        if (argSym.flags.isBlock) {
+        if (paramInfo.flags.isBlock) {
             // Blocks are handled below
             continue;
         }
-        if (argSym.flags.isDefault) {
+        if (paramInfo.flags.isDefault) {
             continue;
         }
-        if (argSym.flags.isRepeated) {
+        if (paramInfo.flags.isRepeated) {
             continue;
         }
-        if (argSym.flags.isKeyword) {
-            fmt::format_to(std::back_inserter(argBuf), "{}: ", argSym.name.shortName(gs));
+        if (paramInfo.flags.isKeyword) {
+            fmt::format_to(std::back_inserter(argBuf), "{}: ", paramInfo.name.shortName(gs));
         }
-        if (argSym.type) {
-            auto resultType = core::source_generator::getResultType(gs, argSym.type, method, receiverType).show(gs);
+        if (paramInfo.type) {
+            auto resultType = core::source_generator::getResultType(gs, paramInfo.type, method, receiverType).show(gs);
             fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
         } else {
             fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
@@ -371,14 +371,14 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         fmt::format_to(std::back_inserter(result), "({})", fmt::join(typeAndArgNames, ", "));
     }
 
-    ENFORCE(!method.data(gs)->arguments.empty());
-    auto &blkArg = method.data(gs)->arguments.back();
-    ENFORCE(blkArg.flags.isBlock);
+    ENFORCE(!method.data(gs)->parameters.empty());
+    auto &blkParam = method.data(gs)->parameters.back();
+    ENFORCE(blkParam.flags.isBlock);
 
-    auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();
-    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type)) {
+    auto hasBlockType = blkParam.type != nullptr && !blkParam.type.isUntyped();
+    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkParam.type)) {
         string blkArgs;
-        if (auto appliedType = core::cast_type<core::AppliedType>(blkArg.type)) {
+        if (auto appliedType = core::cast_type<core::AppliedType>(blkParam.type)) {
             if (appliedType->targs.size() >= 2) {
                 // The first element in targs is the return type.
                 auto targs_it = appliedType->targs.begin();
@@ -811,13 +811,13 @@ unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerDelegate &typeche
     }
     bool firstAfterSummary = true;
 
-    const auto &arguments = method.data(gs)->arguments;
+    const auto &parameters = method.data(gs)->parameters;
     auto resultType = method.data(gs)->resultType;
 
     // 0 is final tabstop. 1 is initial tabstop (for summary)
     auto tabStop = 1;
-    for (const auto &arg : arguments) {
-        auto argumentName = arg.argumentName(gs);
+    for (const auto &param : parameters) {
+        auto argumentName = param.parameterName(gs);
         if (hasAngleBrackets(argumentName)) {
             continue;
         }
@@ -1241,8 +1241,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         }
 
         vector<core::NameRef> allKwargs;
-        allKwargs.reserve(params.kwargsMethod.data(gs)->arguments.size());
-        for (auto &param : params.kwargsMethod.data(gs)->arguments) {
+        allKwargs.reserve(params.kwargsMethod.data(gs)->parameters.size());
+        for (auto &param : params.kwargsMethod.data(gs)->parameters) {
             if (param.flags.isKeyword && !param.flags.isRepeated && hasSimilarName(gs, param.name, params.prefix)) {
                 allKwargs.emplace_back(param.name);
             }

@@ -222,7 +222,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         auto isPrivate = rbiEntry.data(rbiGS)->flags.isPrivate;
         outfile.fmt("  {}def {}{}(", isPrivate ? "private " : "", isSingleton ? "self." : "", rbiEntryShortName);
 
-        auto &rbiParameters = rbiEntry.data(rbiGS)->arguments;
+        auto &rbiParameters = rbiEntry.data(rbiGS)->parameters;
         if (rbiParameters.size() == 3 && rbiParameters[1].name == core::Names::fwdKwargs()) {
             // The positional and block parameters get their names normalized to make overload
             // checking easier. The only reliable way to detect `...` syntax is by looking at the
@@ -233,12 +233,12 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             for (auto &rbiParameter : rbiParameters) {
                 if (first) {
                     first = false;
-                } else if (!(rbiParameter.flags.isBlock && rbiParameter.isSyntheticBlockArgument())) {
+                } else if (!(rbiParameter.flags.isBlock && rbiParameter.isSyntheticBlockParameter())) {
                     outfile.fmt(", ");
                 }
 
                 ENFORCE(rbiParameter.name.exists());
-                auto rbiParameterShortName = rbiParameter.argumentName(rbiGS);
+                auto rbiParameterShortName = rbiParameter.parameterName(rbiGS);
                 if (rbiParameter.flags.isKeyword && rbiParameter.flags.isRepeated) {
                     outfile.fmt("**{}", rbiParameterShortName);
                 } else if (rbiParameter.flags.isRepeated) {
@@ -250,7 +250,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                         outfile.fmt("{}:", rbiParameterShortName);
                     }
                 } else if (rbiParameter.flags.isBlock) {
-                    if (!rbiParameter.isSyntheticBlockArgument()) {
+                    if (!rbiParameter.isSyntheticBlockParameter()) {
                         outfile.fmt("&{}", rbiParameterShortName);
                     }
                 } else if (rbiParameter.flags.isDefault) {

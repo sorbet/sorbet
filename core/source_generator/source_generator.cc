@@ -59,11 +59,12 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (sym->flags.isOverride) {
         flags.emplace_back("override");
     }
-    for (auto &argSym : method.data(gs)->arguments) {
+    for (auto &paramInfo : method.data(gs)->parameters) {
         // Don't display synthetic arguments (like blk).
-        if (!argSym.isSyntheticBlockArgument()) {
-            typeAndArgNames.emplace_back(absl::StrCat(
-                argSym.argumentName(gs), ": ", getResultType(gs, argSym.type, method, receiver).show(gs, options)));
+        if (!paramInfo.isSyntheticBlockParameter()) {
+            typeAndArgNames.emplace_back(
+                absl::StrCat(paramInfo.parameterName(gs), ": ",
+                             getResultType(gs, paramInfo.type, method, receiver).show(gs, options)));
         }
     }
 
@@ -141,11 +142,11 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
         defaultArgumentPlaceholder = "";
     }
 
-    const auto &arguments = methodData->dealiasMethod(gs).data(gs)->arguments;
-    ENFORCE(!arguments.empty(), "Should have at least a block arg");
-    for (const auto &argSym : arguments) {
+    const auto &parameters = methodData->dealiasMethod(gs).data(gs)->parameters;
+    ENFORCE(!parameters.empty(), "Should have at least a block arg");
+    for (const auto &argSym : parameters) {
         // Don't display synthetic arguments (like blk).
-        if (argSym.isSyntheticBlockArgument()) {
+        if (argSym.isSyntheticBlockParameter()) {
             continue;
         }
         string prefix = "";
@@ -167,7 +168,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
         } else if (argSym.flags.isDefault && !defaultArgumentPlaceholder.empty()) {
             suffix = fmt::format("={}", defaultArgumentPlaceholder);
         }
-        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
+        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.parameterName(gs), suffix));
     }
 
     string argListPrefix = "";

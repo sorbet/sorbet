@@ -280,7 +280,7 @@ BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b
 }
 
 tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int argIndex,
-                                                                    const core::ArgInfo &argInfo, LocalRef argLocal,
+                                                                    const core::ParamInfo &argInfo, LocalRef argLocal,
                                                                     core::LocOffsets argLoc, ast::ExpressionPtr &def,
                                                                     BasicBlock *presentCont, BasicBlock *defaultCont) {
     auto defLoc = def.loc();
@@ -629,7 +629,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 if (auto *block = s.block()) {
                     auto &blockParams = block->params;
                     vector<core::ParsedParam> blockArgFlags = ast::ParamParsing::parseParams(blockParams);
-                    vector<core::ArgInfo::ArgFlags> argFlags;
+                    vector<core::ParamInfo::Flags> argFlags;
                     for (auto &e : blockArgFlags) {
                         argFlags.emplace_back(e.flags);
                     }

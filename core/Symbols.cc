@@ -452,7 +452,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
-TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
+TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner.asMethodRef();
     auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
@@ -1376,7 +1376,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
                        }));
     }
     fmt::format_to(std::back_inserter(buf), " ({})",
-                   fmt::map_join(sym->arguments, ", ", [&](const auto &symb) { return symb.argumentName(gs); }));
+                   fmt::map_join(sym->parameters, ", ", [&](const auto &symb) { return symb.parameterName(gs); }));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1400,8 +1400,8 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
         fmt::format_to(std::back_inserter(buf), "{}", move(str));
     }
 
-    for (auto &arg : sym->arguments) {
-        auto str = arg.toString(gs);
+    for (auto &param : sym->parameters) {
+        auto str = param.toString(gs);
         ENFORCE(!str.empty());
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "{}\n", move(str));
@@ -1629,11 +1629,11 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
     }
 }
 
-string ArgInfo::show(const GlobalState &gs) const {
-    return fmt::format("{}", this->argumentName(gs));
+string ParamInfo::show(const GlobalState &gs) const {
+    return fmt::format("{}", this->parameterName(gs));
 }
 
-string ArgInfo::toString(const GlobalState &gs) const {
+string ParamInfo::toString(const GlobalState &gs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "argument {}", show(gs));
     vector<string_view> flagTexts;
@@ -1666,7 +1666,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
     return to_string(buf);
 }
 
-string_view ArgInfo::argumentName(const GlobalState &gs) const {
+string_view ParamInfo::parameterName(const GlobalState &gs) const {
     if (flags.isKeyword && !flags.isRepeated) {
         return name.shortName(gs);
     } else {
@@ -1930,7 +1930,7 @@ void ClassOrModule::recordRequiredAncestorInternal(GlobalState &gs, ClassOrModul
         ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
 
         // Create the first argument typed as a tuple to store RequiredAncestor.origin
-        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
+        auto &arg = gs.enterMethodParameter(core::Loc::none(), ancestors, core::Names::arg());
         vector<TypePtr> torigins;
         arg.type = make_type<TupleType>(move(torigins));
     }
@@ -1951,7 +1951,7 @@ void ClassOrModule::recordRequiredAncestorInternal(GlobalState &gs, ClassOrModul
 
     // Store the RequiredAncestor.origin
     auto tOrigin = core::make_type<ClassType>(ancestor.origin);
-    (cast_type<TupleType>(ancestors.data(gs)->arguments[0].type))->elems.emplace_back(tOrigin);
+    (cast_type<TupleType>(ancestors.data(gs)->parameters[0].type))->elems.emplace_back(tOrigin);
 
     // Store the RequiredAncestor.loc
     ancestors.data(gs)->locs_.emplace_back(ancestor.loc);
@@ -1970,7 +1970,7 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::readRequiredAncestorsInte
 
     auto data = ancestors.data(gs);
     auto tSymbols = cast_type<TupleType>(data->resultType);
-    auto tOrigins = cast_type<TupleType>(data->arguments[0].type);
+    auto tOrigins = cast_type<TupleType>(data->parameters[0].type);
     auto index = 0;
     for (auto elem : tSymbols->elems) {
         ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
@@ -2083,13 +2083,13 @@ SymbolRef TypeParameter::dealias(const GlobalState &gs, int depthLimit) const {
     return dealiasWithDefault(gs, this->ref(gs), depthLimit, Symbols::untyped());
 }
 
-bool ArgInfo::isSyntheticBlockArgument() const {
+bool ParamInfo::isSyntheticBlockParameter() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
     return flags.isBlock && !loc.exists();
 }
 
-ArgInfo ArgInfo::deepCopy() const {
-    ArgInfo result;
+ParamInfo ParamInfo::deepCopy() const {
+    ParamInfo result;
     result.flags = this->flags;
     result.type = this->type;
     result.loc = this->loc;
@@ -2098,7 +2098,7 @@ ArgInfo ArgInfo::deepCopy() const {
     return result;
 }
 
-uint8_t ArgInfo::ArgFlags::toU1() const {
+uint8_t ParamInfo::Flags::toU1() const {
     uint8_t flags = 0;
     if (isKeyword) {
         flags += 1;
@@ -2118,7 +2118,7 @@ uint8_t ArgInfo::ArgFlags::toU1() const {
     return flags;
 }
 
-void ArgInfo::ArgFlags::setFromU1(uint8_t flags) {
+void ParamInfo::Flags::setFromU1(uint8_t flags) {
     isKeyword = flags & 1;
     isRepeated = flags & 2;
     isDefault = flags & 4;
@@ -2162,9 +2162,9 @@ Method Method::deepCopy(const GlobalState &to) const {
     if (this->typeArgs) {
         result.typeArgs = make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
     }
-    result.arguments.reserve(this->arguments.size());
-    for (auto &mem : this->arguments) {
-        auto &store = result.arguments.emplace_back(mem.deepCopy());
+    result.parameters.reserve(this->parameters.size());
+    for (auto &mem : this->parameters) {
+        auto &store = result.parameters.emplace_back(mem.deepCopy());
         store.name = NameRef(to, mem.name);
     }
     result.rebind = this->rebind;
@@ -2234,17 +2234,17 @@ void Method::sanityCheck(const GlobalState &gs) const {
     }
 
     // There should always either be a block argument at the end, or the method should be an alias
-    ENFORCE_NO_TIMER(!this->arguments.empty(), "{}", ref(gs).show(gs));
+    ENFORCE_NO_TIMER(!this->parameters.empty(), "{}", ref(gs).show(gs));
 
     if (isa_type<AliasType>(this->resultType)) {
         // The arguments of an alias method don't mean anything. When calling a method alias,
         // we dealias the symbol and use those arguments.
         //
         // This leaves the alias method's arguments vector free for us to stash some information. See resolver.
-        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
-                         ref(gs).show(gs));
-        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
-                         ref(gs).show(gs));
+        ENFORCE_NO_TIMER(absl::c_all_of(this->parameters, [](const auto &param) { return param.flags.isKeyword; }),
+                         "{}", ref(gs).show(gs));
+        ENFORCE_NO_TIMER(absl::c_all_of(this->parameters, [](const auto &param) { return param.flags.isKeyword; }),
+                         "{}", ref(gs).show(gs));
     }
 }
 
@@ -2423,9 +2423,9 @@ uint32_t Method::hash(const GlobalState &gs) const {
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
     result = mix(result, this->methodArityHash(gs)._hashValue);
-    for (const auto &arg : arguments) {
+    for (const auto &param : this->parameters) {
         // If an argument's resultType changes, then the sig has changed.
-        auto type = arg.type;
+        auto type = param.type;
         if (!type) {
             type = Types::untypedUntracked();
         }
@@ -2497,8 +2497,8 @@ uint32_t Field::fieldShapeHash(const GlobalState &gs) const {
 // This has to match the implementation of ParamParsing::hashParams
 ArityHash Method::methodArityHash(const GlobalState &gs) const {
     uint32_t result = 0;
-    result = mix(result, arguments.size());
-    for (const auto &e : arguments) {
+    result = mix(result, this->parameters.size());
+    for (const auto &e : this->parameters) {
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
             result = mix(result, _hash(e.name.shortName(gs)));

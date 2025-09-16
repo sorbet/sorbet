@@ -55,7 +55,7 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
     edits.emplace_back(make_unique<TextEdit>(move(insertSelfRange), "self."));
     if (needsParens) {
         edits.emplace_back(make_unique<TextEdit>(move(insertParamRange), "(this)"));
-    } else if (definition.symbol.data(gs)->arguments.empty()) {
+    } else if (definition.symbol.data(gs)->parameters.empty()) {
         edits.emplace_back(make_unique<TextEdit>(move(insertParamRange), "this"));
     } else {
         edits.emplace_back(make_unique<TextEdit>(move(insertParamRange), "this, "));

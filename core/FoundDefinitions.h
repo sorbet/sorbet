@@ -150,7 +150,7 @@ struct FoundMethod final {
     core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
-    std::vector<core::ParsedParam> parsedArgs;
+    std::vector<core::ParsedParam> parsedParams;
     core::ArityHash arityHash;
     struct Flags {
         bool isSelfMethod : 1;

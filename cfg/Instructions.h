@@ -192,7 +192,7 @@ public:
         categoryCounterInc("cfg", "loadarg");
     };
 
-    const core::ArgInfo &argument(const core::GlobalState &gs) const;
+    const core::ParamInfo &argument(const core::GlobalState &gs) const;
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -207,7 +207,7 @@ public:
         categoryCounterInc("cfg", "argpresent");
     }
 
-    const core::ArgInfo &argument(const core::GlobalState &gs) const;
+    const core::ParamInfo &argument(const core::GlobalState &gs) const;
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -239,11 +239,11 @@ CheckSize(YieldParamPresent, 8, 8);
 
 INSN(YieldLoadArg) : public Instruction {
 public:
-    core::ArgInfo::ArgFlags flags;
+    core::ParamInfo::Flags flags;
     uint16_t argId;
     VariableUseSite yieldParam;
 
-    YieldLoadArg(uint16_t argId, core::ArgInfo::ArgFlags flags, LocalRef yieldParam)
+    YieldLoadArg(uint16_t argId, core::ParamInfo::Flags flags, LocalRef yieldParam)
         : flags(flags), argId(argId), yieldParam(yieldParam) {
         categoryCounterInc("cfg", "yieldloadarg");
     }

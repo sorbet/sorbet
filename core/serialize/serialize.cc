@@ -36,7 +36,7 @@ public:
     static void pickle(Pickler &p, const ConstantName &what);
     static void pickle(Pickler &p, const UniqueName &what);
     static void pickle(Pickler &p, const TypePtr &what);
-    static void pickle(Pickler &p, const ArgInfo &a);
+    static void pickle(Pickler &p, const ParamInfo &what);
     static void pickle(Pickler &p, const ClassOrModule &what);
     static void pickle(Pickler &p, const Method &what);
     static void pickle(Pickler &p, const Field &what);
@@ -52,7 +52,7 @@ public:
     static ConstantName unpickleConstantName(UnPickler &p, GlobalState &gs);
     static UniqueName unpickleUniqueName(UnPickler &p, GlobalState &gs);
     static TypePtr unpickleType(UnPickler &p, const GlobalState *gs);
-    static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
+    static ParamInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
     static ClassOrModule unpickleClassOrModule(UnPickler &p, const GlobalState *gs);
     static Method unpickleMethod(UnPickler &p, const GlobalState *gs);
     static Field unpickleField(UnPickler &p, const GlobalState *gs);
@@ -619,16 +619,16 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     }
 }
 
-void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
-    p.putU4(a.name.rawId());
-    p.putU4(a.rebind.id());
-    pickle(p, a.loc);
-    p.putU1(a.flags.toU1());
-    pickle(p, a.type);
+void SerializerImpl::pickle(Pickler &p, const ParamInfo &what) {
+    p.putU4(what.name.rawId());
+    p.putU4(what.rebind.id());
+    pickle(p, what.loc);
+    p.putU1(what.flags.toU1());
+    pickle(p, what.type);
 }
 
-ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
-    ArgInfo result;
+ParamInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
+    ParamInfo result;
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.rebind = core::ClassOrModuleRef::fromRaw(p.getU4());
     result.loc = unpickleLoc(p);
@@ -649,9 +649,9 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     for (auto s : what.typeArguments()) {
         p.putU4(s.id());
     }
-    p.putU4(what.arguments.size());
-    for (const auto &a : what.arguments) {
-        pickle(p, a);
+    p.putU4(what.parameters.size());
+    for (const auto &param : what.parameters) {
+        pickle(p, param);
     }
     pickle(p, what.resultType);
     p.putU4(what.intrinsicOffset);
@@ -681,9 +681,9 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
         }
     }
 
-    int argsSize = p.getU4();
-    for (int i = 0; i < argsSize; i++) {
-        result.arguments.emplace_back(unpickleArgInfo(p, gs));
+    int parametersSize = p.getU4();
+    for (int i = 0; i < parametersSize; i++) {
+        result.parameters.emplace_back(unpickleArgInfo(p, gs));
     }
 
     result.resultType = unpickleType(p, gs);

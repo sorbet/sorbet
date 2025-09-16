@@ -19,7 +19,7 @@ public:
 
     static com::stripe::rubytyper::Name toProto(const GlobalState &gs, NameRef name);
 
-    static com::stripe::rubytyper::Symbol::ArgumentInfo toProto(const GlobalState &gs, const ArgInfo &arg);
+    static com::stripe::rubytyper::Symbol::ArgumentInfo toProto(const GlobalState &gs, const ParamInfo &arg);
     static com::stripe::rubytyper::Symbol toProto(const GlobalState &gs, SymbolRef sym, bool showFull);
 
     static com::stripe::rubytyper::Type::Literal toProto(const GlobalState &gs, const NamedLiteralType &lit);

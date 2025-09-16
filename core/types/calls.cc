@@ -272,7 +272,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
 namespace {
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
-                               MethodRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
+                               MethodRef method, const TypeAndOrigins &argTpe, const ParamInfo &argSym,
                                const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
@@ -294,16 +294,16 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             //
             // auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file());
             // if (auto e = gs.beginError(argLoc, what)) {
-            //     e.setHeader("Method parameter `{}` is declared with `{}`", argSym.argumentName(gs), "T.untyped");
+            //     e.setHeader("Method parameter `{}` is declared with `{}`", argSym.parameterName(gs), "T.untyped");
             //     TypeErrorDiagnostics::explainUntyped(gs, e, what, expectedType, argSym.loc, originForUninitialized);
             //     return e.build();
             // }
         } else if (argTpe.type.isUntyped() && expectedType != Types::top()) {
             auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file(), argTpe.type);
             if (auto e = gs.beginError(argLoc, what)) {
-                e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.argumentName(gs), "T.untyped");
+                e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.parameterName(gs), "T.untyped");
                 auto for_ =
-                    ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
+                    ErrorColors::format("argument `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
                 e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, argTpe, originForUninitialized);
                 return e.build();
@@ -314,12 +314,12 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 
     if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && method.data(gs)->name.isSetter(gs)) {
-            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(gs),
+            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.parameterName(gs),
                         expectedType.show(gs));
         } else {
             e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
-                        argSym.argumentName(gs));
-            auto for_ = ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
+                        argSym.parameterName(gs));
+            auto for_ = ErrorColors::format("argument `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
@@ -330,8 +330,8 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ArgInfo &arg,
-                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method,
+                             const ParamInfo &arg, ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
     if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
         auto argName = arg.name.show(gs);
         e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
@@ -347,16 +347,16 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc
 }
 
 size_t getArity(const GlobalState &gs, MethodRef method) {
-    ENFORCE(!method.data(gs)->arguments.empty(), "Every method should have at least a block arg.");
-    ENFORCE(method.data(gs)->arguments.back().flags.isBlock, "Last arg should be the block arg.");
+    ENFORCE(!method.data(gs)->parameters.empty(), "Every method should have at least a block arg.");
+    ENFORCE(method.data(gs)->parameters.back().flags.isBlock, "Last arg should be the block arg.");
 
-    const auto &arguments = method.data(gs)->arguments;
-    if (absl::c_any_of(arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; })) {
+    const auto &parameters = method.data(gs)->parameters;
+    if (absl::c_any_of(parameters, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; })) {
         return SIZE_MAX;
     };
 
     // Don't count the block arg in the arity
-    return method.data(gs)->arguments.size() - 1;
+    return method.data(gs)->parameters.size() - 1;
 }
 
 struct GuessOverloadCandidate {
@@ -431,28 +431,30 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 const auto &[candidate, arity, constr] = *it;
-                const auto &arguments = candidate.data(gs)->arguments;
-                TypePtr argTypeRaw;
-                if (i < arguments.size() - 1) {
-                    argTypeRaw = arguments[i].type;
+                const auto &parameters = candidate.data(gs)->parameters;
+                TypePtr paramTypeRaw;
+                if (i < parameters.size() - 1) {
+                    paramTypeRaw = parameters[i].type;
                 } else if (arity == SIZE_MAX) {
-                    auto restArg = absl::c_find_if(
-                        arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; });
-                    ENFORCE(restArg != arguments.end())
-                    argTypeRaw = restArg->type;
+                    auto restParam = absl::c_find_if(parameters, [&](const auto &param) {
+                        return param.flags.isRepeated && !param.flags.isKeyword;
+                    });
+                    ENFORCE(restParam != parameters.end())
+                    paramTypeRaw = restParam->type;
                 } else {
                     it = leftCandidates.erase(it);
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(gs, argTypeRaw, candidate.data(gs)->owner, inClass, targs);
+                auto paramType =
+                    Types::resultTypeAsSeenFrom(gs, paramTypeRaw, candidate.data(gs)->owner, inClass, targs);
                 if (constr == nullptr) {
-                    if (!Types::isSubType(gs, arg, argType)) {
+                    if (!Types::isSubType(gs, arg, paramType)) {
                         it = leftCandidates.erase(it);
                         continue;
                     }
                 } else {
-                    if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, argType, UntypedMode::AlwaysCompatible,
+                    if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, paramType, UntypedMode::AlwaysCompatible,
                                                          ErrorSection::Collector::NO_OP)) {
                         it = leftCandidates.erase(it);
                         continue;
@@ -481,17 +483,17 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     { // keep only candidates that have a block iff we are passing one
         auto it = std::remove_if(leftCandidates.begin(), leftCandidates.end(), [&gs, hasBlock](auto &c) -> bool {
             const auto &[candidate, _arity, constr] = c;
-            const auto &args = candidate.data(gs)->arguments;
-            ENFORCE(!args.empty(), "Should at least have a block argument.");
-            const auto &lastArg = args.back();
-            auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
+            const auto &params = candidate.data(gs)->parameters;
+            ENFORCE(!params.empty(), "Should at least have a block parameter.");
+            const auto &lastParam = params.back();
+            auto mentionsBlockParam = !lastParam.isSyntheticBlockParameter();
             if (hasBlock) {
-                if (!mentionsBlockArg || lastArg.type == Types::nilClass()) {
+                if (!mentionsBlockParam || lastParam.type == Types::nilClass()) {
                     return true;
                 }
             } else {
-                if (mentionsBlockArg && lastArg.type != nullptr &&
-                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
+                if (mentionsBlockParam && lastParam.type != nullptr &&
+                    (!lastParam.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastParam.type))) {
                     return true;
                 }
             }
@@ -536,12 +538,12 @@ struct ArityComponents {
 ArityComponents arityComponents(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
-    for (const auto &arg : method.data(gs)->arguments) {
-        if (arg.flags.isKeyword || arg.flags.isBlock) {
+    for (const auto &param : method.data(gs)->parameters) {
+        if (param.flags.isKeyword || param.flags.isBlock) {
             // ignore
-        } else if (arg.flags.isDefault) {
+        } else if (param.flags.isDefault) {
             ++optional;
-        } else if (arg.flags.isRepeated) {
+        } else if (param.flags.isRepeated) {
             repeated = true;
         } else {
             ++required;
@@ -969,14 +971,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr->defineDomain(gs, methodData->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwparams = absl::c_any_of(methodData->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwparams = absl::c_any_of(methodData->parameters, [](const auto &param) { return param.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
 
     // p -> params, i.e., what was mentioned in the definition
-    auto pit = methodData->arguments.begin();
-    auto pend = methodData->arguments.end();
+    auto pit = methodData->parameters.begin();
+    auto pend = methodData->parameters.end();
 
     ENFORCE(pit != pend, "Should at least have the block arg.");
     ENFORCE((pend - 1)->flags.isBlock, "Last arg should be the block arg: {}", (pend - 1)->show(gs));
@@ -989,7 +991,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto aPosEnd = args.args.begin() + args.numPosArgs;
 
     while (pit != pend && ait != aPosEnd) {
-        const ArgInfo &param = *pit;
+        const ParamInfo &param = *pit;
         auto &arg = *ait;
         if (param.flags.isKeyword) {
             break;
@@ -1159,10 +1161,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
-            const ArgInfo *kwSplatParam = nullptr;
+            const ParamInfo *kwSplatParam = nullptr;
             auto hasRequiredKwParam = false;
-            auto kwParams = vector<const ArgInfo *>{};
-            for (auto &param : methodData->arguments) {
+            auto kwParams = vector<const ParamInfo *>{};
+            for (auto &param : methodData->parameters) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
                     ENFORCE(kwSplatParam == nullptr);
                     kwSplatParam = &param;
@@ -1244,8 +1246,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
                             e.setHeader("Expected `{}` for keyword parameter `{}` but found `{}` from keyword splat",
-                                        kwParamType.show(gs), kwParam->argumentName(gs), kwSplatValueType.show(gs));
-                            auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->argumentName(gs),
+                                        kwParamType.show(gs), kwParam->parameterName(gs), kwSplatValueType.show(gs));
+                            auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->parameterName(gs),
                                                             method.show(gs));
                             e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
                             e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
@@ -1309,8 +1311,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             pend = kwit;
 
             bool sawKwSplat = false;
-            while (kwit != methodData->arguments.end()) {
-                const ArgInfo &kwParam = *kwit;
+            while (kwit != methodData->parameters.end()) {
+                const ParamInfo &kwParam = *kwit;
                 if (kwParam.flags.isBlock) {
                     break;
                 } else if (kwParam.flags.isRepeated) {
@@ -1425,7 +1427,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         } else if (kwargs == nullptr) {
             // The method has keyword arguments, but none were provided. Report an error for each missing argument.
-            for (auto &param : methodData->arguments) {
+            for (auto &param : methodData->parameters) {
                 if (!param.flags.isKeyword || param.flags.isDefault || param.flags.isRepeated) {
                     continue;
                 }
@@ -1486,18 +1488,18 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(methodData->arguments, [&consumed](const ArgInfo &arg) {
-                    return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
+                auto firstKeyword = absl::c_find_if(methodData->parameters, [&consumed](const ParamInfo &param) {
+                    return param.flags.isKeyword && param.flags.isDefault && consumed.count(param.name) == 0;
                 });
-                if (firstKeyword != methodData->arguments.end()) {
-                    auto possibleArg = firstKeyword->argumentName(gs);
+                if (firstKeyword != methodData->parameters.end()) {
+                    auto possibleParam = firstKeyword->parameterName(gs);
                     e.addErrorLine(args.argLoc(maxPossiblePositional),
-                                   "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
-                                   method.show(gs), possibleArg);
+                                   "`{}` has optional keyword parameters. Did you mean to provide a value for `{}`?",
+                                   method.show(gs), possibleParam);
                     auto howManyExtra = numArgsGiven - hashArgsCount - maxPossiblePositional;
                     if (howManyExtra == 1 && extraArgsLoc.adjustLen(gs, -1, 2).source(gs) != "&:") {
-                        e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
-                                      "{}: ", possibleArg);
+                        e.replaceWith(fmt::format("Prefix with `{}:`", possibleParam),
+                                      extraArgsLoc.copyWithZeroLength(), "{}: ", possibleParam);
                     }
                 } else if (!deleteLoc.empty()) {
                     e.replaceWith("Delete extra args", deleteLoc, "");
@@ -1508,13 +1510,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (args.block != nullptr) {
-        ENFORCE(!methodData->arguments.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
-        const auto &blockParam = methodData->arguments.back();
+        ENFORCE(!methodData->parameters.empty(), "Every symbol must at least have a block parameter: {}",
+                method.show(gs));
+        const auto &blockParam = methodData->parameters.back();
         ENFORCE(blockParam.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
         // file or higher and has a sig, which would force the "uses `yield` but does not mention a
-        // block parameter" error, so we can use the heuristic about isSyntheticBlockArgument.
+        // block parameter" error, so we can use the heuristic about isSyntheticBlockParameter.
         // (Some RBI-only strictness levels are technically higher than strict but don't require
         // having written a sig. This usually manifests as `def foo(*_); end` with no sig in an RBI.)
         //
@@ -1524,7 +1527,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto file = methodData->loc().file();
             auto blockLoc = args.blockLoc(gs);
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
-                blockParam.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
+                blockParam.isSyntheticBlockParameter() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : methodData->locs()) {
@@ -1581,9 +1584,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // This mimics the behavior of the SolveConstraint case in processBinding
             resultType = Types::untypedUntracked();
         }
-        ENFORCE(!methodData->arguments.empty(), "Every method should at least have a block arg.");
-        ENFORCE(methodData->arguments.back().flags.isBlock, "The last arg should be the block arg.");
-        auto blockType = methodData->arguments.back().type;
+        ENFORCE(!methodData->parameters.empty(), "Every method should at least have a block param.");
+        ENFORCE(methodData->parameters.back().flags.isBlock, "The last param should be the block param.");
+        auto blockType = methodData->parameters.back().type;
         // TODO(jez) Highlight untyped code for this error
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
@@ -1607,7 +1610,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     return result;
 }
 
-TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
+// Get a tuple type representing the type of the method's parameters
+// This is an approximation at best.
+TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass, NameRef name,
+                                   const vector<TypePtr> &targs) {
     MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {
@@ -1615,25 +1621,25 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
     }
     auto data = method.data(gs);
 
-    vector<TypePtr> args;
-    args.reserve(data->arguments.size());
-    for (const auto &arg : data->arguments) {
-        if (arg.flags.isRepeated) {
-            ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
+    vector<TypePtr> params;
+    params.reserve(data->parameters.size());
+    for (const auto &param : data->parameters) {
+        if (param.flags.isRepeated) {
+            ENFORCE(params.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     method.toString(gs));
-            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
         }
-        ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", method.toString(gs));
-        if (arg.flags.isBlock) {
+        ENFORCE(!param.flags.isKeyword, "getCallArguments does not support kwargs: {}", method.toString(gs));
+        if (param.flags.isBlock) {
             continue;
         }
-        if (arg.type == nullptr) {
-            args.emplace_back(core::Types::untyped(method));
+        if (param.type == nullptr) {
+            params.emplace_back(core::Types::untyped(method));
             continue;
         }
-        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+        params.emplace_back(Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
     }
-    return make_type<TupleType>(move(args));
+    return make_type<TupleType>(move(params));
 }
 } // namespace
 
@@ -1652,7 +1658,7 @@ TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
     if (symbol == core::Symbols::untyped()) {
         return Types::untyped(Symbols::noSymbol());
     }
-    return getMethodArguments(gs, symbol, name, vector<TypePtr>{});
+    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{});
 }
 
 TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
@@ -1661,7 +1667,7 @@ TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) con
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    return getMethodArguments(gs, klass, name, targs);
+    return getMethodParametersAsTuple(gs, klass, name, targs);
 }
 
 namespace {
@@ -2575,8 +2581,8 @@ private:
         return nullopt;
     }
 
-    static vector<ArgInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {
-        vector<ArgInfo::ArgFlags> res;
+    static vector<ParamInfo::Flags> paramInfoByArity(optional<int> fixedArity) {
+        vector<ParamInfo::Flags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();
@@ -2587,17 +2593,17 @@ private:
         return res;
     }
 
-    static void showLocationOfArgDefn(const GlobalState &gs, ErrorBuilder &e, const TypePtr &blockType,
-                                      DispatchComponent &dispatchComp) {
+    static void showLocationOfParamDefn(const GlobalState &gs, ErrorBuilder &e, const TypePtr &blockType,
+                                        DispatchComponent &dispatchComp) {
         if (!dispatchComp.method.exists()) {
             return;
         }
 
-        const auto &methodArgs = dispatchComp.method.data(gs)->arguments;
-        ENFORCE(!methodArgs.empty());
-        const auto &blockParam = methodArgs.back();
+        const auto &methodParams = dispatchComp.method.data(gs)->parameters;
+        ENFORCE(!methodParams.empty());
+        const auto &blockParam = methodParams.back();
         ENFORCE(blockParam.flags.isBlock);
-        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", blockParam.argumentName(gs),
+        auto for_ = ErrorColors::format("block parameter `{}` of method `{}`", blockParam.parameterName(gs),
                                         dispatchComp.method.show(gs));
         e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, blockParam.loc, for_));
     }
@@ -2624,7 +2630,7 @@ private:
                 if (auto e = gs.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
                     e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType.show(gs));
                     if (!dispatched.secondary) {
-                        Magic_callWithBlockPass::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                        Magic_callWithBlockPass::showLocationOfParamDefn(gs, e, blockPreType, dispatched.main);
                     }
                 }
 
@@ -2640,7 +2646,7 @@ private:
                 e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType.show(gs),
                             passedInBlockType.show(gs));
                 if (!dispatched.secondary) {
-                    Magic_callWithBlockPass::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                    Magic_callWithBlockPass::showLocationOfParamDefn(gs, e, blockPreType, dispatched.main);
                 }
                 e.addErrorSections(move(errorDetailsCollector));
             }
@@ -2749,7 +2755,7 @@ public:
             Magic_callWithBlockPass::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::argInfoByArity(blockArity)};
+        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2864,7 +2870,7 @@ public:
             Magic_callWithBlockPass::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::argInfoByArity(blockArity)};
+        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
