@@ -1758,33 +1758,33 @@ public:
             ++pos;
 
             if (auto *requiredParam = parser::cast_node<Param>(thisParam.get())) {
-                hasDuplicateArg(requiredParam->name, requiredParam->loc, map);
+                hasDuplicateParam(requiredParam->name, requiredParam->loc, map);
             } else if (auto *optarg = parser::cast_node<Optarg>(thisParam.get())) {
-                hasDuplicateArg(optarg->name, optarg->loc, map);
+                hasDuplicateParam(optarg->name, optarg->loc, map);
             } else if (auto *restarg = parser::cast_node<Restarg>(thisParam.get())) {
-                hasDuplicateArg(restarg->name, restarg->loc, map);
+                hasDuplicateParam(restarg->name, restarg->loc, map);
             } else if (auto *blockarg = parser::cast_node<Blockarg>(thisParam.get())) {
-                hasDuplicateArg(blockarg->name, blockarg->loc, map);
+                hasDuplicateParam(blockarg->name, blockarg->loc, map);
             } else if (auto *kwarg = parser::cast_node<Kwarg>(thisParam.get())) {
-                if (hasDuplicateArg(kwarg->name, kwarg->loc, map)) {
+                if (hasDuplicateParam(kwarg->name, kwarg->loc, map)) {
                     kwarg->name = gs_.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, kwarg->name, pos);
                 }
             } else if (auto *kwoptarg = parser::cast_node<Kwoptarg>(thisParam.get())) {
-                if (hasDuplicateArg(kwoptarg->name, kwoptarg->loc, map)) {
+                if (hasDuplicateParam(kwoptarg->name, kwoptarg->loc, map)) {
                     kwoptarg->name = gs_.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, kwoptarg->name, pos);
                 }
             } else if (auto *kwrestarg = parser::cast_node<Kwrestarg>(thisParam.get())) {
-                hasDuplicateArg(kwrestarg->name, kwrestarg->loc, map);
+                hasDuplicateParam(kwrestarg->name, kwrestarg->loc, map);
             } else if (auto *shadowarg = parser::cast_node<Shadowarg>(thisParam.get())) {
-                hasDuplicateArg(shadowarg->name, shadowarg->loc, map);
+                hasDuplicateParam(shadowarg->name, shadowarg->loc, map);
             } else if (auto *mlhs = parser::cast_node<Mlhs>(thisParam.get())) {
                 checkDuplicateParams(mlhs->exprs, map);
             }
         }
     }
 
-    bool hasDuplicateArg(core::NameRef this_name, core::LocOffsets this_loc,
-                         UnorderedMap<core::NameRef, core::LocOffsets> &map) {
+    bool hasDuplicateParam(core::NameRef this_name, core::LocOffsets this_loc,
+                           UnorderedMap<core::NameRef, core::LocOffsets> &map) {
         auto that_arg_loc_it = map.find(this_name);
 
         if (that_arg_loc_it == map.end()) {
