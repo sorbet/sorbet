@@ -765,6 +765,11 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
         vector<ast::ParsedFile> parsed;
         parsed.reserve(files.size());
         for (auto file : files) {
+            if (file.isTombstoned(gs)) {
+                ast::ParsedFile parsedfile{ast::MK::EmptyTree(), file};
+                parsed.emplace_back(move(parsedfile));
+                continue;
+            }
             auto tree = readFileWithStrictnessOverrides(gs, file, opts, kvstore);
             auto parsedFile = indexOne(opts, gs, file, move(tree));
             parsed.emplace_back(move(parsedFile));

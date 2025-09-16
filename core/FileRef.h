@@ -52,6 +52,10 @@ public:
     // file. This helper exposes that without tripping an ENFORCE.
     bool isPackage(const GlobalState &gs) const;
 
+    // Normally, using .data requires that the file not be tombstoned.
+    // But whether or not it's tombstoned is stored in the data. This helper exposes that without tripping an ENFORCE.
+    bool isTombstoned(const GlobalState &gs) const;
+
 private:
     uint32_t _id;
 };

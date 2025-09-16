@@ -172,6 +172,11 @@ bool FileRef::isPackage(const GlobalState &gs) const {
     return dataAllowingUnsafe(gs).isPackage(gs);
 }
 
+bool FileRef::isTombstoned(const GlobalState &gs) const {
+    ENFORCE(gs.files[_id]);
+    return dataAllowingUnsafe(gs).sourceType == File::Type::TombStone;
+}
+
 string_view File::path() const {
     return this->path_;
 }
