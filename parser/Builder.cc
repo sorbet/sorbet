@@ -539,18 +539,9 @@ public:
             }
         }
 
-        bool isNumblock = false;
-        if (parser::isa_node<NumParams>(args.get())) {
-            isNumblock = true;
-        }
-
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
-            if (isNumblock) {
-                return make_unique<NumBlock>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
-                                             std::move(body));
-            }
             return make_unique<Block>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
                                       std::move(body));
         }
@@ -567,12 +558,7 @@ public:
 
         auto &send = exprs->front();
         core::LocOffsets blockLoc = send->loc.join(tokLoc(end));
-        unique_ptr<Node> block;
-        if (isNumblock) {
-            block = make_unique<NumBlock>(blockLoc, std::move(send), std::move(args), std::move(body));
-        } else {
-            block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
-        }
+        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
         exprs->front().swap(block);
         return methodCall;
     }

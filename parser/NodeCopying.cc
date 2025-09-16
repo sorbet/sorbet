@@ -239,10 +239,6 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         [&](const parser::NumParams *numParams) {
             result = std::make_unique<NumParams>(numParams->loc, deepCopyVec(numParams->decls));
         },
-        [&](const parser::NumBlock *numBlock) {
-            result = std::make_unique<NumBlock>(numBlock->loc, deepCopy(numBlock->send.get()),
-                                                deepCopy(numBlock->args.get()), deepCopy(numBlock->body.get()));
-        },
         [&](const parser::OpAsgn *opAsgn) {
             result = std::make_unique<OpAsgn>(opAsgn->loc, deepCopy(opAsgn->left.get()), opAsgn->op, opAsgn->opLoc,
                                               deepCopy(opAsgn->right.get()));

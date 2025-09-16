@@ -134,7 +134,7 @@ Begin {
         }
       ]
     }
-    NumBlock {
+    Block {
       send = Send {
         receiver = Const {
           scope = NULL
