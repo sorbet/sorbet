@@ -185,7 +185,7 @@ public:
     std::vector<core::LocOffsets> extraDirectives_;
     std::optional<
         std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
-        min_typed_level_;
+        minTypedLevel_;
 
     std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
         ENFORCE(exists());
