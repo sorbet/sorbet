@@ -126,7 +126,7 @@ Begin {
                 }
               ]
             }
-            args = NULL
+            params = NULL
             body = NULL
           }
           Send {

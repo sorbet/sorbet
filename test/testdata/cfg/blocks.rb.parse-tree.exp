@@ -23,7 +23,7 @@ Class {
           }
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Arg {
             name = <U x>

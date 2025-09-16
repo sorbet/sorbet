@@ -24,7 +24,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = Send {
         receiver = Self {
         }

@@ -7,7 +7,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = NULL
     }
     Block {
@@ -17,7 +17,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = NULL
     }
     Block {
@@ -27,7 +27,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = String {
         val = <U inline block>
       }
@@ -39,7 +39,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = String {
         val = <U do-end block>
       }
@@ -51,7 +51,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Arg {
             name = <U positional>
@@ -75,7 +75,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Arg {
             name = <U positional>
@@ -99,7 +99,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Arg {
             name = <U positional>
@@ -127,7 +127,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Arg {
             name = <U bar>
@@ -149,7 +149,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Arg {
             name = <U positional>
@@ -183,7 +183,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Arg {
             name = <U bar>
@@ -224,7 +224,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = NULL
     }
     Block {
@@ -234,7 +234,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Mlhs {
             exprs = [
@@ -256,7 +256,7 @@ Begin {
         args = [
         ]
       }
-      args = Params {
+      params = Params {
         params = [
           Restarg {
             name = <U args>

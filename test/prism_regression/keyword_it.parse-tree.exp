@@ -10,7 +10,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = Send {
         receiver = NULL
         method = <U it>
@@ -28,7 +28,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = Begin {
         stmts = [
           Assign {
