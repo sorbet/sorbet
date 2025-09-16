@@ -264,7 +264,7 @@ public:
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
         if (check_args) {
             UnorderedMap<core::NameRef, core::LocOffsets> map;
-            checkDuplicateArgs(args, map);
+            checkDuplicateParams(args, map);
         }
 
         if (begin == nullptr && args.empty() && end == nullptr) {
@@ -994,7 +994,7 @@ public:
 
     unique_ptr<Node> hash_pattern(const token *begin, sorbet::parser::NodeVec kwargs, const token *end) {
         UnorderedMap<core::NameRef, core::LocOffsets> map;
-        checkDuplicateArgs(kwargs, map);
+        checkDuplicateParams(kwargs, map);
         auto loc = collectionLoc(kwargs);
         if (begin != nullptr) {
             loc = tokLoc(begin).join(loc);
@@ -1751,7 +1751,8 @@ public:
         return false;
     }
 
-    void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<core::NameRef, core::LocOffsets> &map) {
+    // TODO
+    void checkDuplicateParams(sorbet::parser::NodeVec &args, UnorderedMap<core::NameRef, core::LocOffsets> &map) {
         int pos = -1;
         for (auto &this_arg : args) {
             ++pos;
@@ -1777,7 +1778,7 @@ public:
             } else if (auto *shadowarg = parser::cast_node<Shadowarg>(this_arg.get())) {
                 hasDuplicateArg(shadowarg->name, shadowarg->loc, map);
             } else if (auto *mlhs = parser::cast_node<Mlhs>(this_arg.get())) {
-                checkDuplicateArgs(mlhs->exprs, map);
+                checkDuplicateParams(mlhs->exprs, map);
             }
         }
     }
