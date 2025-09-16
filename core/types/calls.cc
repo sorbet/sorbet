@@ -330,8 +330,8 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ParamInfo &arg,
-                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method,
+                             const ParamInfo &arg, ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
     if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
         auto argName = arg.name.show(gs);
         e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
