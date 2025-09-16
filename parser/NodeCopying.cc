@@ -283,8 +283,8 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
             result = std::make_unique<Rescue>(rescue->loc, deepCopy(rescue->body.get()), deepCopyVec(rescue->rescue),
                                               deepCopy(rescue->else_.get()));
         },
-        [&](const parser::Restarg *restarg) {
-            result = std::make_unique<Restarg>(restarg->loc, restarg->name, restarg->nameLoc);
+        [&](const parser::RestParam *restarg) {
+            result = std::make_unique<RestParam>(restarg->loc, restarg->name, restarg->nameLoc);
         },
         [&](const parser::Retry *retry) { result = std::make_unique<Retry>(retry->loc); },
         [&](const parser::Return *return_) {

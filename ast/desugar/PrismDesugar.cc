@@ -78,7 +78,7 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
                 // we desugar (m, n, ...) into (m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
                 // add `*<fwd-args>`
                 unique_ptr<parser::Node> rest =
-                    make_unique<parser::Restarg>(fargs->loc, core::Names::fwdArgs(), fargs->loc);
+                    make_unique<parser::RestParam>(fargs->loc, core::Names::fwdArgs(), fargs->loc);
                 params.emplace_back(node2TreeImpl(dctx, rest));
                 // add `**<fwd-kwargs>`
                 unique_ptr<parser::Node> kwrest = make_unique<parser::Kwrestarg>(fargs->loc, core::Names::fwdKwargs());
@@ -1463,7 +1463,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::Param *param) { desugaredByPrismTranslator(param); },
-            [&](parser::Restarg *arg) {
+            [&](parser::RestParam *arg) {
                 ExpressionPtr res = MK::RestArg(loc, MK::Local(arg->nameLoc, arg->name));
                 result = move(res);
             },

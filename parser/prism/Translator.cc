@@ -1242,7 +1242,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             core::NameRef sorbetName = core::Names::restargs();
             auto expr = MK::RestArg(restLoc, MK::Local(restLoc, sorbetName));
 
-            return make_node_with_expr<parser::Restarg>(move(expr), restLoc, sorbetName, restLoc);
+            return make_node_with_expr<parser::RestParam>(move(expr), restLoc, sorbetName, restLoc);
         }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
             return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
@@ -1830,7 +1830,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             auto expr = MK::RestArg(location, MK::Local(nameLoc, sorbetName));
-            return make_node_with_expr<parser::Restarg>(move(expr), location, sorbetName, nameLoc);
+            return make_node_with_expr<parser::RestParam>(move(expr), location, sorbetName, nameLoc);
         }
         case PM_RETURN_NODE: { // A `return` statement, like `return 1, 2, 3`
             auto returnNode = down_cast<pm_return_node>(node);
@@ -3090,7 +3090,7 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
                     auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
                     auto name = translateConstantName(requiredParamNode->name);
                     sorbetLhs.emplace_back(
-                        make_unique<parser::Restarg>(location, name, translateLoc(requiredParamNode->base.location)));
+                        make_unique<parser::RestParam>(location, name, translateLoc(requiredParamNode->base.location)));
                 } else {
                     sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(translate(expression))));
                 }

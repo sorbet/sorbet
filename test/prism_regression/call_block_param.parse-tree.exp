@@ -238,7 +238,7 @@ Begin {
         params = [
           Mlhs {
             exprs = [
-              Restarg {
+              RestParam {
                 name = <U args>
               }
             ]
@@ -258,7 +258,7 @@ Begin {
       }
       params = Params {
         params = [
-          Restarg {
+          RestParam {
             name = <U args>
           }
         ]
