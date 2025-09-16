@@ -1759,8 +1759,8 @@ public:
 
             if (auto *requiredParam = parser::cast_node<Param>(thisParam.get())) {
                 hasDuplicateParam(requiredParam->name, requiredParam->loc, map);
-            } else if (auto *optarg = parser::cast_node<OptParam>(thisParam.get())) {
-                hasDuplicateParam(optarg->name, optarg->loc, map);
+            } else if (auto *optParam = parser::cast_node<OptParam>(thisParam.get())) {
+                hasDuplicateParam(optParam->name, optParam->loc, map);
             } else if (auto *restarg = parser::cast_node<Restarg>(thisParam.get())) {
                 hasDuplicateParam(restarg->name, restarg->loc, map);
             } else if (auto *blockarg = parser::cast_node<Blockarg>(thisParam.get())) {
