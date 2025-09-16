@@ -36,7 +36,7 @@ public:
     static void pickle(Pickler &p, const ConstantName &what);
     static void pickle(Pickler &p, const UniqueName &what);
     static void pickle(Pickler &p, const TypePtr &what);
-    static void pickle(Pickler &p, const ParamInfo &a);
+    static void pickle(Pickler &p, const ParamInfo &what);
     static void pickle(Pickler &p, const ClassOrModule &what);
     static void pickle(Pickler &p, const Method &what);
     static void pickle(Pickler &p, const Field &what);
