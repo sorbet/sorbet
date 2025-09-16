@@ -781,25 +781,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (prismBlock != nullptr) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                    auto blockNode = down_cast<pm_block_node>(prismBlock);
-
                     // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
                     // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
                     // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
                     // The legacy parser inverts this , with a parent "Block" with a child
                     // "Send".
 
-                    if (blockNode->parameters == nullptr ||
-                        PM_NODE_TYPE_P(blockNode->parameters, PM_BLOCK_PARAMETERS_NODE)) {
-                        return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc,
-                                                                  move(sendNode), move(blockParameters),
-                                                                  move(blockBody));
-                    } else {
-                        ENFORCE(PM_NODE_TYPE_P(blockNode->parameters, PM_NUMBERED_PARAMETERS_NODE));
-                        return make_node_with_expr<parser::NumBlock>(sendNode->takeDesugaredExpr(), sendNode->loc,
-                                                                     move(sendNode), move(blockParameters),
-                                                                     move(blockBody));
-                    }
+                    return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc,
+                                                              move(sendNode), move(blockParameters), move(blockBody));
                 } else {
                     unreachable("Found a {} block type, which is not implemented yet ",
                                 pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
@@ -2753,7 +2742,7 @@ bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
 // Sorbet's legacy parser models this the other way around, as a parent `Block` with a child `Send`.
 // Lambda literals also have a similar reverse structure between the 2 parsers.
 //
-// This function translates between the two, creating a `Block` or `NumBlock` node for the given `pm_block_node *`
+// This function translates between the two, creating a `Block`node for the given `pm_block_node *`
 // or `pm_lambda_node *`, and wrapping it around the given `Send` node.
 unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                             unique_ptr<parser::Node> sendNode) {
@@ -2805,11 +2794,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         }
     }
 
-    if (parser::NodeWithExpr::cast_node<parser::NumParams>(parametersNode.get())) {
-        return make_unique<parser::NumBlock>(blockLoc, move(sendNode), move(parametersNode), move(body));
-    } else {
-        return make_unique<parser::Block>(blockLoc, move(sendNode), move(parametersNode), move(body));
-    }
+    return make_unique<parser::Block>(blockLoc, move(sendNode), move(parametersNode), move(body));
 }
 
 // Prism represents a `begin ... rescue ... end` construct using a `pm_begin_node` that may contain:

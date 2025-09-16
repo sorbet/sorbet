@@ -1,4 +1,4 @@
-s(:numblock,
+s(:block,
   s(:send, nil, :m),
   s(:numparams,
     s(:lvar, :_1),
