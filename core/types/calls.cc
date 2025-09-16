@@ -432,27 +432,29 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 const auto &[candidate, arity, constr] = *it;
                 const auto &parameters = candidate.data(gs)->parameters;
-                TypePtr argTypeRaw;
+                TypePtr paramTypeRaw;
                 if (i < parameters.size() - 1) {
-                    argTypeRaw = parameters[i].type;
+                    paramTypeRaw = parameters[i].type;
                 } else if (arity == SIZE_MAX) {
-                    auto restArg = absl::c_find_if(
-                        parameters, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; });
-                    ENFORCE(restArg != parameters.end())
-                    argTypeRaw = restArg->type;
+                    auto restParam = absl::c_find_if(parameters, [&](const auto &param) {
+                        return param.flags.isRepeated && !param.flags.isKeyword;
+                    });
+                    ENFORCE(restParam != parameters.end())
+                    paramTypeRaw = restParam->type;
                 } else {
                     it = leftCandidates.erase(it);
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(gs, argTypeRaw, candidate.data(gs)->owner, inClass, targs);
+                auto paramType =
+                    Types::resultTypeAsSeenFrom(gs, paramTypeRaw, candidate.data(gs)->owner, inClass, targs);
                 if (constr == nullptr) {
-                    if (!Types::isSubType(gs, arg, argType)) {
+                    if (!Types::isSubType(gs, arg, paramType)) {
                         it = leftCandidates.erase(it);
                         continue;
                     }
                 } else {
-                    if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, argType, UntypedMode::AlwaysCompatible,
+                    if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, paramType, UntypedMode::AlwaysCompatible,
                                                          ErrorSection::Collector::NO_OP)) {
                         it = leftCandidates.erase(it);
                         continue;
@@ -482,7 +484,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         auto it = std::remove_if(leftCandidates.begin(), leftCandidates.end(), [&gs, hasBlock](auto &c) -> bool {
             const auto &[candidate, _arity, constr] = c;
             const auto &params = candidate.data(gs)->parameters;
-            ENFORCE(!params.empty(), "Should at least have a block argument.");
+            ENFORCE(!params.empty(), "Should at least have a block parameter.");
             const auto &lastParam = params.back();
             auto mentionsBlockParam = !lastParam.isSyntheticBlockParameter();
             if (hasBlock) {
@@ -1490,14 +1492,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     return param.flags.isKeyword && param.flags.isDefault && consumed.count(param.name) == 0;
                 });
                 if (firstKeyword != methodData->parameters.end()) {
-                    auto possibleArg = firstKeyword->parameterName(gs);
+                    auto possibleParam = firstKeyword->parameterName(gs);
                     e.addErrorLine(args.argLoc(maxPossiblePositional),
-                                   "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
-                                   method.show(gs), possibleArg);
+                                   "`{}` has optional keyword parameters. Did you mean to provide a value for `{}`?",
+                                   method.show(gs), possibleParam);
                     auto howManyExtra = numArgsGiven - hashArgsCount - maxPossiblePositional;
                     if (howManyExtra == 1 && extraArgsLoc.adjustLen(gs, -1, 2).source(gs) != "&:") {
-                        e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
-                                      "{}: ", possibleArg);
+                        e.replaceWith(fmt::format("Prefix with `{}:`", possibleParam),
+                                      extraArgsLoc.copyWithZeroLength(), "{}: ", possibleParam);
                     }
                 } else if (!deleteLoc.empty()) {
                     e.replaceWith("Delete extra args", deleteLoc, "");
@@ -1508,7 +1510,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (args.block != nullptr) {
-        ENFORCE(!methodData->parameters.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
+        ENFORCE(!methodData->parameters.empty(), "Every symbol must at least have a block parameter: {}",
+                method.show(gs));
         const auto &blockParam = methodData->parameters.back();
         ENFORCE(blockParam.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
@@ -1581,8 +1584,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // This mimics the behavior of the SolveConstraint case in processBinding
             resultType = Types::untypedUntracked();
         }
-        ENFORCE(!methodData->parameters.empty(), "Every method should at least have a block arg.");
-        ENFORCE(methodData->parameters.back().flags.isBlock, "The last arg should be the block arg.");
+        ENFORCE(!methodData->parameters.empty(), "Every method should at least have a block param.");
+        ENFORCE(methodData->parameters.back().flags.isBlock, "The last param should be the block param.");
         auto blockType = methodData->parameters.back().type;
         // TODO(jez) Highlight untyped code for this error
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
@@ -1607,7 +1610,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     return result;
 }
 
-TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
+// Get a tuple type representing the type of the method's parameters
+// This is an approximation at best.
+TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass, NameRef name,
+                                   const vector<TypePtr> &targs) {
     MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {
@@ -1652,7 +1658,7 @@ TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
     if (symbol == core::Symbols::untyped()) {
         return Types::untyped(Symbols::noSymbol());
     }
-    return getMethodArguments(gs, symbol, name, vector<TypePtr>{});
+    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{});
 }
 
 TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
@@ -1661,7 +1667,7 @@ TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) con
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    return getMethodArguments(gs, klass, name, targs);
+    return getMethodParametersAsTuple(gs, klass, name, targs);
 }
 
 namespace {
@@ -2575,7 +2581,7 @@ private:
         return nullopt;
     }
 
-    static vector<ParamInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {
+    static vector<ParamInfo::ArgFlags> paramInfoByArity(optional<int> fixedArity) {
         vector<ParamInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
@@ -2587,8 +2593,8 @@ private:
         return res;
     }
 
-    static void showLocationOfArgDefn(const GlobalState &gs, ErrorBuilder &e, const TypePtr &blockType,
-                                      DispatchComponent &dispatchComp) {
+    static void showLocationOfParamDefn(const GlobalState &gs, ErrorBuilder &e, const TypePtr &blockType,
+                                        DispatchComponent &dispatchComp) {
         if (!dispatchComp.method.exists()) {
             return;
         }
@@ -2597,7 +2603,7 @@ private:
         ENFORCE(!methodParams.empty());
         const auto &blockParam = methodParams.back();
         ENFORCE(blockParam.flags.isBlock);
-        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", blockParam.parameterName(gs),
+        auto for_ = ErrorColors::format("block param `{}` of method `{}`", blockParam.parameterName(gs),
                                         dispatchComp.method.show(gs));
         e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, blockParam.loc, for_));
     }
@@ -2624,7 +2630,7 @@ private:
                 if (auto e = gs.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
                     e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType.show(gs));
                     if (!dispatched.secondary) {
-                        Magic_callWithBlockPass::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                        Magic_callWithBlockPass::showLocationOfParamDefn(gs, e, blockPreType, dispatched.main);
                     }
                 }
 
@@ -2640,7 +2646,7 @@ private:
                 e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType.show(gs),
                             passedInBlockType.show(gs));
                 if (!dispatched.secondary) {
-                    Magic_callWithBlockPass::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                    Magic_callWithBlockPass::showLocationOfParamDefn(gs, e, blockPreType, dispatched.main);
                 }
                 e.addErrorSections(move(errorDetailsCollector));
             }
@@ -2749,7 +2755,7 @@ public:
             Magic_callWithBlockPass::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::argInfoByArity(blockArity)};
+        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2864,7 +2870,7 @@ public:
             Magic_callWithBlockPass::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::argInfoByArity(blockArity)};
+        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
