@@ -62,71 +62,71 @@ struct MethodBuilder {
     MethodBuilder(GlobalState &gs, MethodRef m) : gs(gs), method(m) {}
 
     MethodBuilder &defaultArg(NameRef name) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.flags.isDefault = true;
         return *this;
     }
 
     MethodBuilder &typedArg(NameRef name, TypePtr &&type) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.type = std::move(type);
         return *this;
     }
 
     MethodBuilder &arg(NameRef name) {
-        gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        gs.enterMethodParameter(Loc::none(), method, name);
         return *this;
     }
 
     MethodBuilder &untypedArg(NameRef name) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.type = Types::untyped(method);
         return *this;
     }
 
     MethodBuilder &keywordArg(NameRef name, TypePtr &&type) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.type = std::move(type);
         arg.flags.isKeyword = true;
         return *this;
     }
 
     MethodBuilder &defaultKeywordArg(NameRef name) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.flags.isDefault = true;
         arg.flags.isKeyword = true;
         return *this;
     }
 
     MethodBuilder &repeatedArg(NameRef name) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.flags.isRepeated = true;
         return *this;
     }
 
     MethodBuilder &repeatedTypedArg(NameRef name, TypePtr &&type) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.flags.isRepeated = true;
         arg.type = std::move(type);
         return *this;
     }
 
     MethodBuilder &repeatedUntypedArg(NameRef name) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.flags.isRepeated = true;
         arg.type = Types::untyped(method);
         return *this;
     }
 
     MethodBuilder &repeatedTopArg(NameRef name) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.flags.isRepeated = true;
         arg.type = Types::top();
         return *this;
     }
 
     MethodBuilder &kwsplatArg(NameRef name) {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
         arg.flags.isKeyword = true;
         arg.flags.isRepeated = true;
         arg.type = Types::untyped(method);
@@ -134,7 +134,7 @@ struct MethodBuilder {
     }
 
     MethodRef build() {
-        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        auto &arg = gs.enterMethodParameter(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
         return method;
     }
@@ -624,7 +624,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::Class_new());
 
     method = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::TodoMethod());
-    enterMethodArgumentSymbol(Loc::none(), method, Names::args());
+    enterMethodParameter(Loc::none(), method, Names::args());
     ENFORCE_NO_TIMER(method == Symbols::todoMethod());
 
     method = this->staticInitForClass(core::Symbols::root(), Loc::none());
@@ -1002,7 +1002,7 @@ void GlobalState::installIntrinsics() {
         auto method = enterMethodSymbol(Loc::none(), symbol, entry.method);
         method.data(*this)->intrinsicOffset = offset + Method::FIRST_VALID_INTRINSIC_OFFSET;
         if (countBefore != methodsUsed()) {
-            auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+            auto &blkArg = enterMethodParameter(Loc::none(), method, Names::blkArg());
             blkArg.flags.isBlock = true;
         }
     }
@@ -1385,7 +1385,7 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
             }
         }
         NameRef nm = param.name;
-        auto &newArg = enterMethodArgumentSymbol(loc, res, nm);
+        auto &newArg = enterMethodParameter(loc, res, nm);
         ENFORCE_NO_TIMER(newMethod || resParameters.size() == resInitialArgSize,
                          "fast path should not add new arguments to existing overload");
         newArg = param.deepCopy();
@@ -1460,7 +1460,7 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     return ret;
 }
 
-ParamInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name) {
+ParamInfo &GlobalState::enterMethodParameter(Loc loc, MethodRef owner, NameRef name) {
     ENFORCE_NO_TIMER(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE_NO_TIMER(name.exists(), "entering symbol with non-existing name");
     MethodData ownerScope = owner.data(*this);
@@ -2588,7 +2588,7 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
     if (prevCount != methodsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
-        auto &blkSym = enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
+        auto &blkSym = enterMethodParameter(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
     } else {
         // Ensures that locs get properly updated on the fast path
@@ -2611,7 +2611,7 @@ MethodRef GlobalState::staticInitForFile(Loc loc) {
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
     if (prevCount != this->methodsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
-        auto &blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
+        auto &blkSym = this->enterMethodParameter(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
     } else {
         // Ensures that locs get properly updated on the fast path

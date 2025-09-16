@@ -1930,7 +1930,7 @@ void ClassOrModule::recordRequiredAncestorInternal(GlobalState &gs, ClassOrModul
         ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
 
         // Create the first argument typed as a tuple to store RequiredAncestor.origin
-        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
+        auto &arg = gs.enterMethodParameter(core::Loc::none(), ancestors, core::Names::arg());
         vector<TypePtr> torigins;
         arg.type = make_type<TupleType>(move(torigins));
     }

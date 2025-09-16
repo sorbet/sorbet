@@ -802,9 +802,9 @@ private:
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
         auto &paramInfo =
-            ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedParam.loc), ctx.owner.asMethodRef(), name);
+            ctx.state.enterMethodParameter(ctx.locAt(parsedParam.loc), ctx.owner.asMethodRef(), name);
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
-        // from enterMethodArgumentSymbol
+        // from enterMethodParameter
         ENFORCE(methodData->parameters.size() >= pos + 1);
 
         paramInfo.flags = parsedParam.flags;
@@ -1221,7 +1221,7 @@ private:
             auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
             sealedSubclasses.data(ctx)->addLoc(ctx, loc);
             auto &blkArg =
-                ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
+                ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
 
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
