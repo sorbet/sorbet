@@ -86,14 +86,9 @@ ClassDef{
               block = nullptr
               pos_args = 1
               args = [
-                Send{
-                  flags = {privateOk}
-                  recv = Self
-                  fun = <U rest>
-                  block = nullptr
-                  pos_args = 0
-                  args = [
-                  ]
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U args>
                 }
               ]
             }

@@ -2227,10 +2227,32 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto splatNode = down_cast<pm_splat_node>(node);
 
             auto expr = translate(splatNode->expression);
+
+            if (!directlyDesugar || !hasExpr(expr)) {
+                if (expr == nullptr) { // An anonymous splat like `f(*)`
+                    return make_unique<parser::ForwardedRestArg>(location);
+                } else { // Splatting an expression like `f(*a)`
+                    return make_unique<parser::Splat>(location, move(expr));
+                }
+            }
+
             if (expr == nullptr) { // An anonymous splat like `f(*)`
-                return make_unique<parser::ForwardedRestArg>(location);
+                auto var = MK::Local(location, core::Names::star());
+                auto splatExpr = MK::Splat(location, move(var));
+                return make_node_with_expr<parser::ForwardedRestArg>(move(splatExpr), location);
             } else { // Splatting an expression like `f(*a)`
-                return make_unique<parser::Splat>(location, move(expr));
+                // Directly desugaring a splat node is a destructive operation, which can leave the "expr" in an invalid
+                // state (because it would have a null desugared expr), which is incompatible with the "fallback" path
+                // (desugaring it as a Whitequark tree in `PrismDesugar.cc").
+                //
+                // It's only safe to do if we can be sure all adjacent elements (in an the same Array literal,
+                // or arguments to the same method call) can also directly desugared.
+                //
+                // It's really hard to know that ahead of time, so for now, just deepCopy the tree, instead of taking
+                // it out of the splatted expressions's `NodeWithExpr`.
+                auto childExpr = expr->peekDesugaredExpr().deepCopy();
+                auto splatExpr = MK::Splat(location, move(childExpr));
+                return make_node_with_expr<parser::Splat>(move(splatExpr), location, move(expr));
             }
         }
         case PM_STATEMENTS_NODE: { // A sequence of statements, such a in a `begin` block, `()`, etc.

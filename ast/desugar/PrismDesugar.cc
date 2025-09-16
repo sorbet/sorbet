@@ -2146,8 +2146,21 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
 
             [&](parser::NodeWithExpr *nodeWithExpr) {
-                result = nodeWithExpr->takeDesugaredExpr();
-                ENFORCE(result != nullptr, "NodeWithExpr has no cached desugared expr");
+                if (parser::NodeWithExpr::isa_node<parser::Splat>(nodeWithExpr->wrappedNode.get())) {
+                    // Special case for Splats in method calls where we want zero-length locations
+                    // The `parser::Send` case makes a fake parser::Array with locZeroLen to hide callWithSplat
+                    // methods from hover.
+                    auto splat = parser::NodeWithExpr::cast_node<parser::Splat>(nodeWithExpr->wrappedNode.get());
+
+                    if (splat->var->hasDesugaredExpr()) {
+                        result = MK::Splat(loc, splat->var->takeDesugaredExpr());
+                    } else {
+                        result = node2TreeImpl(dctx, splat->var);
+                    }
+                } else {
+                    result = nodeWithExpr->takeDesugaredExpr();
+                    ENFORCE(result != nullptr, "NodeWithExpr has no cached desugared expr");
+                }
             },
 
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
