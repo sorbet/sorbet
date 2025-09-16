@@ -1,6 +1,6 @@
 s(:def, :rescued,
   s(:params,
-    s(:arg, :x)),
+    s(:param, :x)),
   s(:rescue,
     s(:send, nil, :raise,
       s(:str, "to be caught")),

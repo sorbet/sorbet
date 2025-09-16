@@ -1,4 +1,4 @@
 s(:def, :foo,
   s(:params,
-    s(:arg, :_a),
-    s(:arg, :_a)), nil)
+    s(:param, :_a),
+    s(:param, :_a)), nil)

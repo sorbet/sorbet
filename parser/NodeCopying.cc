@@ -33,7 +33,6 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
             result =
                 std::make_unique<AndAsgn>(andAsgn->loc, deepCopy(andAsgn->left.get()), deepCopy(andAsgn->right.get()));
         },
-        [&](const parser::Arg *arg) { result = std::make_unique<Arg>(arg->loc, arg->name); },
         [&](const parser::Array *array) { result = std::make_unique<Array>(array->loc, deepCopyVec(array->elts)); },
         [&](const parser::ArrayPattern *arrayPattern) {
             result = std::make_unique<ArrayPattern>(arrayPattern->loc, deepCopyVec(arrayPattern->elts));
@@ -255,10 +254,12 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         [&](const parser::Pair *pair) {
             result = std::make_unique<Pair>(pair->loc, deepCopy(pair->key.get()), deepCopy(pair->value.get()));
         },
+        [&](const parser::Param *param) { result = std::make_unique<Param>(param->loc, param->name); },
         [&](const parser::Params *params) {
             result = std::make_unique<Params>(params->loc, deepCopyVec(params->params));
         },
         [&](const parser::Pin *pin) { result = std::make_unique<Pin>(pin->loc, deepCopy(pin->var.get())); },
+        [&](const parser::Param *param) { result = std::make_unique<Param>(param->loc, param->name); },
         [&](const parser::Postexe *postexe) {
             result = std::make_unique<Postexe>(postexe->loc, deepCopy(postexe->body.get()));
         },

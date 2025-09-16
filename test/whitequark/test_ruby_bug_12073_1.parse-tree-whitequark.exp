@@ -1,6 +1,6 @@
 s(:def, :foo,
   s(:params,
-    s(:arg, :raise)),
+    s(:param, :raise)),
   s(:send, nil, :raise,
     s(:const,
       s(:const, nil, :A), :B),

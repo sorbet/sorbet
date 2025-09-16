@@ -29,10 +29,10 @@ Begin {
           Restarg {
             name = <U a>
           }
-          Arg {
+          Param {
             name = <U b>
           }
-          Arg {
+          Param {
             name = <U c>
           }
         ]

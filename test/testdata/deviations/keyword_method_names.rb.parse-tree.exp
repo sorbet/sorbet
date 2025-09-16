@@ -4,7 +4,7 @@ Begin {
       name = <U method_named_alias>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -50,7 +50,7 @@ Begin {
       name = <U method_named_and>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -92,7 +92,7 @@ Begin {
       name = <U method_named_begin>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -134,7 +134,7 @@ Begin {
       name = <U method_named_break>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -176,7 +176,7 @@ Begin {
       name = <U method_named_case>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -232,7 +232,7 @@ Begin {
       name = <U method_named_class>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -243,7 +243,7 @@ Begin {
       name = <U method_named_defined?>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -254,7 +254,7 @@ Begin {
       name = <U method_named_do>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -265,7 +265,7 @@ Begin {
       name = <U method_named_else>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -295,7 +295,7 @@ Begin {
       name = <U method_named_elsif>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -306,7 +306,7 @@ Begin {
       name = <U method_named_ensure>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -347,7 +347,7 @@ Begin {
       name = <U method_named_false>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -387,7 +387,7 @@ Begin {
       name = <U method_named_for>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -398,7 +398,7 @@ Begin {
       name = <U method_named_if>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -444,7 +444,7 @@ Begin {
       name = <U method_named_in>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -455,7 +455,7 @@ Begin {
       name = <U method_named_module>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -466,7 +466,7 @@ Begin {
       name = <U method_named_next>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -508,7 +508,7 @@ Begin {
       name = <U method_named_nil>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -548,7 +548,7 @@ Begin {
       name = <U method_named_not>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -559,7 +559,7 @@ Begin {
       name = <U method_named_or>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -570,7 +570,7 @@ Begin {
       name = <U method_named_redo>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -610,7 +610,7 @@ Begin {
       name = <U method_named_rescue>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -658,7 +658,7 @@ Begin {
       name = <U method_named_retry>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -698,7 +698,7 @@ Begin {
       name = <U method_named_return>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -740,7 +740,7 @@ Begin {
       name = <U method_named_self>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -780,7 +780,7 @@ Begin {
       name = <U method_named_super>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -820,7 +820,7 @@ Begin {
       name = <U method_named_then>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -831,7 +831,7 @@ Begin {
       name = <U method_named_true>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -871,7 +871,7 @@ Begin {
       name = <U method_named_unless>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -917,7 +917,7 @@ Begin {
       name = <U method_named_until>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -962,7 +962,7 @@ Begin {
       name = <U method_named_when>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -973,7 +973,7 @@ Begin {
       name = <U method_named_while>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -1018,7 +1018,7 @@ Begin {
       name = <U method_named_yield>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -1060,7 +1060,7 @@ Begin {
       name = <U method_named_end>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]

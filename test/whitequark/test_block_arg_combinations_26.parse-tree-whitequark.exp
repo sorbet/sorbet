@@ -3,5 +3,5 @@ s(:block,
   s(:params,
     s(:optarg, :o,
       s(:int, "1")),
-    s(:arg, :p),
+    s(:param, :p),
     s(:blockarg, :b)), nil)

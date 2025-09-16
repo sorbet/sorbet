@@ -176,7 +176,7 @@ Class {
         name = <U variables_and_loop>
         params = Params {
           params = [
-            Arg {
+            Param {
               name = <U cond>
             }
           ]
@@ -246,7 +246,7 @@ Class {
         name = <U variables_loop_if>
         params = Params {
           params = [
-            Arg {
+            Param {
               name = <U cond>
             }
           ]
@@ -292,7 +292,7 @@ Class {
         name = <U take_arguments>
         params = Params {
           params = [
-            Arg {
+            Param {
               name = <U i>
             }
           ]

@@ -47,10 +47,10 @@ NodeDef nodes[] = {
         "and_asgn",
         vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
     },
-    // Required positional argument
+    // required positional parameter
     {
-        "Arg",
-        "arg",
+        "Param",
+        "param",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
     // inline array with elements

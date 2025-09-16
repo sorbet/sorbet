@@ -4,7 +4,7 @@ Begin {
       name = <U test_method_without_fun_name>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -22,7 +22,7 @@ Begin {
       name = <U test_method_without_fun_name_plus_before>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -52,7 +52,7 @@ Begin {
       name = <U test_method_without_fun_name_plus_after>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]
@@ -73,7 +73,7 @@ Begin {
       name = <U test_method_without_fun_name_before_and_after>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
         ]

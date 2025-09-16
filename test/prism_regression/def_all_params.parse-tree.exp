@@ -4,7 +4,7 @@ Begin {
       name = <U foo>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U a>
           }
           Optarg {

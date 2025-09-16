@@ -2,5 +2,5 @@ s(:block,
   s(:send, nil, :f),
   s(:params,
     s(:restarg, :r),
-    s(:arg, :p),
+    s(:param, :p),
     s(:blockarg, :b)), nil)

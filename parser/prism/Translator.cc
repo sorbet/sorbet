@@ -1800,7 +1800,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto name = translateConstantName(requiredParamNode->name);
             auto expr = MK::Local(location, name);
 
-            return make_node_with_expr<parser::Arg>(move(expr), location, name);
+            return make_node_with_expr<parser::Param>(move(expr), location, name);
         }
         case PM_RESCUE_MODIFIER_NODE: {
             auto rescueModifierNode = down_cast<pm_rescue_modifier_node>(node);

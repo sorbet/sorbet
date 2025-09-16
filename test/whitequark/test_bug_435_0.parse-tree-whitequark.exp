@@ -4,4 +4,4 @@ s(:dstr,
       s(:send,
         s(:const, nil, :Kernel), :lambda),
       s(:params,
-        s(:arg, :foo)), nil)))
+        s(:param, :foo)), nil)))

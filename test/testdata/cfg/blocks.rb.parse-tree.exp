@@ -25,10 +25,10 @@ Class {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U x>
           }
-          Arg {
+          Param {
             name = <U y>
           }
         ]

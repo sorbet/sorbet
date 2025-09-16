@@ -27,13 +27,13 @@ Begin {
       name = <U f3>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U a>
           }
-          Arg {
+          Param {
             name = <U b>
           }
-          Arg {
+          Param {
             name = <U c>
           }
           Kwnilarg {
@@ -46,10 +46,10 @@ Begin {
       name = <U f4>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U a>
           }
-          Arg {
+          Param {
             name = <U b>
           }
           Restarg {
@@ -78,13 +78,13 @@ Begin {
       name = <U f6>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U a>
           }
-          Arg {
+          Param {
             name = <U b>
           }
-          Arg {
+          Param {
             name = <U c>
           }
           Kwnilarg {
@@ -100,10 +100,10 @@ Begin {
       name = <U f7>
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U a>
           }
-          Arg {
+          Param {
             name = <U b>
           }
           Restarg {
