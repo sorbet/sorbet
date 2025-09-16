@@ -81,9 +81,9 @@ rbs_string_t makeRBSString(const string &str) {
 //     return nullptr;
 // }
 
-unique_ptr<parser::Node> SignatureTranslatorPrism::translateMethodSignature(const pm_node_t *methodDef,
-                                                                            const RBSDeclaration &declaration,
-                                                                            const vector<Comment> &annotations) {
+pm_node_t *SignatureTranslatorPrism::translateMethodSignature(const pm_node_t *methodDef,
+                                                              const RBSDeclaration &declaration,
+                                                              const vector<Comment> &annotations) {
     rbs_string_t rbsString = makeRBSString(declaration.string);
     const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
 
@@ -101,40 +101,8 @@ unique_ptr<parser::Node> SignatureTranslatorPrism::translateMethodSignature(cons
         return nullptr;
     }
 
-    auto methodTypeToParserNodePrism = MethodTypeToParserNodePrism(ctx, move(parser));
+    auto methodTypeToParserNodePrism = MethodTypeToParserNodePrism(ctx, move(parser), *this->parser);
     return methodTypeToParserNodePrism.methodSignature(methodDef, rbsMethodType, declaration, annotations);
-}
-
-// New Prism node creation methods
-pm_node_t* SignatureTranslatorPrism::createPrismMethodSignature(const pm_node_t *methodDef,
-                                                                const RBSDeclaration &declaration,
-                                                                const std::vector<Comment> &annotations) {
-    if (!parser) {
-        return nullptr; // Need parser for Prism node creation
-    }
-
-    // If there's no RBS signature to parse, create a placeholder signature
-    if (declaration.string.empty()) {
-        auto methodTypeToParserNodePrism = MethodTypeToParserNodePrism(ctx, Parser(rbs_string_new("", ""), &rbs_encodings[RBS_ENCODING_UTF_8]), *parser);
-        return methodTypeToParserNodePrism.createSigCallPlaceholder();
-    }
-
-    // Parse the RBS declaration to get the method type, following the same pattern as translateMethodSignature
-    rbs_string_t rbsString = makeRBSString(declaration.string);
-    const rbs_encoding_t *encoding = &rbs_encodings[RBS_ENCODING_UTF_8];
-
-    Parser rbsParser(rbsString, encoding);
-    rbs_method_type_t *rbsMethodType = rbsParser.parseMethodType();
-
-    if (rbsParser.hasError()) {
-        // If parsing fails, fall back to placeholder
-        auto methodTypeToParserNodePrism = MethodTypeToParserNodePrism(ctx, move(rbsParser), *parser);
-        return methodTypeToParserNodePrism.createSigCallPlaceholder();
-    }
-
-    // Delegate to MethodTypeToParserNodePrism for actual Prism node creation
-    auto methodTypeToParserNodePrism = MethodTypeToParserNodePrism(ctx, move(rbsParser), *parser);
-    return methodTypeToParserNodePrism.createPrismMethodSignature(methodDef, rbsMethodType, declaration, annotations);
 }
 
 // unique_ptr<parser::Node> SignatureTranslatorPrism::translateType(const RBSDeclaration &declaration) {
@@ -178,6 +146,5 @@ pm_node_t* SignatureTranslatorPrism::createPrismMethodSignature(const pm_node_t 
 //     auto typeParamsToParserNode = TypeParamsToParserNode(ctx, move(parser));
 //     return typeParamsToParserNode.typeParams(rbsTypeParams, declaration);
 // }
-
 
 } // namespace sorbet::rbs

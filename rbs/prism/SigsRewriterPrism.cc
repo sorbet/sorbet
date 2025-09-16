@@ -285,20 +285,22 @@ CommentsPrism SigsRewriterPrism::commentsForNode(pm_node_t *node) {
     return comments;
 }
 
-unique_ptr<parser::NodeVec> SigsRewriterPrism::signaturesForNode(pm_node_t *node) {
+unique_ptr<vector<pm_node_t*>> SigsRewriterPrism::signaturesForNode(pm_node_t *node) {
     auto comments = commentsForNode(node);
 
     if (comments.signatures.empty()) {
         return nullptr;
     }
 
-    auto signatures = make_unique<parser::NodeVec>();
-    auto signatureTranslator = rbs::SignatureTranslatorPrism(ctx);
+    auto signatures = make_unique<vector<pm_node_t*>>();
+    auto signatureTranslator = rbs::SignatureTranslatorPrism(ctx, parser);
 
     for (auto &declaration : comments.signatures) {
         if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
             auto sig = signatureTranslator.translateMethodSignature(node, declaration, comments.annotations);
-            signatures->emplace_back(move(sig));
+            if (sig) {
+                signatures->emplace_back(sig);
+            }
         } else if (PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
             auto *call = down_cast<pm_call_node_t>(node);
             // TODO: Implement isVisibilitySend and isAttrAccessorSend for Prism nodes
@@ -681,46 +683,28 @@ pm_node_t *SigsRewriterPrism::run(pm_node_t *node) {
 
 // Helper method to create statements nodes with signatures
 pm_node_t *SigsRewriterPrism::createStatementsWithSignatures(pm_node_t *originalNode,
-                                                             std::unique_ptr<parser::NodeVec> signatures) {
+                                                             std::unique_ptr<std::vector<pm_node_t*>> signatures) {
     if (!signatures || signatures->empty()) {
-        return originalNode;  // No signatures, return original node
+        return originalNode; // No signatures, return original node
     }
 
     // Create a statements node that wraps the signature + original method
-    pm_parser_t* p = parser.getInternalParser();
+    pm_parser_t *p = parser.getInternalParser();
 
     // Create the statements node
-    pm_statements_node_t *stmts = (pm_statements_node_t*) calloc(1, sizeof(pm_statements_node_t));
-    if (!stmts) return originalNode;
+    pm_statements_node_t *stmts = (pm_statements_node_t *)calloc(1, sizeof(pm_statements_node_t));
+    if (!stmts)
+        return originalNode;
 
-    *stmts = (pm_statements_node_t) {
-        .base = {
-            .type = PM_STATEMENTS_NODE,
-            .flags = 0,
-            .node_id = ++p->node_id,
-            .location = {
-                .start = originalNode->location.start,
-                .end = originalNode->location.end
-            }
-        },
-        .body = { .size = 0, .capacity = 0, .nodes = nullptr }
-    };
+    *stmts = (pm_statements_node_t){
+        .base = {.type = PM_STATEMENTS_NODE,
+                 .flags = 0,
+                 .node_id = ++p->node_id,
+                 .location = {.start = originalNode->location.start, .end = originalNode->location.end}},
+        .body = {.size = 0, .capacity = 0, .nodes = nullptr}};
 
-    // Create signature nodes using SignatureTranslatorPrism
-    auto signatureTranslator = rbs::SignatureTranslatorPrism(ctx, parser);
-    for (auto &signature : *signatures) {
-        (void)signature; // Suppress unused warning - TODO: Use signature to extract RBS content
-
-        // For now, use a placeholder since we need to convert parser::Node to pm_node_t
-        // TODO: Implement proper conversion from parser signatures to Prism signature nodes
-        // This would involve parsing the signature's RBS content and creating proper Prism nodes
-
-        // Create a placeholder sig call for each signature
-        pm_node_t* sigCall = signatureTranslator.createPrismMethodSignature(
-            originalNode,
-            RBSDeclaration{std::vector<Comment>{}}, // TODO: Extract RBS declaration from parser::Node
-            {}  // TODO: Extract annotations
-        );
+    // Add all the Prism signature nodes
+    for (auto sigCall : *signatures) {
         if (sigCall) {
             addNodeToStatements(stmts, sigCall);
         }
@@ -732,17 +716,17 @@ pm_node_t *SigsRewriterPrism::createStatementsWithSignatures(pm_node_t *original
     return up_cast(stmts);
 }
 
-
 // Helper to add a node to a statements node
-bool SigsRewriterPrism::addNodeToStatements(pm_statements_node_t* stmts, pm_node_t* node) {
-    if (!stmts || !node) return false;
+bool SigsRewriterPrism::addNodeToStatements(pm_statements_node_t *stmts, pm_node_t *node) {
+    if (!stmts || !node)
+        return false;
 
     // Grow the node list if needed
     if (stmts->body.size >= stmts->body.capacity) {
         size_t new_capacity = stmts->body.capacity == 0 ? 4 : stmts->body.capacity * 2;
-        pm_node_t** new_nodes = (pm_node_t**) realloc(stmts->body.nodes,
-                                                       sizeof(pm_node_t*) * new_capacity);
-        if (!new_nodes) return false;
+        pm_node_t **new_nodes = (pm_node_t **)realloc(stmts->body.nodes, sizeof(pm_node_t *) * new_capacity);
+        if (!new_nodes)
+            return false;
 
         stmts->body.nodes = new_nodes;
         stmts->body.capacity = new_capacity;
@@ -768,6 +752,5 @@ bool SigsRewriterPrism::addNodeToStatements(pm_statements_node_t* stmts, pm_node
 
     return true;
 }
-
 
 } // namespace sorbet::rbs

@@ -23,13 +23,13 @@ public:
         : ctx(ctx), parser(parser), prismParser(&prismParser) {}
 
     /**
-     * Convert an RBS method signature comment to a Sorbet signature.
+     * Create a Prism signature node from RBS method signature.
      *
      * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
      */
-    std::unique_ptr<parser::Node> methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
-                                                  const RBSDeclaration &declaration,
-                                                  const std::vector<Comment> &annotations);
+    pm_node_t* methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
+                               const RBSDeclaration &declaration,
+                               const std::vector<Comment> &annotations);
 
     /**
      * Convert an RBS attribute type comment to a Sorbet signature.
@@ -40,19 +40,6 @@ public:
                                                 const RBSDeclaration &declaration,
                                                 const std::vector<Comment> &annotations);
 
-    /**
-     * Create a Prism signature node from RBS method signature.
-     *
-     * This creates actual pm_node_t* instead of parser::Node*.
-     */
-    pm_node_t* createPrismMethodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
-                                          const RBSDeclaration &declaration,
-                                          const std::vector<Comment> &annotations);
-
-    /**
-     * Create a placeholder sig call for when no RBS signature is available.
-     */
-    pm_node_t* createSigCallPlaceholder();
 
 private:
     // Prism node creation helpers
