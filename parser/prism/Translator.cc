@@ -580,17 +580,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             pm_node_t *prismBlock = callNode->block;
-            if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
-                // but not a literal block with `{ ... }` or `do ... end`
-                args.emplace_back(translate(prismBlock));
-            }
 
             unique_ptr<parser::Node> sendNode;
 
             auto name = ctx.state.enterNameUTF8(constantNameString);
 
-            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
+            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+                // Handle conditional send, e.g. `a&.b`
+
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+                    // but not a literal block with `{ ... }` or `do ... end`
+
+                    auto blockPassNode = translate(prismBlock);
+                    args.emplace_back(move(blockPassNode));
+                }
+
                 sendNode = make_unique<parser::CSend>(loc, move(receiver), name, messageLoc, move(args));
 
                 // TODO: Direct desugaring support for conditional sends is not implemented yet.
@@ -621,6 +626,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
+            unique_ptr<parser::Node> blockPassNode;
             bool supportedBlock;
             if (prismBlock != nullptr) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
@@ -714,6 +720,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
                 } else {
                     // `PM_BLOCK_ARGUMENT_NODE` is not supported yet.
+                    blockPassNode = translate(prismBlock);
                     supportedBlock = false;
                 }
             } else {
@@ -724,6 +731,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             supportedCallType &= supportedBlock;
 
             if (!supportedCallType) {
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+                    // but not a literal block with `{ ... }` or `do ... end`
+
+                    args.emplace_back(move(blockPassNode));
+                }
+
                 sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
