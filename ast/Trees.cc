@@ -291,7 +291,7 @@ KeywordArg::KeywordArg(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), exp
 
 OptionalParam::OptionalParam(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_)
     : loc(loc), expr(std::move(expr)), default_(std::move(default_)) {
-    categoryCounterInc("trees", "optionalarg");
+    categoryCounterInc("trees", "optionalparam");
     _sanityCheck();
 }
 
