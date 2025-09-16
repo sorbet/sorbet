@@ -10,6 +10,11 @@
 #include "parser/prism/Helpers.h"
 #include "rbs/TypeToParserNode.h"
 #include "rewriter/util/Util.h"
+#include <cstring>
+
+extern "C" {
+#include "prism/util/pm_constant_pool.h"
+}
 
 using namespace std;
 using namespace sorbet::parser::Prism;
@@ -20,18 +25,6 @@ namespace {
 
 // Forward declarations
 core::LocOffsets translateLocation(pm_location_t location);
-
-core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
-    auto range = node->location->rg;
-
-    auto nameRange = node->location->children->entries[0].rg;
-    if (nameRange.start != -1 && nameRange.end != -1) {
-        range.start.char_pos = nameRange.start;
-        range.end.char_pos = nameRange.end;
-    }
-
-    return declaration.typeLocFromRange(range);
-}
 
 struct RBSArg {
     core::LocOffsets loc;
@@ -52,7 +45,110 @@ struct RBSArg {
     Kind kind;
 };
 
-/* TODO: Add back when parameter validation is implemented
+core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
+    auto range = node->location->rg;
+
+    auto nameRange = node->location->children->entries[0].rg;
+    if (nameRange.start != -1 && nameRange.end != -1) {
+        range.start.char_pos = nameRange.start;
+        range.end.char_pos = nameRange.end;
+    }
+
+    return declaration.typeLocFromRange(range);
+}
+
+/* TODO: Implement when needed
+bool isSelfOrKernel(pm_node_t *node) {
+    if (PM_NODE_TYPE_P(node, PM_SELF_NODE)) {
+        return true;
+    }
+
+    if (PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE)) {
+        auto *constant = down_cast<pm_constant_read_node_t>(node);
+        // TODO: Check if the constant name is "Kernel" and has no scope
+        // For now, simplified check
+        (void)constant; // Suppress unused warning
+        return false;
+    }
+
+    return false;
+}
+*/
+
+bool isRaise(pm_node_t *node) {
+    if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
+        return false;
+    }
+
+    auto *call = down_cast<pm_call_node_t>(node);
+    // TODO: Check if method name is 'raise' and receiver is nil or self/Kernel
+    // For now, simplified implementation
+    (void)call; // Suppress unused warning
+    return false;
+}
+
+/* TODO: Migrate autocorrect functions to work with Prism nodes
+core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
+                                                        core::LocOffsets method_declLoc, pm_node_t *method_body) {
+    (void)ctx;
+    (void)method;
+    (void)method_declLoc;
+    (void)method_body;
+
+    // TODO: Implement autocorrect for Prism nodes
+    return core::AutocorrectSuggestion{"TODO: Implement autocorrect for Prism", {}};
+}
+*/
+
+void ensureAbstractMethodRaises(core::MutableContext ctx, const pm_node_t *node) {
+    if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
+        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t *>(node));
+        if (def->body && isRaise(def->body)) {
+            // Method raises properly, remove body to not error later
+            // TODO: Implement body nulling for Prism nodes
+            return;
+        }
+
+        if (auto e = ctx.beginIndexerError(translateLocation(node->location),
+                                           core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
+            e.setHeader("Methods declared @abstract with an RBS comment must always raise");
+            // TODO: Add autocorrect for Prism nodes
+        }
+    }
+}
+
+unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const pm_node_t *node,
+                                           unique_ptr<parser::Node> sigBuilder, const vector<Comment> &annotations) {
+    for (auto &annotation : annotations) {
+        if (annotation.string == "final") {
+            // no-op, `final` is handled in the `sig()` call later
+        } else if (annotation.string == "abstract") {
+            sigBuilder =
+                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::abstract(), annotation.typeLoc);
+            ensureAbstractMethodRaises(ctx, node);
+        } else if (annotation.string == "overridable") {
+            sigBuilder =
+                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::overridable(), annotation.typeLoc);
+        } else if (annotation.string == "override") {
+            sigBuilder =
+                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::override_(), annotation.typeLoc);
+        }
+        // TODO: Add support for other annotations like override(allow_incompatible: true)
+    }
+    return sigBuilder;
+}
+
+/* TODO: Implement when needed
+core::NameRef nodeName(const pm_node_t *node) {
+    core::NameRef name;
+    // TODO: Implement proper node name extraction for Prism nodes
+    // This should handle PM_PARAMETER_NODE, PM_REQUIRED_PARAMETER_NODE, etc.
+    (void)node; // Suppress unused warning for now
+    return name;
+}
+*/
+
+/* TODO: Implement when needed
 string argKindToString(RBSArg::Kind kind) {
     switch (kind) {
         case RBSArg::Kind::Positional:
@@ -74,86 +170,13 @@ string argKindToString(RBSArg::Kind kind) {
 */
 
 /* TODO: Implement when needed
-bool isSelfOrKernelPrism(pm_node_t *node) {
-    if (PM_NODE_TYPE_P(node, PM_SELF_NODE)) {
-        return true;
-    }
-
-    if (PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE)) {
-        auto *constant = down_cast<pm_constant_read_node_t>(node);
-        // TODO: Check if the constant name is "Kernel" and has no scope
-        // For now, simplified check
-        (void)constant; // Suppress unused warning
-        return false;
-    }
-
-    return false;
+string nodeKindToString(const pm_node_t *node) {
+    // TODO: Add proper node kind string mapping for Prism nodes
+    // This should handle all the Prism parameter node types
+    (void)node; // Suppress unused warning for now
+    return "unknown";
 }
 */
-
-bool isRaisePrism(pm_node_t *node) {
-    if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
-        return false;
-    }
-
-    auto *call = down_cast<pm_call_node_t>(node);
-    // TODO: Check if method name is 'raise' and receiver is nil or self/Kernel
-    // For now, simplified implementation
-    (void)call; // Suppress unused warning
-    return false;
-}
-
-/* TODO: Migrate autocorrect functions to work with Prism nodes
-core::AutocorrectSuggestion autocorrectAbstractBodyPrism(core::MutableContext ctx, pm_node_t *method,
-                                                        core::LocOffsets method_declLoc, pm_node_t *method_body) {
-    (void)ctx;
-    (void)method;
-    (void)method_declLoc;
-    (void)method_body;
-
-    // TODO: Implement autocorrect for Prism nodes
-    return core::AutocorrectSuggestion{"TODO: Implement autocorrect for Prism", {}};
-}
-*/
-
-void ensureAbstractMethodRaisesPrism(core::MutableContext ctx, const pm_node_t *node) {
-    if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
-        auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t *>(node));
-        if (def->body && isRaisePrism(def->body)) {
-            // Method raises properly, remove body to not error later
-            // TODO: Implement body nulling for Prism nodes
-            return;
-        }
-
-        if (auto e = ctx.beginIndexerError(translateLocation(node->location),
-                                           core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
-            e.setHeader("Methods declared @abstract with an RBS comment must always raise");
-            // TODO: Add autocorrect for Prism nodes
-        }
-    }
-}
-
-unique_ptr<parser::Node> handleAnnotationsPrism(core::MutableContext ctx, const pm_node_t *node,
-                                                unique_ptr<parser::Node> sigBuilder,
-                                                const vector<Comment> &annotations) {
-    for (auto &annotation : annotations) {
-        if (annotation.string == "final") {
-            // no-op, `final` is handled in the `sig()` call later
-        } else if (annotation.string == "abstract") {
-            sigBuilder =
-                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::abstract(), annotation.typeLoc);
-            ensureAbstractMethodRaisesPrism(ctx, node);
-        } else if (annotation.string == "overridable") {
-            sigBuilder =
-                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::overridable(), annotation.typeLoc);
-        } else if (annotation.string == "override") {
-            sigBuilder =
-                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::override_(), annotation.typeLoc);
-        }
-        // TODO: Add support for other annotations like override(allow_incompatible: true)
-    }
-    return sigBuilder;
-}
 
 core::LocOffsets translateLocation(pm_location_t location) {
     // TODO: This should be shared with CommentsAssociatorPrism
@@ -165,7 +188,17 @@ core::LocOffsets translateLocation(pm_location_t location) {
     return core::LocOffsets{start, end};
 }
 
-parser::Args *getMethodArgsPrism(const pm_node_t *node) {
+/* TODO: Implement when needed
+bool checkParameterKindMatch(const RBSArg &arg, const pm_node_t *methodArg) {
+    // TODO: Implement proper parameter kind matching for Prism nodes
+    // This should handle all Prism parameter node types
+    (void)arg;
+    (void)methodArg;
+    return true; // Placeholder - always return true for now
+}
+*/
+
+parser::Args *getMethodArgs(const pm_node_t *node) {
     if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
         auto *def = down_cast<pm_def_node_t>(const_cast<pm_node_t *>(node));
         // TODO: Convert Prism parameters to parser::Args
@@ -301,7 +334,7 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::methodSignature(const pm_n
     sigParams.reserve(args.size());
     auto typeToParserNode = TypeToParserNode(ctx, typeParams, parser);
 
-    auto methodArgs = getMethodArgsPrism(methodDef);
+    auto methodArgs = getMethodArgs(methodDef);
     for (int i = 0; i < args.size(); i++) {
         auto &arg = args[i];
         auto type = typeToParserNode.toParserNode(arg.type, declaration);
@@ -339,7 +372,7 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::methodSignature(const pm_n
 
     // Build the sig
     auto sigBuilder = parser::MK::Self(fullTypeLoc);
-    sigBuilder = handleAnnotationsPrism(ctx, methodDef, move(sigBuilder), annotations);
+    sigBuilder = handleAnnotations(ctx, methodDef, move(sigBuilder), annotations);
 
     if (typeParams.size() > 0) {
         auto typeParamsVector = parser::NodeVec();
@@ -383,6 +416,7 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::methodSignature(const pm_n
     return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
 }
 
+/* TODO: Implement when needed
 unique_ptr<parser::Node> MethodTypeToParserNodePrism::attrSignature(const pm_call_node_t *call, const rbs_node_t *type,
                                                                     const RBSDeclaration &declaration,
                                                                     const vector<Comment> &annotations) {
@@ -413,6 +447,237 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::attrSignature(const pm_cal
                                 firstLineTypeLoc, move(sigArgs));
 
     return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
+}
+*/
+
+// Prism node creation methods
+pm_node_t *MethodTypeToParserNodePrism::createPrismMethodSignature(const pm_node_t *methodDef,
+                                                                   const rbs_method_type_t *methodType,
+                                                                   const RBSDeclaration &declaration,
+                                                                   const std::vector<Comment> &annotations) {
+    if (!prismParser) {
+        return nullptr; // Need Prism parser for node creation
+    }
+
+    // For now, create a placeholder sig call
+    // TODO: Parse the RBS method type and create appropriate signature nodes
+    // This should eventually use methodType to build the proper signature structure
+    (void)methodDef; // Suppress unused warnings for now
+    (void)methodType;
+    (void)declaration;
+    (void)annotations;
+
+    return createSigCallPlaceholder();
+}
+
+// Node creation helper implementations (moved from SignatureTranslatorPrism)
+
+template <typename T> T *MethodTypeToParserNodePrism::allocateNode() {
+    T *node = (T *)calloc(1, sizeof(T));
+    return node; // Returns nullptr on allocation failure
+}
+
+pm_node_t MethodTypeToParserNodePrism::initializeBaseNode(pm_node_type_t type) {
+    if (!prismParser) {
+        // Return a default-initialized node if parser is not available
+        return (pm_node_t){.type = type, .flags = 0, .node_id = 0, .location = {.start = nullptr, .end = nullptr}};
+    }
+
+    pm_parser_t *p = prismParser->getInternalParser();
+    pm_location_t loc = getZeroWidthLocation();
+
+    return (pm_node_t){.type = type, .flags = 0, .node_id = ++p->node_id, .location = loc};
+}
+
+pm_node_t *MethodTypeToParserNodePrism::createConstantReadNode(const char *name) {
+    pm_constant_id_t constant_id = addConstantToPool(name);
+    if (constant_id == PM_CONSTANT_ID_UNSET)
+        return nullptr;
+
+    pm_constant_read_node_t *node = allocateNode<pm_constant_read_node_t>();
+    if (!node)
+        return nullptr;
+
+    *node = (pm_constant_read_node_t){.base = initializeBaseNode(PM_CONSTANT_READ_NODE), .name = constant_id};
+
+    return up_cast(node);
+}
+
+pm_node_t *MethodTypeToParserNodePrism::createConstantPathNode(pm_node_t *parent, const char *name) {
+    pm_constant_id_t name_id = addConstantToPool(name);
+    if (name_id == PM_CONSTANT_ID_UNSET)
+        return nullptr;
+
+    pm_constant_path_node_t *node = allocateNode<pm_constant_path_node_t>();
+    if (!node)
+        return nullptr;
+
+    pm_location_t loc = getZeroWidthLocation();
+
+    *node = (pm_constant_path_node_t){.base = initializeBaseNode(PM_CONSTANT_PATH_NODE),
+                                      .parent = parent,
+                                      .name = name_id,
+                                      .delimiter_loc = loc,
+                                      .name_loc = loc};
+
+    return up_cast(node);
+}
+
+pm_node_t *MethodTypeToParserNodePrism::createSingleArgumentNode(pm_node_t *arg) {
+    pm_arguments_node_t *arguments = allocateNode<pm_arguments_node_t>();
+    if (!arguments)
+        return nullptr;
+
+    pm_node_t **arg_nodes = (pm_node_t **)calloc(1, sizeof(pm_node_t *));
+    if (!arg_nodes) {
+        free(arguments);
+        return nullptr;
+    }
+    arg_nodes[0] = arg;
+
+    *arguments = (pm_arguments_node_t){.base = initializeBaseNode(PM_ARGUMENTS_NODE),
+                                       .arguments = {.size = 1, .capacity = 1, .nodes = arg_nodes}};
+
+    return up_cast(arguments);
+}
+
+pm_node_t *MethodTypeToParserNodePrism::createSorbetPrivateStaticConstant() {
+    // Create Sorbet constant read
+    pm_node_t *sorbet = createConstantReadNode("Sorbet");
+    if (!sorbet)
+        return nullptr;
+
+    // Create Sorbet::Private constant path
+    pm_node_t *sorbet_private = createConstantPathNode(sorbet, "Private");
+    if (!sorbet_private)
+        return nullptr;
+
+    // Create Sorbet::Private::Static constant path
+    return createConstantPathNode(sorbet_private, "Static");
+}
+
+pm_node_t *MethodTypeToParserNodePrism::createTSigWithoutRuntimeConstant() {
+    // Create T constant read
+    pm_node_t *t_const = createConstantReadNode("T");
+    if (!t_const)
+        return nullptr;
+
+    // Create T::Sig constant path
+    pm_node_t *t_sig = createConstantPathNode(t_const, "Sig");
+    if (!t_sig)
+        return nullptr;
+
+    // Create T::Sig::WithoutRuntime constant path
+    return createConstantPathNode(t_sig, "WithoutRuntime");
+}
+
+pm_node_t *MethodTypeToParserNodePrism::createStringConstant() {
+    return createConstantReadNode("String");
+}
+
+pm_node_t *MethodTypeToParserNodePrism::createSigCallPlaceholder() {
+    if (!prismParser)
+        return nullptr;
+
+    pm_location_t loc = getZeroWidthLocation();
+
+    // Add method names to constant pool
+    pm_constant_id_t sig_method_id = addConstantToPool("sig");
+    pm_constant_id_t returns_id = addConstantToPool("returns");
+
+    if (sig_method_id == PM_CONSTANT_ID_UNSET || returns_id == PM_CONSTANT_ID_UNSET) {
+        return nullptr;
+    }
+
+    // Create receiver: Sorbet::Private::Static
+    pm_node_t *receiver = createSorbetPrivateStaticConstant();
+    if (!receiver)
+        return nullptr;
+
+    // Create argument: T::Sig::WithoutRuntime
+    pm_node_t *t_sig_arg = createTSigWithoutRuntimeConstant();
+    if (!t_sig_arg)
+        return nullptr;
+
+    // Create arguments list
+    pm_node_t *arguments = createSingleArgumentNode(t_sig_arg);
+    if (!arguments)
+        return nullptr;
+
+    // Create block body: returns(String)
+    pm_node_t *string_const = createStringConstant();
+    if (!string_const)
+        return nullptr;
+
+    // Create arguments for returns call
+    pm_node_t *returns_arguments = createSingleArgumentNode(string_const);
+    if (!returns_arguments)
+        return nullptr;
+
+    // Create returns(String) call
+    pm_call_node_t *returns_call = allocateNode<pm_call_node_t>();
+    if (!returns_call)
+        return nullptr;
+
+    *returns_call = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
+                                     .receiver = nullptr, // No explicit receiver (implicit self)
+                                     .call_operator_loc = {.start = nullptr, .end = nullptr},
+                                     .name = returns_id,
+                                     .message_loc = loc,
+                                     .opening_loc = loc,
+                                     .arguments = down_cast<pm_arguments_node_t>(returns_arguments),
+                                     .closing_loc = loc,
+                                     .block = nullptr};
+
+    // Create block node
+    pm_block_node_t *block = allocateNode<pm_block_node_t>();
+    if (!block)
+        return nullptr;
+
+    *block = (pm_block_node_t){.base = initializeBaseNode(PM_BLOCK_NODE),
+                               .locals = {.size = 0, .capacity = 0, .ids = nullptr},
+                               .parameters = nullptr,
+                               .body = up_cast(returns_call),
+                               .opening_loc = loc,
+                               .closing_loc = loc};
+
+    // Create the main sig call: Sorbet::Private::Static.sig(T::Sig::WithoutRuntime) { returns(String) }
+    pm_call_node_t *call = allocateNode<pm_call_node_t>();
+    if (!call)
+        return nullptr;
+
+    *call = (pm_call_node_t){
+        .base = initializeBaseNode(PM_CALL_NODE),
+        .receiver = receiver, // Sorbet::Private::Static constant path
+        .call_operator_loc = loc,
+        .name = sig_method_id, // "sig" method
+        .message_loc = loc,
+        .opening_loc = loc,
+        .arguments = down_cast<pm_arguments_node_t>(arguments), // T::Sig::WithoutRuntime argument
+        .closing_loc = loc,
+        .block = up_cast(block) // { returns(String) } block
+    };
+
+    return up_cast(call);
+}
+
+pm_constant_id_t MethodTypeToParserNodePrism::addConstantToPool(const char *name) {
+    if (!prismParser)
+        return PM_CONSTANT_ID_UNSET;
+
+    pm_parser_t *p = prismParser->getInternalParser();
+    pm_constant_id_t id = pm_constant_pool_insert_constant(&p->constant_pool, (const uint8_t *)name, strlen(name));
+    return id; // Returns PM_CONSTANT_ID_UNSET on failure
+}
+
+pm_location_t MethodTypeToParserNodePrism::getZeroWidthLocation() {
+    if (!prismParser) {
+        return {.start = nullptr, .end = nullptr};
+    }
+
+    pm_parser_t *p = prismParser->getInternalParser();
+    const uint8_t *source_start = p->start;
+    return {.start = source_start, .end = source_start};
 }
 
 } // namespace sorbet::rbs

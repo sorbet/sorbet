@@ -43,23 +43,6 @@ public:
 private:
     core::MutableContext ctx;
     const parser::Prism::Parser* parser; // For Prism node creation
-    
-    // Node creation helpers
-    template<typename T> T* allocateNode();
-    pm_node_t initializeBaseNode(pm_node_type_t type);
-    pm_node_t* createConstantReadNode(const char* name);
-    pm_node_t* createConstantPathNode(pm_node_t* parent, const char* name);
-    pm_node_t* createSingleArgumentNode(pm_node_t* arg);
-    
-    // High-level node creators
-    pm_node_t* createSigCallPlaceholder();
-    pm_node_t* createSorbetPrivateStaticConstant();
-    pm_node_t* createTSigWithoutRuntimeConstant();
-    pm_node_t* createStringConstant();
-    
-    // Utility helpers
-    pm_constant_id_t addConstantToPool(const char* name);
-    pm_location_t getZeroWidthLocation();
 };
 
 } // namespace sorbet::rbs
