@@ -185,13 +185,13 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const
 
     UnorderedMap<core::NameRef, ArgKind> paramKindMap;
     for (const auto &param : methodDef->params) {
-        const auto restArg = ast::cast_tree<ast::RestParam>(param);
-        if (restArg == nullptr) {
+        const auto restParam = ast::cast_tree<ast::RestParam>(param);
+        if (restParam == nullptr) {
             paramKindMap[ast::MK::arg2Name(param)] = ArgKind::Plain;
-        } else if (ast::isa_tree<ast::KeywordArg>(restArg->expr)) {
+        } else if (ast::isa_tree<ast::KeywordArg>(restParam->expr)) {
             paramKindMap[ast::MK::arg2Name(param)] = ArgKind::KeywordRestArg;
         } else {
-            ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));
+            ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restParam->expr));
             paramKindMap[ast::MK::arg2Name(param)] = ArgKind::RestArg;
         }
     }

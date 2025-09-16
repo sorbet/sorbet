@@ -276,16 +276,16 @@ public:
     }
 
     void validateNoForwardArgAfterRestParam(const sorbet::parser::NodeVec &args) {
-        bool restArg = false;
+        bool restParam = false;
         bool forwardArg = false;
         for (auto &arg : args) {
             if (parser::isa_node<RestParam>(arg.get())) {
-                restArg = true;
+                restParam = true;
             } else if (parser::isa_node<ForwardArg>(arg.get())) {
                 forwardArg = true;
             }
         }
-        if (forwardArg && restArg) {
+        if (forwardArg && restParam) {
             error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
         }
     }
@@ -1761,8 +1761,8 @@ public:
                 hasDuplicateParam(requiredParam->name, requiredParam->loc, map);
             } else if (auto *optParam = parser::cast_node<OptParam>(thisParam.get())) {
                 hasDuplicateParam(optParam->name, optParam->loc, map);
-            } else if (auto *restarg = parser::cast_node<RestParam>(thisParam.get())) {
-                hasDuplicateParam(restarg->name, restarg->loc, map);
+            } else if (auto *restParam = parser::cast_node<RestParam>(thisParam.get())) {
+                hasDuplicateParam(restParam->name, restParam->loc, map);
             } else if (auto *blockarg = parser::cast_node<Blockarg>(thisParam.get())) {
                 hasDuplicateParam(blockarg->name, blockarg->loc, map);
             } else if (auto *kwarg = parser::cast_node<Kwarg>(thisParam.get())) {
