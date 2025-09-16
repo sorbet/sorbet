@@ -1506,7 +1506,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                 }
                 bool isSelf = true;
-                ExpressionPtr res = buildMethod(dctx, method->loc, method->declLoc, method->name, method->args.get(),
+                ExpressionPtr res = buildMethod(dctx, method->loc, method->declLoc, method->name, method->params.get(),
                                                 method->body, isSelf);
                 result = move(res);
             },
