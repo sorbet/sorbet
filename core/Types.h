@@ -41,7 +41,7 @@ public:
      * Return type as observed by the method
      * body that defined that argument
      */
-    TypePtr argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
+    TypePtr parameterTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
 
     bool isSyntheticBlockParameter() const;
     std::string toString(const GlobalState &gs) const;

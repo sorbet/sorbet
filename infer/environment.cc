@@ -1338,7 +1338,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(ctx.owner == i.method);
 
                 const auto &argInfo = i.argument(ctx);
-                auto argType = argInfo.argumentTypeAsSeenByImplementation(ctx, constr);
+                auto argType = argInfo.parameterTypeAsSeenByImplementation(ctx, constr);
                 tp.type = std::move(argType);
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
@@ -1622,7 +1622,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 auto castType = core::Types::instantiate(ctx, c.type, klass.data(ctx)->typeMembers(),
                                                          klass.data(ctx)->selfTypeArgs(ctx));
                 if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
-                    // ^ This mimics the check in LoadArg's call to argumentTypeAsSeenByImplementation
+                    // ^ This mimics the check in LoadArg's call to parameterTypeAsSeenByImplementation
                     // It instantiates any `T.type_parameter(:U)`'s in the type (which are only
                     // valid in a method body if the method's signature is generic).
                     castType = core::Types::instantiate(ctx, castType, constr);

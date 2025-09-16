@@ -452,7 +452,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
-TypePtr ParamInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
+TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner.asMethodRef();
     auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
