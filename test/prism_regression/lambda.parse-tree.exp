@@ -26,7 +26,7 @@ Begin {
         ]
       }
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U param>
           }
@@ -47,7 +47,7 @@ Begin {
         ]
       }
       args = Params {
-        args = [
+        params = [
           Optarg {
             name = <U optional_param>
             default_ = Integer {
@@ -100,7 +100,7 @@ Begin {
         ]
       }
       args = Params {
-        args = [
+        params = [
           Arg {
             name = <U param>
           }
@@ -203,7 +203,7 @@ Begin {
         ]
       }
       args = Params {
-        args = [
+        params = [
         ]
       }
       body = Send {

@@ -256,7 +256,7 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
             result = std::make_unique<Pair>(pair->loc, deepCopy(pair->key.get()), deepCopy(pair->value.get()));
         },
         [&](const parser::Params *params) {
-            result = std::make_unique<Params>(params->loc, deepCopyVec(params->args));
+            result = std::make_unique<Params>(params->loc, deepCopyVec(params->params));
         },
         [&](const parser::Pin *pin) { result = std::make_unique<Pin>(pin->loc, deepCopy(pin->var.get())); },
         [&](const parser::Postexe *postexe) {

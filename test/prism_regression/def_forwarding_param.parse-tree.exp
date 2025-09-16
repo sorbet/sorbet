@@ -1,7 +1,7 @@
 DefMethod {
   name = <U foo>
   args = Params {
-    args = [
+    params = [
       ForwardArg {
       }
     ]

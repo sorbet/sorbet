@@ -128,7 +128,7 @@ Begin {
     DefMethod {
       name = <U bfoo>
       args = Params {
-        args = [
+        params = [
           Blockarg {
             name = <U x>
           }
@@ -303,7 +303,7 @@ Begin {
     DefMethod {
       name = <U kwfoo>
       args = Params {
-        args = [
+        params = [
           Kwarg {
             name = <U x>
           }
@@ -415,7 +415,7 @@ Begin {
     DefMethod {
       name = <U optfoo>
       args = Params {
-        args = [
+        params = [
           Optarg {
             name = <U x>
             default_ = Integer {
@@ -597,7 +597,7 @@ Begin {
         ]
       }
       args = Params {
-        args = [
+        params = [
           Shadowarg {
             name = <U x>
           }
@@ -625,7 +625,7 @@ Begin {
     DefMethod {
       name = <U sfoo>
       args = Params {
-        args = [
+        params = [
           Restarg {
             name = <U *>
           }
@@ -636,7 +636,7 @@ Begin {
     DefMethod {
       name = <U ssfoo>
       args = Params {
-        args = [
+        params = [
           Kwrestarg {
             name = <P <U **> $2>
           }
@@ -663,7 +663,7 @@ Begin {
             ]
           }
           args = Params {
-            args = [
+            params = [
               Arg {
                 name = <U a>
               }

@@ -673,7 +673,7 @@ NodeDef nodes[] = {
     {
         "Params",
         "params",
-        vector<FieldDef>({{"args", FieldType::NodeVec}}),
+        vector<FieldDef>({{"params", FieldType::NodeVec}}),
     },
     // class << expr; body; end;
     {

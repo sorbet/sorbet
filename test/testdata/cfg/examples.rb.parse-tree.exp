@@ -9,7 +9,7 @@ Class {
       DefMethod {
         name = <U i_like_ifs>
         args = Params {
-          args = [
+          params = [
           ]
         }
         body = If {
@@ -34,7 +34,7 @@ Class {
       DefMethod {
         name = <U i_like_exps>
         args = Params {
-          args = [
+          params = [
           ]
         }
         body = If {
@@ -55,7 +55,7 @@ Class {
       DefMethod {
         name = <U return_in_one_branch1>
         args = Params {
-          args = [
+          params = [
           ]
         }
         body = If {
@@ -80,7 +80,7 @@ Class {
       DefMethod {
         name = <U return_in_one_branch2>
         args = Params {
-          args = [
+          params = [
           ]
         }
         body = If {
@@ -105,7 +105,7 @@ Class {
       DefMethod {
         name = <U variables>
         args = Params {
-          args = [
+          params = [
           ]
         }
         body = Begin {
@@ -175,7 +175,7 @@ Class {
       DefMethod {
         name = <U variables_and_loop>
         args = Params {
-          args = [
+          params = [
             Arg {
               name = <U cond>
             }
@@ -245,7 +245,7 @@ Class {
       DefMethod {
         name = <U variables_loop_if>
         args = Params {
-          args = [
+          params = [
             Arg {
               name = <U cond>
             }
@@ -291,7 +291,7 @@ Class {
       DefMethod {
         name = <U take_arguments>
         args = Params {
-          args = [
+          params = [
             Arg {
               name = <U i>
             }

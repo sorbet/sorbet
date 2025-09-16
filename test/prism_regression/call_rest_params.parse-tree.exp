@@ -3,7 +3,7 @@ Begin {
     DefMethod {
       name = <U has_named_rest_args>
       args = Params {
-        args = [
+        params = [
           Restarg {
             name = <U args>
           }
@@ -24,7 +24,7 @@ Begin {
     DefMethod {
       name = <U has_anonymous_rest_args>
       args = Params {
-        args = [
+        params = [
           Restarg {
             name = <U *>
           }

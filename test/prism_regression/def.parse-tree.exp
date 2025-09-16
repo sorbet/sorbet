@@ -8,7 +8,7 @@ Begin {
     DefMethod {
       name = <U bar>
       args = Params {
-        args = [
+        params = [
         ]
       }
       body = NULL

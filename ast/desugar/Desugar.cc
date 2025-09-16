@@ -96,8 +96,8 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
     InsSeq::STATS_store destructures;
 
     if (auto *paramsNode = parser::cast_node<parser::Params>(anyParamsNode)) {
-        params.reserve(paramsNode->args.size());
-        for (auto &arg : paramsNode->args) {
+        params.reserve(paramsNode->params.size());
+        for (auto &arg : paramsNode->params) {
             if (parser::isa_node<parser::Mlhs>(arg.get())) {
                 core::NameRef temporary = dctx.freshNameUnique(core::Names::destructureArg());
                 params.emplace_back(MK::Local(arg->loc, temporary));

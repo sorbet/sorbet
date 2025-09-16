@@ -23,7 +23,7 @@ Begin {
       }
       name = <U foo>
       args = Params {
-        args = [
+        params = [
           Blockarg {
             name = <U blk>
           }
