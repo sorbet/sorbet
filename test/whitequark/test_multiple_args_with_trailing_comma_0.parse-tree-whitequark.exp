@@ -3,4 +3,4 @@ s(:block,
   s(:params,
     s(:param, :a),
     s(:param, :b),
-    s(:restarg, :<restargs>)), nil)
+    s(:restparam, :<restargs>)), nil)

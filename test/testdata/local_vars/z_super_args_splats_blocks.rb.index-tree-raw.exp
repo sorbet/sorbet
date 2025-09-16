@@ -85,7 +85,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -199,7 +199,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -359,7 +359,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -521,7 +521,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -792,7 +792,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -906,7 +906,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -1066,7 +1066,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -1228,7 +1228,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -1519,7 +1519,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -1659,7 +1659,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -1845,7 +1845,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -2033,7 +2033,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -2261,7 +2261,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = KeywordArg{ expr = Local{
+        }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -2362,9 +2362,9 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kwsplat><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -2514,13 +2514,13 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kwsplat><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, RestArg{ expr = KeywordArg{ expr = Local{
+        }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -2712,9 +2712,9 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -2912,13 +2912,13 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, RestArg{ expr = KeywordArg{ expr = Local{
+        }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -3156,7 +3156,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -3305,13 +3305,13 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw_kwsplat><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -3509,7 +3509,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw_kwsplat><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -3519,7 +3519,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -3759,13 +3759,13 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -4011,7 +4011,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -4021,7 +4021,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U <blk>>
@@ -4392,7 +4392,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -4532,7 +4532,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -4718,7 +4718,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
@@ -4906,7 +4906,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -5134,7 +5134,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = KeywordArg{ expr = Local{
+        }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -5235,9 +5235,9 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kwsplat_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -5387,13 +5387,13 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kwsplat_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, RestArg{ expr = KeywordArg{ expr = Local{
+        }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -5585,9 +5585,9 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -5785,13 +5785,13 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, RestArg{ expr = KeywordArg{ expr = Local{
+        }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -6029,7 +6029,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -6178,13 +6178,13 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_kw_kwsplat_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -6382,7 +6382,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U possplat_pos_kw_kwsplat_blk><<U <todo method>>>
-      params = [RestArg{ expr = Local{
+      params = [RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -6392,7 +6392,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -6632,13 +6632,13 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, KeywordArg{ expr = Local{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>
@@ -6884,7 +6884,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, RestArg{ expr = Local{
+        }, RestParam{ expr = Local{
           localVariable = <U foo>
         } }, Local{
           localVariable = <U p>
@@ -6894,7 +6894,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, RestArg{ expr = KeywordArg{ expr = Local{
+        } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
           localVariable = <U blk>

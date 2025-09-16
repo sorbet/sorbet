@@ -120,13 +120,13 @@ ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<
 
 // It's not possible to use an anonymous rest parameter in a block, as it always refers to the forwarded arguments
 // from the method. This function raises an error if the anonymous rest arg is present in a parameter list.
-void checkBlockRestArg(DesugarContext dctx, const MethodDef::PARAMS_store &args) {
-    auto it = absl::c_find_if(args, [](const auto &arg) { return isa_tree<RestArg>(arg); });
+void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &args) {
+    auto it = absl::c_find_if(args, [](const auto &arg) { return isa_tree<RestParam>(arg); });
     if (it == args.end()) {
         return;
     }
 
-    auto &rest = cast_tree_nonnull<RestArg>(*it);
+    auto &rest = cast_tree_nonnull<RestParam>(*it);
     if (auto local = cast_tree<UnresolvedIdent>(rest.expr)) {
         if (local->name != core::Names::star()) {
             return;
@@ -167,7 +167,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     }
     auto [params, destructures] = desugarParams(dctx, loc, blockParams);
 
-    checkBlockRestArg(dctx, params);
+    checkBlockRestParam(dctx, params);
 
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
@@ -374,7 +374,7 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto sliced = MK::Send2(zeroLengthLoc, MK::Local(zeroLengthLoc, temp), core::Names::squareBrackets(), zeroLengthLoc,
                             MK::Int(zeroLengthLoc, 1), MK::Int(zeroLengthLoc, LONG_MAX));
     auto body = MK::CallWithSplat(loc, move(recv), name, zeroLengthLoc, MK::Splat(zeroLengthLoc, move(sliced)));
-    return MK::Block1(loc, move(body), MK::RestArg(zeroLengthLoc, MK::Local(zeroLengthLoc, temp)));
+    return MK::Block1(loc, move(body), MK::RestParam(zeroLengthLoc, MK::Local(zeroLengthLoc, temp)));
 }
 
 // Desugar multiple left hand side assignments into a sequence of assignments
@@ -440,7 +440,7 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
                 stats.emplace_back(desugarMlhs(dctx, mlhs->loc, mlhs, move(val)));
             } else {
                 ExpressionPtr lh = node2TreeImpl(dctx, c);
-                if (auto restArg = cast_tree<RestArg>(lh)) {
+                if (auto restArg = cast_tree<RestParam>(lh)) {
                     if (auto e = dctx.ctx.beginIndexerError(lh.loc(),
                                                             core::errors::Desugar::UnsupportedRestArgsDestructure)) {
                         e.setHeader("Unsupported rest args in destructure");
@@ -1464,11 +1464,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::Param *param) { desugaredByPrismTranslator(param); },
             [&](parser::RestParam *param) {
-                ExpressionPtr res = MK::RestArg(loc, MK::Local(param->nameLoc, param->name));
+                ExpressionPtr res = MK::RestParam(loc, MK::Local(param->nameLoc, param->name));
                 result = move(res);
             },
             [&](parser::Kwrestarg *arg) {
-                ExpressionPtr res = MK::RestArg(loc, MK::KeywordArg(loc, arg->name));
+                ExpressionPtr res = MK::RestParam(loc, MK::KeywordArg(loc, arg->name));
                 result = move(res);
             },
             [&](parser::Kwarg *arg) { desugaredByPrismTranslator(arg); },

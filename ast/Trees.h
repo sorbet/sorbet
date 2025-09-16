@@ -50,7 +50,7 @@ enum class Tag {
     Rescue,
     Local,
     UnresolvedIdent,
-    RestArg,
+    RestParam,
     KeywordArg,
     OptionalParam,
     BlockArg,
@@ -697,13 +697,13 @@ public:
 };
 CheckSize(UnresolvedIdent, 16, 8);
 
-EXPRESSION(RestArg) {
+EXPRESSION(RestParam) {
 public:
     const core::LocOffsets loc;
 
     ExpressionPtr expr;
 
-    RestArg(core::LocOffsets loc, ExpressionPtr arg);
+    RestParam(core::LocOffsets loc, ExpressionPtr arg);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
@@ -716,7 +716,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(RestArg, 16, 8);
+CheckSize(RestParam, 16, 8);
 
 EXPRESSION(KeywordArg) {
 public:

@@ -32,7 +32,7 @@ private:
         ExpressionPtr *arg = &argp;
         while (arg != nullptr) {
             typecase(
-                *arg, [&](RestArg &rest) { arg = &rest.expr; }, [&](KeywordArg &kw) { arg = &kw.expr; },
+                *arg, [&](RestParam &rest) { arg = &rest.expr; }, [&](KeywordArg &kw) { arg = &kw.expr; },
                 [&](OptionalParam &opt) { arg = &opt.expr; }, [&](BlockArg &opt) { arg = &opt.expr; },
                 [&](ShadowArg &opt) { arg = &opt.expr; },
                 [&](Local &local) {

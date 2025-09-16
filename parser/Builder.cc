@@ -270,12 +270,12 @@ public:
         if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
-        validateNoForwardArgAfterRestArg(args);
+        validateNoForwardArgAfterRestParam(args);
 
         return make_unique<Params>(collectionLoc(begin, args, end), std::move(args));
     }
 
-    void validateNoForwardArgAfterRestArg(const sorbet::parser::NodeVec &args) {
+    void validateNoForwardArgAfterRestParam(const sorbet::parser::NodeVec &args) {
         bool restArg = false;
         bool forwardArg = false;
         for (auto &arg : args) {

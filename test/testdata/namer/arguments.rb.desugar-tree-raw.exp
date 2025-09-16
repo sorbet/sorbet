@@ -31,7 +31,7 @@ ClassDef{
                 name = <U b>
               }
               default_ = Literal{ value = 1 }
-            }, RestArg{ expr = UnresolvedIdent{
+            }, RestParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U c>
             } }, KeywordArg{ expr = UnresolvedIdent{
@@ -43,7 +43,7 @@ ClassDef{
                 name = <U e>
               } }
               default_ = Literal{ value = 2 }
-            }, RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+            }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U f>
             } } }, BlockArg{ expr = UnresolvedIdent{
@@ -109,7 +109,7 @@ ClassDef{
                     }
                     default_ = Literal{ value = 1 }
                   }
-                  RestArg{ expr = UnresolvedIdent{
+                  RestParam{ expr = UnresolvedIdent{
                     kind = Local
                     name = <U c>
                   } }
@@ -124,7 +124,7 @@ ClassDef{
                     } }
                     default_ = Literal{ value = 2 }
                   }
-                  RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+                  RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
                     kind = Local
                     name = <U f>
                   } } }

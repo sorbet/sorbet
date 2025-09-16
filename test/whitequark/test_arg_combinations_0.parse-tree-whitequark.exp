@@ -3,5 +3,5 @@ s(:def, :f,
     s(:param, :a),
     s(:optparam, :o,
       s(:int, "1")),
-    s(:restarg, :r),
+    s(:restparam, :r),
     s(:blockarg, :b)), nil)

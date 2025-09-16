@@ -3,6 +3,6 @@ s(:block,
   s(:params,
     s(:optparam, :o,
       s(:int, "1")),
-    s(:restarg, :r),
+    s(:restparam, :r),
     s(:param, :p),
     s(:blockarg, :b)), nil)

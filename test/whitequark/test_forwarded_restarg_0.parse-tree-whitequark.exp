@@ -1,5 +1,5 @@
 s(:def, :foo,
   s(:params,
-    s(:restarg, :*)),
+    s(:restparam, :*)),
   s(:send, nil, :bar,
     s(:forwarded_restarg)))

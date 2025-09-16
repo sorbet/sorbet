@@ -146,7 +146,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_rest><<U <todo method>>>
-          params = [RestArg{ expr = Local{
+          params = [RestParam{ expr = Local{
               localVariable = <U args>
             } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -168,7 +168,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_keyword_rest><<U <todo method>>>
-          params = [RestArg{ expr = KeywordArg{ expr = Local{
+          params = [RestParam{ expr = KeywordArg{ expr = Local{
               localVariable = <U args>
             } } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -383,7 +383,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_rest><<U <todo method>>>
-          params = [RestArg{ expr = Local{
+          params = [RestParam{ expr = Local{
               localVariable = <U args>
             } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
@@ -438,7 +438,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_keyword_rest><<U <todo method>>>
-          params = [RestArg{ expr = KeywordArg{ expr = Local{
+          params = [RestParam{ expr = KeywordArg{ expr = Local{
               localVariable = <U args>
             } } }, BlockArg{ expr = Local{
               localVariable = <U <blk>>
