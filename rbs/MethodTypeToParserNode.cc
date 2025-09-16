@@ -311,7 +311,7 @@ parser::Params *getMethodParams(const parser::Node *node) {
 
     typecase(
         node, [&](const parser::DefMethod *defMethod) { args = defMethod->params.get(); },
-        [&](const parser::DefS *defS) { args = defS->args.get(); },
+        [&](const parser::DefS *defS) { args = defS->params.get(); },
         [&](const parser::Node *other) {
             Exception::raise("Unexpected expression type: {}", ((parser::Node *)node)->nodeName());
         });

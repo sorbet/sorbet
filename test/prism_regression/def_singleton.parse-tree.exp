@@ -4,7 +4,7 @@ Begin {
       singleton = Self {
       }
       name = <U foo>
-      args = NULL
+      params = NULL
       body = NULL
     }
     DefS {
@@ -15,14 +15,14 @@ Begin {
         ]
       }
       name = <U foo>
-      args = NULL
+      params = NULL
       body = NULL
     }
     DefS {
       singleton = Self {
       }
       name = <U foo>
-      args = Params {
+      params = Params {
         params = [
           Blockarg {
             name = <U blk>

@@ -17,7 +17,7 @@ Begin {
             singleton = Self {
             }
             name = <U normal_static_method>
-            args = NULL
+            params = NULL
             body = NULL
           }
           Class {

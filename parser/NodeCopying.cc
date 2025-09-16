@@ -96,7 +96,7 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         [&](const parser::DefnHead *defnHead) { result = std::make_unique<DefnHead>(defnHead->loc, defnHead->name); },
         [&](const parser::DefS *defS) {
             result = std::make_unique<DefS>(defS->loc, defS->declLoc, deepCopy(defS->singleton.get()), defS->name,
-                                            deepCopy(defS->args.get()), deepCopy(defS->body.get()));
+                                            deepCopy(defS->params.get()), deepCopy(defS->body.get()));
         },
         [&](const parser::DefsHead *defsHead) {
             result = std::make_unique<DefsHead>(defsHead->loc, deepCopy(defsHead->definee.get()), defsHead->name);

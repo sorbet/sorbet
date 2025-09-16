@@ -208,7 +208,7 @@ NodeDef nodes[] = {
         vector<FieldDef>({{"declLoc", FieldType::Loc},
                           {"singleton", FieldType::Node},
                           {"name", FieldType::Name},
-                          {"args", FieldType::Node},
+                          {"params", FieldType::Node},
                           {"body", FieldType::Node}}),
     },
     // def <expr>.name singleton-class name method def

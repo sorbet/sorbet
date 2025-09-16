@@ -196,7 +196,7 @@ Begin {
       singleton = Self {
       }
       name = <U classmeth>
-      args = NULL
+      params = NULL
       body = NULL
     }
     SClass {
