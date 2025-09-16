@@ -58,14 +58,14 @@ core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
 
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what);
 
-pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
-                                                               parser::Node *argnode) {
+pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext dctx, core::LocOffsets loc,
+                                                                 parser::Node *anyParamsNode) {
     MethodDef::PARAMS_store params;
     InsSeq::STATS_store destructures;
 
-    if (auto *oargs = parser::NodeWithExpr::cast_node<parser::Params>(argnode)) {
-        params.reserve(oargs->args.size());
-        for (auto &arg : oargs->args) {
+    if (auto *paramsNode = parser::NodeWithExpr::cast_node<parser::Params>(anyParamsNode)) {
+        params.reserve(paramsNode->args.size());
+        for (auto &arg : paramsNode->args) {
             if (parser::NodeWithExpr::isa_node<parser::Mlhs>(arg.get())) {
                 core::NameRef temporary = dctx.freshNameUnique(core::Names::destructureArg());
                 params.emplace_back(MK::Local(arg->loc, temporary));
@@ -90,15 +90,15 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dc
                 params.emplace_back(node2TreeImpl(dctx, arg));
             }
         }
-    } else if (auto *numparams = parser::NodeWithExpr::cast_node<parser::NumParams>(argnode)) {
+    } else if (auto *numParamsNode = parser::NodeWithExpr::cast_node<parser::NumParams>(anyParamsNode)) {
         // Register any numbered parameters (`_1`, `_2`, ..., `_9`)
-        for (const auto &numberedParam : numparams->decls) {
+        for (const auto &numberedParam : numParamsNode->decls) {
             params.emplace_back(numberedParam->takeDesugaredExpr());
         }
-    } else if (argnode == nullptr) {
+    } else if (anyParamsNode == nullptr) {
         // do nothing
     } else {
-        Exception::raise("not implemented: {}", argnode->nodeName());
+        Exception::raise("not implemented: {}", anyParamsNode->nodeName());
     }
 
     return make_pair(move(params), move(destructures));
@@ -141,7 +141,7 @@ void checkBlockRestArg(DesugarContext dctx, const MethodDef::PARAMS_store &args)
 }
 
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
-                           unique_ptr<parser::Node> &blockSend, parser::Node *blockArgs,
+                           unique_ptr<parser::Node> &blockSend, parser::Node *blockParams,
                            unique_ptr<parser::Node> &blockBody) {
     blockSend->loc = loc;
     auto recv = node2TreeImpl(dctx, blockSend);
@@ -165,9 +165,9 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         send = cast_tree<Send>(iff->elsep);
         ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
     }
-    auto [args, destructures] = desugarArgs(dctx, loc, blockArgs);
+    auto [params, destructures] = desugarParams(dctx, loc, blockParams);
 
-    checkBlockRestArg(dctx, args);
+    checkBlockRestArg(dctx, params);
 
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
@@ -175,7 +175,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     auto desugaredBody = desugarBody(dctx1, loc, blockBody, move(destructures));
 
     // TODO the send->block's loc is too big and includes the whole send
-    send->setBlock(MK::Block(loc, move(desugaredBody), move(args)));
+    send->setBlock(MK::Block(loc, move(desugaredBody), move(params)));
     return res;
 }
 
@@ -337,14 +337,14 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     auto inModule = dctx.inModule && !isSelf;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name, dctx.inAnyBlock, inModule,
                          dctx.preserveConcreteSyntax);
-    auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
+    auto [params, destructures] = desugarParams(dctx1, loc, argnode);
 
-    if (args.empty() || !isa_tree<BlockArg>(args.back())) {
+    if (params.empty() || !isa_tree<BlockArg>(params.back())) {
         auto blkLoc = core::LocOffsets::none();
-        args.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+        params.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
     }
 
-    const auto &blkArg = cast_tree<BlockArg>(args.back());
+    const auto &blkArg = cast_tree<BlockArg>(params.back());
     ENFORCE(blkArg != nullptr, "Every method's last arg must be a block arg by now.");
     auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
@@ -353,7 +353,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, move(destructures));
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
 
-    auto mdef = MK::Method(loc, declLoc, name, move(args), move(desugaredBody));
+    auto mdef = MK::Method(loc, declLoc, name, move(params), move(desugaredBody));
     cast_tree<MethodDef>(mdef)->flags.isSelfMethod = isSelf;
     return mdef;
 }
