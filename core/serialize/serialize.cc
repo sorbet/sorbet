@@ -619,12 +619,12 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     }
 }
 
-void SerializerImpl::pickle(Pickler &p, const ParamInfo &a) {
-    p.putU4(a.name.rawId());
-    p.putU4(a.rebind.id());
-    pickle(p, a.loc);
-    p.putU1(a.flags.toU1());
-    pickle(p, a.type);
+void SerializerImpl::pickle(Pickler &p, const ParamInfo &what) {
+    p.putU4(what.name.rawId());
+    p.putU4(what.rebind.id());
+    pickle(p, what.loc);
+    p.putU1(what.flags.toU1());
+    pickle(p, what.type);
 }
 
 ParamInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
