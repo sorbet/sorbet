@@ -63,7 +63,7 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dc
     MethodDef::PARAMS_store params;
     InsSeq::STATS_store destructures;
 
-    if (auto *oargs = parser::NodeWithExpr::cast_node<parser::Args>(argnode)) {
+    if (auto *oargs = parser::NodeWithExpr::cast_node<parser::Params>(argnode)) {
         params.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
             if (parser::NodeWithExpr::isa_node<parser::Mlhs>(arg.get())) {

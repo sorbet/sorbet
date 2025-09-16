@@ -41,7 +41,7 @@ Begin {
     }
     DefMethod {
       name = <U has_named_kwargs>
-      args = Args {
+      args = Params {
         args = [
           Kwrestarg {
             name = <U kwargs>
@@ -77,7 +77,7 @@ Begin {
     }
     DefMethod {
       name = <U has_anonymous_kwargs>
-      args = Args {
+      args = Params {
         args = [
           Kwrestarg {
             name = <P <U **> $2>

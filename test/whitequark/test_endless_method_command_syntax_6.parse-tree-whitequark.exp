@@ -1,6 +1,6 @@
 s(:defs,
   s(:self), :rescued,
-  s(:args,
+  s(:params,
     s(:arg, :x)),
   s(:rescue,
     s(:send, nil, :raise,

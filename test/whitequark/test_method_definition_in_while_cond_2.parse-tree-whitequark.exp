@@ -1,6 +1,6 @@
 s(:while,
   s(:def, :foo,
-    s(:args,
+    s(:params,
       s(:optarg, :a,
         s(:block,
           s(:send, nil, :tap), nil, nil))), nil),

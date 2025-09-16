@@ -306,7 +306,7 @@ bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
     return kindMatch;
 }
 
-parser::Args *getMethodArgs(const parser::Node *node) {
+parser::Params *getMethodArgs(const parser::Node *node) {
     parser::Node *args;
 
     typecase(
@@ -316,7 +316,7 @@ parser::Args *getMethodArgs(const parser::Node *node) {
             Exception::raise("Unexpected expression type: {}", ((parser::Node *)node)->nodeName());
         });
 
-    return parser::cast_node<parser::Args>(args);
+    return parser::cast_node<parser::Params>(args);
 }
 
 void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vector<RBSArg> &args, RBSArg::Kind kind) {

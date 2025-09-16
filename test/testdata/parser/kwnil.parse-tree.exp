@@ -2,7 +2,7 @@ Begin {
   stmts = [
     DefMethod {
       name = <U f1>
-      args = Args {
+      args = Params {
         args = [
           Kwnilarg {
           }
@@ -12,7 +12,7 @@ Begin {
     }
     DefMethod {
       name = <U f2>
-      args = Args {
+      args = Params {
         args = [
           Restarg {
             name = <U args>
@@ -25,7 +25,7 @@ Begin {
     }
     DefMethod {
       name = <U f3>
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U a>
@@ -44,7 +44,7 @@ Begin {
     }
     DefMethod {
       name = <U f4>
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U a>
@@ -63,7 +63,7 @@ Begin {
     }
     DefMethod {
       name = <U f5>
-      args = Args {
+      args = Params {
         args = [
           Kwnilarg {
           }
@@ -76,7 +76,7 @@ Begin {
     }
     DefMethod {
       name = <U f6>
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U a>
@@ -98,7 +98,7 @@ Begin {
     }
     DefMethod {
       name = <U f7>
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U a>

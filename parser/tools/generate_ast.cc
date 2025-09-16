@@ -53,12 +53,6 @@ NodeDef nodes[] = {
         "arg",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
-    // Wraps block arg, method arg, and send arg
-    {
-        "Args",
-        "args",
-        vector<FieldDef>({{"args", FieldType::NodeVec}}),
-    },
     // inline array with elements
     {
         "Array",
@@ -657,7 +651,7 @@ NodeDef nodes[] = {
         "resolved_const",
         vector<FieldDef>({{"symbol", FieldType::Symbol}}),
     },
-    // *arg argument inside an (args)
+    // A *rest argument inside a Params node.
     {
         "Restarg",
         "restarg",
@@ -674,6 +668,12 @@ NodeDef nodes[] = {
         "Return",
         "return",
         vector<FieldDef>({{"exprs", FieldType::NodeVec}}),
+    },
+    // Parameter of a method definition or literal block.
+    {
+        "Params",
+        "params",
+        vector<FieldDef>({{"args", FieldType::NodeVec}}),
     },
     // class << expr; body; end;
     {

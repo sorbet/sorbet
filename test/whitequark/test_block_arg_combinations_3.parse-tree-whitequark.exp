@@ -1,4 +1,4 @@
 s(:block,
   s(:send, nil, :f),
-  s(:args,
+  s(:params,
     s(:shadowarg, :a)), nil)

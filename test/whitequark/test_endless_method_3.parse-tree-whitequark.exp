@@ -1,6 +1,6 @@
 s(:defs,
   s(:send, nil, :obj), :inc,
-  s(:args,
+  s(:params,
     s(:arg, :x)),
   s(:send,
     s(:lvar, :x), :+,

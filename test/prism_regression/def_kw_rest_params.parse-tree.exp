@@ -2,7 +2,7 @@ Begin {
   stmts = [
     DefMethod {
       name = <U foo>
-      args = Args {
+      args = Params {
         args = [
           Kwrestarg {
             name = <U a>
@@ -13,7 +13,7 @@ Begin {
     }
     DefMethod {
       name = <U foo>
-      args = Args {
+      args = Params {
         args = [
           Kwrestarg {
             name = <P <U **> $2>
@@ -24,7 +24,7 @@ Begin {
     }
     DefMethod {
       name = <U foo>
-      args = Args {
+      args = Params {
         args = [
           Kwnilarg {
           }

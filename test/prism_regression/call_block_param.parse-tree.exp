@@ -51,7 +51,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U positional>
@@ -75,7 +75,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U positional>
@@ -99,7 +99,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U positional>
@@ -127,7 +127,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U bar>
@@ -149,7 +149,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U positional>
@@ -183,7 +183,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Arg {
             name = <U bar>
@@ -234,7 +234,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Mlhs {
             exprs = [
@@ -256,7 +256,7 @@ Begin {
         args = [
         ]
       }
-      args = Args {
+      args = Params {
         args = [
           Restarg {
             name = <U args>

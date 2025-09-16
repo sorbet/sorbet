@@ -1,6 +1,6 @@
 s(:begin,
   s(:def, :foo,
-    s(:args,
+    s(:params,
       s(:forward_arg)),
     s(:send, nil, :bar,
       s(:forwarded_args))))

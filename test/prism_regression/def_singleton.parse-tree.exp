@@ -22,7 +22,7 @@ Begin {
       singleton = Self {
       }
       name = <U foo>
-      args = Args {
+      args = Params {
         args = [
           Blockarg {
             name = <U blk>

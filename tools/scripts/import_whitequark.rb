@@ -93,7 +93,7 @@ class Rewriter < Parser::AST::Processor
     node.updated(nil, [node.children.join])
   end
 
-  # Sorbet doesn't emit implicit empty s(:args)
+  # Sorbet doesn't emit implicit empty s(:params)
   def on_def(node)
     node = super
     name, args, body_node = *node
@@ -101,7 +101,7 @@ class Rewriter < Parser::AST::Processor
     node.updated(nil, [name, args, body_node])
   end
 
-  # Sorbet doesn't emit implicit empty s(:args)
+  # Sorbet doesn't emit implicit empty s(:params)
   def on_defs(node)
     node = super
     definee_node, name, args, body_node = *node
@@ -109,7 +109,7 @@ class Rewriter < Parser::AST::Processor
     node.updated(nil, [definee_node, name, args, body_node])
   end
 
-  # Sorbet doesn't emit implicit empty s(:args)
+  # Sorbet doesn't emit implicit empty s(:params)
   def on_block(node)
     node = super
     send, args, body = *node
