@@ -127,7 +127,7 @@ Begin {
     }
     DefMethod {
       name = <U bfoo>
-      args = Params {
+      params = Params {
         params = [
           Blockarg {
             name = <U x>
@@ -302,7 +302,7 @@ Begin {
     }
     DefMethod {
       name = <U kwfoo>
-      args = Params {
+      params = Params {
         params = [
           Kwarg {
             name = <U x>
@@ -414,7 +414,7 @@ Begin {
     }
     DefMethod {
       name = <U optfoo>
-      args = Params {
+      params = Params {
         params = [
           Optarg {
             name = <U x>
@@ -624,7 +624,7 @@ Begin {
     }
     DefMethod {
       name = <U sfoo>
-      args = Params {
+      params = Params {
         params = [
           Restarg {
             name = <U *>
@@ -635,7 +635,7 @@ Begin {
     }
     DefMethod {
       name = <U ssfoo>
-      args = Params {
+      params = Params {
         params = [
           Kwrestarg {
             name = <P <U **> $2>
@@ -651,7 +651,7 @@ Begin {
       }
       body = DefMethod {
         name = <U foo>
-        args = NULL
+        params = NULL
         body = Block {
           send = Send {
             receiver = Const {

@@ -1,6 +1,6 @@
 DefMethod {
   name = <U m>
-  args = NULL
+  params = NULL
   body = Begin {
     stmts = [
       ZSuper {

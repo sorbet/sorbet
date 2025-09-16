@@ -2,14 +2,14 @@ Begin {
   stmts = [
     DefMethod {
       name = <U one_statement>
-      args = NULL
+      params = NULL
       body = Integer {
         val = "1"
       }
     }
     DefMethod {
       name = <U two_statements>
-      args = NULL
+      params = NULL
       body = Begin {
         stmts = [
           Integer {
@@ -23,7 +23,7 @@ Begin {
     }
     DefMethod {
       name = <U three_statements>
-      args = NULL
+      params = NULL
       body = Begin {
         stmts = [
           Integer {
@@ -40,7 +40,7 @@ Begin {
     }
     DefMethod {
       name = <U begin_block>
-      args = NULL
+      params = NULL
       body = Kwbegin {
         stmts = [
           Integer {

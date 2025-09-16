@@ -1489,7 +1489,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             [&](parser::Shadowarg *arg) { desugaredByPrismTranslator(arg); },
             [&](parser::DefMethod *method) {
                 bool isSelf = false;
-                ExpressionPtr res = buildMethod(dctx, method->loc, method->declLoc, method->name, method->args.get(),
+                ExpressionPtr res = buildMethod(dctx, method->loc, method->declLoc, method->name, method->params.get(),
                                                 method->body, isSelf);
                 result = move(res);
             },

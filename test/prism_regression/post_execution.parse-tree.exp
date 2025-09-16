@@ -28,7 +28,7 @@ Begin {
     Postexe {
       body = DefMethod {
         name = <U method_in_end>
-        args = NULL
+        params = NULL
         body = NULL
       }
     }

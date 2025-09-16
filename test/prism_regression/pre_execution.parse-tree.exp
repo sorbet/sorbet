@@ -28,7 +28,7 @@ Begin {
     Preexe {
       body = DefMethod {
         name = <U method_in_begin>
-        args = NULL
+        params = NULL
         body = NULL
       }
     }

@@ -10,7 +10,7 @@ Begin {
         stmts = [
           DefMethod {
             name = <U normal_method>
-            args = NULL
+            params = NULL
             body = NULL
           }
           DefS {

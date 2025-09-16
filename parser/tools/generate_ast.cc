@@ -184,13 +184,13 @@ NodeDef nodes[] = {
         "cvasgn",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
-    // args may be NULL, body does not have to be a block.
+    // params may be NULL, body does not have to be a block.
     {
         "DefMethod",
         "def",
         vector<FieldDef>({{"declLoc", FieldType::Loc},
                           {"name", FieldType::Name},
-                          {"args", FieldType::Node},
+                          {"params", FieldType::Node},
                           {"body", FieldType::Node}}),
     },
     // defined?() built-in pseudo-function

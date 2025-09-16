@@ -174,7 +174,7 @@ Begin {
       superclass = NULL
       body = DefMethod {
         name = <U method_returning_lambda>
-        args = NULL
+        params = NULL
         body = Block {
           send = Send {
             receiver = Const {

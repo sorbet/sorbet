@@ -24,7 +24,7 @@ Begin {
     }
     DefMethod {
       name = <U method_with_rescue>
-      args = NULL
+      params = NULL
       body = Rescue {
         body = Integer {
           val = "123"
@@ -442,7 +442,7 @@ Begin {
     }
     DefMethod {
       name = <U index>
-      args = NULL
+      params = NULL
       body = Rescue {
         body = NULL
         rescue = [

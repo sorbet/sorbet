@@ -2,7 +2,7 @@ Begin {
   stmts = [
     DefMethod {
       name = <U foo>
-      args = Params {
+      params = Params {
         params = [
           Blockarg {
             name = <U my_block_param>
@@ -13,7 +13,7 @@ Begin {
     }
     DefMethod {
       name = <U foo>
-      args = Params {
+      params = Params {
         params = [
           Blockarg {
             name = <P <U &> $2>
