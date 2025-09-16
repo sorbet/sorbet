@@ -434,7 +434,7 @@ class OptionParser
   # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
   OctalInteger = T.let(nil, T.untyped)
   Officious = T.let(nil, T.untyped)
-  OptionalArgument = T.let(nil, T.untyped)
+  OptionalParamument = T.let(nil, T.untyped)
   REQUIRED_ARGUMENT = T.let(nil, T.untyped)
   RequiredArgument = T.let(nil, T.untyped)
   SPLAT_PROC = T.let(nil, T.untyped)
@@ -1049,7 +1049,7 @@ class OptionParser
 
     # Guesses argument style from `arg`. Returns corresponding
     # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
-    # class (OptionalArgument, etc.).
+    # class (OptionalParamument, etc.).
     sig {params(arg: T.untyped).returns(T.untyped)}
     def self.guess(arg); end
 
@@ -1287,7 +1287,7 @@ class OptionParser
 
     # [`Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     # that can omit argument.
-    class OptionalArgument < OptionParser::Switch
+    class OptionalParamument < OptionParser::Switch
       # Parses argument if given, or uses default value.
       sig {params(arg: T.untyped, argv: T.untyped, error: T.untyped).returns(T.untyped)}
       def parse(arg, argv, &error); end

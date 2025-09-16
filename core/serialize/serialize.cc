@@ -1440,8 +1440,8 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             break;
         }
 
-        case ast::Tag::OptionalArg: {
-            auto &a = ast::cast_tree_nonnull<ast::OptionalArg>(what);
+        case ast::Tag::OptionalParam: {
+            auto &a = ast::cast_tree_nonnull<ast::OptionalParam>(what);
             pickle(p, a.loc);
             pickle(p, a.expr);
             pickle(p, a.default_);
@@ -1738,11 +1738,11 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto ref = unpickleExpr(p, gs);
             return ast::make_expression<ast::BlockArg>(loc, std::move(ref));
         }
-        case ast::Tag::OptionalArg: {
+        case ast::Tag::OptionalParam: {
             auto loc = unpickleLocOffsets(p);
             auto ref = unpickleExpr(p, gs);
             auto default_ = unpickleExpr(p, gs);
-            return ast::MK::OptionalArg(loc, std::move(ref), std::move(default_));
+            return ast::MK::OptionalParam(loc, std::move(ref), std::move(default_));
         }
         case ast::Tag::ZSuperArgs: {
             auto loc = unpickleLocOffsets(p);

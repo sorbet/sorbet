@@ -633,7 +633,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
             continue;
         }
         auto loc = prop.loc;
-        params.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, prop.name), prop.default_.deepCopy()));
+        params.emplace_back(ast::MK::OptionalParam(loc, ast::MK::KeywordArg(loc, prop.name), prop.default_.deepCopy()));
         sigArgs.emplace_back(ast::MK::Symbol(loc, prop.name));
         sigArgs.emplace_back(prop.type.deepCopy());
     }

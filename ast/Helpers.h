@@ -105,8 +105,8 @@ public:
         return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Local, name);
     }
 
-    static ExpressionPtr OptionalArg(core::LocOffsets loc, ExpressionPtr inner, ExpressionPtr default_) {
-        return make_expression<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
+    static ExpressionPtr OptionalParam(core::LocOffsets loc, ExpressionPtr inner, ExpressionPtr default_) {
+        return make_expression<ast::OptionalParam>(loc, std::move(inner), std::move(default_));
     }
 
     static ExpressionPtr KeywordArg(core::LocOffsets loc, core::NameRef name) {
@@ -114,7 +114,7 @@ public:
     }
 
     static ExpressionPtr KeywordArgWithDefault(core::LocOffsets loc, core::NameRef name, ExpressionPtr default_) {
-        return OptionalArg(loc, KeywordArg(loc, name), std::move(default_));
+        return OptionalParam(loc, KeywordArg(loc, name), std::move(default_));
     }
 
     static ExpressionPtr RestArg(core::LocOffsets loc, ExpressionPtr inner) {
@@ -628,7 +628,7 @@ public:
             typecase(
                 *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
                 [&](const class KeywordArg &kw) { cursor = &kw.expr; },
-                [&](const class OptionalArg &opt) { cursor = &opt.expr; },
+                [&](const class OptionalParam &opt) { cursor = &opt.expr; },
                 [&](const class BlockArg &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
@@ -649,7 +649,7 @@ public:
             typecase(
                 *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
                 [&](const class KeywordArg &kw) { cursor = &kw.expr; },
-                [&](const class OptionalArg &opt) { cursor = &opt.expr; },
+                [&](const class OptionalParam &opt) { cursor = &opt.expr; },
                 [&](const class BlockArg &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.

@@ -41,7 +41,7 @@ InsSeq{
           name = <U take_arguments><<U take_arguments>>
           params = [Local{
               localVariable = <U a>
-            }, OptionalArg{
+            }, OptionalParam{
               expr = Local{
                 localVariable = <U b>
               }
@@ -50,7 +50,7 @@ InsSeq{
               localVariable = <U c>
             }, Local{
               localVariable = <U d>
-            }, OptionalArg{
+            }, OptionalParam{
               expr = Local{
                 localVariable = <U e>
               }
@@ -103,7 +103,7 @@ InsSeq{
                   Local{
                     localVariable = <U a>$1
                   }
-                  OptionalArg{
+                  OptionalParam{
                     expr = Local{
                       localVariable = <U b>$1
                     }
@@ -115,7 +115,7 @@ InsSeq{
                   KeywordArg{ expr = Local{
                     localVariable = <U d>$1
                   } }
-                  OptionalArg{
+                  OptionalParam{
                     expr = KeywordArg{ expr = Local{
                       localVariable = <U e>$1
                     } }

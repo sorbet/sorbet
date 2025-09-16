@@ -52,7 +52,7 @@ enum class Tag {
     UnresolvedIdent,
     RestArg,
     KeywordArg,
-    OptionalArg,
+    OptionalParam,
     BlockArg,
     ShadowArg,
     Assign,
@@ -739,14 +739,14 @@ public:
 };
 CheckSize(KeywordArg, 16, 8);
 
-EXPRESSION(OptionalArg) {
+EXPRESSION(OptionalParam) {
 public:
     const core::LocOffsets loc;
 
     ExpressionPtr expr;
     ExpressionPtr default_;
 
-    OptionalArg(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_);
+    OptionalParam(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_);
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
@@ -759,7 +759,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(OptionalArg, 24, 8);
+CheckSize(OptionalParam, 24, 8);
 
 EXPRESSION(BlockArg) {
 public:

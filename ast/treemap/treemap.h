@@ -344,8 +344,8 @@ private:
         CALL_PRE(MethodDef);
 
         for (auto &param : cast_tree_nonnull<MethodDef>(v).params) {
-            // Only OptionalArgs have subexpressions within them.
-            if (auto optArg = cast_tree<OptionalArg>(param)) {
+            // Only OptionalParams have subexpressions within them.
+            if (auto optArg = cast_tree<OptionalParam>(param)) {
                 CALL_MAP(optArg->default_, ctx.withOwner(cast_tree_nonnull<MethodDef>(v).symbol));
             }
         }
@@ -511,8 +511,8 @@ private:
         CALL_PRE(Block);
 
         for (auto &param : cast_tree_nonnull<Block>(v).params) {
-            // Only OptionalArgs have subexpressions within them.
-            if (auto optArg = cast_tree<OptionalArg>(param)) {
+            // Only OptionalParams have subexpressions within them.
+            if (auto optArg = cast_tree<OptionalParam>(param)) {
                 CALL_MAP(optArg->default_, ctx);
             }
         }
@@ -640,7 +640,7 @@ private:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
-                case Tag::OptionalArg:
+                case Tag::OptionalParam:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 

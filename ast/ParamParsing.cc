@@ -23,7 +23,7 @@ core::ParsedParam parseParam(const ast::ExpressionPtr &param) {
                 parsedParam.flags.isKeyword = true;
                 cursor = &kw.expr;
             },
-            [&](const ast::OptionalArg &opt) {
+            [&](const ast::OptionalParam &opt) {
                 parsedParam.flags.isDefault = true;
                 cursor = &opt.expr;
             },
@@ -51,7 +51,7 @@ ExpressionPtr getDefaultValue(ExpressionPtr param) {
     while (!done) {
         typecase(
             *cursor, [&](ast::RestArg &rest) { cursor = &rest.expr; }, [&](ast::KeywordArg &kw) { cursor = &kw.expr; },
-            [&](ast::OptionalArg &opt) {
+            [&](ast::OptionalParam &opt) {
                 cursor = &opt.default_;
                 done = true;
             },

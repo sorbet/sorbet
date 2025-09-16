@@ -57,7 +57,7 @@ ClassDef{
       fun = <U lambda>
       block = Block {
         params = [
-          OptionalArg{
+          OptionalParam{
             expr = UnresolvedIdent{
               kind = Local
               name = <U optional_param>
