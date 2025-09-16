@@ -280,7 +280,7 @@ ZSuperArgs::ZSuperArgs(core::LocOffsets loc) : loc(loc) {
 }
 
 RestParam::RestParam(core::LocOffsets loc, ExpressionPtr arg) : loc(loc), expr(std::move(arg)) {
-    categoryCounterInc("trees", "restarg");
+    categoryCounterInc("trees", "restparam");
     _sanityCheck();
 }
 
