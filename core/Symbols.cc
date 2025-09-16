@@ -1376,7 +1376,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
                        }));
     }
     fmt::format_to(std::back_inserter(buf), " ({})",
-                   fmt::map_join(sym->parameters, ", ", [&](const auto &symb) { return symb.argumentName(gs); }));
+                   fmt::map_join(sym->parameters, ", ", [&](const auto &symb) { return symb.parameterName(gs); }));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1630,7 +1630,7 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
 }
 
 string ParamInfo::show(const GlobalState &gs) const {
-    return fmt::format("{}", this->argumentName(gs));
+    return fmt::format("{}", this->parameterName(gs));
 }
 
 string ParamInfo::toString(const GlobalState &gs) const {
@@ -1666,7 +1666,7 @@ string ParamInfo::toString(const GlobalState &gs) const {
     return to_string(buf);
 }
 
-string_view ParamInfo::argumentName(const GlobalState &gs) const {
+string_view ParamInfo::parameterName(const GlobalState &gs) const {
     if (flags.isKeyword && !flags.isRepeated) {
         return name.shortName(gs);
     } else {

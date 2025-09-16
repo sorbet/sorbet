@@ -294,16 +294,16 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             //
             // auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file());
             // if (auto e = gs.beginError(argLoc, what)) {
-            //     e.setHeader("Method parameter `{}` is declared with `{}`", argSym.argumentName(gs), "T.untyped");
+            //     e.setHeader("Method parameter `{}` is declared with `{}`", argSym.parameterName(gs), "T.untyped");
             //     TypeErrorDiagnostics::explainUntyped(gs, e, what, expectedType, argSym.loc, originForUninitialized);
             //     return e.build();
             // }
         } else if (argTpe.type.isUntyped() && expectedType != Types::top()) {
             auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file(), argTpe.type);
             if (auto e = gs.beginError(argLoc, what)) {
-                e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.argumentName(gs), "T.untyped");
+                e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.parameterName(gs), "T.untyped");
                 auto for_ =
-                    ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
+                    ErrorColors::format("argument `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
                 e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, argTpe, originForUninitialized);
                 return e.build();
@@ -314,12 +314,12 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 
     if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && method.data(gs)->name.isSetter(gs)) {
-            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(gs),
+            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.parameterName(gs),
                         expectedType.show(gs));
         } else {
             e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
-                        argSym.argumentName(gs));
-            auto for_ = ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
+                        argSym.parameterName(gs));
+            auto for_ = ErrorColors::format("argument `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
@@ -1244,8 +1244,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
                             e.setHeader("Expected `{}` for keyword parameter `{}` but found `{}` from keyword splat",
-                                        kwParamType.show(gs), kwParam->argumentName(gs), kwSplatValueType.show(gs));
-                            auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->argumentName(gs),
+                                        kwParamType.show(gs), kwParam->parameterName(gs), kwSplatValueType.show(gs));
+                            auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->parameterName(gs),
                                                             method.show(gs));
                             e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
                             e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
@@ -1490,7 +1490,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     return param.flags.isKeyword && param.flags.isDefault && consumed.count(param.name) == 0;
                 });
                 if (firstKeyword != methodData->parameters.end()) {
-                    auto possibleArg = firstKeyword->argumentName(gs);
+                    auto possibleArg = firstKeyword->parameterName(gs);
                     e.addErrorLine(args.argLoc(maxPossiblePositional),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
                                    method.show(gs), possibleArg);
@@ -2597,7 +2597,7 @@ private:
         ENFORCE(!methodParams.empty());
         const auto &blockParam = methodParams.back();
         ENFORCE(blockParam.flags.isBlock);
-        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", blockParam.argumentName(gs),
+        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", blockParam.parameterName(gs),
                                         dispatchComp.method.show(gs));
         e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, blockParam.loc, for_));
     }

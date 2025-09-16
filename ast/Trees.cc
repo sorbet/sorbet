@@ -593,7 +593,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
             first = false;
-            fmt::format_to(std::back_inserter(buf), "{}", p.argumentName(gs));
+            fmt::format_to(std::back_inserter(buf), "{}", p.parameterName(gs));
         }
     }
     fmt::format_to(std::back_inserter(buf), ")\n");

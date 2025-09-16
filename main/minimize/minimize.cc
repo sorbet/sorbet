@@ -238,7 +238,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                 }
 
                 ENFORCE(rbiParameter.name.exists());
-                auto rbiParameterShortName = rbiParameter.argumentName(rbiGS);
+                auto rbiParameterShortName = rbiParameter.parameterName(rbiGS);
                 if (rbiParameter.flags.isKeyword && rbiParameter.flags.isRepeated) {
                     outfile.fmt("**{}", rbiParameterShortName);
                 } else if (rbiParameter.flags.isRepeated) {

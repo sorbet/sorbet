@@ -817,7 +817,7 @@ unique_ptr<CompletionItem> trySuggestYardSnippet(LSPTypecheckerDelegate &typeche
     // 0 is final tabstop. 1 is initial tabstop (for summary)
     auto tabStop = 1;
     for (const auto &param : parameters) {
-        auto argumentName = param.argumentName(gs);
+        auto argumentName = param.parameterName(gs);
         if (hasAngleBrackets(argumentName)) {
             continue;
         }

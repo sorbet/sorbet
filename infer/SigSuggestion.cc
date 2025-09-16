@@ -413,7 +413,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             // You almost certainly want to compare NameRef's for equality instead.
             // We need to compare strings here because we're running with a frozen global state
             // (and thus can't take the string that we get from `argumentName` and enter it as a name).
-            if (paramInfo.argumentName(ctx) == core::Names::blkArg().shortName(ctx)) {
+            if (paramInfo.parameterName(ctx) == core::Names::blkArg().shortName(ctx)) {
                 // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
                 // (We add a block argument to every method if it doesn't mention one.)
                 continue;
@@ -438,7 +438,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 chosenType = oldType;
             }
             auto options = core::ShowOptions().withUseValidSyntax();
-            fmt::format_to(std::back_inserter(ss), "{}: {}", paramInfo.argumentName(ctx),
+            fmt::format_to(std::back_inserter(ss), "{}: {}", paramInfo.parameterName(ctx),
                            chosenType.show(ctx, options));
         }
         fmt::format_to(std::back_inserter(ss), ").");

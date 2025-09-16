@@ -63,7 +63,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
         // Don't display synthetic arguments (like blk).
         if (!paramInfo.isSyntheticBlockParameter()) {
             typeAndArgNames.emplace_back(
-                absl::StrCat(paramInfo.argumentName(gs), ": ",
+                absl::StrCat(paramInfo.parameterName(gs), ": ",
                              getResultType(gs, paramInfo.type, method, receiver).show(gs, options)));
         }
     }
@@ -168,7 +168,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
         } else if (argSym.flags.isDefault && !defaultArgumentPlaceholder.empty()) {
             suffix = fmt::format("={}", defaultArgumentPlaceholder);
         }
-        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
+        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.parameterName(gs), suffix));
     }
 
     string argListPrefix = "";

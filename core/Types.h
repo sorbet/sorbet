@@ -46,7 +46,7 @@ public:
     bool isSyntheticBlockParameter() const;
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
-    std::string_view argumentName(const GlobalState &gs) const;
+    std::string_view parameterName(const GlobalState &gs) const;
     ParamInfo(const ParamInfo &) = delete;
     ParamInfo() = default;
     ParamInfo(ParamInfo &&) noexcept = default;

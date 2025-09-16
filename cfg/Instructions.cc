@@ -232,11 +232,11 @@ string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) cons
 }
 
 string LoadArg::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("load_arg({})", this->argument(gs).argumentName(gs));
+    return fmt::format("load_arg({})", this->argument(gs).parameterName(gs));
 }
 
 string LoadArg::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("LoadArg {{ argument = {} }}", this->argument(gs).argumentName(gs));
+    return fmt::format("LoadArg {{ argument = {} }}", this->argument(gs).parameterName(gs));
 }
 
 const core::ParamInfo &LoadArg::argument(const core::GlobalState &gs) const {
@@ -244,11 +244,11 @@ const core::ParamInfo &LoadArg::argument(const core::GlobalState &gs) const {
 }
 
 string ArgPresent::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("arg_present({})", this->argument(gs).argumentName(gs));
+    return fmt::format("arg_present({})", this->argument(gs).parameterName(gs));
 }
 
 string ArgPresent::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("ArgPresent {{ argument = {} }}", this->argument(gs).argumentName(gs));
+    return fmt::format("ArgPresent {{ argument = {} }}", this->argument(gs).parameterName(gs));
 }
 
 const core::ParamInfo &ArgPresent::argument(const core::GlobalState &gs) const {

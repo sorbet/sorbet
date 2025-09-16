@@ -534,7 +534,7 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                           core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodBlkParam.argumentName(ctx), methodBlkParam.type.show(ctx),
+                            methodBlkParam.parameterName(ctx), methodBlkParam.type.show(ctx),
                             superMethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
