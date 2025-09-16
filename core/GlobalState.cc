@@ -1368,15 +1368,15 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     ENFORCE_NO_TIMER(original.data(*this)->parameters.size() == paramsToKeep.size());
     const auto &originalParameters = original.data(*this)->parameters;
     int i = -1;
-    for (auto &arg : originalParameters) {
+    for (auto &param : originalParameters) {
         i += 1;
-        Loc loc = arg.loc;
+        Loc loc = param.loc;
         if (!paramsToKeep[i]) {
-            if (arg.flags.isBlock) {
+            if (param.flags.isBlock) {
                 loc = Loc::none();
             } else {
                 DEBUG_ONLY(if (!newMethod) {
-                    auto f = [&](const auto &resArg) { return arg.name == resArg.name; };
+                    auto f = [&](const auto &resArg) { return param.name == resArg.name; };
                     auto it = absl::c_find_if(resParameters, move(f));
                     ENFORCE_NO_TIMER(it == resParameters.end(),
                                      "fast path should not remove arguments from existing overload");
@@ -1384,11 +1384,11 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
                 continue;
             }
         }
-        NameRef nm = arg.name;
+        NameRef nm = param.name;
         auto &newArg = enterMethodArgumentSymbol(loc, res, nm);
         ENFORCE_NO_TIMER(newMethod || resParameters.size() == resInitialArgSize,
                          "fast path should not add new arguments to existing overload");
-        newArg = arg.deepCopy();
+        newArg = param.deepCopy();
         newArg.loc = loc;
     }
     return res;
