@@ -549,12 +549,6 @@ NodeDef nodes[] = {
         "numparams",
         vector<FieldDef>({{"decls", FieldType::NodeVec}}),
     },
-    // a block with numbered parameters
-    {
-        "NumBlock",
-        "numblock",
-        vector<FieldDef>({{"send", FieldType::Node}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
-    },
     // foo += 6 for += and other ops
     {
         "OpAsgn",

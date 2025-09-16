@@ -1535,11 +1535,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                               move(emptyAncestors), move(body));
                 result = move(res);
             },
-            [&](parser::NumBlock *block) {
-                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                                     dctx.enclosingMethodName, true, dctx.inModule, dctx.preserveConcreteSyntax);
-                result = desugarBlock(dctx1, loc, block->loc, block->send, block->args.get(), block->body);
-            },
             [&](parser::While *wl) {
                 auto cond = node2TreeImpl(dctx, wl->cond);
                 auto body = node2TreeImpl(dctx, wl->body);

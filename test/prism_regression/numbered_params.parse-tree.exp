@@ -1,6 +1,6 @@
 Begin {
   stmts = [
-    NumBlock {
+    Block {
       send = Send {
         receiver = NULL
         method = <U proc>
@@ -29,7 +29,7 @@ Begin {
         ]
       }
     }
-    NumBlock {
+    Block {
       send = Send {
         receiver = Const {
           scope = NULL
