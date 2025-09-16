@@ -865,14 +865,14 @@ private:
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
-                        "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
+                        "Method alias `{}` redefined without matching parameter count. Expected: `{}`, got: `{}`",
                         ctx.owner.show(ctx), symMethod.data(ctx)->parameters.size() - 1, parsedParams.size() - 1);
                     e.addErrorLine(ctx.owner.loc(ctx), "Previous alias definition");
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Dealiased definition");
                 } else {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
-                    e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
+                    e.setHeader("Method `{}` redefined without matching parameter count. Expected: `{}`, got: `{}`",
                                 symMethod.show(ctx), symMethod.data(ctx)->parameters.size() - 1,
                                 parsedParams.size() - 1);
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Previous definition");
@@ -886,12 +886,12 @@ private:
 
             if (symParam.flags.isKeyword != methodParam.flags.isKeyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                    e.setHeader("Method `{}` redefined with parameter `{}` as a {} parameter", sym.show(ctx),
                                 methodParam.local.toString(ctx),
                                 methodParam.flags.isKeyword ? "keyword" : "non-keyword");
                     e.addErrorLine(
                         sym.loc(ctx),
-                        "The corresponding argument `{}` in the previous definition was {}a keyword argument",
+                        "The corresponding parameter `{}` in the previous definition was {}a keyword parameter",
                         symParam.show(ctx), symParam.flags.isKeyword ? "" : "not ");
                 }
                 return;
@@ -907,18 +907,19 @@ private:
             ENFORCE(symParam.flags.isBlock == methodParam.flags.isBlock);
             if (symParam.flags.isRepeated != methodParam.flags.isRepeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
+                    e.setHeader("Method `{}` redefined with parameter `{}` as a {} parameter", sym.show(ctx),
                                 methodParam.local.toString(ctx), methodParam.flags.isRepeated ? "splat" : "non-splat");
-                    e.addErrorLine(sym.loc(ctx),
-                                   "The corresponding argument `{}` in the previous definition was {}a splat argument",
-                                   symParam.show(ctx), symParam.flags.isRepeated ? "" : "not ");
+                    e.addErrorLine(
+                        sym.loc(ctx),
+                        "The corresponding parameter `{}` in the previous definition was {}a splat parameter",
+                        symParam.show(ctx), symParam.flags.isRepeated ? "" : "not ");
                 }
                 return;
             }
             if (symParam.flags.isKeyword && symParam.name != methodParam.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
-                        "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
+                        "Method `{}` redefined with mismatched keyword parameter name. Expected: `{}`, got: `{}`",
                         sym.show(ctx), symParam.name.show(ctx), methodParam.local._name.show(ctx));
                     e.addErrorLine(sym.loc(ctx), "Previous definition");
                 }
