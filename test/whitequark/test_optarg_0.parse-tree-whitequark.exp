@@ -1,4 +1,4 @@
 s(:def, :f,
   s(:params,
-    s(:optarg, :foo,
+    s(:optparam, :foo,
       s(:int, "1"))), nil)

@@ -1,5 +1,5 @@
 s(:def, :f,
   s(:params,
-    s(:optarg, :o,
+    s(:optparam, :o,
       s(:int, "1")),
     s(:blockarg, :b)), nil)

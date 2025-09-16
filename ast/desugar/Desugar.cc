@@ -1539,7 +1539,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     MK::OptionalArg(loc, MK::KeywordArg(arg->nameLoc, arg->name), node2TreeImpl(dctx, arg->default_));
                 result = move(res);
             },
-            [&](parser::Optarg *arg) {
+            [&](parser::OptParam *arg) {
                 ExpressionPtr res =
                     MK::OptionalArg(loc, MK::Local(arg->nameLoc, arg->name), node2TreeImpl(dctx, arg->default_));
                 result = move(res);

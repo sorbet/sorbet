@@ -1,7 +1,7 @@
 s(:block,
   s(:send, nil, :f),
   s(:params,
-    s(:optarg, :o,
+    s(:optparam, :o,
       s(:int, "1")),
     s(:param, :p),
     s(:blockarg, :b)), nil)

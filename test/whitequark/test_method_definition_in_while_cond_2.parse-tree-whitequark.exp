@@ -1,7 +1,7 @@
 s(:while,
   s(:def, :foo,
     s(:params,
-      s(:optarg, :a,
+      s(:optparam, :a,
         s(:block,
           s(:send, nil, :tap), nil, nil))), nil),
   s(:break))

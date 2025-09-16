@@ -247,9 +247,9 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         [&](const parser::OrAsgn *orAsgn) {
             result = std::make_unique<OrAsgn>(orAsgn->loc, deepCopy(orAsgn->left.get()), deepCopy(orAsgn->right.get()));
         },
-        [&](const parser::Optarg *optarg) {
-            result =
-                std::make_unique<Optarg>(optarg->loc, optarg->name, optarg->nameLoc, deepCopy(optarg->default_.get()));
+        [&](const parser::OptParam *optarg) {
+            result = std::make_unique<OptParam>(optarg->loc, optarg->name, optarg->nameLoc,
+                                                deepCopy(optarg->default_.get()));
         },
         [&](const parser::Pair *pair) {
             result = std::make_unique<Pair>(pair->loc, deepCopy(pair->key.get()), deepCopy(pair->value.get()));

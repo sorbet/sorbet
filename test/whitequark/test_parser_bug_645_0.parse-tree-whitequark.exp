@@ -2,5 +2,5 @@ s(:block,
   s(:send,
     s(:const, nil, :Kernel), :lambda),
   s(:params,
-    s(:optarg, :arg,
+    s(:optparam, :arg,
       s(:hash))), nil)

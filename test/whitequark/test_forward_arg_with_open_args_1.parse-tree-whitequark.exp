@@ -1,6 +1,6 @@
 s(:def, :foo,
   s(:params,
     s(:param, :a),
-    s(:optarg, :b,
+    s(:optparam, :b,
       s(:int, "1")),
     s(:forward_arg)), nil)

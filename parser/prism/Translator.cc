@@ -1648,11 +1648,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto value = translate(optionalParamNode->value);
 
             if (!hasExpr(value)) {
-                return make_unique<parser::Optarg>(location, name, nameLoc, move(value));
+                return make_unique<parser::OptParam>(location, name, nameLoc, move(value));
             }
 
             auto expr = MK::OptionalArg(location, MK::Local(nameLoc, name), value->takeDesugaredExpr());
-            return make_node_with_expr<parser::Optarg>(move(expr), location, name, nameLoc, move(value));
+            return make_node_with_expr<parser::OptParam>(move(expr), location, name, nameLoc, move(value));
         }
         case PM_OR_NODE: { // operator `||` and `or`
             auto orNode = down_cast<pm_or_node>(node);

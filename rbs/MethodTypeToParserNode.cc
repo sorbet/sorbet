@@ -167,7 +167,7 @@ core::NameRef nodeName(const parser::Node *node) {
     typecase(
         node, [&](const parser::Param *p) { name = p->name; }, [&](const parser::Restarg *p) { name = p->name; },
         [&](const parser::Kwarg *p) { name = p->name; }, [&](const parser::Blockarg *p) { name = p->name; },
-        [&](const parser::Kwoptarg *p) { name = p->name; }, [&](const parser::Optarg *p) { name = p->name; },
+        [&](const parser::Kwoptarg *p) { name = p->name; }, [&](const parser::OptParam *p) { name = p->name; },
         [&](const parser::Kwrestarg *p) { name = p->name; }, [&](const parser::Shadowarg *p) { name = p->name; },
         [&](const parser::Symbol *s) { name = s->val; },
         [&](const parser::Node *other) {
@@ -201,7 +201,7 @@ string nodeKindToString(const parser::Node *node) {
 
     typecase(
         node, [&](const parser::Param *_p) { kind = "positional"; },
-        [&](const parser::Optarg *_p) { kind = "optional positional"; },
+        [&](const parser::OptParam *_p) { kind = "optional positional"; },
         [&](const parser::Restarg *_p) { kind = "rest positional"; },
         [&](const parser::Kwarg *_p) { kind = "keyword"; },
         [&](const parser::Kwoptarg *_p) { kind = "optional keyword"; },
@@ -237,7 +237,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, c
             }
         },
         // Should be: `?Type name`
-        [&](const parser::Optarg *a) {
+        [&](const parser::OptParam *a) {
             if (arg.name) {
                 auto nameString = nodeName(a).toString(ctx.state);
                 corrected = fmt::format("?{} {}", typeString, nameString);
@@ -295,7 +295,7 @@ bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
 
     typecase(
         methodArg, [&](const parser::Param *_p) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
-        [&](const parser::Optarg *_p) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
+        [&](const parser::OptParam *_p) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
         [&](const parser::Restarg *_p) { kindMatch = arg.kind == RBSArg::Kind::RestPositional; },
         [&](const parser::Kwarg *_p) { kindMatch = arg.kind == RBSArg::Kind::Keyword; },
         [&](const parser::Kwoptarg *_p) { kindMatch = arg.kind == RBSArg::Kind::OptionalKeyword; },

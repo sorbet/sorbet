@@ -1364,8 +1364,8 @@ public:
         core::LocOffsets loc = tokLoc(name);
         checkReservedForNumberedParameters(name->view(), loc);
 
-        return make_unique<Optarg>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
-                                   std::move(value));
+        return make_unique<OptParam>(loc.join(value->loc), gs_.enterNameUTF8(name->view()), tokLoc(name),
+                                     std::move(value));
     }
 
     unique_ptr<Node> p_ident(const token *tok) {
@@ -1759,7 +1759,7 @@ public:
 
             if (auto *requiredParam = parser::cast_node<Param>(thisParam.get())) {
                 hasDuplicateParam(requiredParam->name, requiredParam->loc, map);
-            } else if (auto *optarg = parser::cast_node<Optarg>(thisParam.get())) {
+            } else if (auto *optarg = parser::cast_node<OptParam>(thisParam.get())) {
                 hasDuplicateParam(optarg->name, optarg->loc, map);
             } else if (auto *restarg = parser::cast_node<Restarg>(thisParam.get())) {
                 hasDuplicateParam(restarg->name, restarg->loc, map);

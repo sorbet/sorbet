@@ -567,10 +567,10 @@ NodeDef nodes[] = {
         "or_asgn",
         vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
     },
-    // optional positional argument inside an (args) list
+    // optional positional parameter
     {
-        "Optarg",
-        "optarg",
+        "OptParam",
+        "optparam",
         vector<FieldDef>({{"name", FieldType::Name}, {"nameLoc", FieldType::Loc}, {"default_", FieldType::Node}}),
     },
     // entries of Hash
