@@ -1366,9 +1366,9 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     ENFORCE_NO_TIMER(newMethod || !resParameters.empty(), "must be at least the block arg");
     auto resInitialArgSize = resParameters.size();
     ENFORCE_NO_TIMER(original.data(*this)->parameters.size() == paramsToKeep.size());
-    const auto &originalArguments = original.data(*this)->parameters;
+    const auto &originalParameters = original.data(*this)->parameters;
     int i = -1;
-    for (auto &arg : originalArguments) {
+    for (auto &arg : originalParameters) {
         i += 1;
         Loc loc = arg.loc;
         if (!paramsToKeep[i]) {
