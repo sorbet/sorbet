@@ -278,4 +278,3 @@ public:
 
 } // namespace sorbet::core::packages
 #endif
-minTypedLevel_minTypedminTypedLevel_
