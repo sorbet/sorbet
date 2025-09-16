@@ -578,8 +578,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             // Regular send, e.g. `a.b`
 
-            // The keyword arguments Hash, if there is one, will always be the last argument.
-            auto hasKwargsHash = !args.empty() && parser::NodeWithExpr::isa_node<parser::Hash>(args.back().get());
+            auto hasKwargsHash = callNode->arguments != nullptr &&
+                                 PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORDS);
 
             // Detect special arguments that will require the call to be desugared to magic call.
 
