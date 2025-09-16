@@ -1460,7 +1460,7 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     return ret;
 }
 
-ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name) {
+ParamInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name) {
     ENFORCE_NO_TIMER(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE_NO_TIMER(name.exists(), "entering symbol with non-existing name");
     MethodData ownerScope = owner.data(*this);
@@ -1863,7 +1863,7 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     for (const auto typeArgument : whatData->typeArguments()) {
         this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
     }
-    // This drops the existing core::Method, which drops the `ArgInfo`s the method owned.
+    // This drops the existing core::Method, which drops the `ParamInfo`s the method owned.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
 }
 

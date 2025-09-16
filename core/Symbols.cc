@@ -452,7 +452,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
-TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
+TypePtr ParamInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner.asMethodRef();
     auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
@@ -1629,11 +1629,11 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
     }
 }
 
-string ArgInfo::show(const GlobalState &gs) const {
+string ParamInfo::show(const GlobalState &gs) const {
     return fmt::format("{}", this->argumentName(gs));
 }
 
-string ArgInfo::toString(const GlobalState &gs) const {
+string ParamInfo::toString(const GlobalState &gs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "argument {}", show(gs));
     vector<string_view> flagTexts;
@@ -1666,7 +1666,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
     return to_string(buf);
 }
 
-string_view ArgInfo::argumentName(const GlobalState &gs) const {
+string_view ParamInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword && !flags.isRepeated) {
         return name.shortName(gs);
     } else {
@@ -2083,13 +2083,13 @@ SymbolRef TypeParameter::dealias(const GlobalState &gs, int depthLimit) const {
     return dealiasWithDefault(gs, this->ref(gs), depthLimit, Symbols::untyped());
 }
 
-bool ArgInfo::isSyntheticBlockArgument() const {
+bool ParamInfo::isSyntheticBlockArgument() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
     return flags.isBlock && !loc.exists();
 }
 
-ArgInfo ArgInfo::deepCopy() const {
-    ArgInfo result;
+ParamInfo ParamInfo::deepCopy() const {
+    ParamInfo result;
     result.flags = this->flags;
     result.type = this->type;
     result.loc = this->loc;
@@ -2098,7 +2098,7 @@ ArgInfo ArgInfo::deepCopy() const {
     return result;
 }
 
-uint8_t ArgInfo::ArgFlags::toU1() const {
+uint8_t ParamInfo::ArgFlags::toU1() const {
     uint8_t flags = 0;
     if (isKeyword) {
         flags += 1;
@@ -2118,7 +2118,7 @@ uint8_t ArgInfo::ArgFlags::toU1() const {
     return flags;
 }
 
-void ArgInfo::ArgFlags::setFromU1(uint8_t flags) {
+void ParamInfo::ArgFlags::setFromU1(uint8_t flags) {
     isKeyword = flags & 1;
     isRepeated = flags & 2;
     isDefault = flags & 4;

@@ -150,7 +150,7 @@ public:
         return resultType != nullptr;
     }
 
-    using ParametersStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_PARAMS_COUNT>;
+    using ParametersStore = InlinedVector<ParamInfo, core::SymbolRef::EXPECTED_METHOD_PARAMS_COUNT>;
 
     // if dealiasing fails here, then we return a bad alias method stub instead
     MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const;

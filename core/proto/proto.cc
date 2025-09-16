@@ -75,7 +75,7 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     return protoName;
 }
 
-com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &gs, const ArgInfo &arg) {
+com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &gs, const ParamInfo &arg) {
     com::stripe::rubytyper::Symbol::ArgumentInfo argProto;
     *argProto.mutable_name() = toProto(gs, arg.name);
     argProto.set_iskeyword(arg.flags.isKeyword);

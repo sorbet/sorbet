@@ -272,7 +272,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
 namespace {
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
-                               MethodRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
+                               MethodRef method, const TypeAndOrigins &argTpe, const ParamInfo &argSym,
                                const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
@@ -330,7 +330,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ArgInfo &arg,
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ParamInfo &arg,
                              ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
     if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
         auto argName = arg.name.show(gs);
@@ -989,7 +989,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto aPosEnd = args.args.begin() + args.numPosArgs;
 
     while (pit != pend && ait != aPosEnd) {
-        const ArgInfo &param = *pit;
+        const ParamInfo &param = *pit;
         auto &arg = *ait;
         if (param.flags.isKeyword) {
             break;
@@ -1159,9 +1159,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
-            const ArgInfo *kwSplatParam = nullptr;
+            const ParamInfo *kwSplatParam = nullptr;
             auto hasRequiredKwParam = false;
-            auto kwParams = vector<const ArgInfo *>{};
+            auto kwParams = vector<const ParamInfo *>{};
             for (auto &param : methodData->parameters) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
                     ENFORCE(kwSplatParam == nullptr);
@@ -1310,7 +1310,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             bool sawKwSplat = false;
             while (kwit != methodData->parameters.end()) {
-                const ArgInfo &kwParam = *kwit;
+                const ParamInfo &kwParam = *kwit;
                 if (kwParam.flags.isBlock) {
                     break;
                 } else if (kwParam.flags.isRepeated) {
@@ -1486,7 +1486,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(methodData->parameters, [&consumed](const ArgInfo &param) {
+                auto firstKeyword = absl::c_find_if(methodData->parameters, [&consumed](const ParamInfo &param) {
                     return param.flags.isKeyword && param.flags.isDefault && consumed.count(param.name) == 0;
                 });
                 if (firstKeyword != methodData->parameters.end()) {
@@ -2575,8 +2575,8 @@ private:
         return nullopt;
     }
 
-    static vector<ArgInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {
-        vector<ArgInfo::ArgFlags> res;
+    static vector<ParamInfo::ArgFlags> argInfoByArity(optional<int> fixedArity) {
+        vector<ParamInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();

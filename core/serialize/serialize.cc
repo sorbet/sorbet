@@ -36,7 +36,7 @@ public:
     static void pickle(Pickler &p, const ConstantName &what);
     static void pickle(Pickler &p, const UniqueName &what);
     static void pickle(Pickler &p, const TypePtr &what);
-    static void pickle(Pickler &p, const ArgInfo &a);
+    static void pickle(Pickler &p, const ParamInfo &a);
     static void pickle(Pickler &p, const ClassOrModule &what);
     static void pickle(Pickler &p, const Method &what);
     static void pickle(Pickler &p, const Field &what);
@@ -52,7 +52,7 @@ public:
     static ConstantName unpickleConstantName(UnPickler &p, GlobalState &gs);
     static UniqueName unpickleUniqueName(UnPickler &p, GlobalState &gs);
     static TypePtr unpickleType(UnPickler &p, const GlobalState *gs);
-    static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
+    static ParamInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
     static ClassOrModule unpickleClassOrModule(UnPickler &p, const GlobalState *gs);
     static Method unpickleMethod(UnPickler &p, const GlobalState *gs);
     static Field unpickleField(UnPickler &p, const GlobalState *gs);
@@ -619,7 +619,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     }
 }
 
-void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
+void SerializerImpl::pickle(Pickler &p, const ParamInfo &a) {
     p.putU4(a.name.rawId());
     p.putU4(a.rebind.id());
     pickle(p, a.loc);
@@ -627,8 +627,8 @@ void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
     pickle(p, a.type);
 }
 
-ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
-    ArgInfo result;
+ParamInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
+    ParamInfo result;
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.rebind = core::ClassOrModuleRef::fromRaw(p.getU4());
     result.loc = unpickleLoc(p);

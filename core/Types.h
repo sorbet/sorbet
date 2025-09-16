@@ -27,7 +27,7 @@ class TypeVar;
 class SendAndBlockLink;
 class TypeAndOrigins;
 
-class ArgInfo {
+class ParamInfo {
 public:
     using ArgFlags = core::ParsedParam::ArgFlags;
     ArgFlags flags;
@@ -47,13 +47,13 @@ public:
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
     std::string_view argumentName(const GlobalState &gs) const;
-    ArgInfo(const ArgInfo &) = delete;
-    ArgInfo() = default;
-    ArgInfo(ArgInfo &&) noexcept = default;
-    ArgInfo &operator=(ArgInfo &&) noexcept = default;
-    ArgInfo deepCopy() const;
+    ParamInfo(const ParamInfo &) = delete;
+    ParamInfo() = default;
+    ParamInfo(ParamInfo &&) noexcept = default;
+    ParamInfo &operator=(ParamInfo &&) noexcept = default;
+    ParamInfo deepCopy() const;
 };
-CheckSize(ArgInfo, 32, 8);
+CheckSize(ParamInfo, 32, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&...args) {
     static_assert(!TypePtr::TypeToIsInlined<T>::value, "Inlined types must specialize `make_type` for each combination "
@@ -926,11 +926,11 @@ class SendAndBlockLink {
 
 public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
-    std::vector<ArgInfo::ArgFlags> argFlags;
+    std::vector<ParamInfo::ArgFlags> argFlags;
     core::NameRef fun;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags);
+    SendAndBlockLink(NameRef fun, std::vector<ParamInfo::ArgFlags> &&argFlags);
     std::optional<int> fixedArity() const;
 };
 
