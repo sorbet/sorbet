@@ -312,8 +312,8 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
-        foundMethod.parsedArgs = ast::ParamParsing::parseParams(method.params);
-        foundMethod.arityHash = ast::ParamParsing::hashParams(ctx, foundMethod.parsedArgs);
+        foundMethod.parsedParams = ast::ParamParsing::parseParams(method.params);
+        foundMethod.arityHash = ast::ParamParsing::hashParams(ctx, foundMethod.parsedParams);
         auto def = foundDefs->addMethod(move(foundMethod));
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
@@ -451,7 +451,7 @@ public:
             return;
         }
 
-        auto parsedArgs = InlinedVector<core::NameRef, 2>{};
+        auto parsedParams = InlinedVector<core::NameRef, 2>{};
 
         for (const auto &arg : send.posArgs()) {
             auto lit = ast::cast_tree<ast::Literal>(arg);
@@ -460,14 +460,14 @@ public:
             }
             core::NameRef name = lit->asSymbol();
 
-            parsedArgs.emplace_back(name);
+            parsedParams.emplace_back(name);
         }
 
-        if (parsedArgs.size() != 2) {
+        if (parsedParams.size() != 2) {
             return;
         }
 
-        auto fromName = parsedArgs[0];
+        auto fromName = parsedParams[0];
 
         core::FoundMethod foundMethod;
         foundMethod.owner = getOwner();
@@ -810,7 +810,7 @@ private:
         paramInfo.flags = parsedParam.flags;
     }
 
-    void defineArgs(core::MutableContext ctx, const vector<core::ParsedParam> &parsedArgs) {
+    void defineArgs(core::MutableContext ctx, const vector<core::ParsedParam> &parsedParams) {
         auto methodData = ctx.owner.asMethodRef().data(ctx);
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
@@ -825,7 +825,7 @@ private:
         }
 
         int i = -1;
-        for (auto &arg : parsedArgs) {
+        for (auto &arg : parsedParams) {
             i++;
             if (arg.flags.isShadow) {
                 inShadows = true;
@@ -949,7 +949,7 @@ private:
         // then-current symbol. If we weren't running in incremental mode, then `sym` wouldn't exist yet (we would
         // be about to create it!) and `currentSym` would be `def f()`, because we have not yet progressed far
         // enough in the file to see any other definition of `f`.
-        auto &parsedArgs = method.parsedArgs;
+        auto &parsedParams = method.parsedParams;
         auto symTableSize = ctx.state.methodsUsed();
         auto declLoc = ctx.locAt(method.declLoc);
         auto sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
@@ -961,7 +961,7 @@ private:
                 // we don't have a method definition with the right argument structure, so we need to mangle the
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedParams);
                     ctx.state.mangleRenameMethod(sym, method.name);
                     // Re-enter a new symbol.
                     sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
@@ -974,15 +974,15 @@ private:
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
                 // the previously defined equivalent to re-report any errors
                 auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym); // OK, this is a method
-                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedArgs) &&
+                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedParams) &&
                     !isIntrinsic(replacedSym.asMethodRef().data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedParams);
                 }
                 sym = matchingSym;
             }
         }
 
-        defineArgs(ctx.withOwner(sym), parsedArgs);
+        defineArgs(ctx.withOwner(sym), parsedParams);
         sym.data(ctx)->addLoc(ctx, declLoc);
         if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->flags.isRewriterSynthesized = true;
@@ -1782,11 +1782,11 @@ public:
     }
 #endif
 
-    ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedArgs,
+    ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedParams,
                                               ast::MethodDef::PARAMS_store oldParams) {
         ast::MethodDef::PARAMS_store params;
         int i = -1;
-        for (auto &param : parsedArgs) {
+        for (auto &param : parsedParams) {
             i++;
             auto localVariable = param.local;
 
