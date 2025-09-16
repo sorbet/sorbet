@@ -2,8 +2,8 @@ Begin {
   stmts = [
     DefMethod {
       name = <U test_method_without_fun_name>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U x>
           }
@@ -20,8 +20,8 @@ Begin {
     }
     DefMethod {
       name = <U test_method_without_fun_name_plus_before>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U x>
           }
@@ -50,8 +50,8 @@ Begin {
     }
     DefMethod {
       name = <U test_method_without_fun_name_plus_after>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U x>
           }
@@ -71,8 +71,8 @@ Begin {
     }
     DefMethod {
       name = <U test_method_without_fun_name_before_and_after>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U x>
           }

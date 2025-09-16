@@ -7,7 +7,7 @@ Begin {
         args = [
         ]
       }
-      args = NumParams {
+      params = NumParams {
         decls = [
           LVar {
             name = <U _1>
@@ -39,7 +39,7 @@ Begin {
         args = [
         ]
       }
-      args = NumParams {
+      params = NumParams {
         decls = [
           LVar {
             name = <U _1>

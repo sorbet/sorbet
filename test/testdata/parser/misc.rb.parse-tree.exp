@@ -127,8 +127,8 @@ Begin {
     }
     DefMethod {
       name = <U bfoo>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Blockarg {
             name = <U x>
           }
@@ -143,7 +143,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = NULL
     }
     Case {
@@ -196,7 +196,7 @@ Begin {
       singleton = Self {
       }
       name = <U classmeth>
-      args = NULL
+      params = NULL
       body = NULL
     }
     SClass {
@@ -302,8 +302,8 @@ Begin {
     }
     DefMethod {
       name = <U kwfoo>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Kwarg {
             name = <U x>
           }
@@ -414,8 +414,8 @@ Begin {
     }
     DefMethod {
       name = <U optfoo>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Optarg {
             name = <U x>
             default_ = Integer {
@@ -596,8 +596,8 @@ Begin {
         args = [
         ]
       }
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Shadowarg {
             name = <U x>
           }
@@ -617,15 +617,15 @@ Begin {
               }
             ]
           }
-          args = NULL
+          params = NULL
           body = NULL
         }
       ]
     }
     DefMethod {
       name = <U sfoo>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Restarg {
             name = <U *>
           }
@@ -635,8 +635,8 @@ Begin {
     }
     DefMethod {
       name = <U ssfoo>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Kwrestarg {
             name = <P <U **> $2>
           }
@@ -651,7 +651,7 @@ Begin {
       }
       body = DefMethod {
         name = <U foo>
-        args = NULL
+        params = NULL
         body = Block {
           send = Send {
             receiver = Const {
@@ -662,8 +662,8 @@ Begin {
             args = [
             ]
           }
-          args = Args {
-            args = [
+          params = Params {
+            params = [
               Arg {
                 name = <U a>
               }

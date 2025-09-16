@@ -448,17 +448,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (paramsNode->parameters == nullptr) {
                 // TODO: future follow up, ensure we add the block local variables ("shadowargs"), if any.
-                return make_unique<parser::Args>(location, NodeVec{});
+                return make_unique<parser::Params>(location, NodeVec{});
             }
 
-            unique_ptr<parser::Args> params;
+            unique_ptr<parser::Params> params;
             std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters);
 
-            // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's Args node,
+            // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's Params node,
             // after all other parameters.
             auto sorbetShadowParams = translateMulti(paramsNode->locals);
-            params->args.insert(params->args.end(), make_move_iterator(sorbetShadowParams.begin()),
-                                make_move_iterator(sorbetShadowParams.end()));
+            params->params.insert(params->params.end(), make_move_iterator(sorbetShadowParams.begin()),
+                                  make_move_iterator(sorbetShadowParams.end()));
 
             return params;
         }
@@ -644,21 +644,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                                     // TODO: future follow up, ensure we add the block local variables ("shadowargs"),
                                     // if any.
-                                    blockParameters = make_unique<parser::Args>(location, NodeVec{});
+                                    blockParameters = make_unique<parser::Params>(location, NodeVec{});
                                     didDesugarBlockParams = true;
                                 } else {
-                                    unique_ptr<parser::Args> params;
+                                    unique_ptr<parser::Params> params;
                                     std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters);
 
                                     // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's
-                                    // Args node, after all other parameters.
+                                    // Params node, after all other parameters.
                                     auto sorbetShadowParams = translateMulti(paramsNode->locals);
-                                    params->args.insert(params->args.end(),
-                                                        make_move_iterator(sorbetShadowParams.begin()),
-                                                        make_move_iterator(sorbetShadowParams.end()));
+                                    params->params.insert(params->params.end(),
+                                                          make_move_iterator(sorbetShadowParams.begin()),
+                                                          make_move_iterator(sorbetShadowParams.end()));
 
                                     std::tie(blockParamsStore, blockStatsStore, didDesugarBlockParams) =
-                                        desugarParametersNode(params->args, attemptToDesugarBlockParams);
+                                        desugarParametersNode(params->params, attemptToDesugarBlockParams);
 
                                     blockParameters = move(params);
                                 }
@@ -967,7 +967,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto isSingletonMethod = receiver != nullptr;
 
-            unique_ptr<parser::Args> params;
+            unique_ptr<parser::Params> params;
             core::NameRef enclosingBlockParamName;
             if (defNode->parameters != nullptr) {
                 std::tie(params, enclosingBlockParamName) = translateParametersNode(defNode->parameters);
@@ -975,7 +975,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 if (rparenLoc.start != nullptr) {
                     // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
                     // In this case, Sorbet's legacy parser will still hold an empty Args node
-                    params = make_unique<parser::Args>(location, NodeVec{});
+                    params = make_unique<parser::Params>(location, NodeVec{});
                 } else {
                     params = nullptr;
                 }
@@ -1020,7 +1020,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             bool didDesugarParams = false; // ...and by impliciation, everything else (see `attemptToDesugarParams`)
             if (params != nullptr) {
                 std::tie(paramsStore, statsStore, didDesugarParams) =
-                    desugarParametersNode(params->args, attemptToDesugarParams);
+                    desugarParametersNode(params->params, attemptToDesugarParams);
             } else {
                 didDesugarParams = attemptToDesugarParams;
             }
@@ -2416,7 +2416,7 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
     }
 }
 
-pair<unique_ptr<parser::Args>, core::NameRef /* enclosingBlockParamName */>
+pair<unique_ptr<parser::Params>, core::NameRef /* enclosingBlockParamName */>
 Translator::translateParametersNode(pm_parameters_node *paramsNode) {
     auto location = translateLoc(paramsNode->base.location);
 
@@ -2484,7 +2484,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
         enclosingBlockParamName = core::Names::blkArg();
     }
 
-    return {make_unique<parser::Args>(location, move(params)), enclosingBlockParamName};
+    return {make_unique<parser::Params>(location, move(params)), enclosingBlockParamName};
 }
 
 tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool /* didDesugarParams */>

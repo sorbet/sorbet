@@ -28,7 +28,7 @@ Begin {
     }
     DefMethod {
       name = <U foo>
-      args = NULL
+      params = NULL
       body = Assign {
         lhs = LVarLhs {
           name = <U tr1>
@@ -49,7 +49,7 @@ Begin {
     }
     DefMethod {
       name = <U bar>
-      args = NULL
+      params = NULL
       body = Send {
         receiver = Const {
           scope = Const {

@@ -119,8 +119,8 @@ Begin {
           }
         ]
       }
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U a>
           }
@@ -204,8 +204,8 @@ Begin {
           }
         ]
       }
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U a>
           }

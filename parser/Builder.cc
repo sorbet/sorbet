@@ -272,7 +272,7 @@ public:
         }
         validateNoForwardArgAfterRestArg(args);
 
-        return make_unique<Args>(collectionLoc(begin, args, end), std::move(args));
+        return make_unique<Params>(collectionLoc(begin, args, end), std::move(args));
     }
 
     void validateNoForwardArgAfterRestArg(const sorbet::parser::NodeVec &args) {

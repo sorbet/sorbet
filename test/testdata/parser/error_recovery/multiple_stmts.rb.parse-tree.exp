@@ -1,6 +1,6 @@
 DefMethod {
   name = <U test_method_with_multiple_stmts>
-  args = NULL
+  params = NULL
   body = Begin {
     stmts = [
       Assign {

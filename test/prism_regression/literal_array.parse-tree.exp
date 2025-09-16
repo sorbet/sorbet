@@ -71,8 +71,8 @@ Begin {
     }
     DefMethod {
       name = <U has_named_rest_args>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Restarg {
             name = <U args>
           }
@@ -102,8 +102,8 @@ Begin {
     }
     DefMethod {
       name = <U has_anonymous_rest_args>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Restarg {
             name = <U *>
           }

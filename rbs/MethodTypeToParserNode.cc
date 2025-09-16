@@ -306,17 +306,17 @@ bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
     return kindMatch;
 }
 
-parser::Args *getMethodArgs(const parser::Node *node) {
-    parser::Node *args;
+parser::Params *getMethodParams(const parser::Node *node) {
+    parser::Node *params;
 
     typecase(
-        node, [&](const parser::DefMethod *defMethod) { args = defMethod->args.get(); },
-        [&](const parser::DefS *defS) { args = defS->args.get(); },
+        node, [&](const parser::DefMethod *defMethod) { params = defMethod->params.get(); },
+        [&](const parser::DefS *defS) { params = defS->params.get(); },
         [&](const parser::Node *other) {
             Exception::raise("Unexpected expression type: {}", ((parser::Node *)node)->nodeName());
         });
 
-    return parser::cast_node<parser::Args>(args);
+    return parser::cast_node<parser::Params>(params);
 }
 
 void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vector<RBSArg> &args, RBSArg::Kind kind) {
@@ -461,12 +461,12 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     auto typeToParserNode = TypeToParserNode(ctx, typeParams, parser);
 
-    auto methodArgs = getMethodArgs(methodDef);
+    auto methodParams = getMethodParams(methodDef);
     for (int i = 0; i < args.size(); i++) {
         auto &arg = args[i];
         auto type = typeToParserNode.toParserNode(arg.type, declaration);
 
-        if (!methodArgs || i >= methodArgs->args.size()) {
+        if (!methodParams || i >= methodParams->params.size()) {
             if (auto e = ctx.beginIndexerError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
                 e.setHeader("RBS signature has more parameters than in the method definition");
             }
@@ -474,15 +474,15 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
             return nullptr;
         }
 
-        auto methodArg = methodArgs->args[i].get();
+        auto methodParam = methodParams->params[i].get();
 
-        if (!checkParameterKindMatch(arg, methodArg)) {
+        if (!checkParameterKindMatch(arg, methodParam)) {
             if (auto e = ctx.beginIndexerError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
                 e.setHeader("Argument kind mismatch for `{}`, method declares `{}`, but RBS signature declares `{}`",
-                            nodeName(methodArg).show(ctx.state), nodeKindToString(methodArg),
+                            nodeName(methodParam).show(ctx.state), nodeKindToString(methodParam),
                             argKindToString(arg.kind));
 
-                e.maybeAddAutocorrect(autocorrectArg(ctx, methodArg, arg, type->deepCopy()));
+                e.maybeAddAutocorrect(autocorrectArg(ctx, methodParam, arg, type->deepCopy()));
             }
         }
 
@@ -494,9 +494,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(arg.nameLoc, name), move(type)));
         } else {
             // The RBS arg is not named in the signature, so we get it from the method definition
-            auto name = nodeName(methodArg);
+            auto name = nodeName(methodParam);
             sigParams.emplace_back(
-                make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(methodArg->loc, name), move(type)));
+                make_unique<parser::Pair>(arg.loc, parser::MK::Symbol(methodParam->loc, name), move(type)));
         }
     }
 

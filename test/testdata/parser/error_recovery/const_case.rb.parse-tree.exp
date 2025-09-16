@@ -1,7 +1,7 @@
 DefMethod {
   name = <U foo>
-  args = Args {
-    args = [
+  params = Params {
+    params = [
       Arg {
         name = <U x>
       }

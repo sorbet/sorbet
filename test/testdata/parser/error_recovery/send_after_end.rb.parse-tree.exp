@@ -2,7 +2,7 @@ Begin {
   stmts = [
     DefMethod {
       name = <U foo>
-      args = NULL
+      params = NULL
       body = Begin {
         stmts = [
           Send {

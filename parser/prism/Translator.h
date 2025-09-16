@@ -89,7 +89,7 @@ private:
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
-    std::pair<std::unique_ptr<parser::Args>, core::NameRef /* enclosingBlockParamName */>
+    std::pair<std::unique_ptr<parser::Params>, core::NameRef /* enclosingBlockParamName */>
     translateParametersNode(pm_parameters_node *paramsNode);
 
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool>

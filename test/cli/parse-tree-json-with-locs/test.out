@@ -18,7 +18,7 @@
       "type" : "DefMethod",
       "declLoc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs1.rb:5:5-5:12",
       "name" : "foo",
-      "args" : null,
+      "params" : null,
       "body" : {
         "type" : "String",
         "val" : "foo"
@@ -68,7 +68,7 @@
         "type" : "DefMethod",
         "declLoc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs2.rb:7:3-7:10",
         "name" : "bar",
-        "args" : null,
+        "params" : null,
         "body" : {
           "type" : "Send",
           "receiver" : null,
@@ -94,7 +94,7 @@
     "type" : "DefMethod",
     "declLoc" : "test/cli/parse-tree-json-with-locs/parse-tree-json-with-locs3.rb:4:3-4:11",
     "name" : "main",
-    "args" : null,
+    "params" : null,
     "body" : {
       "type" : "Begin",
       "stmts" : [

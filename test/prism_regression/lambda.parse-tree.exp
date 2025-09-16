@@ -10,7 +10,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = Integer {
         val = "123"
       }
@@ -25,8 +25,8 @@ Begin {
         args = [
         ]
       }
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U param>
           }
@@ -46,8 +46,8 @@ Begin {
         args = [
         ]
       }
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Optarg {
             name = <U optional_param>
             default_ = Integer {
@@ -71,7 +71,7 @@ Begin {
           args = [
           ]
         }
-        args = NULL
+        params = NULL
         body = Integer {
           val = "456"
         }
@@ -87,7 +87,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = Integer {
         val = "789"
       }
@@ -99,8 +99,8 @@ Begin {
         args = [
         ]
       }
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Arg {
             name = <U param>
           }
@@ -127,7 +127,7 @@ Begin {
             args = [
             ]
           }
-          args = NULL
+          params = NULL
           body = Integer {
             val = "123"
           }
@@ -144,7 +144,7 @@ Begin {
         args = [
         ]
       }
-      args = NumParams {
+      params = NumParams {
         decls = [
           LVar {
             name = <U _1>
@@ -174,7 +174,7 @@ Begin {
       superclass = NULL
       body = DefMethod {
         name = <U method_returning_lambda>
-        args = NULL
+        params = NULL
         body = Block {
           send = Send {
             receiver = Const {
@@ -185,7 +185,7 @@ Begin {
             args = [
             ]
           }
-          args = NULL
+          params = NULL
           body = Integer {
             val = "123"
           }
@@ -202,8 +202,8 @@ Begin {
         args = [
         ]
       }
-      args = Args {
-        args = [
+      params = Params {
+        params = [
         ]
       }
       body = Send {

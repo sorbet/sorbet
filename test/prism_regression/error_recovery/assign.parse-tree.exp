@@ -1,7 +1,7 @@
 DefMethod {
   name = <U test_bad_assign>
-  args = Args {
-    args = [
+  params = Params {
+    params = [
       Arg {
         name = <U x>
       }

@@ -1,5 +1,5 @@
 s(:def, :foo,
-  s(:args,
+  s(:params,
     s(:blockarg, :&)),
   s(:send, nil, :bar,
     s(:block_pass, nil)))

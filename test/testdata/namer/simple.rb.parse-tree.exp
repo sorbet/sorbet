@@ -10,14 +10,14 @@ Begin {
         stmts = [
           DefMethod {
             name = <U normal_method>
-            args = NULL
+            params = NULL
             body = NULL
           }
           DefS {
             singleton = Self {
             }
             name = <U normal_static_method>
-            args = NULL
+            params = NULL
             body = NULL
           }
           Class {
@@ -126,7 +126,7 @@ Begin {
                 }
               ]
             }
-            args = NULL
+            params = NULL
             body = NULL
           }
           Send {

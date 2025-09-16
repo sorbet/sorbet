@@ -53,12 +53,6 @@ NodeDef nodes[] = {
         "arg",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
-    // Wraps block arg, method arg, and send arg
-    {
-        "Args",
-        "args",
-        vector<FieldDef>({{"args", FieldType::NodeVec}}),
-    },
     // inline array with elements
     {
         "Array",
@@ -94,11 +88,12 @@ NodeDef nodes[] = {
         "begin",
         vector<FieldDef>({{"stmts", FieldType::NodeVec}}),
     },
-    // Node is always a send, which is previous call, args is arguments of body
+    // A method call with a blockis modelled as a Send node with a Block as a parent.
+    // The `send` is always a `parser::Send` node, and the `params` models the parameters of the block.
     {
         "Block",
         "block",
-        vector<FieldDef>({{"send", FieldType::Node}, {"args", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"send", FieldType::Node}, {"params", FieldType::Node}, {"body", FieldType::Node}}),
     },
     // Wraps a `&foo` argument in an argument list
     {
@@ -190,13 +185,13 @@ NodeDef nodes[] = {
         "cvasgn",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
-    // args may be NULL, body does not have to be a block.
+    // params may be NULL, body does not have to be a block.
     {
         "DefMethod",
         "def",
         vector<FieldDef>({{"declLoc", FieldType::Loc},
                           {"name", FieldType::Name},
-                          {"args", FieldType::Node},
+                          {"params", FieldType::Node},
                           {"body", FieldType::Node}}),
     },
     // defined?() built-in pseudo-function
@@ -214,7 +209,7 @@ NodeDef nodes[] = {
         vector<FieldDef>({{"declLoc", FieldType::Loc},
                           {"singleton", FieldType::Node},
                           {"name", FieldType::Name},
-                          {"args", FieldType::Node},
+                          {"params", FieldType::Node},
                           {"body", FieldType::Node}}),
     },
     // def <expr>.name singleton-class name method def
@@ -657,7 +652,7 @@ NodeDef nodes[] = {
         "resolved_const",
         vector<FieldDef>({{"symbol", FieldType::Symbol}}),
     },
-    // *arg argument inside an (args)
+    // A *rest argument inside a Params node.
     {
         "Restarg",
         "restarg",
@@ -674,6 +669,12 @@ NodeDef nodes[] = {
         "Return",
         "return",
         vector<FieldDef>({{"exprs", FieldType::NodeVec}}),
+    },
+    // Parameter of a method definition or literal block.
+    {
+        "Params",
+        "params",
+        vector<FieldDef>({{"params", FieldType::NodeVec}}),
     },
     // class << expr; body; end;
     {

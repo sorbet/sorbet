@@ -4,7 +4,7 @@
     {
       "type" : "DefMethod",
       "name" : "foo",
-      "args" : null,
+      "params" : null,
       "body" : {
         "type" : "Begin",
         "stmts" : [
@@ -29,15 +29,15 @@
     {
       "type" : "DefMethod",
       "name" : "bar",
-      "args" : null,
+      "params" : null,
       "body" : null
     },
     {
       "type" : "DefMethod",
       "name" : "baz",
-      "args" : {
-        "type" : "Args",
-        "args" : [
+      "params" : {
+        "type" : "Params",
+        "params" : [
           {
             "type" : "Arg",
             "name" : "a"

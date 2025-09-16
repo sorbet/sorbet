@@ -1,5 +1,5 @@
 s(:block,
   s(:send,
     s(:const, nil, :Kernel), :lambda),
-  s(:args,
+  s(:params,
     s(:kwnilarg)), nil)

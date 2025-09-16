@@ -24,7 +24,7 @@ Begin {
         args = [
         ]
       }
-      args = NULL
+      params = NULL
       body = Send {
         receiver = Self {
         }
@@ -39,7 +39,7 @@ Begin {
     }
     DefMethod {
       name = <U foo>
-      args = NULL
+      params = NULL
       body = Assign {
         lhs = LVarLhs {
           name = <U x>

@@ -1,5 +1,5 @@
 s(:def, :inc,
-  s(:args,
+  s(:params,
     s(:arg, :x)),
   s(:send,
     s(:lvar, :x), :+,

@@ -2,8 +2,8 @@ Begin {
   stmts = [
     DefMethod {
       name = <U forwarded_rest_args>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Restarg {
             name = <U *>
           }
@@ -45,8 +45,8 @@ Begin {
     }
     DefMethod {
       name = <U start_dotdotdot>
-      args = Args {
-        args = [
+      params = Params {
+        params = [
           Restarg {
             name = <U *>
           }

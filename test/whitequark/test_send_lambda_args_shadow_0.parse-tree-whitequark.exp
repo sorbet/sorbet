@@ -1,7 +1,7 @@
 s(:block,
   s(:send,
     s(:const, nil, :Kernel), :lambda),
-  s(:args,
+  s(:params,
     s(:arg, :a),
     s(:shadowarg, :foo),
     s(:shadowarg, :bar)), nil)
