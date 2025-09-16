@@ -2603,7 +2603,7 @@ private:
         ENFORCE(!methodParams.empty());
         const auto &blockParam = methodParams.back();
         ENFORCE(blockParam.flags.isBlock);
-        auto for_ = ErrorColors::format("block param `{}` of method `{}`", blockParam.parameterName(gs),
+        auto for_ = ErrorColors::format("block parameter `{}` of method `{}`", blockParam.parameterName(gs),
                                         dispatchComp.method.show(gs));
         e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, blockParam.loc, for_));
     }
