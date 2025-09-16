@@ -2,7 +2,7 @@ Begin {
   stmts = [
     DefMethod {
       name = <U foo>
-      args = Params {
+      params = Params {
         params = [
           Optarg {
             name = <U a>
@@ -16,7 +16,7 @@ Begin {
     }
     DefMethod {
       name = <U bar>
-      args = Params {
+      params = Params {
         params = [
           Optarg {
             name = <U a>

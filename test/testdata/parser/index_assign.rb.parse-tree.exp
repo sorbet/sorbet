@@ -1,6 +1,6 @@
 DefMethod {
   name = <U test_brackets>
-  args = NULL
+  params = NULL
   body = Begin {
     stmts = [
       Send {

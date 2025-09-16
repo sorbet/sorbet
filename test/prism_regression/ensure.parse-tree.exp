@@ -20,7 +20,7 @@ Begin {
     }
     DefMethod {
       name = <U method_with_ensure>
-      args = NULL
+      params = NULL
       body = Ensure {
         body = Begin {
           stmts = [
@@ -39,7 +39,7 @@ Begin {
     }
     DefMethod {
       name = <U empty_method_with_ensure>
-      args = NULL
+      params = NULL
       body = Ensure {
         body = NULL
         ensure = String {
@@ -49,7 +49,7 @@ Begin {
     }
     DefMethod {
       name = <U method_with_begin_and_ensure>
-      args = NULL
+      params = NULL
       body = Kwbegin {
         stmts = [
           Ensure {

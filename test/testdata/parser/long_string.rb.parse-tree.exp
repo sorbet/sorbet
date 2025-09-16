@@ -1,6 +1,6 @@
 DefMethod {
   name = <U test>
-  args = NULL
+  params = NULL
   body = Send {
     receiver = NULL
     method = <U foo>

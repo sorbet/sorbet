@@ -85,7 +85,7 @@ Begin {
     }
     DefMethod {
       name = <U foo>
-      args = Params {
+      params = Params {
         params = [
           Kwarg {
             name = <U x>
@@ -99,7 +99,7 @@ Begin {
     }
     DefMethod {
       name = <U foo>
-      args = Params {
+      params = Params {
         params = [
           Kwarg {
             name = <U x>

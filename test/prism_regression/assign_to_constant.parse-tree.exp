@@ -397,7 +397,7 @@ Begin {
     }
     DefMethod {
       name = <U method1>
-      args = NULL
+      params = NULL
       body = Begin {
         stmts = [
           Assign {
@@ -519,7 +519,7 @@ Begin {
     }
     DefMethod {
       name = <U method2>
-      args = NULL
+      params = NULL
       body = Begin {
         stmts = [
           Assign {

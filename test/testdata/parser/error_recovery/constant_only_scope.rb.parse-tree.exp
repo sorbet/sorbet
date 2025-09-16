@@ -10,7 +10,7 @@ Begin {
     }
     DefMethod {
       name = <U test_constant_only_scope>
-      args = NULL
+      params = NULL
       body = Const {
         scope = Const {
           scope = NULL

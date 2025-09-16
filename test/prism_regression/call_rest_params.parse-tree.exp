@@ -2,7 +2,7 @@ Begin {
   stmts = [
     DefMethod {
       name = <U has_named_rest_args>
-      args = Params {
+      params = Params {
         params = [
           Restarg {
             name = <U args>
@@ -23,7 +23,7 @@ Begin {
     }
     DefMethod {
       name = <U has_anonymous_rest_args>
-      args = Params {
+      params = Params {
         params = [
           Restarg {
             name = <U *>
