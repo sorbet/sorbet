@@ -165,7 +165,7 @@ core::NameRef nodeName(const parser::Node *node) {
     core::NameRef name;
 
     typecase(
-        node, [&](const parser::Arg *a) { name = a->name; }, [&](const parser::Restarg *a) { name = a->name; },
+        node, [&](const parser::Param *a) { name = a->name; }, [&](const parser::Restarg *a) { name = a->name; },
         [&](const parser::Kwarg *a) { name = a->name; }, [&](const parser::Blockarg *a) { name = a->name; },
         [&](const parser::Kwoptarg *a) { name = a->name; }, [&](const parser::Optarg *a) { name = a->name; },
         [&](const parser::Kwrestarg *a) { name = a->name; }, [&](const parser::Shadowarg *a) { name = a->name; },
@@ -200,7 +200,7 @@ string nodeKindToString(const parser::Node *node) {
     string kind;
 
     typecase(
-        node, [&](const parser::Arg *parserArg) { kind = "positional"; },
+        node, [&](const parser::Param *parserArg) { kind = "positional"; },
         [&](const parser::Optarg *parserArg) { kind = "optional positional"; },
         [&](const parser::Restarg *parserArg) { kind = "rest positional"; },
         [&](const parser::Kwarg *parserArg) { kind = "keyword"; },
@@ -228,7 +228,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, c
     typecase(
         methodArg,
         // Should be: `Type name`
-        [&](const parser::Arg *a) {
+        [&](const parser::Param *a) {
             if (arg.name) {
                 auto nameString = nodeName(a).toString(ctx.state);
                 corrected = fmt::format("{} {}", typeString, nameString);
@@ -294,7 +294,7 @@ bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
     auto kindMatch = false;
 
     typecase(
-        methodArg, [&](const parser::Arg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
+        methodArg, [&](const parser::Param *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
         [&](const parser::Optarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
         [&](const parser::Restarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::RestPositional; },
         [&](const parser::Kwarg *parserArg) { kindMatch = arg.kind == RBSArg::Kind::Keyword; },

@@ -53,7 +53,7 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U positional>
           }
           Kwarg {
@@ -77,7 +77,7 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U positional>
           }
           Kwarg {
@@ -101,15 +101,15 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U positional>
           }
           Mlhs {
             exprs = [
-              Arg {
+              Param {
                 name = <U multi>
               }
-              Arg {
+              Param {
                 name = <U target>
               }
             ]
@@ -129,7 +129,7 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U bar>
           }
           Shadowarg {
@@ -151,15 +151,15 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U positional>
           }
           Mlhs {
             exprs = [
-              Arg {
+              Param {
                 name = <U multi>
               }
-              Arg {
+              Param {
                 name = <U target>
               }
             ]
@@ -185,7 +185,7 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U bar>
           }
           Shadowarg {

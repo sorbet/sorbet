@@ -1,7 +1,7 @@
 s(:defs,
   s(:send, nil, :obj), :inc,
   s(:params,
-    s(:arg, :x)),
+    s(:param, :x)),
   s(:send,
     s(:lvar, :x), :+,
     s(:int, "1")))

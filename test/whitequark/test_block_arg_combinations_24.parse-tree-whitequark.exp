@@ -4,5 +4,5 @@ s(:block,
     s(:optarg, :o,
       s(:int, "1")),
     s(:restarg, :r),
-    s(:arg, :p),
+    s(:param, :p),
     s(:blockarg, :b)), nil)

@@ -1,7 +1,7 @@
 s(:def, :f,
   s(:params,
-    s(:arg, :a),
+    s(:param, :a),
     s(:optarg, :o,
       s(:int, "1")),
-    s(:arg, :p),
+    s(:param, :p),
     s(:blockarg, :b)), nil)

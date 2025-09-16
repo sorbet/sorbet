@@ -121,13 +121,13 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U a>
           }
-          Arg {
+          Param {
             name = <U b>
           }
-          Arg {
+          Param {
             name = <U c>
           }
           Kwarg {
@@ -206,13 +206,13 @@ Begin {
       }
       params = Params {
         params = [
-          Arg {
+          Param {
             name = <U a>
           }
-          Arg {
+          Param {
             name = <U b>
           }
-          Arg {
+          Param {
             name = <U c>
           }
           Kwarg {

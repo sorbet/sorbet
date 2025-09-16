@@ -2,6 +2,6 @@ s(:block,
   s(:send,
     s(:const, nil, :Kernel), :lambda),
   s(:params,
-    s(:arg, :a),
+    s(:param, :a),
     s(:shadowarg, :foo),
     s(:shadowarg, :bar)), nil)

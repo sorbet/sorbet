@@ -2,4 +2,4 @@ s(:block,
   s(:send, nil, :a,
     s(:ivar, :@b)),
   s(:params,
-    s(:arg, :c)), nil)
+    s(:param, :c)), nil)

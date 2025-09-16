@@ -2,4 +2,4 @@ s(:def, :f,
   s(:params,
     s(:mlhs,
       s(:restarg, :r),
-      s(:arg, :p))), nil)
+      s(:param, :p))), nil)

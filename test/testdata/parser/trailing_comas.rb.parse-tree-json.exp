@@ -39,11 +39,11 @@
         "type" : "Params",
         "params" : [
           {
-            "type" : "Arg",
+            "type" : "Param",
             "name" : "a"
           },
           {
-            "type" : "Arg",
+            "type" : "Param",
             "name" : "b"
           }
         ]

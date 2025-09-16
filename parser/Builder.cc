@@ -258,7 +258,7 @@ public:
         core::LocOffsets loc = tokLoc(name);
         checkReservedForNumberedParameters(name->asString(), loc);
 
-        return make_unique<Arg>(loc, gs_.enterNameUTF8(name->view()));
+        return make_unique<Param>(loc, gs_.enterNameUTF8(name->view()));
     }
 
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
@@ -1756,7 +1756,7 @@ public:
         for (auto &this_arg : args) {
             ++pos;
 
-            if (auto *arg = parser::cast_node<Arg>(this_arg.get())) {
+            if (auto *arg = parser::cast_node<Param>(this_arg.get())) {
                 hasDuplicateArg(arg->name, arg->loc, map);
             } else if (auto *optarg = parser::cast_node<Optarg>(this_arg.get())) {
                 hasDuplicateArg(optarg->name, optarg->loc, map);
