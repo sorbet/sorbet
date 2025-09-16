@@ -578,13 +578,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             // Regular send, e.g. `a.b`
 
-            // The keyword arguments Hash, if there is one, will always be the last argument.
-            auto hasKwargsHash = !args.empty() && parser::NodeWithExpr::isa_node<parser::Hash>(args.back().get());
+            auto hasKwargsHash = callNode->arguments != nullptr &&
+                                 PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORDS);
 
             // Detect special arguments that will require the call to be desugared to magic call.
-            auto hasFwdArgs = false;
-            auto hasFwdRestArg = false;
-            auto hasSplat = false;
+
+            // true if the call contains a forwarded argument like `foo(...)`
+            auto hasFwdArgs = callNode->arguments != nullptr &&
+                              PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
+            auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*rest)`
+            auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             if (auto prismArgsNode = callNode->arguments; prismArgsNode != nullptr) {
                 for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
                     switch (PM_NODE_TYPE(arg)) {
@@ -595,11 +598,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             } else { // Splatting an expression like `f(*a)`
                                 hasSplat = true;
                             }
-                            break;
-                        }
-
-                        case PM_FORWARDING_ARGUMENTS_NODE: {
-                            hasFwdArgs = true;
                             break;
                         }
 
@@ -1417,8 +1415,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
-            auto kvPairs = translateKeyValuePairs(down_cast<pm_keyword_hash_node>(node)->elements);
-            auto isKwargs = absl::c_all_of(kvPairs, [](const auto &node) { return isKeywordHashElement(node.get()); });
+            auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
+
+            auto kvPairs = translateKeyValuePairs(keywordHashNode->elements);
+
+            auto isKwargs = PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
+                            absl::c_all_of(kvPairs, [](const auto &node) {
+                                // Checks if the given node is a keyword hash element based on the standards of Sorbet's
+                                // legacy parser. Based on `Builder::isKeywordHashElement()`
+
+                                if (parser::NodeWithExpr::isa_node<Kwsplat>(node.get())) {
+                                    return true;
+                                }
+
+                                if (parser::NodeWithExpr::isa_node<ForwardedKwrestArg>(node.get())) {
+                                    return true;
+                                }
+
+                                return false;
+                            });
 
             return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
         }
@@ -2718,24 +2733,6 @@ ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPair
     } else {
         return MK::InsSeq(loc, move(updateStmts), MK::Local(loc, acc));
     }
-}
-
-// Copied from `Builder::isKeywordHashElement()`
-// Checks if the given node is a keyword hash element based on the standards of Sorbet's legacy parser.
-bool Translator::isKeywordHashElement(sorbet::parser::Node *node) {
-    if (NodeWithExpr::isa_node<Kwsplat>(node)) {
-        return true;
-    }
-
-    if (NodeWithExpr::isa_node<ForwardedKwrestArg>(node)) {
-        return true;
-    }
-
-    if (auto *pair = NodeWithExpr::cast_node<Pair>(node)) {
-        return NodeWithExpr::isa_node<Symbol>(pair->key.get());
-    }
-
-    return false;
 }
 
 // Prism models a call with an explicit block argument as a `pm_call_node` that contains a `pm_block_node`.
