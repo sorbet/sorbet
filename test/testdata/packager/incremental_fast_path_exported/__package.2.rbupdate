@@ -1,0 +1,7 @@
+# typed: strict
+# enable-packager: true
+# exclude-from-file-update: true
+
+class Root < PackageSpec
+  import Lib
+end

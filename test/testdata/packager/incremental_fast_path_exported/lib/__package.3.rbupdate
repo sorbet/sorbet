@@ -1,0 +1,6 @@
+# typed: strict
+# exclude-from-file-update: true
+
+class Lib < PackageSpec
+  export Lib::MyStaticField
+end
