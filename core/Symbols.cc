@@ -1400,8 +1400,8 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
         fmt::format_to(std::back_inserter(buf), "{}", move(str));
     }
 
-    for (auto &arg : sym->parameters) {
-        auto str = arg.toString(gs);
+    for (auto &param : sym->parameters) {
+        auto str = param.toString(gs);
         ENFORCE(!str.empty());
         printTabs(buf, tabs + 1);
         fmt::format_to(std::back_inserter(buf), "{}\n", move(str));
@@ -2241,10 +2241,10 @@ void Method::sanityCheck(const GlobalState &gs) const {
         // we dealias the symbol and use those arguments.
         //
         // This leaves the alias method's arguments vector free for us to stash some information. See resolver.
-        ENFORCE_NO_TIMER(absl::c_all_of(this->parameters, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
-                         ref(gs).show(gs));
-        ENFORCE_NO_TIMER(absl::c_all_of(this->parameters, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
-                         ref(gs).show(gs));
+        ENFORCE_NO_TIMER(absl::c_all_of(this->parameters, [](const auto &param) { return param.flags.isKeyword; }),
+                         "{}", ref(gs).show(gs));
+        ENFORCE_NO_TIMER(absl::c_all_of(this->parameters, [](const auto &param) { return param.flags.isKeyword; }),
+                         "{}", ref(gs).show(gs));
     }
 }
 
@@ -2423,9 +2423,9 @@ uint32_t Method::hash(const GlobalState &gs) const {
     result = mix(result, this->owner.id());
     result = mix(result, this->rebind.id());
     result = mix(result, this->methodArityHash(gs)._hashValue);
-    for (const auto &arg : this->parameters) {
+    for (const auto &param : this->parameters) {
         // If an argument's resultType changes, then the sig has changed.
-        auto type = arg.type;
+        auto type = param.type;
         if (!type) {
             type = Types::untypedUntracked();
         }

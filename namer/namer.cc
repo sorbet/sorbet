@@ -774,39 +774,40 @@ private:
     }
 
     void defineArg(core::MutableContext ctx, core::MethodData &methodData, int pos,
-                   const core::ParsedParam &parsedArg) {
+                   const core::ParsedParam &parsedParam) {
         if (pos < methodData->parameters.size()) {
             // TODO: check that flags match;
-            if (parsedArg.loc.exists()) {
-                methodData->parameters[pos].loc = ctx.locAt(parsedArg.loc);
+            if (parsedParam.loc.exists()) {
+                methodData->parameters[pos].loc = ctx.locAt(parsedParam.loc);
             }
             return;
         }
 
         core::NameRef name;
-        if (parsedArg.flags.isKeyword) {
-            if (parsedArg.flags.isRepeated) {
-                if (parsedArg.local._name == core::Names::fwdKwargs()) {
+        if (parsedParam.flags.isKeyword) {
+            if (parsedParam.flags.isRepeated) {
+                if (parsedParam.local._name == core::Names::fwdKwargs()) {
                     name = core::Names::fwdKwargs();
                 } else {
                     name = core::Names::kwargs();
                 }
             } else {
-                name = parsedArg.local._name;
+                name = parsedParam.local._name;
             }
-        } else if (parsedArg.flags.isBlock) {
+        } else if (parsedParam.flags.isBlock) {
             name = core::Names::blkArg();
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo = ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
+        auto &paramInfo =
+            ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedParam.loc), ctx.owner.asMethodRef(), name);
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
         ENFORCE(methodData->parameters.size() >= pos + 1);
 
-        argInfo.flags = parsedArg.flags;
+        paramInfo.flags = parsedParam.flags;
     }
 
     void defineArgs(core::MutableContext ctx, const vector<core::ParsedParam> &parsedArgs) {
@@ -842,54 +843,57 @@ private:
         }
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedParam> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<core::ParsedParam> &parsedParams) {
         auto sym = method.data(ctx)->dealiasMethod(ctx);
-        return absl::c_equal(parsedArgs, sym.data(ctx)->parameters, [](const auto &methodArg, const auto &symArg) {
-            return symArg.flags.isKeyword == methodArg.flags.isKeyword &&
-                   symArg.flags.isBlock == methodArg.flags.isBlock &&
-                   symArg.flags.isRepeated == methodArg.flags.isRepeated &&
-                   (!symArg.flags.isKeyword || symArg.name == methodArg.local._name);
-        });
+        return absl::c_equal(parsedParams, sym.data(ctx)->parameters,
+                             [](const auto &methodParam, const auto &symParam) {
+                                 return symParam.flags.isKeyword == methodParam.flags.isKeyword &&
+                                        symParam.flags.isBlock == methodParam.flags.isBlock &&
+                                        symParam.flags.isRepeated == methodParam.flags.isRepeated &&
+                                        (!symParam.flags.isKeyword || symParam.name == methodParam.local._name);
+                             });
     }
 
-    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedParam> &parsedArgs) {
+    void paramMismatchErrors(core::MutableContext ctx, core::Loc loc, const vector<core::ParsedParam> &parsedParams) {
         auto sym = ctx.owner.dealias(ctx);
         if (!sym.isMethod()) {
             return;
         }
         auto symMethod = sym.asMethodRef();
-        if (symMethod.data(ctx)->parameters.size() != parsedArgs.size()) {
+        if (symMethod.data(ctx)->parameters.size() != parsedParams.size()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                 if (sym != ctx.owner) {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                        ctx.owner.show(ctx), symMethod.data(ctx)->parameters.size() - 1, parsedArgs.size() - 1);
+                        ctx.owner.show(ctx), symMethod.data(ctx)->parameters.size() - 1, parsedParams.size() - 1);
                     e.addErrorLine(ctx.owner.loc(ctx), "Previous alias definition");
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Dealiased definition");
                 } else {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
                     e.setHeader("Method `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                                symMethod.show(ctx), symMethod.data(ctx)->parameters.size() - 1, parsedArgs.size() - 1);
+                                symMethod.show(ctx), symMethod.data(ctx)->parameters.size() - 1,
+                                parsedParams.size() - 1);
                     e.addErrorLine(symMethod.data(ctx)->loc(), "Previous definition");
                 }
             }
             return;
         }
-        for (int i = 0; i < parsedArgs.size(); i++) {
-            auto &methodArg = parsedArgs[i];
-            auto &symArg = symMethod.data(ctx)->parameters[i];
+        for (int i = 0; i < parsedParams.size(); i++) {
+            auto &methodParam = parsedParams[i];
+            auto &symParam = symMethod.data(ctx)->parameters[i];
 
-            if (symArg.flags.isKeyword != methodArg.flags.isKeyword) {
+            if (symParam.flags.isKeyword != methodParam.flags.isKeyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
-                                methodArg.local.toString(ctx), methodArg.flags.isKeyword ? "keyword" : "non-keyword");
+                                methodParam.local.toString(ctx),
+                                methodParam.flags.isKeyword ? "keyword" : "non-keyword");
                     e.addErrorLine(
                         sym.loc(ctx),
                         "The corresponding argument `{}` in the previous definition was {}a keyword argument",
-                        symArg.show(ctx), symArg.flags.isKeyword ? "" : "not ");
+                        symParam.show(ctx), symParam.flags.isKeyword ? "" : "not ");
                 }
                 return;
             }
@@ -901,22 +905,22 @@ private:
             // already with the "without matching argument count" error above. So, as long as we have maintained the
             // intended invariants around methods and arguments, we do not need to ever issue an error about
             // non-matching isBlock-ness.
-            ENFORCE(symArg.flags.isBlock == methodArg.flags.isBlock);
-            if (symArg.flags.isRepeated != methodArg.flags.isRepeated) {
+            ENFORCE(symParam.flags.isBlock == methodParam.flags.isBlock);
+            if (symParam.flags.isRepeated != methodParam.flags.isRepeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
-                                methodArg.local.toString(ctx), methodArg.flags.isRepeated ? "splat" : "non-splat");
+                                methodParam.local.toString(ctx), methodParam.flags.isRepeated ? "splat" : "non-splat");
                     e.addErrorLine(sym.loc(ctx),
                                    "The corresponding argument `{}` in the previous definition was {}a splat argument",
-                                   symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
+                                   symParam.show(ctx), symParam.flags.isRepeated ? "" : "not ");
                 }
                 return;
             }
-            if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
+            if (symParam.flags.isKeyword && symParam.name != methodParam.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                        sym.show(ctx), symParam.name.show(ctx), methodParam.local._name.show(ctx));
                     e.addErrorLine(sym.loc(ctx), "Previous definition");
                 }
                 return;

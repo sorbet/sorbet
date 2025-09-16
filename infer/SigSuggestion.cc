@@ -15,17 +15,17 @@ namespace {
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
                              optional<core::NameRef> keyword, int argId) {
     ENFORCE(component.method.exists());
-    const auto &args = component.method.data(ctx)->parameters;
-    if (argId >= args.size()) {
+    const auto &params = component.method.data(ctx)->parameters;
+    if (argId >= params.size()) {
         return nullptr;
     }
 
     core::TypePtr to = nullptr;
     if (keyword.has_value()) {
         auto name = *keyword;
-        for (auto &argInfo : args) {
-            if (argInfo.flags.isKeyword && argInfo.name == name) {
-                to = argInfo.type;
+        for (auto &paramInfo : params) {
+            if (paramInfo.flags.isKeyword && paramInfo.name == name) {
+                to = paramInfo.type;
                 break;
             }
         }
@@ -33,14 +33,14 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
             return nullptr;
         }
     } else {
-        auto &argInfo = args[argId];
-        if (argInfo.flags.isKeyword) {
+        auto &paramInfo = params[argId];
+        if (paramInfo.flags.isKeyword) {
             // TODO(trevor) this is possibly due to the argument being a keyword args splat. Right now we ignore this
             // case, but it would be great to give a hash or shape suggestion instead.
             return nullptr;
         }
 
-        to = argInfo.type;
+        to = paramInfo.type;
     }
 
     if (!to || !to.isFullyDefined()) {
@@ -346,16 +346,16 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         guessedReturnType = methodReturnType;
     }
 
-    auto isBadArg = [&](const core::ArgInfo &arg) -> bool {
+    auto isBadParam = [&](const core::ArgInfo &param) -> bool {
         return
             // runtime does not support rest args and key-rest args
-            arg.flags.isRepeated ||
+            param.flags.isRepeated ||
 
             // sometimes variable does not have a name e.g. `def initialize (*)`
-            arg.name.shortName(ctx).empty();
+            param.name.shortName(ctx).empty();
     };
-    bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->parameters, isBadArg);
-    if (hasBadArg) {
+    bool hasBadParam = absl::c_any_of(methodSymbol.data(ctx)->parameters, isBadParam);
+    if (hasBadParam) {
         return nullopt;
     }
 
@@ -371,9 +371,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             guessedReturnType = closestReturnType;
         }
 
-        for (const auto &arg : closestMethod.data(ctx)->parameters) {
-            if (arg.type && !arg.type.isUntyped()) {
-                guessedArgumentTypes[arg.name] = arg.type;
+        for (const auto &param : closestMethod.data(ctx)->parameters) {
+            if (param.type && !param.type.isUntyped()) {
+                guessedArgumentTypes[param.name] = param.type;
             }
         }
     }
@@ -408,12 +408,12 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         fmt::format_to(std::back_inserter(ss), "params(");
 
         bool first = true;
-        for (auto &argSym : methodSymbol.data(ctx)->parameters) {
+        for (auto &paramInfo : methodSymbol.data(ctx)->parameters) {
             // WARNING: This is doing raw string equality--don't cargo cult this!
             // You almost certainly want to compare NameRef's for equality instead.
             // We need to compare strings here because we're running with a frozen global state
             // (and thus can't take the string that we get from `argumentName` and enter it as a name).
-            if (argSym.argumentName(ctx) == core::Names::blkArg().shortName(ctx)) {
+            if (paramInfo.argumentName(ctx) == core::Names::blkArg().shortName(ctx)) {
                 // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
                 // (We add a block argument to every method if it doesn't mention one.)
                 continue;
@@ -422,10 +422,10 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 fmt::format_to(std::back_inserter(ss), ", ");
             }
             first = false;
-            auto argType = guessedArgumentTypes[argSym.name];
+            auto argType = guessedArgumentTypes[paramInfo.name];
             core::TypePtr chosenType;
 
-            auto oldType = argSym.type;
+            auto oldType = paramInfo.type;
             if (!oldType || oldType.isUntyped()) {
                 if (!argType || argType.isBottom()) {
                     chosenType = core::Types::untypedUntracked();
@@ -438,7 +438,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 chosenType = oldType;
             }
             auto options = core::ShowOptions().withUseValidSyntax();
-            fmt::format_to(std::back_inserter(ss), "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx, options));
+            fmt::format_to(std::back_inserter(ss), "{}: {}", paramInfo.argumentName(ctx),
+                           chosenType.show(ctx, options));
         }
         fmt::format_to(std::back_inserter(ss), ").");
     }

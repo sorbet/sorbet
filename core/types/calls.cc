@@ -350,8 +350,8 @@ size_t getArity(const GlobalState &gs, MethodRef method) {
     ENFORCE(!method.data(gs)->parameters.empty(), "Every method should have at least a block arg.");
     ENFORCE(method.data(gs)->parameters.back().flags.isBlock, "Last arg should be the block arg.");
 
-    const auto &arguments = method.data(gs)->parameters;
-    if (absl::c_any_of(arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; })) {
+    const auto &parameters = method.data(gs)->parameters;
+    if (absl::c_any_of(parameters, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; })) {
         return SIZE_MAX;
     };
 
@@ -431,14 +431,14 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 const auto &[candidate, arity, constr] = *it;
-                const auto &arguments = candidate.data(gs)->parameters;
+                const auto &parameters = candidate.data(gs)->parameters;
                 TypePtr argTypeRaw;
-                if (i < arguments.size() - 1) {
-                    argTypeRaw = arguments[i].type;
+                if (i < parameters.size() - 1) {
+                    argTypeRaw = parameters[i].type;
                 } else if (arity == SIZE_MAX) {
                     auto restArg = absl::c_find_if(
-                        arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; });
-                    ENFORCE(restArg != arguments.end())
+                        parameters, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; });
+                    ENFORCE(restArg != parameters.end())
                     argTypeRaw = restArg->type;
                 } else {
                     it = leftCandidates.erase(it);
@@ -481,17 +481,17 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     { // keep only candidates that have a block iff we are passing one
         auto it = std::remove_if(leftCandidates.begin(), leftCandidates.end(), [&gs, hasBlock](auto &c) -> bool {
             const auto &[candidate, _arity, constr] = c;
-            const auto &args = candidate.data(gs)->parameters;
-            ENFORCE(!args.empty(), "Should at least have a block argument.");
-            const auto &lastArg = args.back();
-            auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
+            const auto &params = candidate.data(gs)->parameters;
+            ENFORCE(!params.empty(), "Should at least have a block argument.");
+            const auto &lastParam = params.back();
+            auto mentionsBlockParam = !lastParam.isSyntheticBlockArgument();
             if (hasBlock) {
-                if (!mentionsBlockArg || lastArg.type == Types::nilClass()) {
+                if (!mentionsBlockParam || lastParam.type == Types::nilClass()) {
                     return true;
                 }
             } else {
-                if (mentionsBlockArg && lastArg.type != nullptr &&
-                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
+                if (mentionsBlockParam && lastParam.type != nullptr &&
+                    (!lastParam.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastParam.type))) {
                     return true;
                 }
             }
@@ -536,12 +536,12 @@ struct ArityComponents {
 ArityComponents arityComponents(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
-    for (const auto &arg : method.data(gs)->parameters) {
-        if (arg.flags.isKeyword || arg.flags.isBlock) {
+    for (const auto &param : method.data(gs)->parameters) {
+        if (param.flags.isKeyword || param.flags.isBlock) {
             // ignore
-        } else if (arg.flags.isDefault) {
+        } else if (param.flags.isDefault) {
             ++optional;
-        } else if (arg.flags.isRepeated) {
+        } else if (param.flags.isRepeated) {
             repeated = true;
         } else {
             ++required;
@@ -969,7 +969,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr->defineDomain(gs, methodData->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwparams = absl::c_any_of(methodData->parameters, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwparams = absl::c_any_of(methodData->parameters, [](const auto &param) { return param.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
@@ -1486,8 +1486,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(methodData->parameters, [&consumed](const ArgInfo &arg) {
-                    return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
+                auto firstKeyword = absl::c_find_if(methodData->parameters, [&consumed](const ArgInfo &param) {
+                    return param.flags.isKeyword && param.flags.isDefault && consumed.count(param.name) == 0;
                 });
                 if (firstKeyword != methodData->parameters.end()) {
                     auto possibleArg = firstKeyword->argumentName(gs);
@@ -1615,25 +1615,25 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
     }
     auto data = method.data(gs);
 
-    vector<TypePtr> args;
-    args.reserve(data->parameters.size());
-    for (const auto &arg : data->parameters) {
-        if (arg.flags.isRepeated) {
-            ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
+    vector<TypePtr> params;
+    params.reserve(data->parameters.size());
+    for (const auto &param : data->parameters) {
+        if (param.flags.isRepeated) {
+            ENFORCE(params.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     method.toString(gs));
-            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
         }
-        ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", method.toString(gs));
-        if (arg.flags.isBlock) {
+        ENFORCE(!param.flags.isKeyword, "getCallArguments does not support kwargs: {}", method.toString(gs));
+        if (param.flags.isBlock) {
             continue;
         }
-        if (arg.type == nullptr) {
-            args.emplace_back(core::Types::untyped(method));
+        if (param.type == nullptr) {
+            params.emplace_back(core::Types::untyped(method));
             continue;
         }
-        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+        params.emplace_back(Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
     }
-    return make_type<TupleType>(move(args));
+    return make_type<TupleType>(move(params));
 }
 } // namespace
 
@@ -2593,9 +2593,9 @@ private:
             return;
         }
 
-        const auto &methodArgs = dispatchComp.method.data(gs)->parameters;
-        ENFORCE(!methodArgs.empty());
-        const auto &blockParam = methodArgs.back();
+        const auto &methodParams = dispatchComp.method.data(gs)->parameters;
+        ENFORCE(!methodParams.empty());
+        const auto &blockParam = methodParams.back();
         ENFORCE(blockParam.flags.isBlock);
         auto for_ = ErrorColors::format("block argument `{}` of method `{}`", blockParam.argumentName(gs),
                                         dispatchComp.method.show(gs));

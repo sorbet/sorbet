@@ -650,8 +650,8 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
         p.putU4(s.id());
     }
     p.putU4(what.parameters.size());
-    for (const auto &a : what.parameters) {
-        pickle(p, a);
+    for (const auto &param : what.parameters) {
+        pickle(p, param);
     }
     pickle(p, what.resultType);
     p.putU4(what.intrinsicOffset);
@@ -681,8 +681,8 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
         }
     }
 
-    int argsSize = p.getU4();
-    for (int i = 0; i < argsSize; i++) {
+    int parametersSize = p.getU4();
+    for (int i = 0; i < parametersSize; i++) {
         result.parameters.emplace_back(unpickleArgInfo(p, gs));
     }
 

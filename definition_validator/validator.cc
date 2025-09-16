@@ -30,19 +30,19 @@ struct Signature {
 
 Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method) {
     Signature sig;
-    for (auto &arg : method.data(gs)->parameters) {
-        if (arg.flags.isBlock) {
-            sig.syntheticBlk = arg.isSyntheticBlockArgument();
+    for (auto &param : method.data(gs)->parameters) {
+        if (param.flags.isBlock) {
+            sig.syntheticBlk = param.isSyntheticBlockArgument();
             continue;
         }
 
-        auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
-        if (arg.flags.isRepeated) {
-            dst.rest = optional<reference_wrapper<const core::ArgInfo>>{arg};
-        } else if (arg.flags.isDefault) {
-            dst.optional.push_back(arg);
+        auto &dst = param.flags.isKeyword ? sig.kw : sig.pos;
+        if (param.flags.isRepeated) {
+            dst.rest = optional<reference_wrapper<const core::ArgInfo>>{param};
+        } else if (param.flags.isDefault) {
+            dst.optional.push_back(param);
         } else {
-            dst.required.push_back(arg);
+            dst.required.push_back(param);
         }
     }
     return sig;
@@ -526,19 +526,19 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                 constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
         }
     } else {
-        const auto &methodBlkArg = method.data(ctx)->parameters.back();
-        const auto &superMethodBlkArg = superMethod.data(ctx)->parameters.back();
+        const auto &methodBlkParam = method.data(ctx)->parameters.back();
+        const auto &superMethodBlkParam = superMethod.data(ctx)->parameters.back();
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodBlkArg.type, method, superMethodBlkArg.type, superMethod,
+        if (!checkSubtype(ctx, *constr, methodBlkParam.type, method, superMethodBlkParam.type, superMethod,
                           core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodBlkArg.argumentName(ctx), methodBlkArg.type.show(ctx),
+                            methodBlkParam.argumentName(ctx), methodBlkParam.type.show(ctx),
                             superMethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
-                               superMethodBlkArg.show(ctx), superMethodBlkArg.type.show(ctx));
+                               superMethodBlkParam.show(ctx), superMethodBlkParam.type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
                 e.maybeAddAutocorrect(
