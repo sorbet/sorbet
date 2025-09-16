@@ -123,7 +123,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesMultipleWatchmanUpdates") {
 
 TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
     auto opts = make_shared<realmain::options::Options>();
-    opts->cacheSensitiveOptions.stripePackages = true;
+    opts->cacheSensitiveOptions.sorbetPackages = true;
     this->resetState(std::move(opts));
 
     writeFilesToFS({

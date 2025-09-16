@@ -295,13 +295,19 @@ Usage:
 
 ```
 
-## STRIPE PACKAGES MODE options
+## SORBET PACKAGES MODE options
 
 ```plaintext
-      --stripe-packages         Enable support for Stripe's internal Ruby package system
+      --stripe-packages         Enable support for Sorbet's experimental Ruby package
+                                system
       --stripe-packages-hint-message arg
-                                Optional hint message to add to packaging related errors
-                                (default: "")
+                                Optional hint message to add to all packaging related
+                                errors (default: "")
+      --sorbet-packages         Enable support for Sorbet's experimental Ruby package
+                                system
+      --sorbet-packages-hint-message arg
+                                Optional hint message to add to all packaging related
+                                errors (default: "")
       --extra-package-files-directory-prefix-underscore <dir>
                                 Extra parent directories which contain package files.
                                 Files are associated to a package using a package's
