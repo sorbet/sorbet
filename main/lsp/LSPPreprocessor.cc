@@ -12,16 +12,14 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
-string readFile(const string &path, const FileSystem &fs) {
+optional<string> readFile(const string &path, const FileSystem &fs) {
     try {
         return fs.readFile(path);
     } catch (FileNotFoundException e) {
-        // Act as if file is completely empty.
         // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman
         // updates that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted
         // files.
-        // TODO(jvilk): Use Tombstone files instead.
-        return "";
+        return std::nullopt;
     }
 }
 
@@ -477,9 +475,13 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentPa
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath)) {
             openFiles.erase(localPath);
             // Use contents of file on disk.
-            auto fileType = core::File::Type::Normal;
             auto fileContents = readFile(localPath, *config->opts.fs);
-            edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
+            if (fileContents.has_value()) {
+                edit->updates.push_back(
+                    make_shared<core::File>(move(localPath), move(fileContents.value()), core::File::Type::Normal, v));
+            } else {
+                edit->updates.push_back(make_shared<core::File>(move(localPath), "", core::File::Type::TombStone, v));
+            }
         }
     }
     return edit;
@@ -495,9 +497,13 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
         // Editor contents supersede file system updates.
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath) &&
             !openFiles.contains(localPath)) {
-            auto fileType = core::File::Type::Normal;
             auto fileContents = readFile(localPath, *config->opts.fs);
-            edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
+            if (fileContents.has_value()) {
+                edit->updates.push_back(
+                    make_shared<core::File>(move(localPath), move(fileContents.value()), core::File::Type::Normal, v));
+            } else {
+                edit->updates.push_back(make_shared<core::File>(move(localPath), "", core::File::Type::TombStone, v));
+            }
         }
     }
     return edit;
