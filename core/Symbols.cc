@@ -2083,7 +2083,7 @@ SymbolRef TypeParameter::dealias(const GlobalState &gs, int depthLimit) const {
     return dealiasWithDefault(gs, this->ref(gs), depthLimit, Symbols::untyped());
 }
 
-bool ParamInfo::isSyntheticBlockArgument() const {
+bool ParamInfo::isSyntheticBlockParameter() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
     return flags.isBlock && !loc.exists();
 }

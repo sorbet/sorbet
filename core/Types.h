@@ -43,7 +43,7 @@ public:
      */
     TypePtr argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
 
-    bool isSyntheticBlockArgument() const;
+    bool isSyntheticBlockParameter() const;
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
     std::string_view argumentName(const GlobalState &gs) const;

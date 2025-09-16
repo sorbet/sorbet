@@ -61,7 +61,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     }
     for (auto &paramInfo : method.data(gs)->parameters) {
         // Don't display synthetic arguments (like blk).
-        if (!paramInfo.isSyntheticBlockArgument()) {
+        if (!paramInfo.isSyntheticBlockParameter()) {
             typeAndArgNames.emplace_back(
                 absl::StrCat(paramInfo.argumentName(gs), ": ",
                              getResultType(gs, paramInfo.type, method, receiver).show(gs, options)));
@@ -146,7 +146,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
     ENFORCE(!parameters.empty(), "Should have at least a block arg");
     for (const auto &argSym : parameters) {
         // Don't display synthetic arguments (like blk).
-        if (argSym.isSyntheticBlockArgument()) {
+        if (argSym.isSyntheticBlockParameter()) {
             continue;
         }
         string prefix = "";

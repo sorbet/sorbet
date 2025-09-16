@@ -393,7 +393,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     ENFORCE(!methodSymbol.data(ctx)->parameters.empty(), "There should always be at least one arg (the block arg).");
     bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->parameters.size() == 1 &&
-                                methodSymbol.data(ctx)->parameters[0].isSyntheticBlockArgument();
+                                methodSymbol.data(ctx)->parameters[0].isSyntheticBlockParameter();
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
         // Only need override / implementation if the parent has a sig

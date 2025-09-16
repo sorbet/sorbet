@@ -3403,7 +3403,7 @@ private:
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
-            bool isSyntheticBlkArg = param.isSyntheticBlockArgument();
+            bool isSyntheticBlkArg = param.isSyntheticBlockParameter();
             bool isBlkArg = param.flags.isBlock;
 
             if (spec != sig.argTypes.end()) {

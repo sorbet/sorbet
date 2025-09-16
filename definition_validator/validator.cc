@@ -32,7 +32,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
     Signature sig;
     for (auto &param : method.data(gs)->parameters) {
         if (param.flags.isBlock) {
-            sig.syntheticBlk = param.isSyntheticBlockArgument();
+            sig.syntheticBlk = param.isSyntheticBlockParameter();
             continue;
         }
 

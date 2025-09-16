@@ -484,7 +484,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             const auto &params = candidate.data(gs)->parameters;
             ENFORCE(!params.empty(), "Should at least have a block argument.");
             const auto &lastParam = params.back();
-            auto mentionsBlockParam = !lastParam.isSyntheticBlockArgument();
+            auto mentionsBlockParam = !lastParam.isSyntheticBlockParameter();
             if (hasBlock) {
                 if (!mentionsBlockParam || lastParam.type == Types::nilClass()) {
                     return true;
@@ -1514,7 +1514,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
         // file or higher and has a sig, which would force the "uses `yield` but does not mention a
-        // block parameter" error, so we can use the heuristic about isSyntheticBlockArgument.
+        // block parameter" error, so we can use the heuristic about isSyntheticBlockParameter.
         // (Some RBI-only strictness levels are technically higher than strict but don't require
         // having written a sig. This usually manifests as `def foo(*_); end` with no sig in an RBI.)
         //
@@ -1524,7 +1524,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto file = methodData->loc().file();
             auto blockLoc = args.blockLoc(gs);
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
-                blockParam.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
+                blockParam.isSyntheticBlockParameter() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : methodData->locs()) {

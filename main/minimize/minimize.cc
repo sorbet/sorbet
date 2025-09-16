@@ -233,7 +233,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
             for (auto &rbiParameter : rbiParameters) {
                 if (first) {
                     first = false;
-                } else if (!(rbiParameter.flags.isBlock && rbiParameter.isSyntheticBlockArgument())) {
+                } else if (!(rbiParameter.flags.isBlock && rbiParameter.isSyntheticBlockParameter())) {
                     outfile.fmt(", ");
                 }
 
@@ -250,7 +250,7 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
                         outfile.fmt("{}:", rbiParameterShortName);
                     }
                 } else if (rbiParameter.flags.isBlock) {
-                    if (!rbiParameter.isSyntheticBlockArgument()) {
+                    if (!rbiParameter.isSyntheticBlockParameter()) {
                         outfile.fmt("&{}", rbiParameterShortName);
                     }
                 } else if (rbiParameter.flags.isDefault) {
