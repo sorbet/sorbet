@@ -2454,12 +2454,6 @@ packages::UnfreezePackages GlobalState::unfreezePackages() {
     return packageDB_.unfreeze();
 }
 
-unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {
-    ENFORCE_NO_TIMER(fref.id() < what->filesUsed());
-    what->files[fref.id()]->sourceType = File::Type::TombStone;
-    return what;
-}
-
 unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     uint32_t hierarchyHash = 0;
