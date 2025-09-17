@@ -329,12 +329,10 @@ public:
         // That might be wrong. Punting for now.
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
-            return make_unique<Send>(loc, std::move(s->receiver), s->method, s->methodLoc.join(tokLoc(eql)),
-                                     std::move(s->args));
+            return make_unique<Send>(loc, std::move(s->receiver), s->method, s->methodLoc, std::move(s->args));
         } else if (auto *s = parser::cast_node<CSend>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
-            return make_unique<CSend>(loc, std::move(s->receiver), s->method, s->methodLoc.join(tokLoc(eql)),
-                                      std::move(s->args));
+            return make_unique<CSend>(loc, std::move(s->receiver), s->method, s->methodLoc, std::move(s->args));
         } else {
             return make_unique<Assign>(loc, std::move(lhs), std::move(rhs));
         }
