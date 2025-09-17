@@ -57,6 +57,7 @@ private:
     // Utility helpers
     pm_constant_id_t addConstantToPool(const char* name);
     pm_location_t getZeroWidthLocation();
+    pm_location_t convertLocOffsets(core::LocOffsets loc);
 };
 
 } // namespace sorbet::rbs

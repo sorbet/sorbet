@@ -305,6 +305,8 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::attrSignature(const pm_cal
 pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
                                                         const RBSDeclaration &declaration,
                                                         const std::vector<Comment> &annotations) {
+    fmt::print("DEBUG: MethodTypeToParserNodePrism::methodSignature called\n");
+
     if (!prismParser) {
         return nullptr; // Need Prism parser for node creation
     }
@@ -329,7 +331,9 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     (void)methodDef;   // Suppress unused warning for now
     (void)annotations; // Suppress unused warning for now
 
-    pm_location_t loc = getZeroWidthLocation();
+    auto fullTypeLoc = declaration.fullTypeLoc();
+    auto firstLineTypeLoc = declaration.firstLineTypeLoc();
+    auto commentLoc = declaration.commentLoc();
 
     // Add method names to constant pool
     pm_constant_id_t sig_method_id = addConstantToPool("sig");
@@ -354,6 +358,8 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     // Create block body based on return type
     pm_node_t *blockBody = nullptr;
+    pm_location_t return_type_loc =
+        convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
 
     if (functionType->return_type->type == RBS_TYPES_BASES_VOID) {
         // Create void call: void
@@ -365,15 +371,20 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         if (!voidCall)
             return nullptr;
 
+        pm_location_t loc = convertLocOffsets(
+            declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
+
         *voidCall = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
                                      .receiver = nullptr, // No explicit receiver (implicit self)
-                                     .call_operator_loc = {.start = nullptr, .end = nullptr},
+                                     .call_operator_loc = loc,
                                      .name = void_id,
-                                     .message_loc = loc,
-                                     .opening_loc = {.start = nullptr, .end = nullptr},
+                                     .message_loc = return_type_loc,
+                                     .opening_loc = return_type_loc,
                                      .arguments = nullptr,
-                                     .closing_loc = {.start = nullptr, .end = nullptr},
+                                     .closing_loc = return_type_loc,
                                      .block = nullptr};
+        // Overall send location for `void`
+        voidCall->base.location = loc;
         blockBody = up_cast(voidCall);
     } else {
         // For non-void types, create returns(Type) call
@@ -395,15 +406,20 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         if (!returnsCall)
             return nullptr;
 
+        pm_location_t loc = convertLocOffsets(
+            declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
+
         *returnsCall = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
                                         .receiver = nullptr, // No explicit receiver (implicit self)
-                                        .call_operator_loc = {.start = nullptr, .end = nullptr},
+                                        .call_operator_loc = loc,
                                         .name = returns_id,
-                                        .message_loc = loc,
-                                        .opening_loc = loc,
+                                        .message_loc = return_type_loc,
+                                        .opening_loc = return_type_loc,
                                         .arguments = down_cast<pm_arguments_node_t>(returnsArguments),
-                                        .closing_loc = loc,
+                                        .closing_loc = return_type_loc,
                                         .block = nullptr};
+        // Overall send location for `returns`
+        returnsCall->base.location = loc;
         blockBody = up_cast(returnsCall);
     }
 
@@ -415,12 +431,19 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     if (!block)
         return nullptr;
 
+    pm_location_t sig_loc = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
+    pm_location_t full_loc = convertLocOffsets(fullTypeLoc);
+    pm_location_t end_zero = convertLocOffsets(fullTypeLoc.copyEndWithZeroLength());
+
     *block = (pm_block_node_t){.base = initializeBaseNode(PM_BLOCK_NODE),
                                .locals = {.size = 0, .capacity = 0, .ids = nullptr},
                                .parameters = nullptr,
                                .body = blockBody,
-                               .opening_loc = loc,
-                               .closing_loc = loc};
+                               .opening_loc = sig_loc,
+                               .closing_loc = end_zero};
+
+    // Set overall block location to cover the full RBS span
+    block->base.location = full_loc;
 
     // Create the main sig call
     pm_call_node_t *call = allocateNode<pm_call_node_t>();
@@ -429,16 +452,18 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     *call = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
                              .receiver = receiver,
-                             .call_operator_loc = loc,
+                             .call_operator_loc = sig_loc,
                              .name = sig_method_id,
-                             .message_loc = loc,
-                             .opening_loc = loc,
+                             .message_loc = sig_loc,
+                             .opening_loc = sig_loc,
                              .arguments = down_cast<pm_arguments_node_t>(arguments),
-                             .closing_loc = loc,
+                             .closing_loc = sig_loc,
                              .block = up_cast(block)};
 
-    (void)declaration; // Suppress unused warning for now
+    // Set overall call location to cover the full RBS span
+    call->base.location = full_loc;
 
+    (void)commentLoc; // Suppress unused warning
     return up_cast(call);
 }
 
@@ -566,5 +591,19 @@ pm_location_t MethodTypeToParserNodePrism::getZeroWidthLocation() {
     return {.start = source_start, .end = source_start};
 }
 
+pm_location_t MethodTypeToParserNodePrism::convertLocOffsets(core::LocOffsets loc) {
+    if (!prismParser) {
+        return {.start = nullptr, .end = nullptr};
+    }
+
+    pm_parser_t *p = prismParser->getInternalParser();
+    const uint8_t *source_start = p->start;
+
+    // Convert byte offsets to pointers
+    const uint8_t *start_ptr = source_start + loc.beginPos();
+    const uint8_t *end_ptr = source_start + loc.endPos();
+
+    return {.start = start_ptr, .end = end_ptr};
+}
 
 } // namespace sorbet::rbs
