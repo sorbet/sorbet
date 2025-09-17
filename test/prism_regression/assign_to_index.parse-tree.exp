@@ -41,6 +41,26 @@ Begin {
       left = Send {
         receiver = Send {
           receiver = NULL
+          method = <U bitwise_or>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U |>
+      right = Integer {
+        val = "3"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
           method = <U bitwise_xor>
           args = [
           ]
@@ -101,6 +121,26 @@ Begin {
       left = Send {
         receiver = Send {
           receiver = NULL
+          method = <U add_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U +>
+      right = Integer {
+        val = "7"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
           method = <U subtract_assign>
           args = [
           ]
@@ -114,14 +154,14 @@ Begin {
       }
       op = <U ->
       right = Integer {
-        val = "7"
+        val = "8"
       }
     }
     OpAsgn {
       left = Send {
         receiver = Send {
           receiver = NULL
-          method = <U module_assign>
+          method = <U modulo_assign>
           args = [
           ]
         }
@@ -133,26 +173,6 @@ Begin {
         ]
       }
       op = <U %>
-      right = Integer {
-        val = "8"
-      }
-    }
-    OpAsgn {
-      left = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U bitwise_or>
-          args = [
-          ]
-        }
-        method = <U []>
-        args = [
-          Integer {
-            val = "0"
-          }
-        ]
-      }
-      op = <U |>
       right = Integer {
         val = "9"
       }
@@ -255,48 +275,318 @@ Begin {
         val = "14"
       }
     }
-    Masgn {
-      lhs = Mlhs {
-        exprs = [
-          Send {
-            receiver = Send {
-              receiver = NULL
-              method = <U target>
-              args = [
-              ]
-            }
-            method = <U []=>
-            args = [
-              Integer {
-                val = "0"
-              }
-            ]
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U regular>
+        args = [
+        ]
+      }
+      method = <U []=>
+      args = [
+        Integer {
+          val = "0"
+        }
+        Integer {
+          val = "101"
+        }
+      ]
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U bitwise_and>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
           }
-          Send {
-            receiver = Send {
-              receiver = NULL
-              method = <U target>
-              args = [
-              ]
-            }
-            method = <U []=>
-            args = [
-              Integer {
-                val = "1"
-              }
-            ]
+          Integer {
+            val = "1"
           }
         ]
       }
-      rhs = Array {
-        elts = [
+      op = <U &>
+      right = Integer {
+        val = "102"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U bitwise_or>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
           Integer {
-            val = "15"
+            val = "0"
           }
           Integer {
-            val = "16"
+            val = "1"
           }
         ]
+      }
+      op = <U |>
+      right = Integer {
+        val = "103"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U bitwise_xor>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U ^>
+      right = Integer {
+        val = "104"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U shift_right>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U >>>
+      right = Integer {
+        val = "105"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U shift_left>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U <<>
+      right = Integer {
+        val = "106"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U add_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U +>
+      right = Integer {
+        val = "107"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U subtract_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U ->
+      right = Integer {
+        val = "108"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U modulo_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U %>
+      right = Integer {
+        val = "109"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U divide_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U />
+      right = Integer {
+        val = "110"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U multiply_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U *>
+      right = Integer {
+        val = "111"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U exponentiate_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      op = <U **>
+      right = Integer {
+        val = "112"
+      }
+    }
+    AndAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U lazy_and_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      right = Integer {
+        val = "113"
+      }
+    }
+    OrAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U lazy_or_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      right = Integer {
+        val = "114"
       }
     }
     Masgn {
@@ -341,16 +631,10 @@ Begin {
       rhs = Array {
         elts = [
           Integer {
-            val = "17"
+            val = "115"
           }
           Integer {
-            val = "18"
-          }
-          Integer {
-            val = "19"
-          }
-          Integer {
-            val = "20"
+            val = "116"
           }
         ]
       }
@@ -365,7 +649,7 @@ Begin {
       method = <U []=>
       args = [
         Integer {
-          val = "21"
+          val = "17"
         }
       ]
     }
@@ -391,132 +675,7 @@ Begin {
       }
       op = <U &>
       right = Integer {
-        val = "2"
-      }
-    }
-    OpAsgn {
-      left = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U bitwise_xor>
-          args = [
-          ]
-        }
-        method = <U []>
-        args = [
-          BlockPass {
-            block = Send {
-              receiver = NULL
-              method = <U blk>
-              args = [
-              ]
-            }
-          }
-        ]
-      }
-      op = <U ^>
-      right = Integer {
-        val = "4"
-      }
-    }
-    OpAsgn {
-      left = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U shift_right>
-          args = [
-          ]
-        }
-        method = <U []>
-        args = [
-          BlockPass {
-            block = Send {
-              receiver = NULL
-              method = <U blk>
-              args = [
-              ]
-            }
-          }
-        ]
-      }
-      op = <U >>>
-      right = Integer {
-        val = "5"
-      }
-    }
-    OpAsgn {
-      left = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U shift_left>
-          args = [
-          ]
-        }
-        method = <U []>
-        args = [
-          BlockPass {
-            block = Send {
-              receiver = NULL
-              method = <U blk>
-              args = [
-              ]
-            }
-          }
-        ]
-      }
-      op = <U <<>
-      right = Integer {
-        val = "6"
-      }
-    }
-    OpAsgn {
-      left = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U subtract_assign>
-          args = [
-          ]
-        }
-        method = <U []>
-        args = [
-          BlockPass {
-            block = Send {
-              receiver = NULL
-              method = <U blk>
-              args = [
-              ]
-            }
-          }
-        ]
-      }
-      op = <U ->
-      right = Integer {
-        val = "7"
-      }
-    }
-    OpAsgn {
-      left = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U module_assign>
-          args = [
-          ]
-        }
-        method = <U []>
-        args = [
-          BlockPass {
-            block = Send {
-              receiver = NULL
-              method = <U blk>
-              args = [
-              ]
-            }
-          }
-        ]
-      }
-      op = <U %>
-      right = Integer {
-        val = "8"
+        val = "202"
       }
     }
     OpAsgn {
@@ -541,7 +700,157 @@ Begin {
       }
       op = <U |>
       right = Integer {
-        val = "9"
+        val = "203"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U bitwise_xor>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          BlockPass {
+            block = Send {
+              receiver = NULL
+              method = <U blk>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+      op = <U ^>
+      right = Integer {
+        val = "204"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U shift_right>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          BlockPass {
+            block = Send {
+              receiver = NULL
+              method = <U blk>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+      op = <U >>>
+      right = Integer {
+        val = "205"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U shift_left>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          BlockPass {
+            block = Send {
+              receiver = NULL
+              method = <U blk>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+      op = <U <<>
+      right = Integer {
+        val = "206"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U add_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          BlockPass {
+            block = Send {
+              receiver = NULL
+              method = <U blk>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+      op = <U +>
+      right = Integer {
+        val = "207"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U subtract_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          BlockPass {
+            block = Send {
+              receiver = NULL
+              method = <U blk>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+      op = <U ->
+      right = Integer {
+        val = "208"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U modulo_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          BlockPass {
+            block = Send {
+              receiver = NULL
+              method = <U blk>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+      op = <U %>
+      right = Integer {
+        val = "209"
       }
     }
     OpAsgn {
@@ -566,7 +875,7 @@ Begin {
       }
       op = <U />
       right = Integer {
-        val = "10"
+        val = "200"
       }
     }
     OpAsgn {
@@ -591,7 +900,7 @@ Begin {
       }
       op = <U *>
       right = Integer {
-        val = "11"
+        val = "201"
       }
     }
     OpAsgn {
@@ -616,7 +925,7 @@ Begin {
       }
       op = <U **>
       right = Integer {
-        val = "12"
+        val = "202"
       }
     }
     AndAsgn {
@@ -640,7 +949,7 @@ Begin {
         ]
       }
       right = Integer {
-        val = "13"
+        val = "203"
       }
     }
     OrAsgn {
@@ -664,7 +973,7 @@ Begin {
         ]
       }
       right = Integer {
-        val = "14"
+        val = "204"
       }
     }
     Masgn {
@@ -706,7 +1015,7 @@ Begin {
         ]
       }
       rhs = Integer {
-        val = "4"
+        val = "205"
       }
     }
   ]

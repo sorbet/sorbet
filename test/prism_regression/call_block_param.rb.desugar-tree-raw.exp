@@ -411,6 +411,25 @@ ClassDef{
       ]
     }
 
+    Send{
+      flags = {privateOk}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <call-with-block-pass>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        Self
+        Literal{ value = :foo }
+        UnresolvedIdent{
+          kind = Local
+          name = <U &>
+        }
+      ]
+    }
+
     InsSeq{
       stats = [
         Assign{

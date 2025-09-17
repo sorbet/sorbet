@@ -19,6 +19,15 @@ Begin {
     }
     OpAsgn {
       left = GVarLhs {
+        name = <U $bitwise_or>
+      }
+      op = <U |>
+      right = Integer {
+        val = "3"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
         name = <U $bitwise_xor>
       }
       op = <U ^>
@@ -46,27 +55,27 @@ Begin {
     }
     OpAsgn {
       left = GVarLhs {
-        name = <U $subtract_assign>
+        name = <U $add_assign>
       }
-      op = <U ->
+      op = <U +>
       right = Integer {
         val = "7"
       }
     }
     OpAsgn {
       left = GVarLhs {
-        name = <U $module_assign>
+        name = <U $subtract_assign>
       }
-      op = <U %>
+      op = <U ->
       right = Integer {
         val = "8"
       }
     }
     OpAsgn {
       left = GVarLhs {
-        name = <U $bitwise_or>
+        name = <U $modulo_assign>
       }
-      op = <U |>
+      op = <U %>
       right = Integer {
         val = "9"
       }

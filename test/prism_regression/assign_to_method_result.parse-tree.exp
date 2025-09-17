@@ -31,6 +31,19 @@ Begin {
         args = [
         ]
       }
+      op = <U |>
+      right = Integer {
+        val = "3"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Self {
+        }
+        method = <U m>
+        args = [
+        ]
+      }
       op = <U ^>
       right = Integer {
         val = "4"
@@ -70,7 +83,7 @@ Begin {
         args = [
         ]
       }
-      op = <U ->
+      op = <U +>
       right = Integer {
         val = "7"
       }
@@ -83,7 +96,7 @@ Begin {
         args = [
         ]
       }
-      op = <U %>
+      op = <U ->
       right = Integer {
         val = "8"
       }
@@ -96,7 +109,7 @@ Begin {
         args = [
         ]
       }
-      op = <U |>
+      op = <U %>
       right = Integer {
         val = "9"
       }

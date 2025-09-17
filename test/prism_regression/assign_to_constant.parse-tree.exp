@@ -22,6 +22,16 @@ Begin {
     OpAsgn {
       left = ConstLhs {
         scope = NULL
+        name = <C <U BITWISE_OR>>
+      }
+      op = <U |>
+      right = Integer {
+        val = "3"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
         name = <C <U BITWISE_XOR>>
       }
       op = <U ^>
@@ -52,9 +62,9 @@ Begin {
     OpAsgn {
       left = ConstLhs {
         scope = NULL
-        name = <C <U SUBTRACT_ASSIGN>>
+        name = <C <U ADD_ASSIGN>>
       }
-      op = <U ->
+      op = <U +>
       right = Integer {
         val = "7"
       }
@@ -62,21 +72,11 @@ Begin {
     OpAsgn {
       left = ConstLhs {
         scope = NULL
-        name = <C <U MODULE_ASSIGN>>
+        name = <C <U SUBTRACT_ASSIGN>>
       }
-      op = <U %>
+      op = <U ->
       right = Integer {
         val = "8"
-      }
-    }
-    OpAsgn {
-      left = ConstLhs {
-        scope = NULL
-        name = <C <U BITWISE_OR>>
-      }
-      op = <U |>
-      right = Integer {
-        val = "9"
       }
     }
     OpAsgn {
@@ -85,6 +85,16 @@ Begin {
         name = <C <U DIVIDE_ASSIGN>>
       }
       op = <U />
+      right = Integer {
+        val = "9"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U MODULO_ASSIGN>>
+      }
+      op = <U %>
       right = Integer {
         val = "10"
       }
@@ -143,10 +153,10 @@ Begin {
       rhs = Array {
         elts = [
           Integer {
-            val = "29"
+            val = "15"
           }
           Integer {
-            val = "30"
+            val = "16"
           }
         ]
       }
@@ -160,7 +170,204 @@ Begin {
         name = <C <U REGULAR>>
       }
       rhs = Integer {
-        val = "15"
+        val = "101"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U BITWISE_AND>>
+      }
+      op = <U &>
+      right = Integer {
+        val = "102"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U BITWISE_OR>>
+      }
+      op = <U |>
+      right = Integer {
+        val = "103"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U BITWISE_XOR>>
+      }
+      op = <U ^>
+      right = Integer {
+        val = "104"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SHIFT_RIGHT>>
+      }
+      op = <U >>>
+      right = Integer {
+        val = "105"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SHIFT_LEFT>>
+      }
+      op = <U <<>
+      right = Integer {
+        val = "106"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U ADD_ASSIGN>>
+      }
+      op = <U +>
+      right = Integer {
+        val = "107"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SUBTRACT_ASSIGN>>
+      }
+      op = <U ->
+      right = Integer {
+        val = "108"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U MODULO_ASSIGN>>
+      }
+      op = <U %>
+      right = Integer {
+        val = "109"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U DIVIDE_ASSIGN>>
+      }
+      op = <U />
+      right = Integer {
+        val = "110"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U MULTIPLY_ASSIGN>>
+      }
+      op = <U *>
+      right = Integer {
+        val = "111"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U EXPONENTIATE_ASSIGN>>
+      }
+      op = <U **>
+      right = Integer {
+        val = "112"
+      }
+    }
+    AndAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U LAZY_AND_ASSIGN>>
+      }
+      right = Integer {
+        val = "113"
+      }
+    }
+    OrAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U LAZY_OR_ASSGIN>>
+      }
+      right = Integer {
+        val = "114"
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          ConstLhs {
+            scope = Const {
+              scope = NULL
+              name = <C <U ConstantPath>>
+            }
+            name = <C <U TARGET1>>
+          }
+          ConstLhs {
+            scope = Const {
+              scope = NULL
+              name = <C <U ConstantPath>>
+            }
+            name = <C <U TARGET2>>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "115"
+          }
+          Integer {
+            val = "116"
+          }
+        ]
       }
     }
     Assign {
@@ -176,161 +383,226 @@ Begin {
         name = <C <U REGULAR>>
       }
       rhs = Integer {
-        val = "16"
+        val = "201"
       }
     }
     OpAsgn {
       left = ConstLhs {
         scope = Const {
-          scope = NULL
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
           name = <C <U ConstantPath>>
         }
         name = <C <U BITWISE_AND>>
       }
       op = <U &>
       right = Integer {
-        val = "17"
+        val = "202"
       }
     }
     OpAsgn {
       left = ConstLhs {
         scope = Const {
-          scope = NULL
-          name = <C <U ConstantPath>>
-        }
-        name = <C <U BITWISE_XOR>>
-      }
-      op = <U ^>
-      right = Integer {
-        val = "18"
-      }
-    }
-    OpAsgn {
-      left = ConstLhs {
-        scope = Const {
-          scope = NULL
-          name = <C <U ConstantPath>>
-        }
-        name = <C <U SHIFT_RIGHT>>
-      }
-      op = <U >>>
-      right = Integer {
-        val = "19"
-      }
-    }
-    OpAsgn {
-      left = ConstLhs {
-        scope = Const {
-          scope = NULL
-          name = <C <U ConstantPath>>
-        }
-        name = <C <U SHIFT_LEFT>>
-      }
-      op = <U <<>
-      right = Integer {
-        val = "20"
-      }
-    }
-    OpAsgn {
-      left = ConstLhs {
-        scope = Const {
-          scope = NULL
-          name = <C <U ConstantPath>>
-        }
-        name = <C <U SUBTRACT_ASSIGN>>
-      }
-      op = <U ->
-      right = Integer {
-        val = "21"
-      }
-    }
-    OpAsgn {
-      left = ConstLhs {
-        scope = Const {
-          scope = NULL
-          name = <C <U ConstantPath>>
-        }
-        name = <C <U MODULE_ASSIGN>>
-      }
-      op = <U %>
-      right = Integer {
-        val = "22"
-      }
-    }
-    OpAsgn {
-      left = ConstLhs {
-        scope = Const {
-          scope = NULL
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
           name = <C <U ConstantPath>>
         }
         name = <C <U BITWISE_OR>>
       }
       op = <U |>
       right = Integer {
-        val = "23"
+        val = "203"
       }
     }
     OpAsgn {
       left = ConstLhs {
         scope = Const {
-          scope = NULL
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U BITWISE_XOR>>
+      }
+      op = <U ^>
+      right = Integer {
+        val = "204"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SHIFT_RIGHT>>
+      }
+      op = <U >>>
+      right = Integer {
+        val = "205"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SHIFT_LEFT>>
+      }
+      op = <U <<>
+      right = Integer {
+        val = "206"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U ADD_ASSIGN>>
+      }
+      op = <U +>
+      right = Integer {
+        val = "207"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SUBTRACT_ASSIGN>>
+      }
+      op = <U ->
+      right = Integer {
+        val = "208"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U MODULO_ASSIGN>>
+      }
+      op = <U %>
+      right = Integer {
+        val = "209"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
           name = <C <U ConstantPath>>
         }
         name = <C <U DIVIDE_ASSIGN>>
       }
       op = <U />
       right = Integer {
-        val = "24"
+        val = "210"
       }
     }
     OpAsgn {
       left = ConstLhs {
         scope = Const {
-          scope = NULL
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
           name = <C <U ConstantPath>>
         }
         name = <C <U MULTIPLY_ASSIGN>>
       }
       op = <U *>
       right = Integer {
-        val = "25"
+        val = "211"
       }
     }
     OpAsgn {
       left = ConstLhs {
         scope = Const {
-          scope = NULL
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
           name = <C <U ConstantPath>>
         }
         name = <C <U EXPONENTIATE_ASSIGN>>
       }
       op = <U **>
       right = Integer {
-        val = "26"
+        val = "312"
       }
     }
     AndAsgn {
       left = ConstLhs {
         scope = Const {
-          scope = NULL
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
           name = <C <U ConstantPath>>
         }
         name = <C <U LAZY_AND_ASSIGN>>
       }
       right = Integer {
-        val = "27"
+        val = "313"
       }
     }
     OrAsgn {
       left = ConstLhs {
         scope = Const {
-          scope = NULL
+          scope = Const {
+            scope = Cbase {
+            }
+            name = <C <U FullyQualified>>
+          }
           name = <C <U ConstantPath>>
         }
         name = <C <U LAZY_OR_ASSGIN>>
       }
       right = Integer {
-        val = "28"
+        val = "314"
       }
     }
     Masgn {
@@ -338,37 +610,10 @@ Begin {
         exprs = [
           ConstLhs {
             scope = Const {
-              scope = NULL
-              name = <C <U ConstantPath>>
-            }
-            name = <C <U TARGET1>>
-          }
-          ConstLhs {
-            scope = Const {
-              scope = NULL
-              name = <C <U ConstantPath>>
-            }
-            name = <C <U TARGET2>>
-          }
-        ]
-      }
-      rhs = Array {
-        elts = [
-          Integer {
-            val = "31"
-          }
-          Integer {
-            val = "32"
-          }
-        ]
-      }
-    }
-    Masgn {
-      lhs = Mlhs {
-        exprs = [
-          ConstLhs {
-            scope = Const {
-              scope = Cbase {
+              scope = Const {
+                scope = Cbase {
+                }
+                name = <C <U FullyQualified>>
               }
               name = <C <U ConstantPath>>
             }
@@ -376,7 +621,10 @@ Begin {
           }
           ConstLhs {
             scope = Const {
-              scope = Cbase {
+              scope = Const {
+                scope = Cbase {
+                }
+                name = <C <U FullyQualified>>
               }
               name = <C <U ConstantPath>>
             }
@@ -387,10 +635,10 @@ Begin {
       rhs = Array {
         elts = [
           Integer {
-            val = "33"
+            val = "315"
           }
           Integer {
-            val = "34"
+            val = "316"
           }
         ]
       }
@@ -415,6 +663,15 @@ Begin {
             op = <U &>
             right = Integer {
               val = "2"
+            }
+          }
+          OpAsgn {
+            left = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            op = <U |>
+            right = Integer {
+              val = "3"
             }
           }
           OpAsgn {
@@ -448,7 +705,7 @@ Begin {
             left = LVarLhs {
               name = <U <dynamic-const-assign>>
             }
-            op = <U ->
+            op = <U +>
             right = Integer {
               val = "7"
             }
@@ -457,7 +714,7 @@ Begin {
             left = LVarLhs {
               name = <U <dynamic-const-assign>>
             }
-            op = <U %>
+            op = <U ->
             right = Integer {
               val = "8"
             }
@@ -466,7 +723,7 @@ Begin {
             left = LVarLhs {
               name = <U <dynamic-const-assign>>
             }
-            op = <U |>
+            op = <U %>
             right = Integer {
               val = "9"
             }
@@ -549,6 +806,19 @@ Begin {
                 scope = NULL
                 name = <C <U ConstantPath>>
               }
+              name = <C <U DynamicConstantBitwiseOr>>
+            }
+            op = <U |>
+            right = Integer {
+              val = "3"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = NULL
+                name = <C <U ConstantPath>>
+              }
               name = <C <U DynamicConstantBitwiseXor>>
             }
             op = <U ^>
@@ -588,9 +858,9 @@ Begin {
                 scope = NULL
                 name = <C <U ConstantPath>>
               }
-              name = <C <U DynamicConstantSubtractAssign>>
+              name = <C <U DynamicConstantAddAssign>>
             }
-            op = <U ->
+            op = <U +>
             right = Integer {
               val = "7"
             }
@@ -601,9 +871,9 @@ Begin {
                 scope = NULL
                 name = <C <U ConstantPath>>
               }
-              name = <C <U DynamicConstantModuleAssign>>
+              name = <C <U DynamicConstantSubtractAssign>>
             }
-            op = <U %>
+            op = <U ->
             right = Integer {
               val = "8"
             }
@@ -614,9 +884,9 @@ Begin {
                 scope = NULL
                 name = <C <U ConstantPath>>
               }
-              name = <C <U DynamicConstantBitwiseOr>>
+              name = <C <U DynamicConstantModuloAssign>>
             }
-            op = <U |>
+            op = <U %>
             right = Integer {
               val = "9"
             }
@@ -676,6 +946,241 @@ Begin {
             left = ConstLhs {
               scope = Const {
                 scope = NULL
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantLazyOrAssgin>>
+            }
+            right = Integer {
+              val = "14"
+            }
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U method3>
+      params = NULL
+      body = Begin {
+        stmts = [
+          Assign {
+            lhs = LVarLhs {
+              name = <U <dynamic-const-assign>>
+            }
+            rhs = Integer {
+              val = "1"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantBitwiseAnd>>
+            }
+            op = <U &>
+            right = Integer {
+              val = "2"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantBitwiseOr>>
+            }
+            op = <U |>
+            right = Integer {
+              val = "3"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantBitwiseXor>>
+            }
+            op = <U ^>
+            right = Integer {
+              val = "4"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantShiftRight>>
+            }
+            op = <U >>>
+            right = Integer {
+              val = "5"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantShiftLeft>>
+            }
+            op = <U <<>
+            right = Integer {
+              val = "6"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantAddAssign>>
+            }
+            op = <U +>
+            right = Integer {
+              val = "7"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantSubtractAssign>>
+            }
+            op = <U ->
+            right = Integer {
+              val = "8"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantModuloAssign>>
+            }
+            op = <U %>
+            right = Integer {
+              val = "9"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantDivideAssign>>
+            }
+            op = <U />
+            right = Integer {
+              val = "10"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantMultiplyAssign>>
+            }
+            op = <U *>
+            right = Integer {
+              val = "11"
+            }
+          }
+          OpAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantExponentiateAssign>>
+            }
+            op = <U **>
+            right = Integer {
+              val = "12"
+            }
+          }
+          AndAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
+                name = <C <U ConstantPath>>
+              }
+              name = <C <U DynamicConstantLazyAndAssign>>
+            }
+            right = Integer {
+              val = "13"
+            }
+          }
+          OrAsgn {
+            left = ConstLhs {
+              scope = Const {
+                scope = Const {
+                  scope = Cbase {
+                  }
+                  name = <C <U FullyQualified>>
+                }
                 name = <C <U ConstantPath>>
               }
               name = <C <U DynamicConstantLazyOrAssgin>>
