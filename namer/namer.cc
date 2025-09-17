@@ -1412,13 +1412,13 @@ private:
                                            oldSym);
                 typeMemberName = ctx.state.nextMangledName(onSymbol, typeMemberName);
             }
-            ensureNoPackageConflict(ctx, onSymbol, typeMemberName, typeMember.nameLoc);
             sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMemberName, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
             sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, todo, todo);
         }
+        ensureNoPackageConflict(ctx, onSymbol, typeMemberName, typeMember.nameLoc);
 
         if (isTypeTemplate) {
             auto typeTemplateAliasName = typeMember.name;
