@@ -212,6 +212,15 @@ Begin {
         }
       ]
     }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        BlockPass {
+          block = NULL
+        }
+      ]
+    }
     Block {
       send = CSend {
         receiver = Send {

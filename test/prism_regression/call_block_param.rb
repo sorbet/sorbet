@@ -32,6 +32,8 @@ foo { |bar; baz, qux| }
 
 foo(&forwarded_block)
 
+foo(&) # Anonymous block pass argument
+
 foo&.bar {}
 
 foo do |(*args)|
