@@ -873,7 +873,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                        const auto toReplace = args.name.toString(gs);
+                        auto toReplace = args.name.shortName(gs);
+                        if (isSetter) {
+                            toReplace.remove_suffix(1);
+                        }
                         if (args.funLoc().source(gs) != toReplace) {
                             auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
                                                                                   : possibleSymbol.show(gs);
@@ -892,9 +895,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                        const auto replacement = possibleSymbol.name(gs).toString(gs);
+                        auto replacement = possibleSymbol.name(gs).shortName(gs);
+                        if (isSetter && possibleSymbol.name(gs).isSetter(gs)) {
+                            replacement.remove_suffix(1);
+                        }
                         if (replacement != toReplace) {
-                            e.didYouMean(replacement, args.funLoc());
+                            e.didYouMean(string(replacement), args.funLoc());
                             e.addErrorLine(possibleSymbol.loc(gs), "Defined here");
                             continue;
                         }
