@@ -109,7 +109,7 @@ InsSeq{
                     }
                     default_ = Literal{ value = 1 }
                   }
-                  RestArg{ expr = Local{
+                  RestParam{ expr = Local{
                     localVariable = <U c>$1
                   } }
                   KeywordArg{ expr = Local{
@@ -121,7 +121,7 @@ InsSeq{
                     } }
                     default_ = Literal{ value = 2 }
                   }
-                  RestArg{ expr = KeywordArg{ expr = Local{
+                  RestParam{ expr = KeywordArg{ expr = Local{
                     localVariable = <U f>$1
                   } } }
                   BlockArg{ expr = Local{

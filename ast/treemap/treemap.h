@@ -632,7 +632,7 @@ private:
                 case Tag::UnresolvedIdent:
                     return mapUnresolvedIdent(Funcs::pass(what), ctx);
 
-                case Tag::RestArg:
+                case Tag::RestParam:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 

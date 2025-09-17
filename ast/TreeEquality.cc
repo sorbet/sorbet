@@ -177,9 +177,9 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             return a->kind == b->kind && Comparator::compareNames(gs, a->name, b->name);
         }
 
-        case Tag::RestArg: {
-            auto *a = reinterpret_cast<const RestArg *>(tree);
-            auto *b = reinterpret_cast<const RestArg *>(other);
+        case Tag::RestParam: {
+            auto *a = reinterpret_cast<const RestParam *>(tree);
+            auto *b = reinterpret_cast<const RestParam *>(other);
             return Comparator::compareNodes(gs, avoid, a->expr, b->expr, file);
         }
 
@@ -473,7 +473,7 @@ EQUAL_IMPL(RescueCase);
 EQUAL_IMPL(Rescue);
 EQUAL_IMPL(Local);
 EQUAL_IMPL(UnresolvedIdent);
-EQUAL_IMPL(RestArg);
+EQUAL_IMPL(RestParam);
 EQUAL_IMPL(KeywordArg);
 EQUAL_IMPL(OptionalParam);
 EQUAL_IMPL(BlockArg);

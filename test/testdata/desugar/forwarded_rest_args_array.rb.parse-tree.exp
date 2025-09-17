@@ -4,7 +4,7 @@ Begin {
       name = <U forwarded_rest_args>
       params = Params {
         params = [
-          Restarg {
+          RestParam {
             name = <U *>
           }
         ]
@@ -47,7 +47,7 @@ Begin {
       name = <U start_dotdotdot>
       params = Params {
         params = [
-          Restarg {
+          RestParam {
             name = <U *>
           }
           ForwardArg {

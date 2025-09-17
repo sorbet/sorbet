@@ -2,5 +2,5 @@ s(:def, :f,
   s(:params,
     s(:mlhs,
       s(:param, :a),
-      s(:restarg, :*),
+      s(:restparam, :*),
       s(:param, :p))), nil)

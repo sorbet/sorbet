@@ -1412,8 +1412,8 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             break;
         }
 
-        case ast::Tag::RestArg: {
-            auto &a = ast::cast_tree_nonnull<ast::RestArg>(what);
+        case ast::Tag::RestParam: {
+            auto &a = ast::cast_tree_nonnull<ast::RestParam>(what);
             pickle(p, a.loc);
             pickle(p, a.expr);
             break;
@@ -1718,10 +1718,10 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             }
             return ast::make_expression<ast::RescueCase>(loc, std::move(exceptions), std::move(var), std::move(body));
         }
-        case ast::Tag::RestArg: {
+        case ast::Tag::RestParam: {
             auto loc = unpickleLocOffsets(p);
             auto ref = unpickleExpr(p, gs);
-            return ast::make_expression<ast::RestArg>(loc, std::move(ref));
+            return ast::make_expression<ast::RestParam>(loc, std::move(ref));
         }
         case ast::Tag::KeywordArg: {
             auto loc = unpickleLocOffsets(p);

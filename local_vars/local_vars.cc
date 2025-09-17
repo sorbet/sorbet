@@ -91,7 +91,7 @@ class LocalNameInserter {
                     *cursor = ast::make_expression<ast::Local>(nm.loc, named.local);
                     cursor = nullptr;
                 },
-                [&](ast::RestArg &rest) {
+                [&](ast::RestParam &rest) {
                     named.flags.repeated = true;
                     cursor = &rest.expr;
                 },

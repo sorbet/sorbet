@@ -15,7 +15,7 @@ core::ParsedParam parseParam(const ast::ExpressionPtr &param) {
     while (cursor != nullptr) {
         typecase(
             *cursor,
-            [&](const ast::RestArg &rest) {
+            [&](const ast::RestParam &rest) {
                 parsedParam.flags.isRepeated = true;
                 cursor = &rest.expr;
             },
@@ -50,7 +50,8 @@ ExpressionPtr getDefaultValue(ExpressionPtr param) {
     bool done = false;
     while (!done) {
         typecase(
-            *cursor, [&](ast::RestArg &rest) { cursor = &rest.expr; }, [&](ast::KeywordArg &kw) { cursor = &kw.expr; },
+            *cursor, [&](ast::RestParam &rest) { cursor = &rest.expr; },
+            [&](ast::KeywordArg &kw) { cursor = &kw.expr; },
             [&](ast::OptionalParam &opt) {
                 cursor = &opt.default_;
                 done = true;

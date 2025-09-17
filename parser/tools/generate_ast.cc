@@ -654,8 +654,8 @@ NodeDef nodes[] = {
     },
     // A *rest argument inside a Params node.
     {
-        "Restarg",
-        "restarg",
+        "RestParam",
+        "restparam",
         vector<FieldDef>({{"name", FieldType::Name}, {"nameLoc", FieldType::Loc}}),
     },
     // `retry` keyword

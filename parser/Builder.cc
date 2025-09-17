@@ -270,22 +270,22 @@ public:
         if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
-        validateNoForwardArgAfterRestArg(args);
+        validateNoForwardArgAfterRestParam(args);
 
         return make_unique<Params>(collectionLoc(begin, args, end), std::move(args));
     }
 
-    void validateNoForwardArgAfterRestArg(const sorbet::parser::NodeVec &args) {
-        bool restArg = false;
+    void validateNoForwardArgAfterRestParam(const sorbet::parser::NodeVec &args) {
+        bool restParam = false;
         bool forwardArg = false;
         for (auto &arg : args) {
-            if (parser::isa_node<Restarg>(arg.get())) {
-                restArg = true;
+            if (parser::isa_node<RestParam>(arg.get())) {
+                restParam = true;
             } else if (parser::isa_node<ForwardArg>(arg.get())) {
                 forwardArg = true;
             }
         }
-        if (forwardArg && restArg) {
+        if (forwardArg && restParam) {
             error(ruby_parser::dclass::ForwardArgAfterRestArg, args[0].get()->loc);
         }
     }
@@ -1494,13 +1494,13 @@ public:
             nm = core::Names::star();
         }
 
-        return make_unique<Restarg>(loc, nm, nameLoc);
+        return make_unique<RestParam>(loc, nm, nameLoc);
     }
 
     unique_ptr<Node> implicit_restarg(const token *trailingComma) {
         auto loc = tokLoc(trailingComma).copyEndWithZeroLength();
         auto name = core::Names::restargs();
-        return make_unique<Restarg>(loc, name, loc);
+        return make_unique<RestParam>(loc, name, loc);
     }
 
     unique_ptr<Node> self_(const token *tok) {
@@ -1761,8 +1761,8 @@ public:
                 hasDuplicateParam(requiredParam->name, requiredParam->loc, map);
             } else if (auto *optParam = parser::cast_node<OptParam>(thisParam.get())) {
                 hasDuplicateParam(optParam->name, optParam->loc, map);
-            } else if (auto *restarg = parser::cast_node<Restarg>(thisParam.get())) {
-                hasDuplicateParam(restarg->name, restarg->loc, map);
+            } else if (auto *restParam = parser::cast_node<RestParam>(thisParam.get())) {
+                hasDuplicateParam(restParam->name, restParam->loc, map);
             } else if (auto *blockarg = parser::cast_node<Blockarg>(thisParam.get())) {
                 hasDuplicateParam(blockarg->name, blockarg->loc, map);
             } else if (auto *kwarg = parser::cast_node<Kwarg>(thisParam.get())) {

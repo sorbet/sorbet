@@ -13,7 +13,7 @@ Begin {
               val = "2"
             }
           }
-          Restarg {
+          RestParam {
             name = <U c>
           }
           Kwarg {
@@ -39,7 +39,7 @@ Begin {
       name = <U foo>
       params = Params {
         params = [
-          Restarg {
+          RestParam {
             name = <U *>
           }
           Kwrestarg {

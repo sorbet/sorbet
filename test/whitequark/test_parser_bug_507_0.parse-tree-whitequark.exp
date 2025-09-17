@@ -4,4 +4,4 @@ s(:assign,
     s(:send,
       s(:const, nil, :Kernel), :lambda),
     s(:params,
-      s(:restarg, :args)), nil))
+      s(:restparam, :args)), nil))

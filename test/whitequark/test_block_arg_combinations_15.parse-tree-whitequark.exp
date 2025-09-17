@@ -1,4 +1,4 @@
 s(:block,
   s(:send, nil, :f),
   s(:params,
-    s(:restarg, :s)), nil)
+    s(:restparam, :s)), nil)

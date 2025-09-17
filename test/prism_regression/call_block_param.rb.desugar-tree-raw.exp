@@ -570,7 +570,7 @@ ClassDef{
       fun = <U foo>
       block = Block {
         params = [
-          RestArg{ expr = UnresolvedIdent{
+          RestParam{ expr = UnresolvedIdent{
             kind = Local
             name = <U args>
           } }

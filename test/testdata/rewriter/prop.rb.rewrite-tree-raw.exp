@@ -1076,7 +1076,7 @@ ClassDef{
         MethodDef{
           flags = {self}
           name = <U prop><<U <todo method>>>
-          params = [RestArg{ expr = UnresolvedIdent{
+          params = [RestParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U args>
             } }, BlockArg{ expr = UnresolvedIdent{

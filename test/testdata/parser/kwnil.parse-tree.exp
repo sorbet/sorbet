@@ -14,7 +14,7 @@ Begin {
       name = <U f2>
       params = Params {
         params = [
-          Restarg {
+          RestParam {
             name = <U args>
           }
           Kwnilarg {
@@ -52,7 +52,7 @@ Begin {
           Param {
             name = <U b>
           }
-          Restarg {
+          RestParam {
             name = <U c>
           }
           Kwnilarg {
@@ -106,7 +106,7 @@ Begin {
           Param {
             name = <U b>
           }
-          Restarg {
+          RestParam {
             name = <U c>
           }
           Kwnilarg {

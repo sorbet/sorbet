@@ -1240,9 +1240,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_IMPLICIT_REST_NODE: { // An implicit splat, like the `,` in `a, = 1, 2, 3`
             auto restLoc = core::LocOffsets{location.beginLoc + 1, location.beginLoc + 1};
             core::NameRef sorbetName = core::Names::restargs();
-            auto expr = MK::RestArg(restLoc, MK::Local(restLoc, sorbetName));
+            auto expr = MK::RestParam(restLoc, MK::Local(restLoc, sorbetName));
 
-            return make_node_with_expr<parser::Restarg>(move(expr), restLoc, sorbetName, restLoc);
+            return make_node_with_expr<parser::RestParam>(move(expr), restLoc, sorbetName, restLoc);
         }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
             return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
@@ -1450,8 +1450,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             auto kwrestLoc = core::LocOffsets{location.beginPos() + 2, location.endPos()};
-            return make_node_with_expr<parser::Kwrestarg>(MK::RestArg(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)),
-                                                          kwrestLoc, sorbetName);
+            return make_node_with_expr<parser::Kwrestarg>(
+                MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)), kwrestLoc, sorbetName);
         }
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
             auto lambdaNode = down_cast<pm_lambda_node>(node);
@@ -1829,8 +1829,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 nameLoc = location;
             }
 
-            auto expr = MK::RestArg(location, MK::Local(nameLoc, sorbetName));
-            return make_node_with_expr<parser::Restarg>(move(expr), location, sorbetName, nameLoc);
+            auto expr = MK::RestParam(location, MK::Local(nameLoc, sorbetName));
+            return make_node_with_expr<parser::RestParam>(move(expr), location, sorbetName, nameLoc);
         }
         case PM_RETURN_NODE: { // A `return` statement, like `return 1, 2, 3`
             auto returnNode = down_cast<pm_return_node>(node);
@@ -2538,10 +2538,10 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
             // `def foo(m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)`
 
             // add `*<fwd-args>`
-            paramsStore.emplace_back(MK::RestArg(loc, MK::Local(loc, core::Names::fwdArgs())));
+            paramsStore.emplace_back(MK::RestParam(loc, MK::Local(loc, core::Names::fwdArgs())));
 
             // add `**<fwd-kwargs>`
-            paramsStore.emplace_back(MK::RestArg(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
+            paramsStore.emplace_back(MK::RestParam(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
 
             // add `&<fwd-block>`
             paramsStore.emplace_back(MK::BlockArg(loc, MK::Local(loc, core::Names::fwdBlock())));
@@ -3090,7 +3090,7 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
                     auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
                     auto name = translateConstantName(requiredParamNode->name);
                     sorbetLhs.emplace_back(
-                        make_unique<parser::Restarg>(location, name, translateLoc(requiredParamNode->base.location)));
+                        make_unique<parser::RestParam>(location, name, translateLoc(requiredParamNode->base.location)));
                 } else {
                     sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(translate(expression))));
                 }

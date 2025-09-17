@@ -28,7 +28,7 @@ void ExpressionPtr::_sanityCheck() const {
         SANITY_CHECK(Rescue)
         SANITY_CHECK(Local)
         SANITY_CHECK(UnresolvedIdent)
-        SANITY_CHECK(RestArg)
+        SANITY_CHECK(RestParam)
         SANITY_CHECK(KeywordArg)
         SANITY_CHECK(OptionalParam)
         SANITY_CHECK(BlockArg)
@@ -196,7 +196,7 @@ void RescueCase::_sanityCheck() {
     }
 }
 
-void RestArg::_sanityCheck() {
+void RestParam::_sanityCheck() {
     ENFORCE(expr);
     ENFORCE(!isa_tree<OptionalParam>(expr), "OptionalParams must be at the top-level of an arg.");
 }

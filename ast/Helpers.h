@@ -117,8 +117,8 @@ public:
         return OptionalParam(loc, KeywordArg(loc, name), std::move(default_));
     }
 
-    static ExpressionPtr RestArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_expression<ast::RestArg>(loc, std::move(inner));
+    static ExpressionPtr RestParam(core::LocOffsets loc, ExpressionPtr inner) {
+        return make_expression<ast::RestParam>(loc, std::move(inner));
     }
 
     static ExpressionPtr BlockArg(core::LocOffsets loc, ExpressionPtr inner) {
@@ -626,7 +626,7 @@ public:
 
             // Recurse into structure to find the UnresolvedIdent
             typecase(
-                *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
+                *cursor, [&](const class RestParam &rest) { cursor = &rest.expr; },
                 [&](const class KeywordArg &kw) { cursor = &kw.expr; },
                 [&](const class OptionalParam &opt) { cursor = &opt.expr; },
                 [&](const class BlockArg &blk) { cursor = &blk.expr; },
@@ -647,7 +647,7 @@ public:
 
             // Recurse into structure to find the Local
             typecase(
-                *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
+                *cursor, [&](const class RestParam &rest) { cursor = &rest.expr; },
                 [&](const class KeywordArg &kw) { cursor = &kw.expr; },
                 [&](const class OptionalParam &opt) { cursor = &opt.expr; },
                 [&](const class BlockArg &blk) { cursor = &blk.expr; },

@@ -32,7 +32,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, Rescue)                  \
         CASE_STATEMENT(CASE_BODY, Local)                   \
         CASE_STATEMENT(CASE_BODY, UnresolvedIdent)         \
-        CASE_STATEMENT(CASE_BODY, RestArg)                 \
+        CASE_STATEMENT(CASE_BODY, RestParam)               \
         CASE_STATEMENT(CASE_BODY, KeywordArg)              \
         CASE_STATEMENT(CASE_BODY, OptionalParam)           \
         CASE_STATEMENT(CASE_BODY, BlockArg)                \
@@ -138,7 +138,7 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
 }
 
 bool isa_reference(const ExpressionPtr &what) {
-    return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
+    return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestParam>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalParam>(what) || isa_tree<BlockArg>(what) ||
            isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
 }
@@ -279,8 +279,8 @@ ZSuperArgs::ZSuperArgs(core::LocOffsets loc) : loc(loc) {
     _sanityCheck();
 }
 
-RestArg::RestArg(core::LocOffsets loc, ExpressionPtr arg) : loc(loc), expr(std::move(arg)) {
-    categoryCounterInc("trees", "restarg");
+RestParam::RestParam(core::LocOffsets loc, ExpressionPtr arg) : loc(loc), expr(std::move(arg)) {
+    categoryCounterInc("trees", "restparam");
     _sanityCheck();
 }
 
@@ -1284,7 +1284,7 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
-string RestArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string RestParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "*" + this->expr.toStringWithTabs(gs, tabs);
 }
 
@@ -1441,12 +1441,12 @@ string EmptyTree::showRaw(const core::GlobalState &gs, int tabs) const {
     return string(nodeName());
 }
 
-string RestArg::showRaw(const core::GlobalState &gs, int tabs) const {
+string RestParam::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("{}{{ expr = {} }}", nodeName(), expr.showRaw(gs, tabs));
 }
 
-string_view RestArg::nodeName() const {
-    return "RestArg";
+string_view RestParam::nodeName() const {
+    return "RestParam";
 }
 
 string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -1986,7 +1986,7 @@ string Rescue::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, 
     return fmt::to_string(buf);
 }
 
-string RestArg::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) const {
+string RestParam::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) const {
     return fmt::format("{}{{ loc = {}, expr = {} }}", nodeName(), core::Loc(file, this->loc).fileShortPosToString(gs),
                        expr.showRawWithLocs(gs, file, tabs));
 }

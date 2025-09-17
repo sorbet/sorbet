@@ -4,7 +4,7 @@ Begin {
       name = <U has_named_rest_args>
       params = Params {
         params = [
-          Restarg {
+          RestParam {
             name = <U args>
           }
         ]
@@ -25,7 +25,7 @@ Begin {
       name = <U has_anonymous_rest_args>
       params = Params {
         params = [
-          Restarg {
+          RestParam {
             name = <U *>
           }
         ]
