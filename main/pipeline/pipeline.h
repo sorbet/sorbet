@@ -7,6 +7,7 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "core/FileHash.h"
 #include "main/options/options.h"
+#include "parser/prism/Parser.h"
 
 extern "C" {
 #include "prism.h"
@@ -127,7 +128,8 @@ std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from
 // RBS Prism rewriter function
 pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileRef file, pm_node_t *node,
                               const std::vector<sorbet::core::LocOffsets> &commentLocations,
-                              const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx);
+                              const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx,
+                              const parser::Prism::Parser& parser);
 
 } // namespace sorbet::realmain::pipeline
 

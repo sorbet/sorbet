@@ -251,7 +251,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                         auto prismParseResult = prismParser.parse(collectComments);
                         pm_node_t *rewrittenNode =
                             realmain::pipeline::runRBSRewritePrism(gs, file, prismParseResult.getRawNodePointer(),
-                                                                   prismParseResult.getCommentLocations(), print, ctx);
+                                                                   prismParseResult.getCommentLocations(), print, ctx, prismParser);
                         parseResult = parser::Prism::Parser::translateOnly(
                             ctx, prismParser, rewrittenNode, prismParseResult.getParseErrors(),
                             prismParseResult.getCommentLocations(),
@@ -753,7 +753,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     auto prismParseResult = prismParser.parse(collectComments);
                     pm_node_t *rewrittenNode =
                         realmain::pipeline::runRBSRewritePrism(*gs, f.file, prismParseResult.getRawNodePointer(),
-                                                               prismParseResult.getCommentLocations(), print, ctx);
+                                                               prismParseResult.getCommentLocations(), print, ctx, prismParser);
                     parseResult = parser::Prism::Parser::translateOnly(
                         ctx, prismParser, rewrittenNode, prismParseResult.getParseErrors(),
                         prismParseResult.getCommentLocations(), false); // TODO: preserveConcreteSyntax set to false
