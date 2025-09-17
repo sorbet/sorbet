@@ -9,7 +9,6 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
-#include "core/TypeErrorDiagnostics.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
 #include <utility>
@@ -801,12 +800,12 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ParamInfo::Flags> &&argFlags)
-    : argFlags(move(argFlags)), fun(fun) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ParamInfo::Flags> &&paramFlags)
+    : paramFlags(move(paramFlags)), fun(fun) {}
 
 optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
-    for (auto &arg : argFlags) {
+    for (auto &arg : paramFlags) {
         if (arg.isKeyword || arg.isDefault || arg.isRepeated) {
             arity = nullopt;
             break;

@@ -62,14 +62,14 @@ struct MethodBuilder {
     MethodBuilder(GlobalState &gs, MethodRef m) : gs(gs), method(m) {}
 
     MethodBuilder &defaultArg(NameRef name) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.flags.isDefault = true;
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.flags.isDefault = true;
         return *this;
     }
 
     MethodBuilder &typedArg(NameRef name, TypePtr &&type) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.type = std::move(type);
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.type = std::move(type);
         return *this;
     }
 
@@ -79,63 +79,63 @@ struct MethodBuilder {
     }
 
     MethodBuilder &untypedArg(NameRef name) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.type = Types::untyped(method);
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.type = Types::untyped(method);
         return *this;
     }
 
     MethodBuilder &keywordArg(NameRef name, TypePtr &&type) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.type = std::move(type);
-        arg.flags.isKeyword = true;
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.type = std::move(type);
+        param.flags.isKeyword = true;
         return *this;
     }
 
     MethodBuilder &defaultKeywordArg(NameRef name) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.flags.isDefault = true;
-        arg.flags.isKeyword = true;
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.flags.isDefault = true;
+        param.flags.isKeyword = true;
         return *this;
     }
 
     MethodBuilder &repeatedArg(NameRef name) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.flags.isRepeated = true;
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.flags.isRepeated = true;
         return *this;
     }
 
     MethodBuilder &repeatedTypedArg(NameRef name, TypePtr &&type) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.flags.isRepeated = true;
-        arg.type = std::move(type);
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.flags.isRepeated = true;
+        param.type = std::move(type);
         return *this;
     }
 
     MethodBuilder &repeatedUntypedArg(NameRef name) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.flags.isRepeated = true;
-        arg.type = Types::untyped(method);
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.flags.isRepeated = true;
+        param.type = Types::untyped(method);
         return *this;
     }
 
     MethodBuilder &repeatedTopArg(NameRef name) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.flags.isRepeated = true;
-        arg.type = Types::top();
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.flags.isRepeated = true;
+        param.type = Types::top();
         return *this;
     }
 
     MethodBuilder &kwsplatArg(NameRef name) {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, name);
-        arg.flags.isKeyword = true;
-        arg.flags.isRepeated = true;
-        arg.type = Types::untyped(method);
+        auto &param = gs.enterMethodParameter(Loc::none(), method, name);
+        param.flags.isKeyword = true;
+        param.flags.isRepeated = true;
+        param.type = Types::untyped(method);
         return *this;
     }
 
     MethodRef build() {
-        auto &arg = gs.enterMethodParameter(Loc::none(), method, Names::blkArg());
-        arg.flags.isBlock = true;
+        auto &param = gs.enterMethodParameter(Loc::none(), method, Names::blkArg());
+        param.flags.isBlock = true;
         return method;
     }
 
@@ -1002,8 +1002,8 @@ void GlobalState::installIntrinsics() {
         auto method = enterMethodSymbol(Loc::none(), symbol, entry.method);
         method.data(*this)->intrinsicOffset = offset + Method::FIRST_VALID_INTRINSIC_OFFSET;
         if (countBefore != methodsUsed()) {
-            auto &blkArg = enterMethodParameter(Loc::none(), method, Names::blkArg());
-            blkArg.flags.isBlock = true;
+            auto &blkParam = enterMethodParameter(Loc::none(), method, Names::blkArg());
+            blkParam.flags.isBlock = true;
         }
     }
 }

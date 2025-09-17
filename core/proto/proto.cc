@@ -75,14 +75,14 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     return protoName;
 }
 
-com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &gs, const ParamInfo &arg) {
+com::stripe::rubytyper::Symbol::ArgumentInfo Proto::toProto(const GlobalState &gs, const ParamInfo &param) {
     com::stripe::rubytyper::Symbol::ArgumentInfo argProto;
-    *argProto.mutable_name() = toProto(gs, arg.name);
-    argProto.set_iskeyword(arg.flags.isKeyword);
-    argProto.set_isrepeated(arg.flags.isRepeated);
-    argProto.set_isdefault(arg.flags.isDefault);
-    argProto.set_isshadow(arg.flags.isShadow);
-    argProto.set_isblock(arg.flags.isBlock);
+    *argProto.mutable_name() = toProto(gs, param.name);
+    argProto.set_iskeyword(param.flags.isKeyword);
+    argProto.set_isrepeated(param.flags.isRepeated);
+    argProto.set_isdefault(param.flags.isDefault);
+    argProto.set_isshadow(param.flags.isShadow);
+    argProto.set_isblock(param.flags.isBlock);
 
     return argProto;
 }

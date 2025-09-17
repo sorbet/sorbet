@@ -31,8 +31,8 @@ private:
     static BasicBlock *walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
                                        BasicBlock *current);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
-    walkDefault(CFGContext cctx, int argIndex, const core::ParamInfo &argInfo, LocalRef argLocal,
-                core::LocOffsets argLoc, ast::ExpressionPtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
+    walkDefault(CFGContext cctx, int paramIndex, const core::ParamInfo &paramInfo, LocalRef paramLocal,
+                core::LocOffsets paramLoc, ast::ExpressionPtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
     static BasicBlock *joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b);
     static BasicBlock *buildExceptionHandler(CFGContext cctx, ast::ExpressionPtr &ex, BasicBlock *caseBody,
                                              cfg::LocalRef exceptionValue, BasicBlock *rescueHandlersBlock);
