@@ -661,7 +661,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_lambda_returnType());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
 
-    method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::type(), Types::top()).build();
+    method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::arg0(), Types::top()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_lambdaTLet());
 
     method = enterMethod(*this, Symbols::Kernel(), Names::proc()).build();

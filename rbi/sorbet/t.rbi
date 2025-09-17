@@ -428,11 +428,6 @@ module T::Configuration
   def self.redaction_handler; end
   def self.class_owner_finder=(handler); end
   def self.class_owner_finder; end
-
-  sig {params(handler: T.proc.params(arg0: T::Props::Decorator::DecoratedInstance, arg1: Symbol).void).void}
-  def self.prop_freeze_handler=(handler); end
-  sig {returns(T.proc.params(arg0: T::Props::Decorator::DecoratedInstance, arg1: Symbol).void)}
-  def self.prop_freeze_handler; end
 end
 
 module T::Utils
