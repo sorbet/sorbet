@@ -30,7 +30,7 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
-    void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
+    void recursiveExportSymbol(core::GlobalState &gs, core::ClassOrModuleRef klass) {
         // Stop recursing at package boundary
         if (this->package.mangledName() != klass.data(gs)->package) {
             return;
@@ -44,7 +44,7 @@ class PropagateVisibility final {
                 continue;
             }
             if (child.isClassOrModule()) {
-                recursiveExportSymbol(gs, false, child.asClassOrModuleRef());
+                recursiveExportSymbol(gs, child.asClassOrModuleRef());
             } else if (child.isFieldOrStaticField()) {
                 child.asFieldRef().data(gs)->flags.isExported = true;
             }
@@ -146,7 +146,7 @@ public:
         if (litSymbol.isClassOrModule()) {
             auto sym = litSymbol.asClassOrModuleRef();
             checkExportPackage(ctx, send.loc, litSymbol);
-            recursiveExportSymbol(ctx, true, sym);
+            recursiveExportSymbol(ctx, sym);
 
             // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
