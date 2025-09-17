@@ -153,49 +153,49 @@ public:
             return;
         }
 
+        string_view kind;
         auto sym = lit->symbol();
-        if (sym.isClassOrModule()) {
-            checkExportPackage(ctx, send.loc, sym);
-            auto setExportedTo = true;
-            recursiveSetIsExported(ctx, setExportedTo, sym);
+        switch (sym.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule: {
+                checkExportPackage(ctx, send.loc, sym);
+                auto setExportedTo = true;
+                recursiveSetIsExported(ctx, setExportedTo, sym);
 
-            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would be
-            // great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.asClassOrModuleRef().data(ctx)->owner);
-        } else if (sym.isFieldOrStaticField()) {
-            checkExportPackage(ctx, send.loc, sym);
-            auto setExportedTo = true;
-            recursiveSetIsExported(ctx, setExportedTo, sym);
-
-            // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
-            // great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.asFieldRef().data(ctx)->owner);
-        } else {
-            string_view kind = ""sv;
-            switch (sym.kind()) {
-                case core::SymbolRef::Kind::ClassOrModule:
-                case core::SymbolRef::Kind::FieldOrStaticField:
-                    ENFORCE(false, "ClassOrModule and FieldOrStaticField marked not exportable");
-                    break;
-
-                case core::SymbolRef::Kind::Method:
-                    kind = "type argument"sv;
-                    break;
-
-                case core::SymbolRef::Kind::TypeArgument:
-                    kind = "type argument"sv;
-                    break;
-
-                case core::SymbolRef::Kind::TypeMember:
-                    kind = "type member"sv;
-                    break;
+                // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
+                // be great to remove this, but this was the behavior of the previous packager implementation.
+                exportParentNamespace(ctx, sym.asClassOrModuleRef().data(ctx)->owner);
+                return;
             }
 
-            if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
-                e.setHeader("Only classes, modules, or constants may be exported");
-                e.addErrorLine(sym.loc(ctx), "Defined here");
-                e.addErrorNote("`{}` is a `{}`", sym.show(ctx), kind);
+            case core::SymbolRef::Kind::FieldOrStaticField: {
+                checkExportPackage(ctx, send.loc, sym);
+                auto setExportedTo = true;
+                recursiveSetIsExported(ctx, setExportedTo, sym);
+
+                // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
+                // great to remove this, but this was the behavior of the previous packager implementation.
+                exportParentNamespace(ctx, sym.asFieldRef().data(ctx)->owner);
+                return;
             }
+
+            case core::SymbolRef::Kind::Method: {
+                kind = "method"sv;
+                break;
+            }
+            case core::SymbolRef::Kind::TypeArgument: {
+                kind = "type argument"sv;
+                break;
+            }
+            case core::SymbolRef::Kind::TypeMember: {
+                kind = "type member"sv;
+                break;
+            }
+        }
+
+        if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
+            e.setHeader("Only classes, modules, or constants may be exported");
+            e.addErrorLine(sym.loc(ctx), "Defined here");
+            e.addErrorNote("`{}` is a `{}`", sym.show(ctx), kind);
         }
     }
 
