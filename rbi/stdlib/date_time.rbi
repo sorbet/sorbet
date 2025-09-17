@@ -206,7 +206,7 @@ class DateTime < Date
   # DateTime.new(2001,2,3,4,5,6,'-7').to_s
   #                          #=> "2001-02-03T04:05:06-07:00"
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(String)}
   def to_s(); end
 
   # Returns the offset.
