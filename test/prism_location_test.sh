@@ -18,8 +18,8 @@ root_dir="$(rlocation com_stripe_ruby_typer)"
 test_file="test/$1"
 
 # Temporary files to hold parser outputs
-sorbet_output_sorbet=$(mktemp -t "parser_original")
-sorbet_output_prism=$(mktemp  -t "parser_prism   ")
+sorbet_output_sorbet=$(mktemp -t "parser_original.XXXXXXXXXX")
+sorbet_output_prism=$(mktemp  -t "parser_prism   .XXXXXXXXXX")
 
 (
   cd "$root_dir"
