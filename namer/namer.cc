@@ -741,6 +741,28 @@ private:
         }
     }
 
+    void ensureNoPackageConflict(core::Context ctx, core::ClassOrModuleRef scope, core::NameRef name,
+                                 core::LocOffsets errLoc) {
+        auto packageRegistryOwner = scope.data(ctx)->packageRegistryOwner;
+        if (!packageRegistryOwner.exists()) {
+            return;
+        }
+        auto packageRegistryMember = packageRegistryOwner.data(ctx)->findMember(ctx, name);
+        // Note: this asks whether *any* constant exists in the <PackageSpecRegistry> namespace
+        // with the same name as this symbol, not just whether it exists and is a PackageSpec,
+        // because that's just as problematic
+        if (!packageRegistryMember.exists()) {
+            return;
+        }
+
+        if (auto e = ctx.beginError(errLoc, core::errors::Namer::PackageScopeMustBeClass)) {
+            e.setHeader(
+                "`{}` shares a name with a package and thus must be a class or module, not a constant assignment",
+                packageRegistryMember.show(ctx));
+            e.addErrorLine(packageRegistryMember.loc(ctx), "Declared as a package namespace here:");
+        }
+    }
+
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
@@ -1302,6 +1324,7 @@ private:
                 emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, currSym);
             }
         }
+        ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
         // Reset resultType to nullptr for idempotency on the fast path--it will always be
         // re-entered in resolver.
@@ -1389,6 +1412,7 @@ private:
                                            oldSym);
                 typeMemberName = ctx.state.nextMangledName(onSymbol, typeMemberName);
             }
+            ensureNoPackageConflict(ctx, onSymbol, typeMemberName, typeMember.nameLoc);
             sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMemberName, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
@@ -1410,6 +1434,7 @@ private:
                                                core::SymbolRef::Kind::TypeMember, oldSym);
                     typeTemplateAliasName = ctx.state.nextMangledName(context, typeTemplateAliasName);
                 }
+                ensureNoPackageConflict(ctx, context, typeTemplateAliasName, typeMember.nameLoc);
                 // This static field with an AliasType is how we get `MyTypeTemplate` to resolve,
                 // because resolver does not usually look on the singleton class to resolve constant
                 // literals, but type_template's are only ever entered on the singleton class.
