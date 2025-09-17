@@ -1019,6 +1019,7 @@ public:
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                            const token *rbrack) {
+        // Empty funLoc implies that errors should use the callLoc
         return make_unique<Send>(receiver->loc.join(tokLoc(rbrack)), std::move(receiver), core::Names::squareBrackets(),
                                  tokLoc(lbrack).copyWithZeroLength(), std::move(indexes));
     }

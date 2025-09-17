@@ -547,12 +547,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 args = translateArguments(callNode->arguments);
             }
 
-            if (constantNameString == "[]=") {
-                messageLoc.endLoc += 2; // The message includes the closing bracket and equals sign
-            } else if (constantNameString == "[]") {
+            if (constantNameString == "[]" || constantNameString == "[]=") {
+                // Empty funLoc implies that errors should use the callLoc
                 messageLoc.endLoc = messageLoc.beginLoc;
-            } else if (constantNameString.back() == '=') {
-                messageLoc.endLoc = args.front()->loc.beginPos() - 1; // The message ends right before the equals sign
             }
 
             unique_ptr<parser::Node> sendNode;
