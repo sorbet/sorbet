@@ -602,6 +602,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unique_ptr<parser::Node> sendNode;
 
             auto name = ctx.state.enterNameUTF8(constantNameString);
+            auto methodName = MK::Symbol(location.copyWithZeroLength(), name);
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `a&.b`
@@ -645,6 +646,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
             unique_ptr<parser::Node> blockPassNode;
+            ast::ExpressionPtr blockPassArg;
             bool blockPassArgIsSymbol = false;
             bool supportedBlock = false;
             if (prismBlock != nullptr) {
@@ -744,8 +746,28 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
                     blockPassNode = translate(prismBlock);
-                    blockPassArgIsSymbol = bp->expression && PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
-                    supportedBlock = false; // `PM_BLOCK_ARGUMENT_NODE` is not supported yet.
+
+                    if (bp->expression) {
+                        blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
+
+                        if (blockPassArgIsSymbol) {
+                            supportedBlock = false; // TODO: Implement symbol procs
+                        } else {
+                            auto blockPassArgNode = translate(bp->expression);
+
+                            if (supportedCallType && hasExpr(blockPassArgNode)) {
+                                blockPassArg = blockPassArgNode->takeDesugaredExpr();
+                                supportedBlock = true;
+                            } else {
+                                supportedBlock = false;
+                            }
+                        }
+                    } else {
+                        // Replace an anonymous block pass like `f(&)` with a local variable reference, like
+                        // `f(&&)`.
+                        blockPassArg = MK::Local(location, core::Names::ampersand());
+                        supportedBlock = true;
+                    }
                 }
             } else {
                 // If there's no block, we support the call
@@ -802,7 +824,32 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 // Special handling for non-Symbol block pass args, like `a.map(&block)`
                 // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
                 // and handled separately below.
-                ENFORCE(false, "TODO: Implement non-Symbol block pass args here (via core::Names::callWithBlockPass())")
+
+                // Desugar a call without a splat, and any other expression as a block pass argument.
+                // E.g. `a.each(&block)`
+
+                ast::Send::ARGS_store magicSendArgs;
+                magicSendArgs.reserve(3 + args.size());
+                magicSendArgs.emplace_back(move(receiverExpr));
+                magicSendArgs.emplace_back(move(methodName));
+                magicSendArgs.emplace_back(move(blockPassArg));
+
+                numPosArgs += 3;
+
+                for (auto &arg : args) {
+                    magicSendArgs.emplace_back(arg->takeDesugaredExpr());
+                }
+
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // Add the parser node back into the wq tree, to pass the parser tests.
+                    args.emplace_back(move(blockPassNode));
+                }
+
+                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), messageLoc, numPosArgs,
+                                         move(magicSendArgs), flags);
+
+                return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
+                                                         move(args));
             }
 
             ast::Send::ARGS_store sendArgs{};
