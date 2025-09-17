@@ -1,6 +1,6 @@
 test/cli/setter-does-not-exist/test.rb:11: Setter method `foo=` does not exist on `A` https://srb.help/7003
     11 |A.new(foo: 0).foo = 1
-                      ^^^^^
+                      ^^^
   Got `A` originating from:
     test/cli/setter-does-not-exist/test.rb:11:
     11 |A.new(foo: 0).foo = 1
@@ -11,7 +11,7 @@ test/cli/setter-does-not-exist/test.rb:11: Setter method `foo=` does not exist o
 
 test/cli/setter-does-not-exist/test.rb:12: Setter method `bar=` does not exist on `A` https://srb.help/7003
     12 |A.new(foo: 0).bar = 1
-                      ^^^^^
+                      ^^^
   Got `A` originating from:
     test/cli/setter-does-not-exist/test.rb:12:
     12 |A.new(foo: 0).bar = 1
@@ -22,7 +22,7 @@ test/cli/setter-does-not-exist/test.rb:12: Setter method `bar=` does not exist o
 
 test/cli/setter-does-not-exist/test.rb:13: Setter method `qux=` does not exist on `A` https://srb.help/7003
     13 |A.new(foo: 0).qux = 1
-                      ^^^^^
+                      ^^^
   Got `A` originating from:
     test/cli/setter-does-not-exist/test.rb:13:
     13 |A.new(foo: 0).qux = 1
