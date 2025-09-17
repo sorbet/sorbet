@@ -26,6 +26,26 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
     return core::Symbols::noSymbol();
 }
 
+core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Span<const core::NameRef> parts,
+                                          core::ClassOrModuleRef startingFrom) {
+    auto result = startingFrom;
+    ENFORCE(result.exists());
+    for (auto it = parts.rbegin(); it != parts.rend(); it++) {
+        auto nextScope = result.data(gs)->findMember(gs, *it);
+        if (!nextScope.exists() || !nextScope.isClassOrModule()) {
+            return core::Symbols::noClassOrModule();
+        }
+
+        result = nextScope.asClassOrModuleRef();
+    }
+
+    if (result == core::Symbols::root()) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    return result;
+}
+
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
@@ -71,6 +91,44 @@ class PropagateVisibility final {
                this->package.mangledName() == owner.data(gs)->package) {
             owner.data(gs)->flags.isExported = true;
             owner = owner.data(gs)->owner;
+        }
+    }
+
+    // TODO(jez) This function is annoying that it has to recurse up the owner chain. It would be
+    // better if we didn't have to do this, but that would involve persisting the test and non-test
+    // root symbols for a package onto the PackageInfo itself, which is tricky.
+    //
+    // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
+    // which was half of the point of moving Symbols into the package database in the first place.
+    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
+        vector<core::NameRef> parts;
+        auto owner = package.mangledName().owner;
+        while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
+            auto ownerData = owner.data(gs);
+            parts.emplace_back(ownerData->name);
+            owner = ownerData->owner;
+        }
+
+        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
+        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
+        core::ClassOrModuleRef testScope;
+        if (testNamespace.exists() && testNamespace.isClassOrModule()) {
+            testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
+        }
+
+        return {nonTestScope, testScope};
+    }
+
+    void unsetAllExportedInPackage(core::MutableContext ctx) {
+        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+
+        auto setExportedTo = false;
+
+        if (nonTestScope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, nonTestScope);
+        }
+        if (testScope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, testScope);
         }
     }
 
@@ -213,9 +271,9 @@ public:
         const auto &package = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
-        PropagateVisibility pass{package};
-
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
+        PropagateVisibility pass{package};
+        pass.unsetAllExportedInPackage(ctx);
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
     }
 };
