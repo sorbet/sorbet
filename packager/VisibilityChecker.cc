@@ -30,24 +30,35 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
-    void recursiveSetIsExported(core::GlobalState &gs, bool setExportedTo, core::ClassOrModuleRef klass) {
+    void recursiveSetIsExported(core::GlobalState &gs, bool setExportedTo, core::SymbolRef sym) {
         // Stop recursing at package boundary
-        if (this->package.mangledName() != klass.data(gs)->package) {
+        if (this->package.mangledName() != sym.enclosingClass(gs).data(gs)->package) {
             return;
         }
 
-        klass.data(gs)->flags.isExported = setExportedTo;
+        switch (sym.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule: {
+                auto klass = sym.asClassOrModuleRef();
+                klass.data(gs)->flags.isExported = setExportedTo;
+                for (const auto &[name, child] : klass.data(gs)->members()) {
+                    if (name == core::Names::attached()) {
+                        // There is a cycle between a class and its singleton, and this avoids infinite recursion.
+                        continue;
+                    }
 
-        for (const auto &[name, child] : klass.data(gs)->members()) {
-            if (name == core::Names::attached()) {
-                // There is a cycle between a class and its singleton, and this avoids infinite recursion.
-                continue;
+                    recursiveSetIsExported(gs, setExportedTo, child);
+                }
+                break;
             }
-            if (child.isClassOrModule()) {
-                recursiveSetIsExported(gs, setExportedTo, child.asClassOrModuleRef());
-            } else if (child.isFieldOrStaticField()) {
-                child.asFieldRef().data(gs)->flags.isExported = setExportedTo;
-            }
+
+            case core::SymbolRef::Kind::FieldOrStaticField:
+                sym.asFieldRef().data(gs)->flags.isExported = setExportedTo;
+                break;
+
+            case core::SymbolRef::Kind::TypeMember:
+            case core::SymbolRef::Kind::Method:
+            case core::SymbolRef::Kind::TypeArgument:
+                break;
         }
     }
 
@@ -142,27 +153,26 @@ public:
             return;
         }
 
-        auto litSymbol = lit->symbol();
-        if (litSymbol.isClassOrModule()) {
-            auto sym = litSymbol.asClassOrModuleRef();
-            checkExportPackage(ctx, send.loc, litSymbol);
+        auto sym = lit->symbol();
+        if (sym.isClassOrModule()) {
+            checkExportPackage(ctx, send.loc, sym);
             auto setExportedTo = true;
             recursiveSetIsExported(ctx, setExportedTo, sym);
 
             // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.data(ctx)->owner);
-        } else if (litSymbol.isFieldOrStaticField()) {
-            auto sym = litSymbol.asFieldRef();
-            checkExportPackage(ctx, send.loc, litSymbol);
-            sym.data(ctx)->flags.isExported = true;
+            exportParentNamespace(ctx, sym.asClassOrModuleRef().data(ctx)->owner);
+        } else if (sym.isFieldOrStaticField()) {
+            checkExportPackage(ctx, send.loc, sym);
+            auto setExportedTo = true;
+            recursiveSetIsExported(ctx, setExportedTo, sym);
 
             // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
             // great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.data(ctx)->owner);
+            exportParentNamespace(ctx, sym.asFieldRef().data(ctx)->owner);
         } else {
             string_view kind = ""sv;
-            switch (litSymbol.kind()) {
+            switch (sym.kind()) {
                 case core::SymbolRef::Kind::ClassOrModule:
                 case core::SymbolRef::Kind::FieldOrStaticField:
                     ENFORCE(false, "ClassOrModule and FieldOrStaticField marked not exportable");
@@ -183,8 +193,8 @@ public:
 
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Only classes, modules, or constants may be exported");
-                e.addErrorLine(litSymbol.loc(ctx), "Defined here");
-                e.addErrorNote("`{}` is a `{}`", litSymbol.show(ctx), kind);
+                e.addErrorLine(sym.loc(ctx), "Defined here");
+                e.addErrorNote("`{}` is a `{}`", sym.show(ctx), kind);
             }
         }
     }
