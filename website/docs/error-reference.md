@@ -1305,6 +1305,30 @@ end
 
 This file defines a global class called `::SomeGlobalClass` outside of the enclosing namespace of the current package. This means it will not be treated as belonging to the package `SomePackage`, and therefore cannot be made `package_private`.
 
+## 4026
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Package files can only share a name with class or module. For example, given a file like this:
+
+```ruby
+module Some::Namespace
+  MyConstant = ["hello", "world"]
+end
+```
+
+Only `Some` and `Some::Namespace` are valid package names. `Some::Namespace::Constant` is not a valid package name.
+
+To define a package that contains nothing except a single constant assignment, wrap that constant assignment in a class or module namespace (like `Some::Namespace` in the example above). If `Some::Namespace` is already a package, and `MyConstant` is meant to live in its own package, restructure the code so that there is an enclosing namespace:
+
+```ruby
+module Some::Namespace::MyConstant
+  Value = ["hello", "world"]
+end
+```
+
+(**Note**: this requires updating references to point at the new `Value` constant.)
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:
@@ -3968,3 +3992,5 @@ T.reveal_type(result) # => T::Boolean
 [report an issue]: https://github.com/sorbet/sorbet/issues
 
 <script src="/js/error-reference.js"></script>
+<!-- vim:tw=0
+-->
