@@ -10,8 +10,8 @@ class A
 end
 
 a = A.new
-a.fooo = 12
-# ^^^^^^ error: Setter method `fooo=` does not exist on `A`
+a.foo = 12
+# ^^^^ error: Setter method `fooo=` does not exist on `A`
 
 a.foo
 # ^^^^ error: Method `fooo` does not exist on `A`
