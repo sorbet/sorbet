@@ -667,6 +667,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
                     e.addAutocorrect(move(autocorrect.value()));
+                    // TODO(neil): we should also delete imports that are unused but have a modularity error here
                 }
             }
         }
