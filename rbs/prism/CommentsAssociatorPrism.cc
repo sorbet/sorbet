@@ -872,6 +872,11 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             walkStatements(program->statements->body);
             break;
         }
+        case PM_STATEMENTS_NODE: {
+            auto *statements = down_cast<pm_statements_node_t>(node);
+            walkStatements(statements->body);
+            break;
+        }
         default: {
             associateAssertionCommentsToNode(node);
             consumeCommentsInsideNode(node, "other");

@@ -285,14 +285,14 @@ CommentsPrism SigsRewriterPrism::commentsForNode(pm_node_t *node) {
     return comments;
 }
 
-unique_ptr<vector<pm_node_t*>> SigsRewriterPrism::signaturesForNode(pm_node_t *node) {
+unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *node) {
     auto comments = commentsForNode(node);
 
     if (comments.signatures.empty()) {
         return nullptr;
     }
 
-    auto signatures = make_unique<vector<pm_node_t*>>();
+    auto signatures = make_unique<vector<pm_node_t *>>();
     auto signatureTranslator = rbs::SignatureTranslatorPrism(ctx, parser);
 
     for (auto &declaration : comments.signatures) {
@@ -672,6 +672,11 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             rewriteNodes(program->statements->body);
             return node;
         }
+        case PM_STATEMENTS_NODE: {
+            auto *statements = down_cast<pm_statements_node_t>(node);
+            rewriteNodes(statements->body);
+            return node;
+        }
         default:
             return node;
     }
@@ -683,7 +688,7 @@ pm_node_t *SigsRewriterPrism::run(pm_node_t *node) {
 
 // Helper method to create statements nodes with signatures
 pm_node_t *SigsRewriterPrism::createStatementsWithSignatures(pm_node_t *originalNode,
-                                                             std::unique_ptr<std::vector<pm_node_t*>> signatures) {
+                                                             std::unique_ptr<std::vector<pm_node_t *>> signatures) {
     if (!signatures || signatures->empty()) {
         return originalNode; // No signatures, return original node
     }

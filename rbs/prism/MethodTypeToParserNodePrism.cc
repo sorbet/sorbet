@@ -539,32 +539,28 @@ pm_node_t *MethodTypeToParserNodePrism::createSingleArgumentNode(pm_node_t *arg)
 }
 
 pm_node_t *MethodTypeToParserNodePrism::createSorbetPrivateStaticConstant() {
-    // Create Sorbet constant read
-    pm_node_t *sorbet = createConstantReadNode("Sorbet");
+    // Build a root-anchored constant path ::Sorbet::Private::Static
+    pm_node_t *sorbet = createConstantPathNode(nullptr, "Sorbet");
     if (!sorbet)
         return nullptr;
 
-    // Create Sorbet::Private constant path
     pm_node_t *sorbet_private = createConstantPathNode(sorbet, "Private");
     if (!sorbet_private)
         return nullptr;
 
-    // Create Sorbet::Private::Static constant path
     return createConstantPathNode(sorbet_private, "Static");
 }
 
 pm_node_t *MethodTypeToParserNodePrism::createTSigWithoutRuntimeConstant() {
-    // Create T constant read
-    pm_node_t *t_const = createConstantReadNode("T");
+    // Build a root-anchored constant path ::T::Sig::WithoutRuntime
+    pm_node_t *t_const = createConstantPathNode(nullptr, "T");
     if (!t_const)
         return nullptr;
 
-    // Create T::Sig constant path
     pm_node_t *t_sig = createConstantPathNode(t_const, "Sig");
     if (!t_sig)
         return nullptr;
 
-    // Create T::Sig::WithoutRuntime constant path
     return createConstantPathNode(t_sig, "WithoutRuntime");
 }
 
