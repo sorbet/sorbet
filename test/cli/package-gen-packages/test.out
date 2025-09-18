@@ -1,3 +1,5 @@
+--gen-packages can only be used when --stripe-packages is also enabled
+--gen-packages can not be used when --lsp is also enabled
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
