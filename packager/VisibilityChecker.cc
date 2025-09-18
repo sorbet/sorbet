@@ -549,10 +549,7 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        if (ctx.state.packageDB().genPackages()) {
-            // [[unlikely]] ?
-            packageReferences[otherPackage] = {importNeeded, false};
-        }
+        packageReferences[otherPackage] = {importNeeded, false};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
@@ -672,10 +669,7 @@ public:
                     ENFORCE(false);
                 }
             } else {
-                if (ctx.state.packageDB().genPackages()) {
-                    // [[unlikely]] ?
-                    packageReferences[otherPackage].causesModularityError = true;
-                }
+                packageReferences[otherPackage].causesModularityError = true;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 core::ErrorClass error =
