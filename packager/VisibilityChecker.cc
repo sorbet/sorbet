@@ -50,7 +50,8 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
-    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef sym) {
+    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef topExportSym,
+                                core::LocOffsets topExportLoc, core::SymbolRef sym) {
         // Stop recursing at package boundary
         if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
             return;
@@ -66,7 +67,7 @@ class PropagateVisibility final {
                         continue;
                     }
 
-                    recursiveSetIsExported(ctx, setExportedTo, child);
+                    recursiveSetIsExported(ctx, setExportedTo, topExportSym, topExportLoc, child);
                 }
                 break;
             }
@@ -124,11 +125,13 @@ class PropagateVisibility final {
 
         auto setExportedTo = false;
 
+        // `topExportLoc` is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
+        auto topExportLoc = core::LocOffsets::none();
         if (nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope);
+            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, topExportLoc, nonTestScope);
         }
         if (testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope);
+            recursiveSetIsExported(ctx, setExportedTo, testScope, topExportLoc, testScope);
         }
     }
 
@@ -218,7 +221,7 @@ public:
             case core::SymbolRef::Kind::ClassOrModule: {
                 checkExportPackage(ctx, send.loc, sym);
                 auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym);
+                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
 
                 // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
                 // be great to remove this, but this was the behavior of the previous packager implementation.
@@ -229,7 +232,7 @@ public:
             case core::SymbolRef::Kind::FieldOrStaticField: {
                 checkExportPackage(ctx, send.loc, sym);
                 auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym);
+                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
 
                 // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
                 // great to remove this, but this was the behavior of the previous packager implementation.
