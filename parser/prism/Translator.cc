@@ -95,7 +95,25 @@ ast::ExpressionPtr mergeStrings(core::MutableContext ctx, core::LocOffsets loc,
     }
 }
 
-// Member function implementation for desugarDString
+// Extract the content and location of a Symbol node.
+// This is handy for `desugarSymbolProc`, where it saves us from needing to dig and
+// cast to extract this info out of an `ast::Literal`.
+pair<core::NameRef, core::LocOffsets> Translator::translateSymbol(pm_symbol_node *symbol) {
+    auto location = translateLoc(symbol->base.location);
+
+    auto unescaped = &symbol->unescaped;
+    // TODO: can these have different encodings?
+    auto content = ctx.state.enterNameUTF8(parser.extractString(unescaped));
+
+    // If the opening location is null, the symbol is used as a key with a colon postfix, like `{a: 1}`
+    // In those cases, the location should not include the colon.
+    if (symbol->opening_loc.start == nullptr) {
+        location = translateLoc(symbol->value_loc);
+    }
+
+    return make_pair(content, location);
+}
+
 ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list prismNodeList) {
     if (prismNodeList.size == 0) {
         return MK::String(loc, core::Names::empty());
@@ -1981,15 +1999,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
             auto symNode = down_cast<pm_symbol_node>(node);
 
-            auto unescaped = &symNode->unescaped;
-            // TODO: can these have different encodings?
-            auto content = ctx.state.enterNameUTF8(parser.extractString(unescaped));
-
-            // If the opening location is null, the symbol is used as a key with a colon postfix, like `{a: 1}`
-            // In those cases, the location should not include the colon.
-            if (symNode->opening_loc.start == nullptr) {
-                location = translateLoc(symNode->value_loc);
-            }
+            auto [content, location] = translateSymbol(symNode);
 
             return make_node_with_expr<parser::Symbol>(MK::Symbol(location, content), location, content);
         }
