@@ -30,4 +30,122 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.outer_helper()
     end
   end
+
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    <self>.sig() do ||
+      <self>.params(:args, <emptyTree>::<C T>.untyped(), :block, <emptyTree>::<C T>.proc().void()).void()
+    end
+
+    def self.describe<<todo method>>(*args, &block)
+      <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.params(:args, <emptyTree>::<C T>.untyped(), :block, <emptyTree>::<C T>.proc().void()).void()
+    end
+
+    def self.xdescribe<<todo method>>(*args, &block)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.describe>
+
+    <runtime method definition of self.xdescribe>
+
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def expect<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        def puts<<todo method>>(*args, &<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of expect>
+
+        <runtime method definition of eq>
+
+        <runtime method definition of puts>
+      end
+    end
+  end
+
+  class <emptyTree>::<C RSpecLetBasicTest><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    class <emptyTree>::<C <RSpec.describe 'basic let functionality'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def foo<<todo method>>(&<blk>)
+        1
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.foo()
+      end
+
+      def <it 'creates a method from let'><<todo method>>(&<blk>)
+        begin
+          result = <self>.foo()
+          <self>.puts(result)
+        end
+      end
+
+      def <it 'can use methods from RSpec::Core::ExampleGroup'><<todo method>>(&<blk>)
+        <self>.expect(1.+(1)).to(<self>.eq(2))
+      end
+
+      <runtime method definition of foo>
+
+      class <emptyTree>::<C <context 'nested context'>><<C <todo sym>>> < (<self>)
+        def bar<<todo method>>(&<blk>)
+          2
+        end
+
+        def <it 'creates a method from let in nested context'><<todo method>>(&<blk>)
+          begin
+            result = <self>.bar()
+            <self>.puts(result)
+          end
+        end
+
+        <runtime method definition of bar>
+      end
+
+      class <emptyTree>::<C <xcontext 'pending context'>><<C <todo sym>>> < (<self>)
+        def baz<<todo method>>(&<blk>)
+          3
+        end
+
+        def <it 'creates a method from let in pending context'><<todo method>>(&<blk>)
+          begin
+            result = <self>.baz()
+            <self>.puts(result)
+          end
+        end
+
+        <runtime method definition of baz>
+      end
+    end
+
+    class <emptyTree>::<C <RSpec.xdescribe 'pending describe block'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def foo<<todo method>>(&<blk>)
+        1
+      end
+
+      def <it 'creates a method from let'><<todo method>>(&<blk>)
+        begin
+          result = <self>.foo()
+          <self>.puts(result)
+        end
+      end
+
+      <runtime method definition of foo>
+    end
+  end
 end

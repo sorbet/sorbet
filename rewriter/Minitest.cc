@@ -485,8 +485,21 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
+    // Allow both self.describe and RSpec.describe calls (and other RSpec methods)
     if (!send->recv.isSelfReference()) {
-        return nullptr;
+        // Only allow RSpec calls for describe-like methods
+        if (send->fun == core::Names::describe() || send->fun == core::Names::context() ||
+            send->fun == core::Names::xcontext() || send->fun == core::Names::xdescribe()) {
+            if (auto constant = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv)) {
+                if (constant->cnst != core::Names::Constants::RSpec()) {
+                    return nullptr;
+                }
+            } else {
+                return nullptr;
+            }
+        } else {
+            return nullptr;
+        }
     }
 
     switch (send->fun.rawId()) {
@@ -530,7 +543,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                  send->flags);
         }
 
-        case core::Names::describe().rawId(): {
+        case core::Names::describe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xcontext().rawId():
+        case core::Names::xdescribe().rawId(): {
             if (send->numPosArgs() != 1) {
                 return nullptr;
             }
@@ -539,7 +555,23 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ast::ClassDef::ANCESTORS_store ancestors;
 
             // First ancestor is the superclass
-            if (isClass) {
+            bool isRSpecCall = false;
+            if (auto constant = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv)) {
+                if (constant->cnst == core::Names::Constants::RSpec()) {
+                    isRSpecCall = true;
+                }
+            }
+
+            if (isRSpecCall) {
+                // For RSpec calls, inherit from RSpec::Core::ExampleGroup
+                auto rspecCore = ast::MK::UnresolvedConstant(
+                    arg.loc(),
+                    ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(), core::Names::Constants::RSpec()),
+                    core::Names::Constants::Core());
+                auto exampleGroup =
+                    ast::MK::UnresolvedConstant(arg.loc(), move(rspecCore), core::Names::Constants::ExampleGroup());
+                ancestors.emplace_back(move(exampleGroup));
+            } else if (isClass) {
                 ancestors.emplace_back(ast::MK::Self(arg.loc()));
             } else {
                 // Avoid subclassing self when it's a module, as that will produce an error.
@@ -555,8 +587,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             auto rhs = prepareBody(ctx, /* isClass */ true, std::move(block->body), /* insideDescribe */ true);
 
-            auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
-                                                    ctx.state.enterNameConstant("<describe '" + argString + "'>"));
+            // Use the method name in the constant name to distinguish between describe/context/etc
+            auto methodName = send->fun.show(ctx);
+            string className;
+            if (isRSpecCall) {
+                className = "<RSpec." + methodName + " '" + argString + "'>";
+            } else {
+                className = "<" + methodName + " '" + argString + "'>";
+            }
+            auto name =
+                ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(), ctx.state.enterNameConstant(className));
             auto declLoc = declLocForSendWithBlock(*send);
             return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                                   flattenDescribeBody(move(rhs)));

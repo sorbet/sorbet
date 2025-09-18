@@ -595,6 +595,14 @@ NameDef names[] = {
     {"Account", "Account", true},
     {"Merchant", "Merchant", true},
 
+    // RSpec
+    {"RSpec", "RSpec", true},
+    {"Core", "Core", true},
+    {"ExampleGroup", "ExampleGroup", true},
+    {"context"},
+    {"xcontext"},
+    {"xdescribe"},
+
     // RBS
     {"RBSBind", "<RBSBind>", true},
     {"RBSTypeAlias", "<RBSTypeAlias>", true},
