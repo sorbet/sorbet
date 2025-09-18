@@ -1,0 +1,18 @@
+# -- test/testdata/infer/setter_method.rb --
+# typed: true
+
+class A
+  def foo; @foo; end
+
+  def foo=(foo)
+    @foo = foo
+  end
+end
+
+a = A.new
+a.foo = 12
+# ^^^^ error: Setter method `fooo=` does not exist on `A`
+
+a.foo
+# ^^^^ error: Method `fooo` does not exist on `A`
+# ------------------------------

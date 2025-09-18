@@ -17,7 +17,7 @@ a = A.new(some_const: '', some_prop: '')
 a.some_const
 # ^^^^^^^^^^ usage: A#some_const
 a.some_prop=('')
-# ^^^^^^^^^^ usage: A#some_prop
+# ^^^^^^^^^  usage: A#some_prop
 a.some_prop
 # ^^^^^^^^^ usage: A#some_prop
 a.foreign_b_
@@ -45,6 +45,6 @@ b = B.new(some_const: '', some_prop: '')
 b.some_const
 # ^^^^^^^^^^ usage: B#some_const
 b.some_prop=('')
-# ^^^^^^^^^^ usage: B#some_prop
+# ^^^^^^^^^  usage: B#some_prop
 b.some_prop
 # ^^^^^^^^^ usage: B#some_prop
