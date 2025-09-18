@@ -15,6 +15,7 @@
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
+#include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
@@ -129,6 +130,17 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
     }
 
     packager::Packager::run(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
+
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        core::UnfreezeSymbolTable symbolTableAccess(gs);
+        auto maybeResult = resolver::Resolver::run(gs, move(parsedFiles), *workers);
+        ENFORCE(maybeResult.hasResult());
+        parsedFiles = move(maybeResult.result());
+    }
+
+    parsedFiles = packager::VisibilityChecker::run(gs, *workers, move(parsedFiles));
+
     return parsedFiles;
 }
 
