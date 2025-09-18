@@ -3745,294 +3745,342 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
 
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
         if (auto *prismParentNode = node->parent) {
-            // This constant reference is chained onto another constant reference.
-            // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the `name`.
-            //   A::B::C
-            //    /    \
-            //  A::B   ::C
-            //  /  \
-            // A   ::B
-            parent = translate(prismParentNode);
-            parentExpr = parent ? parent->takeDesugaredExpr() : nullptr;
-        } else { // This is the root of a fully qualified constant reference, like `::A`.
-            auto delimiterLoc = translateLoc(node->delimiter_loc); // The location of the `::`
-            parent = make_unique<parser::Cbase>(delimiterLoc);
-            parentExpr = MK::Constant(delimiterLoc, core::Symbols::root());
-        }
-    } else { // Handle plain constants like `A`, that aren't part of a constant path.
-        static_assert(
-            is_same_v<PrismLhsNode, pm_constant_and_write_node> || is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
-            is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
-            is_same_v<PrismLhsNode, pm_constant_target_node> || is_same_v<PrismLhsNode, pm_constant_read_node> ||
-            is_same_v<PrismLhsNode, pm_constant_write_node>);
-
-        // For writes, location should only include the name, like `FOO` in `FOO = 1`.
-        if constexpr (is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_write_node>) {
-            location = translateLoc(node->name_loc);
-        }
-        parent = nullptr;
-        parentExpr = MK::EmptyTree();
-    }
-
-    if (parentExpr != nullptr) {
-        ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
-        return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
-    } else {
-        return make_unique<SorbetLHSNode>(location, move(parent), constantName);
-    }
-}
-
-core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
-    return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
-}
-
-core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
-}
-
-core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
-    ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++desugarUniqueCounter);
-}
-
-// Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
-// Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
-// TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
-    auto length = closingLoc.end - closingLoc.start;
-    auto location = translateLoc(closingLoc);
-
-    string_view options;
-
-    if (length > 0) {
-        options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
-    } else {
-        options = string_view();
-    }
-
-    if (!directlyDesugar) {
-        return make_unique<parser::Regopt>(location, options);
-    }
-
-    // Desugar options to integer flags
-    int flags = 0;
-    for (auto &chr : options) {
-        switch (chr) {
-            case 'i':
-                flags |= 1; // Regexp::IGNORECASE
-                break;
-            case 'x':
-                flags |= 2; // Regexp::EXTENDED
-                break;
-            case 'm':
-                flags |= 4; // Regexp::MULTILINE
-                break;
-            default:
-                // Encoding options (n, e, s, u) are handled by the parser
-                break;
-        }
-    }
-    auto flagsExpr = MK::Int(location, flags);
-    return make_node_with_expr<parser::Regopt>(move(flagsExpr), location, options);
-}
-
-// Translate an unescaped string from a Regexp literal
-unique_ptr<parser::Node> Translator::translateRegexp(pm_string_t unescaped, core::LocOffsets location,
-                                                     pm_location_t closingLoc) {
-    // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
-    // but we'll only have up to one String node here for this non-interpolated Regexp.
-    parser::NodeVec parts;
-    auto source = parser.extractString(&unescaped);
-    if (!source.empty()) {
-        if (directlyDesugar) {
-            // Create a String node with its desugared expression
-            auto name = ctx.state.enterNameUTF8(source);
-            auto expr = MK::String(location, name);
-            auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), location, name);
-            parts.emplace_back(move(sourceStringNode));
-        } else {
-            auto sourceStringNode = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
-            parts.emplace_back(move(sourceStringNode));
-        }
-    }
-
-    auto options = translateRegexpOptions(closingLoc);
-
-    if (!directlyDesugar) {
-        return make_unique<parser::Regexp>(location, move(parts), move(options));
-    }
-
-    ast::ExpressionPtr pattern;
-    if (parts.empty()) {
-        pattern = MK::String(location, core::Names::empty());
-    } else {
-        pattern = parts[0]->takeDesugaredExpr();
-    }
-    auto optsExpr = options->takeDesugaredExpr();
-
-    auto cnst = MK::Constant(location, core::Symbols::Regexp());
-
-    // Desugar `/ foo / i` to `::Regexp.new("foo", option_flags_int)`
-    auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(), move(pattern),
-                          move(optsExpr));
-
-    return make_node_with_expr<parser::Regexp>(move(expr), location, move(parts), move(options));
-}
-
-string_view Translator::sliceLocation(pm_location_t loc) const {
-    return cast_prism_string(loc.start, loc.end - loc.start);
-}
-
-// Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.
-template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node) {
-    static_assert(
-        is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>,
-        "Translator::translateMultiTarget can only be used for PM_MULTI_TARGET_NODE and PM_MULTI_WRITE_NODE.");
-
-    auto location = translateLoc(node->base.location);
-
-    // Left-hand side of the assignment
-    auto prismLefts = absl::MakeSpan(node->lefts.nodes, node->lefts.size);
-    auto prismRights = absl::MakeSpan(node->rights.nodes, node->rights.size);
-    auto prismSplat = node->rest;
-
-    NodeVec sorbetLhs{};
-    sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
-
-    translateMultiInto(sorbetLhs, prismLefts);
-
-    if (prismSplat != nullptr) {
-        switch (PM_NODE_TYPE(prismSplat)) {
-            case PM_SPLAT_NODE: {
-                // This requires separate handling from the `PM_SPLAT_NODE` because it
-                // has a different Sorbet node type, `parser::SplatLhs`
-                auto splatNode = down_cast<pm_splat_node>(prismSplat);
-                auto location = translateLoc(splatNode->base.location);
-                auto expression = splatNode->expression;
-
-                if (expression != nullptr && PM_NODE_TYPE_P(expression, PM_REQUIRED_PARAMETER_NODE)) {
-                    auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
-                    auto name = translateConstantName(requiredParamNode->name);
-                    sorbetLhs.emplace_back(
-                        make_unique<parser::RestParam>(location, name, translateLoc(requiredParamNode->base.location)));
-                } else {
-                    sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(translate(expression))));
+            {
+                absl::InlinedVector<core::NameRef, 4> fullPath;
+                bool isRootAnchored = false;
+                pm_node_t *current = up_cast(const_cast<PrismLhsNode *>(node));
+                while (current != nullptr) {
+                    switch (PM_NODE_TYPE(current)) {
+                        case PM_CONSTANT_PATH_NODE: {
+                            auto *p = down_cast<pm_constant_path_node>(current);
+                            fullPath.push_back(translateConstantName(p->name));
+                            if (p->parent != nullptr) {
+                                current = p->parent;
+                            } else {
+                                isRootAnchored = true;
+                                current = nullptr;
+                            }
+                            break;
+                        }
+                        case PM_CONSTANT_READ_NODE: {
+                            auto *r = down_cast<pm_constant_read_node>(current);
+                            fullPath.push_back(translateConstantName(r->name));
+                            current = nullptr;
+                            break;
+                        }
+                        default:
+                            current = nullptr;
+                            break;
+                    }
                 }
-
-                break;
+                if (!fullPath.empty()) {
+                    absl::c_reverse(fullPath);
+                    if (isRootAnchored) {
+                        if (fullPath.size() == 3 && fullPath[0] == ctx.state.enterNameUTF8("Sorbet") &&
+                            fullPath[1] == ctx.state.enterNameUTF8("Private") &&
+                            fullPath[2] == ctx.state.enterNameUTF8("Static")) {
+                            return make_unique<parser::ResolvedConst>(location, core::Symbols::Sorbet_Private_Static());
+                        }
+                        if (fullPath.size() == 3 && fullPath[0] == ctx.state.enterNameUTF8("T") &&
+                            fullPath[1] == ctx.state.enterNameUTF8("Sig") &&
+                            fullPath[2] == ctx.state.enterNameUTF8("WithoutRuntime")) {
+                            return make_unique<parser::ResolvedConst>(location, core::Symbols::T_Sig_WithoutRuntime());
+                        }
+                    }
+                }
             }
-            case PM_IMPLICIT_REST_NODE:
-                // No-op, because Sorbet's parser infers this from just having an `Mlhs`.
-                break;
-            default:
-                unreachable("Unexpected rest node type. Expected only PM_SPLAT_NODE or PM_IMPLICIT_REST_NODE.");
+            if (auto prismParentNode = node->parent; prismParentNode != nullptr) {
+                // This constant reference is chained onto another constant reference.
+                // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the
+                // `name`.
+                //   A::B::C
+                //    /    \
+            //  A::B   ::C
+                //  /  \
+            // A   ::B
+                parent = translate(prismParentNode);
+                parentExpr = parent ? parent->takeDesugaredExpr() : nullptr;
+            } else { // This is the root of a fully qualified constant reference, like `::A`.
+                auto delimiterLoc = translateLoc(node->delimiter_loc); // The location of the `::`
+                parent = make_unique<parser::Cbase>(delimiterLoc);
+                parentExpr = MK::Constant(delimiterLoc, core::Symbols::root());
+            }
+        } else { // Handle plain constants like `A`, that aren't part of a constant path.
+            static_assert(is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_target_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_read_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_write_node>);
+
+            // For writes, location should only include the name, like `FOO` in `FOO = 1`.
+            if constexpr (is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_write_node>) {
+                location = translateLoc(node->name_loc);
+            }
+            parent = nullptr;
+            parentExpr = MK::EmptyTree();
+        }
+
+        if (parentExpr != nullptr) {
+            ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
+            return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
+        } else {
+            return make_unique<SorbetLHSNode>(location, move(parent), constantName);
         }
     }
 
-    translateMultiInto(sorbetLhs, prismRights);
-
-    return make_unique<parser::Mlhs>(location, move(sorbetLhs));
-}
-
-// Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
-// The body can be a Begin node comprising multiple statements, or a single statement.
-// Return nullopt if the body does not have all of its expressions desugared.
-// TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
-                                                                          unique_ptr<parser::Node> &scopeBody) {
-    ENFORCE(directlyDesugar, "desugarScopeBodyToRHSStore should only be called when direct desugaring is enabled");
-
-    if (scopeBody == nullptr) { // Empty body
-        ast::ClassDef::RHS_store result;
-        result.emplace_back(MK::EmptyTree());
-        return result;
+    core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
+        return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
     }
 
-    ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
-
-    if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
-        if (!hasExpr(scopeBody)) {
-            return nullopt;
-        }
-
-        auto beginExpr = scopeBody->takeDesugaredExpr();
-
-        auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
-        ENFORCE(insSeqExpr != nullptr, "The cached expr on every multi-statement Begin should be an InsSeq.")
-
-        ast::ClassDef::RHS_store result;
-        result.reserve(insSeqExpr->stats.size());
-        for (auto &statement : insSeqExpr->stats) {
-            result.emplace_back(move(statement));
-        }
-        // Move the the final expression too, which is separated out in the `ast::InsSeq`.
-        result.emplace_back(move(insSeqExpr->expr));
-        return result;
-    } else { // Handle single-statement body
-        if (!hasExpr(scopeBody)) {
-            return nullopt;
-        }
-
-        ast::ClassDef::RHS_store result;
-        result.emplace_back(scopeBody->takeDesugaredExpr());
-        return result;
+    core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
+        return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
     }
-}
 
-core::NameRef Translator::maybeTypedSuper() const {
-    bool typedSuper = ctx.state.cacheSensitiveOptions.typedSuper;
-    bool shouldUseTypedSuper = typedSuper && !isInAnyBlock && !isInModule;
-
-    return shouldUseTypedSuper ? core::Names::super() : core::Names::untypedSuper();
-}
-
-// Context management methods
-bool Translator::isInMethodDef() const {
-    ENFORCE(enclosingMethodLoc.exists() == enclosingMethodName.exists(),
-            "The enclosing method name and location should always both be present, "
-            "or both be absecent, depending on whether we're in a method def or not.")
-
-    return enclosingMethodName.exists();
-}
-
-Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
-                                      core::NameRef enclosingBlockParamName) const {
-    auto resetDesugarUniqueCounter = true;
-    auto isInModule = this->isInModule && !isSingletonMethod;
-    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamName, isInModule,
-                      this->isInAnyBlock);
-}
-
-Translator Translator::enterBlockContext() const {
-    auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
-    auto isInAnyBlock = true;
-    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      this->enclosingBlockParamName, this->isInModule, isInAnyBlock);
-}
-
-Translator Translator::enterModuleContext() const {
-    auto resetDesugarUniqueCounter = true;
-    auto isInModule = true;
-    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
-    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      this->enclosingBlockParamName, isInModule, isInAnyBlock);
-}
-
-Translator Translator::enterClassContext() const {
-    auto resetDesugarUniqueCounter = true;
-    auto isInModule = false;
-    auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
-    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      this->enclosingBlockParamName, isInModule, isInAnyBlock);
-}
-
-void Translator::reportError(core::LocOffsets loc, const string &message) const {
-    auto errorLoc = core::Loc(ctx.file, loc);
-    if (auto e = ctx.state.beginError(errorLoc, core::errors::Parser::ParserError)) {
-        e.setHeader("{}", message);
+    core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
+        ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
+        return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++desugarUniqueCounter);
     }
-}
+
+    // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
+    // Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
+    // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+    unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
+        auto length = closingLoc.end - closingLoc.start;
+        auto location = translateLoc(closingLoc);
+
+        string_view options;
+
+        if (length > 0) {
+            options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
+        } else {
+            options = string_view();
+        }
+
+        if (!directlyDesugar) {
+            return make_unique<parser::Regopt>(location, options);
+        }
+
+        // Desugar options to integer flags
+        int flags = 0;
+        for (auto &chr : options) {
+            switch (chr) {
+                case 'i':
+                    flags |= 1; // Regexp::IGNORECASE
+                    break;
+                case 'x':
+                    flags |= 2; // Regexp::EXTENDED
+                    break;
+                case 'm':
+                    flags |= 4; // Regexp::MULTILINE
+                    break;
+                default:
+                    // Encoding options (n, e, s, u) are handled by the parser
+                    break;
+            }
+        }
+        auto flagsExpr = MK::Int(location, flags);
+        return make_node_with_expr<parser::Regopt>(move(flagsExpr), location, options);
+    }
+
+    // Translate an unescaped string from a Regexp literal
+    unique_ptr<parser::Node> Translator::translateRegexp(pm_string_t unescaped, core::LocOffsets location,
+                                                         pm_location_t closingLoc) {
+        // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
+        // but we'll only have up to one String node here for this non-interpolated Regexp.
+        parser::NodeVec parts;
+        auto source = parser.extractString(&unescaped);
+        if (!source.empty()) {
+            if (directlyDesugar) {
+                // Create a String node with its desugared expression
+                auto name = ctx.state.enterNameUTF8(source);
+                auto expr = MK::String(location, name);
+                auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), location, name);
+                parts.emplace_back(move(sourceStringNode));
+            } else {
+                auto sourceStringNode = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
+                parts.emplace_back(move(sourceStringNode));
+            }
+        }
+
+        auto options = translateRegexpOptions(closingLoc);
+
+        if (!directlyDesugar) {
+            return make_unique<parser::Regexp>(location, move(parts), move(options));
+        }
+
+        ast::ExpressionPtr pattern;
+        if (parts.empty()) {
+            pattern = MK::String(location, core::Names::empty());
+        } else {
+            pattern = parts[0]->takeDesugaredExpr();
+        }
+        auto optsExpr = options->takeDesugaredExpr();
+
+        auto cnst = MK::Constant(location, core::Symbols::Regexp());
+
+        // Desugar `/ foo / i` to `::Regexp.new("foo", option_flags_int)`
+        auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(), move(pattern),
+                              move(optsExpr));
+
+        return make_node_with_expr<parser::Regexp>(move(expr), location, move(parts), move(options));
+    }
+
+    string_view Translator::sliceLocation(pm_location_t loc) const {
+        return cast_prism_string(loc.start, loc.end - loc.start);
+    }
+
+    // Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.
+    template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode * node) {
+        static_assert(
+            is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>,
+            "Translator::translateMultiTarget can only be used for PM_MULTI_TARGET_NODE and PM_MULTI_WRITE_NODE.");
+
+        auto location = translateLoc(node->base.location);
+
+        // Left-hand side of the assignment
+        auto prismLefts = absl::MakeSpan(node->lefts.nodes, node->lefts.size);
+        auto prismRights = absl::MakeSpan(node->rights.nodes, node->rights.size);
+        auto prismSplat = node->rest;
+
+        NodeVec sorbetLhs{};
+        sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
+
+        translateMultiInto(sorbetLhs, prismLefts);
+
+        if (prismSplat != nullptr) {
+            switch (PM_NODE_TYPE(prismSplat)) {
+                case PM_SPLAT_NODE: {
+                    // This requires separate handling from the `PM_SPLAT_NODE` because it
+                    // has a different Sorbet node type, `parser::SplatLhs`
+                    auto splatNode = down_cast<pm_splat_node>(prismSplat);
+                    auto location = translateLoc(splatNode->base.location);
+                    auto expression = splatNode->expression;
+
+                    if (expression != nullptr && PM_NODE_TYPE_P(expression, PM_REQUIRED_PARAMETER_NODE)) {
+                        auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
+                        auto name = translateConstantName(requiredParamNode->name);
+                        sorbetLhs.emplace_back(make_unique<parser::RestParam>(
+                            location, name, translateLoc(requiredParamNode->base.location)));
+                    } else {
+                        sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(translate(expression))));
+                    }
+
+                    break;
+                }
+                case PM_IMPLICIT_REST_NODE:
+                    // No-op, because Sorbet's parser infers this from just having an `Mlhs`.
+                    break;
+                default:
+                    unreachable("Unexpected rest node type. Expected only PM_SPLAT_NODE or PM_IMPLICIT_REST_NODE.");
+            }
+        }
+
+        translateMultiInto(sorbetLhs, prismRights);
+
+        return make_unique<parser::Mlhs>(location, move(sorbetLhs));
+    }
+
+    // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
+    // The body can be a Begin node comprising multiple statements, or a single statement.
+    // Return nullopt if the body does not have all of its expressions desugared.
+    // TODO: make the return non-optional after direct desugaring is complete.
+    // https://github.com/Shopify/sorbet/issues/671
+    optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_node * prismBodyNode,
+                                                                              unique_ptr<parser::Node> & scopeBody) {
+        ENFORCE(directlyDesugar, "desugarScopeBodyToRHSStore should only be called when direct desugaring is enabled");
+
+        if (scopeBody == nullptr) { // Empty body
+            ast::ClassDef::RHS_store result;
+            result.emplace_back(MK::EmptyTree());
+            return result;
+        }
+
+        ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
+
+        if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
+            if (!hasExpr(scopeBody)) {
+                return nullopt;
+            }
+
+            auto beginExpr = scopeBody->takeDesugaredExpr();
+
+            auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
+            ENFORCE(insSeqExpr != nullptr, "The cached expr on every multi-statement Begin should be an InsSeq.")
+
+            ast::ClassDef::RHS_store result;
+            result.reserve(insSeqExpr->stats.size());
+            for (auto &statement : insSeqExpr->stats) {
+                result.emplace_back(move(statement));
+            }
+            // Move the the final expression too, which is separated out in the `ast::InsSeq`.
+            result.emplace_back(move(insSeqExpr->expr));
+            return result;
+        } else { // Handle single-statement body
+            if (!hasExpr(scopeBody)) {
+                return nullopt;
+            }
+
+            ast::ClassDef::RHS_store result;
+            result.emplace_back(scopeBody->takeDesugaredExpr());
+            return result;
+        }
+    }
+
+    core::NameRef Translator::maybeTypedSuper() const {
+        bool typedSuper = ctx.state.cacheSensitiveOptions.typedSuper;
+        bool shouldUseTypedSuper = typedSuper && !isInAnyBlock && !isInModule;
+
+        return shouldUseTypedSuper ? core::Names::super() : core::Names::untypedSuper();
+    }
+
+    // Context management methods
+    bool Translator::isInMethodDef() const {
+        ENFORCE(enclosingMethodLoc.exists() == enclosingMethodName.exists(),
+                "The enclosing method name and location should always both be present, "
+                "or both be absecent, depending on whether we're in a method def or not.")
+
+        return enclosingMethodName.exists();
+    }
+
+    Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
+                                          core::NameRef enclosingBlockParamName) const {
+        auto resetDesugarUniqueCounter = true;
+        auto isInModule = this->isInModule && !isSingletonMethod;
+        return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamName, isInModule,
+                          this->isInAnyBlock);
+    }
+
+    Translator Translator::enterBlockContext() const {
+        auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
+        auto isInAnyBlock = true;
+        return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                          this->enclosingBlockParamName, this->isInModule, isInAnyBlock);
+    }
+
+    Translator Translator::enterModuleContext() const {
+        auto resetDesugarUniqueCounter = true;
+        auto isInModule = true;
+        auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+        return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                          this->enclosingBlockParamName, isInModule, isInAnyBlock);
+    }
+
+    Translator Translator::enterClassContext() const {
+        auto resetDesugarUniqueCounter = true;
+        auto isInModule = false;
+        auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
+        return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                          this->enclosingBlockParamName, isInModule, isInAnyBlock);
+    }
+
+    void Translator::reportError(core::LocOffsets loc, const string &message) const {
+        auto errorLoc = core::Loc(ctx.file, loc);
+        if (auto e = ctx.state.beginError(errorLoc, core::errors::Parser::ParserError)) {
+            e.setHeader("{}", message);
+        }
+    }
 }; // namespace sorbet::parser::Prism
