@@ -1086,7 +1086,53 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto arg = translate(definedNode->value);
 
-            return make_unique<parser::Defined>(location.join(arg->loc), move(arg));
+            if (!directlyDesugar) {
+                return make_unique<parser::Defined>(location.join(arg->loc), move(arg));
+            }
+
+            // Desugar to `::Magic.defined_instance_var(ivar)` or `::Magic.defined_class_var(cvar)`
+            if (auto *ivar = parser::NodeWithExpr::cast_node<parser::IVar>(arg.get())) {
+                auto sym = MK::Symbol(arg->loc, ivar->name);
+                auto expr = MK::Send1(arg->loc, MK::Magic(arg->loc), core::Names::definedInstanceVar(),
+                                      location.copyWithZeroLength(), move(sym));
+                return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
+            }
+
+            if (auto *cvar = parser::NodeWithExpr::cast_node<parser::CVar>(arg.get())) {
+                auto sym = MK::Symbol(arg->loc, cvar->name);
+                auto expr = MK::Send1(arg->loc, MK::Magic(arg->loc), core::Names::definedClassVar(),
+                                      location.copyWithZeroLength(), move(sym));
+                return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
+            }
+
+            // Desugar to `::Magic.defined_p(a, b, c)` or `::Magic.defined_p()`
+            ast::Send::ARGS_store args;
+            if (auto *constNode = parser::NodeWithExpr::cast_node<parser::Const>(arg.get())) {
+                auto currentConst = constNode;
+
+                while (currentConst != nullptr) {
+                    auto nameStr = currentConst->name.show(ctx.state);
+                    auto nameRef = ctx.state.enterNameUTF8(nameStr);
+                    args.emplace_back(MK::String(currentConst->loc, nameRef));
+
+                    if (currentConst->scope != nullptr) {
+                        // Check if this is a fully qualified path
+                        if (parser::NodeWithExpr::isa_node<parser::Cbase>(currentConst->scope.get())) {
+                            args.clear();
+                            break;
+                        }
+                        currentConst = parser::NodeWithExpr::cast_node<parser::Const>(currentConst->scope.get());
+                    } else {
+                        currentConst = nullptr;
+                    }
+                }
+
+                absl::c_reverse(args);
+            }
+
+            auto expr = MK::Send(arg->loc, MK::Magic(arg->loc), core::Names::defined_p(), location.copyWithZeroLength(),
+                                 args.size(), move(args));
+            return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
         }
         case PM_ELSE_NODE: { // An `else` clauses, which can pertain to an `if`, `begin`, `case`, etc.
             auto elseNode = down_cast<pm_else_node>(node);
