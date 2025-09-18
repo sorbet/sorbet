@@ -33,11 +33,6 @@ Import Import::prelude(MangledName mangledName, core::LocOffsets declLoc) {
     return res;
 }
 
-bool Export::lexCmp(const Export &a, const Export &b) {
-    return absl::c_lexicographical_compare(a.parts(), b.parts(),
-                                           [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
-}
-
 PackageInfo &PackageInfo::from(core::GlobalState &gs, MangledName pkg) {
     ENFORCE(pkg.exists());
     return *gs.packageDB().getPackageInfoNonConst(pkg);

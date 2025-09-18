@@ -48,7 +48,64 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
 
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
-    const core::packages::PackageInfo &package;
+    core::packages::PackageInfo &package;
+
+    // Blames which location (export) caused a symbol to first be marked exported.
+    struct ExportBlame {
+        core::SymbolRef exportedBy;
+        core::LocOffsets firstExportedAt;
+    };
+    UnorderedMap<core::SymbolRef, ExportBlame> explicitlyExported;
+
+    // In general, it's not good to compare arbitrary LocOffsets, because they might not be in the
+    // same file and thus not comparable, thus they have no `operator<` on them.
+    //
+    // Since we know that we're only going to compare locs from within a file, we can define our own
+    // function here.
+    static constexpr auto COMPARE_EXPORT_LOCS = [](const core::LocOffsets &left, const core::LocOffsets &right) {
+        if (left.beginPos() < right.beginPos()) {
+            return true;
+        } else if (left.beginPos() == right.beginPos()) {
+            return left.endPos() < right.endPos();
+        } else {
+            return false;
+        }
+    };
+
+    struct DuplicateExportError {
+        core::SymbolRef duplicate;
+        core::SymbolRef prefix;
+        core::LocOffsets firstExportedAt;
+    };
+    // Collect duplicate export errors into a map and report at the end of this file.
+    // - uses an ordered map, because we want to report them in a determinstic order
+    // - unique by `export` loc, because we want to only report a given `export` line as bad once
+    map<core::LocOffsets, DuplicateExportError, decltype(COMPARE_EXPORT_LOCS)> duplicateExports =
+        decltype(duplicateExports)(COMPARE_EXPORT_LOCS);
+
+    void checkDuplicateExport(core::MutableContext ctx, core::SymbolRef topExportSym, core::LocOffsets topExportLoc,
+                              core::SymbolRef sym, bool alreadyExported) {
+        // Only report duplicate errors if there's an entry in the blameMap. We don't add to the
+        // blameMap when marking a parent namespace as exported (in exportParentNamespace).
+        auto explicitlyExported = this->explicitlyExported.find(sym) != this->explicitlyExported.end();
+        if (explicitlyExported) {
+            // If we're not at the top, then the current export is more general.
+            // Report the error on the line that previously exported this symbol.
+            auto atTop = sym == topExportSym;
+            auto errLoc = atTop ? topExportLoc : this->explicitlyExported[sym].firstExportedAt;
+
+            if (alreadyExported && duplicateExports.find(errLoc) == duplicateExports.end()) {
+                auto firstExportedAt = atTop ? this->explicitlyExported[sym].firstExportedAt : topExportLoc;
+                duplicateExports[errLoc] = DuplicateExportError{sym, topExportSym, firstExportedAt};
+            }
+
+        } else if (topExportLoc.exists() &&
+                   // Don't treat singleton classes as explicitly exported, so they never show up in
+                   // duplicate export errors.
+                   (!sym.isClassOrModule() || !sym.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx))) {
+            this->explicitlyExported[sym] = ExportBlame{.exportedBy = topExportSym, .firstExportedAt = topExportLoc};
+        }
+    }
 
     void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef topExportSym,
                                 core::LocOffsets topExportLoc, core::SymbolRef sym) {
@@ -59,9 +116,17 @@ class PropagateVisibility final {
 
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
-                auto klass = sym.asClassOrModuleRef();
-                klass.data(ctx)->flags.isExported = setExportedTo;
-                for (const auto &[name, child] : klass.data(ctx)->members()) {
+                auto klassData = sym.asClassOrModuleRef().data(ctx);
+
+                if (setExportedTo) {
+                    checkDuplicateExport(ctx, topExportSym, topExportLoc, sym, klassData->flags.isExported);
+                }
+
+                klassData->flags.isExported = setExportedTo;
+
+                // This `members` call does not have a stable order--we recover a determinstic order
+                // by sorting duplicate errors at the end of PropagateVisibility
+                for (const auto &[name, child] : klassData->members()) {
                     if (name == core::Names::attached()) {
                         // There is a cycle between a class and its singleton, and this avoids infinite recursion.
                         continue;
@@ -73,7 +138,13 @@ class PropagateVisibility final {
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
-                sym.asFieldRef().data(ctx)->flags.isExported = setExportedTo;
+                auto fieldData = sym.asFieldRef().data(ctx);
+
+                if (setExportedTo) {
+                    checkDuplicateExport(ctx, topExportSym, topExportLoc, sym, fieldData->flags.isExported);
+                }
+
+                fieldData->flags.isExported = setExportedTo;
                 break;
             }
 
@@ -133,6 +204,9 @@ class PropagateVisibility final {
         if (testScope.exists()) {
             recursiveSetIsExported(ctx, setExportedTo, testScope, topExportLoc, testScope);
         }
+
+        // Shouldn't have been touched, because topExportLoc was none, but let's just clear it to be safe.
+        explicitlyExported.clear();
     }
 
     bool ignoreRBIExportEnforcement(core::MutableContext ctx, core::FileRef file) {
@@ -192,7 +266,7 @@ class PropagateVisibility final {
         }
     }
 
-    PropagateVisibility(const core::packages::PackageInfo &package) : package{package} {}
+    PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
@@ -207,12 +281,37 @@ public:
         }
 
         auto lit = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
-        if (lit == nullptr || lit->symbol() == core::Symbols::StubModule()) {
-            // We don't raise an explicit error here, as this is one of two cases:
-            //   1. Export is given a non-constant argument
-            //   2. The argument failed to resolve
-            // In both cases, errors will be raised by previous passes.
+        if (lit == nullptr) {
+            // Already reported an error in packager.cc
             return;
+        }
+
+        // There was a constant here, but we don't know what it was.
+        //
+        // This is a "valid" export that happens to also be attempting to export something that doesn't exist.
+        // The rest of the pipeline depends on being able to see these lines for the purposes of autocorrects,
+        // so let's at leasat record that there is an export here.
+        this->package.exports_.emplace_back(send.loc);
+
+        if (lit->symbol() == core::Symbols::StubModule()) {
+            // Don't attempt to export a symbol that doesn't exist. Resolver reported an error already.
+            return;
+        }
+
+        if (this->package.exportAll()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Packager::ExportConflict)) {
+                e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
+                            this->package.mangledName().owner.show(ctx), "export_all!");
+                auto replaceLoc = ctx.locAt(send.loc);
+                auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
+                // Remove leading whitespace
+                replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);
+                if (replaceLoc.beginPos() != 0) {
+                    // Remove leading newline
+                    replaceLoc = replaceLoc.adjust(ctx, -1, 0);
+                }
+                e.replaceWith("Delete export", replaceLoc, "");
+            }
         }
 
         string_view kind;
@@ -271,13 +370,25 @@ public:
             return;
         }
 
-        const auto &package = gs.packageDB().getPackageInfo(pkgName);
-        ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
+        auto package = gs.packageDB().getPackageInfoNonConst(pkgName);
+        ENFORCE(package->exists(), "Package is associated with a file, but doesn't exist");
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
-        PropagateVisibility pass{package};
+        PropagateVisibility pass{*package};
         pass.unsetAllExportedInPackage(ctx);
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
+
+        for (const auto [errLoc, err] : pass.duplicateExports) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Packager::ExportConflict)) {
+                if (err.duplicate == err.prefix) {
+                    e.setHeader("Duplicate export of `{}`", err.duplicate.show(ctx));
+                } else {
+                    e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
+                                err.duplicate.show(ctx), err.prefix.show(ctx));
+                }
+                e.addErrorLine(ctx.locAt(err.firstExportedAt), "Prefix exported here");
+            }
+        }
     }
 };
 

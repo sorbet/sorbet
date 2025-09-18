@@ -1,12 +1,12 @@
-__package.rb:6: Cannot export `MyPackage::A::C` because another exported name `MyPackage::A` is a prefix of it https://srb.help/3716
-     6 |  export MyPackage::A::C
+__package.rb:5: Cannot export `MyPackage::A::B` because another exported name `MyPackage::A` is a prefix of it https://srb.help/3716
+     5 |  export MyPackage::A::B
           ^^^^^^^^^^^^^^^^^^^^^^
     __package.rb:7: Prefix exported here
      7 |  export MyPackage::A
           ^^^^^^^^^^^^^^^^^^^
 
-__package.rb:5: Cannot export `MyPackage::A::B` because another exported name `MyPackage::A` is a prefix of it https://srb.help/3716
-     5 |  export MyPackage::A::B
+__package.rb:6: Cannot export `MyPackage::A::C` because another exported name `MyPackage::A` is a prefix of it https://srb.help/3716
+     6 |  export MyPackage::A::C
           ^^^^^^^^^^^^^^^^^^^^^^
     __package.rb:7: Prefix exported here
      7 |  export MyPackage::A
