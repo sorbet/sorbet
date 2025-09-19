@@ -404,7 +404,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             NodeVec statements;
-            if (auto ensureNode = beginNode->ensure_clause; ensureNode != nullptr) {
+            if (auto *ensureNode = beginNode->ensure_clause) {
                 // Handle `begin ... ensure ... end`
                 // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
                 // Ensure node.
@@ -2273,7 +2273,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 arrayPattern = make_unique<parser::ArrayPattern>(location, move(sorbetElements));
             }
 
-            if (auto prismConstant = arrayPatternNode->constant; prismConstant != nullptr) {
+            if (auto *prismConstant = arrayPatternNode->constant) {
                 // An array pattern can start with a constant that matches against a specific type,
                 // rather than any value whose `#deconstruct` results are matched by the pattern
                 // E.g. the `Point` in `in Point[1, 2]`
@@ -2352,7 +2352,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             auto hashPattern = make_unique<parser::HashPattern>(location, move(sorbetElements));
 
-            if (auto prismConstant = hashPatternNode->constant; prismConstant != nullptr) {
+            if (auto *prismConstant = hashPatternNode->constant) {
                 // A hash pattern can start with a constant that matches against a specific type,
                 // rather than any value whose `#deconstruct_keys` results are matched by the pattern
                 // E.g. the `Point` in `in Point[x: Integer => 1, y: Integer => 2]`
@@ -2998,7 +2998,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     ast::ExpressionPtr parentExpr = nullptr;
 
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
-        if (auto prismParentNode = node->parent; prismParentNode != nullptr) {
+        if (auto *prismParentNode = node->parent) {
             // This constant reference is chained onto another constant reference.
             // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the `name`.
             //   A::B::C
