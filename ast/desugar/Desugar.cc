@@ -107,17 +107,16 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
             } else if (parser::isa_node<parser::Kwnilarg>(arg.get())) {
                 // TODO implement logic for `**nil` args
             } else if (auto *fargs = parser::cast_node<parser::ForwardArg>(arg.get())) {
-                // we desugar (m, n, ...) into (m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
-                // add `*<fwd-args>`
-                unique_ptr<parser::Node> rest =
-                    make_unique<parser::RestParam>(fargs->loc, core::Names::fwdArgs(), fargs->loc);
-                params.emplace_back(node2TreeImpl(dctx, rest));
+                // we desugar (m, n, ...) into (m, n, *<*rest-param>, **<fwd-kwargs>, &<fwd-block>)
+
+                // add `*<*rest-param>`
+                params.emplace_back(MK::RestParam(fargs->loc, MK::Local(fargs->loc, core::Names::restParam())));
+
                 // add `**<fwd-kwargs>`
-                unique_ptr<parser::Node> kwrest = make_unique<parser::Kwrestarg>(fargs->loc, core::Names::fwdKwargs());
-                params.emplace_back(node2TreeImpl(dctx, kwrest));
+                params.emplace_back(MK::RestParam(fargs->loc, MK::KeywordArg(fargs->loc, core::Names::fwdKwargs())));
+
                 // add `&<fwd-block>`
-                unique_ptr<parser::Node> block = make_unique<parser::Blockarg>(fargs->loc, core::Names::fwdBlock());
-                params.emplace_back(node2TreeImpl(dctx, block));
+                params.emplace_back(MK::BlockArg(fargs->loc, MK::Local(fargs->loc, core::Names::fwdBlock())));
             } else {
                 params.emplace_back(node2TreeImpl(dctx, arg));
             }
@@ -758,7 +757,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 // Remove "special" arguments from the list, and keep track of what we found along the way.
-                auto hasFwdArgs = false;
+                auto hasRestArg = false;
                 auto hasFwdRestArg = false;
                 auto hasSplat = false;
                 auto newEndIt = remove_if(send->args.begin(), send->args.end(), [&](auto &arg) {
@@ -771,7 +770,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &<fwd-block>)`.
                         blockPassArg = MK::Local(loc, core::Names::fwdBlock());
 
-                        hasFwdArgs = true;
+                        hasRestArg = true;
                         eraseFromArgs = true;
                     } else if (parser::isa_node<parser::ForwardedRestArg>(arg.get())) {
                         // Pull out the ForwardedRestArg (an anonymous splat like `f(*)`)
@@ -789,7 +788,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 });
                 send->args.erase(newEndIt, send->args.end());
 
-                if (hasFwdArgs || hasFwdRestArg || hasSplat) {
+                if (hasRestArg || hasFwdRestArg || hasSplat) {
                     // If we have a splat anywhere in the argument list, desugar
                     // the argument list as a single Array node, and then
                     // synthesize a call to
@@ -800,9 +799,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, move(send->args));
                     auto args = node2TreeImpl(dctx, array);
 
-                    if (hasFwdArgs) {
-                        auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
-                        auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), locZeroLen);
+                    if (hasRestArg) {
+                        auto restArg = MK::Local(loc, core::Names::restParam());
+                        auto argsSplat = MK::Send0(loc, move(restArg), core::Names::toA(), locZeroLen);
                         auto argsConcat =
                             MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(argsSplat));
 
@@ -819,8 +818,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                         args = move(argsConcat);
                     } else if (hasFwdRestArg) {
-                        auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
-                        auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), locZeroLen);
+                        auto restParam = MK::Local(loc, core::Names::restParam());
+                        auto argsSplat = MK::Send0(loc, move(restParam), core::Names::toA(), locZeroLen);
                         auto tUnsafe = MK::Unsafe(loc, move(argsSplat));
                         auto argsConcat = MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(tUnsafe));
 

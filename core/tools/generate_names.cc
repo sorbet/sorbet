@@ -432,7 +432,7 @@ NameDef names[] = {
     {"at"},
 
     // Argument forwarding
-    {"fwdArgs", "<fwd-args>"},
+    {"restParam", "<*rest-param>"},
     {"fwdKwargs", "<fwd-kwargs>"},
     {"fwdBlock", "<fwd-block>"},
 
