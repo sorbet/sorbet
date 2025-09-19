@@ -33,7 +33,7 @@ private:
         while (arg != nullptr) {
             typecase(
                 *arg, [&](RestParam &rest) { arg = &rest.expr; }, [&](KeywordArg &kw) { arg = &kw.expr; },
-                [&](OptionalParam &opt) { arg = &opt.expr; }, [&](BlockArg &opt) { arg = &opt.expr; },
+                [&](OptionalParam &opt) { arg = &opt.expr; }, [&](BlockParam &opt) { arg = &opt.expr; },
                 [&](ShadowArg &opt) { arg = &opt.expr; },
                 [&](Local &local) {
                     local.localVariable._name = subst.substitute(local.localVariable._name);

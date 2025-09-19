@@ -43,7 +43,7 @@ struct DesugarContext final {
     }
 };
 
-core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
+core::NameRef blockArg2Name(DesugarContext dctx, const BlockParam &blkArg) {
     auto blkIdent = cast_tree<UnresolvedIdent>(blkArg.expr);
     ENFORCE(blkIdent != nullptr, "BlockArg must wrap UnresolvedIdent in desugar.");
     return blkIdent->name;
@@ -371,12 +371,12 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
                          inModule, dctx.preserveConcreteSyntax);
     auto [params, destructures] = desugarParams(dctx1, loc, argnode);
 
-    if (params.empty() || !isa_tree<BlockArg>(params.back())) {
+    if (params.empty() || !isa_tree<BlockParam>(params.back())) {
         auto blkLoc = core::LocOffsets::none();
         params.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
     }
 
-    const auto &blkArg = cast_tree<BlockArg>(params.back());
+    const auto &blkArg = cast_tree<BlockParam>(params.back());
     ENFORCE(blkArg != nullptr, "Every method's last arg must be a block arg by now.");
     auto enclosingBlockParamName = blockArg2Name(dctx, *blkArg);
 

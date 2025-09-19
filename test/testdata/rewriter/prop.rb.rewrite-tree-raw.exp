@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U main><<U <todo method>>>
-      params = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -1079,7 +1079,7 @@ ClassDef{
           params = [RestParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U args>
-            } }, BlockArg{ expr = UnresolvedIdent{
+            } }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1356,7 +1356,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foo><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1423,7 +1423,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1483,7 +1483,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foo2><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1568,7 +1568,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1702,7 +1702,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U default><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1769,7 +1769,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1832,7 +1832,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U t_nilable><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1923,7 +1923,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -1974,7 +1974,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U array><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2041,7 +2041,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2107,7 +2107,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U t_array><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2204,7 +2204,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2274,7 +2274,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U hash_of><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2379,7 +2379,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2430,7 +2430,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U const_explicit><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2481,7 +2481,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U const><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2532,7 +2532,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U enum_prop><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2599,7 +2599,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2650,7 +2650,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2717,7 +2717,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2814,7 +2814,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2899,7 +2899,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -2950,7 +2950,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_lazy><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3017,7 +3017,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3114,7 +3114,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3199,7 +3199,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3250,7 +3250,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_proc><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3317,7 +3317,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3414,7 +3414,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3499,7 +3499,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3550,7 +3550,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U foreign_invalid><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3617,7 +3617,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3710,7 +3710,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3803,7 +3803,7 @@ ClassDef{
                 name = <U allow_direct_mutation>
               } }
               default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3854,7 +3854,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U ifunset><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3921,7 +3921,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3984,7 +3984,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U ifunset_nilable><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4075,7 +4075,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4126,7 +4126,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U empty_hash_rules><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4193,7 +4193,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4244,7 +4244,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U hash_rules><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4311,7 +4311,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4819,7 +4819,7 @@ ClassDef{
                 pairs = [
                 ]
               }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4838,7 +4838,7 @@ ClassDef{
                 pairs = [
                 ]
               }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4877,7 +4877,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U token><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4944,7 +4944,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4995,7 +4995,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U created><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5062,7 +5062,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5156,7 +5156,7 @@ ClassDef{
                 pairs = [
                 ]
               }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5175,7 +5175,7 @@ ClassDef{
                 pairs = [
                 ]
               }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5214,7 +5214,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U token><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5281,7 +5281,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5332,7 +5332,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U created><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5483,7 +5483,7 @@ ClassDef{
                 pairs = [
                 ]
               }
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5534,7 +5534,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U foo><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5624,7 +5624,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U encrypted_foo><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5727,7 +5727,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5860,7 +5860,7 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
-            }, BlockArg{ expr = UnresolvedIdent{
+            }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -5935,7 +5935,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U bar><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -6025,7 +6025,7 @@ ClassDef{
         MethodDef{
           flags = {rewriterSynthesized}
           name = <U encrypted_bar><<U <todo method>>>
-          params = [BlockArg{ expr = UnresolvedIdent{
+          params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
