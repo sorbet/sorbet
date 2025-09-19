@@ -833,6 +833,16 @@ struct PackageSpecBodyWalk {
                 if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                                 info.mangledName_.owner.show(ctx), "export_all!");
+
+                    auto replaceLoc = ctx.locAt(it->loc);
+                    auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
+                    // Remove leading whitespace
+                    replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);
+                    if (replaceLoc.beginPos() != 0) {
+                        // Remove leading newline
+                        replaceLoc = replaceLoc.adjust(ctx, -1, 0);
+                    }
+                    e.replaceWith("Delete export", replaceLoc, "");
                 }
             }
         }
