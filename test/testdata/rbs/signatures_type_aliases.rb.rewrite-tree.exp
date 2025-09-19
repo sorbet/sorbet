@@ -1,4 +1,20 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C EmptyClass>::<C type fooType>)
+  end
+
+  def class_alias_type<<todo method>>(&<blk>)
+    "42"
+  end
+
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+    <self>.returns(<emptyTree>::<C EmptyModule>::<C type fooType>)
+  end
+
+  def module_alias_type<<todo method>>(&<blk>)
+    42
+  end
+
   module <emptyTree>::<C Errors><<C <todo sym>>> < ()
     ::T::Sig::WithoutRuntime.sig() do ||
       <self>.void()
@@ -238,4 +254,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of bar>
   end
+
+  class <emptyTree>::<C EmptyClass><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C type fooType> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C Integer>
+    end
+  end
+
+  <runtime method definition of class_alias_type>
+
+  module <emptyTree>::<C EmptyModule><<C <todo sym>>> < ()
+    <emptyTree>::<C type fooType> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C String>
+    end
+  end
+
+  <runtime method definition of module_alias_type>
 end
