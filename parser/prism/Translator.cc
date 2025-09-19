@@ -360,9 +360,83 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_ARRAY_NODE: { // An array literal, e.g. `[1, 2, 3]`
             auto arrayNode = down_cast<pm_array_node>(node);
 
+            for (auto element : absl::MakeSpan(arrayNode->elements.nodes, arrayNode->elements.size)) {
+                if (PM_NODE_TYPE_P(element, PM_SPLAT_NODE)) {
+                    // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
+                    // methods from hover. Using the array's loc means that we will get a zero-length loc for
+                    // the Splat in that case, and non-zero if there was a real Array literal.
+                    element->location = node->location;
+                }
+            }
+
             auto sorbetElements = translateMulti(arrayNode->elements);
 
-            return make_unique<parser::Array>(location, move(sorbetElements));
+            if (!directlyDesugar || !hasExpr(sorbetElements)) {
+                return make_unique<parser::Array>(location, move(sorbetElements));
+            }
+
+            auto locZeroLen = location.copyWithZeroLength();
+
+            ast::Array::ENTRY_store elems;
+            elems.reserve(sorbetElements.size());
+            ExpressionPtr lastMerge;
+            for (auto &stat : sorbetElements) {
+                if (parser::NodeWithExpr::isa_node<parser::Splat>(stat.get()) ||
+                    parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(stat.get())) {
+                    // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
+
+                    // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
+                    // But for array literals, we want the splat to have the array's location to match
+                    // the legacy parser's behavior (important for error messages and hover).
+                    auto splatExpr = stat->takeDesugaredExpr();
+
+                    // Recreate the Splat Send with the array's location instead of the splat's location
+                    if (auto send = ast::cast_tree<ast::Send>(splatExpr)) {
+                        ENFORCE(send->numPosArgs() == 1, "Splat Send should have exactly 1 argument");
+                        // Extract the argument from the old Send and create a new one with array's location
+                        splatExpr = MK::Splat(location, move(send->getPosArg(0)));
+                    }
+                    auto var = move(splatExpr);
+                    if (elems.empty()) {
+                        if (lastMerge != nullptr) {
+                            lastMerge =
+                                MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
+                        } else {
+                            lastMerge = move(var);
+                        }
+                    } else {
+                        ExpressionPtr current = MK::Array(location, move(elems));
+                        /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
+                        elems = ast::Array::ENTRY_store();
+                        if (lastMerge != nullptr) {
+                            lastMerge =
+                                MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(current));
+                        } else {
+                            lastMerge = move(current);
+                        }
+                        lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
+                    }
+                } else {
+                    elems.emplace_back(stat->takeDesugaredExpr());
+                }
+            };
+
+            ExpressionPtr res;
+            if (elems.empty()) {
+                if (lastMerge != nullptr) {
+                    res = move(lastMerge);
+                } else {
+                    // Empty array
+                    res = MK::Array(location, move(elems));
+                }
+            } else {
+                res = MK::Array(location, move(elems));
+                if (lastMerge != nullptr) {
+                    res = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(res));
+                }
+            }
+
+            return make_node_with_expr<parser::Array>(move(res), location, move(sorbetElements));
         }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash literal, e.g. the `a: 1` in `{ a: 1 }
             auto assocNode = down_cast<pm_assoc_node>(node);
@@ -1964,10 +2038,32 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto splatNode = down_cast<pm_splat_node>(node);
 
             auto expr = translate(splatNode->expression);
+
+            if (!directlyDesugar || !hasExpr(expr)) {
+                if (expr == nullptr) { // An anonymous splat like `f(*)`
+                    return make_unique<parser::ForwardedRestArg>(location);
+                } else { // Splatting an expression like `f(*a)`
+                    return make_unique<parser::Splat>(location, move(expr));
+                }
+            }
+
             if (expr == nullptr) { // An anonymous splat like `f(*)`
-                return make_unique<parser::ForwardedRestArg>(location);
+                auto var = MK::Local(location, core::Names::star());
+                auto splatExpr = MK::Splat(location, move(var));
+                return make_node_with_expr<parser::ForwardedRestArg>(move(splatExpr), location);
             } else { // Splatting an expression like `f(*a)`
-                return make_unique<parser::Splat>(location, move(expr));
+                // Directly desugaring a splat node is a destructive operation, which can leave the "expr" in an invalid
+                // state (because it would have a null desugared expr), which is incompatible with the "fallback" path
+                // (desugaring it as a Whitequark tree in `PrismDesugar.cc").
+                //
+                // It's only safe to do if we can be sure all adjacent elements (in an the same Array literal,
+                // or arguments to the same method call) can also directly desugared.
+                //
+                // It's really hard to know that ahead of time, so for now, just deepCopy the tree, instead of taking
+                // it out of the splatted expressions's `NodeWithExpr`.
+                auto childExpr = expr->peekDesugaredExpr().deepCopy();
+                auto splatExpr = MK::Splat(location, move(childExpr));
+                return make_node_with_expr<parser::Splat>(move(splatExpr), location, move(expr));
             }
         }
         case PM_STATEMENTS_NODE: { // A sequence of statements, such a in a `begin` block, `()`, etc.

@@ -13,7 +13,7 @@
 %W[string7 string8 string9]
 
 def has_named_rest_args(*args)
-  [1, 2, *rest, 3]
+  [1, 2, *args, 3]
 end
 
 def has_anonymous_rest_args(*)
