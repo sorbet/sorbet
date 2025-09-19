@@ -116,7 +116,7 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
                 params.emplace_back(MK::RestParam(fargs->loc, MK::KeywordArg(fargs->loc, core::Names::fwdKwargs())));
 
                 // add `&<fwd-block>`
-                params.emplace_back(MK::BlockArg(fargs->loc, MK::Local(fargs->loc, core::Names::fwdBlock())));
+                params.emplace_back(MK::BlockParam(fargs->loc, MK::Local(fargs->loc, core::Names::fwdBlock())));
             } else {
                 params.emplace_back(node2TreeImpl(dctx, arg));
             }
@@ -373,7 +373,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 
     if (params.empty() || !isa_tree<BlockParam>(params.back())) {
         auto blkLoc = core::LocOffsets::none();
-        params.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+        params.emplace_back(MK::BlockParam(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
     }
 
     const auto &blockParam = cast_tree<BlockParam>(params.back());
@@ -1532,7 +1532,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::BlockParam *param) {
-                ExpressionPtr res = MK::BlockArg(loc, MK::Local(loc, param->name));
+                ExpressionPtr res = MK::BlockParam(loc, MK::Local(loc, param->name));
                 result = move(res);
             },
             [&](parser::Kwoptarg *arg) {
