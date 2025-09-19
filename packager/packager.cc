@@ -603,7 +603,7 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() == 1) {
                 // null indicates an invalid export.
                 if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                    exported.emplace_back(getFullyQualifiedName(ctx, target), target->loc);
+                    exported.emplace_back(getFullyQualifiedName(ctx, target), send.loc);
                 }
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
