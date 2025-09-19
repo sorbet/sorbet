@@ -236,7 +236,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
             // Insert before the first import
             core::Loc beforePackageName = {loc.file(), firstImport->loc};
             auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
-            auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - 1, 0);
+            auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - "\n"sv.size(), 0);
             insertionLoc = endOfPrevLine.copyWithZeroLength();
         } else {
             insertionLoc = core::Loc(loc.file(), importToInsertAfter.copyEndWithZeroLength());
@@ -247,9 +247,9 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         // exports, then right before the final `end`
         int64_t exportLoc;
         if (!exports_.empty()) {
-            exportLoc = exports_.front().loc.beginPos() - "export "sv.size() - 1;
+            exportLoc = exports_.front().loc.beginPos() - " "sv.size();
         } else {
-            exportLoc = loc.endPos() - "end"sv.size() - 1;
+            exportLoc = loc.endPos() - "end\n"sv.size();
         }
 
         string_view file_source = loc.file().data(gs).source();
@@ -321,14 +321,14 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
             // Insert before the first export
             auto beforeConstantName = exports_.front().loc;
             auto [beforeExport, numWhitespace] = core::Loc(pkgFile, beforeConstantName).findStartOfIndentation(gs);
-            auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - 1, 0);
+            auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - "\n"sv.size(), 0);
             insertionLoc = endOfPrevLine.copyWithZeroLength();
         } else {
             insertionLoc = core::Loc(pkgFile, exportToInsertAfter.copyEndWithZeroLength());
         }
     } else {
         // if we don't have any exports, then we can try adding it right before the final `end`
-        uint32_t exportLoc = loc.endPos() - "end"sv.size() - 1;
+        uint32_t exportLoc = loc.endPos() - "end\n"sv.size();
         // we want to find the end of the last non-empty line, so
         // let's do something gross: walk backward until we find non-whitespace
         const auto &file_source = loc.file().data(gs).source();
