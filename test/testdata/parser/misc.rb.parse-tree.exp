@@ -129,7 +129,7 @@ Begin {
       name = <U bfoo>
       params = Params {
         params = [
-          Blockarg {
+          BlockParam {
             name = <U x>
           }
         ]

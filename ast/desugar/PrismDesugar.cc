@@ -1471,7 +1471,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::Kwarg *arg) { desugaredByPrismTranslator(arg); },
-            [&](parser::Blockarg *arg) {
+            [&](parser::BlockParam *arg) {
                 ExpressionPtr res = MK::BlockArg(loc, MK::Local(loc, arg->name));
                 result = move(res);
             },

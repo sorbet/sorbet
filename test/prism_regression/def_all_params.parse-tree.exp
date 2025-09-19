@@ -28,7 +28,7 @@ Begin {
           Kwrestarg {
             name = <U f>
           }
-          Blockarg {
+          BlockParam {
             name = <U blk>
           }
         ]
@@ -45,7 +45,7 @@ Begin {
           Kwrestarg {
             name = <P <U **> $2>
           }
-          Blockarg {
+          BlockParam {
             name = <P <U &> $3>
           }
         ]
