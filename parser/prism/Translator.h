@@ -143,6 +143,8 @@ private:
                                                   std::unique_ptr<parser::Node> ifTrue,
                                                   std::unique_ptr<parser::Node> ifFalse);
 
+    std::pair<core::NameRef, core::LocOffsets> translateSymbol(pm_symbol_node *symbol);
+
     // String interpolation desugaring
     sorbet::ast::ExpressionPtr desugarDString(core::LocOffsets loc, pm_node_list prismNodeList);
 

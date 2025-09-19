@@ -95,7 +95,25 @@ ast::ExpressionPtr mergeStrings(core::MutableContext ctx, core::LocOffsets loc,
     }
 }
 
-// Member function implementation for desugarDString
+// Extract the content and location of a Symbol node.
+// This is handy for `desugarSymbolProc`, where it saves us from needing to dig and
+// cast to extract this info out of an `ast::Literal`.
+pair<core::NameRef, core::LocOffsets> Translator::translateSymbol(pm_symbol_node *symbol) {
+    auto location = translateLoc(symbol->base.location);
+
+    auto unescaped = &symbol->unescaped;
+    // TODO: can these have different encodings?
+    auto content = ctx.state.enterNameUTF8(parser.extractString(unescaped));
+
+    // If the opening location is null, the symbol is used as a key with a colon postfix, like `{a: 1}`
+    // In those cases, the location should not include the colon.
+    if (symbol->opening_loc.start == nullptr) {
+        location = translateLoc(symbol->value_loc);
+    }
+
+    return make_pair(content, location);
+}
+
 ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list prismNodeList) {
     if (prismNodeList.size == 0) {
         return MK::String(loc, core::Names::empty());
@@ -253,7 +271,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
     auto location = translateLoc(node->location);
 
     switch (PM_NODE_TYPE(node)) {
-        case PM_ALIAS_GLOBAL_VARIABLE_NODE: { // // The `alias` keyword used for global vars, like `alias $new $old`
+        case PM_ALIAS_GLOBAL_VARIABLE_NODE: { // The `alias` keyword used for global vars, like `alias $new $old`
             auto aliasGlobalVariableNode = down_cast<pm_alias_global_variable_node>(node);
 
             auto newName = translate(aliasGlobalVariableNode->new_name);
@@ -536,27 +554,66 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::Integer>(move(sendNode), location, move(valueString));
             }
 
-            pm_node_t *prismBlock = callNode->block;
-
-            NodeVec args;
-            // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
-            // but not an explicit block with `{ ... }` or `do ... end`
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                args = translateArguments(callNode->arguments, callNode->block);
-            } else {
-                args = translateArguments(callNode->arguments);
-            }
-
             if (constantNameString == "[]" || constantNameString == "[]=") {
                 // Empty funLoc implies that errors should use the callLoc
                 messageLoc.endLoc = messageLoc.beginLoc;
             }
 
+            // Translate the args, detecting special cases along the way,
+            // that will require the call to be desugared into a magic call.
+            //
+            // TODO list:
+            // * Optimize via `PM_ARGUMENTS_NODE_FLAGS_CONTAINS_SPLAT`
+            //   We can skip the `hasFwdRestArg`/`hasSplat` logic below if it's false.
+            //   However, we still need the loop if it's true, to be able to tell the two cases apart.
+
+            NodeVec args;
+            // true if the call contains a forwarded argument like `foo(...)`
+            auto hasFwdArgs = callNode->arguments != nullptr &&
+                              PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
+            auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*rest)`
+            auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
+            if (auto *prismArgsNode = callNode->arguments) {
+                for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
+                    switch (PM_NODE_TYPE(arg)) {
+                        case PM_SPLAT_NODE: {
+                            auto splatNode = down_cast<pm_splat_node>(arg);
+                            if (splatNode->expression == nullptr) { // An anonymous splat like `f(*)`
+                                hasFwdRestArg = true;
+                            } else { // Splatting an expression like `f(*a)`
+                                hasSplat = true;
+                            }
+
+                            args.emplace_back(translate(arg));
+
+                            break;
+                        }
+
+                        default:
+                            args.emplace_back(translate(arg));
+
+                            break;
+                    }
+                }
+            }
+
+            pm_node_t *prismBlock = callNode->block;
+
             unique_ptr<parser::Node> sendNode;
 
             auto name = ctx.state.enterNameUTF8(constantNameString);
 
-            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) { // Handle conditional send, e.g. `a&.b`
+            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+                // Handle conditional send, e.g. `a&.b`
+
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+                    // but not a literal block with `{ ... }` or `do ... end`
+
+                    auto blockPassNode = translate(prismBlock);
+                    args.emplace_back(move(blockPassNode));
+                }
+
                 sendNode = make_unique<parser::CSend>(loc, move(receiver), name, messageLoc, move(args));
 
                 // TODO: Direct desugaring support for conditional sends is not implemented yet.
@@ -578,32 +635,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto hasKwargsHash = callNode->arguments != nullptr &&
                                  PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORDS);
 
-            // Detect special arguments that will require the call to be desugared to magic call.
-
-            // true if the call contains a forwarded argument like `foo(...)`
-            auto hasFwdArgs = callNode->arguments != nullptr &&
-                              PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
-            auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*rest)`
-            auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
-            if (auto prismArgsNode = callNode->arguments; prismArgsNode != nullptr) {
-                for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
-                    switch (PM_NODE_TYPE(arg)) {
-                        case PM_SPLAT_NODE: {
-                            auto splatNode = down_cast<pm_splat_node>(arg);
-                            if (splatNode->expression == nullptr) { // An anonymous splat like `f(*)`
-                                hasFwdRestArg = true;
-                            } else { // Splatting an expression like `f(*a)`
-                                hasSplat = true;
-                            }
-                            break;
-                        }
-
-                        default:
-                            break;
-                    }
-                }
-            }
-
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
             auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasFwdArgs &&
@@ -613,6 +644,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
+            unique_ptr<parser::Node> blockPassNode;
             bool supportedBlock;
             if (prismBlock != nullptr) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
@@ -706,6 +738,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
                 } else {
                     // `PM_BLOCK_ARGUMENT_NODE` is not supported yet.
+                    blockPassNode = translate(prismBlock);
                     supportedBlock = false;
                 }
             } else {
@@ -716,6 +749,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             supportedCallType &= supportedBlock;
 
             if (!supportedCallType) {
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+                    // but not a literal block with `{ ... }` or `do ... end`
+
+                    args.emplace_back(move(blockPassNode));
+                }
+
                 sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
@@ -1959,15 +1999,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
             auto symNode = down_cast<pm_symbol_node>(node);
 
-            auto unescaped = &symNode->unescaped;
-            // TODO: can these have different encodings?
-            auto content = ctx.state.enterNameUTF8(parser.extractString(unescaped));
-
-            // If the opening location is null, the symbol is used as a key with a colon postfix, like `{a: 1}`
-            // In those cases, the location should not include the colon.
-            if (symNode->opening_loc.start == nullptr) {
-                location = translateLoc(symNode->value_loc);
-            }
+            auto [content, location] = translateSymbol(symNode);
 
             return make_node_with_expr<parser::Symbol>(MK::Symbol(location, content), location, content);
         }
@@ -2510,10 +2542,10 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
                // These other block types don't have their own dedicated desugared
                // representation, so they won't be directly translated.
                // Instead, they have special desugar logic below.
-               parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `f(**nil)`
-               parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `f(...)`
-               parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `f(*)`
-               parser::NodeWithExpr::isa_node<parser::Splat>(param.get());              // a splat like `f(*a)`
+               parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `def f(**nil)`
+               parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `def f(...)`
+               parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `def foo(*)`
+               parser::NodeWithExpr::isa_node<parser::Splat>(param.get());              // a splat like `def foo(*a)`
     });
 
     if (!supportedParams) {
