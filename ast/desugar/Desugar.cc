@@ -373,7 +373,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 
     if (params.empty() || !isa_tree<BlockParam>(params.back())) {
         auto blkLoc = core::LocOffsets::none();
-        params.emplace_back(MK::BlockParam(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+        params.emplace_back(MK::BlockParam(blkLoc, MK::Local(blkLoc, core::Names::blkParam())));
     }
 
     const auto &blockParam = cast_tree<BlockParam>(params.back());
@@ -2019,7 +2019,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // we always want to report an error if we're using yield with a synthesized name in
                     // strict mode
                     auto blockArgName = dctx.enclosingBlockParamName;
-                    if (blockArgName == core::Names::blkArg()) {
+                    if (blockArgName == core::Names::blkParam()) {
                         if (auto e = dctx.ctx.beginIndexerError(dctx.enclosingMethodLoc,
                                                                 core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",

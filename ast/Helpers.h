@@ -249,7 +249,7 @@ public:
                                 MethodDef::Flags flags = MethodDef::Flags()) {
         if (params.empty() || (!isa_tree<ast::Local>(params.back()) && !isa_tree<ast::BlockParam>(params.back()))) {
             auto blkLoc = core::LocOffsets::none();
-            params.emplace_back(make_expression<ast::BlockParam>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+            params.emplace_back(make_expression<ast::BlockParam>(blkLoc, MK::Local(blkLoc, core::Names::blkParam())));
         }
         return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(params),
                                           std::move(rhs), flags);

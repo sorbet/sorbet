@@ -360,7 +360,7 @@ NameDef names[] = {
     {"arg", "<arg>"},
     {"kwargs", "<kwargs>"},
     {"restargs", "<restargs>"},
-    {"blkArg", "<blk>"},
+    {"blkParam", "<blk>"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 
