@@ -2016,10 +2016,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 ExpressionPtr recv;
                 if (dctx.enclosingBlockParamName.exists()) {
-                    // we always want to report an error if we're using yield with a synthesized name in
-                    // strict mode
-                    auto blockArgName = dctx.enclosingBlockParamName;
-                    if (blockArgName == core::Names::blkArg()) {
+                    // we always want to report an error if we're using yield with a synthesized name in strict mode
+                    if (dctx.enclosingBlockParamName == core::Names::blkArg()) {
                         if (auto e = dctx.ctx.beginIndexerError(dctx.enclosingMethodLoc,
                                                                 core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
