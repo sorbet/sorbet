@@ -30,30 +30,31 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
-    void recursiveSetIsExported(core::GlobalState &gs, bool setExportedTo, core::SymbolRef sym) {
+    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef sym) {
         // Stop recursing at package boundary
-        if (this->package.mangledName() != sym.enclosingClass(gs).data(gs)->package) {
+        if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
             return;
         }
 
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klass = sym.asClassOrModuleRef();
-                klass.data(gs)->flags.isExported = setExportedTo;
-                for (const auto &[name, child] : klass.data(gs)->members()) {
+                klass.data(ctx)->flags.isExported = setExportedTo;
+                for (const auto &[name, child] : klass.data(ctx)->members()) {
                     if (name == core::Names::attached()) {
                         // There is a cycle between a class and its singleton, and this avoids infinite recursion.
                         continue;
                     }
 
-                    recursiveSetIsExported(gs, setExportedTo, child);
+                    recursiveSetIsExported(ctx, setExportedTo, child);
                 }
                 break;
             }
 
-            case core::SymbolRef::Kind::FieldOrStaticField:
-                sym.asFieldRef().data(gs)->flags.isExported = setExportedTo;
+            case core::SymbolRef::Kind::FieldOrStaticField: {
+                sym.asFieldRef().data(ctx)->flags.isExported = setExportedTo;
                 break;
+            }
 
             case core::SymbolRef::Kind::TypeMember:
             case core::SymbolRef::Kind::Method:
