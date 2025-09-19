@@ -253,7 +253,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
     auto location = translateLoc(node->location);
 
     switch (PM_NODE_TYPE(node)) {
-        case PM_ALIAS_GLOBAL_VARIABLE_NODE: { // // The `alias` keyword used for global vars, like `alias $new $old`
+        case PM_ALIAS_GLOBAL_VARIABLE_NODE: { // The `alias` keyword used for global vars, like `alias $new $old`
             auto aliasGlobalVariableNode = down_cast<pm_alias_global_variable_node>(node);
 
             auto newName = translate(aliasGlobalVariableNode->new_name);
@@ -2516,10 +2516,10 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
                // These other block types don't have their own dedicated desugared
                // representation, so they won't be directly translated.
                // Instead, they have special desugar logic below.
-               parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `f(**nil)`
-               parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `f(...)`
-               parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `f(*)`
-               parser::NodeWithExpr::isa_node<parser::Splat>(param.get());              // a splat like `f(*a)`
+               parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `def f(**nil)`
+               parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `def f(...)`
+               parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `def foo(*)`
+               parser::NodeWithExpr::isa_node<parser::Splat>(param.get());              // a splat like `def foo(*a)`
     });
 
     if (!supportedParams) {
