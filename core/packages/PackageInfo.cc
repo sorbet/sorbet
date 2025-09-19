@@ -247,7 +247,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         // exports, then right before the final `end`
         int64_t exportLoc;
         if (!exports_.empty()) {
-            exportLoc = exports_.front().loc.beginPos() - "\n"sv.size();
+            exportLoc = exports_.front().loc.beginPos() - " "sv.size();
         } else {
             exportLoc = loc.endPos() - "end\n"sv.size();
         }
