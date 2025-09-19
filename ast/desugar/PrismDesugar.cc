@@ -76,16 +76,15 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
                 // TODO implement logic for `**nil` args
             } else if (auto *fargs = parser::NodeWithExpr::cast_node<parser::ForwardArg>(arg.get())) {
                 // we desugar (m, n, ...) into (m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
+
                 // add `*<fwd-args>`
-                unique_ptr<parser::Node> rest =
-                    make_unique<parser::RestParam>(fargs->loc, core::Names::fwdArgs(), fargs->loc);
-                params.emplace_back(node2TreeImpl(dctx, rest));
+                params.emplace_back(MK::RestParam(fargs->loc, MK::Local(fargs->loc, core::Names::fwdArgs())));
+
                 // add `**<fwd-kwargs>`
-                unique_ptr<parser::Node> kwrest = make_unique<parser::Kwrestarg>(fargs->loc, core::Names::fwdKwargs());
-                params.emplace_back(node2TreeImpl(dctx, kwrest));
+                params.emplace_back(MK::RestParam(fargs->loc, MK::KeywordArg(fargs->loc, core::Names::fwdKwargs())));
+
                 // add `&<fwd-block>`
-                unique_ptr<parser::Node> block = make_unique<parser::Blockarg>(fargs->loc, core::Names::fwdBlock());
-                params.emplace_back(node2TreeImpl(dctx, block));
+                params.emplace_back(MK::BlockArg(fargs->loc, MK::Local(fargs->loc, core::Names::fwdBlock())));
             } else {
                 params.emplace_back(node2TreeImpl(dctx, arg));
             }
