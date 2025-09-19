@@ -9,6 +9,6 @@ class Foo::Bar < PackageSpec
             # ^^^^^^^^^^^^^^ error: Too many arguments
 
   export Foo::Bar::Thing
-       # ^^^^^^^^^^^^^^^ error: Package `Foo::Bar` declares `export_all!` and therefore should not use explicit exports
+# ^^^^^^^^^^^^^^^^^^^^^^ error: Package `Foo::Bar` declares `export_all!` and therefore should not use explicit exports
 
 end
