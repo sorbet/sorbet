@@ -13,7 +13,7 @@ ClassDef{
       params = [RestParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U args>
-        } }, BlockArg{ expr = UnresolvedIdent{
+        } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -56,7 +56,7 @@ ClassDef{
       params = [RestParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U *>
-        } }, BlockArg{ expr = UnresolvedIdent{
+        } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -96,7 +96,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <U <fwd-args>>
+                      name = <U <*rest-param>>
                     }
                     fun = <U to_a>
                     block = nullptr

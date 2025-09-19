@@ -657,7 +657,7 @@ private:
         auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
 
         // Add a fake block argument so that this method symbol passes sanity checks
-        auto &arg = ctx.state.enterMethodParameter(core::Loc::none(), uaSym, core::Names::blkArg());
+        auto &arg = ctx.state.enterMethodParameter(core::Loc::none(), uaSym, core::Names::blkParam());
         arg.flags.isBlock = true;
 
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
@@ -863,7 +863,7 @@ private:
                 mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{});
 
                 // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
-                auto &arg = gs.enterMethodParameter(core::Loc::none(), mixMethod, core::Names::blkArg());
+                auto &arg = gs.enterMethodParameter(core::Loc::none(), mixMethod, core::Names::blkParam());
                 arg.flags.isBlock = true;
             } else {
                 mixMethod.data(gs)->addLoc(gs, loc);
@@ -3235,14 +3235,14 @@ private:
     static bool usesArgumentForwardingSyntax(core::Context ctx, core::MethodData methodInfo, const ast::MethodDef &mdef,
                                              bool isOverloaded) {
         // To match, the definition must have been desugared with at least 3 parameters named
-        // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
+        // `<*rest-param>`, `<fwd-kwargs>` and `<fwd-block>`
         auto len = methodInfo->parameters.size();
         if (len < 3) {
             return false;
         }
 
         auto l1 = getArgLocal(ctx, methodInfo->parameters[len - 3], mdef, len - 3, isOverloaded)->localVariable;
-        if (l1._name != core::Names::fwdArgs()) {
+        if (l1._name != core::Names::restParam()) {
             return false;
         }
 

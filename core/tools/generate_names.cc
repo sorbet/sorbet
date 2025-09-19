@@ -360,7 +360,7 @@ NameDef names[] = {
     {"arg", "<arg>"},
     {"kwargs", "<kwargs>"},
     {"restargs", "<restargs>"},
-    {"blkArg", "<blk>"},
+    {"blkParam", "<blk>"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 
@@ -432,7 +432,7 @@ NameDef names[] = {
     {"at"},
 
     // Argument forwarding
-    {"fwdArgs", "<fwd-args>"},
+    {"restParam", "<*rest-param>"},
     {"fwdKwargs", "<fwd-kwargs>"},
     {"fwdBlock", "<fwd-block>"},
 

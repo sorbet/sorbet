@@ -13,7 +13,7 @@ ClassDef{
       params = [KeywordArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U a>
-        } }, BlockArg{ expr = UnresolvedIdent{
+        } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -29,7 +29,7 @@ ClassDef{
         } }, KeywordArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U b>
-        } }, BlockArg{ expr = UnresolvedIdent{
+        } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]

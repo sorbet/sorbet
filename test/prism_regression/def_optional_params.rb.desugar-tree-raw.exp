@@ -16,7 +16,7 @@ ClassDef{
             name = <U a>
           }
           default_ = Literal{ value = 1 }
-        }, BlockArg{ expr = UnresolvedIdent{
+        }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -38,7 +38,7 @@ ClassDef{
             name = <U b>
           }
           default_ = Literal{ value = 2 }
-        }, BlockArg{ expr = UnresolvedIdent{
+        }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]

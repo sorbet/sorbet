@@ -166,7 +166,7 @@ core::NameRef nodeName(const parser::Node *node) {
 
     typecase(
         node, [&](const parser::Param *p) { name = p->name; }, [&](const parser::RestParam *p) { name = p->name; },
-        [&](const parser::Kwarg *p) { name = p->name; }, [&](const parser::Blockarg *p) { name = p->name; },
+        [&](const parser::Kwarg *p) { name = p->name; }, [&](const parser::BlockParam *p) { name = p->name; },
         [&](const parser::Kwoptarg *p) { name = p->name; }, [&](const parser::OptParam *p) { name = p->name; },
         [&](const parser::Kwrestarg *p) { name = p->name; }, [&](const parser::Shadowarg *p) { name = p->name; },
         [&](const parser::Symbol *s) { name = s->val; },
@@ -206,7 +206,7 @@ string nodeKindToString(const parser::Node *node) {
         [&](const parser::Kwarg *_p) { kind = "keyword"; },
         [&](const parser::Kwoptarg *_p) { kind = "optional keyword"; },
         [&](const parser::Kwrestarg *_p) { kind = "rest keyword"; },
-        [&](const parser::Blockarg *_p) { kind = "block"; },
+        [&](const parser::BlockParam *_p) { kind = "block"; },
         [&](const parser::Node *other) {
             Exception::raise("Unexpected expression type: {}", ((parser::Node *)node)->nodeName());
         });
@@ -214,9 +214,9 @@ string nodeKindToString(const parser::Node *node) {
     return kind;
 }
 
-optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, const parser::Node *methodArg,
+optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, const parser::Node *methodParam,
                                                      RBSArg arg, unique_ptr<parser::Node> type) {
-    if (arg.kind == RBSArg::Kind::Block || parser::isa_node<parser::Blockarg>((parser::Node *)methodArg)) {
+    if (arg.kind == RBSArg::Kind::Block || parser::isa_node<parser::BlockParam>((parser::Node *)methodParam)) {
         // Block arguments are not autocorrected
         return nullopt;
     }
@@ -226,7 +226,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, c
     auto typeString = source.substr(type->loc.beginPos(), type->loc.endPos() - type->loc.beginPos());
 
     typecase(
-        methodArg,
+        methodParam,
         // Should be: `Type name`
         [&](const parser::Param *p) {
             if (arg.name) {
@@ -290,18 +290,20 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, c
                                        {core::AutocorrectSuggestion::Edit{ctx.locAt(loc), corrected}}};
 }
 
-bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodArg) {
+bool checkParameterKindMatch(const RBSArg &arg, const parser::Node *methodParam) {
     auto kindMatch = false;
 
     typecase(
-        methodArg, [&](const parser::Param *_p) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
+        methodParam, [&](const parser::Param *_p) { kindMatch = arg.kind == RBSArg::Kind::Positional; },
         [&](const parser::OptParam *_p) { kindMatch = arg.kind == RBSArg::Kind::OptionalPositional; },
         [&](const parser::RestParam *_p) { kindMatch = arg.kind == RBSArg::Kind::RestPositional; },
         [&](const parser::Kwarg *_p) { kindMatch = arg.kind == RBSArg::Kind::Keyword; },
         [&](const parser::Kwoptarg *_p) { kindMatch = arg.kind == RBSArg::Kind::OptionalKeyword; },
         [&](const parser::Kwrestarg *_p) { kindMatch = arg.kind == RBSArg::Kind::RestKeyword; },
-        [&](const parser::Blockarg *_p) { kindMatch = arg.kind == RBSArg::Kind::Block; },
-        [&](const parser::Node *other) { Exception::raise("Unexpected expression type: {}", methodArg->nodeName()); });
+        [&](const parser::BlockParam *_p) { kindMatch = arg.kind == RBSArg::Kind::Block; },
+        [&](const parser::Node *other) {
+            Exception::raise("Unexpected expression type: {}", methodParam->nodeName());
+        });
 
     return kindMatch;
 }
