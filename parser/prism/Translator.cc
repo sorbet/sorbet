@@ -2792,7 +2792,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
         // Drop the `&` before the name of the block parameter.
         blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + 1, blockParamLoc.endPos()};
 
-        auto blockParamExpr = MK::BlockArg(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
+        auto blockParamExpr = MK::BlockParam(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
         auto blockParamNode =
             make_node_with_expr<parser::BlockParam>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
 
@@ -2848,7 +2848,7 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
             paramsStore.emplace_back(MK::RestParam(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
 
             // add `&<fwd-block>`
-            paramsStore.emplace_back(MK::BlockArg(loc, MK::Local(loc, core::Names::fwdBlock())));
+            paramsStore.emplace_back(MK::BlockParam(loc, MK::Local(loc, core::Names::fwdBlock())));
         } else {
             paramsStore.emplace_back(param->takeDesugaredExpr());
         }

@@ -121,7 +121,7 @@ public:
         return make_expression<ast::RestParam>(loc, std::move(inner));
     }
 
-    static ExpressionPtr BlockArg(core::LocOffsets loc, ExpressionPtr inner) {
+    static ExpressionPtr BlockParam(core::LocOffsets loc, ExpressionPtr inner) {
         return make_expression<ast::BlockParam>(loc, std::move(inner));
     }
 
