@@ -16,7 +16,7 @@ ClassDef{
         } }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <fwd-kwargs>>
-        } } }, BlockArg{ expr = UnresolvedIdent{
+        } } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <fwd-block>>
         } }]

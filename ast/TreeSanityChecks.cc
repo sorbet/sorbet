@@ -31,7 +31,7 @@ void ExpressionPtr::_sanityCheck() const {
         SANITY_CHECK(RestParam)
         SANITY_CHECK(KeywordArg)
         SANITY_CHECK(OptionalParam)
-        SANITY_CHECK(BlockArg)
+        SANITY_CHECK(BlockParam)
         SANITY_CHECK(ShadowArg)
         SANITY_CHECK(Assign)
         SANITY_CHECK(Cast)
@@ -67,7 +67,7 @@ void Block::_sanityCheck() {
     ENFORCE(body);
 }
 
-void BlockArg::_sanityCheck() {
+void BlockParam::_sanityCheck() {
     ENFORCE(expr);
     ENFORCE(!isa_tree<OptionalParam>(expr), "OptionalParams must be at the top-level of an arg.");
 }
@@ -157,7 +157,7 @@ void Local::_sanityCheck() {
 void MethodDef::_sanityCheck() {
     ENFORCE(name.exists());
     ENFORCE(!params.empty(), "Every method should have at least one param (the block param).\n");
-    ENFORCE(isa_tree<BlockArg>(params.back()) || isa_tree<Local>(params.back()),
+    ENFORCE(isa_tree<BlockParam>(params.back()) || isa_tree<Local>(params.back()),
             "Last param must be a block param (or a local, if block param has already been removed).");
     for (auto &node : params) {
         ENFORCE(node);

@@ -24,7 +24,7 @@ ClassDef{
           name = <U takes_positional><<U <todo method>>>
           params = [Local{
               localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
+            }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -46,7 +46,7 @@ ClassDef{
           name = <U takes_keyword><<U <todo method>>>
           params = [KeywordArg{ expr = Local{
               localVariable = <U arg0>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -70,7 +70,7 @@ ClassDef{
               localVariable = <U arg0>
             } }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = InsSeq{
@@ -110,7 +110,7 @@ ClassDef{
               localVariable = <U arg0>
             }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = InsSeq{
@@ -148,7 +148,7 @@ ClassDef{
           name = <U takes_rest><<U <todo method>>>
           params = [RestParam{ expr = Local{
               localVariable = <U args>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -170,7 +170,7 @@ ClassDef{
           name = <U takes_keyword_rest><<U <todo method>>>
           params = [RestParam{ expr = KeywordArg{ expr = Local{
               localVariable = <U args>
-            } } }, BlockArg{ expr = Local{
+            } } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -190,7 +190,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_block><<U <todo method>>>
-          params = [BlockArg{ expr = Local{
+          params = [BlockParam{ expr = Local{
               localVariable = <U blk>
             } }]
           rhs = Send{
@@ -210,7 +210,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U zsuper_inside_block><<U <todo method>>>
-          params = [BlockArg{ expr = Local{
+          params = [BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = EmptyTree
@@ -251,7 +251,7 @@ ClassDef{
           name = <U takes_positional><<U <todo method>>>
           params = [Local{
               localVariable = <U arg0>
-            }, BlockArg{ expr = Local{
+            }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -281,7 +281,7 @@ ClassDef{
           name = <U takes_keyword><<U <todo method>>>
           params = [KeywordArg{ expr = Local{
               localVariable = <U arg0>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -314,7 +314,7 @@ ClassDef{
               localVariable = <U arg0>
             } }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -351,7 +351,7 @@ ClassDef{
               localVariable = <U arg0>
             }, KeywordArg{ expr = Local{
               localVariable = <U arg1>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -385,7 +385,7 @@ ClassDef{
           name = <U takes_rest><<U <todo method>>>
           params = [RestParam{ expr = Local{
               localVariable = <U args>
-            } }, BlockArg{ expr = Local{
+            } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -440,7 +440,7 @@ ClassDef{
           name = <U takes_keyword_rest><<U <todo method>>>
           params = [RestParam{ expr = KeywordArg{ expr = Local{
               localVariable = <U args>
-            } } }, BlockArg{ expr = Local{
+            } } }, BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -480,7 +480,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U takes_block><<U <todo method>>>
-          params = [BlockArg{ expr = Local{
+          params = [BlockParam{ expr = Local{
               localVariable = <U blk>
             } }]
           rhs = Send{
@@ -505,7 +505,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U zsuper_inside_block><<U <todo method>>>
-          params = [BlockArg{ expr = Local{
+          params = [BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
@@ -572,7 +572,7 @@ ClassDef{
         MethodDef{
           flags = {}
           name = <U super_inside_module><<U <todo method>>>
-          params = [BlockArg{ expr = Local{
+          params = [BlockParam{ expr = Local{
               localVariable = <U <blk>>
             } }]
           rhs = Send{

@@ -117,9 +117,9 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
             return make_expression<OptionalParam>(exp->loc, deepCopy(avoid, exp->expr), deepCopy(avoid, exp->default_));
         }
 
-        case Tag::BlockArg: {
-            auto *exp = reinterpret_cast<const BlockArg *>(tree);
-            return make_expression<BlockArg>(exp->loc, deepCopy(avoid, exp->expr));
+        case Tag::BlockParam: {
+            auto *exp = reinterpret_cast<const BlockParam *>(tree);
+            return make_expression<BlockParam>(exp->loc, deepCopy(avoid, exp->expr));
         }
 
         case Tag::ShadowArg: {
@@ -239,7 +239,7 @@ COPY_IMPL(UnresolvedIdent);
 COPY_IMPL(RestParam);
 COPY_IMPL(KeywordArg);
 COPY_IMPL(OptionalParam);
-COPY_IMPL(BlockArg);
+COPY_IMPL(BlockParam);
 COPY_IMPL(ShadowArg);
 COPY_IMPL(Assign);
 COPY_IMPL(Cast);

@@ -46,7 +46,7 @@ ClassDef{
             }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U f>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+            } } }, BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U g>
             } }]
@@ -128,7 +128,7 @@ ClassDef{
                     kind = Local
                     name = <U f>
                   } } }
-                  BlockArg{ expr = UnresolvedIdent{
+                  BlockParam{ expr = UnresolvedIdent{
                     kind = Local
                     name = <U g>
                   } }
