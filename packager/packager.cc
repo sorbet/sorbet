@@ -78,41 +78,26 @@ vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState 
     return fqn;
 }
 
-// TODO(jez) This function is only used in two places, and should be possible to delete:
-//
-// - To resolve import/visible_to names to MangledNames
-// - To populate exports
-//
-// The constant lit resolution logic should probably not materialize the vector, and instead just
-// reimplement enough of ResolveConstantsWalk to resolve the constant literals in place, returning
-// the final package symbol.
-//
-// Exports can probably be rewritten to not need to store the fully qualified name entirely.
-FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
-    FullyQualifiedName fqn;
+// TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
+// If we did it recursively, it would also mean that we didn't have to materialize the fullNameReversed vector below
+MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit, bool allowNamespace) {
+    ENFORCE(constantLit != nullptr);
+
+    vector<core::NameRef> fullNameReversed;
     while (constantLit != nullptr) {
-        fqn.parts.emplace_back(constantLit->cnst);
+        fullNameReversed.emplace_back(constantLit->cnst);
         if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
             constantLit = resolvedLit->original();
         } else {
             constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
         }
     }
-    reverse(fqn.parts.begin(), fqn.parts.end());
-    ENFORCE(!fqn.parts.empty());
-    return fqn;
-}
-
-// TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
-MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit, bool allowNamespace) {
-    ENFORCE(constantLit != nullptr);
-
-    auto fullName = getFullyQualifiedName(ctx, constantLit);
+    ENFORCE(!fullNameReversed.empty());
 
     // Since packager now runs after namer, we know that these symbols are entered.
     auto owner = core::Symbols::PackageSpecRegistry();
-    for (auto part : fullName.parts) {
-        auto member = owner.data(ctx)->findMember(ctx, part);
+    for (auto part = fullNameReversed.rbegin(); part != fullNameReversed.rend(); part++) {
+        auto member = owner.data(ctx)->findMember(ctx, *part);
         if (!member.exists() || !member.isClassOrModule()) {
             owner = core::Symbols::noClassOrModule();
             break;
@@ -126,7 +111,7 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
         // should probably be able to pre-resolve the constants in import/visible_to/etc. lines at
         // this point, and report an eager error if those package names fail to resolve, rather than
         // resorting handling this (impossible?) edge case.
-        ENFORCE(fullName.parts.empty());
+        ENFORCE(fullNameReversed.empty());
         owner = core::Symbols::noClassOrModule();
     }
 

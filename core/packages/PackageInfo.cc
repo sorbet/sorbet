@@ -23,10 +23,6 @@ string_view strictDependenciesLevelToString(StrictDependenciesLevel level) {
     }
 }
 
-string FullyQualifiedName::show(const core::GlobalState &gs) const {
-    return absl::StrJoin(parts, "::", NameFormatter(gs));
-}
-
 Import Import::prelude(MangledName mangledName, core::LocOffsets declLoc) {
     Import res{mangledName, ImportType::Normal, declLoc};
     res.isPrelude_ = true;
