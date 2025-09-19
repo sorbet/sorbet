@@ -1,0 +1,65 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C TestModule1><<C <todo sym>>> < ()
+    def some_method<<todo method>>(&<blk>)
+      <self>.puts("hello")
+    end
+
+    <runtime method definition of some_method>
+
+    <self>.extend(::T::Helpers)
+
+    <self>.requires_ancestor() do ||
+      ::Kernel
+    end
+  end
+
+  module <emptyTree>::<C TestModule2><<C <todo sym>>> < ()
+    def some_method<<todo method>>(&<blk>)
+      <self>.puts("hello")
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      <emptyTree>::<C BasicObject>
+    end
+
+    <runtime method definition of some_method>
+  end
+
+  module <emptyTree>::<C TestModule3><<C <todo sym>>> < ()
+    def some_method<<todo method>>(&<blk>)
+      <self>.puts("hello")
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      <emptyTree>::<C Kernel>
+    end
+
+    <runtime method definition of some_method>
+  end
+
+  class <emptyTree>::<C TestClass1><<C <todo sym>>> < (::<todo sym>)
+    def some_method<<todo method>>(&<blk>)
+      <self>.puts("hello")
+    end
+
+    <runtime method definition of some_method>
+  end
+
+  module <emptyTree>::<C TestModule4><<C <todo sym>>> < ()
+    def some_method<<todo method>>(&<blk>)
+      <self>.puts("hello")
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.requires_ancestor() do ||
+      <emptyTree>::<C Object>
+    end
+
+    <runtime method definition of some_method>
+  end
+end

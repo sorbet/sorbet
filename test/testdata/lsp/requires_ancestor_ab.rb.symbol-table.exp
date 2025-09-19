@@ -3,19 +3,27 @@ class ::<root> < ::Object ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:4
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   module ::A < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/lsp/requires_ancestor_ab.rb:4
+    method ::A#<required-ancestor-lin> (<arg>) -> [Kernel] @ test/testdata/lsp/requires_ancestor_ab.rb:4
+      argument <arg><> -> [A] @ Loc {file=??? start=??? end=???}
+    method ::A#<required-ancestor> (<arg>) -> [Kernel] @ test/testdata/lsp/requires_ancestor_ab.rb:4
+      argument <arg><> -> [A] @ Loc {file=??? start=??? end=???}
     method ::A#on_both_a_and_b (<blk>) -> Integer @ test/testdata/lsp/requires_ancestor_ab.rb:10
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
     method ::A#only_on_a (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:7
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
-  class ::<Class:A> < ::Module (Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:4
+  class ::<Class:A> < ::Module (Helpers, Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:4
     method ::<Class:A>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:4
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   module ::B < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/lsp/requires_ancestor_ab.rb:13
+    method ::B#<required-ancestor-lin> (<arg>) -> [Kernel] @ test/testdata/lsp/requires_ancestor_ab.rb:13
+      argument <arg><> -> [B] @ Loc {file=??? start=??? end=???}
+    method ::B#<required-ancestor> (<arg>) -> [Kernel] @ test/testdata/lsp/requires_ancestor_ab.rb:13
+      argument <arg><> -> [B] @ Loc {file=??? start=??? end=???}
     method ::B#on_both_a_and_b (<blk>) -> String @ test/testdata/lsp/requires_ancestor_ab.rb:19
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
     method ::B#only_on_b (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:16
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
-  class ::<Class:B> < ::Module (Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:13
+  class ::<Class:B> < ::Module (Helpers, Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:13
     method ::<Class:B>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:13
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   class ::C < ::Object (Target) @ test/testdata/lsp/requires_ancestor_ab.rb:35
@@ -26,8 +34,8 @@ class ::<root> < ::Object ()
     method ::<Class:C>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:35
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   module ::Target < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/lsp/requires_ancestor_ab.rb:22
-    method ::Target#<required-ancestor-lin> (<arg>) -> [A] @ test/testdata/lsp/requires_ancestor_ab.rb:25
-      argument <arg><> -> [Target] @ Loc {file=??? start=??? end=???}
+    method ::Target#<required-ancestor-lin> (<arg>) -> [A, Kernel] @ (test/testdata/lsp/requires_ancestor_ab.rb:25, test/testdata/lsp/requires_ancestor_ab.rb:4)
+      argument <arg><> -> [Target, A] @ Loc {file=??? start=??? end=???}
     method ::Target#<required-ancestor> (<arg>) -> [A] @ test/testdata/lsp/requires_ancestor_ab.rb:25
       argument <arg><> -> [Target] @ Loc {file=??? start=??? end=???}
     method ::Target#foo_b (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:27

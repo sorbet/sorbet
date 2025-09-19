@@ -975,6 +975,10 @@ void validateUselessRequiredAncestors(core::Context ctx, const core::ClassOrModu
     auto data = sym.data(ctx);
 
     for (auto req : data->requiredAncestors(ctx)) {
+        // Skip complaining for BasicObject: everything already derives from it by construction.
+        if (req.symbol == core::Symbols::BasicObject()) {
+            continue;
+        }
         if (data->derivesFrom(ctx, req.symbol)) {
             if (auto e = ctx.state.beginError(req.loc, core::errors::Resolver::UselessRequiredAncestor)) {
                 e.setHeader("`{}` is already {} by `{}`", req.symbol.show(ctx),
