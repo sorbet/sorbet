@@ -102,7 +102,7 @@ fi
 rb_src=()
 while IFS='' read -r line; do
   rb_src+=("$line")
-done < <(find "${paths[@]}" -name '*.rb*' | sort)
+done < <(find "${paths[@]}" -name '*.rb*' | LC_COLLATE=C sort)
 
 basename=
 srcs=()
