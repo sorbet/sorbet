@@ -21,8 +21,12 @@ struct Expectations {
     static Expectations getExpectations(std::string singleTest);
 };
 
+void CHECK_EQ_DIFF_IMPL(const char *file, int line, std::string_view expected, std::string_view actual,
+                        std::string_view errorMessage);
+
 // A variant of CHECK_EQ that prints a diff on failure.
-void CHECK_EQ_DIFF(std::string_view expected, std::string_view actual, std::string_view errorMessage);
+#define CHECK_EQ_DIFF(expected, actual, errorMessage) \
+    CHECK_EQ_DIFF_IMPL(__FILE__, __LINE__, (expected), (actual), (errorMessage));
 
 } // namespace sorbet::test
 
