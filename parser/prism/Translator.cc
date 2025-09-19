@@ -541,17 +541,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 messageLoc.endLoc = messageLoc.beginLoc;
             }
 
-            pm_node_t *prismBlock = callNode->block;
-
-            NodeVec args;
-            // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
-            // but not an explicit block with `{ ... }` or `do ... end`
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                args = translateArguments(callNode->arguments, callNode->block);
-            } else {
-                args = translateArguments(callNode->arguments);
-            }
-
             // Translate the args, detecting special cases along the way,
             // that will require the call to be desugared into a magic call.
             //
@@ -560,6 +549,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             //   We can skip the `hasFwdRestArg`/`hasSplat` logic below if it's false.
             //   However, we still need the loop if it's true, to be able to tell the two cases apart.
 
+            NodeVec args;
             // true if the call contains a forwarded argument like `foo(...)`
             auto hasFwdArgs = callNode->arguments != nullptr &&
                               PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
@@ -575,13 +565,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             } else { // Splatting an expression like `f(*a)`
                                 hasSplat = true;
                             }
+
+                            args.emplace_back(translate(arg));
+
                             break;
                         }
 
                         default:
+                            args.emplace_back(translate(arg));
+
                             break;
                     }
                 }
+            }
+
+            pm_node_t *prismBlock = callNode->block;
+            if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+                // but not a literal block with `{ ... }` or `do ... end`
+                args.emplace_back(translate(prismBlock));
             }
 
             unique_ptr<parser::Node> sendNode;
