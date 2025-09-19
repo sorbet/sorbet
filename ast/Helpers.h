@@ -261,6 +261,10 @@ public:
                                              core::make_type<core::NamedLiteralType>(core::Symbols::String(), value));
     }
 
+    static ExpressionPtr StringFromConstant(const UnresolvedConstantLit *cnst) {
+        return String(cnst->loc, cnst->cnst);
+    }
+
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                 MethodDef::PARAMS_store params, ExpressionPtr rhs,
                                 MethodDef::Flags flags = MethodDef::Flags()) {
