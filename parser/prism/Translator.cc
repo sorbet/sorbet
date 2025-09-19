@@ -494,11 +494,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Break>(location, move(arguments));
             }
 
-            bool hasBlock = absl::c_any_of(arguments, [](const auto &node) {
-                return node != nullptr && parser::isa_node<parser::BlockPass>(node.get());
-            });
-            ENFORCE(!hasBlock, "Prism expected to disallow block argument for `break` as invalid syntax.");
-
             ExpressionPtr breakArgs;
             if (arguments.size() == 1) {
                 auto &first = arguments[0];
@@ -1610,11 +1605,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Next>(location, move(arguments));
             }
 
-            bool hasBlock = absl::c_any_of(arguments, [](const auto &node) {
-                return node != nullptr && parser::isa_node<parser::BlockPass>(node.get());
-            });
-            ENFORCE(!hasBlock, "Prism expected to disallow block argument for `next` as invalid syntax.");
-
             ExpressionPtr nextArgs;
             if (arguments.size() == 1) {
                 auto &first = arguments[0];
@@ -1882,11 +1872,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             if (!directlyDesugar || !hasExpr(returnValues)) {
                 return make_unique<parser::Return>(location, move(returnValues));
             }
-
-            bool hasBlock = absl::c_any_of(returnValues, [](const auto &node) {
-                return node != nullptr && parser::isa_node<parser::BlockPass>(node.get());
-            });
-            ENFORCE(!hasBlock, "Prism expected to disallow block argument for `return` as invalid syntax.");
 
             ExpressionPtr returnArgs;
             if (returnValues.size() == 1) {
