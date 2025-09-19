@@ -15,11 +15,12 @@ namespace sorbet::rbs {
 class MethodTypeToParserNodePrism {
     core::MutableContext ctx;
     Parser parser;
-    const parser::Prism::Parser* prismParser; // For Prism node creation
+    const parser::Prism::Parser *prismParser; // For Prism node creation
 
 public:
-    MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser) : ctx(ctx), parser(parser), prismParser(nullptr) {}
-    MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser, const parser::Prism::Parser& prismParser)
+    MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser)
+        : ctx(ctx), parser(parser), prismParser(nullptr) {}
+    MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser, const parser::Prism::Parser &prismParser)
         : ctx(ctx), parser(parser), prismParser(&prismParser) {}
 
     /**
@@ -27,9 +28,8 @@ public:
      *
      * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
      */
-    pm_node_t* methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
-                               const RBSDeclaration &declaration,
-                               const std::vector<Comment> &annotations);
+    pm_node_t *methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
+                               const RBSDeclaration &declaration, const std::vector<Comment> &annotations);
 
     /**
      * Convert an RBS attribute type comment to a Sorbet signature.
@@ -40,22 +40,26 @@ public:
                                                 const RBSDeclaration &declaration,
                                                 const std::vector<Comment> &annotations);
 
-
 private:
     // Prism node creation helpers
-    template<typename T> T* allocateNode();
+    template <typename T> T *allocateNode();
     pm_node_t initializeBaseNode(pm_node_type_t type);
-    pm_node_t* createConstantReadNode(const char* name);
-    pm_node_t* createConstantPathNode(pm_node_t* parent, const char* name);
-    pm_node_t* createSingleArgumentNode(pm_node_t* arg);
+    pm_node_t *createConstantReadNode(const char *name);
+    pm_node_t *createConstantPathNode(pm_node_t *parent, const char *name);
+    pm_node_t *createSingleArgumentNode(pm_node_t *arg);
 
     // High-level node creators
-    pm_node_t* createSorbetPrivateStaticConstant();
-    pm_node_t* createTSigWithoutRuntimeConstant();
-    pm_node_t* createStringConstant();
+    pm_node_t *createSorbetPrivateStaticConstant();
+    pm_node_t *createTSigWithoutRuntimeConstant();
+    pm_node_t *createSelfNode();
+    pm_node_t *createSymbolNode(rbs_ast_symbol_t *name, core::LocOffsets nameLoc);
+    pm_node_t *createAssocNode(pm_node_t *key, pm_node_t *value, core::LocOffsets loc);
+    pm_node_t *createHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
+    pm_node_t *createKeywordHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
+    pm_node_t *createSymbolNodeFromConstant(pm_constant_id_t nameId, core::LocOffsets nameLoc);
 
     // Utility helpers
-    pm_constant_id_t addConstantToPool(const char* name);
+    pm_constant_id_t addConstantToPool(const char *name);
     pm_location_t getZeroWidthLocation();
     pm_location_t convertLocOffsets(core::LocOffsets loc);
 };
