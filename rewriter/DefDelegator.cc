@@ -13,7 +13,7 @@ void generateStub(vector<ast::ExpressionPtr> &methodStubs, const core::LocOffset
                   const core::NameRef &methodName) {
     // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
     auto sigArgs = ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
-                                     ast::MK::Symbol(loc, core::Names::blkArg()),
+                                     ast::MK::Symbol(loc, core::Names::blkParam()),
                                      ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
 
     methodStubs.push_back(ast::MK::Sig(loc, std::move(sigArgs), ast::MK::Untyped(loc)));
@@ -21,7 +21,7 @@ void generateStub(vector<ast::ExpressionPtr> &methodStubs, const core::LocOffset
     // def $methodName(*arg0, &blk); end
     ast::MethodDef::PARAMS_store params;
     params.emplace_back(ast::MK::RestParam(loc, ast::MK::Local(loc, core::Names::arg0())));
-    params.emplace_back(ast::make_expression<ast::BlockParam>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+    params.emplace_back(ast::make_expression<ast::BlockParam>(loc, ast::MK::Local(loc, core::Names::blkParam())));
 
     methodStubs.push_back(
         ast::MK::SyntheticMethod(loc, loc, methodName, std::move(params), ast::MK::RaiseUnimplemented(loc)));

@@ -657,7 +657,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     auto *argBlock = bodyBlock;
                     if (!blockParamFlags.empty()) {
-                        LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
+                        LocalRef argTemp = cctx.newTemporary(core::Names::blkParam());
                         bodyBlock->exprs.emplace_back(argTemp, s.block()->loc, make_insn<LoadYieldParams>(link));
 
                         for (int i = 0; i < blockParamFlags.size(); ++i) {

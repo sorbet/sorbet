@@ -134,7 +134,7 @@ struct MethodBuilder {
     }
 
     MethodRef build() {
-        auto &param = gs.enterMethodParameter(Loc::none(), method, Names::blkArg());
+        auto &param = gs.enterMethodParameter(Loc::none(), method, Names::blkParam());
         param.flags.isBlock = true;
         return method;
     }
@@ -1002,7 +1002,7 @@ void GlobalState::installIntrinsics() {
         auto method = enterMethodSymbol(Loc::none(), symbol, entry.method);
         method.data(*this)->intrinsicOffset = offset + Method::FIRST_VALID_INTRINSIC_OFFSET;
         if (countBefore != methodsUsed()) {
-            auto &blkParam = enterMethodParameter(Loc::none(), method, Names::blkArg());
+            auto &blkParam = enterMethodParameter(Loc::none(), method, Names::blkParam());
             blkParam.flags.isBlock = true;
         }
     }
@@ -2588,7 +2588,7 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
     if (prevCount != methodsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
-        auto &blkSym = enterMethodParameter(blkLoc, sym, core::Names::blkArg());
+        auto &blkSym = enterMethodParameter(blkLoc, sym, core::Names::blkParam());
         blkSym.flags.isBlock = true;
     } else {
         // Ensures that locs get properly updated on the fast path
@@ -2611,7 +2611,7 @@ MethodRef GlobalState::staticInitForFile(Loc loc) {
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
     if (prevCount != this->methodsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
-        auto &blkSym = this->enterMethodParameter(blkLoc, sym, core::Names::blkArg());
+        auto &blkSym = this->enterMethodParameter(blkLoc, sym, core::Names::blkParam());
         blkSym.flags.isBlock = true;
     } else {
         // Ensures that locs get properly updated on the fast path

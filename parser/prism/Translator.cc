@@ -1269,7 +1269,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 // Desugaring a method def like `def foo()` should behave like `def foo(&<blk>)`,
                 // so we set a synthetic name here for `yield` to use.
-                enclosingBlockParamName = core::Names::blkArg();
+                enclosingBlockParamName = core::Names::blkParam();
 
                 // TODO: In a future PR, we'll actually generate the expr via `Mk::Block`
                 // See the `Mk::Block` call in Desugar.cc's `buildMethod()` for reference.
@@ -2418,7 +2418,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             ExpressionPtr recv;
             if (enclosingBlockParamName.exists()) {
-                if (enclosingBlockParamName == core::Names::blkArg()) {
+                if (enclosingBlockParamName == core::Names::blkParam()) {
                     if (auto e =
                             ctx.beginIndexerError(enclosingMethodLoc, core::errors::Desugar::UnnamedBlockParameter)) {
                         e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
@@ -2805,7 +2805,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
     } else {
         // Desugaring a method def like `def foo(a, b)` should behave like `def foo(a, b, &<blk>)`,
         // so we set a synthetic name here for `yield` to use.
-        enclosingBlockParamName = core::Names::blkArg();
+        enclosingBlockParamName = core::Names::blkParam();
     }
 
     return {make_unique<parser::Params>(location, move(params)), enclosingBlockParamName};

@@ -657,7 +657,7 @@ private:
         auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
 
         // Add a fake block argument so that this method symbol passes sanity checks
-        auto &arg = ctx.state.enterMethodParameter(core::Loc::none(), uaSym, core::Names::blkArg());
+        auto &arg = ctx.state.enterMethodParameter(core::Loc::none(), uaSym, core::Names::blkParam());
         arg.flags.isBlock = true;
 
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
@@ -863,7 +863,7 @@ private:
                 mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{});
 
                 // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
-                auto &arg = gs.enterMethodParameter(core::Loc::none(), mixMethod, core::Names::blkArg());
+                auto &arg = gs.enterMethodParameter(core::Loc::none(), mixMethod, core::Names::blkParam());
                 arg.flags.isBlock = true;
             } else {
                 mixMethod.data(gs)->addLoc(gs, loc);

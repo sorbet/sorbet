@@ -95,7 +95,7 @@ public:
         // because we have to know exactly what invariants desugar and namer set up about
         // methods and block arguments before us.
         auto blkLoc = core::LocOffsets::none();
-        core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
+        core::LocalVariable blkLocalVar(core::Names::blkParam(), 0);
         ast::MethodDef::PARAMS_store params;
         params.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
 
