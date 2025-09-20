@@ -2661,8 +2661,7 @@ private:
         {
             auto nonNilPassedInBlockType = Types::dropNil(gs, passedInBlockType);
             auto passedInBlockReturnType = Types::getProcReturnType(gs, nonNilPassedInBlockType);
-            auto it = &dispatched;
-            while (it != nullptr) {
+            for (auto it : dispatched) {
                 if (it->main.method.exists()) {
                     // TODO(jez) This only looks at the main component!
                     const auto &blockReturnType = it->main.blockReturnType;
@@ -2673,7 +2672,6 @@ private:
                                                         UntypedMode::AlwaysCompatible, ErrorSection::Collector::NO_OP);
                     }
                 }
-                it = it->secondary.get();
             }
         }
         if (constr) {
@@ -3082,7 +3080,7 @@ public:
         auto multipleComponents = dispatched.secondary != nullptr;
         if (multipleComponents) {
             int unknownMethodOnNilClassErrors = 0;
-            for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+            for (auto it : dispatched) {
                 for (auto &err : it->main.errors) {
                     if (err->what == core::errors::Infer::UnknownMethod && it->main.receiver.isNilClass()) {
                         unknownMethodOnNilClassErrors++;
@@ -3109,12 +3107,12 @@ public:
                 auto retried = selfTyAndAnd.type.dispatchCall(gs, newInnerArgs);
 
                 auto foundErrorOnRetry = false;
-                for (auto it = &retried; it != nullptr; it = it->secondary.get()) {
+                for (auto it : retried) {
                     foundErrorOnRetry |= !it->main.errors.empty();
                 }
 
                 if (!foundErrorOnRetry) {
-                    for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+                    for (auto it : dispatched) {
                         for (auto &err : it->main.errors) {
                             if (err->what == core::errors::Infer::UnknownMethod && it->main.receiver.isNilClass()) {
                                 if (auto newErr = gs.beginError(err->loc, core::errors::Infer::CallAfterAndAnd)) {
@@ -3916,7 +3914,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
 
     auto recursiveDispatch = newSelfType.dispatchCall(gs, digArgs);
 
-    for (auto it = &recursiveDispatch; it != nullptr; it = it->secondary.get()) {
+    for (auto it : recursiveDispatch) {
         for (auto &err : it->main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
@@ -4352,7 +4350,7 @@ public:
         };
         auto dispatched = classArg->type.dispatchCall(gs, newArgs);
 
-        for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+        for (auto it : dispatched) {
             for (auto &err : it->main.errors) {
                 res.main.errors.emplace_back(std::move(err));
             }
