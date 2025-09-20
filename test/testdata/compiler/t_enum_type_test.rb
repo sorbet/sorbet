@@ -34,8 +34,8 @@ class Main
   end
 end
 
-p Main.takes_a_or_b(T.unsafe(MyEnum::A))
-p Main.takes_a_or_b(T.unsafe(MyEnum::B))
+Main.takes_a_or_b(T.unsafe(MyEnum::A))
+Main.takes_a_or_b(T.unsafe(MyEnum::B))
 begin
   Main.takes_a_or_b(T.unsafe(MyEnum::C))
 rescue TypeError => exn
@@ -43,13 +43,13 @@ rescue TypeError => exn
 end
 
 begin
-  p Main.takes_c(T.unsafe(MyEnum::A))
+  Main.takes_c(T.unsafe(MyEnum::A))
 rescue TypeError => exn
   puts exn.message.match(/Expected.*/).to_s
 end
-p Main.takes_c(T.unsafe(MyEnum::C))
+Main.takes_c(T.unsafe(MyEnum::C))
 
-p Main.some_common_cases(T.unsafe(MyEnum::A))
-p Main.some_common_cases(T.unsafe(MyEnum::B))
-p Main.some_common_cases(T.unsafe(MyEnum::C))
-p Main.some_common_cases(T.unsafe(MyEnum::D))
+Main.some_common_cases(T.unsafe(MyEnum::A))
+Main.some_common_cases(T.unsafe(MyEnum::B))
+Main.some_common_cases(T.unsafe(MyEnum::C))
+Main.some_common_cases(T.unsafe(MyEnum::D))
