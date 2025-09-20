@@ -640,7 +640,10 @@ TEST_CASE("LSPTest") {
                 UntypedAssertion::checkAll(test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions),
                                            diagnostics, errorPrefixes[i]);
 
-            slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed;
+            bool hintAssertionsPassed = HintAssertion::checkAll(
+                test.sourceFileContents, RangeAssertion::getHintAssertions(assertions), diagnostics, errorPrefixes[i]);
+
+            slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed && hintAssertionsPassed;
         }
     }
 
