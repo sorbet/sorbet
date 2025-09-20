@@ -43,21 +43,6 @@ enum class StrictDependenciesLevel {
 
 std::string_view strictDependenciesLevelToString(StrictDependenciesLevel level);
 
-struct FullyQualifiedName {
-    std::vector<core::NameRef> parts;
-
-    FullyQualifiedName() = default;
-    FullyQualifiedName(std::vector<core::NameRef> parts) : parts(parts) {}
-    explicit FullyQualifiedName(const FullyQualifiedName &) = default;
-    FullyQualifiedName(FullyQualifiedName &&) = default;
-    FullyQualifiedName &operator=(const FullyQualifiedName &) = delete;
-    FullyQualifiedName &operator=(FullyQualifiedName &&) = default;
-
-    std::string show(const core::GlobalState &gs) const;
-};
-
-class PackageInfo;
-
 struct Import {
     MangledName mangledName;
     ImportType type;
@@ -90,17 +75,9 @@ struct Import {
 };
 
 struct Export {
-    FullyQualifiedName fqn;
     core::LocOffsets loc;
 
-    explicit Export(FullyQualifiedName &&fqn, core::LocOffsets loc) : fqn(std::move(fqn)), loc(loc) {}
-
-    const std::vector<core::NameRef> &parts() const {
-        return fqn.parts;
-    }
-
-    // Lex sort by name.
-    static bool lexCmp(const Export &a, const Export &b);
+    explicit Export(core::LocOffsets loc) : loc(loc) {}
 };
 
 struct VisibleTo {
