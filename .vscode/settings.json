@@ -10,7 +10,13 @@
   // Disable feature where Clangd auto-imports headers for missing references.
   // It inserts relative paths that we don't want.
   "clangd.arguments": ["--header-insertion=never"],
-  "clangd.path": "bazel-sorbet/external/llvm_toolchain_15_0_7/bin/clangd",
+  // TODO(jez) Something changed and now clangd doesn't work when we invoke the
+  // one out of the bazel sandbox. The one installed to /usr/bin from XCode mostly
+  // works, modulo some extra warnings, so let's just use that until we figure out
+  // a better way forward.
+  // TODO(jez) Revisit when we next upgrade llvm_toolchain
+  //"clangd.path": "bazel-sorbet/external/llvm_toolchain_15_0_7/bin/clangd",
+  "clangd.path": "clangd",
   "files.associations": {
     "*.rbi": "ruby",
     "*.rbupdated": "ruby",
