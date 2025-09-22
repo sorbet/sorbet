@@ -336,6 +336,13 @@ pipeline_tests(
 
             # Minor differences in the parse tree lead to different exp files
             "testdata/rbs/assertions_heredoc.rb",
+
+            # Whitequark and Prism parsers disagree on inclusion of parentheses in the location.
+            # This is surfaced with PM_AND_NODE and PM_OR_NODE desugaring a right hand side enclosed in parentheses.
+            # See comment in PM_PARENTHESES_NODE in Translator.cc.
+            #   "Override the begin node location to be the parentheses location instead of the statements location"
+            # However, undoing that override leads to issues with nested parentheses handling.
+            "testdata/infer/control_flow/complex_implication_1.rb",
         ],
     ),
     "PrismPosTests",
