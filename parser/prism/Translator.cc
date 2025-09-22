@@ -664,6 +664,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unique_ptr<parser::Node> sendNode;
 
             auto name = ctx.state.enterNameUTF8(constantNameString);
+            auto methodName = MK::Symbol(location.copyWithZeroLength(), name);
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `a&.b`
@@ -707,9 +708,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
             unique_ptr<parser::Node> blockPassNode;
-            bool supportedBlock;
+            ast::ExpressionPtr blockPassArg;
+            bool blockPassArgIsSymbol = false;
+            bool supportedBlock = false;
             if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
+
                     auto blockNode = down_cast<pm_block_node>(prismBlock);
 
                     blockBody = this->enterBlockContext().translate(blockNode->body);
@@ -799,9 +803,33 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         supportedBlock = true;
                     }
                 } else {
-                    // `PM_BLOCK_ARGUMENT_NODE` is not supported yet.
+                    ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
+
+                    auto *bp = down_cast<pm_block_argument_node>(prismBlock);
+
                     blockPassNode = translate(prismBlock);
-                    supportedBlock = false;
+
+                    if (bp->expression) {
+                        blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
+
+                        if (blockPassArgIsSymbol) {
+                            supportedBlock = false; // TODO: Implement symbol procs
+                        } else {
+                            auto blockPassArgNode = translate(bp->expression);
+
+                            if (supportedCallType && hasExpr(blockPassArgNode)) {
+                                blockPassArg = blockPassArgNode->takeDesugaredExpr();
+                                supportedBlock = true;
+                            } else {
+                                supportedBlock = false;
+                            }
+                        }
+                    } else {
+                        // Replace an anonymous block pass like `f(&)` with a local variable reference, like
+                        // `f(&&)`.
+                        blockPassArg = MK::Local(location, core::Names::ampersand());
+                        supportedBlock = true;
+                    }
                 }
             } else {
                 // If there's no block, we support the call
@@ -810,7 +838,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             supportedCallType &= supportedBlock;
 
-            if (!supportedCallType) {
+            if (!directlyDesugar || !supportedCallType) {
                 if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
                     // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
                     // but not a literal block with `{ ... }` or `do ... end`
@@ -854,22 +882,68 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0);
 
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) && !blockPassArgIsSymbol) {
+                // Special handling for non-Symbol block pass args, like `a.map(&block)`
+                // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
+                // and handled separately below.
+
+                // Desugar a call without a splat, and any other expression as a block pass argument.
+                // E.g. `a.each(&block)`
+
+                ast::Send::ARGS_store magicSendArgs;
+                magicSendArgs.reserve(3 + args.size());
+                magicSendArgs.emplace_back(move(receiverExpr));
+                magicSendArgs.emplace_back(move(methodName));
+                magicSendArgs.emplace_back(move(blockPassArg));
+
+                numPosArgs += 3;
+
+                for (auto &arg : args) {
+                    magicSendArgs.emplace_back(arg->takeDesugaredExpr());
+                }
+
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // Add the parser node back into the wq tree, to pass the parser tests.
+                    args.emplace_back(move(blockPassNode));
+                }
+
+                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), messageLoc, numPosArgs,
+                                         move(magicSendArgs), flags);
+
+                return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
+                                                         move(args));
+            }
+
             ast::Send::ARGS_store sendArgs{};
-            sendArgs.reserve(args.size());
+            sendArgs.reserve(args.size()); // TODO: reserve size for block, if needed.
             for (auto &arg : args) {
                 sendArgs.emplace_back(arg->takeDesugaredExpr());
             }
 
             if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                    auto blockBodyExpr = blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
-                    auto blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
+                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
+                    // A literal block arg (like `foo { ... }` or `foo do ... end`),
+                    // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
+
+                    ast::ExpressionPtr blockExpr;
+                    if (blockPassArgIsSymbol) {
+                        ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
+                        auto *bp = down_cast<pm_block_argument_node>(prismBlock);
+                        ENFORCE(PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE));
+                        ENFORCE(false, "TODO: Implement symbol block pass args here");
+                    } else {
+                        auto blockBodyExpr = blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
+                        blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
+                    }
+
                     sendArgs.emplace_back(move(blockExpr));
 
                     flags.hasBlock = true;
+                } else if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // A forwarded block like the `&b` in `a.map(&b)`
+                    unreachable("This should be desugar to `Magic.callWithBlockPass()` above.");
                 } else {
-                    unreachable("Found a {} block type, which is not implemented yet ",
-                                pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
+                    unreachable("Found an unexpected block of type {}", pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
                 }
             }
 
@@ -878,11 +952,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (prismBlock != nullptr) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
-                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
-                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
-                    // The legacy parser inverts this , with a parent "Block" with a child
-                    // "Send".
+                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
+                    // but the legacy parser inverts this, with a parent "Block" with a child "Send".
+                    //
+                    // Note: The legacy parser doesn't treat block pass arguments this way.
+                    //       It just puts them at the end of the arguments list,
+                    //       which is why we checked for `PM_BLOCK_NODE` specifically here.
 
                     return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc,
                                                               move(sendNode), move(blockParameters), move(blockBody));
