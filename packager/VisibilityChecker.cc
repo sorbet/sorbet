@@ -387,7 +387,7 @@ public:
                               path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
-                if (db.genPackages()) {
+                if (db.genPackages() || db.genPackagesStrict()) {
                     // TODO(neil): this is technically incorrect since it means export errors won't be reported at all
                     // until we implement export handling in genPackages mode
                     return;
@@ -604,7 +604,7 @@ public:
             barrier.DecrementCount();
         });
 
-        if (gs.packageDB().genPackages()) {
+        if (gs.packageDB().genPackages() || gs.packageDB().genPackagesStrict()) {
             for (auto &parsedFile : filesSpan) {
                 // TODO(neil): we can skip this loop on the slow path since the package references sets will be empty
                 auto file = parsedFile.file;

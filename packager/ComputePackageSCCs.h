@@ -111,6 +111,7 @@ class ComputePackageSCCs {
             // This SCC's layer, if all packages in the SCC have the same one.
             // TODO: handle the case where packager is enabled but layering is not
             std::optional<core::NameRef> condensationNodeLayer = std::nullopt;
+            // core::StrictDependenciesLevel lowest_level_for_empty_or_build_pkg = dag
             {
                 auto firstPkgLayer = packageDB.getPackageInfo(this->stack.back()).layer();
                 if (firstPkgLayer.has_value()) {
@@ -134,6 +135,12 @@ class ComputePackageSCCs {
                             condensationNodeLayer = std::nullopt;
                         }
                     }
+
+                    /*
+                     * if pkg has no files or is build package
+                     *   if pkg.strictDeps < lowest_level_for_empty_or_build_pkg
+                     *     lowest_level_for_empty_or_build_pkg = pkg.strictDeps
+                     */
                 } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
                     packageGraph.setTestSCCId(poppedPkgName, sccId);
 
@@ -143,15 +150,17 @@ class ComputePackageSCCs {
                     condensationNode.imports.insert(appSccId);
                 }
             } while (poppedPkgName != pkgName);
+            condensationNode.layer = condensationNodeLayer;
 
-            if (!condensationNodeLayer.has_value()) {
+            if (!condensationNode.layer.has_value()) {
                 // SCC has multiple layers, which implies layering violation
                 condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::False;
             } else if (condensationNode.members.size() > 1) {
                 // More than one package in SCC, which implies cycle
                 condensationNode.bestStrictness = core::packages::StrictDependenciesLevel::Layered;
             }
-            condensationNode.layer = condensationNodeLayer;
+            // if lowest_level_for_empty_or_build_pkg < condensationNode.bestStrictness
+            //    condensationNode.bestStrictness = lowest_level_for_empty_or_build_pkg
 
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
