@@ -25,6 +25,7 @@
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/Rails.h"
+#include "rewriter/RequiresAncestorKernel.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TestCase.h"
@@ -52,6 +53,10 @@ public:
         TypeMembers::run(ctx, classDef);
         Concern::run(ctx, classDef);
         TestCase::run(ctx, classDef);
+
+        if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
+            RequiresAncestorKernel::run(ctx, classDef);
+        }
 
         PackageSpec::run(ctx, classDef);
 
