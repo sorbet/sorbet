@@ -837,7 +837,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
 
                         if (blockPassArgIsSymbol) {
-                            supportedBlock = false; // TODO: Implement symbol procs
+                            supportedBlock = true;
                         } else {
                             auto blockPassArgNode = translate(bp->expression);
 
@@ -953,8 +953,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     if (blockPassArgIsSymbol) {
                         ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
                         auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-                        ENFORCE(PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE));
-                        ENFORCE(false, "TODO: Implement symbol block pass args here");
+                        ENFORCE(bp->expression && PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE));
+
+                        auto symbol = down_cast<pm_symbol_node>(bp->expression);
+                        blockExpr = desugarSymbolProc(symbol);
                     } else {
                         auto blockBodyExpr = blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
                         blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
@@ -975,7 +977,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
 
             if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
                     // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
                     // but the legacy parser inverts this, with a parent "Block" with a child "Send".
                     //
@@ -2729,6 +2731,39 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
     }
 
     return make_tuple(move(paramsStore), move(statsStore), true);
+}
+
+// Desugar a Symbol block pass argument (like the `&foo` in `m(&:foo)`) into a block literal.
+// `&:foo` => `{ |*temp| (temp[0]).foo(*temp[1, LONG_MAX]) }`
+//
+// This works because Sorbet is guaranteed to infer a tuple type for `temp` corresponding to however
+// many block params the enclosing Send declares (or T.untyped). From there, various tuple-specific
+// intrinsics kick in:
+//
+// - temp[0]            (evaluates to the 0th elem of the tuple)
+// - temp[1, LONG_MAX]  (evalutes to a tuple type if temp is a tuple type)
+// - foo(*expr)         (call-with-splat handles case of splatted tuple type)
+ast::ExpressionPtr Translator::desugarSymbolProc(pm_symbol_node *symbol) {
+    ENFORCE(directlyDesugar, "desugarSymbolProc should only be called when direct desugaring is enabled");
+
+    auto [symbolName, loc] = translateSymbol(symbol);
+    auto loc0 = loc.copyWithZeroLength(); // TODO: shorten name
+
+    // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
+    core::NameRef tempName = nextUniqueDesugarName(core::Names::blockPassTemp());
+
+    // `temp[0]`
+    auto recv = MK::Send1(loc0, MK::Local(loc0, tempName), core::Names::squareBrackets(), loc0, MK::Int(loc0, 0));
+
+    // `temp[1, LONG_MAX]`
+    auto sliced = MK::Send2(loc0, MK::Local(loc0, tempName), core::Names::squareBrackets(), loc0, MK::Int(loc0, 1),
+                            MK::Int(loc0, LONG_MAX));
+
+    // `(temp[0]).foo(*temp[1, LONG_MAX])`
+    auto body = MK::CallWithSplat(loc, move(recv), symbolName, loc0, MK::Splat(loc0, move(sliced)));
+
+    // `{ |*temp| (temp[0]).foo(*temp[1, LONG_MAX]) }`
+    return MK::Block1(loc, move(body), MK::RestParam(loc0, MK::Local(loc0, tempName)));
 }
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
