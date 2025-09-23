@@ -762,30 +762,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // Note: super is not a method call, and so all the logic in the case below to
                 // compute autocorrects to potentially fix up the method call's receiver can't apply.
                 e.addErrorNote("For help fixing `{}` errors: {}", "super", "https://sorbet.org/docs/typed-super");
-            } else if (args.receiverLoc().exists() &&
-                       (gs.suggestUnsafe.has_value() ||
-                        (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
-                auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
-                if (args.receiverLoc().empty()) {
-                    auto shortName = args.name.shortName(gs);
-                    auto beginAdjust = -2;                     // (&
-                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
-                    if (blockPassLoc.exists()) {
-                        auto blockPassSource = blockPassLoc.source(gs).value();
-                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                          " {{ |x| {}(x).{} }}", wrapInFn, shortName);
-                        }
-                    }
-                } else if (args.errLoc() == args.funLoc() &&
-                           args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
-                                  args.receiverLoc().source(gs).value(), args.name.shortName(gs));
-                } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
-                                  args.receiverLoc().source(gs).value());
-                }
             } else {
                 auto canSkipFuzzyMatch = false;
                 if (symbol.data(gs)->isModule()) {
@@ -844,6 +820,31 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
                         }
                         canSkipFuzzyMatch = true;
+                    }
+                }
+                if (args.receiverLoc().exists() &&
+                    (gs.suggestUnsafe.has_value() ||
+                     (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
+                    auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
+                    if (args.receiverLoc().empty()) {
+                        auto shortName = args.name.shortName(gs);
+                        auto beginAdjust = -2;                     // (&
+                        auto endAdjust = 1 + shortName.size() + 1; // :foo)
+                        auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
+                        if (blockPassLoc.exists()) {
+                            auto blockPassSource = blockPassLoc.source(gs).value();
+                            if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                                e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
+                                              " {{ |x| {}(x).{} }}", wrapInFn, shortName);
+                            }
+                        }
+                    } else if (args.errLoc() == args.funLoc() &&
+                               args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
+                        e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
+                                      args.receiverLoc().source(gs).value(), args.name.shortName(gs));
+                    } else {
+                        e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
+                                      args.receiverLoc().source(gs).value());
                     }
                 }
 
