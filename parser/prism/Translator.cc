@@ -520,39 +520,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_BEGIN_NODE: { // A `begin ... end` block
             auto beginNode = down_cast<pm_begin_node>(node);
 
-            unique_ptr<parser::Node> translatedRescue;
-            if (beginNode->rescue_clause != nullptr) {
-                // Extract rescue and else nodes from the begin node
-                auto bodyNode = translateStatements(beginNode->statements);
-                auto elseNode = translate(up_cast(beginNode->else_clause));
-                // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
-                // statements
-                translatedRescue = translateRescue(beginNode->rescue_clause, move(bodyNode), move(elseNode));
-            }
-
-            NodeVec statements;
-            if (auto *ensureNode = beginNode->ensure_clause) {
-                // Handle `begin ... ensure ... end`
-                // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
-                // Ensure node.
-                auto bodyNode = translateStatements(beginNode->statements);
-                auto ensureBody = translateStatements(ensureNode->statements);
-
-                unique_ptr<parser::Ensure> translatedEnsure;
-                if (translatedRescue != nullptr) {
-                    translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
-                } else {
-                    translatedEnsure = make_unique<parser::Ensure>(location, move(bodyNode), move(ensureBody));
-                }
-
-                statements.emplace_back(move(translatedEnsure));
-            } else if (translatedRescue != nullptr) {
-                // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
-                statements.emplace_back(move(translatedRescue));
-            } else if (beginNode->statements != nullptr) {
-                // Handle just `begin ... end` without ensure or rescue
-                statements = translateMulti(beginNode->statements->body);
-            }
+            NodeVec statements = translateEnsure(beginNode);
 
             if (statements.empty()) {
                 return make_node_with_expr<parser::Kwbegin>(MK::Nil(location), location, std::move(statements));
@@ -3210,6 +3178,47 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
 
     // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
     return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
+}
+
+NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
+    auto location = translateLoc(beginNode->base.location);
+
+    NodeVec statements;
+
+    unique_ptr<parser::Node> translatedRescue;
+    if (beginNode->rescue_clause != nullptr) {
+        // Extract rescue and else nodes from the begin node
+        auto bodyNode = translateStatements(beginNode->statements);
+        auto elseNode = translate(up_cast(beginNode->else_clause));
+        // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
+        // statements
+        translatedRescue = translateRescue(beginNode->rescue_clause, move(bodyNode), move(elseNode));
+    }
+
+    if (auto *ensureNode = beginNode->ensure_clause) {
+        // Handle `begin ... ensure ... end`
+        // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
+        // Ensure node.
+        auto bodyNode = translateStatements(beginNode->statements);
+        auto ensureBody = translateStatements(ensureNode->statements);
+
+        unique_ptr<parser::Ensure> translatedEnsure;
+        if (translatedRescue != nullptr) {
+            translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
+        } else {
+            translatedEnsure = make_unique<parser::Ensure>(location, move(bodyNode), move(ensureBody));
+        }
+
+        statements.emplace_back(move(translatedEnsure));
+    } else if (translatedRescue != nullptr) {
+        // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
+        statements.emplace_back(move(translatedRescue));
+    } else if (beginNode->statements != nullptr) {
+        // Handle just `begin ... end` without ensure or rescue
+        statements = translateMulti(beginNode->statements->body);
+    }
+
+    return statements;
 }
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.

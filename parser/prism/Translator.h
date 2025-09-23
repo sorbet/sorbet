@@ -104,6 +104,8 @@ private:
 
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                          std::unique_ptr<parser::Node> sendNode);
+
+    NodeVec translateEnsure(pm_begin_node *beginNode);
     std::unique_ptr<parser::Node> translateRescue(pm_rescue_node *prismRescueNode,
                                                   std::unique_ptr<parser::Node> beginNode,
                                                   std::unique_ptr<parser::Node> elseNode);
