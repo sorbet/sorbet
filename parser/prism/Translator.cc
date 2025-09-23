@@ -1148,7 +1148,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
             }
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(classNode->body, body);
             if (!bodyExprsOpt.has_value()) {
                 return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
             }
@@ -1862,7 +1862,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Module>(location, declLoc, move(name), move(body));
             }
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(moduleNode->body, body);
             if (!bodyExprsOpt.has_value()) {
                 return make_unique<parser::Module>(location, declLoc, move(name), move(body));
             }
@@ -2201,7 +2201,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
             }
 
-            if (!parser::NodeWithExpr::isa_node<parser::Self>(receiver.get())) {
+            if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) {
                 if (auto e = ctx.beginIndexerError(receiver->loc, core::errors::Desugar::InvalidSingletonDef)) {
                     e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                 }
@@ -2209,7 +2209,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::SClass>(move(emptyTree), location, declLoc, move(receiver), nullptr);
             }
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(classNode->body, body);
             if (!bodyExprsOpt.has_value()) {
                 return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
             }
@@ -3454,7 +3454,8 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 // The body can be a Begin node comprising multiple statements, or a single statement.
 // Return nullopt if the body does not have all of its expressions desugared.
 // TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(unique_ptr<parser::Node> &scopeBody) {
+optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
+                                                                          unique_ptr<parser::Node> &scopeBody) {
     ENFORCE(directlyDesugar, "desugarScopeBodyToRHSStore should only be called when direct desugaring is enabled");
 
     if (scopeBody == nullptr) { // Empty body
@@ -3463,7 +3464,9 @@ optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(unique
         return result;
     }
 
-    if (parser::NodeWithExpr::isa_node<parser::Begin>(scopeBody.get())) { // Handle multi-statement body
+    ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
+
+    if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
         if (!hasExpr(scopeBody)) {
             return nullopt;
         }

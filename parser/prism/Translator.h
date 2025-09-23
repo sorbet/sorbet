@@ -151,7 +151,8 @@ private:
     sorbet::ast::ExpressionPtr desugarDString(core::LocOffsets loc, pm_node_list prismNodeList);
 
     // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
-    std::optional<ast::ClassDef::RHS_store> desugarScopeBodyToRHSStore(std::unique_ptr<parser::Node> &scopeBody);
+    std::optional<ast::ClassDef::RHS_store> desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
+                                                                       std::unique_ptr<parser::Node> &scopeBody);
 
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
