@@ -1244,25 +1244,42 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamName);
-            auto body = methodContext.translate(defNode->body);
 
-            if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
-                // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
-                // doesn't have an explicit begin block.
-                // If that's the case, we need to check if the body contains an ensure or rescue clause, and if so,
-                // we need to elevate that node to the top level of the method definition, without the Kwbegin node to
-                // match the behavior of Sorbet's legacy parser.
-                auto kwbeginNode = parser::NodeWithExpr::cast_node<parser::Kwbegin>(body.get());
+            unique_ptr<parser::Node> body;
+            if (defNode->body != nullptr) {
+                if (PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
+                    auto beginNode = down_cast<pm_begin_node>(defNode->body);
+                    auto statements = this->translateEnsure(beginNode);
 
-                if (kwbeginNode != nullptr && kwbeginNode->stmts[0] != nullptr &&
-                    (parser::NodeWithExpr::cast_node<parser::Rescue>(kwbeginNode->stmts[0].get()) ||
-                     parser::NodeWithExpr::cast_node<parser::Ensure>(kwbeginNode->stmts[0].get()))) {
-                    if (kwbeginNode->stmts.size() == 1) {
-                        body = move(kwbeginNode->stmts[0]);
+                    // Prism uses a PM_BEGIN_NODE to model the body of a method that has a top level rescue/ensure, e.g.
+                    //
+                    //     def method_with_top_level_rescue
+                    //       "body"
+                    //     rescue
+                    //       "fallback"
+                    //     end
+                    //
+                    // This gets parsed as-if the body had an explicit begin/rescue/ensure block nested in it.
+                    //
+                    // This would cause the legacy parse tree to have an extra `parser::Kwbegin` node wrapping the body.
+                    // To match the legacy parse tree, we dig into the `beginNode` and pull out its statements,
+                    // skipping the creation of that parent `parser::Kwbegin` node.
+                    if (statements.size() == 1) {
+                        body = move(statements[0]);
                     } else {
-                        unreachable("With ensure or rescue, the body of a method definition will be either a rescue or "
-                                    "ensure node.");
+                        if (!directlyDesugar || !hasExpr(statements)) {
+                            body = make_unique<parser::Kwbegin>(location, move(statements));
+                        } else {
+                            auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
+                            auto finalExpr = move(args.back());
+                            args.pop_back();
+                            auto expr = MK::InsSeq(location, move(args), move(finalExpr));
+                            body = make_node_with_expr<parser::Kwbegin>(move(expr), location, move(statements));
+                        }
                     }
+
+                } else {
+                    body = methodContext.translate(defNode->body);
                 }
             }
 
