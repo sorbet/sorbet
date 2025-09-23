@@ -1748,21 +1748,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto kvPairs = translateKeyValuePairs(keywordHashNode->elements);
 
-            auto isKwargs = PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
-                            absl::c_all_of(kvPairs, [](const auto &node) {
-                                // Checks if the given node is a keyword hash element based on the standards of Sorbet's
-                                // legacy parser. Based on `Builder::isKeywordHashElement()`
+            auto isKwargs =
+                PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
+                absl::c_all_of(absl::MakeSpan(keywordHashNode->elements.nodes, keywordHashNode->elements.size),
+                               [](const auto *node) {
+                                   // Checks if the given node is a keyword hash element based on the standards of
+                                   // Sorbet's legacy parser. Based on `Builder::isKeywordHashElement()`
 
-                                if (parser::NodeWithExpr::isa_node<Kwsplat>(node.get())) {
-                                    return true;
-                                }
+                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) {
+                                       return true;
+                                   }
 
-                                if (parser::NodeWithExpr::isa_node<ForwardedKwrestArg>(node.get())) {
-                                    return true;
-                                }
-
-                                return false;
-                            });
+                                   return false;
+                               });
 
             return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
         }
