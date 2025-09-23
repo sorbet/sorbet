@@ -660,7 +660,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Handle `~[Integer]`, like `~42`
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
-            if (constantNameString == "~" && parser::NodeWithExpr::cast_node<parser::Integer>(receiver.get())) {
+            if (constantNameString == "~" && PM_NODE_TYPE_P(callNode->receiver, PM_INTEGER_NODE)) {
                 string valueString(sliceLocation(callNode->base.location));
 
                 if (!directlyDesugar) {
