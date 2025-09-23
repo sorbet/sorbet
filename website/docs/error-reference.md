@@ -897,26 +897,6 @@ The following directives can only appear once per `__package.rb` file:
 
 The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. It takes two keyword arguments: `min_typed_level` and `tests_min_typed_level`. For each, the valid options are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
 
-## 3730
-
-> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
-
-If a package is marked with `prelude_package`, it is not allowed to use `visible_to` annotations, as it is implicitly imported by all other non-prelude packages.
-
-```ruby
-class A < PackageSpec
-end
-
-class B < PackageSpec
-end
-
-class C < PackageSpec
-  prelude_package
-
-  visible_to B # error: The implicit import in `A` would automatically violate the visibility restrictions
-end
-```
-
 ## 3731
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.

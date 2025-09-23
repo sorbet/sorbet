@@ -1210,21 +1210,6 @@ void validatePreludePackage(const core::GlobalState &gs, core::FileRef file, Pac
             }
         }
     }
-
-    // We disallow `visible_to` annotations in prelude packages, as they're implicitly imported by all non-prelude
-    // packages.
-    for (auto &v : info.visibleTo()) {
-        if (auto e = gs.beginError(core::Loc(file, v.loc), core::errors::Packager::NoPreludeVisibleTo)) {
-            e.setHeader("Prelude package `{}` may not include `{}` annotations", info.show(gs), "visible_to");
-            e.addErrorNote("Prelude packages are implicitly imported by all other packages, which would\n"
-                           "mean that `{}` annotations would have to be added to for every package to be\n"
-                           "valid.",
-                           "visible_to");
-        }
-    }
-
-    // Ensure that there aren't any `visible_to` annotations present, as they will cause errors with all other packages.
-    info.visibleTo_.clear();
 }
 
 void validatePackage(core::Context ctx) {
@@ -1281,8 +1266,11 @@ void validatePackage(core::Context ctx) {
                 }
             }
         } else {
-            // Implicit imports of prelude packages are all added with locs that don't exist.
-            if (!i.isPrelude() && otherPkg.isPreludePackage()) {
+            // Implicit imports of prelude packages are all added with locs that don't exist. There is one exception to
+            // this rule: if the prelude package has `visible_to` annotations, we don't add it as an implicit
+            // dependency of all packages and instead rely on the normal rules for `visible_to` checking of explicit
+            // imports.
+            if (!i.isPrelude() && otherPkg.isPreludePackage() && otherPkg.visibleTo().empty()) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoExplicitPreludeImport)) {
                     e.setHeader("Prelude package `{}` may not be explicitly imported", otherPkg.show(ctx));
                 }
@@ -1409,7 +1397,11 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             rewritePackageSpec(gs, file, info);
 
             if (info.isPreludePackage()) {
-                preludePackages.emplace_back(pkgName);
+                // Prelude packages with visible_to annotations are not added as implicit dependencies to all other
+                // packages.
+                if (info.visibleTo().empty()) {
+                    preludePackages.emplace_back(pkgName);
+                }
                 validatePreludePackage(gs, file.file, info);
             }
         }
