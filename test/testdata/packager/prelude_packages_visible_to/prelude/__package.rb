@@ -5,8 +5,7 @@
 class Prelude < PackageSpec
   prelude_package
 
-  visible_to Application::A # error: Prelude package `Prelude` may not include `visible_to` annotations
-  visible_to Application::B # error: Prelude package `Prelude` may not include `visible_to` annotations
+  visible_to Application::A
 
   export Prelude::A
 end
