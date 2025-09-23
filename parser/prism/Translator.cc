@@ -890,6 +890,29 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
+            if (hasSplat || hasRestArg || hasFwdRestArg) { // f(*a) || f(*) || f(**)
+                // If we have a splat anywhere in the argument list, desugar the argument list as a single Array node,
+                // and synthesize a call to `::Magic.<callWithSplat>(receiver, method, argArray[, &blk])`
+                // The `callWithSplat` implementation (in C++) will unpack a tuple type and call into the normal
+                // call mechanism.
+
+                // unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, move(send->args));
+                // auto argsArrayExpr = translate(array);
+
+                ast::Send::ARGS_store magicSendArgs;
+                magicSendArgs.reserve(4); // TODO: reserve room for a block pass arg
+                magicSendArgs.emplace_back(move(receiverExpr));
+                magicSendArgs.emplace_back(move(methodName));
+                magicSendArgs.emplace_back(move(args));
+                magicSendArgs.emplace_back(move(kwargs));
+
+                // Desugar any call with a splat and without a block pass argument.
+                // If there's a literal block argument, that's handled here, too.
+                // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
+                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
+                                         move(sendargs), flags);
+            }
+
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
             int numPosArgs = args.size();
 
