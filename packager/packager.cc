@@ -1090,44 +1090,6 @@ void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Impo
     }
 }
 
-void validatePreludePackage(const core::GlobalState &gs, core::FileRef file, PackageInfo &info) {
-    auto &packageDB = gs.packageDB();
-
-    // Prelude packages must be in the lowest possible layer, as that's the only way to ensure that the implicit
-    // imports of them are valid.
-    auto enforceLayering = gs.packageDB().enforceLayering();
-    if (enforceLayering) {
-        if (info.layer.exists()) {
-            if (packageDB.layerIndex(info.layer) != 0) {
-                core::Loc layerLoc(file, info.locs.layer);
-                if (auto e = gs.beginError(layerLoc, core::errors::Packager::PreludeLowestLayer)) {
-                    auto layers = packageDB.layers();
-                    e.setHeader("Prelude package `{}` must be in the lowest layer, `{}`", info.show(gs),
-                                layers.front().toString(gs));
-                }
-
-                // Overwrite the invalid layer to ensure that we don't see additional errors from other packages.
-                info.layer = packageDB.layers().front();
-            }
-        }
-    }
-
-    // We disallow `visible_to` annotations in prelude packages, as they're implicitly imported by all non-prelude
-    // packages.
-    for (auto &v : info.visibleTo()) {
-        if (auto e = gs.beginError(core::Loc(file, v.loc), core::errors::Packager::NoPreludeVisibleTo)) {
-            e.setHeader("Prelude package `{}` may not include `{}` annotations", info.show(gs), "visible_to");
-            e.addErrorNote("Prelude packages are implicitly imported by all other packages, which would\n"
-                           "mean that `{}` annotations would have to be added to for every package to be\n"
-                           "valid.",
-                           "visible_to");
-        }
-    }
-
-    // Ensure that there aren't any `visible_to` annotations present, as they will cause errors with all other packages.
-    info.visibleTo_.clear();
-}
-
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
@@ -1164,7 +1126,6 @@ void validatePackage(core::Context ctx) {
 
         if (pkgIsPrelude) {
             // Prelude packages may only import other prelude packages
-            ENFORCE(!i.isPrelude(), "Prelude packages shouldn't have implicit imports");
             if (!otherPkg.isPreludePackage()) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
                     string_view import;
@@ -1179,13 +1140,6 @@ void validatePackage(core::Context ctx) {
                     }
                     e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`", pkgInfo.show(ctx), import,
                                 otherPkg.show(ctx));
-                }
-            }
-        } else {
-            // Implicit imports of prelude packages are all added with locs that don't exist.
-            if (!i.isPrelude() && otherPkg.isPreludePackage()) {
-                if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoExplicitPreludeImport)) {
-                    e.setHeader("Prelude package `{}` may not be explicitly imported", otherPkg.show(ctx));
                 }
             }
         }
@@ -1296,7 +1250,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
 
-        vector<MangledName> preludePackages;
         for (auto &file : files) {
             if (!file.file.data(gs).isPackage(gs)) {
                 continue;
@@ -1308,30 +1261,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
             auto &info = PackageInfo::from(gs, pkgName);
             rewritePackageSpec(gs, file, info);
-
-            if (info.isPreludePackage()) {
-                preludePackages.emplace_back(pkgName);
-                validatePreludePackage(gs, file.file, info);
-            }
-        }
-
-        // Now that we know the set of prelude packages, we can loop over the whole package DB and add implicit imports
-        // to the imports of the non-prelude set.
-        if (!preludePackages.empty()) {
-            for (auto pkgName : gs.packageDB().packages()) {
-                auto *info = gs.packageDB().getPackageInfoNonConst(pkgName);
-                ENFORCE(info != nullptr);
-                if (info->isPreludePackage()) {
-                    continue;
-                }
-
-                // Extend the imports with the implicit prelude imports, which can be identified by their non-existant
-                // locs.
-                auto implicitImportLoc = info->locs.declLoc;
-                info->importedPackageNames.reserve(info->importedPackageNames.size() + preludePackages.size());
-                absl::c_transform(preludePackages, back_inserter(info->importedPackageNames),
-                                  [implicitImportLoc](auto name) { return Import::prelude(name, implicitImportLoc); });
-            }
         }
     }
 }
@@ -1519,10 +1448,6 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 // errors on the fast path.
                 PackageInfo copy{info.mangledName_, info.file, info.locs.loc, info.locs.declLoc};
                 rewritePackageSpec(gs, file, copy);
-
-                if (info.isPreludePackage()) {
-                    validatePreludePackage(gs, file.file, copy);
-                }
             }
             validatePackage(ctx);
         } else {

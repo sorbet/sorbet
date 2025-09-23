@@ -47,11 +47,10 @@ std::string_view strictDependenciesLevelToString(StrictDependenciesLevel level);
 struct Import {
     MangledName mangledName;
     ImportType type;
-    bool isPrelude_;
     core::LocOffsets loc;
 
     Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), isPrelude_{false}, loc(loc) {}
+        : mangledName(mangledName), type(type), loc(loc) {}
 
     // Generate a prelude import, with the given origin.
     // NOTE: the origin must point to something to hang any errors related to the implicit import off of. Currently this
@@ -66,12 +65,6 @@ struct Import {
 
     bool isTestImport() const {
         return type != ImportType::Normal;
-    }
-
-    // Prelude imports don't correspond to an import definition in a package source, and as such their location
-    // should not be relied on for autocorrects.
-    bool isPrelude() const {
-        return this->isPrelude_;
     }
 };
 
