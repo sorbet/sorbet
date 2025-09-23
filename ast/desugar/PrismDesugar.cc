@@ -2083,36 +2083,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                      node2TreeImpl(dctx, alias->from), node2TreeImpl(dctx, alias->to));
                 result = move(res);
             },
-            [&](parser::Defined *defined) {
-                auto value = node2TreeImpl(dctx, defined->value);
-                auto loc = value.loc();
-                auto ident = cast_tree<UnresolvedIdent>(value);
-                if (ident &&
-                    (ident->kind == UnresolvedIdent::Kind::Instance || ident->kind == UnresolvedIdent::Kind::Class)) {
-                    auto methodName = ident->kind == UnresolvedIdent::Kind::Instance ? core::Names::definedInstanceVar()
-                                                                                     : core::Names::definedClassVar();
-                    auto sym = MK::Symbol(loc, ident->name);
-                    auto res = MK::Send1(loc, MK::Magic(loc), methodName, locZeroLen, move(sym));
-                    result = move(res);
-                    return;
-                }
-
-                Send::ARGS_store args;
-                while (!isa_tree<EmptyTree>(value)) {
-                    auto lit = cast_tree<UnresolvedConstantLit>(value);
-                    if (lit == nullptr) {
-                        args.clear();
-                        break;
-                    }
-                    args.emplace_back(MK::String(lit->loc, lit->cnst));
-                    value = move(lit->scope);
-                }
-                absl::c_reverse(args);
-
-                auto numPosArgs = args.size();
-                auto res = MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, move(args));
-                result = move(res);
-            },
+            [&](parser::Defined *defined) { desugaredByPrismTranslator(defined); },
             [&](parser::LineLiteral *line) { desugaredByPrismTranslator(line); },
             [&](parser::XString *xstring) {
                 auto res = MK::Send1(loc, MK::Self(loc), core::Names::backtick(), locZeroLen,
