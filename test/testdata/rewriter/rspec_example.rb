@@ -62,3 +62,17 @@ RSpec.describe("A") do
     outer_helper
   end
 end
+
+RSpec.context("B") do
+  def outer_helper; end
+
+  it "inside B" do
+    outer_helper
+  end
+
+  context("Nested, no RSpec") do
+    it "inside Nested" do
+      outer_helper
+    end
+  end
+end

@@ -88,4 +88,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
   end
+
+  class <emptyTree>::<C <context 'B'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def outer_helper<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <it 'inside B'><<todo method>>(&<blk>)
+      <self>.outer_helper()
+    end
+
+    <runtime method definition of outer_helper>
+
+    <self>.context("Nested, no RSpec") do ||
+      <self>.it("inside Nested") do ||
+        <self>.outer_helper()
+      end
+    end
+  end
 end
