@@ -81,6 +81,42 @@ bool isStringLit(const ast::ExpressionPtr &expr) {
     return false;
 }
 
+// Flattens the key/value pairs from the Kwargs Hash into the destination container.
+// If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
+template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> &kwargsHash, Container &destination) {
+    ENFORCE(kwargsHash != nullptr);
+
+    // Skip inlining the kwargs if there are any kwsplat nodes present
+    if (absl::c_any_of(kwargsHash->pairs, [](auto &node) {
+            // the parser guarantees that if we see a kwargs hash it only contains pair,
+            // kwsplat, or forwarded kwrest arg nodes
+            ENFORCE(parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
+                    parser::NodeWithExpr::isa_node<parser::Pair>(node.get()) ||
+                    parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get()));
+
+            return parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
+                   parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get());
+        })) {
+        ENFORCE(kwargsHash->hasDesugaredExpr());
+        destination.emplace_back(kwargsHash->takeDesugaredExpr());
+        return;
+    }
+
+    // Flatten the key/value pairs into the destination
+    for (auto &entry : kwargsHash->pairs) {
+        if (auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(entry.get())) {
+            ENFORCE(pair->key->hasDesugaredExpr());
+            ENFORCE(pair->value->hasDesugaredExpr());
+            destination.emplace_back(pair->key->takeDesugaredExpr());
+            destination.emplace_back(pair->value->takeDesugaredExpr());
+        } else {
+            Exception::raise("Unhandled case");
+        }
+    }
+
+    return;
+}
+
 // Helper function to merge multiple string literals into one
 ast::ExpressionPtr mergeStrings(core::MutableContext ctx, core::LocOffsets loc,
                                 absl::InlinedVector<ast::ExpressionPtr, 4> stringsAccumulated) {
@@ -659,8 +695,38 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                               PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
             auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*rest)`
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
+            unique_ptr<parser::Hash> kwargsHash;
+            auto kwargsHashHasExpr = true; // true if we can directly desugar the kwargs Hash, if any.
             if (auto *prismArgsNode = callNode->arguments) {
-                for (auto &arg : absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size)) {
+                auto prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
+
+                // Pop the Kwargs Hash off the end of the arguments, if there is one.
+                if (!prismArgs.empty() && PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
+                    auto h = translate(prismArgs.back());
+                    auto hash = unique_ptr<parser::Hash>(reinterpret_cast<parser::Hash *>(h.release()));
+                    ENFORCE(hash != nullptr);
+
+                    if (hash->kwargs) {
+                        kwargsHash = move(hash);
+
+                        // Remove the kwargsHash from the arguments Span, so it's not revisited by the `for` loop below.
+                        prismArgs.remove_suffix(1);
+
+                        kwargsHashHasExpr = absl::c_all_of(kwargsHash->pairs, [](auto &node) {
+                            // Only support kwarg Hashes that only contain pairs for now.
+                            // TODO: Add support for Kwsplat and ForwardedKwrestArg
+
+                            auto pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get());
+                            return pair != nullptr && hasExpr(pair->key, pair->value);
+                        });
+                    }
+                }
+
+                // TODO: reserve size for kwargs Hash keys and values, if needed.
+                // TODO: reserve size for block, if needed.
+                args.reserve(prismArgs.size());
+
+                for (auto &arg : prismArgs) {
                     switch (PM_NODE_TYPE(arg)) {
                         case PM_SPLAT_NODE: {
                             auto splatNode = down_cast<pm_splat_node>(arg);
@@ -719,12 +785,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             // Regular send, e.g. `a.b`
 
-            auto hasKwargsHash = callNode->arguments != nullptr &&
-                                 PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_KEYWORDS);
-
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
-            auto supportedCallType = constantNameString != "block_given?" && !hasKwargsHash && !hasFwdArgs &&
+            auto supportedCallType = constantNameString != "block_given?" && kwargsHashHasExpr && !hasFwdArgs &&
                                      !hasFwdRestArg && !hasSplat && hasExpr(receiver, args);
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
@@ -856,13 +919,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
                 }
             } else {
-                // If there's no block, we support the call
+                // There is no block, so we support direct desugaring of this method call.
                 supportedBlock = true;
             }
 
             supportedCallType &= supportedBlock;
 
             if (!directlyDesugar || !supportedCallType) {
+                // We previously popped the kwargs Hash off, in the hopes that we can directly desugar it.
+                // Turns out we can't, so let's put it back (and in the correct order).
+                if (kwargsHash) {
+                    args.emplace_back(move(kwargsHash));
+                }
+
                 if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
                     // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
                     // but not a literal block with `{ ... }` or `do ... end`
@@ -904,7 +973,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
-            int numPosArgs = args.size() - (hasKwargsHash ? 1 : 0);
+            // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
+            int numPosArgs = args.size();
 
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) && !blockPassArgIsSymbol) {
                 // Special handling for non-Symbol block pass args, like `a.map(&block)`
@@ -923,7 +993,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 numPosArgs += 3;
 
                 for (auto &arg : args) {
-                    magicSendArgs.emplace_back(arg->takeDesugaredExpr());
+                    auto x = arg->takeDesugaredExpr();
+                    ENFORCE(x != nullptr);
+                    magicSendArgs.emplace_back(move(x));
+                }
+
+                if (kwargsHash) {
+                    flattenKwargs(kwargsHash, magicSendArgs);
+                    ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, magicSendArgs);
                 }
 
                 if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
@@ -939,9 +1016,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             ast::Send::ARGS_store sendArgs{};
-            sendArgs.reserve(args.size()); // TODO: reserve size for block, if needed.
+            // TODO: reserve size for kwargs Hash keys and values, if needed.
+            // TODO: reserve size for the block, if needed.
+            sendArgs.reserve(args.size());
             for (auto &arg : args) {
                 sendArgs.emplace_back(arg->takeDesugaredExpr());
+            }
+
+            if (kwargsHash) {
+                flattenKwargs(kwargsHash, sendArgs);
+                ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, sendArgs);
+
+                // Add the kwargs Hash back into parse tree, so that it's correct, too.
+                // This doesn't effect the desugared expression.
+                args.emplace_back(move(kwargsHash));
             }
 
             if (prismBlock != nullptr) {
@@ -974,6 +1062,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             auto expr = MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
+
             sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
 
             if (prismBlock != nullptr) {
