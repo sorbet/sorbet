@@ -18,6 +18,48 @@ class PackageInfo;
 
 namespace sorbet::test {
 
+class PackageTextBuilder {
+    std::string name;
+    std::string strictDeps;
+    std::string layer;
+    std::vector<std::string> imports;
+    std::vector<std::string> testImports;
+    bool preludePackage;
+
+public:
+    PackageTextBuilder &withName(std::string name) {
+        this->name = std::move(name);
+        return *this;
+    }
+
+    PackageTextBuilder &withStrictDeps(std::string strictDeps) {
+        this->strictDeps = std::move(strictDeps);
+        return *this;
+    }
+
+    PackageTextBuilder &withLayer(std::string layer) {
+        this->layer = std::move(layer);
+        return *this;
+    }
+
+    PackageTextBuilder &withImports(std::vector<std::string> imports) {
+        this->imports = std::move(imports);
+        return *this;
+    }
+
+    PackageTextBuilder &withTestImports(std::vector<std::string> testImports) {
+        this->testImports = std::move(testImports);
+        return *this;
+    }
+
+    PackageTextBuilder &withPreludePackage() {
+        this->preludePackage = true;
+        return *this;
+    }
+
+    std::string build();
+};
+
 // Helpers for writing tests about the package DB.
 class PackageHelpers {
 public:
