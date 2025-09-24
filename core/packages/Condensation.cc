@@ -30,69 +30,83 @@ struct TraversalBuilder {
         result.packages.reserve(gs.packageDB().packages().size());
     }
 
+    struct Roots {
+        // All the prelude package SCCs.
+        vector<uint32_t> prelude;
+
+        // The roots of the rest of the graph.
+        vector<uint32_t> roots;
+    };
+
     // Return the set of all root packages, for the first stratum in the traversal.
-    vector<uint32_t> roots() {
-        vector<uint32_t> frontier;
+    Roots roots() {
+        Roots result;
 
         // Seed the needed imports for the traversal from the roots.
         for (auto &node : this->nodes) {
-            this->remainingImports[node.id] = node.imports.size();
+            // Prelude packages behave a little differently from normal packages: we put them all into the first stratum
+            // regardless of their imports. This has interesting effects on the `remainingImports` and `backEdges`
+            // vectors that we track in the builder:
+            // 1. `remainingImports` must be set to `0` to indicate that all imports have been satisfied. This is true,
+            //    as all prelude packages will be processed in the same stratum.
+            // 2. `backEdges` must not be populated for the imports of prelude packages. As prelude packages may only
+            //    import other prelude packages populating `backEdges` would cause prelude packages to be queued into
+            //    the next stratum. Skipping the imports of prelude packages when we're populating `backEdges` ensures
+            //    that we don't accidentally requeue a prelude package for a future stratum.
+            if (node.isPrelude) {
+                // We collect all prelude nodes here, as they will all show up in the first stratum if there are any.
+                result.prelude.emplace_back(node.id);
+                this->remainingImports[node.id] = 0;
+            } else {
+                auto numImports = node.imports.size();
+                this->remainingImports[node.id] = numImports;
+                if (numImports == 0) {
+                    result.roots.emplace_back(node.id);
+                }
 
-            if (node.imports.empty()) {
-                frontier.emplace_back(node.id);
-            }
-
-            for (auto imp : node.imports) {
-                this->backEdges[imp].push_back(node.id);
+                for (auto imp : node.imports) {
+                    this->backEdges[imp].push_back(node.id);
+                }
             }
         }
 
-        return frontier;
+        return result;
     }
 
-    void traverseFrom(absl::Span<const uint32_t> roots) {
-        vector<uint32_t> frontier(roots.begin(), roots.end());
-        vector<uint32_t> next;
+    // Record a single stratum by processing each SCC id, marking the imports of those ids as satisfied. If any
+    // dependent package no longer has any outstanding imports, its id will be added to `next`.
+    void recordStratum(absl::Span<const uint32_t> stratum, vector<uint32_t> &next) {
+        stratumLengths.emplace_back(stratum.size());
+        ENFORCE(!stratum.empty());
 
-        while (!frontier.empty()) {
-            next.clear();
+        for (auto sccId : stratum) {
+            auto &node = this->nodes[sccId];
+            ENFORCE(this->remainingImports[node.id] == 0);
 
-            stratumLengths.emplace_back(frontier.size());
+            // Insert the members of the SCC into the packages vector.
+            absl::c_copy(node.members, back_inserter(this->result.packages));
 
-            for (auto sccId : frontier) {
-                auto &node = this->nodes[sccId];
-                ENFORCE(remainingImports[node.id] == 0);
+            auto &scc = this->result.sccs.emplace_back();
+            scc.isTest = node.isTest;
+            this->sccLengths.emplace_back(node.members.size());
 
-                // Insert the members of the SCC into the packages vector.
-                absl::c_copy(node.members, back_inserter(result.packages));
+            // Queue up the dependents in the next frontier, decrementing their imports by one
+            for (auto dep : this->backEdges[sccId]) {
+                auto &remaining = this->remainingImports[dep];
 
-                auto &scc = result.sccs.emplace_back();
-                scc.isTest = node.isTest;
-                sccLengths.emplace_back(node.members.size());
+                // Having a `remaining` value of <= 0 at this point implies that the scc should have been in this or a
+                // previous stratum already. This would only be possible if there were a cycle in the condensation
+                // graph, and it should be a DAG by construction.
+                ENFORCE(remaining > 0);
+                remaining -= 1;
 
-                // Queue up the dependents in the next frontier, decrementing their imports by one
-                for (auto dep : backEdges[sccId]) {
-                    auto &remaining = remainingImports[dep];
-
-                    // Having a `remaining` value of <= 0 at this point implies that the scc should have been in the
-                    // frontier already. This would only be possible if there were a cycle in the condensation graph,
-                    // and it should be a DAG by construction.
-                    ENFORCE(remaining > 0);
-                    remaining -= 1;
-
-                    // `remaining` should never go below zero (as edges are unique in the condensation graph), but as a
-                    // defensive measure, we keep it signed and check for `<= 0` instead of `== 0` to guard against that
-                    // case at runtime.
-                    if (remaining <= 0) {
-                        next.emplace_back(dep);
-                    }
+                // `remaining` should never go below zero (as edges are unique in the condensation graph), but as a
+                // defensive measure, we keep it signed and check for `<= 0` instead of `== 0` to guard against that
+                // case at runtime.
+                if (remaining <= 0) {
+                    next.emplace_back(dep);
                 }
             }
-
-            // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
-            // loop. Morally this is `frontier = next`, but we swap and clear instead to avoid any ambiguity about
-            // reallocations.
-            swap(frontier, next);
         }
     }
 
@@ -124,10 +138,28 @@ struct TraversalBuilder {
 const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs) const {
     TraversalBuilder builder(gs, this->nodes_);
 
-    // The SCCs that have no imports of their own.
-    auto roots = builder.roots();
+    // All prelude package SCCs, and the set of non-prelude package SCCs that have no imports.
+    auto [prelude, roots] = builder.roots();
 
-    builder.traverseFrom(roots);
+    if (!prelude.empty()) {
+        // Record a single stratum for all prelude SCCs, emitting any packages whose imports were satisfied by the
+        // prelude set to the roots.
+        builder.recordStratum(prelude, roots);
+    }
+
+    // Insert the non-prelude SCCs that are ready but were skipped into the frontier, so that we process all of the
+    // non-prelude nodes with no outstanding dependencies in one stratum.
+    vector<uint32_t> next;
+    while (!roots.empty()) {
+        next.clear();
+
+        builder.recordStratum(roots, next);
+
+        // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
+        // loop. Morally this is `roots = next`, but we swap and clear instead to avoid any ambiguity about
+        // reallocations.
+        swap(roots, next);
+    }
 
     return builder.build();
 }
