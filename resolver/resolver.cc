@@ -3235,14 +3235,14 @@ private:
     static bool usesArgumentForwardingSyntax(core::Context ctx, core::MethodData methodInfo, const ast::MethodDef &mdef,
                                              bool isOverloaded) {
         // To match, the definition must have been desugared with at least 3 parameters named
-        // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
+        // `<rest>`, `<fwd-kwargs>` and `<fwd-block>`
         auto len = methodInfo->parameters.size();
         if (len < 3) {
             return false;
         }
 
         auto l1 = getArgLocal(ctx, methodInfo->parameters[len - 3], mdef, len - 3, isOverloaded)->localVariable;
-        if (l1._name != core::Names::fwdArgs()) {
+        if (l1._name != core::Names::restParam()) {
             return false;
         }
 

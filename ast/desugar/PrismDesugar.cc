@@ -78,7 +78,7 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
                 // we desugar (m, n, ...) into (m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
 
                 // add `*<fwd-args>`
-                params.emplace_back(MK::RestParam(fargs->loc, MK::Local(fargs->loc, core::Names::fwdArgs())));
+                params.emplace_back(MK::RestParam(fargs->loc, MK::Local(fargs->loc, core::Names::restParam())));
 
                 // add `**<fwd-kwargs>`
                 params.emplace_back(MK::RestParam(fargs->loc, MK::KeywordArg(fargs->loc, core::Names::fwdKwargs())));
@@ -757,7 +757,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     auto args = node2TreeImpl(dctx, array);
 
                     if (hasFwdArgs) {
-                        auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
+                        auto fwdArgs = MK::Local(loc, core::Names::restParam());
                         auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), locZeroLen);
                         auto argsConcat =
                             MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(argsSplat));
@@ -775,7 +775,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                         args = move(argsConcat);
                     } else if (hasFwdRestArg) {
-                        auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
+                        auto fwdArgs = MK::Local(loc, core::Names::restParam());
                         auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), locZeroLen);
                         auto tUnsafe = MK::Unsafe(loc, move(argsSplat));
                         auto argsConcat = MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(tUnsafe));

@@ -2844,10 +2844,10 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
             // TODO: implement logic for `**nil` args
         } else if (parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get())) { // `def foo(...)`
             // Desugar `def foo(m, n, ...)` into:
-            // `def foo(m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)`
+            // `def foo(m, n, *<rest>, **<fwd-kwargs>, &<fwd-block>)`
 
-            // add `*<fwd-args>`
-            paramsStore.emplace_back(MK::RestParam(loc, MK::Local(loc, core::Names::fwdArgs())));
+            // add `*<rest>`
+            paramsStore.emplace_back(MK::RestParam(loc, MK::Local(loc, core::Names::restParam())));
 
             // add `**<fwd-kwargs>`
             paramsStore.emplace_back(MK::RestParam(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));

@@ -96,7 +96,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <U <fwd-args>>
+                      name = <U <rest>>
                     }
                     fun = <U to_a>
                     block = nullptr

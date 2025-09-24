@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def start_dotdotdot<<todo method>>(**, *<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+  def start_dotdotdot<<todo method>>(**, *<rest>, *<fwd-kwargs>:, &<fwd-block>)
     <emptyTree>
   end
 end

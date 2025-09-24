@@ -12,7 +12,7 @@ ClassDef{
       name = <U foo><<U <todo method>>>
       params = [RestParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <fwd-args>>
+          name = <U <rest>>
         } }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <fwd-kwargs>>
@@ -48,7 +48,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <U <fwd-args>>
+                    name = <U <rest>>
                   }
                   fun = <U to_a>
                   block = nullptr
