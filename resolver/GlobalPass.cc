@@ -276,15 +276,13 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int classCount = 0;
     int singletonClassCount = 0;
     int moduleCount = 0;
-    for (size_t i = 1; i < gs.methodsUsed(); ++i) {
-        auto ref = core::MethodRef(gs, i);
+    for (const auto ref : gs.newSymbols().methodRefs(gs)) {
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             methodCount++;
         }
     }
-    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto ref = core::ClassOrModuleRef(gs, i);
+    for (auto ref : gs.newSymbols().classOrModuleRefs(gs)) {
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
@@ -293,8 +291,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     }
 
     auto n = gs.classAndModulesUsed();
-    for (int i = 1; i < n; ++i) {
-        auto ref = core::ClassOrModuleRef(gs, i);
+    for (auto ref : gs.newSymbols().classOrModuleRefs(gs)) {
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (ref.data(gs)->isClass()) {
@@ -364,9 +361,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
     {
         Timer timer(gs.tracer(), "resolver.mix_in_class_methods");
 
-        for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
-            auto sym = core::ClassOrModuleRef(gs, i);
-
+        for (auto sym : gs.newSymbols().classOrModuleRefs(gs)) {
             if (sym.data(gs)->flags.isLinearizationComputed) {
                 // Without this, the addMixin below for mixedInClassMethods is not idempotent on the
                 // fast path, and will accidentally mix a `ClassMethods` module into all children (not
@@ -424,8 +419,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
         gs.computeLinearization();
 
         Timer timer(gs.tracer(), "resolver.resolve_type_members");
-        for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-            auto sym = core::ClassOrModuleRef(gs, i);
+        for (auto sym : gs.newSymbols().classOrModuleRefs(gs)) {
             resolveTypeMembers(gs, sym, typeAliases, resolved);
 
             if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
