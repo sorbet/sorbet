@@ -4,4 +4,4 @@ s(:def, :f,
       s(:int, "1")),
     s(:restparam, :r),
     s(:param, :p),
-    s(:blockarg, :b)), nil)
+    s(:blockparam, :b)), nil)

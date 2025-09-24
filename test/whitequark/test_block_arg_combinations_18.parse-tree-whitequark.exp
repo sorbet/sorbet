@@ -7,4 +7,4 @@ s(:block,
     s(:optparam, :o1,
       s(:int, "2")),
     s(:restparam, :r),
-    s(:blockarg, :b)), nil)
+    s(:blockparam, :b)), nil)
