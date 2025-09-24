@@ -251,7 +251,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
 
 }; // namespace
 
-void Resolver::finalizeAncestors(core::GlobalState &gs) {
+void Resolver::finalizeAncestors(core::GlobalState &gs, const core::SymbolTableOffsets &offsets) {
     Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
@@ -334,7 +334,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     prodCounterAdd("types.input.methods.total", methodCount);
 }
 
-void Resolver::finalizeSymbols(core::GlobalState &gs,
+void Resolver::finalizeSymbols(core::GlobalState &gs, const core::SymbolTableOffsets &offsets,
                                optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
     Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,

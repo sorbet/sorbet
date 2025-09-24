@@ -441,6 +441,23 @@ private:
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
 
+// A snapshot of the size of all of GlobalState's symbol tables at a point in time.
+class SymbolTableOffsets {
+public:
+    unsigned int classAndModulesOffset = 1;
+    unsigned int methodsOffset = 1;
+    unsigned int fieldsOffset = 1;
+    unsigned int typeMembersOffset = 1;
+    unsigned int typeArgumentsOffset = 1;
+
+    SymbolTableOffsets() = default;
+
+    explicit SymbolTableOffsets(const GlobalState &gs)
+        : classAndModulesOffset{gs.classAndModulesUsed()}, methodsOffset{gs.methodsUsed()},
+          fieldsOffset{gs.fieldsUsed()}, typeMembersOffset{gs.typeMembersUsed()},
+          typeArgumentsOffset{gs.typeArgumentsUsed()} {}
+};
+
 } // namespace sorbet::core
 
 #endif // SORBET_GLOBAL_STATE_H

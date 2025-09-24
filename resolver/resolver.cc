@@ -162,7 +162,7 @@ private:
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
     struct AncestorResolutionItem {
@@ -3944,7 +3944,8 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
 
 } // namespace
 
-ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
+ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
+                                          const core::SymbolTableOffsets &offsets) {
     const auto &epochManager = *gs.epochManager;
     {
         auto result = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
@@ -3953,12 +3954,12 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
         }
         trees = std::move(result.result());
     }
-    finalizeAncestors(gs);
+    finalizeAncestors(gs, offsets);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
     auto computeAllSymbols = nullopt;
-    finalizeSymbols(gs, computeAllSymbols);
+    finalizeSymbols(gs, offsets, computeAllSymbols);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
@@ -3995,7 +3996,8 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     // If we had a faster/incremental way to do finalizeSymbols, we could maybe start
     // unconditionally finalizing symbols again, and then the above note about lineraization would apply.
     if (ranIncrementalNamer) {
-        Resolver::finalizeSymbols(gs, symbolsToRecompute);
+        core::SymbolTableOffsets emptyOffsets;
+        Resolver::finalizeSymbols(gs, emptyOffsets, symbolsToRecompute);
     }
     auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, symbolsToRecompute);
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);

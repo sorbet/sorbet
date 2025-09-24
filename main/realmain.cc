@@ -602,7 +602,10 @@ int realmain(int argc, char *argv[]) {
         // The rest of the pipeline proceeds by strata in the package condensation graph. When stripe-packages is not
         // enabled, everything ends up in one big stratum.
         vector<ast::ParsedFile> stratumFiles;
+        core::SymbolTableOffsets offsets;
         for (auto &stratum : pipeline::computePackageStrata(*gs, indexed, inputFilesSpan, opts)) {
+            offsets = core::SymbolTableOffsets(*gs);
+
             stratumFiles.clear();
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
 
@@ -649,7 +652,7 @@ int realmain(int argc, char *argv[]) {
             if (gs->cacheSensitiveOptions.runningUnderAutogen) {
                 runAutogen(*gs, opts, *workers, stratumFiles);
             } else {
-                stratumFiles = move(pipeline::resolve(*gs, move(stratumFiles), opts, *workers).result());
+                stratumFiles = move(pipeline::resolve(*gs, offsets, move(stratumFiles), opts, *workers).result());
                 if (gs->hadCriticalError()) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }

@@ -43,7 +43,8 @@ void processSource(core::GlobalState &cb, string str) {
     core::FoundDefHashes foundHashes; // compute this just for test coverage
     auto cancelled = namer::Namer::run(cb, absl::Span<ast::ParsedFile>(trees), *workers, &foundHashes);
     ENFORCE(!cancelled);
-    auto resolved = resolver::Resolver::run(cb, move(trees), *workers);
+    core::SymbolTableOffsets offsets;
+    auto resolved = resolver::Resolver::run(cb, move(trees), *workers, offsets);
     for (auto &tree : resolved.result()) {
         sorbet::core::MutableContext ctx(cb, core::Symbols::root(), tree.file);
         tree = class_flatten::runOne(ctx, move(tree));

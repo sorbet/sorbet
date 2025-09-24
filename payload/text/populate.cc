@@ -33,7 +33,8 @@ void populateRBIsInto(core::GlobalState &gs) {
     // '[0].to_set' will typecheck (using text-based payload) but never calculate hashes for the
     // payload files (because neither `--lsp` nor `--store-state` was passed).
     auto foundMethodHashes = nullptr;
-    realmain::pipeline::nameAndResolve(gs, move(indexed.result()), emptyOpts, *workers, foundMethodHashes);
+    realmain::pipeline::nameAndResolve(gs, core::SymbolTableOffsets{}, move(indexed.result()), emptyOpts, *workers,
+                                       foundMethodHashes);
     // ^ result is thrown away
     gs.ensureCleanStrings = false;
 }
