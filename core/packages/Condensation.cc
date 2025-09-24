@@ -13,94 +13,123 @@ Condensation::Node &Condensation::pushNode(ImportType type) {
     return node;
 }
 
-const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs) const {
-    Traversal result;
+namespace {
 
-    // The nodes we're currently exploring, and will explore on the next iteration.
-    vector<uint32_t> frontier;
-    vector<uint32_t> next;
-
-    vector<int> remainingImports(this->nodes_.size(), 0);
-    vector<vector<uint32_t>> backEdges(this->nodes_.size());
-
-    // Seed the needed imports for the traversal from the roots.
-    for (auto &node : this->nodes_) {
-        remainingImports[node.id] = node.imports.size();
-
-        if (node.imports.empty()) {
-            frontier.emplace_back(node.id);
-        }
-
-        for (auto imp : node.imports) {
-            backEdges[imp].push_back(node.id);
-        }
-    }
-
-    result.packages.reserve(2 * gs.packageDB().packages().size());
+struct TraversalBuilder {
+    absl::Span<const Condensation::Node> nodes;
+    vector<uint32_t> remainingImports;
+    vector<vector<uint32_t>> backEdges;
 
     vector<uint32_t> sccLengths;
     vector<uint32_t> stratumLengths;
 
-    while (!frontier.empty()) {
-        next.clear();
+    Condensation::Traversal result;
 
-        stratumLengths.emplace_back(frontier.size());
+    TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes)
+        : nodes{nodes}, remainingImports(this->nodes.size(), 0), backEdges(this->nodes.size()) {
+        result.packages.reserve(gs.packageDB().packages().size());
+    }
 
-        for (auto sccId : frontier) {
-            auto &node = this->nodes_[sccId];
-            ENFORCE(remainingImports[node.id] == 0);
+    // Return the set of all root packages, for the first stratum in the traversal.
+    vector<uint32_t> roots() {
+        vector<uint32_t> frontier;
 
-            // Insert the members of the SCC into the packages vector.
-            absl::c_copy(node.members, back_inserter(result.packages));
+        // Seed the needed imports for the traversal from the roots.
+        for (auto &node : this->nodes) {
+            this->remainingImports[node.id] = node.imports.size();
 
-            auto &scc = result.sccs.emplace_back();
-            scc.isTest = node.isTest;
-            sccLengths.emplace_back(node.members.size());
+            if (node.imports.empty()) {
+                frontier.emplace_back(node.id);
+            }
 
-            // Queue up the dependents in the next frontier, decrementing their imports by one
-            for (auto dep : backEdges[sccId]) {
-                auto &remaining = remainingImports[dep];
-
-                // Having a `remaining` value of <= 0 at this point implies that the scc should have been in the
-                // frontier already. This would only be possible if there were a cycle in the condensation graph, and
-                // it should be a DAG by construction.
-                ENFORCE(remaining > 0);
-                remaining -= 1;
-
-                // `remaining` should never go below zero (as edges are unique in the condensation graph), but as a
-                // defensive measure, we keep it signed and check for `<= 0` instead of `== 0` to guard against that
-                // case at runtime.
-                if (remaining <= 0) {
-                    next.emplace_back(dep);
-                }
+            for (auto imp : node.imports) {
+                this->backEdges[imp].push_back(node.id);
             }
         }
 
-        // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
-        // loop. Morally this is `frontier = next`, but we swap and clear instead to avoid any ambiguity about
-        // reallocations.
-        swap(frontier, next);
+        return frontier;
     }
 
-    // Fill in the scc member spans
-    ENFORCE(result.sccs.size() == sccLengths.size());
-    int i = -1;
-    size_t offset = 0;
-    for (auto length : sccLengths) {
-        i++;
-        result.sccs[i].members = absl::MakeSpan(result.packages).subspan(offset, length);
-        offset += length;
+    void traverseFrom(absl::Span<const uint32_t> roots) {
+        vector<uint32_t> frontier(roots.begin(), roots.end());
+        vector<uint32_t> next;
+
+        while (!frontier.empty()) {
+            next.clear();
+
+            stratumLengths.emplace_back(frontier.size());
+
+            for (auto sccId : frontier) {
+                auto &node = this->nodes[sccId];
+                ENFORCE(remainingImports[node.id] == 0);
+
+                // Insert the members of the SCC into the packages vector.
+                absl::c_copy(node.members, back_inserter(result.packages));
+
+                auto &scc = result.sccs.emplace_back();
+                scc.isTest = node.isTest;
+                sccLengths.emplace_back(node.members.size());
+
+                // Queue up the dependents in the next frontier, decrementing their imports by one
+                for (auto dep : backEdges[sccId]) {
+                    auto &remaining = remainingImports[dep];
+
+                    // Having a `remaining` value of <= 0 at this point implies that the scc should have been in the
+                    // frontier already. This would only be possible if there were a cycle in the condensation graph,
+                    // and it should be a DAG by construction.
+                    ENFORCE(remaining > 0);
+                    remaining -= 1;
+
+                    // `remaining` should never go below zero (as edges are unique in the condensation graph), but as a
+                    // defensive measure, we keep it signed and check for `<= 0` instead of `== 0` to guard against that
+                    // case at runtime.
+                    if (remaining <= 0) {
+                        next.emplace_back(dep);
+                    }
+                }
+            }
+
+            // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
+            // loop. Morally this is `frontier = next`, but we swap and clear instead to avoid any ambiguity about
+            // reallocations.
+            swap(frontier, next);
+        }
     }
 
-    // Fill in the stratum spans, now that the scc vector is fully defined
-    result.strata.reserve(stratumLengths.size());
-    offset = 0;
-    for (auto length : stratumLengths) {
-        result.strata.emplace_back(absl::MakeSpan(result.sccs).subspan(offset, length));
-        offset += length;
-    }
+    Condensation::Traversal build() {
+        // Fill in the scc member spans
+        ENFORCE(this->result.sccs.size() == this->sccLengths.size());
+        int i = -1;
+        size_t offset = 0;
+        for (auto length : this->sccLengths) {
+            i++;
+            this->result.sccs[i].members = absl::MakeSpan(this->result.packages).subspan(offset, length);
+            offset += length;
+        }
 
-    return result;
+        // Fill in the stratum spans, now that the scc vector is fully defined
+        this->result.strata.reserve(this->stratumLengths.size());
+        offset = 0;
+        for (auto length : this->stratumLengths) {
+            this->result.strata.emplace_back(absl::MakeSpan(this->result.sccs).subspan(offset, length));
+            offset += length;
+        }
+
+        return move(this->result);
+    }
+};
+
+} // namespace
+
+const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs) const {
+    TraversalBuilder builder(gs, this->nodes_);
+
+    // The SCCs that have no imports of their own.
+    auto roots = builder.roots();
+
+    builder.traverseFrom(roots);
+
+    return builder.build();
 }
 
 UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
