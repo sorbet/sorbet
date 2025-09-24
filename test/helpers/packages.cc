@@ -1,7 +1,6 @@
 #include "test/helpers/packages.h"
 
 #include "ast/desugar/Desugar.h"
-#include "common/strings/formatting.h"
 #include "core/FileRef.h"
 #include "core/GlobalState.h"
 #include "core/Unfreeze.h"
@@ -21,21 +20,43 @@ const vector<string> PackageHelpers::NO_LAYERS = {};
 const vector<string> PackageHelpers::LAYERS_LIB_APP = {"lib", "app"};
 const vector<string> PackageHelpers::LAYERS_UTIL_LIB_APP = {"util", "lib", "app"};
 
+string PackageTextBuilder::build() {
+    string out = fmt::format("class {} < PackageSpec\n", this->name);
+
+    if (this->preludePackage) {
+        fmt::format_to(back_inserter(out), "  prelude_package\n");
+    }
+
+    if (!this->strictDeps.empty()) {
+        fmt::format_to(back_inserter(out), "  strict_dependencies '{}'\n", this->strictDeps);
+    }
+
+    if (!this->layer.empty()) {
+        fmt::format_to(back_inserter(out), "  layer '{}'\n", this->layer);
+    }
+
+    for (auto &i : this->imports) {
+        fmt::format_to(back_inserter(out), "  import {}\n", i);
+    }
+
+    for (auto &i : this->testImports) {
+        fmt::format_to(back_inserter(out), "  test_import {}\n", i);
+    }
+
+    fmt::format_to(back_inserter(out), "end\n");
+
+    return out;
+}
+
 string PackageHelpers::makePackageRB(string name, string strictDeps, string layer, vector<string> imports,
                                      vector<string> testImports) {
-    auto importList =
-        fmt::map_join(imports, "", [&](const auto &import) { return fmt::format("  import {}\n", import); });
-
-    auto testImportList = fmt::map_join(
-        testImports, "", [&](const auto &testImport) { return fmt::format("  test_import {}\n", testImport); });
-
-    return fmt::format("class {} < PackageSpec\n"
-                       "  strict_dependencies '{}'\n"
-                       "  layer '{}'\n"
-                       "{}"
-                       "{}"
-                       "end",
-                       name, strictDeps, layer, importList, testImportList);
+    return PackageTextBuilder()
+        .withName(move(name))
+        .withStrictDeps(move(strictDeps))
+        .withLayer(move(layer))
+        .withImports(move(imports))
+        .withTestImports(move(testImports))
+        .build();
 }
 
 void PackageHelpers::makeDefaultPackagerGlobalState(core::GlobalState &gs, const vector<string> &packagerLayers) {
