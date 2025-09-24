@@ -1529,7 +1529,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr res = MK::KeywordArg(loc, arg->name);
                 result = move(res);
             },
-            [&](parser::Blockarg *arg) {
+            [&](parser::BlockParam *arg) {
                 ExpressionPtr res = MK::BlockArg(loc, MK::Local(loc, arg->name));
                 result = move(res);
             },

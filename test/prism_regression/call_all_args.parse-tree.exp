@@ -139,7 +139,7 @@ Begin {
           Kwarg {
             name = <U f>
           }
-          Blockarg {
+          BlockParam {
             name = <U block>
           }
         ]
@@ -224,7 +224,7 @@ Begin {
           Kwarg {
             name = <U f>
           }
-          Blockarg {
+          BlockParam {
             name = <U block>
           }
         ]

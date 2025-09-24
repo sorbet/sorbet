@@ -95,10 +95,10 @@ NodeDef nodes[] = {
         "block",
         vector<FieldDef>({{"send", FieldType::Node}, {"params", FieldType::Node}, {"body", FieldType::Node}}),
     },
-    // Wraps a `&foo` argument in an argument list
+    // Wraps a `&foo` parameter in a parameter list
     {
-        "Blockarg",
-        "blockarg",
+        "BlockParam",
+        "blockparam",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
     //  e.g. map(&:token)

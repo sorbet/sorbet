@@ -59,7 +59,7 @@ Begin {
           Kwarg {
             name = <U kwarg>
           }
-          Blockarg {
+          BlockParam {
             name = <U block>
           }
         ]
@@ -83,7 +83,7 @@ Begin {
           Kwarg {
             name = <U kwarg>
           }
-          Blockarg {
+          BlockParam {
             name = <U block>
           }
         ]

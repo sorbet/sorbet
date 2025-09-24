@@ -582,7 +582,7 @@ public:
             nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
         }
 
-        return make_unique<Blockarg>(loc, nm);
+        return make_unique<BlockParam>(loc, nm);
     }
 
     unique_ptr<Node> callLambda(const token *lambda) {
@@ -1762,7 +1762,7 @@ public:
                 hasDuplicateParam(optParam->name, optParam->loc, map);
             } else if (auto *restParam = parser::cast_node<RestParam>(thisParam.get())) {
                 hasDuplicateParam(restParam->name, restParam->loc, map);
-            } else if (auto *blockarg = parser::cast_node<Blockarg>(thisParam.get())) {
+            } else if (auto *blockarg = parser::cast_node<BlockParam>(thisParam.get())) {
                 hasDuplicateParam(blockarg->name, blockarg->loc, map);
             } else if (auto *kwarg = parser::cast_node<Kwarg>(thisParam.get())) {
                 if (hasDuplicateParam(kwarg->name, kwarg->loc, map)) {

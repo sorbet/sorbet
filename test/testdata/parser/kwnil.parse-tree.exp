@@ -67,7 +67,7 @@ Begin {
         params = [
           Kwnilarg {
           }
-          Blockarg {
+          BlockParam {
             name = <U blk>
           }
         ]
@@ -89,7 +89,7 @@ Begin {
           }
           Kwnilarg {
           }
-          Blockarg {
+          BlockParam {
             name = <U blk>
           }
         ]
@@ -111,7 +111,7 @@ Begin {
           }
           Kwnilarg {
           }
-          Blockarg {
+          BlockParam {
             name = <U blk>
           }
         ]

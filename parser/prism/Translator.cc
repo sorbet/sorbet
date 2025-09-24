@@ -2794,7 +2794,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
 
         auto blockParamExpr = MK::BlockArg(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
         auto blockParamNode =
-            make_node_with_expr<parser::Blockarg>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
+            make_node_with_expr<parser::BlockParam>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
 
         params.emplace_back(move(blockParamNode));
     } else {
