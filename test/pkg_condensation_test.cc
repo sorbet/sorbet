@@ -232,4 +232,88 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     }
 }
 
+TEST_CASE("Condensation Graph - Two prelude packages, two normal packages") {
+    core::GlobalState gs(errorQueue);
+    PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
+
+    auto parsedFiles = PackageHelpers::enterPackages(
+        gs,
+        {
+            {"prelude/a/__package.rb", PackageTextBuilder()
+                                           .withName("Prelude::A")
+                                           .withStrictDeps("layered")
+                                           .withLayer("lib")
+                                           .withPreludePackage()
+                                           .build()},
+            {"prelude/b/__package.rb", PackageTextBuilder()
+                                           .withName("Prelude::B")
+                                           .withStrictDeps("layered")
+                                           .withLayer("lib")
+                                           .withImports({"Prelude::A"})
+                                           .withPreludePackage()
+                                           .build()},
+            // No imports, so that it would be treated as a package root without prelude packages being present.
+            {"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "app")},
+
+            // Only importing Prelude::A, so that it technically could be in the same stratum as Prelude::B without
+            // the requirement that all prelude packages are processed first.
+            {"lib/foo/b/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "app", {"Prelude::A"})},
+        });
+
+    auto &condensation = gs.packageDB().condensation();
+    {
+        INFO("The condensation graph should contain two nodes for each package");
+        CHECK_EQ(8, condensation.nodes().size());
+    }
+
+    auto traversal = condensation.computeTraversal(gs);
+
+    {
+        REQUIRE_EQ(3, traversal.strata.size());
+        CHECK_EQ(condensation.nodes().size(), traversal.sccs.size());
+    }
+
+    {
+        INFO("The first stratum should be all prelude packages");
+        REQUIRE_EQ(4, traversal.strata[0].size());
+        for (auto scc : traversal.strata[0]) {
+            for (auto pkg : scc.members) {
+                CHECK(gs.packageDB().getPackageInfo(pkg).isPreludePackage());
+            }
+        }
+        CHECK_EQ(2, absl::c_count_if(traversal.strata[0], [](auto &scc) { return scc.isTest; }));
+        CHECK_EQ(2, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
+    }
+
+    {
+        INFO("There should be no prelude packages in layers other than the first");
+        for (auto &stratum : absl::MakeSpan(traversal.strata).subspan(1)) {
+            for (auto scc : stratum) {
+                for (auto pkg : scc.members) {
+                    CHECK(!gs.packageDB().getPackageInfo(pkg).isPreludePackage());
+                }
+            }
+        }
+    }
+
+    {
+        // Lib::Foo::A is here because it's the first stratum where a non-prelude package could show up.
+        // Lib::Foo::B is here because all of its imports have been satisfied while traversing the prelude set, and it's
+        // the first stratum where a non-prelude package could show up.
+        INFO("The second stratum should be the application code of Lib::Foo::A and Lib::Foo::B");
+        REQUIRE_EQ(2, traversal.strata[1].size());
+        for (auto scc : traversal.strata[1]) {
+            CHECK(!scc.isTest);
+        }
+    }
+
+    {
+        INFO("The third stratum should be the test code of Lib::Foo::A and Lib::Foo::B");
+        REQUIRE_EQ(2, traversal.strata[2].size());
+        for (auto scc : traversal.strata[2]) {
+            CHECK(scc.isTest);
+        }
+    }
+}
+
 } // namespace sorbet::test
