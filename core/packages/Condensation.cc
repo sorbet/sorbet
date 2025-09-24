@@ -6,10 +6,10 @@ using namespace std;
 
 namespace sorbet::core::packages {
 
-Condensation::Node &Condensation::pushNode(ImportType type) {
+Condensation::Node &Condensation::pushNode(ImportType type, bool isPrelude) {
     auto id = this->nodes_.size();
     auto isTest = type != ImportType::Normal;
-    auto &node = this->nodes_.emplace_back(id, isTest);
+    auto &node = this->nodes_.emplace_back(id, isTest, isPrelude);
     return node;
 }
 

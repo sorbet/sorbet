@@ -105,7 +105,8 @@ class ComputePackageSCCs {
             // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
             // the same SCC ID.
             core::packages::MangledName poppedPkgName;
-            auto &condensationNode = this->condensation.pushNode(EdgeType);
+            auto &condensationNode =
+                this->condensation.pushNode(EdgeType, packageDB.getPackageInfo(pkgName).isPreludePackage());
             auto sccId = condensationNode.id;
 
             // Set the SCC ids for all of the members of the SCC
