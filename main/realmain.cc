@@ -650,7 +650,7 @@ int realmain(int argc, char *argv[]) {
             if (gs->cacheSensitiveOptions.runningUnderAutogen) {
                 runAutogen(*gs, opts, *workers, stratumFiles);
             } else {
-                stratumFiles = move(pipeline::resolve(*gs, move(stratumFiles), opts, *workers).result());
+                stratumFiles = move(pipeline::resolve(*gs, offsets, move(stratumFiles), opts, *workers).result());
                 if (gs->hadCriticalError()) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
