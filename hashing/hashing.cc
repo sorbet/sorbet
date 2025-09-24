@@ -42,7 +42,8 @@ bool isEmptyParseResult(const core::GlobalState &gs, const ast::ExpressionPtr &t
 }
 
 unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, core::GlobalState &lgs,
-                                                 core::UsageHash usageHash, ast::ParsedFile file) {
+                                                 const core::SymbolTableOffsets &offsets, core::UsageHash usageHash,
+                                                 ast::ParsedFile file) {
     if (file.file.data(lgs).hasIndexErrors()) {
         if (isEmptyParseResult(lgs, file.tree)) {
             rapidjson::StringBuffer result;
@@ -80,7 +81,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, core::G
 
     auto workers = WorkerPool::create(0, lgs.tracer());
     core::FoundDefHashes foundHashes; // out parameter
-    realmain::pipeline::nameAndResolve(lgs, move(single), opts(), *workers, &foundHashes);
+    realmain::pipeline::nameAndResolve(lgs, offsets, move(single), opts(), *workers, &foundHashes);
 
     return make_unique<core::FileHash>(move(*lgs.hash()), move(usageHash), move(foundHashes));
 }
@@ -104,6 +105,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
                                                   const realmain::options::Options &hashingOpts) {
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
+    core::SymbolTableOffsets offsets;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, hashingOpts);
     auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
 
@@ -112,7 +114,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     core::LazyNameSubstitution subst(*lgs, *lgs);
     core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
     ast = ast::Substitute::run(ctx, subst, move(ast));
-    return computeFileHashForAST(logger, *lgs, subst.getAllNames(), move(ast));
+    return computeFileHashForAST(logger, *lgs, offsets, subst.getAllNames(), move(ast));
 }
 }; // namespace
 
@@ -207,11 +209,12 @@ Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::option
                     }
 
                     unique_ptr<core::GlobalState> lgs;
+                    core::SymbolTableOffsets offsets;
                     auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs, opts);
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
-                    threadResult.emplace_back(ast.file,
-                                              computeFileHashForAST(logger, *lgs, move(usageHash), move(rewrittenAST)));
+                    threadResult.emplace_back(
+                        ast.file, computeFileHashForAST(logger, *lgs, offsets, move(usageHash), move(rewrittenAST)));
                 }
             }
         }
