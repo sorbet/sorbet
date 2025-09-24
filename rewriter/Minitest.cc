@@ -591,7 +591,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 return nullptr;
             }
 
-            if (requiresSecondFactor(send->fun) && !recvIsRSpec) {
+            if (requiresSecondFactor(send->fun) && !recvIsRSpec && !insideDescribe) {
                 return nullptr;
             }
 
