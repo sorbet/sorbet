@@ -136,7 +136,8 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
     {
         core::UnfreezeNameTable nameTableAccess(gs);
         core::UnfreezeSymbolTable symbolTableAccess(gs);
-        auto maybeResult = resolver::Resolver::run(gs, move(parsedFiles), *workers);
+        core::SymbolTableOffsets offsets;
+        auto maybeResult = resolver::Resolver::run(gs, move(parsedFiles), *workers, offsets);
         ENFORCE(maybeResult.hasResult());
         parsedFiles = move(maybeResult.result());
     }

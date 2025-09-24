@@ -944,7 +944,7 @@ void GlobalState::initEmpty() {
                      Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS);
 
     installIntrinsics();
-    computeLinearization();
+    computeLinearization(SymbolTableOffsets{});
 
     Symbols::top().data(*this)->resultType = Types::top();
     Symbols::bottom().data(*this)->resultType = Types::bottom();
@@ -989,12 +989,11 @@ void GlobalState::installIntrinsics() {
     }
 }
 
-void GlobalState::computeLinearization() {
+void GlobalState::computeLinearization(const SymbolTableOffsets &offsets) {
     Timer timer(this->tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
-    for (int i = 1; i < this->classAndModulesUsed(); ++i) {
-        const auto &ref = core::ClassOrModuleRef(*this, i);
+    for (auto ref : offsets.classOrModuleRefs(*this)) {
         computeClassLinearization(*this, ref);
     }
 }
