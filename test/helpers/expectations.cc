@@ -193,7 +193,8 @@ Expectations Expectations::getExpectations(string singleTest) {
 }
 
 // A variant of CHECK_EQ that prints a diff on failure.
-void CHECK_EQ_DIFF(string_view expected, string_view actual, string_view errorMessage) {
+void CHECK_EQ_DIFF_IMPL(const char *file, int line, string_view expected, string_view actual,
+                        string_view errorMessage) {
     if (expected == actual) {
         return;
     }
@@ -206,7 +207,7 @@ void CHECK_EQ_DIFF(string_view expected, string_view actual, string_view errorMe
 
     stringstream ss;
     diff.printUnifiedFormat(ss);
-    FAIL_CHECK(fmt::format("{}\n{}", errorMessage, ss.str()));
+    DOCTEST_ADD_FAIL_CHECK_AT(file, line, fmt::format("{}\n{}", errorMessage, ss.str()));
 }
 
 } // namespace sorbet::test
