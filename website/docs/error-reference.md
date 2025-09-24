@@ -897,26 +897,6 @@ The following directives can only appear once per `__package.rb` file:
 
 The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. It takes two keyword arguments: `min_typed_level` and `tests_min_typed_level`. For each, the valid options are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
 
-## 3730
-
-> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
-
-If a package is marked with `prelude_package`, it is not allowed to use `visible_to` annotations, as it is implicitly imported by all other non-prelude packages.
-
-```ruby
-class A < PackageSpec
-end
-
-class B < PackageSpec
-end
-
-class C < PackageSpec
-  prelude_package
-
-  visible_to B # error: The implicit import in `A` would automatically violate the visibility restrictions
-end
-```
-
 ## 3731
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
@@ -931,49 +911,6 @@ class B < PackageSpec
   prelude_package
 
   import A # error: Importing A, which is not marked as `prelude_package`
-end
-```
-
-## 3732
-
-> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
-
-As all packages marked with `prelude_package` are implicitly imported by all non-prelude packages, we reject explicit imports of them to avoid the confusion of a `test_import` of a prelude package being treated as a normal import, for the purposes of the package graph.
-
-```ruby
-class A < PackageSpec
- import B       # error: Prelude package `B` may not be explicitly imported
- test_import C  # error: Prelude package `C` may not be explicitly imported
-end
-
-class B < PackageSpec
-  prelude_package
-end
-
-class C < PackageSpec
-  prelude_package
-end
-```
-
-## 3733
-
-> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
-
-When layering is enabled, all packages marked `prelude_package` must be declared with the lowest level layer. This requirement is because prelude packages are imported implicitly by all non-prelude packages: declaring them at a layer other than the lowest would create layering violations for any package declared at a layer lower than any of the prelude packages.
-
-For example, if two layers exist named `utility` and `product`, the following would be an error:
-
-```ruby
-class A < PackageSpec # The implicit import of `B` causes a layering violation
-  layer 'utility'
-  strict_dependencies 'dag'
-end
-
-class B < PackageSpec
-  layer 'product'
-  strict_dependencies 'dag'
-
-  prelude_package
 end
 ```
 
