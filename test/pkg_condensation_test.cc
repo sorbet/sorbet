@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace sorbet {
+namespace sorbet::test {
 
 namespace {
 auto logger = spdlog::stderr_color_mt("pkg-autocorrects-test");
@@ -16,11 +16,11 @@ auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
 
 TEST_CASE("Condensation Graph - One package") {
     core::GlobalState gs(errorQueue);
-    test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
+    PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
 
     // Enter a single package, and verify that we get out a condensation with two strata.
-    auto parsedFiles = test::PackageHelpers::enterPackages(
-        gs, {{"lib/foo/a/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")}});
+    auto parsedFiles = PackageHelpers::enterPackages(
+        gs, {{"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")}});
 
     auto &condensation = gs.packageDB().condensation();
     {
@@ -50,12 +50,12 @@ TEST_CASE("Condensation Graph - One package") {
 
 TEST_CASE("Condensation Graph - Two packages") {
     core::GlobalState gs(errorQueue);
-    test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
+    PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
 
-    auto parsedFiles = test::PackageHelpers::enterPackages(
-        gs, {{"lib/foo/a/__package.rb",
-              test::PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib", {"Lib::Foo::B"})},
-             {"lib/foo/b/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib")}});
+    auto parsedFiles = PackageHelpers::enterPackages(
+        gs,
+        {{"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib", {"Lib::Foo::B"})},
+         {"lib/foo/b/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib")}});
 
     auto &condensation = gs.packageDB().condensation();
     {
@@ -92,14 +92,14 @@ TEST_CASE("Condensation Graph - Two packages") {
 
 TEST_CASE("Condensation Graph - Four packages without deps") {
     core::GlobalState gs(errorQueue);
-    test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
+    PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
 
-    auto parsedFiles = test::PackageHelpers::enterPackages(
+    auto parsedFiles = PackageHelpers::enterPackages(
         gs, {
-                {"lib/foo/a/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")},
-                {"lib/foo/b/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib")},
-                {"lib/foo/c/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::C", "layered", "lib")},
-                {"lib/foo/d/__package.rb", test::PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib")},
+                {"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")},
+                {"lib/foo/b/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib")},
+                {"lib/foo/c/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::C", "layered", "lib")},
+                {"lib/foo/d/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib")},
             });
 
     auto &condensation = gs.packageDB().condensation();
@@ -139,25 +139,25 @@ TEST_CASE("Condensation Graph - Four packages without deps") {
 
 TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     core::GlobalState gs(errorQueue);
-    test::PackageHelpers::makeDefaultPackagerGlobalState(gs, test::PackageHelpers::LAYERS_UTIL_LIB_APP);
+    PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
 
-    auto parsedFiles = test::PackageHelpers::enterPackages(
+    auto parsedFiles = PackageHelpers::enterPackages(
         gs, {{"lib/foo/a/__package.rb",
-              test::PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib", {"Lib::Foo::B"}, {"Lib::Foo::B"})},
+              PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib", {"Lib::Foo::B"}, {"Lib::Foo::B"})},
              {"lib/foo/b/__package.rb",
-              test::PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib", {"Lib::Foo::D"}, {"Lib::Foo::C"})},
+              PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib", {"Lib::Foo::D"}, {"Lib::Foo::C"})},
              {"lib/foo/c/__package.rb",
-              test::PackageHelpers::makePackageRB("Lib::Foo::C", "layered", "lib", {"Lib::Foo::B"}, {})},
+              PackageHelpers::makePackageRB("Lib::Foo::C", "layered", "lib", {"Lib::Foo::B"}, {})},
              {"lib/foo/d/__package.rb",
-              test::PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib", {"Lib::Foo::A"}, {})}});
+              PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib", {"Lib::Foo::A"}, {})}});
 
     auto &condensation = gs.packageDB().condensation();
     auto traversal = condensation.computeTraversal(gs);
 
-    auto pkgA = test::PackageHelpers::packageInfoFor(gs, parsedFiles[0].file).mangledName();
-    auto pkgB = test::PackageHelpers::packageInfoFor(gs, parsedFiles[1].file).mangledName();
-    auto pkgC = test::PackageHelpers::packageInfoFor(gs, parsedFiles[2].file).mangledName();
-    auto pkgD = test::PackageHelpers::packageInfoFor(gs, parsedFiles[3].file).mangledName();
+    auto pkgA = PackageHelpers::packageInfoFor(gs, parsedFiles[0].file).mangledName();
+    auto pkgB = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file).mangledName();
+    auto pkgC = PackageHelpers::packageInfoFor(gs, parsedFiles[2].file).mangledName();
+    auto pkgD = PackageHelpers::packageInfoFor(gs, parsedFiles[3].file).mangledName();
 
     {
         INFO("There should be three strata in the resulting traversal");
@@ -232,4 +232,4 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     }
 }
 
-} // namespace sorbet
+} // namespace sorbet::test
