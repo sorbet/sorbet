@@ -219,10 +219,14 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
 // depended on methods sharing names with RSpec methods not firing.
 bool requiresSecondFactor(core::NameRef fun) {
     switch (fun.rawId()) {
+        // Example names
         case core::Names::example().rawId():
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId():
+        // ExampleGroup names
+        case core::Names::context().rawId():
+        case core::Names::exampleGroup().rawId():
             return true;
 
         default:
@@ -268,6 +272,14 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
         default:
             return core::NameRef::noName();
     }
+}
+
+ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const ast::ExpressionPtr &arg) {
+    // We use shared_examples regardless of the send used to create the shared examples module,
+    // because they are uniquely identified by the string argument (not which method alias was used
+    // to create the module)
+    auto name = fmt::format("<shared_examples '{}'>", to_s(ctx, arg));
+    return ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(name)});
 }
 
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
@@ -343,7 +355,13 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     }
 
     switch (send->fun.rawId()) {
-        case core::Names::describe().rawId(): {
+        case core::Names::describe().rawId():
+        case core::Names::xdescribe().rawId():
+        case core::Names::fdescribe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xcontext().rawId():
+        case core::Names::fcontext().rawId():
+        case core::Names::exampleGroup().rawId(): {
             if (send->numPosArgs() != 1) {
                 return invalidUnderTestEach(ctx, eachName, move(stmt));
             }
@@ -371,6 +389,26 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 
             auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, move(body));
             return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+
+        case core::Names::sharedExamples().rawId():
+        case core::Names::sharedContext().rawId():
+        case core::Names::sharedExamplesFor().rawId(): {
+            // We don't handle RSpec's SharedExampleGroup inside test_each, because it's not clear
+            // what that should do and whether anyone actually uses it.
+            //
+            // We can revisit this choice if people complain about Sorbet lacking support for this.
+            break;
+        }
+
+        case core::Names::includeExamples().rawId():
+        case core::Names::includeContext().rawId(): {
+            if (!insideDescribe || send->numPosArgs() != 1) {
+                return nullptr;
+            }
+
+            auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
+            return ast::MK::Send1(send->loc, move(send->recv), core::Names::include(), send->funLoc, move(name));
         }
     }
 
@@ -485,13 +523,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference()) {
-        return nullptr;
-    }
-
     switch (send->fun.rawId()) {
         case core::Names::testEach().rawId():
         case core::Names::testEachHash().rawId(): {
+            if (!send->recv.isSelfReference()) {
+                return nullptr;
+            }
+
             if (send->numPosArgs() != 1) {
                 if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
                     auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
@@ -530,10 +568,25 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                  send->flags);
         }
 
-        case core::Names::describe().rawId(): {
+        case core::Names::describe().rawId():
+        case core::Names::xdescribe().rawId():
+        case core::Names::fdescribe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xcontext().rawId():
+        case core::Names::fcontext().rawId():
+        case core::Names::exampleGroup().rawId(): {
             if (send->numPosArgs() != 1) {
                 return nullptr;
             }
+
+            if (!send->recv.isSelfReference()) {
+                return nullptr;
+            }
+
+            if (requiresSecondFactor(send->fun) && !insideDescribe) {
+                return nullptr;
+            }
+
             auto &arg = send->getPosArg(0);
             auto argString = to_s(ctx, arg);
             ast::ClassDef::ANCESTORS_store ancestors;
@@ -555,8 +608,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             auto rhs = prepareBody(ctx, /* isClass */ true, std::move(block->body), /* insideDescribe */ true);
 
-            auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
-                                                    ctx.state.enterNameConstant("<describe '" + argString + "'>"));
+            auto testName = fmt::format("<{} '{}'>", send->fun.show(ctx), argString);
+            auto name = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
             auto declLoc = declLocForSendWithBlock(*send);
             return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                                   flattenDescribeBody(move(rhs)));
@@ -576,6 +629,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId(): {
+            if (!send->recv.isSelfReference()) {
+                return nullptr;
+            }
+
             if (!insideDescribe && requiresSecondFactor(send->fun)) {
                 return nullptr;
             }
@@ -605,7 +662,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::let().rawId():
         case core::Names::let_bang().rawId():
         case core::Names::subject().rawId(): {
-            if (!insideDescribe) {
+            if (!send->recv.isSelfReference() || !insideDescribe) {
                 return nullptr;
             }
 
@@ -620,6 +677,57 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             auto [methodName, declLoc] = maybeDecl.value();
             auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
             return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+
+        case core::Names::sharedExamples().rawId():
+        case core::Names::sharedContext().rawId():
+        case core::Names::sharedExamplesFor().rawId(): {
+            if (!send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
+                return nullptr;
+            }
+
+            auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
+
+            auto declLoc = declLocForSendWithBlock(*send);
+
+            // We're not in a class (we're making a module).
+            //
+            // We're also not in a describe, but we're going to lie and say we are, because we
+            // currently only use that to gate other Minitest/RSpec features behind a check where
+            // we're _really_ sure that we're probably in a test context (vs some unrelated,
+            // similarly-named DSL)
+            auto body = prepareBody(ctx, /* isClass */ false, move(block->body), /* insideDescribe */ true);
+            auto rhs = flattenDescribeBody(move(body));
+
+            if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
+                // Don't generate this if the option isn't enabled.
+                // Technically, Sorbet will ignore it, but also it could possibly generate a "failed
+                // to resolve constant" error, so better to be defensive.
+
+                auto emptyLoc = declLoc.copyEndWithZeroLength();
+                static const auto parts = vector<core::NameRef>{
+                    core::Names::Constants::RSpec(),
+                    core::Names::Constants::Core(),
+                    core::Names::Constants::ExampleGroup(),
+                };
+                auto rspecExampleGroup = ast::MK::UnresolvedConstantParts(emptyLoc, parts);
+
+                rhs.emplace_back(ast::MK::Send0Block(emptyLoc, ast::MK::Magic(emptyLoc),
+                                                     core::Names::requiresAncestor(), emptyLoc,
+                                                     ast::MK::Block0(emptyLoc, move(rspecExampleGroup))));
+            }
+
+            return ast::MK::Module(send->loc, declLoc, move(name), move(rhs));
+        }
+
+        case core::Names::includeExamples().rawId():
+        case core::Names::includeContext().rawId(): {
+            if (!send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
+                return nullptr;
+            }
+
+            auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
+            return ast::MK::Send1(send->loc, move(send->recv), core::Names::include(), send->funLoc, move(name));
         }
     }
 

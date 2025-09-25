@@ -1,33 +1,98 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def outer_helper<<todo method>>(&<blk>)
-      <emptyTree>
+  def self.test_each<<todo method>>(arg, &blk)
+    ::<Magic>.<call-with-block-pass>(arg, :each, blk)
+  end
+
+  def outer_helper<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def my_helper<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def outer_helper<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def described_class<<todo method>>(&<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of described_class>
+      end
     end
+  end
 
-    <runtime method definition of outer_helper>
-
-    class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
-      def my_helper<<todo method>>(&<blk>)
-        <emptyTree>
+  <emptyTree>::<C RSpec>.describe("A") do ||
+    begin
+      <runtime method definition of self.test_each>
+      <runtime method definition of outer_helper>
+      <self>.describe("inside describe") do ||
+        begin
+          <runtime method definition of my_helper>
+          <self>.xit() do ||
+            begin
+              <self>.my_helper()
+              <self>.described_class()
+            end
+          end
+          <self>.it("example", :focus, true) do ||
+            <self>.my_helper()
+          end
+          <self>.example() do ||
+            <self>.my_helper()
+          end
+          <self>.shared_examples("some examples") do ||
+            begin
+              <self>.let(:defined_in_shared_examples) do ||
+                "foo"
+              end
+              <self>.it("a shared example") do ||
+                <self>.described_class()
+              end
+            end
+          end
+          <self>.describe("will include shared examples") do ||
+            begin
+              <self>.include_examples("some examples")
+              <self>.it("has access to defined_in_shared_examples") do ||
+                <self>.defined_in_shared_examples()
+              end
+            end
+          end
+          <self>.test_each([]) do |x|
+            <self>.describe("shared examples in test_each") do ||
+              begin
+                <self>.include_examples("some examples")
+                <self>.it("has access to defined_in_shared_examples") do ||
+                  <self>.defined_in_shared_examples()
+                end
+              end
+            end
+          end
+        end
       end
-
-      def <it><<todo method>>(&<blk>)
-        <self>.my_helper()
+      <self>.example() do ||
+        <self>.outer_helper()
       end
-
-      def <it 'example'><<todo method>>(&<blk>)
-        <self>.my_helper()
-      end
-
-      def <it><<todo method>>(&<blk>)
-        <self>.my_helper()
-      end
-
-      <runtime method definition of my_helper>
     end
+  end
 
-    <self>.example() do ||
-      <self>.outer_helper()
+  <emptyTree>::<C RSpec>.context("B") do ||
+    begin
+      <runtime method definition of outer_helper>
+      <self>.it("inside B") do ||
+        <self>.outer_helper()
+      end
+      <self>.context("Nested, no RSpec") do ||
+        <self>.it("inside Nested") do ||
+          <self>.outer_helper()
+        end
+      end
     end
   end
 end
