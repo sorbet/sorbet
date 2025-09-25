@@ -632,10 +632,8 @@ public:
                         nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
                     }
                 }
-            }
-        } else {
-            barrier.Wait();
         }
+        barrier.Wait();
 
         return files;
     }
@@ -658,8 +656,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
         for (auto package : gs.packageDB().packages()) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
-            auto autocorrect = pkgInfo.aggregateMissingImports(gs);
-            if (autocorrect.has_value()) {
+            if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
                     e.addAutocorrect(move(autocorrect.value()));
