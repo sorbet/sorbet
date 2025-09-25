@@ -252,6 +252,7 @@ public:
         return this->isPreludePackage_;
     }
 };
+CheckSize(PackageInfo, 248, 8);
 
 } // namespace sorbet::core::packages
 #endif
