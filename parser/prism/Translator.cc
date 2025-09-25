@@ -202,15 +202,6 @@ ast::Send *asTLet(ExpressionPtr &arg) {
     return send;
 }
 
-// Structure for holding the scaffolding needed for op-assignment desugaring
-struct OpAsgnScaffolding {
-    core::NameRef temporaryName;
-    ast::InsSeq::STATS_store statementBody;
-    uint16_t numPosArgs;
-    ast::Send::ARGS_store readArgs;
-    ast::Send::ARGS_store assgnArgs;
-};
-
 // Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
@@ -437,7 +428,7 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
     Exception::raise(s);
 }
 
-OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
+Translator::OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
     // This is for storing the temporary assignments followed by the final update. In the case that we have other
     // arguments to the send (e.g. in the case of x.y[z] += 1) we'll want to store the other parameters (z) in a
     // temporary as well, producing a sequence like
@@ -602,6 +593,48 @@ unique_ptr<parser::Node> Translator::translateVariableAssignment(pm_node_t *node
                                                                                             move(lhs));
 }
 
+// Handle operator assignment to the result of a safe method call, like `a&.b += 1`
+// This creates a pattern like: { $temp = a; if $temp == nil then nil else $temp.b += 1 }
+template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNode *callNode, core::LocOffsets location,
+                                                              unique_ptr<parser::Node> receiver, core::NameRef name,
+                                                              core::LocOffsets messageLoc) {
+    if (!directlyDesugar || !hasExpr(receiver)) {
+        // Fall back to CSend if we can't desugar directly
+        auto lhs = make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
+        return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::CSend>(callNode, location,
+                                                                                                  move(lhs));
+    }
+
+    // Create temporary variable to hold the receiver
+    auto tempRecv = nextUniqueDesugarName(core::Names::assignTemp());
+    auto receiverExpr = receiver->takeDesugaredExpr();
+    auto recvLoc = receiver->loc;
+    auto zeroLengthLoc = location.copyWithZeroLength();
+    auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
+
+    auto tempAssign = MK::Assign(zeroLengthRecvLoc, tempRecv, move(receiverExpr));
+    auto cond = MK::Send1(zeroLengthLoc, MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
+                          core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
+    auto send =
+        MK::Send(location, MK::Local(zeroLengthRecvLoc, tempRecv), name, messageLoc, 0, ast::Send::ARGS_store{});
+    auto tempSend = make_node_with_expr<parser::Send>(move(send), location, nullptr, name, messageLoc, NodeVec{});
+
+    // Recursively handle the assignment operation on the temporary send
+    auto assignmentResult = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
+        callNode, location, move(tempSend));
+
+    auto assignmentExpr = assignmentResult->takeDesugaredExpr();
+    auto nilValue = MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
+                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(zeroLengthLoc, tempRecv));
+    auto ifExpr = MK::If(zeroLengthLoc, move(cond), move(nilValue), move(assignmentExpr));
+    auto result = MK::InsSeq1(location, move(tempAssign), move(ifExpr));
+
+    // Create a node that directly contains the InsSeq expression for the safe navigation pattern
+    auto lhs = make_node_with_expr<parser::Send>(move(result), location, nullptr, name, messageLoc, NodeVec{});
+    return move(lhs);
+}
+
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, core::LocOffsets location) {
     auto callNode = down_cast<PrismAssignmentNode>(node);
@@ -611,11 +644,11 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
 
     if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
         // Handle operator assignment to the result of a safe method call, like `a&.b += 1`
-        // TODO: this requires usage of nextUniqueDesugarName
-        auto lhs = make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
-        return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::CSend>(callNode, location,
-                                                                                                  move(lhs));
+        auto result = translateCSendAssignment<PrismAssignmentNode, SorbetAssignmentNode>(
+            callNode, location, move(receiver), name, messageLoc);
+        return result;
     }
+
     // Handle operator assignment to the result of a method call, like `a.b += 1`
     if (!directlyDesugar || !hasExpr(receiver)) {
         auto lhs = make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{});
