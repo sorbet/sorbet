@@ -430,10 +430,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             ast::Array::ENTRY_store elems;
             elems.reserve(sorbetElements.size());
+
             ExpressionPtr lastMerge;
-            for (auto &stat : sorbetElements) {
-                if (parser::NodeWithExpr::isa_node<parser::Splat>(stat.get()) ||
-                    parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(stat.get())) {
+            ENFORCE(sorbetElements.size() == arrayNode->elements.size);
+            for (int i = 0; i < sorbetElements.size(); i++) {
+                auto *node = arrayNode->elements.nodes[i];
+                auto &stat = sorbetElements[i];
+
+                if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
                     // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
 
                     // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
