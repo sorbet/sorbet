@@ -162,12 +162,9 @@ public:
 
     core::FileRef file;
 
-    std::optional<core::NameRef> layer; // 20
+    core::NameRef layer; // 20
 
     std::optional<StrictDependenciesLevel> strictDependenciesLevel; // 16
-
-    core::StrictLevel minTypedLevel = core::StrictLevel::None;
-    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     int sccID_ = -1; // 8
@@ -185,6 +182,9 @@ public:
     bool visibleToTests_ = false;
 
     bool isPreludePackage_ = false;
+
+    core::StrictLevel minTypedLevel = core::StrictLevel::None;
+    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
     // The id of the SCC that this package's normal imports belong to.
     //
@@ -259,7 +259,7 @@ public:
         return this->isPreludePackage_;
     }
 };
-CheckSize(PackageInfo, 216, 8);
+CheckSize(PackageInfo, 208, 8);
 
 } // namespace sorbet::core::packages
 #endif

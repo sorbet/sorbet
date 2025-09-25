@@ -682,7 +682,7 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.layer.has_value()) {
+            if (info.layer.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
                     e.addErrorLine(ctx.locAt(info.locs.layer), "Previously declared here");
@@ -693,8 +693,8 @@ struct PackageSpecBodyWalk {
 
             if (send.numPosArgs() > 0) {
                 auto parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
-                if (parsedValue.has_value()) {
-                    info.layer = parsedValue.value();
+                if (parsedValue.exists()) {
+                    info.layer = parsedValue;
                     info.locs.layer = send.getPosArg(0).loc();
                 } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidLayer)) {
@@ -852,17 +852,17 @@ private:
         return nullopt;
     }
 
-    optional<core::NameRef> parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+    core::NameRef parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
         auto validLayers = gs.packageDB().layers();
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
-            return nullopt;
+            return core::NameRef::noName();
         }
         auto value = lit->asString();
         if (absl::c_find(validLayers, value) != validLayers.end()) {
             return value;
         }
-        return nullopt;
+        return core::NameRef::noName();
     }
 
     core::StrictLevel parseTypedLevelOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
@@ -1004,7 +1004,7 @@ void validateLayering(core::Context ctx, const Import &i) {
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
     if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
-        !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
+        !thisPkg.layer.exists() || !otherPkg.layer.exists()) {
         return;
     }
 
@@ -1012,8 +1012,8 @@ void validateLayering(core::Context ctx, const Import &i) {
         return;
     }
 
-    auto pkgLayer = thisPkg.layer.value();
-    auto otherPkgLayer = otherPkg.layer.value();
+    auto pkgLayer = thisPkg.layer;
+    auto otherPkgLayer = otherPkg.layer;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::LayeringViolation)) {
@@ -1096,8 +1096,8 @@ void validatePreludePackage(const core::GlobalState &gs, core::FileRef file, Pac
     // imports of them are valid.
     auto enforceLayering = gs.packageDB().enforceLayering();
     if (enforceLayering) {
-        if (auto layer = info.layer) {
-            if (packageDB.layerIndex(layer.value()) != 0) {
+        if (info.layer.exists()) {
+            if (packageDB.layerIndex(info.layer) != 0) {
                 core::Loc layerLoc(file, info.locs.layer);
                 if (auto e = gs.beginError(layerLoc, core::errors::Packager::PreludeLowestLayer)) {
                     auto layers = packageDB.layers();

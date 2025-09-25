@@ -677,15 +677,14 @@ public:
 
                     if (layeringViolation) {
                         reasons.emplace_back("importing its package would cause a layering violation");
-                        ENFORCE(pkg.layer.has_value(),
-                                "causesLayeringViolation should return false if layer is not set");
-                        ENFORCE(this->package.layer.has_value(),
+                        ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
+                        ENFORCE(this->package.layer.exists(),
                                 "causesLayeringViolation should return false if layer is not set");
                         e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
                                        "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
                                        "currently layer `{}`",
-                                       pkg.show(ctx), this->package.layer.value().show(ctx), this->package.show(ctx),
-                                       pkg.layer.value().show(ctx));
+                                       pkg.show(ctx), this->package.layer.show(ctx), this->package.show(ctx),
+                                       pkg.layer.show(ctx));
                     }
 
                     if (strictDependenciesTooLow) {

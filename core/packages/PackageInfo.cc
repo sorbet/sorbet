@@ -88,14 +88,14 @@ int PackageInfo::orderImports(const core::GlobalState &gs, const PackageInfo &a,
 
 int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const {
     if (!packageDB.enforceLayering() || !strictDependenciesLevel.has_value() ||
-        !a.strictDependenciesLevel.has_value() || !b.strictDependenciesLevel.has_value() || !a.layer.has_value() ||
-        !b.layer.has_value()) {
+        !a.strictDependenciesLevel.has_value() || !b.strictDependenciesLevel.has_value() || !a.layer.exists() ||
+        !b.layer.exists()) {
         return 0;
     }
 
     // Layering violations always come first
-    auto aCausesLayeringViolation = causesLayeringViolation(packageDB, a.layer.value());
-    auto bCausesLayeringViolation = causesLayeringViolation(packageDB, b.layer.value());
+    auto aCausesLayeringViolation = causesLayeringViolation(packageDB, a.layer);
+    auto bCausesLayeringViolation = causesLayeringViolation(packageDB, b.layer);
     if (aCausesLayeringViolation && bCausesLayeringViolation) {
         return 0;
     } else if (aCausesLayeringViolation && !bCausesLayeringViolation) {
@@ -359,20 +359,20 @@ optional<ImportType> PackageInfo::importsPackage(MangledName mangledName) const 
 // Is it a layering violation to import otherPkg from this package?
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const {
     ENFORCE(exists());
-    if (!otherPkg.layer.has_value()) {
+    if (!otherPkg.layer.exists()) {
         return false;
     }
 
-    return causesLayeringViolation(packageDB, otherPkg.layer.value());
+    return causesLayeringViolation(packageDB, otherPkg.layer);
 }
 
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const {
     ENFORCE(exists());
-    if (!layer.has_value()) {
+    if (!layer.exists()) {
         return false;
     }
 
-    auto pkgLayer = layer.value();
+    auto pkgLayer = layer;
     auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
     auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
 
