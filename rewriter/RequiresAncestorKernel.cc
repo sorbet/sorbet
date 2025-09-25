@@ -25,12 +25,6 @@ void RequiresAncestorKernel::run(core::MutableContext ctx, ast::ClassDef *klass)
         return;
     }
 
-    // If the module is named Kernel and has no scope, don't add Kernel
-    auto id = ast::cast_tree<ast::UnresolvedConstantLit>(klass->name);
-    if (id && id->cnst == core::Names::Constants::Kernel() && ast::MK::isRootScope(id->scope)) {
-        return;
-    }
-
     if (hasAnyRequiresAncestorCall(ctx, klass)) {
         return;
     }

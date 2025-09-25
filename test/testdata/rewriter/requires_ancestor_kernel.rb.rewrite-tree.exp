@@ -62,29 +62,4 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of some_method>
   end
-
-  module <emptyTree>::<C Kernel><<C <todo sym>>> < ()
-  end
-
-  module ::<root>::<C Kernel><<C <todo sym>>> < ()
-  end
-
-  module <emptyTree>::<C Mine>::<C Kernel><<C <todo sym>>> < ()
-    <self>.extend(::T::Helpers)
-
-    <self>.requires_ancestor() do ||
-      ::Kernel
-    end
-  end
-
-  module <emptyTree>::<C Mine><<C <todo sym>>> < ()
-    module <emptyTree>::<C Kernel><<C <todo sym>>> < ()
-    end
-
-    <self>.extend(::T::Helpers)
-
-    <self>.requires_ancestor() do ||
-      ::Kernel
-    end
-  end
 end

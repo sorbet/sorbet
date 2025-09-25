@@ -1,14 +1,14 @@
 # typed: true
 # enable-experimental-requires-ancestor: true
 
-# Module without any `requires_ancestor` should get `Kernel` added
+# Test case 1: Module without any requires_ancestor should get Kernel added
 module TestModule1
   def some_method
     puts "hello"
   end
 end
 
-# Module with `requires_ancestor { BasicObject }` should NOT get `Kernel` added
+# Test case 2: Module with requires_ancestor { BasicObject } should NOT get Kernel added
 module TestModule2
   extend T::Helpers
   requires_ancestor { BasicObject }
@@ -18,7 +18,7 @@ module TestModule2
   end
 end
 
-# Module with `requires_ancestor { Kernel }` should NOT get another `Kernel` added
+# Test case 3: Module with requires_ancestor { Kernel } should NOT get another Kernel added
 module TestModule3
   extend T::Helpers
   requires_ancestor { Kernel }
@@ -28,36 +28,19 @@ module TestModule3
   end
 end
 
-# Class should NOT get `requires_ancestor { Kernel }` added
+# Test case 4: Class should NOT get requires_ancestor { Kernel } added
 class TestClass1
   def some_method
     puts "hello"
   end
 end
 
-# Module with other `requires_ancestor` should get `Kernel` added
+# Test case 5: Module with other requires_ancestor should get Kernel added
 module TestModule4
   extend T::Helpers
   requires_ancestor { Object }
 
   def some_method
     puts "hello"
-  end
-end
-
-# Unscoped `Kernel` modules should NOT get `Kernel` added
-module Kernel
-end
-
-module ::Kernel
-end
-
-# Scoped modules named `Kernel` should get `Kernel` added
-module Mine::Kernel
-end
-
-# Unfortunately, nested constants that are named Kernel will not get Kernel added
-module Mine
-  module Kernel
   end
 end
