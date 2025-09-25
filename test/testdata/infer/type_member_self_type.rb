@@ -1,5 +1,10 @@
 # typed: strict
 
+# type members redeclaration error disappears on fast path:
+# https://github.com/sorbet/sorbet/issues/6699
+
+# disable-fast-path: true
+
 # This is a test of what happens if you use `T.self_type` in a type member.
 #
 # At time of writing, we don't explicitly ban this, but it introduces problems
