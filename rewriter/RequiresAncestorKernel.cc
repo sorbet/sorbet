@@ -35,18 +35,13 @@ void RequiresAncestorKernel::run(core::MutableContext ctx, ast::ClassDef *klass)
         return;
     }
 
-    auto loc = klass->loc;
-    auto locZero = loc.copyWithZeroLength();
-
-    // Add extend T::Helpers
-    klass->rhs.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::extend(), locZero,
-                                           ast::MK::Constant(loc, core::Symbols::T_Helpers())));
+    auto locZero = klass->declLoc.copyEndWithZeroLength();
 
     // Add requires_ancestor { Kernel }
-    auto kernelConstant = ast::MK::Constant(loc, core::Symbols::Kernel());
-    auto block = ast::MK::Block0(loc, std::move(kernelConstant));
-    auto requiresAncestorSend =
-        ast::MK::Send0Block(loc, ast::MK::Self(loc), core::Names::requiresAncestor(), loc, std::move(block));
+    auto kernelConstant = ast::MK::Constant(locZero, core::Symbols::Kernel());
+    auto block = ast::MK::Block0(locZero, std::move(kernelConstant));
+    auto requiresAncestorSend = ast::MK::Send0Block(locZero, ast::MK::Magic(locZero), core::Names::requiresAncestor(),
+                                                    locZero, std::move(block));
 
     klass->rhs.emplace_back(std::move(requiresAncestorSend));
 }
