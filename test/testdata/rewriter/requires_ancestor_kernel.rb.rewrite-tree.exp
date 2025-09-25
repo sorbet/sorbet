@@ -6,7 +6,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of some_method>
 
-    ::<Magic>.requires_ancestor() do ||
+    <self>.extend(::T::Helpers)
+
+    <self>.requires_ancestor() do ||
       ::Kernel
     end
   end
@@ -68,7 +70,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C Mine>::<C Kernel><<C <todo sym>>> < ()
-    ::<Magic>.requires_ancestor() do ||
+    <self>.extend(::T::Helpers)
+
+    <self>.requires_ancestor() do ||
       ::Kernel
     end
   end
@@ -77,7 +81,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     module <emptyTree>::<C Kernel><<C <todo sym>>> < ()
     end
 
-    ::<Magic>.requires_ancestor() do ||
+    <self>.extend(::T::Helpers)
+
+    <self>.requires_ancestor() do ||
       ::Kernel
     end
   end
