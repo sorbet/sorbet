@@ -169,11 +169,11 @@ public:
     std::optional<std::pair<core::StrictLevel, core::StrictLevel>> minTypedLevel; // 28
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
-    std::optional<int> sccID_; // 8
+    int sccID_ = -1; // 8
 
     // ID of the strongly-connected component that this package's tests are in, according to its graph of import
     // dependencies
-    std::optional<int> testSccID_;
+    int testSccID_ = -1;
 
     MangledName mangledName_;
 
@@ -191,7 +191,7 @@ public:
     // date.
     std::optional<int> sccID() const {
         ENFORCE(exists());
-        return sccID_;
+        return sccID_ == -1 ? std::nullopt : std::make_optional(sccID_);
     }
 
     // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
@@ -201,7 +201,7 @@ public:
     // date.
     std::optional<int> testSccID() const {
         ENFORCE(exists());
-        return testSccID_;
+        return testSccID_ == -1 ? std::nullopt : std::make_optional(testSccID_);
     }
 
     static PackageInfo &from(core::GlobalState &gs, MangledName pkg);
@@ -258,7 +258,7 @@ public:
         return this->isPreludePackage_;
     }
 };
-CheckSize(PackageInfo, 224, 8);
+CheckSize(PackageInfo, 216, 8);
 
 } // namespace sorbet::core::packages
 #endif
