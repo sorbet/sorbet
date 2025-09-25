@@ -492,7 +492,7 @@ void PackageInfo::untrackPackageReferencesFor(const core::FileRef file) {
 namespace {
 core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file) {
     if (file.data(gs).isPackagedTestHelper()) {
-        return core::packages::ImportType::TestUnit;
+        return core::packages::ImportType::TestHelper;
     } else if (file.data(gs).isPackagedTest()) {
         return core::packages::ImportType::TestUnit;
     } else {
