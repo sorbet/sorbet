@@ -38,6 +38,8 @@
 # Be advised, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will not
 # detect delegated methods.
 class Delegator < BasicObject
+  include ::Kernel
+
   # Pass in the *obj* to delegate method calls to. All methods supported by
   # *obj* will be delegated to.
   sig { params(obj: BasicObject).void }
