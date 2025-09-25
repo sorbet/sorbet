@@ -212,15 +212,6 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
     return pair{methodName, declLoc};
 }
 
-bool isRSpec(const ast::ExpressionPtr &recv) {
-    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(recv);
-    if (cnst == nullptr) {
-        return false;
-    }
-
-    return cnst->cnst == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope);
-}
-
 // Some RSpec methods are relatively common method names where we really want to make sure that
 // we're definitely in a test context before we do the translation here.
 //
@@ -586,12 +577,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 return nullptr;
             }
 
-            auto recvIsRSpec = isRSpec(send->recv);
-            if (!send->recv.isSelfReference() && !recvIsRSpec) {
+            if (!send->recv.isSelfReference()) {
                 return nullptr;
             }
 
-            if (requiresSecondFactor(send->fun) && !recvIsRSpec && !insideDescribe) {
+            if (requiresSecondFactor(send->fun) && !insideDescribe) {
                 return nullptr;
             }
 
@@ -600,12 +590,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ast::ClassDef::ANCESTORS_store ancestors;
 
             // First ancestor is the superclass
-            if (recvIsRSpec) {
-                auto parts = vector<core::NameRef>{core::Names::Constants::RSpec(), core::Names::Constants::Core(),
-                                                   core::Names::Constants::ExampleGroup()};
-                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(send->recv.loc(), parts));
-
-            } else if (isClass) {
+            if (isClass) {
                 ancestors.emplace_back(ast::MK::Self(arg.loc()));
             } else {
                 // Avoid subclassing self when it's a module, as that will produce an error.
