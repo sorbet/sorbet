@@ -520,39 +520,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_BEGIN_NODE: { // A `begin ... end` block
             auto beginNode = down_cast<pm_begin_node>(node);
 
-            unique_ptr<parser::Node> translatedRescue;
-            if (beginNode->rescue_clause != nullptr) {
-                // Extract rescue and else nodes from the begin node
-                auto bodyNode = translateStatements(beginNode->statements);
-                auto elseNode = translate(up_cast(beginNode->else_clause));
-                // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
-                // statements
-                translatedRescue = translateRescue(beginNode->rescue_clause, move(bodyNode), move(elseNode));
-            }
-
-            NodeVec statements;
-            if (auto *ensureNode = beginNode->ensure_clause) {
-                // Handle `begin ... ensure ... end`
-                // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
-                // Ensure node.
-                auto bodyNode = translateStatements(beginNode->statements);
-                auto ensureBody = translateStatements(ensureNode->statements);
-
-                unique_ptr<parser::Ensure> translatedEnsure;
-                if (translatedRescue != nullptr) {
-                    translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
-                } else {
-                    translatedEnsure = make_unique<parser::Ensure>(location, move(bodyNode), move(ensureBody));
-                }
-
-                statements.emplace_back(move(translatedEnsure));
-            } else if (translatedRescue != nullptr) {
-                // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
-                statements.emplace_back(move(translatedRescue));
-            } else if (beginNode->statements != nullptr) {
-                // Handle just `begin ... end` without ensure or rescue
-                statements = translateMulti(beginNode->statements->body);
-            }
+            NodeVec statements = translateEnsure(beginNode);
 
             if (statements.empty()) {
                 return make_node_with_expr<parser::Kwbegin>(MK::Nil(location), location, std::move(statements));
@@ -660,7 +628,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Handle `~[Integer]`, like `~42`
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
-            if (constantNameString == "~" && parser::NodeWithExpr::cast_node<parser::Integer>(receiver.get())) {
+            if (constantNameString == "~" && PM_NODE_TYPE_P(callNode->receiver, PM_INTEGER_NODE)) {
                 string valueString(sliceLocation(callNode->base.location));
 
                 if (!directlyDesugar) {
@@ -1148,7 +1116,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
             }
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(classNode->body, body);
             if (!bodyExprsOpt.has_value()) {
                 return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
             }
@@ -1276,25 +1244,42 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             Translator methodContext = this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamName);
-            auto body = methodContext.translate(defNode->body);
 
-            if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
-                // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
-                // doesn't have an explicit begin block.
-                // If that's the case, we need to check if the body contains an ensure or rescue clause, and if so,
-                // we need to elevate that node to the top level of the method definition, without the Kwbegin node to
-                // match the behavior of Sorbet's legacy parser.
-                auto kwbeginNode = parser::NodeWithExpr::cast_node<parser::Kwbegin>(body.get());
+            unique_ptr<parser::Node> body;
+            if (defNode->body != nullptr) {
+                if (PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
+                    auto beginNode = down_cast<pm_begin_node>(defNode->body);
+                    auto statements = this->translateEnsure(beginNode);
 
-                if (kwbeginNode != nullptr && kwbeginNode->stmts[0] != nullptr &&
-                    (parser::NodeWithExpr::cast_node<parser::Rescue>(kwbeginNode->stmts[0].get()) ||
-                     parser::NodeWithExpr::cast_node<parser::Ensure>(kwbeginNode->stmts[0].get()))) {
-                    if (kwbeginNode->stmts.size() == 1) {
-                        body = move(kwbeginNode->stmts[0]);
+                    // Prism uses a PM_BEGIN_NODE to model the body of a method that has a top level rescue/ensure, e.g.
+                    //
+                    //     def method_with_top_level_rescue
+                    //       "body"
+                    //     rescue
+                    //       "fallback"
+                    //     end
+                    //
+                    // This gets parsed as-if the body had an explicit begin/rescue/ensure block nested in it.
+                    //
+                    // This would cause the legacy parse tree to have an extra `parser::Kwbegin` node wrapping the body.
+                    // To match the legacy parse tree, we dig into the `beginNode` and pull out its statements,
+                    // skipping the creation of that parent `parser::Kwbegin` node.
+                    if (statements.size() == 1) {
+                        body = move(statements[0]);
                     } else {
-                        unreachable("With ensure or rescue, the body of a method definition will be either a rescue or "
-                                    "ensure node.");
+                        if (!directlyDesugar || !hasExpr(statements)) {
+                            body = make_unique<parser::Kwbegin>(location, move(statements));
+                        } else {
+                            auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
+                            auto finalExpr = move(args.back());
+                            args.pop_back();
+                            auto expr = MK::InsSeq(location, move(args), move(finalExpr));
+                            body = make_node_with_expr<parser::Kwbegin>(move(expr), location, move(statements));
+                        }
                     }
+
+                } else {
+                    body = methodContext.translate(defNode->body);
                 }
             }
 
@@ -1748,21 +1733,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto kvPairs = translateKeyValuePairs(keywordHashNode->elements);
 
-            auto isKwargs = PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
-                            absl::c_all_of(kvPairs, [](const auto &node) {
-                                // Checks if the given node is a keyword hash element based on the standards of Sorbet's
-                                // legacy parser. Based on `Builder::isKeywordHashElement()`
+            auto isKwargs =
+                PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
+                absl::c_all_of(absl::MakeSpan(keywordHashNode->elements.nodes, keywordHashNode->elements.size),
+                               [](const auto *node) {
+                                   // Checks if the given node is a keyword hash element based on the standards of
+                                   // Sorbet's legacy parser. Based on `Builder::isKeywordHashElement()`
 
-                                if (parser::NodeWithExpr::isa_node<Kwsplat>(node.get())) {
-                                    return true;
-                                }
+                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) {
+                                       return true;
+                                   }
 
-                                if (parser::NodeWithExpr::isa_node<ForwardedKwrestArg>(node.get())) {
-                                    return true;
-                                }
-
-                                return false;
-                            });
+                                   return false;
+                               });
 
             return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
         }
@@ -1864,7 +1847,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Module>(location, declLoc, move(name), move(body));
             }
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(moduleNode->body, body);
             if (!bodyExprsOpt.has_value()) {
                 return make_unique<parser::Module>(location, declLoc, move(name), move(body));
             }
@@ -2203,7 +2186,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
             }
 
-            if (!parser::NodeWithExpr::isa_node<parser::Self>(receiver.get())) {
+            if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) {
                 if (auto e = ctx.beginIndexerError(receiver->loc, core::errors::Desugar::InvalidSingletonDef)) {
                     e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                 }
@@ -2211,7 +2194,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::SClass>(move(emptyTree), location, declLoc, move(receiver), nullptr);
             }
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(body);
+            auto bodyExprsOpt = desugarScopeBodyToRHSStore(classNode->body, body);
             if (!bodyExprsOpt.has_value()) {
                 return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
             }
@@ -3214,6 +3197,47 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
     return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
 }
 
+NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
+    auto location = translateLoc(beginNode->base.location);
+
+    NodeVec statements;
+
+    unique_ptr<parser::Node> translatedRescue;
+    if (beginNode->rescue_clause != nullptr) {
+        // Extract rescue and else nodes from the begin node
+        auto bodyNode = translateStatements(beginNode->statements);
+        auto elseNode = translate(up_cast(beginNode->else_clause));
+        // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
+        // statements
+        translatedRescue = translateRescue(beginNode->rescue_clause, move(bodyNode), move(elseNode));
+    }
+
+    if (auto *ensureNode = beginNode->ensure_clause) {
+        // Handle `begin ... ensure ... end`
+        // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
+        // Ensure node.
+        auto bodyNode = translateStatements(beginNode->statements);
+        auto ensureBody = translateStatements(ensureNode->statements);
+
+        unique_ptr<parser::Ensure> translatedEnsure;
+        if (translatedRescue != nullptr) {
+            translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
+        } else {
+            translatedEnsure = make_unique<parser::Ensure>(location, move(bodyNode), move(ensureBody));
+        }
+
+        statements.emplace_back(move(translatedEnsure));
+    } else if (translatedRescue != nullptr) {
+        // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
+        statements.emplace_back(move(translatedRescue));
+    } else if (beginNode->statements != nullptr) {
+        // Handle just `begin ... end` without ensure or rescue
+        statements = translateMulti(beginNode->statements->body);
+    }
+
+    return statements;
+}
+
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
 // @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
@@ -3456,7 +3480,8 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
 // The body can be a Begin node comprising multiple statements, or a single statement.
 // Return nullopt if the body does not have all of its expressions desugared.
 // TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(unique_ptr<parser::Node> &scopeBody) {
+optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
+                                                                          unique_ptr<parser::Node> &scopeBody) {
     ENFORCE(directlyDesugar, "desugarScopeBodyToRHSStore should only be called when direct desugaring is enabled");
 
     if (scopeBody == nullptr) { // Empty body
@@ -3465,7 +3490,9 @@ optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(unique
         return result;
     }
 
-    if (parser::NodeWithExpr::isa_node<parser::Begin>(scopeBody.get())) { // Handle multi-statement body
+    ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
+
+    if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
         if (!hasExpr(scopeBody)) {
             return nullopt;
         }

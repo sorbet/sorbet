@@ -104,6 +104,8 @@ private:
 
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                          std::unique_ptr<parser::Node> sendNode);
+
+    NodeVec translateEnsure(pm_begin_node *beginNode);
     std::unique_ptr<parser::Node> translateRescue(pm_rescue_node *prismRescueNode,
                                                   std::unique_ptr<parser::Node> beginNode,
                                                   std::unique_ptr<parser::Node> elseNode);
@@ -151,7 +153,8 @@ private:
     sorbet::ast::ExpressionPtr desugarDString(core::LocOffsets loc, pm_node_list prismNodeList);
 
     // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
-    std::optional<ast::ClassDef::RHS_store> desugarScopeBodyToRHSStore(std::unique_ptr<parser::Node> &scopeBody);
+    std::optional<ast::ClassDef::RHS_store> desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
+                                                                       std::unique_ptr<parser::Node> &scopeBody);
 
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
