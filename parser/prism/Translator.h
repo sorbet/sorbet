@@ -14,9 +14,6 @@ extern "C" {
 
 namespace sorbet::parser::Prism {
 
-// Forward declaration for op-assignment scaffolding
-struct OpAsgnScaffolding;
-
 class Translator final {
     const Parser &parser;
     // This context holds a reference to the GlobalState allocated up the call stack, which is why we don't allow
@@ -154,6 +151,12 @@ private:
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
     std::unique_ptr<parser::Node> translateSendAssignment(pm_node_t *node, core::LocOffsets location);
 
+    // Translate operator assignment targeting a safe navigation call (e.g., `a&.b += 1`).
+    template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+    std::unique_ptr<parser::Node> translateCSendAssignment(PrismAssignmentNode *callNode, core::LocOffsets location,
+                                                           std::unique_ptr<parser::Node> receiver, core::NameRef name,
+                                                           core::LocOffsets messageLoc);
+
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
@@ -163,6 +166,15 @@ private:
 
     // Generates a unique name for a directly desugared `ast::ExpressionPtr`.
     core::NameRef nextUniqueDesugarName(core::NameRef original);
+
+    // Structure for holding the scaffolding needed for op-assignment desugaring
+    struct OpAsgnScaffolding {
+        core::NameRef temporaryName;
+        ast::InsSeq::STATS_store statementBody;
+        uint16_t numPosArgs;
+        ast::Send::ARGS_store readArgs;
+        ast::Send::ARGS_store assgnArgs;
+    };
 
     // Copy arguments in op-assignment desugaring
     OpAsgnScaffolding copyArgsForOpAsgn(ast::Send *s);
