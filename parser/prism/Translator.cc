@@ -426,16 +426,26 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Array>(location, move(sorbetElements));
             }
 
+            ast::Array::ENTRY_store elements;
+            elements.reserve(arrayNode->elements.size);
+
+            ENFORCE(sorbetElements.size() == arrayNode->elements.size);
+            for (auto &stat : sorbetElements) {
+                auto expr = stat->takeDesugaredExpr();
+                ENFORCE(expr != nullptr);
+                elements.emplace_back(move(expr));
+            }
+
             auto locZeroLen = location.copyWithZeroLength();
 
             ast::Array::ENTRY_store elems;
-            elems.reserve(sorbetElements.size());
+            elems.reserve(elements.size());
 
             ExpressionPtr lastMerge;
-            ENFORCE(sorbetElements.size() == arrayNode->elements.size);
-            for (int i = 0; i < sorbetElements.size(); i++) {
+            ENFORCE(elements.size() == arrayNode->elements.size);
+            for (int i = 0; i < elements.size(); i++) {
                 auto *node = arrayNode->elements.nodes[i];
-                auto &stat = sorbetElements[i];
+                auto &stat = elements[i];
 
                 if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
                     // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
@@ -443,7 +453,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
                     // But for array literals, we want the splat to have the array's location to match
                     // the legacy parser's behavior (important for error messages and hover).
-                    auto splatExpr = stat->takeDesugaredExpr();
+                    auto splatExpr = move(stat);
 
                     // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
                     // methods from hover. Using the array's loc means that we will get a zero-length loc for
@@ -474,7 +484,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
                     }
                 } else {
-                    elems.emplace_back(stat->takeDesugaredExpr());
+                    elems.emplace_back(move(stat));
                 }
             };
 
