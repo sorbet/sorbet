@@ -152,6 +152,12 @@ private:
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
     std::unique_ptr<parser::Node> translateSendAssignment(pm_node_t *node, core::LocOffsets location);
 
+    // Translate operator assignment targeting a safe navigation call (e.g., `a&.b += 1`).
+    template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
+    std::unique_ptr<parser::Node> translateCSendAssignment(PrismAssignmentNode *callNode, core::LocOffsets location,
+                                                           std::unique_ptr<parser::Node> receiver, core::NameRef name,
+                                                           core::LocOffsets messageLoc);
+
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
