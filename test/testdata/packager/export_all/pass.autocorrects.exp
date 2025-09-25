@@ -57,6 +57,11 @@ class Other < PackageSpec
   import Foo::Bar
   import Foo::Bar::Baz
   import Typical
+
+  export_all!
+
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Other` declares `export_all!` and therefore should not use explicit exports
+# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Other` declares `export_all!` and therefore should not use explicit exports
 end
 # ------------------------------
 # -- test/testdata/packager/export_all/other/other.rb --
@@ -75,6 +80,13 @@ class Other::OtherClass
   Typical::Example # packages that don't use `export_all` are not affected
   Typical::NonExported # packages that don't use `export_all` are not affected
 # ^^^^^^^^^^^^^^^^^^^^ error: `Typical::NonExported` resolves but is not exported
+end
+# ------------------------------
+# -- test/testdata/packager/export_all/other/other2.rb --
+# frozen_string_literal: true
+# typed: strict
+
+class Other::OtherClass2
 end
 # ------------------------------
 # -- test/testdata/packager/export_all/typical/__package.rb --
