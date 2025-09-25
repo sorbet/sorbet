@@ -87,15 +87,15 @@ int PackageInfo::orderImports(const core::GlobalState &gs, const PackageInfo &a,
 }
 
 int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const {
-    if (!packageDB.enforceLayering() || !strictDependenciesLevel().has_value() ||
-        !a.strictDependenciesLevel().has_value() || !b.strictDependenciesLevel().has_value() ||
-        !a.layer().has_value() || !b.layer().has_value()) {
+    if (!packageDB.enforceLayering() || !strictDependenciesLevel.has_value() ||
+        !a.strictDependenciesLevel.has_value() || !b.strictDependenciesLevel.has_value() || !a.layer.has_value() ||
+        !b.layer.has_value()) {
         return 0;
     }
 
     // Layering violations always come first
-    auto aCausesLayeringViolation = causesLayeringViolation(packageDB, a.layer().value().first);
-    auto bCausesLayeringViolation = causesLayeringViolation(packageDB, b.layer().value().first);
+    auto aCausesLayeringViolation = causesLayeringViolation(packageDB, a.layer.value());
+    auto bCausesLayeringViolation = causesLayeringViolation(packageDB, b.layer.value());
     if (aCausesLayeringViolation && bCausesLayeringViolation) {
         return 0;
     } else if (aCausesLayeringViolation && !bCausesLayeringViolation) {
@@ -104,9 +104,9 @@ int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo
         return 1;
     }
 
-    auto aStrictDependenciesLevel = a.strictDependenciesLevel().value().first;
-    auto bStrictDependenciesLevel = b.strictDependenciesLevel().value().first;
-    switch (strictDependenciesLevel().value().first) {
+    auto aStrictDependenciesLevel = a.strictDependenciesLevel.value();
+    auto bStrictDependenciesLevel = b.strictDependenciesLevel.value();
+    switch (strictDependenciesLevel.value()) {
         case StrictDependenciesLevel::False: {
             // Sort order: Layering violations, false, layered or stricter
             switch (aStrictDependenciesLevel) {
@@ -166,7 +166,7 @@ int PackageInfo::orderByAlphabetical(const core::GlobalState &gs, const PackageI
 
 optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalState &gs, const PackageInfo &info,
                                                              ImportType importType) const {
-    auto insertionLoc = core::Loc::none(loc.file());
+    auto insertionLoc = core::Loc::none(this->file);
     optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
 
     // Find the first non-prelude import (if one exists) so that we don't recommend inserting near an implicit import
@@ -225,12 +225,12 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         }
         if (!importToInsertAfter.exists()) {
             // Insert before the first import
-            core::Loc beforePackageName = {loc.file(), firstImport->loc};
+            core::Loc beforePackageName = {this->file, firstImport->loc};
             auto [beforeImport, numWhitespace] = beforePackageName.findStartOfIndentation(gs);
             auto endOfPrevLine = beforeImport.adjust(gs, -numWhitespace - "\n"sv.size(), 0);
             insertionLoc = endOfPrevLine.copyWithZeroLength();
         } else {
-            insertionLoc = core::Loc(loc.file(), importToInsertAfter.copyEndWithZeroLength());
+            insertionLoc = core::Loc(this->file, importToInsertAfter.copyEndWithZeroLength());
         }
     } else {
         // if we don't have any imports, then we can try adding it
@@ -240,10 +240,10 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         if (!exports_.empty()) {
             exportLoc = exports_.front().loc.beginPos() - " "sv.size();
         } else {
-            exportLoc = loc.endPos() - "end\n"sv.size();
+            exportLoc = locs.loc.endPos() - "end\n"sv.size();
         }
 
-        string_view file_source = loc.file().data(gs).source();
+        string_view file_source = this->file.data(gs).source();
 
         // Defensively guard against the first export loc or the package's loc being invalid.
         if (exportLoc <= 0 || exportLoc >= file_source.size()) {
@@ -261,7 +261,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                 return nullopt;
             }
         }
-        insertionLoc = core::Loc(loc.file(), exportLoc + 1, exportLoc + 1);
+        insertionLoc = core::Loc(this->file, exportLoc + 1, exportLoc + 1);
     }
     ENFORCE(insertionLoc.exists());
 
@@ -301,7 +301,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
                                                              const core::SymbolRef newExport) const {
     auto newExportName = newExport.show(gs);
     auto exportLine = fmt::format("export {}", newExportName);
-    auto pkgFile = loc.file();
+    auto pkgFile = this->file;
     auto insertionLoc = core::Loc::none(pkgFile);
     if (!exports_.empty()) {
         core::LocOffsets exportToInsertAfter;
@@ -321,10 +321,10 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
         }
     } else {
         // if we don't have any exports, then we can try adding it right before the final `end`
-        uint32_t exportLoc = loc.endPos() - "end\n"sv.size();
+        uint32_t exportLoc = this->locs.loc.endPos() - "end\n"sv.size();
         // we want to find the end of the last non-empty line, so
         // let's do something gross: walk backward until we find non-whitespace
-        const auto &file_source = loc.file().data(gs).source();
+        const auto &file_source = this->file.data(gs).source();
         while (isspace(file_source[exportLoc])) {
             exportLoc--;
             // this shouldn't happen in a well-formatted
@@ -333,7 +333,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
                 return nullopt;
             }
         }
-        insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
+        insertionLoc = {this->file, exportLoc + 1, exportLoc + 1};
     }
     ENFORCE(insertionLoc.exists());
 
@@ -359,20 +359,20 @@ optional<ImportType> PackageInfo::importsPackage(MangledName mangledName) const 
 // Is it a layering violation to import otherPkg from this package?
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const {
     ENFORCE(exists());
-    if (!otherPkg.layer().has_value()) {
+    if (!otherPkg.layer.has_value()) {
         return false;
     }
 
-    return causesLayeringViolation(packageDB, otherPkg.layer().value().first);
+    return causesLayeringViolation(packageDB, otherPkg.layer.value());
 }
 
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const {
     ENFORCE(exists());
-    if (!layer().has_value()) {
+    if (!layer.has_value()) {
         return false;
     }
 
-    auto pkgLayer = layer().value().first;
+    auto pkgLayer = layer.value();
     auto pkgLayerIndex = packageDB.layerIndex(pkgLayer);
     auto otherPkgLayerIndex = packageDB.layerIndex(otherPkgLayer);
 
@@ -381,11 +381,11 @@ bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, core::Name
 
 // What is the minimum strict dependencies level that this package's imports must have?
 StrictDependenciesLevel PackageInfo::minimumStrictDependenciesLevel() const {
-    if (!strictDependenciesLevel().has_value()) {
+    if (!strictDependenciesLevel.has_value()) {
         return StrictDependenciesLevel::False;
     }
 
-    switch (strictDependenciesLevel().value().first) {
+    switch (strictDependenciesLevel.value()) {
         case StrictDependenciesLevel::False:
             return StrictDependenciesLevel::False;
         case StrictDependenciesLevel::Layered:

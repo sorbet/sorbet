@@ -102,12 +102,12 @@ public:
 
     core::Loc fullLoc() const {
         ENFORCE(exists());
-        return loc;
+        return core::Loc(file, locs.loc);
     }
 
     core::Loc declLoc() const {
         ENFORCE(exists());
-        return declLoc_;
+        return core::Loc(file, locs.declLoc);
     }
 
     bool exists() const {
@@ -149,18 +149,24 @@ public:
 
     std::vector<core::LocOffsets> extraDirectives_;
 
-    // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
-    core::Loc loc;
-    // loc for the package definition. Single line (just the class def). Used for error messages.
-    core::Loc declLoc_;
+    struct {
+        // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
+        core::LocOffsets loc;
+        // loc for the package definition. Single line (just the class def). Used for error messages.
+        core::LocOffsets declLoc;
+        core::LocOffsets layer;
+        core::LocOffsets strictDependenciesLevel;
+        core::LocOffsets minTypedLevel;
+        core::LocOffsets testsMinTypedLevel;
+    } locs;
 
-    std::optional<std::pair<core::NameRef, core::LocOffsets>> layer_; // 20
+    core::FileRef file;
 
-    std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_; // 16
+    std::optional<core::NameRef> layer; // 20
 
-    std::optional<
-        std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
-        minTypedLevel_; // 28
+    std::optional<StrictDependenciesLevel> strictDependenciesLevel; // 16
+
+    std::optional<std::pair<core::StrictLevel, core::StrictLevel>> minTypedLevel; // 28
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     std::optional<int> sccID_; // 8
@@ -178,16 +184,6 @@ public:
     bool visibleToTests_ = false;
 
     bool isPreludePackage_ = false;
-
-    std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
-        ENFORCE(exists());
-        return strictDependenciesLevel_;
-    }
-
-    std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const {
-        ENFORCE(exists());
-        return layer_;
-    }
 
     // The id of the SCC that this package's normal imports belong to.
     //
@@ -214,8 +210,11 @@ public:
 
     std::unique_ptr<PackageInfo> deepCopy() const;
 
-    PackageInfo(MangledName mangledName, core::Loc loc, core::Loc declLoc_)
-        : loc(loc), declLoc_(declLoc_), mangledName_(mangledName) {}
+    PackageInfo(MangledName mangledName, core::FileRef file, core::LocOffsets loc, core::LocOffsets declLoc)
+        : file(file), mangledName_(mangledName) {
+        this->locs.loc = loc;
+        this->locs.declLoc = declLoc;
+    }
 
     explicit PackageInfo(const PackageInfo &) = default;
     PackageInfo &operator=(const PackageInfo &) = delete;
@@ -259,7 +258,7 @@ public:
         return this->isPreludePackage_;
     }
 };
-CheckSize(PackageInfo, 232, 8);
+CheckSize(PackageInfo, 224, 8);
 
 } // namespace sorbet::core::packages
 #endif
