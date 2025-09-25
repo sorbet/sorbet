@@ -308,12 +308,12 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
-    if (!send->hasBlock() || send->block()->params.size() != 0) {
+    if (send->hasBlock() && send->block()->params.size() != 0) {
         return invalidUnderTestEach(ctx, eachName, move(stmt));
     }
 
     auto maybeName = nameForTestHelperMethod(ctx, *send);
-    if (maybeName.exists()) {
+    if (maybeName.exists() && send->hasBlock()) {
         auto name = maybeName;
 
         // pull constants out of the block
@@ -352,8 +352,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 
     switch (send->fun.rawId()) {
         case core::Names::describe().rawId(): {
-            if (send->numPosArgs() != 1) {
-                return invalidUnderTestEach(ctx, eachName, move(stmt));
+            if (send->numPosArgs() != 1 || !send->hasBlock()) {
+                break;
             }
 
             return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
@@ -363,13 +363,14 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         case core::Names::let().rawId():
         case core::Names::let_bang().rawId():
         case core::Names::subject().rawId(): {
-            if (!(insideDescribe && (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0))))) {
-                return invalidUnderTestEach(ctx, eachName, move(stmt));
+            if (!send->hasBlock() ||
+                !(insideDescribe && (send->numPosArgs() == 0 || ast::isa_tree<ast::Literal>(send->getPosArg(0))))) {
+                break;
             }
 
             auto maybeDecl = getLetNameAndDeclLoc(*send);
             if (!maybeDecl.has_value()) {
-                return invalidUnderTestEach(ctx, eachName, move(stmt));
+                break;
             }
             auto [methodName, declLoc] = maybeDecl.value();
 
@@ -391,9 +392,10 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             break;
         }
 
+        // hello
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (!insideDescribe || send->numPosArgs() != 1) {
+            if (send->hasBlock() || !insideDescribe || send->numPosArgs() != 1) {
                 return nullptr;
             }
 
