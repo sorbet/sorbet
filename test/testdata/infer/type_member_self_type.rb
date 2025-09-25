@@ -21,7 +21,8 @@ class A
 end
 
 p(A) # error: Expression does not have a fully-defined type
-T.reveal_type(A.new) # error: `T.untyped`
+a = A.new # error: Expression does not have a fully-defined type
+T.reveal_type(a) # error: `T.untyped`
 
 class ChildABad < A # error: Type `X` declared by parent `A` must be re-declared in `ChildABad`
 end
