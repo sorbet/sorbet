@@ -44,6 +44,10 @@ suggest-sig.rb:5: The method `hazTwoArgs` does not have a `sig` https://srb.help
 suggest-sig.rb:8: Method `someCondition` does not exist on `Object` https://srb.help/7003
      8 |  if someCondition
              ^^^^^^^^^^^^^
+  Got `Object` originating from:
+    suggest-sig.rb:7:
+     7 |def baz
+        ^
 
 suggest-sig.rb:7: The method `baz` does not have a `sig` https://srb.help/7017
      7 |def baz
@@ -66,6 +70,10 @@ suggest-sig.rb:18: The method `bla` does not have a `sig` https://srb.help/7017
 suggest-sig.rb:21: Method `someCondition` does not exist on `Object` https://srb.help/7003
     21 |  if someCondition
              ^^^^^^^^^^^^^
+  Got `Object` originating from:
+    suggest-sig.rb:20:
+    20 |def bbq
+        ^
 
 suggest-sig.rb:20: The method `bbq` does not have a `sig` https://srb.help/7017
     20 |def bbq
@@ -307,6 +315,10 @@ suggest-sig.rb:112: The method `load_account_business_profile` does not have a `
 suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
             ^^^
+  Got `T.class_of(TestCarash)` originating from:
+    suggest-sig.rb:104:
+     104 |class TestCarash
+          ^
   Autocorrect: Done
     suggest-sig.rb:105: Inserted `extend T::Sig`
      105 |  class Merchant
@@ -315,6 +327,10 @@ suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http
 suggest-sig.rb:108: Method `params` does not exist on `T.class_of(TestCarash)` https://srb.help/7003
      108 |  sig {params(merchant: Merchant).void}
                  ^^^^^^
+  Got `T.class_of(TestCarash)` originating from:
+    suggest-sig.rb:104:
+     104 |class TestCarash
+          ^
 
 suggest-sig.rb:166: The method `test1` does not have a `sig` https://srb.help/7017
      166 |  def self.test1(x:, y:)

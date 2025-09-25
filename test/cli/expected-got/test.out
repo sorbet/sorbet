@@ -115,6 +115,10 @@ test/cli/expected-got/expected-got.rb:57: Used `&.` operator on `Integer(1)`, wh
 test/cli/expected-got/expected-got.rb:59: Method `top_level_does_not_exist` does not exist on `T.class_of(<root>)` https://srb.help/7003
     59 |top_level_does_not_exist
         ^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/expected-got/expected-got.rb:2:
+     2 |extend T::Sig
+        ^
 
 test/cli/expected-got/expected-got.rb:61: Argument does not have asserted type `Integer` https://srb.help/7007
     61 |T.let(nil, Integer)

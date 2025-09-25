@@ -152,6 +152,10 @@ test/cli/errors-skip-cache/props.rb:5: Superclasses must only contain constant l
 test/cli/errors-skip-cache/props.rb:6: Method `prop` does not exist on `T.class_of(A)` https://srb.help/7003
      6 |  prop :foo, T.nilable(T.untyped)
           ^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/errors-skip-cache/props.rb:5:
+     5 |class A < T:Struct
+        ^
   Did you mean `proc`? Use `-a` to autocorrect
     test/cli/errors-skip-cache/props.rb:6: Replace with `proc`
      6 |  prop :foo, T.nilable(T.untyped)
@@ -188,6 +192,10 @@ test/cli/errors-skip-cache/props.rb:5: Superclasses must only contain constant l
 test/cli/errors-skip-cache/props.rb:6: Method `prop` does not exist on `T.class_of(A)` https://srb.help/7003
      6 |  prop :foo, T.nilable(T.untyped)
           ^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/errors-skip-cache/props.rb:5:
+     5 |class A < T:Struct
+        ^
   Did you mean `proc`? Use `-a` to autocorrect
     test/cli/errors-skip-cache/props.rb:6: Replace with `proc`
      6 |  prop :foo, T.nilable(T.untyped)

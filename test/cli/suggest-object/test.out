@@ -1,4 +1,8 @@
 test/cli/suggest-object/suggest-object.rb:4: Method `class` does not exist on `M` https://srb.help/7003
      4 |    self.class
                  ^^^^^
+  Got `M` originating from:
+    test/cli/suggest-object/suggest-object.rb:3:
+     3 |  def foo
+          ^
 Errors: 1

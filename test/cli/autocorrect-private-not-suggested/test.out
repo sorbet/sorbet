@@ -9,6 +9,10 @@ autocorrect-private-not-suggested.rb:11: Method `my_private_metho` does not exis
 autocorrect-private-not-suggested.rb:7: Method `my_private_metho` does not exist on `A` https://srb.help/7003
      7 |    my_private_metho
             ^^^^^^^^^^^^^^^^
+  Got `A` originating from:
+    autocorrect-private-not-suggested.rb:6:
+     6 |  def example
+          ^
   Autocorrect: Done
     autocorrect-private-not-suggested.rb:7: Replaced with `my_private_method`
      7 |    my_private_metho
