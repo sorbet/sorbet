@@ -491,7 +491,7 @@ module Kernel
   private def initialize_clone(*args); end
 
   sig {params(object: T.self_type).returns(T.self_type)}
-  def initialize_copy(object); end
+  private def initialize_copy(object); end
 
   private def initialize_dup(orig); end
 
