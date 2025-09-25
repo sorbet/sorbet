@@ -166,7 +166,8 @@ public:
 
     std::optional<StrictDependenciesLevel> strictDependenciesLevel; // 16
 
-    std::optional<std::pair<core::StrictLevel, core::StrictLevel>> minTypedLevel; // 28
+    core::StrictLevel minTypedLevel = core::StrictLevel::None;
+    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     int sccID_ = -1; // 8

@@ -705,7 +705,7 @@ struct PackageSpecBodyWalk {
             }
         } else if (send.fun == core::Names::sorbet()) {
             // TODO(neil): enforce the minimum sigil declared here
-            if (info.minTypedLevel.has_value()) {
+            if (info.minTypedLevel != core::StrictLevel::None) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
                     e.addErrorLine(ctx.locAt(info.locs.minTypedLevel), "Previously declared here");
@@ -715,15 +715,15 @@ struct PackageSpecBodyWalk {
             }
 
             if (send.numKwArgs() >= 2) {
-                std::optional<core::StrictLevel> minTypedLevel;
+                core::StrictLevel minTypedLevel;
                 core::LocOffsets minTypedLevelLoc;
-                std::optional<core::StrictLevel> testsMinTypedLevel;
+                core::StrictLevel testsMinTypedLevel;
                 core::LocOffsets testsMinTypedLevelLoc;
                 for (const auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
                     auto typedLevel = parseTypedLevelOption(ctx, value);
-                    if (!typedLevel.has_value()) {
+                    if (typedLevel != core::StrictLevel::None) {
                         if (keyLit->asSymbol() == core::Names::minTypedLevel() ||
                             keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
                             if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidMinTypedLevel)) {
@@ -735,17 +735,18 @@ struct PackageSpecBodyWalk {
                         continue;
                     }
                     if (keyLit->asSymbol() == core::Names::minTypedLevel()) {
-                        minTypedLevel = typedLevel.value();
+                        minTypedLevel = typedLevel;
                         minTypedLevelLoc = value.loc();
                     } else if (keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
-                        testsMinTypedLevel = typedLevel.value();
+                        testsMinTypedLevel = typedLevel;
                         testsMinTypedLevelLoc = value.loc();
                     } else {
                         // Handled elsewhere
                     }
                 }
-                if (minTypedLevel.has_value() && testsMinTypedLevel.has_value()) {
-                    info.minTypedLevel = make_pair(minTypedLevel.value(), testsMinTypedLevel.value());
+                if (minTypedLevel != core::StrictLevel::None && testsMinTypedLevel != core::StrictLevel::None) {
+                    info.minTypedLevel = minTypedLevel;
+                    info.testsMinTypedLevel = testsMinTypedLevel;
                     info.locs.minTypedLevel = minTypedLevelLoc;
                     info.locs.testsMinTypedLevel = testsMinTypedLevelLoc;
                 }
@@ -864,10 +865,10 @@ private:
         return nullopt;
     }
 
-    optional<core::StrictLevel> parseTypedLevelOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+    core::StrictLevel parseTypedLevelOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
-            return nullopt;
+            return core::StrictLevel::None;
         }
         auto value = lit->asString();
         auto strictLevel = core::SigilTraits<core::StrictLevel>::fromString(value.show(gs));
@@ -879,7 +880,7 @@ private:
             case core::StrictLevel::Strong:
                 return strictLevel;
             default:
-                return nullopt;
+                return core::StrictLevel::None;
         }
     }
 };
