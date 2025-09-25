@@ -509,10 +509,6 @@ ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::Expr
 }
 
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe) {
-    if (!send->hasBlock()) {
-        return nullptr;
-    }
-
     auto *block = send->block();
 
     if (!send->recv.isSelfReference()) {
@@ -522,6 +518,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     switch (send->fun.rawId()) {
         case core::Names::testEach().rawId():
         case core::Names::testEachHash().rawId(): {
+            if (!send->hasBlock()) {
+                return nullptr;
+            }
+
             if (send->numPosArgs() != 1) {
                 if (send->fun == core::Names::testEachHash() && send->numKwArgs() > 0) {
                     auto errLoc = send->getKwKey(0).loc().join(send->getKwValue(send->numKwArgs() - 1).loc());
@@ -561,7 +561,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
 
         case core::Names::describe().rawId(): {
-            if (send->numPosArgs() != 1) {
+            if (!send->hasBlock() || send->numPosArgs() != 1) {
                 return nullptr;
             }
             auto &arg = send->getPosArg(0);
@@ -606,7 +606,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId(): {
-            if (!insideDescribe && requiresSecondFactor(send->fun)) {
+            if (!send->hasBlock() || (!insideDescribe && requiresSecondFactor(send->fun))) {
                 return nullptr;
             }
 
@@ -635,7 +635,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::let().rawId():
         case core::Names::let_bang().rawId():
         case core::Names::subject().rawId(): {
-            if (!insideDescribe) {
+            if (!send->hasBlock() || !insideDescribe) {
                 return nullptr;
             }
 
@@ -655,7 +655,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::sharedExamples().rawId():
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
-            if (!insideDescribe || send->numPosArgs() != 1) {
+            if (!send->hasBlock() || !insideDescribe || send->numPosArgs() != 1) {
                 return nullptr;
             }
 
@@ -695,7 +695,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (!insideDescribe || send->numPosArgs() != 1) {
+            if (send->hasBlock() || !insideDescribe || send->numPosArgs() != 1) {
                 return nullptr;
             }
 

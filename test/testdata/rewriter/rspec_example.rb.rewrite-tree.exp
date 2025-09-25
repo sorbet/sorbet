@@ -70,7 +70,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <self>.defined_in_shared_examples()
         end
 
-        <self>.include_examples("some examples")
+        <self>.include(<emptyTree>::<C <shared_examples 'some examples'>>)
       end
 
       <self>.test_each([]) do |x|
