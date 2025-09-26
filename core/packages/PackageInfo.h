@@ -163,10 +163,10 @@ public:
 
     core::FileRef file;
 
-    core::NameRef layer; // 20
+    core::NameRef layer;
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
-    int sccID_ = -1; // 8
+    int sccID_ = -1;
 
     // ID of the strongly-connected component that this package's tests are in, according to its graph of import
     // dependencies
@@ -185,7 +185,7 @@ public:
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
-    StrictDependenciesLevel strictDependenciesLevel; // 16
+    StrictDependenciesLevel strictDependenciesLevel;
 
     // The id of the SCC that this package's normal imports belong to.
     //
