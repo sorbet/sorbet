@@ -950,7 +950,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 magicSendArgs.emplace_back(move(argsArrayExpr));
                 magicSendArgs.emplace_back(move(kwargsExpr));
 
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) &&
+                    !blockPassArgIsSymbol) {
+                    // Special handling for non-Symbol block pass args, like `a.map(&block)`
+                    // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
+                    // and handled separately below.
+
                     // Desugar a call with a splat, and any other expression as a block pass argument.
                     // E.g. `foo(*splat, &block)`
 
@@ -959,6 +964,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                     cout << "callWithSplatAndBlockPass @ " << core::Loc(ctx.file, loc).fileShortPosToString(ctx.state)
                          << endl;
+
                     auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(), messageLoc,
                                              numPosArgs, move(magicSendArgs), flags);
                     return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
