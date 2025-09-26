@@ -584,7 +584,7 @@ struct PackageSpecBodyWalk {
             }
         } else if (send.fun == core::Names::exportAll()) {
             if (send.numPosArgs() == 0) {
-                info.exportAll_ = true;
+                info.locs.exportAll = send.loc;
             }
         } else if (send.fun == core::Names::preludePackage() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             info.isPreludePackage_ = true;

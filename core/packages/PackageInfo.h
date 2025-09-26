@@ -118,11 +118,6 @@ public:
     std::string show(const core::GlobalState &gs) const;
     bool operator==(const PackageInfo &rhs) const;
 
-    bool exportAll() const {
-        ENFORCE(exists());
-        return exportAll_;
-    }
-
     bool visibleToTests() const {
         ENFORCE(exists());
         return visibleToTests_;
@@ -153,12 +148,17 @@ public:
     struct {
         // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
         core::LocOffsets loc;
+
         // loc for the package definition. Single line (just the class def). Used for error messages.
         core::LocOffsets declLoc;
+
         core::LocOffsets layer;
         core::LocOffsets strictDependenciesLevel;
         core::LocOffsets minTypedLevel;
         core::LocOffsets testsMinTypedLevel;
+
+        // Set to non-none loc when this package should just export everything
+        core::LocOffsets exportAll;
     } locs;
 
     core::FileRef file;
@@ -173,9 +173,6 @@ public:
     int testSccID_ = -1;
 
     MangledName mangledName_;
-
-    // Whether this package should just export everything
-    bool exportAll_ = false;
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
@@ -260,7 +257,7 @@ public:
         return this->isPreludePackage_;
     }
 };
-CheckSize(PackageInfo, 200, 8);
+CheckSize(PackageInfo, 208, 8);
 
 } // namespace sorbet::core::packages
 #endif

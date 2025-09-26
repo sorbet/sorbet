@@ -300,7 +300,7 @@ public:
             return;
         }
 
-        if (this->package.exportAll()) {
+        if (this->package.locs.exportAll.exists()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::ExportConflict)) {
                 e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                             this->package.mangledName().owner.show(ctx), "export_all!");
@@ -517,7 +517,7 @@ public:
         }
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        bool isExported = pkg.exportAll();
+        bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
             isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
         } else if (litSymbol.isFieldOrStaticField()) {
