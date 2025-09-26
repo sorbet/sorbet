@@ -63,7 +63,7 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
-    return pkg.loc.file().data(gs).isPackagedTest();
+    return pkg.file.data(gs).isPackagedTest();
 }
 
 vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, MangledName pkg) {
@@ -649,10 +649,10 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.strictDependenciesLevel_.has_value()) {
+            if (info.strictDependenciesLevel != StrictDependenciesLevel::None) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel_.value().second), "Previously declared here");
+                    e.addErrorLine(ctx.locAt(info.locs.strictDependenciesLevel), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
@@ -660,8 +660,9 @@ struct PackageSpecBodyWalk {
 
             if (send.numPosArgs() > 0) {
                 auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
-                if (parsedValue.has_value()) {
-                    info.strictDependenciesLevel_ = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                if (parsedValue != StrictDependenciesLevel::None) {
+                    info.strictDependenciesLevel = parsedValue;
+                    info.locs.strictDependenciesLevel = send.getPosArg(0).loc();
                 } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                         e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, or `{}`", send.fun.show(ctx),
@@ -681,10 +682,10 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.layer_.has_value()) {
+            if (info.layer.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.layer_.value().second), "Previously declared here");
+                    e.addErrorLine(ctx.locAt(info.locs.layer), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
@@ -692,8 +693,9 @@ struct PackageSpecBodyWalk {
 
             if (send.numPosArgs() > 0) {
                 auto parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
-                if (parsedValue.has_value()) {
-                    info.layer_ = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                if (parsedValue.exists()) {
+                    info.layer = parsedValue;
+                    info.locs.layer = send.getPosArg(0).loc();
                 } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidLayer)) {
                         e.setHeader("Argument to `{}` must be one of: {}", send.fun.show(ctx),
@@ -703,23 +705,25 @@ struct PackageSpecBodyWalk {
             }
         } else if (send.fun == core::Names::sorbet()) {
             // TODO(neil): enforce the minimum sigil declared here
-            if (info.minTypedLevel_.has_value()) {
+            if (info.minTypedLevel != core::StrictLevel::None) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.minTypedLevel_.value().first.second), "Previously declared here");
+                    e.addErrorLine(ctx.locAt(info.locs.minTypedLevel), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
             }
 
             if (send.numKwArgs() >= 2) {
-                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> minTypedLevel;
-                std::optional<std::pair<core::StrictLevel, core::LocOffsets>> testsMinTypedLevel;
+                core::StrictLevel minTypedLevel;
+                core::LocOffsets minTypedLevelLoc;
+                core::StrictLevel testsMinTypedLevel;
+                core::LocOffsets testsMinTypedLevelLoc;
                 for (const auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
                     auto typedLevel = parseTypedLevelOption(ctx, value);
-                    if (!typedLevel.has_value()) {
+                    if (typedLevel == core::StrictLevel::None) {
                         if (keyLit->asSymbol() == core::Names::minTypedLevel() ||
                             keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
                             if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidMinTypedLevel)) {
@@ -731,15 +735,20 @@ struct PackageSpecBodyWalk {
                         continue;
                     }
                     if (keyLit->asSymbol() == core::Names::minTypedLevel()) {
-                        minTypedLevel = make_pair(typedLevel.value(), value.loc());
+                        minTypedLevel = typedLevel;
+                        minTypedLevelLoc = value.loc();
                     } else if (keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
-                        testsMinTypedLevel = make_pair(typedLevel.value(), value.loc());
+                        testsMinTypedLevel = typedLevel;
+                        testsMinTypedLevelLoc = value.loc();
                     } else {
                         // Handled elsewhere
                     }
                 }
-                if (minTypedLevel.has_value() && testsMinTypedLevel.has_value()) {
-                    info.minTypedLevel_ = make_pair(minTypedLevel.value(), testsMinTypedLevel.value());
+                if (minTypedLevel != core::StrictLevel::None && testsMinTypedLevel != core::StrictLevel::None) {
+                    info.minTypedLevel = minTypedLevel;
+                    info.testsMinTypedLevel = testsMinTypedLevel;
+                    info.locs.minTypedLevel = minTypedLevelLoc;
+                    info.locs.testsMinTypedLevel = testsMinTypedLevelLoc;
                 }
             }
         } else {
@@ -823,10 +832,10 @@ struct PackageSpecBodyWalk {
     }
 
 private:
-    optional<StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
+    StrictDependenciesLevel parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
-            return nullopt;
+            return StrictDependenciesLevel::None;
         }
         auto value = lit->asString();
 
@@ -840,26 +849,26 @@ private:
             return StrictDependenciesLevel::Dag;
         }
 
-        return nullopt;
+        return StrictDependenciesLevel::None;
     }
 
-    optional<core::NameRef> parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+    core::NameRef parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
         auto validLayers = gs.packageDB().layers();
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
-            return nullopt;
+            return core::NameRef::noName();
         }
         auto value = lit->asString();
         if (absl::c_find(validLayers, value) != validLayers.end()) {
             return value;
         }
-        return nullopt;
+        return core::NameRef::noName();
     }
 
-    optional<core::StrictLevel> parseTypedLevelOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+    core::StrictLevel parseTypedLevelOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
-            return nullopt;
+            return core::StrictLevel::None;
         }
         auto value = lit->asString();
         auto strictLevel = core::SigilTraits<core::StrictLevel>::fromString(value.show(gs));
@@ -871,7 +880,7 @@ private:
             case core::StrictLevel::Strong:
                 return strictLevel;
             default:
-                return nullopt;
+                return core::StrictLevel::None;
         }
     }
 };
@@ -902,8 +911,8 @@ unique_ptr<PackageInfo> definePackage(core::GlobalState &gs, ast::ParsedFile &pa
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
-        return make_unique<PackageInfo>(MangledName(packageSpecClass->symbol), ctx.locAt(packageSpecClass->loc),
-                                        ctx.locAt(packageSpecClass->declLoc));
+        return make_unique<PackageInfo>(MangledName(packageSpecClass->symbol), ctx.file, packageSpecClass->loc,
+                                        packageSpecClass->declLoc);
     }
 
     return nullptr;
@@ -994,25 +1003,26 @@ void validateLayering(core::Context ctx, const Import &i) {
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
-    if (!thisPkg.strictDependenciesLevel().has_value() || !otherPkg.strictDependenciesLevel().has_value() ||
-        !thisPkg.layer().has_value() || !otherPkg.layer().has_value()) {
+    if (thisPkg.strictDependenciesLevel == StrictDependenciesLevel::None ||
+        otherPkg.strictDependenciesLevel == StrictDependenciesLevel::None || !thisPkg.layer.exists() ||
+        !otherPkg.layer.exists()) {
         return;
     }
 
-    if (thisPkg.strictDependenciesLevel().value().first == StrictDependenciesLevel::False) {
+    if (thisPkg.strictDependenciesLevel == StrictDependenciesLevel::False) {
         return;
     }
 
-    auto pkgLayer = thisPkg.layer().value().first;
-    auto otherPkgLayer = otherPkg.layer().value().first;
+    auto pkgLayer = thisPkg.layer;
+    auto otherPkgLayer = otherPkg.layer;
 
     if (thisPkg.causesLayeringViolation(packageDB, otherPkgLayer)) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::LayeringViolation)) {
             e.setHeader("Layering violation: cannot import `{}` (in layer `{}`) from `{}` (in layer `{}`)",
                         otherPkg.show(ctx), otherPkgLayer.show(ctx), thisPkg.show(ctx), pkgLayer.show(ctx));
-            e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer().value().second), "`{}`'s `{}` declared here",
-                           thisPkg.show(ctx), "layer");
-            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer().value().second), "`{}`'s `{}` declared here",
+            e.addErrorLine(core::Loc(thisPkg.file, thisPkg.locs.layer), "`{}`'s `{}` declared here", thisPkg.show(ctx),
+                           "layer");
+            e.addErrorLine(core::Loc(otherPkg.file, otherPkg.locs.layer), "`{}`'s `{}` declared here",
                            otherPkg.show(ctx), "layer");
             // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
             // package), autocorrect to delete import
@@ -1021,11 +1031,11 @@ void validateLayering(core::Context ctx, const Import &i) {
 
     StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
-    if (otherPkg.strictDependenciesLevel().value().first < otherPkgExpectedLevel) {
+    if (otherPkg.strictDependenciesLevel < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
-            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel().value().second),
+            e.addErrorLine(core::Loc(otherPkg.file, otherPkg.locs.strictDependenciesLevel),
                            "`{}`'s `{}` level declared here", otherPkg.show(ctx), "strict_dependencies");
             // TODO(neil): if the import is unused (ie. there are no references in this package to the imported
             // package), autocorrect to delete import
@@ -1034,12 +1044,11 @@ void validateLayering(core::Context ctx, const Import &i) {
         }
     }
 
-    if (thisPkg.strictDependenciesLevel().value().first >= StrictDependenciesLevel::LayeredDag) {
+    if (thisPkg.strictDependenciesLevel >= StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
-                auto level =
-                    fmt::format("strict_dependencies '{}'",
-                                strictDependenciesLevelToString(thisPkg.strictDependenciesLevel().value().first));
+                auto level = fmt::format("strict_dependencies '{}'",
+                                         strictDependenciesLevelToString(thisPkg.strictDependenciesLevel));
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
@@ -1088,9 +1097,9 @@ void validatePreludePackage(const core::GlobalState &gs, core::FileRef file, Pac
     // imports of them are valid.
     auto enforceLayering = gs.packageDB().enforceLayering();
     if (enforceLayering) {
-        if (auto layer = info.layer()) {
-            if (packageDB.layerIndex(layer->first) != 0) {
-                core::Loc layerLoc(file, layer->second);
+        if (info.layer.exists()) {
+            if (packageDB.layerIndex(info.layer) != 0) {
+                core::Loc layerLoc(file, info.locs.layer);
                 if (auto e = gs.beginError(layerLoc, core::errors::Packager::PreludeLowestLayer)) {
                     auto layers = packageDB.layers();
                     e.setHeader("Prelude package `{}` must be in the lowest layer, `{}`", info.show(gs),
@@ -1098,7 +1107,7 @@ void validatePreludePackage(const core::GlobalState &gs, core::FileRef file, Pac
                 }
 
                 // Overwrite the invalid layer to ensure that we don't see additional errors from other packages.
-                info.layer_->first = packageDB.layers().front();
+                info.layer = packageDB.layers().front();
             }
         }
     }
@@ -1266,7 +1275,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
             auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
             if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
-                if (auto e = gs.beginError(pkg->loc, core::errors::Packager::RedefinitionOfPackage)) {
+                if (auto e = gs.beginError(pkg->declLoc(), core::errors::Packager::RedefinitionOfPackage)) {
                     auto pkgName = pkg->mangledName_.owner.show(gs);
                     e.setHeader("Redefinition of package `{}`", pkgName);
                     e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
@@ -1318,7 +1327,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
                 // Extend the imports with the implicit prelude imports, which can be identified by their non-existant
                 // locs.
-                auto implicitImportLoc = info->declLoc_.offsets();
+                auto implicitImportLoc = info->locs.declLoc;
                 info->importedPackageNames.reserve(info->importedPackageNames.size() + preludePackages.size());
                 absl::c_transform(preludePackages, back_inserter(info->importedPackageNames),
                                   [implicitImportLoc](auto name) { return Import::prelude(name, implicitImportLoc); });
@@ -1508,7 +1517,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 // We aren't going to mutate the packageDB at this point, but we do need something to give to
                 // rewritePackageSpec. We make the most shallow copy possible, to ensure that we don't raise duplicate
                 // errors on the fast path.
-                PackageInfo copy{info.mangledName_, info.loc, info.declLoc_};
+                PackageInfo copy{info.mangledName_, info.file, info.locs.loc, info.locs.declLoc};
                 rewritePackageSpec(gs, file, copy);
 
                 if (info.isPreludePackage()) {

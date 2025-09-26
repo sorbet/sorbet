@@ -34,7 +34,8 @@ enum class VisibleToType {
     Wildcard,
 };
 
-enum class StrictDependenciesLevel {
+enum class StrictDependenciesLevel : uint8_t {
+    None,
     False,
     Layered,
     LayeredDag,
@@ -102,12 +103,12 @@ public:
 
     core::Loc fullLoc() const {
         ENFORCE(exists());
-        return loc;
+        return core::Loc(file, locs.loc);
     }
 
     core::Loc declLoc() const {
         ENFORCE(exists());
-        return declLoc_;
+        return core::Loc(file, locs.declLoc);
     }
 
     bool exists() const {
@@ -127,22 +128,15 @@ public:
         return visibleToTests_;
     }
 
-    MangledName mangledName_;
-
-    // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
-    core::Loc loc;
-    // loc for the package definition. Single line (just the class def). Used for error messages.
-    core::Loc declLoc_;
     // The possible path prefixes associated with files in the package, including path separator at end.
     std::vector<std::string> packagePathPrefixes = {};
+
     // The names of each package imported by this package.
     std::vector<Import> importedPackageNames = {};
+
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     std::vector<Export> exports_ = {};
-
-    // Whether this package should just export everything
-    bool exportAll_ = false;
 
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
@@ -154,28 +148,44 @@ public:
     // `visible_to` line of their own.)
     std::vector<VisibleTo> visibleTo_ = {};
 
+    std::vector<core::LocOffsets> extraDirectives_;
+
+    struct {
+        // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
+        core::LocOffsets loc;
+        // loc for the package definition. Single line (just the class def). Used for error messages.
+        core::LocOffsets declLoc;
+        core::LocOffsets layer;
+        core::LocOffsets strictDependenciesLevel;
+        core::LocOffsets minTypedLevel;
+        core::LocOffsets testsMinTypedLevel;
+    } locs;
+
+    core::FileRef file;
+
+    core::NameRef layer;
+
+    // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
+    int sccID_ = -1;
+
+    // ID of the strongly-connected component that this package's tests are in, according to its graph of import
+    // dependencies
+    int testSccID_ = -1;
+
+    MangledName mangledName_;
+
+    // Whether this package should just export everything
+    bool exportAll_ = false;
+
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
-    std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel_;
-    std::optional<std::pair<core::NameRef, core::LocOffsets>> layer_;
-    std::vector<core::LocOffsets> extraDirectives_;
-    std::optional<
-        std::pair<std::pair<core::StrictLevel, core::LocOffsets>, std::pair<core::StrictLevel, core::LocOffsets>>>
-        minTypedLevel_;
+    bool isPreludePackage_ = false;
 
-    std::optional<std::pair<StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel() const {
-        ENFORCE(exists());
-        return strictDependenciesLevel_;
-    }
+    core::StrictLevel minTypedLevel = core::StrictLevel::None;
+    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
-    std::optional<std::pair<core::NameRef, core::LocOffsets>> layer() const {
-        ENFORCE(exists());
-        return layer_;
-    }
-
-    // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
-    std::optional<int> sccID_;
+    StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
     // The id of the SCC that this package's normal imports belong to.
     //
@@ -183,12 +193,8 @@ public:
     // date.
     std::optional<int> sccID() const {
         ENFORCE(exists());
-        return sccID_;
+        return sccID_ == -1 ? std::nullopt : std::make_optional(sccID_);
     }
-
-    // ID of the strongly-connected component that this package's tests are in, according to its graph of import
-    // dependencies
-    std::optional<int> testSccID_;
 
     // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
     // condensation graph.
@@ -197,7 +203,7 @@ public:
     // date.
     std::optional<int> testSccID() const {
         ENFORCE(exists());
-        return testSccID_;
+        return testSccID_ == -1 ? std::nullopt : std::make_optional(testSccID_);
     }
 
     static PackageInfo &from(core::GlobalState &gs, MangledName pkg);
@@ -206,8 +212,12 @@ public:
 
     std::unique_ptr<PackageInfo> deepCopy() const;
 
-    PackageInfo(MangledName mangledName, core::Loc loc, core::Loc declLoc_)
-        : mangledName_(mangledName), loc(loc), declLoc_(declLoc_) {}
+    PackageInfo(MangledName mangledName, core::FileRef file, core::LocOffsets loc, core::LocOffsets declLoc)
+        : file(file), mangledName_(mangledName) {
+        this->locs.loc = loc;
+        this->locs.declLoc = declLoc;
+    }
+
     explicit PackageInfo(const PackageInfo &) = default;
     PackageInfo &operator=(const PackageInfo &) = delete;
 
@@ -244,14 +254,13 @@ public:
     // looks at non-test imports.
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;
 
-    bool isPreludePackage_ = false;
-
     // True when the package is marked with a `prelude_package` annotation. This requires that the package only import
     // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
     bool isPreludePackage() const {
         return this->isPreludePackage_;
     }
 };
+CheckSize(PackageInfo, 200, 8);
 
 } // namespace sorbet::core::packages
 #endif

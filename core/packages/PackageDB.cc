@@ -7,7 +7,7 @@ using namespace std;
 namespace sorbet::core::packages {
 
 namespace {
-static const PackageInfo NONE_PKG(MangledName(), Loc::none(), Loc::none());
+static const PackageInfo NONE_PKG(MangledName(), FileRef(), LocOffsets::none(), LocOffsets::none());
 } // namespace
 
 UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {

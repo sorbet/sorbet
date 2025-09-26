@@ -547,25 +547,22 @@ public:
                     autocorrectedImportType = core::packages::ImportType::TestUnit;
                 }
             }
-            auto strictDepsLevel = this->package.strictDependenciesLevel();
-            auto importStrictDepsLevel = pkg.strictDependenciesLevel();
+            auto strictDepsLevel = this->package.strictDependenciesLevel;
+            auto importStrictDepsLevel = pkg.strictDependenciesLevel;
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
-                layeringViolation = strictDepsLevel.has_value() &&
-                                    strictDepsLevel.value().first != core::packages::StrictDependenciesLevel::False &&
+                layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
                                     this->package.causesLayeringViolation(db, pkg);
-                strictDependenciesTooLow =
-                    importStrictDepsLevel.has_value() &&
-                    importStrictDepsLevel.value().first < this->package.minimumStrictDependenciesLevel();
+                strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
+                                           importStrictDepsLevel < this->package.minimumStrictDependenciesLevel();
                 // If there's a path from the imported packaged to this package, then adding the import will close
                 // the loop and cause a cycle.
                 path = pkg.pathTo(ctx, this->package.mangledName());
-                causesCycle = strictDepsLevel.has_value() &&
-                              strictDepsLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag &&
-                              path.has_value();
+                causesCycle =
+                    strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                 std::optional<core::AutocorrectSuggestion> importAutocorrect;
@@ -665,8 +662,8 @@ public:
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
                         auto currentStrictDepsLevel =
                             fmt::format("strict_dependencies '{}'",
-                                        core::packages::strictDependenciesLevelToString(strictDepsLevel.value().first));
-                        e.addErrorLine(core::Loc(this->package.declLoc().file(), strictDepsLevel.value().second),
+                                        core::packages::strictDependenciesLevelToString(strictDepsLevel));
+                        e.addErrorLine(core::Loc(this->package.file, this->package.locs.strictDependenciesLevel),
                                        "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
                                        currentStrictDepsLevel);
                         ENFORCE(path.has_value(),
@@ -677,29 +674,28 @@ public:
 
                     if (layeringViolation) {
                         reasons.emplace_back("importing its package would cause a layering violation");
-                        ENFORCE(pkg.layer().has_value(),
+                        ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
+                        ENFORCE(this->package.layer.exists(),
                                 "causesLayeringViolation should return false if layer is not set");
-                        ENFORCE(this->package.layer().has_value(),
-                                "causesLayeringViolation should return false if layer is not set");
-                        e.addErrorLine(core::Loc(pkg.declLoc().file(), pkg.layer().value().second),
+                        e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
                                        "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
                                        "currently layer `{}`",
-                                       pkg.show(ctx), this->package.layer().value().first.show(ctx),
-                                       this->package.show(ctx), pkg.layer().value().first.show(ctx));
+                                       pkg.show(ctx), this->package.layer.show(ctx), this->package.show(ctx),
+                                       pkg.layer.show(ctx));
                     }
 
                     if (strictDependenciesTooLow) {
                         reasons.emplace_back(
                             core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
-                        ENFORCE(importStrictDepsLevel.has_value(),
+                        ENFORCE(importStrictDepsLevel != core::packages::StrictDependenciesLevel::None,
                                 "strictDependenciesTooLow should be false if strict_dependencies level is not set");
                         auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
                                                                    core::packages::strictDependenciesLevelToString(
                                                                        this->package.minimumStrictDependenciesLevel()));
-                        auto currentStrictDepsLevel = fmt::format(
-                            "strict_dependencies '{}'",
-                            core::packages::strictDependenciesLevelToString(importStrictDepsLevel.value().first));
-                        e.addErrorLine(core::Loc(pkg.declLoc().file(), importStrictDepsLevel.value().second),
+                        auto currentStrictDepsLevel =
+                            fmt::format("strict_dependencies '{}'",
+                                        core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
+                        e.addErrorLine(core::Loc(pkg.file, pkg.locs.strictDependenciesLevel),
                                        "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
                                        requiredStrictDepsLevel, currentStrictDepsLevel);
                     }
