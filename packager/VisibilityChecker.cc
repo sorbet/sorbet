@@ -303,22 +303,6 @@ public:
             return;
         }
 
-        if (this->package.exportAll()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Packager::ExportConflict)) {
-                e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                            this->package.mangledName().owner.show(ctx), "export_all!");
-                auto replaceLoc = ctx.locAt(send.loc);
-                auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
-                // Remove leading whitespace
-                replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);
-                if (replaceLoc.beginPos() != 0) {
-                    // Remove leading newline
-                    replaceLoc = replaceLoc.adjust(ctx, -1, 0);
-                }
-                e.replaceWith("Delete export", replaceLoc, "");
-            }
-        }
-
         string_view kind;
         auto sym = lit->symbol();
         switch (sym.kind()) {
@@ -382,6 +366,28 @@ public:
         PropagateVisibility pass{*package};
         pass.unsetAllExportedInPackage(ctx);
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
+
+        auto exportAll = package->locs.exportAll;
+        if (exportAll.exists() && !package->exports_.empty()) {
+            if (auto e = ctx.beginError(exportAll, core::errors::Packager::ExportConflict)) {
+                e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
+                            package->mangledName().owner.show(ctx), "export_all!");
+
+                auto edits = vector<core::AutocorrectSuggestion::Edit>{};
+                for (const auto &export_ : package->exports_) {
+                    auto replaceLoc = ctx.locAt(export_.loc);
+                    auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
+                    // Remove leading whitespace
+                    replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);
+                    if (replaceLoc.beginPos() != 0) {
+                        // Remove leading newline
+                        replaceLoc = replaceLoc.adjust(ctx, -1, 0);
+                    }
+                    edits.emplace_back(core::AutocorrectSuggestion::Edit{replaceLoc, ""});
+                }
+                e.addAutocorrect({"Delete every export", edits});
+            }
+        }
 
         for (const auto [errLoc, err] : pass.duplicateExports) {
             if (auto e = ctx.beginError(errLoc, core::errors::Packager::ExportConflict)) {
@@ -521,7 +527,7 @@ public:
         }
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        bool isExported = pkg.exportAll();
+        bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
             isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
         } else if (litSymbol.isFieldOrStaticField()) {
