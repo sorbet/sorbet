@@ -614,8 +614,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             unique_ptr<parser::Hash> kwargsHash;
             auto kwargsHashHasExpr = true; // true if we can directly desugar the kwargs Hash, if any.
+            absl::Span<pm_node_t *> prismArgs;
             if (auto *prismArgsNode = callNode->arguments) {
-                auto prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
+                prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
 
                 // Pop the Kwargs Hash off the end of the arguments, if there is one.
                 if (!prismArgs.empty() && PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
@@ -700,12 +701,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return sendNode;
             }
 
+            // hasSplat && prismBlock == nullptr && kwargsHash == nullptr
+
             // Regular send, e.g. `a.b`
 
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
             auto supportedCallType = constantNameString != "block_given?" && kwargsHashHasExpr && !hasFwdArgs &&
-                                     !hasFwdRestArg && !hasSplat && hasExpr(receiver, args);
+                                     !hasFwdRestArg && hasExpr(receiver, args);
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
@@ -890,27 +893,79 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
-            if (hasSplat || hasRestArg || hasFwdRestArg) { // f(*a) || f(*) || f(**)
+            if (hasSplat || hasFwdArgs || hasFwdRestArg) { // f(*a) || f(*) || f(**)
                 // If we have a splat anywhere in the argument list, desugar the argument list as a single Array node,
                 // and synthesize a call to `::Magic.<callWithSplat>(receiver, method, argArray[, &blk])`
                 // The `callWithSplat` implementation (in C++) will unpack a tuple type and call into the normal
                 // call mechanism.
 
-                // unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, move(send->args));
-                // auto argsArrayExpr = translate(array);
+                ast::Array::ENTRY_store argExprs; // TODO: migrate desugarArray to take Span<ast::ExpressionPtr>
+                argExprs.reserve(prismArgs.size());
+                for (auto &arg : args) {
+                    auto expr = arg->takeDesugaredExpr();
 
+                    // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
+                    // But for array literals, we want the splat to have the array's location to match
+                    // the legacy parser's behavior (important for error messages and hover).
+
+                    // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
+                    // methods from hover. Using the array's loc means that we will get a zero-length loc for
+                    // the Splat in that case, and non-zero if there was a real Array literal.
+                    if (auto splattedExpr = ast::MK::extractSplattedExpression(expr)) {
+                        // Exception::raise("hello, world!");
+                        // Extract the argument from the old Send and create a new one with array's location
+                        expr = MK::Splat(location.copyWithZeroLength(), move(splattedExpr));
+                    }
+
+                    ENFORCE(expr != nullptr);
+                    argExprs.emplace_back(move(expr));
+                }
+                auto argsArrayExpr = desugarArray(location.copyWithZeroLength(), prismArgs, move(argExprs));
+
+                // Build up an array that represents the keyword args for the send.
+                // When there is a Kwsplat, treat all keyword arguments as a single argument.
+                // If the kwargs hash is not present, make a `nil` to put in the place of that argument.
+                // This will be used in the implementation of the intrinsic to tell the difference between keyword
+                // args, keyword args with kw splats, and no keyword args at all.
+                ExpressionPtr kwargsExpr;
+                if (kwargsHash != nullptr) {
+                    ast::Array::ENTRY_store kwargElements;
+                    flattenKwargs(kwargsHash, kwargElements);
+                    ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, 0, kwargElements);
+
+                    kwargsExpr = MK::Array(loc, move(kwargElements));
+                } else {
+                    kwargsExpr = MK::Nil(loc);
+                }
+
+                auto numPosArgs = 4;
                 ast::Send::ARGS_store magicSendArgs;
-                magicSendArgs.reserve(4); // TODO: reserve room for a block pass arg
+                magicSendArgs.reserve(numPosArgs); // TODO: reserve room for a block pass arg
                 magicSendArgs.emplace_back(move(receiverExpr));
                 magicSendArgs.emplace_back(move(methodName));
-                magicSendArgs.emplace_back(move(args));
-                magicSendArgs.emplace_back(move(kwargs));
+                magicSendArgs.emplace_back(move(argsArrayExpr));
+                magicSendArgs.emplace_back(move(kwargsExpr));
+
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // Desugar a call with a splat, and any other expression as a block pass argument.
+                    // E.g. `foo(*splat, &block)`
+
+                    magicSendArgs.emplace_back(move(blockPassArg));
+                    numPosArgs++;
+
+                    auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(), messageLoc,
+                                             numPosArgs, move(magicSendArgs), flags);
+                    return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
+                                                             move(args));
+                }
 
                 // Desugar any call with a splat and without a block pass argument.
                 // If there's a literal block argument, that's handled here, too.
                 // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
-                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
-                                         move(sendargs), flags);
+                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), messageLoc, numPosArgs,
+                                         move(magicSendArgs), flags);
+                return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
+                                                         move(args));
             }
 
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
@@ -948,8 +1003,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(blockPassNode));
                 }
 
-                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), messageLoc, numPosArgs,
-                                         move(magicSendArgs), flags);
+                auto sendExpr =
+                    MK::Send(loc.copyWithZeroLength(), MK::Magic(loc.copyWithZeroLength()),
+                             core::Names::callWithBlockPass(), messageLoc, numPosArgs, move(magicSendArgs), flags);
 
                 return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
                                                          move(args));
@@ -2199,10 +2255,32 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto splatNode = down_cast<pm_splat_node>(node);
 
             auto expr = translate(splatNode->expression);
+
+            if (!directlyDesugar || !hasExpr(expr)) {
+                if (expr == nullptr) { // An anonymous splat like `f(*)`
+                    return make_unique<parser::ForwardedRestArg>(location);
+                } else { // Splatting an expression like `f(*a)`
+                    return make_unique<parser::Splat>(location, move(expr));
+                }
+            }
+
             if (expr == nullptr) { // An anonymous splat like `f(*)`
-                return make_unique<parser::ForwardedRestArg>(location);
+                auto var = MK::Local(location, core::Names::star());
+                auto splatExpr = MK::Splat(location, move(var));
+                return make_node_with_expr<parser::ForwardedRestArg>(move(splatExpr), location);
             } else { // Splatting an expression like `f(*a)`
-                return make_unique<parser::Splat>(location, move(expr));
+                // Directly desugaring a splat node is a destructive operation, which can leave the "expr" in an invalid
+                // state (because it would have a null desugared expr), which is incompatible with the "fallback" path
+                // (desugaring it as a Whitequark tree in `PrismDesugar.cc").
+                //
+                // It's only safe to do if we can be sure all adjacent elements (in an the same Array literal,
+                // or arguments to the same method call) can also directly desugared.
+                //
+                // It's really hard to know that ahead of time, so for now, just deepCopy the tree, instead of taking
+                // it out of the splatted expressions's `NodeWithExpr`.
+                auto childExpr = expr->peekDesugaredExpr().deepCopy();
+                auto splatExpr = MK::Splat(location, move(childExpr));
+                return make_node_with_expr<parser::Splat>(move(splatExpr), location, move(expr));
             }
         }
         case PM_STATEMENTS_NODE: { // A sequence of statements, such a in a `begin` block, `()`, etc.
@@ -2887,20 +2965,8 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
         if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
             // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
 
-            // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
-            // But for array literals, we want the splat to have the array's location to match
-            // the legacy parser's behavior (important for error messages and hover).
-            auto splatExpr = move(stat);
+            auto var = move(stat);
 
-            // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
-            // methods from hover. Using the array's loc means that we will get a zero-length loc for
-            // the Splat in that case, and non-zero if there was a real Array literal.
-            if (auto send = ast::cast_tree<ast::Send>(splatExpr)) {
-                ENFORCE(send->numPosArgs() == 1, "Splat Send should have exactly 1 argument");
-                // Extract the argument from the old Send and create a new one with array's location
-                splatExpr = MK::Splat(location, move(send->getPosArg(0)));
-            }
-            auto var = move(splatExpr);
             if (elems.empty()) {
                 if (lastMerge != nullptr) {
                     lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));

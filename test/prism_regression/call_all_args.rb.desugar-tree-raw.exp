@@ -17,16 +17,11 @@ ClassDef{
       block = nullptr
       pos_args = 5
       args = [
-        Send{
-          flags = {privateOk}
-          recv = Self
-          fun = <U receiver>
-          block = nullptr
-          pos_args = 0
-          args = [
-          ]
+        UnresolvedConstantLit{
+          cnst = <C <U RECEIVER1>>
+          scope = EmptyTree
         }
-        Literal{ value = :foo }
+        Literal{ value = :m1 }
         Send{
           flags = {}
           recv = Array{
@@ -60,22 +55,13 @@ ClassDef{
         }
         Array{
           elems = [
-            Literal{ value = :d }
-            Literal{ value = 4 }
             Literal{ value = :e }
             Literal{ value = 5 }
-            Literal{ value = :f }
-            Literal{ value = 6 }
           ]
         }
-        Send{
-          flags = {privateOk}
-          recv = Self
-          fun = <U forwarded_block>
-          block = nullptr
-          pos_args = 0
-          args = [
-          ]
+        UnresolvedConstantLit{
+          cnst = <C <U FORWARDED_BLOCK>>
+          scope = EmptyTree
         }
       ]
     }
@@ -97,10 +83,10 @@ ClassDef{
             kind = Local
             name = <U b>
           }
-          UnresolvedIdent{
+          RestParam{ expr = UnresolvedIdent{
             kind = Local
             name = <U c>
-          }
+          } }
           KeywordArg{ expr = UnresolvedIdent{
             kind = Local
             name = <U d>
@@ -109,10 +95,10 @@ ClassDef{
             kind = Local
             name = <U e>
           } }
-          KeywordArg{ expr = UnresolvedIdent{
+          RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
             kind = Local
             name = <U f>
-          } }
+          } } }
           BlockArg{ expr = UnresolvedIdent{
             kind = Local
             name = <U block>
@@ -122,16 +108,11 @@ ClassDef{
       }
       pos_args = 4
       args = [
-        Send{
-          flags = {privateOk}
-          recv = Self
-          fun = <U receiver>
-          block = nullptr
-          pos_args = 0
-          args = [
-          ]
+        UnresolvedConstantLit{
+          cnst = <C <U RECEIVER2>>
+          scope = EmptyTree
         }
-        Literal{ value = :foo }
+        Literal{ value = :m2 }
         Send{
           flags = {}
           recv = Array{
@@ -165,12 +146,8 @@ ClassDef{
         }
         Array{
           elems = [
-            Literal{ value = :d }
-            Literal{ value = 4 }
             Literal{ value = :e }
             Literal{ value = 5 }
-            Literal{ value = :f }
-            Literal{ value = 6 }
           ]
         }
       ]
@@ -193,10 +170,10 @@ ClassDef{
             kind = Local
             name = <U b>
           }
-          UnresolvedIdent{
+          RestParam{ expr = UnresolvedIdent{
             kind = Local
             name = <U c>
-          }
+          } }
           KeywordArg{ expr = UnresolvedIdent{
             kind = Local
             name = <U d>
@@ -205,10 +182,10 @@ ClassDef{
             kind = Local
             name = <U e>
           } }
-          KeywordArg{ expr = UnresolvedIdent{
+          RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
             kind = Local
             name = <U f>
-          } }
+          } } }
           BlockArg{ expr = UnresolvedIdent{
             kind = Local
             name = <U block>
@@ -218,16 +195,11 @@ ClassDef{
       }
       pos_args = 4
       args = [
-        Send{
-          flags = {privateOk}
-          recv = Self
-          fun = <U receiver>
-          block = nullptr
-          pos_args = 0
-          args = [
-          ]
+        UnresolvedConstantLit{
+          cnst = <C <U RECEIVER3>>
+          scope = EmptyTree
         }
-        Literal{ value = :foo }
+        Literal{ value = :m3 }
         Send{
           flags = {}
           recv = Array{
@@ -261,12 +233,8 @@ ClassDef{
         }
         Array{
           elems = [
-            Literal{ value = :d }
-            Literal{ value = 4 }
             Literal{ value = :e }
             Literal{ value = 5 }
-            Literal{ value = :f }
-            Literal{ value = 6 }
           ]
         }
       ]
