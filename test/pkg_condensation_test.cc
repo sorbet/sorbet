@@ -316,4 +316,46 @@ TEST_CASE("Condensation Graph - Two prelude packages, two normal packages") {
     }
 }
 
+TEST_CASE("Condensation Graph - Two packages, one is test-only") {
+    core::GlobalState gs(errorQueue);
+    PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
+
+    auto parsedFiles = PackageHelpers::enterPackages(
+        gs, {
+                {"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")},
+                {"lib/foo/test/b/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::Test::B", "layered", "lib")},
+            });
+
+    auto &condensation = gs.packageDB().condensation();
+    {
+        INFO("The condensation graph should contain two nodes for Lib::Foo::A, and one for Lib::Foo::Test::B");
+        CHECK_EQ(3, condensation.nodes().size());
+    }
+
+    auto traversal = condensation.computeTraversal(gs);
+
+    {
+        INFO("The traversal should include the same number of nodes as the condensation");
+        CHECK_EQ(condensation.nodes().size(), traversal.sccs.size());
+    }
+
+    {
+        INFO("The traversal should include two strata");
+        REQUIRE_EQ(2, traversal.strata.size());
+    }
+
+    {
+        INFO("The first stratum is a mix of application and test packages");
+        CHECK_EQ(2, traversal.strata[0].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return scc.isTest; }));
+    }
+
+    {
+        INFO("The second stratum should be all test code");
+        CHECK_EQ(1, traversal.strata[1].size());
+        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return scc.isTest; }));
+    }
+}
+
 } // namespace sorbet::test
