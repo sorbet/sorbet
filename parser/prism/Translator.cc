@@ -674,9 +674,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto name = ctx.state.enterNameUTF8(constantNameString);
             auto methodName = MK::Symbol(location.copyWithZeroLength(), name);
 
-            cout << "DD=" << directlyDesugar << " #" << constantNameString << " @ "
-                 << core::Loc(ctx.file, loc).fileShortPosToString(ctx.state) << endl;
-
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `a&.b`
 
@@ -937,9 +934,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     flattenKwargs(kwargsHash, kwargElements);
                     ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, 0, kwargElements);
 
+                    // Add the kwargs Hash back into parse tree, so that it's correct, too.
+                    // This doesn't effect the desugared expression.
+                    args.emplace_back(move(kwargsHash));
+
                     kwargsExpr = MK::Array(loc, move(kwargElements));
                 } else {
                     kwargsExpr = MK::Nil(loc);
+                }
+
+                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                    // Add the parser node back into the wq tree, to pass the parser tests.
+                    args.emplace_back(move(blockPassNode));
                 }
 
                 auto numPosArgs = 4;
@@ -961,9 +967,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                     magicSendArgs.emplace_back(move(blockPassArg));
                     numPosArgs++;
-
-                    cout << "callWithSplatAndBlockPass @ " << core::Loc(ctx.file, loc).fileShortPosToString(ctx.state)
-                         << endl;
 
                     auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(), messageLoc,
                                              numPosArgs, move(magicSendArgs), flags);
@@ -1001,16 +1004,27 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
                 }
 
-                cout << "callWithSplat @ " << core::Loc(ctx.file, loc).fileShortPosToString(ctx.state) << endl;
-
-                // loc = {1, 2};
                 // Desugar any call with a splat and without a block pass argument.
                 // If there's a literal block argument, that's handled here, too.
                 // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
                 auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), messageLoc, numPosArgs,
                                          move(magicSendArgs), flags);
-                return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
-                                                         move(args));
+                auto sendNode = make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
+                                                                  move(args));
+
+                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
+                    // but the legacy parser inverts this, with a parent "Block" with a child "Send".
+                    //
+                    // Note: The legacy parser doesn't treat block pass arguments this way.
+                    //       It just puts them at the end of the arguments list,
+                    //       which is why we checked for `PM_BLOCK_NODE` specifically here.
+
+                    return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc,
+                                                              move(sendNode), move(blockParameters), move(blockBody));
+                }
+
+                return sendNode;
             }
 
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
@@ -1041,6 +1055,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 if (kwargsHash) {
                     flattenKwargs(kwargsHash, magicSendArgs);
                     ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, magicSendArgs);
+
+                    // Add the kwargs Hash back into parse tree, so that it's correct, too.
+                    // This doesn't effect the desugared expression.
+                    args.emplace_back(move(kwargsHash));
                 }
 
                 if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
@@ -1104,21 +1122,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
 
-            if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
-                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
-                    // but the legacy parser inverts this, with a parent "Block" with a child "Send".
-                    //
-                    // Note: The legacy parser doesn't treat block pass arguments this way.
-                    //       It just puts them at the end of the arguments list,
-                    //       which is why we checked for `PM_BLOCK_NODE` specifically here.
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
+                // but the legacy parser inverts this, with a parent "Block" with a child "Send".
+                //
+                // Note: The legacy parser doesn't treat block pass arguments this way.
+                //       It just puts them at the end of the arguments list,
+                //       which is why we checked for `PM_BLOCK_NODE` specifically here.
 
-                    return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc,
-                                                              move(sendNode), move(blockParameters), move(blockBody));
-                } else {
-                    unreachable("Found a {} block type, which is not implemented yet ",
-                                pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
-                }
+                return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc, move(sendNode),
+                                                          move(blockParameters), move(blockBody));
             }
 
             return sendNode;
@@ -2338,7 +2351,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_node_with_expr<parser::String>(MK::String(location, content), location, content);
         }
         case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
-            cout << "Super @ " << core::Loc(ctx.file, location).fileShortPosToString(ctx.state) << endl;
             auto superNode = down_cast<pm_super_node>(node);
 
             auto blockArgumentNode = superNode->block;
@@ -3012,10 +3024,6 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
             auto var = move(stat);
 
             if (auto splattedExpr = ast::MK::extractSplattedExpression(var)) {
-                cout << "Replacing location of splat from "
-                     << core::Loc(ctx.file, splatOverrideLocation).fileShortPosToString(ctx.state) << " to "
-                     << core::Loc(ctx.file, splatOverrideLocation).fileShortPosToString(ctx.state) << endl;
-                // splatOverrideLocation = {1, 2};
                 // Extract the argument from the old Send and create a new one with array's location
                 var = MK::Splat(splatOverrideLocation, move(splattedExpr));
             }
