@@ -185,7 +185,7 @@ public:
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
-    StrictDependenciesLevel strictDependenciesLevel;
+    StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
     // The id of the SCC that this package's normal imports belong to.
     //
