@@ -101,7 +101,7 @@ private:
     parser::NodeVec translateKeyValuePairs(pm_node_list_t elements);
 
     ast::ExpressionPtr desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
-                                    ast::Array::ENTRY_store elements);
+                                    ast::Array::ENTRY_store elements, core::LocOffsets splatOverrideLocation);
     ast::ExpressionPtr desugarHash(core::LocOffsets loc, NodeVec &kvPairs);
 
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,

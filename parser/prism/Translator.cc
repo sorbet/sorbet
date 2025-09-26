@@ -437,7 +437,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             auto prismElements = absl::MakeSpan(arrayNode->elements.nodes, arrayNode->elements.size);
-            auto expr = desugarArray(location, prismElements, move(elements));
+            auto expr = desugarArray(location, prismElements, move(elements), location);
             return make_node_with_expr<parser::Array>(move(expr), location, move(sorbetElements));
         }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash literal, e.g. the `a: 1` in `{ a: 1 }
@@ -673,6 +673,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto name = ctx.state.enterNameUTF8(constantNameString);
             auto methodName = MK::Symbol(location.copyWithZeroLength(), name);
+
+            cout << "DD=" << directlyDesugar << " #" << constantNameString << " @ "
+                 << core::Loc(ctx.file, loc).fileShortPosToString(ctx.state) << endl;
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `a&.b`
@@ -911,16 +914,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
                     // methods from hover. Using the array's loc means that we will get a zero-length loc for
                     // the Splat in that case, and non-zero if there was a real Array literal.
-                    if (auto splattedExpr = ast::MK::extractSplattedExpression(expr)) {
-                        // Exception::raise("hello, world!");
-                        // Extract the argument from the old Send and create a new one with array's location
-                        expr = MK::Splat(location.copyWithZeroLength(), move(splattedExpr));
-                    }
+                    // if (auto splattedExpr = ast::MK::extractSplattedExpression(expr)) {
+                    //     // Exception::raise("hello, world!");
+                    //     // Extract the argument from the old Send and create a new one with array's location
+                    //     expr = MK::Splat(location.copyWithZeroLength(), move(splattedExpr));
+                    // }
 
                     ENFORCE(expr != nullptr);
                     argExprs.emplace_back(move(expr));
                 }
-                auto argsArrayExpr = desugarArray(location.copyWithZeroLength(), prismArgs, move(argExprs));
+                auto argsArrayExpr = desugarArray(location.copyWithZeroLength(), prismArgs, move(argExprs),
+                                                  location.copyWithZeroLength());
 
                 // Build up an array that represents the keyword args for the send.
                 // When there is a Kwsplat, treat all keyword arguments as a single argument.
@@ -953,6 +957,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     magicSendArgs.emplace_back(move(blockPassArg));
                     numPosArgs++;
 
+                    cout << "callWithSplatAndBlockPass @ " << core::Loc(ctx.file, loc).fileShortPosToString(ctx.state)
+                         << endl;
                     auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(), messageLoc,
                                              numPosArgs, move(magicSendArgs), flags);
                     return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
@@ -989,6 +995,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
                 }
 
+                cout << "callWithSplat @ " << core::Loc(ctx.file, loc).fileShortPosToString(ctx.state) << endl;
+
+                // loc = {1, 2};
                 // Desugar any call with a splat and without a block pass argument.
                 // If there's a literal block argument, that's handled here, too.
                 // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
@@ -2323,6 +2332,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_node_with_expr<parser::String>(MK::String(location, content), location, content);
         }
         case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
+            cout << "Super @ " << core::Loc(ctx.file, location).fileShortPosToString(ctx.state) << endl;
             auto superNode = down_cast<pm_super_node>(node);
 
             auto blockArgumentNode = superNode->block;
@@ -2978,7 +2988,7 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blo
 }
 
 ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
-                                            ast::Array::ENTRY_store elements) {
+                                            ast::Array::ENTRY_store elements, core::LocOffsets splatOverrideLocation) {
     auto locZeroLen = location.copyWithZeroLength();
 
     ast::Array::ENTRY_store elems;
@@ -2994,6 +3004,15 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
             // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
 
             auto var = move(stat);
+
+            if (auto splattedExpr = ast::MK::extractSplattedExpression(var)) {
+                cout << "Replacing location of splat from "
+                     << core::Loc(ctx.file, splatOverrideLocation).fileShortPosToString(ctx.state) << " to "
+                     << core::Loc(ctx.file, splatOverrideLocation).fileShortPosToString(ctx.state) << endl;
+                // splatOverrideLocation = {1, 2};
+                // Extract the argument from the old Send and create a new one with array's location
+                var = MK::Splat(splatOverrideLocation, move(splattedExpr));
+            }
 
             if (elems.empty()) {
                 if (lastMerge != nullptr) {
