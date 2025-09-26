@@ -507,10 +507,13 @@ bool isSingleton(core::Context ctx, const core::TypePtr &ty, bool includeSinglet
     }
 
     // attachedClass on untyped symbol is defined to return itself
-    if (includeSingletonClasses && sym != core::Symbols::untyped() && data->attachedClass(ctx).exists() &&
-        data->flags.isFinal) {
-        // This is a Ruby singleton class object
-        return true;
+    if (includeSingletonClasses && sym != core::Symbols::untyped()) {
+        // Check for Ruby singleton class objects
+        auto attachedClass = data->attachedClass(ctx);
+        if (attachedClass.exists() && (data->flags.isFinal || attachedClass.data(ctx)->flags.isModule)) {
+            // module singleton classes are final even if not declared `final!` because of how the Ruby VM works
+            return true;
+        }
     }
 
     // The Ruby stdlib has a Singleton module which lets people invent their own singletons.

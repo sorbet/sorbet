@@ -100,7 +100,7 @@ def test9(x)
   elsif x == E
     T.reveal_type(x) # error: `T.class_of(E)`
   else
-    T.absurd(x) # error: the type `T.class_of(G)` wasn't handled
+    T.absurd(x)
   end
 
   if G == x
@@ -108,7 +108,7 @@ def test9(x)
   elsif E == x
     T.reveal_type(x) # error: `T.class_of(E)`
   else
-    T.absurd(x) # error: the type `T.class_of(G)` wasn't handled
+    T.absurd(x)
   end
 end
 
