@@ -141,6 +141,9 @@ class PropagateVisibility final {
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
                 auto fieldData = sym.asFieldRef().data(ctx);
+                if (!fieldData->flags.isStaticField) {
+                    break;
+                }
 
                 if (setExportedTo) {
                     checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
