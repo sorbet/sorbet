@@ -1033,9 +1033,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(blockPassNode));
                 }
 
-                auto sendExpr =
-                    MK::Send(loc.copyWithZeroLength(), MK::Magic(loc.copyWithZeroLength()),
-                             core::Names::callWithBlockPass(), messageLoc, numPosArgs, move(magicSendArgs), flags);
+                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), messageLoc, numPosArgs,
+                                         move(magicSendArgs), flags);
 
                 return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
                                                          move(args));
