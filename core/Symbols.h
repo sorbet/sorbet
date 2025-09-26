@@ -232,6 +232,7 @@ public:
         bool isStaticFieldTypeAlias : 1;
         bool isStaticFieldPrivate : 1;
 
+        // Can only export a static field
         bool isExported : 1;
 
         constexpr static uint8_t NUMBER_OF_FLAGS = 5;
