@@ -384,11 +384,12 @@ public:
             if (auto e = ctx.beginError(errLoc, core::errors::Packager::ExportConflict)) {
                 if (err.duplicate == err.prefix) {
                     e.setHeader("Duplicate export of `{}`", err.duplicate.show(ctx));
+                    e.addErrorLine(ctx.locAt(err.firstExportedAt), "Previously exported here");
                 } else {
                     e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
                                 err.duplicate.show(ctx), err.prefix.show(ctx));
+                    e.addErrorLine(ctx.locAt(err.firstExportedAt), "Prefix exported here");
                 }
-                e.addErrorLine(ctx.locAt(err.firstExportedAt), "Prefix exported here");
             }
         }
     }

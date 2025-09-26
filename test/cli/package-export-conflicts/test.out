@@ -15,7 +15,7 @@ __package.rb:6: Cannot export `MyPackage::A::C` because another exported name `M
 another/__package.rb:5: Duplicate export of `Another::A` https://srb.help/3716
      5 |  export Another::A
           ^^^^^^^^^^^^^^^^^
-    another/__package.rb:4: Prefix exported here
+    another/__package.rb:4: Previously exported here
      4 |  export Another::A
           ^^^^^^^^^^^^^^^^^
 Errors: 3
