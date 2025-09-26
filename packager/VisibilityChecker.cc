@@ -554,18 +554,15 @@ public:
             bool causesCycle = false;
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
-                layeringViolation = strictDepsLevel.has_value() &&
-                                    strictDepsLevel.value() != core::packages::StrictDependenciesLevel::False &&
+                layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
                                     this->package.causesLayeringViolation(db, pkg);
-                strictDependenciesTooLow =
-                    importStrictDepsLevel.has_value() &&
-                    importStrictDepsLevel.value() < this->package.minimumStrictDependenciesLevel();
+                strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
+                                           importStrictDepsLevel < this->package.minimumStrictDependenciesLevel();
                 // If there's a path from the imported packaged to this package, then adding the import will close
                 // the loop and cause a cycle.
                 path = pkg.pathTo(ctx, this->package.mangledName());
-                causesCycle = strictDepsLevel.has_value() &&
-                              strictDepsLevel.value() >= core::packages::StrictDependenciesLevel::LayeredDag &&
-                              path.has_value();
+                causesCycle =
+                    strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                 std::optional<core::AutocorrectSuggestion> importAutocorrect;
@@ -665,7 +662,7 @@ public:
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
                         auto currentStrictDepsLevel =
                             fmt::format("strict_dependencies '{}'",
-                                        core::packages::strictDependenciesLevelToString(strictDepsLevel.value()));
+                                        core::packages::strictDependenciesLevelToString(strictDepsLevel));
                         e.addErrorLine(core::Loc(this->package.file, this->package.locs.strictDependenciesLevel),
                                        "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
                                        currentStrictDepsLevel);
@@ -690,14 +687,14 @@ public:
                     if (strictDependenciesTooLow) {
                         reasons.emplace_back(
                             core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
-                        ENFORCE(importStrictDepsLevel.has_value(),
+                        ENFORCE(importStrictDepsLevel != core::packages::StrictDependenciesLevel::None,
                                 "strictDependenciesTooLow should be false if strict_dependencies level is not set");
                         auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
                                                                    core::packages::strictDependenciesLevelToString(
                                                                        this->package.minimumStrictDependenciesLevel()));
                         auto currentStrictDepsLevel =
                             fmt::format("strict_dependencies '{}'",
-                                        core::packages::strictDependenciesLevelToString(importStrictDepsLevel.value()));
+                                        core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
                         e.addErrorLine(core::Loc(pkg.file, pkg.locs.strictDependenciesLevel),
                                        "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
                                        requiredStrictDepsLevel, currentStrictDepsLevel);

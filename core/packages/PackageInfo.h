@@ -34,7 +34,8 @@ enum class VisibleToType {
     Wildcard,
 };
 
-enum class StrictDependenciesLevel {
+enum class StrictDependenciesLevel : uint8_t {
+    None,
     False,
     Layered,
     LayeredDag,
@@ -164,8 +165,6 @@ public:
 
     core::NameRef layer; // 20
 
-    std::optional<StrictDependenciesLevel> strictDependenciesLevel; // 16
-
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     int sccID_ = -1; // 8
 
@@ -185,6 +184,8 @@ public:
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
+
+    StrictDependenciesLevel strictDependenciesLevel; // 16
 
     // The id of the SCC that this package's normal imports belong to.
     //
@@ -259,7 +260,7 @@ public:
         return this->isPreludePackage_;
     }
 };
-CheckSize(PackageInfo, 208, 8);
+CheckSize(PackageInfo, 200, 8);
 
 } // namespace sorbet::core::packages
 #endif

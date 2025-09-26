@@ -649,7 +649,7 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.strictDependenciesLevel.has_value()) {
+            if (info.strictDependenciesLevel != StrictDependenciesLevel::None) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
                     e.addErrorLine(ctx.locAt(info.locs.strictDependenciesLevel), "Previously declared here");
@@ -660,8 +660,8 @@ struct PackageSpecBodyWalk {
 
             if (send.numPosArgs() > 0) {
                 auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
-                if (parsedValue.has_value()) {
-                    info.strictDependenciesLevel = parsedValue.value();
+                if (parsedValue != StrictDependenciesLevel::None) {
+                    info.strictDependenciesLevel = parsedValue;
                     info.locs.strictDependenciesLevel = send.getPosArg(0).loc();
                 } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
@@ -832,10 +832,10 @@ struct PackageSpecBodyWalk {
     }
 
 private:
-    optional<StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
+    StrictDependenciesLevel parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
         auto lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
-            return nullopt;
+            return StrictDependenciesLevel::None;
         }
         auto value = lit->asString();
 
@@ -849,7 +849,7 @@ private:
             return StrictDependenciesLevel::Dag;
         }
 
-        return nullopt;
+        return StrictDependenciesLevel::None;
     }
 
     core::NameRef parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
@@ -1003,12 +1003,13 @@ void validateLayering(core::Context ctx, const Import &i) {
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
 
-    if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
-        !thisPkg.layer.exists() || !otherPkg.layer.exists()) {
+    if (thisPkg.strictDependenciesLevel == StrictDependenciesLevel::None ||
+        otherPkg.strictDependenciesLevel == StrictDependenciesLevel::None || !thisPkg.layer.exists() ||
+        !otherPkg.layer.exists()) {
         return;
     }
 
-    if (thisPkg.strictDependenciesLevel.value() == StrictDependenciesLevel::False) {
+    if (thisPkg.strictDependenciesLevel == StrictDependenciesLevel::False) {
         return;
     }
 
@@ -1030,7 +1031,7 @@ void validateLayering(core::Context ctx, const Import &i) {
 
     StrictDependenciesLevel otherPkgExpectedLevel = thisPkg.minimumStrictDependenciesLevel();
 
-    if (otherPkg.strictDependenciesLevel.value() < otherPkgExpectedLevel) {
+    if (otherPkg.strictDependenciesLevel < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
             e.setHeader("Strict dependencies violation: All of `{}`'s `{}`s must be `{}` or higher", thisPkg.show(ctx),
                         "import", strictDependenciesLevelToString(otherPkgExpectedLevel));
@@ -1043,11 +1044,11 @@ void validateLayering(core::Context ctx, const Import &i) {
         }
     }
 
-    if (thisPkg.strictDependenciesLevel.value() >= StrictDependenciesLevel::LayeredDag) {
+    if (thisPkg.strictDependenciesLevel >= StrictDependenciesLevel::LayeredDag) {
         if (thisPkg.sccID() == otherPkg.sccID()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::StrictDependenciesViolation)) {
                 auto level = fmt::format("strict_dependencies '{}'",
-                                         strictDependenciesLevelToString(thisPkg.strictDependenciesLevel.value()));
+                                         strictDependenciesLevelToString(thisPkg.strictDependenciesLevel));
                 e.setHeader("Strict dependencies violation: importing `{}` will put `{}` into a cycle, which is not "
                             "valid at `{}`",
                             otherPkg.show(ctx), thisPkg.show(ctx), level);
