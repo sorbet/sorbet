@@ -38,11 +38,11 @@ class A
       end
     end
 
-    describe "will include shared examples" do
-      include_examples("some examples") # error: does not exist
+    describe "will include shared examples" do # error: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`)
+      include_examples("some examples")
 
       it "has access to defined_in_shared_examples" do
-        defined_in_shared_examples # error: does not exist
+        defined_in_shared_examples
       end
     end
 
