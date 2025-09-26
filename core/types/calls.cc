@@ -801,7 +801,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                                                    fmt::format("{}.{}", ownerName, args.name.show(gs)))
                                              : ".";
 
-                        e.addErrorNote("`{}` is actually defined as a method on `{}`. To call it, either\n"
+                        e.addErrorNote("`{}` is actually defined as a method on `{}`. To call it,\n"
                                        "    `{}` in this module to ensure the method is always there{}",
                                        args.name.show(gs), ownerName, fmt::format("include {}", ownerName),
                                        suggestKernelDot);
