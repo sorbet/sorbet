@@ -1678,7 +1678,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto parts = translateMulti(interpolatedRegexNode->parts);
             auto options = translateRegexpOptions(interpolatedRegexNode->closing_loc);
 
-            return make_unique<parser::Regexp>(location, move(parts), move(options));
+            if (!directlyDesugar) {
+                return make_unique<parser::Regexp>(location, move(parts), move(options));
+            }
+
+            // Desugar interpolated regexp to Regexp.new(pattern, options)
+            auto pattern = desugarDString(location, interpolatedRegexNode->parts);
+            auto optsExpr = options->takeDesugaredExpr();
+
+            auto cnst = MK::Constant(location, core::Symbols::Regexp());
+            auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(),
+                                  move(pattern), move(optsExpr));
+
+            return make_node_with_expr<parser::Regexp>(move(expr), location, move(parts), move(options));
         }
         case PM_INTERPOLATED_STRING_NODE: { // An interpolated string like `"foo #{bar} baz"`
             auto interpolatedStringNode = down_cast<pm_interpolated_string_node>(node);
@@ -3390,8 +3402,11 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
-unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t closingLoc) {
+// Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
+// TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     auto length = closingLoc.end - closingLoc.start;
+    auto location = translateLoc(closingLoc);
 
     string_view options;
 
@@ -3401,24 +3416,73 @@ unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t clos
         options = string_view();
     }
 
-    return make_unique<parser::Regopt>(translateLoc(closingLoc), options);
+    if (!directlyDesugar) {
+        return make_unique<parser::Regopt>(location, options);
+    }
+
+    // Desugar options to integer flags
+    int flags = 0;
+    for (auto &chr : options) {
+        switch (chr) {
+            case 'i':
+                flags |= 1; // Regexp::IGNORECASE
+                break;
+            case 'x':
+                flags |= 2; // Regexp::EXTENDED
+                break;
+            case 'm':
+                flags |= 4; // Regexp::MULTILINE
+                break;
+            default:
+                // Encoding options (n, e, s, u) are handled by the parser
+                break;
+        }
+    }
+    auto flagsExpr = MK::Int(location, flags);
+    return make_node_with_expr<parser::Regopt>(move(flagsExpr), location, options);
 }
 
 // Translate an unescaped string from a Regexp literal
-unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, core::LocOffsets location,
-                                                       pm_location_t closingLoc) {
+unique_ptr<parser::Node> Translator::translateRegexp(pm_string_t unescaped, core::LocOffsets location,
+                                                     pm_location_t closingLoc) {
     // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
     // but we'll only have up to one String node here for this non-interpolated Regexp.
     parser::NodeVec parts;
     auto source = parser.extractString(&unescaped);
     if (!source.empty()) {
-        auto sourceStringNode = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
-        parts.emplace_back(move(sourceStringNode));
+        if (directlyDesugar) {
+            // Create a String node with its desugared expression
+            auto name = ctx.state.enterNameUTF8(source);
+            auto expr = MK::String(location, name);
+            auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), location, name);
+            parts.emplace_back(move(sourceStringNode));
+        } else {
+            auto sourceStringNode = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
+            parts.emplace_back(move(sourceStringNode));
+        }
     }
 
     auto options = translateRegexpOptions(closingLoc);
 
-    return make_unique<parser::Regexp>(location, move(parts), move(options));
+    if (!directlyDesugar) {
+        return make_unique<parser::Regexp>(location, move(parts), move(options));
+    }
+
+    ast::ExpressionPtr pattern;
+    if (parts.empty()) {
+        pattern = MK::String(location, core::Names::empty());
+    } else {
+        pattern = parts[0]->takeDesugaredExpr();
+    }
+    auto optsExpr = options->takeDesugaredExpr();
+
+    auto cnst = MK::Constant(location, core::Symbols::Regexp());
+
+    // Desugar `/ foo / i` to `::Regexp.new("foo", option_flags_int)`
+    auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(), move(pattern),
+                          move(optsExpr));
+
+    return make_node_with_expr<parser::Regexp>(move(expr), location, move(parts), move(options));
 }
 
 string_view Translator::sliceLocation(pm_location_t loc) const {

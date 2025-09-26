@@ -1732,41 +1732,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                       move(excludeEnd));
                 result = move(send);
             },
-            [&](parser::Regexp *regexpNode) {
-                ExpressionPtr cnst = MK::Constant(loc, core::Symbols::Regexp());
-                auto pattern = desugarDString(dctx, loc, move(regexpNode->regex));
-                auto opts = node2TreeImpl(dctx, regexpNode->opts);
-                auto send = MK::Send2(loc, move(cnst), core::Names::new_(), locZeroLen, move(pattern), move(opts));
-                result = move(send);
-            },
-            [&](parser::Regopt *regopt) {
-                int flags = 0;
-                for (auto &chr : regopt->opts) {
-                    int flag = 0;
-                    switch (chr) {
-                        case 'i':
-                            flag = 1; // Regexp::IGNORECASE
-                            break;
-                        case 'x':
-                            flag = 2; // Regexp::EXTENDED
-                            break;
-                        case 'm':
-                            flag = 4; // Regexp::MULILINE
-                            break;
-                        case 'n':
-                        case 'e':
-                        case 's':
-                        case 'u':
-                            // Encoding options that should already be handled by the parser
-                            break;
-                        default:
-                            // The parser already yelled about this
-                            break;
-                    }
-                    flags |= flag;
-                }
-                result = MK::Int(loc, flags);
-            },
+            [&](parser::Regexp *regexpNode) { desugaredByPrismTranslator(regexpNode); },
+            [&](parser::Regopt *regopt) { desugaredByPrismTranslator(regopt); },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {
                     auto arrayLoc = ret->exprs.front()->loc.join(ret->exprs.back()->loc);

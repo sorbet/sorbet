@@ -112,9 +112,9 @@ private:
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true,
                                                       std::optional<pm_location_t> overrideLocation = std::nullopt);
 
-    std::unique_ptr<parser::Regopt> translateRegexpOptions(pm_location_t closingLoc);
-    std::unique_ptr<parser::Regexp> translateRegexp(pm_string_t unescaped, core::LocOffsets location,
-                                                    pm_location_t closingLoc);
+    std::unique_ptr<parser::Node> translateRegexpOptions(pm_location_t closingLoc);
+    std::unique_ptr<parser::Node> translateRegexp(pm_string_t unescaped, core::LocOffsets location,
+                                                  pm_location_t closingLoc);
 
     template <typename PrismNode> std::unique_ptr<parser::Mlhs> translateMultiTargetLhs(PrismNode *);
 
