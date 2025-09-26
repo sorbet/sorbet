@@ -723,7 +723,7 @@ struct PackageSpecBodyWalk {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
                     auto typedLevel = parseTypedLevelOption(ctx, value);
-                    if (typedLevel != core::StrictLevel::None) {
+                    if (typedLevel == core::StrictLevel::None) {
                         if (keyLit->asSymbol() == core::Names::minTypedLevel() ||
                             keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
                             if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidMinTypedLevel)) {
