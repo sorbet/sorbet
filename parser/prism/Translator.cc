@@ -959,6 +959,36 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                                              move(args));
                 }
 
+                if (prismBlock != nullptr) {
+                    if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
+                        // A literal block arg (like `foo { ... }` or `foo do ... end`),
+                        // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
+
+                        ast::ExpressionPtr blockExpr;
+                        if (blockPassArgIsSymbol) {
+                            ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
+                            auto *bp = down_cast<pm_block_argument_node>(prismBlock);
+                            ENFORCE(bp->expression && PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE));
+
+                            auto symbol = down_cast<pm_symbol_node>(bp->expression);
+                            blockExpr = desugarSymbolProc(symbol);
+                        } else {
+                            auto blockBodyExpr =
+                                blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
+                            blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
+                        }
+
+                        magicSendArgs.emplace_back(move(blockExpr));
+                        flags.hasBlock = true;
+                    } else if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                        // A forwarded block like the `&b` in `a.map(&b)`
+                        unreachable("This should be desugar to `Magic.callWithBlockPass()` above.");
+                    } else {
+                        unreachable("Found an unexpected block of type {}",
+                                    pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
+                    }
+                }
+
                 // Desugar any call with a splat and without a block pass argument.
                 // If there's a literal block argument, that's handled here, too.
                 // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
@@ -1047,7 +1077,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
 
                     sendArgs.emplace_back(move(blockExpr));
-
                     flags.hasBlock = true;
                 } else if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
                     // A forwarded block like the `&b` in `a.map(&b)`
