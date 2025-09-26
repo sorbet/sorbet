@@ -83,32 +83,33 @@ class PropagateVisibility final {
     map<core::LocOffsets, DuplicateExportError, decltype(COMPARE_EXPORT_LOCS)> duplicateExports =
         decltype(duplicateExports)(COMPARE_EXPORT_LOCS);
 
-    void checkDuplicateExport(core::MutableContext ctx, core::SymbolRef topExportSym, core::LocOffsets topExportLoc,
-                              core::SymbolRef sym, bool alreadyExported) {
-        // Only report duplicate errors if there's an entry in the blameMap. We don't add to the
-        // blameMap when marking a parent namespace as exported (in exportParentNamespace).
-        auto explicitlyExported = this->explicitlyExported.find(sym) != this->explicitlyExported.end();
-        if (explicitlyExported) {
+    void checkDuplicateExport(core::MutableContext ctx, core::SymbolRef currentExportLineSym,
+                              core::LocOffsets currentExportLineLoc, core::SymbolRef sym, bool alreadyExported) {
+        // Only report duplicate errors if there's an entry in the explicitlyExported map. We don't add to the
+        // explicitlyExported map when marking a parent namespace as exported (in exportParentNamespace).
+        auto isExplicitlyExported = this->explicitlyExported.find(sym) != this->explicitlyExported.end();
+        if (isExplicitlyExported) {
             // If we're not at the top, then the current export is more general.
             // Report the error on the line that previously exported this symbol.
-            auto atTop = sym == topExportSym;
-            auto errLoc = atTop ? topExportLoc : this->explicitlyExported[sym].firstExportedAt;
+            auto atTop = sym == currentExportLineSym;
+            auto errLoc = atTop ? currentExportLineLoc : this->explicitlyExported[sym].firstExportedAt;
 
             if (alreadyExported && duplicateExports.find(errLoc) == duplicateExports.end()) {
-                auto firstExportedAt = atTop ? this->explicitlyExported[sym].firstExportedAt : topExportLoc;
-                duplicateExports[errLoc] = DuplicateExportError{sym, topExportSym, firstExportedAt};
+                auto firstExportedAt = atTop ? this->explicitlyExported[sym].firstExportedAt : currentExportLineLoc;
+                duplicateExports[errLoc] = DuplicateExportError{sym, currentExportLineSym, firstExportedAt};
             }
 
-        } else if (topExportLoc.exists() &&
+        } else if (currentExportLineLoc.exists() &&
                    // Don't treat singleton classes as explicitly exported, so they never show up in
                    // duplicate export errors.
                    (!sym.isClassOrModule() || !sym.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx))) {
-            this->explicitlyExported[sym] = ExportBlame{.exportedBy = topExportSym, .firstExportedAt = topExportLoc};
+            this->explicitlyExported[sym] =
+                ExportBlame{.exportedBy = currentExportLineSym, .firstExportedAt = currentExportLineLoc};
         }
     }
 
-    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef topExportSym,
-                                core::LocOffsets topExportLoc, core::SymbolRef sym) {
+    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef currentExportLineSym,
+                                core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Stop recursing at package boundary
         if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
             return;
@@ -119,7 +120,8 @@ class PropagateVisibility final {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
                 if (setExportedTo) {
-                    checkDuplicateExport(ctx, topExportSym, topExportLoc, sym, klassData->flags.isExported);
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
+                                         klassData->flags.isExported);
                 }
 
                 klassData->flags.isExported = setExportedTo;
@@ -132,7 +134,7 @@ class PropagateVisibility final {
                         continue;
                     }
 
-                    recursiveSetIsExported(ctx, setExportedTo, topExportSym, topExportLoc, child);
+                    recursiveSetIsExported(ctx, setExportedTo, currentExportLineSym, currentExportLineLoc, child);
                 }
                 break;
             }
@@ -141,7 +143,8 @@ class PropagateVisibility final {
                 auto fieldData = sym.asFieldRef().data(ctx);
 
                 if (setExportedTo) {
-                    checkDuplicateExport(ctx, topExportSym, topExportLoc, sym, fieldData->flags.isExported);
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
+                                         fieldData->flags.isExported);
                 }
 
                 fieldData->flags.isExported = setExportedTo;
@@ -196,16 +199,16 @@ class PropagateVisibility final {
 
         auto setExportedTo = false;
 
-        // `topExportLoc` is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
-        auto topExportLoc = core::LocOffsets::none();
+        // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
+        auto currentExportLineLoc = core::LocOffsets::none();
         if (nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, topExportLoc, nonTestScope);
+            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
         }
         if (testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, topExportLoc, testScope);
+            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
         }
 
-        // Shouldn't have been touched, because topExportLoc was none, but let's just clear it to be safe.
+        // Shouldn't have been touched, because currentExportLineLoc was none, but let's just clear it to be safe.
         explicitlyExported.clear();
     }
 
@@ -286,11 +289,10 @@ public:
             return;
         }
 
-        // There was a constant here, but we don't know what it was.
-        //
-        // This is a "valid" export that happens to also be attempting to export something that doesn't exist.
-        // The rest of the pipeline depends on being able to see these lines for the purposes of autocorrects,
-        // so let's at leasat record that there is an export here.
+        // This is a syntactically valid export. It might export something that doesn't exist, but
+        // that doesn't matter: the rest of the pipeline depends on being able to see the `export`
+        // lines locations for the purposes of autocorrects, so let's at least record that there is
+        // an export here.
         this->package.exports_.emplace_back(send.loc);
 
         if (lit->symbol() == core::Symbols::StubModule()) {
