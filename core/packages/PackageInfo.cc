@@ -23,19 +23,10 @@ string_view strictDependenciesLevelToString(StrictDependenciesLevel level) {
     }
 }
 
-string FullyQualifiedName::show(const core::GlobalState &gs) const {
-    return absl::StrJoin(parts, "::", NameFormatter(gs));
-}
-
 Import Import::prelude(MangledName mangledName, core::LocOffsets declLoc) {
     Import res{mangledName, ImportType::Normal, declLoc};
     res.isPrelude_ = true;
     return res;
-}
-
-bool Export::lexCmp(const Export &a, const Export &b) {
-    return absl::c_lexicographical_compare(a.parts(), b.parts(),
-                                           [](auto a, auto b) -> bool { return a.rawId() < b.rawId(); });
 }
 
 PackageInfo &PackageInfo::from(core::GlobalState &gs, MangledName pkg) {
@@ -308,12 +299,14 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
 
 optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalState &gs,
                                                              const core::SymbolRef newExport) const {
+    auto newExportName = newExport.show(gs);
+    auto exportLine = fmt::format("export {}", newExportName);
     auto pkgFile = loc.file();
     auto insertionLoc = core::Loc::none(pkgFile);
     if (!exports_.empty()) {
         core::LocOffsets exportToInsertAfter;
         for (auto &e : exports_) {
-            if (newExport.show(gs) > e.fqn.show(gs)) {
+            if (exportLine > core::Loc(pkgFile, e.loc).source(gs)) {
                 exportToInsertAfter = e.loc;
             }
         }
@@ -344,10 +337,9 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     }
     ENFORCE(insertionLoc.exists());
 
-    auto strName = newExport.show(gs);
     core::AutocorrectSuggestion suggestion(
-        fmt::format("Export `{}` in package `{}`", strName, mangledName_.owner.show(gs)),
-        {{insertionLoc, fmt::format("\n  export {}", strName)}});
+        fmt::format("Export `{}` in package `{}`", newExportName, mangledName_.owner.show(gs)),
+        {{insertionLoc, fmt::format("\n  {}", exportLine)}});
     return {suggestion};
 }
 

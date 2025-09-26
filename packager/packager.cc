@@ -60,43 +60,6 @@ string buildValidLayersStr(const core::GlobalState &gs) {
     return result;
 }
 
-// For a given vector of NameRefs, this represents the "next" vector that does not begin with its
-// prefix (without actually constructing it). Consider the following sorted names:
-//
-// [A B]
-// [A B C]
-// [A B D E]
-//    <<<< Position of LexNext([A B]) roughly equivalent to [A B <Infinity>]
-// [X Y]
-// [X Y Z]
-class LexNext final {
-    absl::Span<const core::NameRef> names;
-
-public:
-    LexNext(const vector<core::NameRef> &names) : names(names) {}
-
-    bool operator<(absl::Span<const core::NameRef> rhs) const {
-        // Lexicographic comparison:
-        for (auto lhsIt = names.begin(), rhsIt = rhs.begin(); lhsIt != names.end() && rhsIt != rhs.end();
-             ++lhsIt, ++rhsIt) {
-            if (lhsIt->rawId() < rhsIt->rawId()) {
-                return true;
-            } else if (rhsIt->rawId() < lhsIt->rawId()) {
-                return false;
-            }
-        }
-
-        // This is where this implementation differs from `std::lexicographic_compare`: if one name is the prefix of
-        // another they're considered equal, wheras `std::lexicographic_compare` would return `true` if the LHS
-        // was shorter.
-        return false;
-    }
-
-    bool operator<(const Export &e) const {
-        return *this < e.parts();
-    }
-};
-
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
@@ -115,41 +78,26 @@ vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState 
     return fqn;
 }
 
-// TODO(jez) This function is only used in two places, and should be possible to delete:
-//
-// - To resolve import/visible_to names to MangledNames
-// - To populate exports
-//
-// The constant lit resolution logic should probably not materialize the vector, and instead just
-// reimplement enough of ResolveConstantsWalk to resolve the constant literals in place, returning
-// the final package symbol.
-//
-// Exports can probably be rewritten to not need to store the fully qualified name entirely.
-FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
-    FullyQualifiedName fqn;
+// TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
+// If we did it recursively, it would also mean that we didn't have to materialize the fullNameReversed vector below
+MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit, bool allowNamespace) {
+    ENFORCE(constantLit != nullptr);
+
+    vector<core::NameRef> fullNameReversed;
     while (constantLit != nullptr) {
-        fqn.parts.emplace_back(constantLit->cnst);
+        fullNameReversed.emplace_back(constantLit->cnst);
         if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
             constantLit = resolvedLit->original();
         } else {
             constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
         }
     }
-    reverse(fqn.parts.begin(), fqn.parts.end());
-    ENFORCE(!fqn.parts.empty());
-    return fqn;
-}
-
-// TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
-MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit, bool allowNamespace) {
-    ENFORCE(constantLit != nullptr);
-
-    auto fullName = getFullyQualifiedName(ctx, constantLit);
+    ENFORCE(!fullNameReversed.empty());
 
     // Since packager now runs after namer, we know that these symbols are entered.
     auto owner = core::Symbols::PackageSpecRegistry();
-    for (auto part : fullName.parts) {
-        auto member = owner.data(ctx)->findMember(ctx, part);
+    for (auto part = fullNameReversed.rbegin(); part != fullNameReversed.rend(); part++) {
+        auto member = owner.data(ctx)->findMember(ctx, *part);
         if (!member.exists() || !member.isClassOrModule()) {
             owner = core::Symbols::noClassOrModule();
             break;
@@ -163,7 +111,7 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
         // should probably be able to pre-resolve the constants in import/visible_to/etc. lines at
         // this point, and report an eager error if those package names fail to resolve, rather than
         // resorting handling this (impossible?) edge case.
-        ENFORCE(fullName.parts.empty());
+        ENFORCE(fullNameReversed.empty());
         owner = core::Symbols::noClassOrModule();
     }
 
@@ -572,7 +520,6 @@ struct PackageSpecBodyWalk {
     PackageSpecBodyWalk(PackageInfo &info) : info(info) {}
 
     PackageInfo &info;
-    vector<Export> exported;
     bool foundFirstPackageSpec = false;
     bool foundLayerDeclaration = false;
     bool foundStrictDependenciesDeclaration = false;
@@ -602,9 +549,7 @@ struct PackageSpecBodyWalk {
         if (send.fun == core::Names::export_()) {
             if (send.numPosArgs() == 1) {
                 // null indicates an invalid export.
-                if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
-                    exported.emplace_back(getFullyQualifiedName(ctx, target), send.loc);
-                }
+                verifyConstant(ctx, core::Names::export_(), send.getPosArg(0));
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
             if (send.numPosArgs() == 1) {
@@ -819,68 +764,6 @@ struct PackageSpecBodyWalk {
         illegalNode(ctx, tree);
     }
 
-    // Generate a list of FQNs exported by this package. No export may be a prefix of another.
-    void finalize(core::Context ctx) {
-        if (exported.empty()) {
-            return;
-        }
-
-        if (info.exportAll()) {
-            // we're only here because exports exist, which means if
-            // `exportAll` is set then we've got conflicting
-            // information about export; flag the exports as wrong
-            for (auto it = exported.begin(); it != exported.end(); ++it) {
-                if (auto e = ctx.beginError(it->loc, core::errors::Packager::ExportConflict)) {
-                    e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info.mangledName_.owner.show(ctx), "export_all!");
-
-                    auto replaceLoc = ctx.locAt(it->loc);
-                    auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
-                    // Remove leading whitespace
-                    replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);
-                    if (replaceLoc.beginPos() != 0) {
-                        // Remove leading newline
-                        replaceLoc = replaceLoc.adjust(ctx, -1, 0);
-                    }
-                    e.replaceWith("Delete export", replaceLoc, "");
-                }
-            }
-        }
-
-        fast_sort(exported, Export::lexCmp);
-        vector<size_t> dupInds;
-        for (auto it = exported.begin(); it != exported.end(); ++it) {
-            LexNext upperBound(it->parts());
-            auto longer = it + 1;
-            for (; longer != exported.end() && !(upperBound < *longer); ++longer) {
-                if (auto e = ctx.beginError(longer->loc, core::errors::Packager::ExportConflict)) {
-                    if (it->parts() == longer->parts()) {
-                        e.setHeader("Duplicate export of `{}`",
-                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    } else {
-                        e.setHeader("Cannot export `{}` because another exported name `{}` is a prefix of it",
-                                    fmt::map_join(longer->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }),
-                                    fmt::map_join(it->parts(), "::", [&](const auto &nr) { return nr.show(ctx); }));
-                    }
-                    e.addErrorLine(ctx.locAt(it->loc), "Prefix exported here");
-                }
-
-                dupInds.emplace_back(distance(exported.begin(), longer));
-            }
-        }
-
-        // Remove duplicates we found (in reverse order)
-        fast_sort(dupInds);
-        dupInds.erase(unique(dupInds.begin(), dupInds.end()), dupInds.end());
-        for (auto indIt = dupInds.rbegin(); indIt != dupInds.rend(); ++indIt) {
-            // Yes this is quadratic, but this only happens in an error condition.
-            exported.erase(exported.begin() + *indIt);
-        }
-
-        ENFORCE(info.exports_.empty());
-        std::swap(exported, info.exports_);
-    }
-
     bool isSpecMethod(const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
@@ -1042,7 +925,6 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
             }
         }
     }
-    bodyWalk.finalize(ctx);
 }
 
 void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
