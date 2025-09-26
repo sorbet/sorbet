@@ -81,14 +81,6 @@ StrictLevel File::fileStrictSigil(string_view source) {
     return ParseSigil<StrictLevel>::parse(source);
 }
 
-bool endsWithTestRb(string_view path) {
-    return absl::EndsWith(path, ".test.rb");
-}
-
-bool containsTestDir(string_view path) {
-    return absl::StrContains(path, "/test/");
-}
-
 bool isPackageRBIPath(string_view path) {
     return absl::EndsWith(path, ".package.rbi");
 }
@@ -107,8 +99,9 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : hasIndexErrors(false), isTestPath(containsTestDir(path)), isTestFile(endsWithTestRb(path)),
-      hasPackageRBIPath(isPackageRBIPath(path)), hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
+    : hasIndexErrors(false), isTestPath(absl::StrContains(path, "/test/")),
+      isTestFile(absl::EndsWith(path, ".test.rb")), hasPackageRBIPath(isPackageRBIPath(path)),
+      hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), path_(move(path_)), source_(move(source_)),
