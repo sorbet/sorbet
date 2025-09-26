@@ -165,6 +165,12 @@ bool FileRef::isPackage(const GlobalState &gs) const {
     return dataAllowingUnsafe(gs).isPackage(gs);
 }
 
+bool FileRef::isTestPackage(const GlobalState &gs) const {
+    ENFORCE(gs.files[_id]);
+    ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
+    return dataAllowingUnsafe(gs).isTestPackage(gs);
+}
+
 string_view File::path() const {
     return this->path_;
 }
@@ -212,6 +218,15 @@ bool File::isPackage(const GlobalState &gs) const {
     // Checks `packageDB()` last because probably we have better locality on the `flags` for the
     // common case of this not being a `__package.rb` file.
     return hasPackageRbPath() && gs.packageDB().enabled();
+}
+
+bool File::isTestPackage(const GlobalState &gs) const {
+    // If the `__package.rb` file is at `typed: ignore`, then we haven't even parsed it.
+    // Any loop over "all package files" really only wants "all non-ignored package files."
+    //
+    // Checks `packageDB()` last because probably we have better locality on the `flags` for the
+    // common case of this not being a `__package.rb` file.
+    return hasPackageRbPath() && this->flags.isTestPath && gs.packageDB().enabled();
 }
 
 bool File::isOpenInClient() const {

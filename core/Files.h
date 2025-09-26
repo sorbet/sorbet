@@ -51,6 +51,7 @@ public:
 
     bool hasPackageRbPath() const;
     bool isPackage(const GlobalState &gs) const;
+    bool isTestPackage(const GlobalState &gs) const;
 
     // Whether the file is open in the LSP client. (Always false if not running under LSP.)
     bool isOpenInClient() const;
