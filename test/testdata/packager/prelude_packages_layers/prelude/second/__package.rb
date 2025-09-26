@@ -8,7 +8,7 @@ class Prelude::Second < PackageSpec
   layer "utility"
   strict_dependencies "dag"
 
-  import Prelude::First
+  import Prelude::First # error: Layering violation
 
   export Prelude::Second::B
 end

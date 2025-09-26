@@ -29,7 +29,10 @@ public:
         // Whether or not this is a node of application or test code.
         const bool isTest = false;
 
-        Node(int id, bool isTest) : id{id}, isTest{isTest} {}
+        // True when this node contains prelude packages.
+        const bool isPrelude = false;
+
+        Node(int id, bool isTest, bool isPrelude) : id{id}, isTest{isTest}, isPrelude{isPrelude} {}
     };
 
 private:
@@ -46,7 +49,7 @@ public:
     Condensation &operator=(const Condensation &other) = delete;
     Condensation &operator=(Condensation &&other) = default;
 
-    Node &pushNode(ImportType type);
+    Node &pushNode(ImportType type, bool isPrelude);
 
     struct Traversal {
         // Packages ordered according to their dependencies in the package graph. It's safe to traverse this vector, and

@@ -4,9 +4,9 @@ module Application
   class B
     extend T::Sig
 
-    sig { returns(Prelude::A) }
+    sig { returns(Integer) }
     def self.test
-      Prelude::A.new
+      10
     end
   end
 end
