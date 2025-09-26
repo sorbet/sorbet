@@ -81,12 +81,12 @@ StrictLevel File::fileStrictSigil(string_view source) {
     return ParseSigil<StrictLevel>::parse(source);
 }
 
-bool isTestPath(string_view path) {
-    return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
+bool endsWithTestRb(string_view path) {
+    return absl::EndsWith(path, ".test.rb");
 }
 
-bool isTestHelperPath(string_view path) {
-    return absl::StrContains(path, "/test/") && !absl::EndsWith(path, ".test.rb");
+bool containsTestDir(string_view path) {
+    return absl::StrContains(path, "/test/");
 }
 
 bool isPackageRBIPath(string_view path) {
@@ -107,7 +107,7 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : hasIndexErrors(false), isPackagedTestHelper(isTestHelperPath(path)), isPackagedTest(isTestPath(path)),
+    : hasIndexErrors(false), isTestPath(containsTestDir(path)), isTestFile(endsWithTestRb(path)),
       hasPackageRBIPath(isPackageRBIPath(path)), hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
@@ -279,11 +279,11 @@ string File::censorFilePathForSnapshotTests(string_view orig) {
 }
 
 bool File::isPackagedTest() const {
-    return flags.isPackagedTest;
+    return flags.isTestFile || flags.isTestPath;
 }
 
 bool File::isPackagedTestHelper() const {
-    return flags.isPackagedTestHelper;
+    return flags.isTestPath && !flags.isTestFile;
 }
 
 bool File::isPackageRBI() const {
