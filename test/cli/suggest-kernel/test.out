@@ -6,14 +6,14 @@ test/cli/suggest-kernel/suggest-kernel.rb:14: Method `is_a?` does not exist on `
     .. |def example(x)
                     ^
   Note:
-    `is_a?` is actually defined as a method on `Kernel`. To call it, either
+    `is_a?` is actually defined as a method on `Kernel`. To call it,
     `include Kernel` in this module to ensure the method is always there.
 
 test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://srb.help/7003
      .. |    raise "hi"
             ^^^^^
   Note:
-    `raise` is actually defined as a method on `Kernel`. To call it, either
+    `raise` is actually defined as a method on `Kernel`. To call it,
     `include Kernel` in this module to ensure the method is always there, or
     call the method using `Kernel.raise` instead.
   Autocorrect: Use `-a` to autocorrect
@@ -25,7 +25,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:5: Method `Integer` does not exist on 
      .. |    Integer(0)
             ^^^^^^^
   Note:
-    `Integer` is actually defined as a method on `Kernel`. To call it, either
+    `Integer` is actually defined as a method on `Kernel`. To call it,
     `include Kernel` in this module to ensure the method is always there, or
     call the method using `Kernel.Integer` instead.
   Autocorrect: Use `-a` to autocorrect
@@ -43,7 +43,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:6: Method `Array` does not exist on `F
      .. |    Array(0)
             ^^^^^
   Note:
-    `Array` is actually defined as a method on `Kernel`. To call it, either
+    `Array` is actually defined as a method on `Kernel`. To call it,
     `include Kernel` in this module to ensure the method is always there, or
     call the method using `Kernel.Array` instead.
   Autocorrect: Use `-a` to autocorrect
