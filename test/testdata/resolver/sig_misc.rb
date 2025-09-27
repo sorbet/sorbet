@@ -26,7 +26,7 @@ class A
   sig {params(types).returns(T1)}
             # ^^^^^ error: Method `types` does not exist
      # ^^^^^^^^^^^^^ error: `params` expects keyword arguments
-  def f1(x) # error: Type not specified for argument
+  def f1(x) # error: Type not specified for parameter
     T1.new
   end
 
@@ -80,7 +80,7 @@ class A
 
   sig { override.void }
   def test_implementation(x) # error: Method `A#test_implementation` is marked `override` but does not override anything
-                        # ^ error: Malformed `sig`. Type not specified for argument
+                        # ^ error: Malformed `sig`. Type not specified for parameter
   end
 
   sig {override.returns(T1)}

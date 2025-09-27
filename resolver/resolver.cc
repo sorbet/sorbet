@@ -3460,7 +3460,7 @@ private:
                     (sig.seen.params.exists() || sig.seen.returns.exists() || sig.seen.void_.exists())) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
+                        e.setHeader("Malformed `{}`. Type not specified for parameter `{}`", "sig",
                                     param.parameterName(ctx.state));
                         e.addErrorLine(ctx.locAt(exprLoc), "Signature");
                     }

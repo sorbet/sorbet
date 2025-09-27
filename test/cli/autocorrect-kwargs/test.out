@@ -28,14 +28,14 @@ autocorrect-kwargs.rb:21: `params` expects keyword arguments https://srb.help/50
     21 |sig {params({a: Integer, b: String}).void}
                     ^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-kwargs.rb:22: Malformed `sig`. Type not specified for argument `a` https://srb.help/5003
+autocorrect-kwargs.rb:22: Malformed `sig`. Type not specified for parameter `a` https://srb.help/5003
     22 |def test3(a, b)
                   ^
     autocorrect-kwargs.rb:21: Signature
     21 |sig {params({a: Integer, b: String}).void}
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-kwargs.rb:22: Malformed `sig`. Type not specified for argument `b` https://srb.help/5003
+autocorrect-kwargs.rb:22: Malformed `sig`. Type not specified for parameter `b` https://srb.help/5003
     22 |def test3(a, b)
                      ^
     autocorrect-kwargs.rb:21: Signature
