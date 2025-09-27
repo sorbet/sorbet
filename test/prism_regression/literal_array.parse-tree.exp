@@ -87,11 +87,8 @@ Begin {
             val = "2"
           }
           Splat {
-            var = Send {
-              receiver = NULL
-              method = <U rest>
-              args = [
-              ]
+            var = LVar {
+              name = <U args>
             }
           }
           Integer {
