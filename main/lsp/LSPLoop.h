@@ -111,11 +111,7 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
 std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef sym,
                                                       bool includeSelf);
 
-std::unique_ptr<core::lsp::QueryResponse>
-skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,
-                              std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
-
-std::unique_ptr<core::lsp::QueryResponse>
+std::vector<std::unique_ptr<core::lsp::QueryResponse>>::iterator
 skipLiteralIfMethodDef(const core::GlobalState &gs,
                        std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
