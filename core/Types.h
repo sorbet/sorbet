@@ -549,18 +549,14 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
 }
 
 TYPE_INLINED(NamedLiteralType) final {
-    const NameRef name;
-
 public:
-    enum class LiteralTypeKind : uint8_t { String, Symbol };
-    const LiteralTypeKind literalKind;
+    const NameRef name;
+    enum class Kind : uint8_t { String, Symbol };
+    const Kind kind;
     NamedLiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
-    int64_t asInteger() const;
-    core::NameRef asName() const;
-    core::NameRef unsafeAsName() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
@@ -581,26 +577,24 @@ CheckSize(NamedLiteralType, 8, 8);
 template <>
 inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
     NamedLiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::NamedLiteralType,
-                   (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
+    return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.kind));
 }
 
 template <>
 inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
     NamedLiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::NamedLiteralType,
-                   (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.literalKind));
+    return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.kind));
 }
 
 template <> inline NamedLiteralType cast_type_nonnull<NamedLiteralType>(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<NamedLiteralType>(what));
     uint64_t tagged = what.inlinedValue();
     uint32_t id = static_cast<uint32_t>(tagged >> 8);
-    auto literalKind = static_cast<NamedLiteralType::LiteralTypeKind>(tagged & 0xff);
-    switch (literalKind) {
-        case NamedLiteralType::LiteralTypeKind::String:
+    auto kind = static_cast<NamedLiteralType::Kind>(tagged & 0xff);
+    switch (kind) {
+        case NamedLiteralType::Kind::String:
             return NamedLiteralType(Symbols::String(), NameRef::fromRawUnchecked(id));
-        case NamedLiteralType::LiteralTypeKind::Symbol:
+        case NamedLiteralType::Kind::Symbol:
             return NamedLiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(id));
     }
 }
