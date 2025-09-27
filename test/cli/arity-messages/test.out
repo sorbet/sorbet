@@ -157,6 +157,10 @@ paperino(2, y: 3, z: 4)
 super-arity-messages.rb:12: Method `unary2` does not exist on ancestors of `Parent` https://srb.help/7048
     12 |    super
             ^^^^^
+  Got `Parent` originating from:
+    super-arity-messages.rb:11:
+    11 |  def unary2(x)
+          ^
   Note:
     For help fixing `super` errors: https://sorbet.org/docs/typed-super
 

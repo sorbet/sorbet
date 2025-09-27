@@ -58,6 +58,10 @@ suggest_static.rb:21: Method `on_both` does not exist on `Right` component of `T
 suggest_static.rb:7: Method `foo` does not exist on `A` https://srb.help/7003
      7 |    foo
             ^^^
+  Got `A` originating from:
+    suggest_static.rb:6:
+     6 |  def bar
+          ^
   There is a singleton class method with the same name:
     suggest_static.rb:3: Defined here
      3 |  def self.foo

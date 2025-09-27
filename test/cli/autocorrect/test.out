@@ -1,6 +1,10 @@
 autocorrect.rb:8: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
      8 |sig {params(a: String).void}
         ^^^
+  Got `T.class_of(<root>)` originating from:
+    autocorrect.rb:3:
+     3 |foo = T.let(nil, T.nilable(String))
+        ^
   Autocorrect: Done
     autocorrect.rb:8: Inserted `extend T::Sig`
      8 |sig {params(a: String).void}
@@ -9,10 +13,18 @@ autocorrect.rb:8: Method `sig` does not exist on `T.class_of(<root>)` https://sr
 autocorrect.rb:8: Method `params` does not exist on `T.class_of(<root>)` https://srb.help/7003
      8 |sig {params(a: String).void}
              ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    autocorrect.rb:3:
+     3 |foo = T.let(nil, T.nilable(String))
+        ^
 
 autocorrect.rb:19: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
     19 |sig {params(a: T.nilable(Integer)).void}
         ^^^
+  Got `T.class_of(<root>)` originating from:
+    autocorrect.rb:3:
+     3 |foo = T.let(nil, T.nilable(String))
+        ^
   Autocorrect: Done
     autocorrect.rb:19: Inserted `extend T::Sig`
     19 |sig {params(a: T.nilable(Integer)).void}
@@ -21,6 +33,10 @@ autocorrect.rb:19: Method `sig` does not exist on `T.class_of(<root>)` https://s
 autocorrect.rb:19: Method `params` does not exist on `T.class_of(<root>)` https://srb.help/7003
     19 |sig {params(a: T.nilable(Integer)).void}
              ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    autocorrect.rb:3:
+     3 |foo = T.let(nil, T.nilable(String))
+        ^
 
 autocorrect.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      4 |foo[0]

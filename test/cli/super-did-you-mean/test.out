@@ -1,6 +1,10 @@
 test/cli/super-did-you-mean/test.rb:15: Method `no_parent_method` does not exist on ancestors of `Child` https://srb.help/7048
     15 |    super
             ^^^^^
+  Got `Child` originating from:
+    test/cli/super-did-you-mean/test.rb:14:
+    14 |  def no_parent_method
+          ^
   Note:
     For help fixing `super` errors: https://sorbet.org/docs/typed-super
 Errors: 1

@@ -147,6 +147,10 @@ suggest_unsafe_dead.rb:81: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:80: Replaced with `T.unsafe(self)`
     80 |    unless self
                    ^^^^
+  Got `A` originating from:
+    suggest_unsafe_dead.rb:79:
+    79 |  def test7_self
+          ^
 
 suggest_unsafe_dead.rb:89: This code is unreachable https://srb.help/7006
     89 |      do_something
