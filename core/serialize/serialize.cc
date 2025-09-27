@@ -453,12 +453,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::NamedLiteralType: {
             auto c = cast_type_nonnull<NamedLiteralType>(what);
             p.putU1((uint8_t)c.literalKind);
-            switch (c.literalKind) {
-                case NamedLiteralType::LiteralTypeKind::Symbol:
-                case NamedLiteralType::LiteralTypeKind::String:
-                    p.putU4(c.unsafeAsName().rawId());
-                    break;
-            }
+            p.putU4(c.name.rawId());
             break;
         }
         case TypePtr::Tag::IntegerLiteralType: {

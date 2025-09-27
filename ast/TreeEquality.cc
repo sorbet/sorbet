@@ -258,7 +258,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
                 auto named_literal_a = core::cast_type_nonnull<core::NamedLiteralType>(aType);
                 auto named_literal_b = core::cast_type_nonnull<core::NamedLiteralType>(bType);
                 return named_literal_a.literalKind == named_literal_b.literalKind &&
-                       Comparator::compareNames(gs, named_literal_a.asName(), named_literal_b.asName());
+                       Comparator::compareNames(gs, named_literal_a.name, named_literal_b.name);
             } else if (aType.tag() == core::TypePtr::Tag::ClassType) {
                 auto class_type_a = core::cast_type_nonnull<core::ClassType>(aType);
                 auto class_type_b = core::cast_type_nonnull<core::ClassType>(bType);

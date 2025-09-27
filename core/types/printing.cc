@@ -80,7 +80,7 @@ string NamedLiteralType::show(const GlobalState &gs, ShowOptions options) const 
 string NamedLiteralType::showValue(const GlobalState &gs) const {
     switch (literalKind) {
         case NamedLiteralType::LiteralTypeKind::String:
-            return fmt::format("\"{}\"", absl::CEscape(asName().show(gs)));
+            return fmt::format("\"{}\"", absl::CEscape(name.show(gs)));
         case NamedLiteralType::LiteralTypeKind::Symbol: {
             return name.showAsSymbolLiteral(gs);
         }
@@ -180,8 +180,8 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
         if (isa_type<NamedLiteralType>(key)) {
             const auto &keyLiteral = cast_type_nonnull<NamedLiteralType>(key);
             if (keyLiteral.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol &&
-                !absl::StartsWith(keyLiteral.asName().shortName(gs), "$")) {
-                keyStr = keyLiteral.asName().show(gs);
+                !absl::StartsWith(keyLiteral.name.shortName(gs), "$")) {
+                keyStr = keyLiteral.name.show(gs);
                 sepStr = ": ";
             } else {
                 keyStr = options.useValidSyntax ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);

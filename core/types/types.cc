@@ -406,16 +406,6 @@ NamedLiteralType::NamedLiteralType(ClassOrModuleRef klass, NameRef val)
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
-core::NameRef NamedLiteralType::asName() const {
-    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Symbol || literalKind == LiteralTypeKind::String);
-    return name;
-}
-
-core::NameRef NamedLiteralType::unsafeAsName() const {
-    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Symbol || literalKind == LiteralTypeKind::String);
-    return name;
-}
-
 TypePtr NamedLiteralType::underlying(const GlobalState &gs) const {
     switch (literalKind) {
         case LiteralTypeKind::String:
@@ -458,11 +448,8 @@ bool NamedLiteralType::equals(const NamedLiteralType &rhs) const {
     if (this->literalKind != rhs.literalKind) {
         return false;
     }
-    switch (this->literalKind) {
-        case LiteralTypeKind::Symbol:
-        case LiteralTypeKind::String:
-            return this->name == rhs.name;
-    }
+
+    return this->name == rhs.name;
 }
 
 void IntegerLiteralType::_sanityCheck(const GlobalState &gs) const {

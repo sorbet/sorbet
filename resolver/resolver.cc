@@ -2554,8 +2554,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto name = literal.asName();
-        auto shortName = name.shortName(ctx);
+        auto shortName = literal.name.shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("The string given to `{}` must not be empty", method);

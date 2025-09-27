@@ -171,11 +171,11 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
     switch (lit.literalKind) {
         case NamedLiteralType::LiteralTypeKind::String:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::STRING);
-            proto.set_string(lit.asName().show(gs));
+            proto.set_string(lit.name.show(gs));
             break;
         case NamedLiteralType::LiteralTypeKind::Symbol:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::SYMBOL);
-            proto.set_symbol(lit.asName().show(gs));
+            proto.set_symbol(lit.name.show(gs));
             break;
     }
     return proto;

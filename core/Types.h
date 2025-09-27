@@ -549,18 +549,14 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
 }
 
 TYPE_INLINED(NamedLiteralType) final {
-    const NameRef name;
-
 public:
+    const NameRef name;
     enum class LiteralTypeKind : uint8_t { String, Symbol };
     const LiteralTypeKind literalKind;
     NamedLiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
-    int64_t asInteger() const;
-    core::NameRef asName() const;
-    core::NameRef unsafeAsName() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
