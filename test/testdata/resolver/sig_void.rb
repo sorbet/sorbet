@@ -24,7 +24,7 @@ class Main
     end
 
     sig {void}
-    def self.missing_arg(my_arg) # error: Type not specified for argument `my_arg`
+    def self.missing_arg(my_arg) # error: Type not specified for parameter `my_arg`
     end
 end
 
