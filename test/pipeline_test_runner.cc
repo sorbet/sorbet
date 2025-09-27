@@ -297,11 +297,11 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     auto expected = ast.showRawWithLocs(gs, file);
                     auto actual = directlyDesugaredAST.showRawWithLocs(gs, file);
 
-                    cout << "--- Expected: " << endl;
-                    cout << expected << endl << endl;
-                    cout << "+++ Actual: " << endl;
-                    cout << actual << endl << endl;
-                    cout << "Diff:" << endl;
+                    // cout << "--- Expected: " << endl;
+                    // cout << expected << endl << endl;
+                    // cout << "+++ Actual: " << endl;
+                    // cout << actual << endl << endl;
+                    // cout << "Diff:" << endl;
                     CHECK_EQ_DIFF(expected, actual,
                                   fmt::format("Prism desugared tree does not match legacy desugared tree"));
                 }

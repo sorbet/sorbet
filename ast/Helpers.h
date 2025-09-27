@@ -194,6 +194,23 @@ public:
         return Send1(loc, Magic(loc), core::Names::splat(), loc, std::move(arg));
     }
 
+    // If `expr` is a Splat, returns the expression being splatted, otherwise nullptr.
+    static ast::ExpressionPtr extractSplattedExpression(ExpressionPtr &expr) {
+        auto splat = cast_tree<ast::Send>(expr);
+        if (splat == nullptr) {
+            return nullptr;
+        }
+
+        if (splat->fun != core::Names::splat()) {
+            return nullptr;
+        }
+
+        ENFORCE(isMagicClass(splat->recv), "Splat Send should have Magic as the receiver");
+        ENFORCE(splat->numPosArgs() == 1, "Splat Send should have exactly 1 argument");
+
+        return std::move(splat->getPosArg(0));
+    }
+
     static ExpressionPtr CallWithSplat(core::LocOffsets loc, ExpressionPtr recv, core::NameRef name,
                                        core::LocOffsets funLoc, ExpressionPtr splat) {
         return Send4(loc, Magic(loc), core::Names::callWithSplat(), loc, std::move(recv), MK::Symbol(loc, name),
@@ -561,7 +578,7 @@ public:
         return root != nullptr && root->symbol() == core::Symbols::root();
     }
 
-    static bool isMagicClass(ExpressionPtr &expr) {
+    static bool isMagicClass(const ExpressionPtr &expr) {
         if (auto recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol() == core::Symbols::Magic();
         } else {
