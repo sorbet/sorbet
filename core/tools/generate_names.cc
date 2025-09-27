@@ -280,8 +280,16 @@ NameDef names[] = {
     {"itAngles", "<it>"},
     {"testEach", "test_each"},
     {"testEachHash", "test_each_hash"},
+    {"sharedExamples", "shared_examples"},
+    {"sharedContext", "shared_context"},
+    {"sharedExamplesFor", "shared_examples_for"},
+    {"includeExamples", "include_examples"},
+    {"includeContext", "include_context"},
+    {"RSpec", "RSpec", true},
+    {"Core", "Core", true},
+    {"ExampleGroup", "ExampleGroup", true},
+
     {"constSet", "const_set"},
-    {"collect"},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
