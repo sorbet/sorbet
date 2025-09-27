@@ -35,10 +35,10 @@ class Wrap1
 
   sig {params(x: Integer, y: String).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
-#                         ^ error: Unknown argument name
+#                         ^ error: Unknown parameter name
   sig {params(x: Integer, y: String, blk: T.proc.returns(Integer)).void}
 #             ^ error: Overloaded functions cannot have keyword arguments
-#                         ^ error: Unknown argument name
+#                         ^ error: Unknown parameter name
   def arg_in_sig_but_not_method(x:, &blk); end # error: against an overloaded signature
 
   sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments

@@ -2,7 +2,7 @@
 # assert-fast-path: method_add_argument.rb
 
 class A extend T::Sig
-  sig {params(x: Integer, y: Integer).returns(String)} # error: Unknown argument name `y`
+  sig {params(x: Integer, y: Integer).returns(String)} # error: Unknown parameter name `y`
   def bar(x)
     res = x.to_s
     puts(y) # error: Method `y` does not exist on `A`

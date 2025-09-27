@@ -3482,7 +3482,7 @@ private:
         for (const auto &spec : sig.argTypes) {
             info.allArgsMatched = false;
             if (auto e = ctx.beginError(spec.nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
+                e.setHeader("Unknown parameter name `{}`", spec.name.show(ctx));
             }
         }
 

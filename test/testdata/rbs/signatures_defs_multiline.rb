@@ -30,7 +30,7 @@ def parse_error3; T.unsafe(nil); end # error: The method `parse_error3` does not
 
 #: (
 #|   String x ) -> String
-#           ^ error: Unknown argument name `x`
+#           ^ error: Unknown parameter name `x`
 def named_args1(y)
   #             ^ error: Malformed `sig`. Type not specified for argument `y`
   T.reveal_type(y) # error: Revealed type: `T.untyped`
@@ -39,7 +39,7 @@ end
 #: (
 #|   String
 #| x ) -> String
-#  ^ error: Unknown argument name `x`
+#  ^ error: Unknown parameter name `x`
 def named_args2(y)
   #             ^ error: Malformed `sig`. Type not specified for argument `y`
   T.reveal_type(y) # error: Revealed type: `T.untyped`

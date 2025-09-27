@@ -35,7 +35,7 @@ class A
     T2.new
   end
 
-  sig {params(x: T1).returns(T1)} # error: Unknown argument name `x`
+  sig {params(x: T1).returns(T1)} # error: Unknown parameter name `x`
   def f3
     T1.new
   end

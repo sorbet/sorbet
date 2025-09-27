@@ -42,7 +42,7 @@ def sig_mismatch1(p1, p2); end
 
 #: (foo: P1) -> void
 #   ^^^^^^^ error: Argument kind mismatch for `p1`, method declares `positional`, but RBS signature declares `keyword`
-#   ^^^ error: Unknown argument name `foo`
+#   ^^^ error: Unknown parameter name `foo`
 def sig_mismatch2(p1); end
 #                 ^^ error: Malformed `sig`. Type not specified for argument `p1`
 
@@ -155,14 +155,14 @@ method11("foo")
 method11(42) # error: Expected `String` but found `Integer(42)` for argument `x`
 
 #: (String x) -> String
-#          ^ error: Unknown argument name `x`
+#          ^ error: Unknown parameter name `x`
 def named_args2(y)
   #             ^ error: Malformed `sig`. Type not specified for argument `y`
   T.reveal_type(y) # error: Revealed type: `T.untyped`
 end
 
 #: (String foo) -> String
-#          ^^^ error: Unknown argument name `foo`
+#          ^^^ error: Unknown parameter name `foo`
 def method12(y)
   #          ^ error: Malformed `sig`. Type not specified for argument `y`
   T.reveal_type(y) # error: Revealed type: `T.untyped`
