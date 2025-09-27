@@ -817,7 +817,7 @@ private:
                 name = parsedParam.local._name;
             }
         } else if (parsedParam.flags.isBlock) {
-            name = core::Names::blkArg();
+            name = core::Names::blkParam();
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
@@ -1241,7 +1241,7 @@ private:
             auto loc = ctx.locAt(mod.loc);
             auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
             sealedSubclasses.data(ctx)->addLoc(ctx, loc);
-            auto &blkArg = ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
+            auto &blkArg = ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkParam());
             blkArg.flags.isBlock = true;
 
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.

@@ -1237,7 +1237,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 // Desugaring a method def like `def foo()` should behave like `def foo(&<blk>)`,
                 // so we set a synthetic name here for `yield` to use.
-                enclosingBlockParamName = core::Names::blkArg();
+                enclosingBlockParamName = core::Names::blkParam();
 
                 // TODO: In a future PR, we'll actually generate the expr via `Mk::Block`
                 // See the `Mk::Block` call in Desugar.cc's `buildMethod()` for reference.
@@ -2413,7 +2413,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             ExpressionPtr recv;
             if (enclosingBlockParamName.exists()) {
-                if (enclosingBlockParamName == core::Names::blkArg()) {
+                if (enclosingBlockParamName == core::Names::blkParam()) {
                     if (auto e =
                             ctx.beginIndexerError(enclosingMethodLoc, core::errors::Desugar::UnnamedBlockParameter)) {
                         e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
@@ -2792,15 +2792,15 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode) {
         // Drop the `&` before the name of the block parameter.
         blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + 1, blockParamLoc.endPos()};
 
-        auto blockParamExpr = MK::BlockArg(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
+        auto blockParamExpr = MK::BlockParam(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
         auto blockParamNode =
-            make_node_with_expr<parser::Blockarg>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
+            make_node_with_expr<parser::BlockParam>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
 
         params.emplace_back(move(blockParamNode));
     } else {
         // Desugaring a method def like `def foo(a, b)` should behave like `def foo(a, b, &<blk>)`,
         // so we set a synthetic name here for `yield` to use.
-        enclosingBlockParamName = core::Names::blkArg();
+        enclosingBlockParamName = core::Names::blkParam();
     }
 
     return {make_unique<parser::Params>(location, move(params)), enclosingBlockParamName};
@@ -2848,7 +2848,7 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
             paramsStore.emplace_back(MK::RestParam(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
 
             // add `&<fwd-block>`
-            paramsStore.emplace_back(MK::BlockArg(loc, MK::Local(loc, core::Names::fwdBlock())));
+            paramsStore.emplace_back(MK::BlockParam(loc, MK::Local(loc, core::Names::fwdBlock())));
         } else {
             paramsStore.emplace_back(param->takeDesugaredExpr());
         }

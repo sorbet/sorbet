@@ -102,7 +102,7 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
         }
         // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
         auto sigArgs = ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
-                                         ast::MK::Symbol(loc, core::Names::blkArg()),
+                                         ast::MK::Symbol(loc, core::Names::blkParam()),
                                          ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
 
         methodStubs.push_back(ast::MK::Sig(loc, std::move(sigArgs), ast::MK::Untyped(loc)));
@@ -110,7 +110,7 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
         // def $methodName(*arg0, &blk); end
         ast::MethodDef::PARAMS_store params;
         params.emplace_back(ast::MK::RestParam(loc, ast::MK::Local(loc, core::Names::arg0())));
-        params.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+        params.emplace_back(ast::make_expression<ast::BlockParam>(loc, ast::MK::Local(loc, core::Names::blkParam())));
 
         methodStubs.push_back(ast::MK::SyntheticMethod(loc, loc, methodName, std::move(params), ast::MK::EmptyTree()));
     }

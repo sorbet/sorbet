@@ -27,7 +27,7 @@ core::ParsedParam parseParam(const ast::ExpressionPtr &param) {
                 parsedParam.flags.isDefault = true;
                 cursor = &opt.expr;
             },
-            [&](const ast::BlockArg &blk) {
+            [&](const ast::BlockParam &blk) {
                 parsedParam.flags.isBlock = true;
                 cursor = &blk.expr;
             },
@@ -56,7 +56,7 @@ ExpressionPtr getDefaultValue(ExpressionPtr param) {
                 cursor = &opt.default_;
                 done = true;
             },
-            [&](ast::BlockArg &blk) { cursor = &blk.expr; }, [&](ast::ShadowArg &shadow) { cursor = &shadow.expr; },
+            [&](ast::BlockParam &blk) { cursor = &blk.expr; }, [&](ast::ShadowArg &shadow) { cursor = &shadow.expr; },
             [&](ast::Local &local) {
                 ENFORCE(false, "shouldn't reach a local variable for arg");
                 done = true;

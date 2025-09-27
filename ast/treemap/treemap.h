@@ -644,7 +644,7 @@ private:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
-                case Tag::BlockArg:
+                case Tag::BlockParam:
                     Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
