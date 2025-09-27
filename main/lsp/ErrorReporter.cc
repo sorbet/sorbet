@@ -200,15 +200,15 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                 if (section.isAutocorrectDescription && section.isDidYouMean) {
                     message = fmt::format("{} (fix available)", sectionHeader);
                     usedSectionHeader = true;
-                } else if (errorLine.formattedMessage.length() > 0) {
+                } else {
                     if (!usedSectionHeader) {
-                        relatedInformation.push_back(
-                            make_unique<DiagnosticRelatedInformation>(location->copy(), sectionHeader));
+                        message = sectionHeader;
                         usedSectionHeader = true;
                     }
-                    message = errorLine.formattedMessage;
-                } else {
-                    message = sectionHeader;
+                    auto maybeSpace = message.empty() ? "" : " ";
+                    if (!errorLine.formattedMessage.empty()) {
+                        message = fmt::format("{}{}{}", message, maybeSpace, errorLine.formattedMessage);
+                    }
                 }
 
                 // VSCode strips out leading whitespace, but we use leading whitespaces to convey
