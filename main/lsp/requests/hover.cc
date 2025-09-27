@@ -81,7 +81,8 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         return response;
     }
 
-    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
+    auto respIt = skipLiteralIfMethodDef(gs, queryResponses);
+    auto resp = move(*respIt);
     auto options = core::ShowOptions();
     vector<core::Loc> documentationLocations;
     string typeString;
@@ -147,6 +148,51 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             retType = core::Types::untypedUntracked();
         }
         typeString = retType.showWithMoreInfo(gs);
+    } else if (auto l = resp->isLiteral()) {
+        // TODO(jez) Pull this out to a function, so you can early return to cut down on nesting
+        // TODO(jez) The whitespace is weird, you're adding an extra trailing newline
+        // TODO(jez) Try to get the name of the method that owns it in there?
+        // TODO(jez) Figure out whether you want to make this logic apply in go to def and find all references
+        // TODO(jez) Tests:
+        // - with symbol in positional param
+        // - with string
+        // - with splat/block/kwsplat
+        // - with punned kwarg
+        if (core::isa_type<core::NamedLiteralType>(l->retType.type)) {
+            auto litType = core::cast_type_nonnull<core::NamedLiteralType>(l->retType.type);
+            if (litType.kind == core::NamedLiteralType::Kind::Symbol) {
+                auto &nextResp = *(respIt + 1);
+                if (auto send = nextResp->isSend()) {
+                    auto query = core::lsp::Query::createLocQuery(queryLoc);
+                    auto argLoc = absl::c_find_if(
+                        send->argLocOffsets, [&](auto loc) { return query.matchesLoc(core::Loc(send->file, loc)); });
+                    if (argLoc != send->argLocOffsets.end()) {
+                        auto argIdx = distance(send->argLocOffsets.begin(), argLoc);
+                        if (argIdx >= send->numPosArgs) {
+                            auto curr = send->dispatchResult.get();
+                            while (curr != nullptr) {
+                                if (curr->main.method.exists() && !curr->main.receiver.isUntyped()) {
+                                    auto &parameters = curr->main.method.data(gs)->parameters;
+                                    auto param = absl::c_find_if(parameters, [&](auto &p) {
+                                        return p.flags.isKeyword && !p.flags.isRepeated && p.name == litType.name;
+                                    });
+                                    if (param != parameters.end()) {
+                                        typeString += fmt::format("(kwparam) {}: {}\n", param->parameterName(gs),
+                                                                  param->type.showWithMoreInfo(gs));
+                                    }
+                                }
+                                curr = curr->secondary.get();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (typeString.empty()) {
+            // fallback, in case this isn't a keyword arg
+            typeString = resp->getRetType().showWithMoreInfo(gs);
+        }
     } else {
         auto retType = resp->getRetType();
         // Some untyped arguments have null types.
