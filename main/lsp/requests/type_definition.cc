@@ -110,7 +110,7 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
     vector<unique_ptr<Location>> locations;
     if (!queryResponses.empty()) {
         const bool fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = skipLiteralIfMethodDef(gs, queryResponses);
+        auto resp = move(*skipLiteralIfMethodDef(gs, queryResponses));
 
         // Only support go-to-type-definition on constants and fields in untyped files.
         if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
