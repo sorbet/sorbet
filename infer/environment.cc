@@ -499,20 +499,25 @@ bool isSingleton(core::Context ctx, const core::TypePtr &ty, bool includeSinglet
         return true;
     }
 
+    auto data = sym.data(ctx);
+
     // T::Enum values are modeled as singletons of their own fake class.
-    if (sym.data(ctx)->name.isTEnumName(ctx)) {
+    if (data->name.isTEnumName(ctx)) {
         return true;
     }
 
     // attachedClass on untyped symbol is defined to return itself
-    if (includeSingletonClasses && sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() &&
-        sym.data(ctx)->flags.isFinal) {
-        // This is a Ruby singleton class object
-        return true;
+    if (includeSingletonClasses && sym != core::Symbols::untyped()) {
+        // Check for Ruby singleton class objects
+        auto attachedClass = data->attachedClass(ctx);
+        if (attachedClass.exists() && (data->flags.isFinal || attachedClass.data(ctx)->flags.isModule)) {
+            // module singleton classes are final even if not declared `final!` because of how the Ruby VM works
+            return true;
+        }
     }
 
     // The Ruby stdlib has a Singleton module which lets people invent their own singletons.
-    return (sym.data(ctx)->derivesFrom(ctx, core::Symbols::Singleton()) && sym.data(ctx)->flags.isFinal);
+    return (data->derivesFrom(ctx, core::Symbols::Singleton()) && data->flags.isFinal);
 }
 
 } // namespace

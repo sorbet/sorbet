@@ -72,6 +72,8 @@ end
 
 module E; extend T::Helpers; final!; end
 module F; extend T::Helpers; final!; end
+# module singleton classes are implicitly final
+module G; end
 
 sig {params(x: T.any(T.class_of(E), T.class_of(F))).void}
 def test7(x)
@@ -91,11 +93,30 @@ def test8(x)
   end
 end
 
+sig { params(x: T.any(T.class_of(G), T.class_of(E))).void }
+def test9(x)
+  if x == G
+    T.reveal_type(x) # error: `T.class_of(G)`
+  elsif x == E
+    T.reveal_type(x) # error: `T.class_of(E)`
+  else
+    T.absurd(x)
+  end
+
+  if G == x
+    T.reveal_type(x) # error: `T.class_of(G)`
+  elsif E == x
+    T.reveal_type(x) # error: `T.class_of(E)`
+  else
+    T.absurd(x)
+  end
+end
+
 class Parent; end
 class Child < Parent; end
 
 sig {params(x: T.class_of(Parent)).void}
-def test9(x)
+def test10(x)
   if x == Parent
     T.reveal_type(x) # error: `T.class_of(Parent)`
   else
@@ -105,7 +126,7 @@ def test9(x)
 end
 
 sig {params(x: T.class_of(Parent)).void}
-def test10(x)
+def test11(x)
   if Parent == x
     T.reveal_type(x) # error: `T.class_of(Parent)`
   else
