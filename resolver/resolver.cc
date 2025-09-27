@@ -3483,6 +3483,7 @@ private:
             info.allArgsMatched = false;
             if (auto e = ctx.beginError(spec.nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unknown parameter name `{}`", spec.name.show(ctx));
+                e.addErrorLine(ctx.locAt(mdef.declLoc), "Parameter not in method definition here");
             }
         }
 
