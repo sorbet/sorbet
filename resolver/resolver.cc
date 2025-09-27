@@ -3458,11 +3458,14 @@ private:
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
                 if (!isOverloaded && !isSyntheticBlkArg &&
                     (sig.seen.params.exists() || sig.seen.returns.exists() || sig.seen.void_.exists())) {
-                    // Only error if we have any types
-                    if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.beginError(local->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for parameter `{}`", "sig",
-                                    param.parameterName(ctx.state));
-                        e.addErrorLine(ctx.locAt(exprLoc), "Signature");
+                                    param.parameterName(ctx));
+                        if (sig.seen.params.exists()) {
+                            e.addErrorLine(ctx.locAt(sig.seen.params), "Add it to the signature's `{}` here", "params");
+                        } else {
+                            e.addErrorLine(ctx.locAt(exprLoc), "Add it to the signature here");
+                        }
                     }
                 }
             }
