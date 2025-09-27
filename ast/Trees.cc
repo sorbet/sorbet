@@ -1390,8 +1390,7 @@ core::NameRef Literal::asName() const {
 
 bool Literal::isSymbol() const {
     return core::isa_type<core::NamedLiteralType>(value) &&
-           core::cast_type_nonnull<core::NamedLiteralType>(value).literalKind ==
-               core::NamedLiteralType::LiteralTypeKind::Symbol;
+           core::cast_type_nonnull<core::NamedLiteralType>(value).kind == core::NamedLiteralType::Kind::Symbol;
 }
 
 bool Literal::isNil(const core::GlobalState &gs) const {
@@ -1400,8 +1399,7 @@ bool Literal::isNil(const core::GlobalState &gs) const {
 
 bool Literal::isString() const {
     return core::isa_type<core::NamedLiteralType>(value) &&
-           core::cast_type_nonnull<core::NamedLiteralType>(value).literalKind ==
-               core::NamedLiteralType::LiteralTypeKind::String;
+           core::cast_type_nonnull<core::NamedLiteralType>(value).kind == core::NamedLiteralType::Kind::String;
 }
 
 bool Literal::isName() const {

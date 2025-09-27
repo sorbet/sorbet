@@ -2549,7 +2549,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         auto literal = core::cast_type_nonnull<core::NamedLiteralType>(literalNode->value);
-        if (literal.literalKind != core::NamedLiteralType::LiteralTypeKind::String) {
+        if (literal.kind != core::NamedLiteralType::Kind::String) {
             // Infer will report a type error
             return;
         }

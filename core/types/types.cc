@@ -397,7 +397,7 @@ void sanityCheckProxyType(const GlobalState &gs, TypePtr underlying) {
 } // namespace
 
 NamedLiteralType::NamedLiteralType(ClassOrModuleRef klass, NameRef val)
-    : name(val), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
+    : name(val), kind(klass == Symbols::String() ? Kind::String : Kind::Symbol) {
     if (klass == Symbols::String()) {
         recordAllocatedType("literaltype.string");
     } else {
@@ -407,10 +407,10 @@ NamedLiteralType::NamedLiteralType(ClassOrModuleRef klass, NameRef val)
 }
 
 TypePtr NamedLiteralType::underlying(const GlobalState &gs) const {
-    switch (literalKind) {
-        case LiteralTypeKind::String:
+    switch (kind) {
+        case Kind::String:
             return Types::String();
-        case LiteralTypeKind::Symbol:
+        case Kind::Symbol:
             return Types::Symbol();
     }
 }
@@ -445,7 +445,7 @@ void NamedLiteralType::_sanityCheck(const GlobalState &gs) const {
 }
 
 bool NamedLiteralType::equals(const NamedLiteralType &rhs) const {
-    if (this->literalKind != rhs.literalKind) {
+    if (this->kind != rhs.kind) {
         return false;
     }
 
