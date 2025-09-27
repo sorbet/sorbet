@@ -12,13 +12,14 @@ class SendResponse final {
 public:
     SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, InlinedVector<core::LocOffsets, 2> argLocOffsets,
                  core::NameRef callerSideName, core::NameRef originalName, core::MethodRef enclosingMethod,
-                 bool isPrivateOk, core::FileRef file, core::LocOffsets termLocOffsets,
+                 bool isPrivateOk, uint16_t numPosArgs, core::FileRef file, core::LocOffsets termLocOffsets,
                  core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
                  core::LocOffsets locOffsetsWithoutBlock)
         : dispatchResult(std::move(dispatchResult)), argLocOffsets(std::move(argLocOffsets)),
           callerSideName(callerSideName), originalName(originalName), enclosingMethod(enclosingMethod),
-          isPrivateOk(isPrivateOk), file(file), termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets),
-          funLocOffsets(funLocOffsets), locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
+          isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), file(file), termLocOffsets(termLocOffsets),
+          receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
+          locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const InlinedVector<core::LocOffsets, 2> argLocOffsets;
     // The actual name we wind up invoking; in the case of `<Magic>` methods
@@ -29,6 +30,7 @@ public:
     const core::NameRef originalName;
     const core::MethodRef enclosingMethod;
     const bool isPrivateOk;
+    const uint16_t numPosArgs;
     const core::FileRef file;
     const core::LocOffsets termLocOffsets;
     const core::LocOffsets receiverLocOffsets;
