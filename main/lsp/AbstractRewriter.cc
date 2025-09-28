@@ -124,7 +124,7 @@ void AbstractRewriter::addSubclassRelatedMethods(const core::GlobalState &gs, co
 void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs,
                                                  const core::DispatchResult *dispatchResult,
                                                  shared_ptr<UniqueSymbolQueue> methods) {
-    for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
+    for (const auto *dr : dispatchResult) {
         auto method = dr->main.method;
         ENFORCE(method.exists());
         auto isNew = methods->tryEnqueue(method);

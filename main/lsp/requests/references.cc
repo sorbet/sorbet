@@ -175,16 +175,14 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
             }
         } else if (auto sendResp = resp->isSend()) {
             if (fileIsTyped) {
-                auto start = sendResp->dispatchResult.get();
                 vector<unique_ptr<core::lsp::QueryResponse>> responses;
-                while (start != nullptr) {
+                for (auto start : sendResp->dispatchResult) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         // This could be a `prop` or `attr_*`, which has multiple associated symbols.
                         responses = getReferencesToAccessor(typechecker,
                                                             getAccessorInfo(typechecker.state(), start->main.method),
                                                             start->main.method, move(responses));
                     }
-                    start = start->secondary.get();
                 }
                 response->result = extractLocations(typechecker.state(), responses);
             } else {
