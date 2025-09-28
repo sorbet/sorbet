@@ -2262,17 +2262,47 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         auto self = unwrapSymbol(gs, args.thisType, mustExist);
+        auto selfData = self.data(gs);
         auto widenedSelfType = Types::widen(gs, args.selfType);
         auto tClassSelfType = Types::tClass(widenedSelfType);
-        if (self.data(gs)->isModule()) {
+        if (selfData->isModule()) {
             // In the case where the receiver is a module, `singleton` will be `T.class_of(MyModule)`
             // which will not actually reflect how `.class` in a module instance method works at runtime.
             // (see https://sorbet.org/docs/class-of#tclass_of-and-modules)
+
             res.returnType = tClassSelfType;
+
+            auto selfClassMethods = selfData->findMethod(gs, core::Names::mixedInClassMethods());
+            if (!selfClassMethods.exists()) {
+                return;
+            }
+
+            auto &mixedInClassMethods = core::cast_type_nonnull<core::TupleType>(selfClassMethods.data(gs)->resultType);
+            for (auto &cmType : mixedInClassMethods.elems) {
+                auto classType = core::cast_type_nonnull<core::ClassType>(cmType);
+                auto cmMod = classType.symbol;
+                if (!cmMod.data(gs)->findMember(gs, core::Names::Constants::AttachedClass()).exists()) {
+                    // If the mixed in module is marked `has_attached_class!`, then we know it can't
+                    // have been mixed into another module--it can only have been mixed into a class.
+                    // This lets us know that having an instance of the module guarantees that its
+                    // `.class` is also an instance of the mixed in module.
+                    //
+                    // If it wasn't, then we have to skip adding this class methods to the return
+                    // type, because we don't know that. It would be nice to change mixed_in_class_methods
+                    // or build some other feature so that worked more recursively.
+                    //
+                    // TODO(jez) Write a test for this
+                    continue;
+                }
+
+                // TODO(jez) External type handles generics--write a test for this
+                res.returnType = Types::all(gs, res.returnType, cmMod.data(gs)->externalType());
+            }
+
             return;
         }
 
-        auto singleton = self.data(gs)->lookupSingletonClass(gs);
+        auto singleton = selfData->lookupSingletonClass(gs);
         if (!singleton.exists()) {
             res.returnType = tClassSelfType;
             return;
