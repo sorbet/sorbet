@@ -13,7 +13,7 @@ ClassDef{
       params = [UnresolvedIdent{
           kind = Local
           name = <U x>
-        }, BlockArg{ expr = UnresolvedIdent{
+        }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]

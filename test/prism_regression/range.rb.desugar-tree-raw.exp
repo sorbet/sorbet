@@ -53,7 +53,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U foo><<U <todo method>>>
-      params = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -83,7 +83,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U bar><<U <todo method>>>
-      params = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]

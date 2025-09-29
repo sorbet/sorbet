@@ -35,7 +35,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, RestParam)               \
         CASE_STATEMENT(CASE_BODY, KeywordArg)              \
         CASE_STATEMENT(CASE_BODY, OptionalParam)           \
-        CASE_STATEMENT(CASE_BODY, BlockArg)                \
+        CASE_STATEMENT(CASE_BODY, BlockParam)              \
         CASE_STATEMENT(CASE_BODY, ShadowArg)               \
         CASE_STATEMENT(CASE_BODY, Assign)                  \
         CASE_STATEMENT(CASE_BODY, Cast)                    \
@@ -139,7 +139,7 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
 
 bool isa_reference(const ExpressionPtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestParam>(what) ||
-           isa_tree<KeywordArg>(what) || isa_tree<OptionalParam>(what) || isa_tree<BlockArg>(what) ||
+           isa_tree<KeywordArg>(what) || isa_tree<OptionalParam>(what) || isa_tree<BlockParam>(what) ||
            isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
 }
 
@@ -300,7 +300,7 @@ ShadowArg::ShadowArg(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(
     _sanityCheck();
 }
 
-BlockArg::BlockArg(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
+BlockParam::BlockParam(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "blockarg");
     _sanityCheck();
 }
@@ -1305,7 +1305,7 @@ string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     return this->expr.toStringWithTabs(gs, tabs);
 }
 
-string BlockArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string BlockParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     return "&" + this->expr.toStringWithTabs(gs, tabs);
 }
 
@@ -1477,7 +1477,7 @@ string ShadowArg::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("{}{{ expr = {} }}", nodeName(), expr.showRaw(gs, tabs));
 }
 
-string BlockArg::showRaw(const core::GlobalState &gs, int tabs) const {
+string BlockParam::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::format("{}{{ expr = {} }}", nodeName(), expr.showRaw(gs, tabs));
 }
 
@@ -1485,8 +1485,8 @@ string_view ShadowArg::nodeName() const {
     return "ShadowArg";
 }
 
-string_view BlockArg::nodeName() const {
-    return "BlockArg";
+string_view BlockParam::nodeName() const {
+    return "BlockParam";
 }
 
 string_view RuntimeMethodDefinition::nodeName() const {
@@ -1928,7 +1928,7 @@ string Cast::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, in
     return fmt::to_string(buf);
 }
 
-string BlockArg::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) const {
+string BlockParam::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) const {
     return fmt::format("{}{{ loc = {}, expr = {} }}", nodeName(), core::Loc(file, this->loc).fileShortPosToString(gs),
                        expr.showRawWithLocs(gs, file, tabs));
 }

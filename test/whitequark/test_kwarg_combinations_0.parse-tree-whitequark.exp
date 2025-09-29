@@ -5,4 +5,4 @@ s(:def, :f,
     s(:kwoptarg, :bar,
       s(:int, "2")),
     s(:kwrestarg, :baz),
-    s(:blockarg, :b)), nil)
+    s(:blockparam, :b)), nil)

@@ -77,7 +77,7 @@ ClassDef{
             kind = Local
             name = <U kwarg>
           } }
-          BlockArg{ expr = UnresolvedIdent{
+          BlockParam{ expr = UnresolvedIdent{
             kind = Local
             name = <U block>
           } }
@@ -103,7 +103,7 @@ ClassDef{
             kind = Local
             name = <U kwarg>
           } }
-          BlockArg{ expr = UnresolvedIdent{
+          BlockParam{ expr = UnresolvedIdent{
             kind = Local
             name = <U block>
           } }

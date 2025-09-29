@@ -121,8 +121,8 @@ public:
         return make_expression<ast::RestParam>(loc, std::move(inner));
     }
 
-    static ExpressionPtr BlockArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_expression<ast::BlockArg>(loc, std::move(inner));
+    static ExpressionPtr BlockParam(core::LocOffsets loc, ExpressionPtr inner) {
+        return make_expression<ast::BlockParam>(loc, std::move(inner));
     }
 
     static ExpressionPtr ShadowArg(core::LocOffsets loc, ExpressionPtr inner) {
@@ -247,9 +247,9 @@ public:
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                 MethodDef::PARAMS_store params, ExpressionPtr rhs,
                                 MethodDef::Flags flags = MethodDef::Flags()) {
-        if (params.empty() || (!isa_tree<ast::Local>(params.back()) && !isa_tree<ast::BlockArg>(params.back()))) {
+        if (params.empty() || (!isa_tree<ast::Local>(params.back()) && !isa_tree<ast::BlockParam>(params.back()))) {
             auto blkLoc = core::LocOffsets::none();
-            params.emplace_back(make_expression<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+            params.emplace_back(make_expression<ast::BlockParam>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(params),
                                           std::move(rhs), flags);
@@ -629,7 +629,7 @@ public:
                 *cursor, [&](const class RestParam &rest) { cursor = &rest.expr; },
                 [&](const class KeywordArg &kw) { cursor = &kw.expr; },
                 [&](const class OptionalParam &opt) { cursor = &opt.expr; },
-                [&](const class BlockArg &blk) { cursor = &blk.expr; },
+                [&](const class BlockParam &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](const ast::Local &opt) { ENFORCE(false, "Should only be called before local_vars.cc"); },
@@ -650,7 +650,7 @@ public:
                 *cursor, [&](const class RestParam &rest) { cursor = &rest.expr; },
                 [&](const class KeywordArg &kw) { cursor = &kw.expr; },
                 [&](const class OptionalParam &opt) { cursor = &opt.expr; },
-                [&](const class BlockArg &blk) { cursor = &blk.expr; },
+                [&](const class BlockParam &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](const UnresolvedIdent &opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },

@@ -16,7 +16,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, BlockArg{ expr = Local{
+        }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -87,7 +87,7 @@ ClassDef{
       name = <U possplat><<U <todo method>>>
       params = [RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -205,7 +205,7 @@ ClassDef{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, BlockArg{ expr = Local{
+        }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -361,7 +361,7 @@ ClassDef{
           localVariable = <U z>
         }, RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -527,7 +527,7 @@ ClassDef{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, BlockArg{ expr = Local{
+        }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -723,7 +723,7 @@ ClassDef{
           localVariable = <U y>
         }, Local{
           localVariable = <U z>
-        }, BlockArg{ expr = Local{
+        }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -794,7 +794,7 @@ ClassDef{
       name = <U possplat_blk><<U <todo method>>>
       params = [RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -912,7 +912,7 @@ ClassDef{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, BlockArg{ expr = Local{
+        }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -1068,7 +1068,7 @@ ClassDef{
           localVariable = <U z>
         }, RestParam{ expr = Local{
           localVariable = <U foo>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -1234,7 +1234,7 @@ ClassDef{
           localVariable = <U p>
         }, Local{
           localVariable = <U q>
-        }, BlockArg{ expr = Local{
+        }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -1434,7 +1434,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -1525,7 +1525,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -1669,7 +1669,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -1851,7 +1851,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -2043,7 +2043,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -2263,7 +2263,7 @@ ClassDef{
           localVariable = <U z>
         }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -2366,7 +2366,7 @@ ClassDef{
           localVariable = <U foo>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -2522,7 +2522,7 @@ ClassDef{
           localVariable = <U q>
         }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -2716,7 +2716,7 @@ ClassDef{
           localVariable = <U foo>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -2920,7 +2920,7 @@ ClassDef{
           localVariable = <U q>
         }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -3158,7 +3158,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -3313,7 +3313,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -3521,7 +3521,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -3767,7 +3767,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -4023,7 +4023,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
@@ -4307,7 +4307,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -4398,7 +4398,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -4542,7 +4542,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -4724,7 +4724,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -4916,7 +4916,7 @@ ClassDef{
           localVariable = <U j>
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
-        } }, BlockArg{ expr = Local{
+        } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -5136,7 +5136,7 @@ ClassDef{
           localVariable = <U z>
         }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -5239,7 +5239,7 @@ ClassDef{
           localVariable = <U foo>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -5395,7 +5395,7 @@ ClassDef{
           localVariable = <U q>
         }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -5589,7 +5589,7 @@ ClassDef{
           localVariable = <U foo>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -5793,7 +5793,7 @@ ClassDef{
           localVariable = <U q>
         }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -6031,7 +6031,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -6186,7 +6186,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -6394,7 +6394,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -6640,7 +6640,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{
@@ -6896,7 +6896,7 @@ ClassDef{
           localVariable = <U k>
         } }, RestParam{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
-        } } }, BlockArg{ expr = Local{
+        } } }, BlockParam{ expr = Local{
           localVariable = <U blk>
         } }]
       rhs = InsSeq{

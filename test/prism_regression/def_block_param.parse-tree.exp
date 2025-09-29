@@ -4,7 +4,7 @@ Begin {
       name = <U foo>
       params = Params {
         params = [
-          Blockarg {
+          BlockParam {
             name = <U my_block_param>
           }
         ]
@@ -15,7 +15,7 @@ Begin {
       name = <U foo>
       params = Params {
         params = [
-          Blockarg {
+          BlockParam {
             name = <P <U &> $2>
           }
         ]

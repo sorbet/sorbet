@@ -21,7 +21,7 @@ void generateStub(vector<ast::ExpressionPtr> &methodStubs, const core::LocOffset
     // def $methodName(*arg0, &blk); end
     ast::MethodDef::PARAMS_store params;
     params.emplace_back(ast::MK::RestParam(loc, ast::MK::Local(loc, core::Names::arg0())));
-    params.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+    params.emplace_back(ast::make_expression<ast::BlockParam>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
     methodStubs.push_back(
         ast::MK::SyntheticMethod(loc, loc, methodName, std::move(params), ast::MK::RaiseUnimplemented(loc)));

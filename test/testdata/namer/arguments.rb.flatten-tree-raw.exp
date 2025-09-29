@@ -124,7 +124,7 @@ InsSeq{
                   RestParam{ expr = KeywordArg{ expr = Local{
                     localVariable = <U f>$1
                   } } }
-                  BlockArg{ expr = Local{
+                  BlockParam{ expr = Local{
                     localVariable = <U g>$1
                   } }
                   ShadowArg{ expr = Local{

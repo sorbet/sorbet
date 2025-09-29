@@ -10,7 +10,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U one_statement><<U <todo method>>>
-      params = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -20,7 +20,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U two_statements><<U <todo method>>>
-      params = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -35,7 +35,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U three_statements><<U <todo method>>>
-      params = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
@@ -51,7 +51,7 @@ ClassDef{
     MethodDef{
       flags = {}
       name = <U begin_block><<U <todo method>>>
-      params = [BlockArg{ expr = UnresolvedIdent{
+      params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
         } }]
