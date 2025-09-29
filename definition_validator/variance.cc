@@ -12,45 +12,60 @@ namespace sorbet::definition_validator::variance {
 
 class VarianceValidator {
 private:
+    const core::MethodRef owningMethod;
     const core::Loc loc;
 
-    VarianceValidator(const core::Loc loc) : loc(loc) {}
+    VarianceValidator(core::MethodRef owningMethod, const core::Loc loc) : owningMethod(owningMethod), loc(loc) {}
 
     void validate(const core::Context ctx, const core::Polarity polarity, const core::TypePtr &type) {
-        typecase(
-            type, [&](const core::ClassType &klass) {},
+        switch (type.tag()) {
+            case core::TypePtr::Tag::ClassType:
+            case core::TypePtr::Tag::BlamedUntyped:
+            case core::TypePtr::Tag::UnresolvedClassType:
+            case core::TypePtr::Tag::UnresolvedAppliedType:
+                break;
 
-            [&](const core::NamedLiteralType &lit) {},
+            case core::TypePtr::Tag::IntegerLiteralType:
+            case core::TypePtr::Tag::FloatLiteralType:
+            case core::TypePtr::Tag::NamedLiteralType:
+                break;
 
-            [&](const core::SelfType &self) {},
+            case core::TypePtr::Tag::SelfTypeParam:
+            case core::TypePtr::Tag::TypeVar:
+                break;
 
-            [&](const core::SelfTypeParam &sp) {},
-
-            [&](const core::TypeVar &tvar) {},
-
-            [&](const core::OrType &any) {
+            case core::TypePtr::Tag::OrType: {
+                auto &any = core::cast_type_nonnull<core::OrType>(type);
                 validate(ctx, polarity, any.left);
                 validate(ctx, polarity, any.right);
-            },
+                break;
+            }
 
-            [&](const core::AndType &all) {
+            case core::TypePtr::Tag::AndType: {
+                auto &all = core::cast_type_nonnull<core::AndType>(type);
                 validate(ctx, polarity, all.left);
                 validate(ctx, polarity, all.right);
-            },
+                break;
+            }
 
-            [&](const core::ShapeType &shape) {
+            case core::TypePtr::Tag::ShapeType: {
+                auto &shape = core::cast_type_nonnull<core::ShapeType>(type);
                 for (auto value : shape.values) {
                     validate(ctx, polarity, value);
                 }
-            },
+                break;
+            }
 
-            [&](const core::TupleType &tuple) {
+            case core::TypePtr::Tag::TupleType: {
+                auto &tuple = core::cast_type_nonnull<core::TupleType>(type);
                 for (auto value : tuple.elems) {
                     validate(ctx, polarity, value);
                 }
-            },
+                break;
+            }
 
-            [&](const core::AppliedType &app) {
+            case core::TypePtr::Tag::AppliedType: {
+                auto &app = core::cast_type_nonnull<core::AppliedType>(type);
                 auto members = app.klass.data(ctx)->typeMembers();
                 auto params = app.targs;
 
@@ -82,10 +97,11 @@ private:
 
                     validate(ctx, paramPolarity, typeArg);
                 }
-            },
+                break;
+            }
 
-            // This is where the actual variance checks are done.
-            [&](const core::LambdaParam &param) {
+            case core::TypePtr::Tag::LambdaParam: {
+                auto &param = core::cast_type_nonnull<core::LambdaParam>(type);
                 auto paramData = param.definition.data(ctx);
                 auto paramVariance = paramData->variance();
 
@@ -115,9 +131,41 @@ private:
                         }
                     }
                 }
-            },
+                break;
+            }
 
-            [&](const core::AliasType &alias) {
+            case core::TypePtr::Tag::SelfType: {
+                if (!core::Polarities::hasCompatibleVariance(polarity, core::Variance::CoVariant)) {
+                    if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
+                        e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.self_type", ":out",
+                                    "returns");
+
+                        string eqeqNote;
+                        if (owningMethod.data(ctx)->name == core::Names::eqeq()) {
+                            eqeqNote = core::ErrorColors::format(
+                                ",\n    but equality methods should accept `{}` or `{}` instead.", "T.anything",
+                                "BasicObject");
+                        }
+                        e.addErrorNote("Methods marked `{}` are not subject to this constraint{}", "private", eqeqNote);
+
+                        auto selfTypeStr = "T.self_type"sv;
+                        auto replaceLoc =
+                            this->loc.copyEndWithZeroLength().adjustLen(ctx, ": "sv.size(), selfTypeStr.size());
+                        if (replaceLoc.source(ctx) == selfTypeStr) {
+                            if (eqeqNote.empty()) {
+                                e.replaceWith("Use enclosing class name directly", replaceLoc, "{}",
+                                              owningMethod.enclosingClass(ctx).show(ctx));
+                            } else {
+                                e.replaceWith("Use `T.anything` instead", replaceLoc, "T.anything");
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+
+            case core::TypePtr::Tag::AliasType: {
+                auto alias = core::cast_type_nonnull<core::AliasType>(type);
                 auto aliasSym = alias.symbol.dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
@@ -128,17 +176,19 @@ private:
                 } else {
                     Exception::raise("Unexpected type alias: {}", type.toString(ctx));
                 }
-            },
+                break;
+            }
 
-            [&](const core::TypePtr &skipped) {
-                Exception::raise("Unexpected type in variance checking: {}", skipped.toString(ctx));
-            });
+            case core::TypePtr::Tag::MetaType:
+                ENFORCE(false, "Please add a test case!");
+                break;
+        }
     }
 
 public:
-    static void validatePolarity(const core::Loc loc, const core::Context ctx, const core::Polarity polarity,
-                                 const core::TypePtr &type) {
-        VarianceValidator validator(loc);
+    static void validatePolarity(core::MethodRef owningMethod, const core::Loc loc, const core::Context ctx,
+                                 const core::Polarity polarity, const core::TypePtr &type) {
+        VarianceValidator validator(owningMethod, loc);
         return validator.validate(ctx, polarity, type);
     }
 
@@ -167,12 +217,12 @@ public:
 
         for (auto &param : methodData->parameters) {
             if (param.type != nullptr) {
-                validatePolarity(param.loc, ctx, negated, param.type);
+                validatePolarity(method, param.loc, ctx, negated, param.type);
             }
         }
 
         if (methodData->resultType != nullptr) {
-            validatePolarity(methodData->loc(), ctx, polarity, methodData->resultType);
+            validatePolarity(method, methodData->loc(), ctx, polarity, methodData->resultType);
         }
     }
 };
