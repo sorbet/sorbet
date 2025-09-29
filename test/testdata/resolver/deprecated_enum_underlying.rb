@@ -18,6 +18,6 @@ class A
 
   sig { params(x: T.deprecated_enum([0])).void }
   def integer_0(x)
-    T.reveal_type(x) # error: `Integer(0)`
+    T.reveal_type(x) # error: `Integer`
   end
 end
