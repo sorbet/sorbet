@@ -231,7 +231,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
 
     // If this class has no type members, fix attached class early.
     if (sym.data(gs)->typeMembers().empty()) {
-        sym.data(gs)->unsafeComputeExternalType(gs);
+        auto externalType = sym.data(gs)->unsafeComputeExternalType(gs);
         auto singleton = sym.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
             // AttachedClass doesn't exist on `T.untyped`, which is a problem
@@ -242,8 +242,10 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                     core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(gs)->resultType);
                 ENFORCE(lambdaParam != nullptr);
 
-                lambdaParam->lowerBound = core::Types::bottom();
-                lambdaParam->upperBound = sym.data(gs)->externalType();
+                // TODO(jez) factor this logic into shared helper
+                // Allow treating `T.attached_class` as the class itself in final classes
+                lambdaParam->lowerBound = sym.data(gs)->flags.isFinal ? externalType : core::Types::bottom();
+                lambdaParam->upperBound = externalType;
             }
         }
     }
