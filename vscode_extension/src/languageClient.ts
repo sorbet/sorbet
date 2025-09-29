@@ -33,9 +33,10 @@ export function createClient(
     ...Object.entries(initializationOptions).map(([k, v]) => `${k}:${v}`),
   );
 
+  const pattern = workspaceFolder ? `${workspaceFolder.uri}/**/*.rb` : undefined;
   const client = new CustomLanguageClient("ruby", "Sorbet", serverOptions, {
     documentSelector: [
-      { language: "ruby", scheme: "file" },
+      { language: "ruby", scheme: "file", pattern },
       // Support queries on generated files with sorbet:// URIs that do not exist editor-side.
       { language: "ruby", scheme: "sorbet" },
     ],
