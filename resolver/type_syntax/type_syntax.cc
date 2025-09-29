@@ -1226,7 +1226,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                     if (usedOnSourceClass &&
                         ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton))) {
                         // At this point, we make a skolemized variable that will be unwrapped at the end of type
-                        // parsing using Types::unwrapSkolemVariables. The justification for this is that type
+                        // parsing using Types::unwrapSelfTypeParam. The justification for this is that type
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
                         result.type = core::make_type<core::SelfTypeParam>(sym);
                     } else {
