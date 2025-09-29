@@ -70,18 +70,15 @@ namespace {
 // `underlying` of that literal. The effect of using `underlying` is that `T.deprecated_enum(["a", "b", true])` will be
 // parsed as the type `T.any(String, TrueClass)`.
 core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr) {
-    core::TypePtr result;
-    typecase(
-        expr, [&](const ast::Literal &lit) { result = lit.value.underlying(ctx); },
-        [&](const ast::ExpressionPtr &e) {
-            if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Unsupported type literal");
-            }
-            result = core::Types::untypedUntracked();
-        });
-    ENFORCE(result != nullptr);
-    result.sanityCheck(ctx);
-    return result;
+    if (auto lit = ast::cast_tree<ast::Literal>(expr)) {
+        return lit->value.underlying(ctx);
+    }
+
+    if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+        e.setHeader("Unsupported type literal");
+    }
+
+    return core::Types::untypedUntracked();
 }
 
 bool isTProc(core::Context ctx, const ast::Send *send) {
