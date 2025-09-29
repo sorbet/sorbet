@@ -1327,7 +1327,6 @@ public:
     void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto methodData = methodDef.symbol.data(ctx);
-        auto ownerData = methodData->owner.data(ctx);
 
         if (methodData->locs().empty()) {
             Exception::raise("method has no locs! ctx.file=\"{}\" method=\"{}\"", ctx.file.data(ctx).path(),
@@ -1343,7 +1342,7 @@ public:
         // NOTE: We're skipping variance checks on the stdlib right now, as
         // Array and Hash are defined with their parameters as covariant, and as
         // a result most of their methods would fail this check.
-        if (!methodData->loc().file().data(ctx).isStdlib() && !ownerData->typeMembers().empty()) {
+        if (!methodData->loc().file().data(ctx).isStdlib()) {
             variance::validateMethodVariance(ctx, methodDef.symbol);
         }
 

@@ -54,6 +54,7 @@ module B
   end
 
   sig { params(x: T.self_type).void }
+  #            ^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def takes_self_public(x)
     #                   ^ error: Expression does not have a fully-defined type
     x
@@ -61,8 +62,7 @@ module B
 
   sig { params(x: T.self_type).void }
   private def takes_self_private(x)
-    #                            ^ error: Expression does not have a fully-defined type
-    T.reveal_type(x) # error: `T.untyped`
+    T.reveal_type(x) # error: `B`
     x
   end
 
@@ -74,12 +74,12 @@ module B
 
   sig { params(x: T.any(T.self_type, Integer)).void }
   private def takes_self_or_integer(x)
-    #                               ^ error: Expression does not have a fully-defined type
-    T.reveal_type(x) # error: `T.untyped`
+    T.reveal_type(x) # error: `T.any(Integer, B)`
     x
   end
 
   sig { params(other: T.self_type).void }
+  #            ^^^^^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def ==(other)
     #    ^^^^^ error: Expression does not have a fully-defined type
     return self.class == other.class

@@ -12,9 +12,10 @@ namespace sorbet::definition_validator::variance {
 
 class VarianceValidator {
 private:
+    const core::MethodRef owningMethod;
     const core::Loc loc;
 
-    VarianceValidator(const core::Loc loc) : loc(loc) {}
+    VarianceValidator(core::MethodRef owningMethod, const core::Loc loc) : owningMethod(owningMethod), loc(loc) {}
 
     void validate(const core::Context ctx, const core::Polarity polarity, const core::TypePtr &type) {
         switch (type.tag()) {
@@ -29,7 +30,6 @@ private:
             case core::TypePtr::Tag::NamedLiteralType:
                 break;
 
-            case core::TypePtr::Tag::SelfType:
             case core::TypePtr::Tag::SelfTypeParam:
             case core::TypePtr::Tag::TypeVar:
                 break;
@@ -134,6 +134,35 @@ private:
                 break;
             }
 
+            case core::TypePtr::Tag::SelfType: {
+                if (!core::Polarities::hasCompatibleVariance(polarity, core::Variance::CoVariant)) {
+                    if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
+                        e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.self_type", ":out",
+                                    "returns");
+
+                        string eqeqNote;
+                        if (owningMethod.data(ctx)->name == core::Names::eqeq()) {
+                            eqeqNote = core::ErrorColors::format(
+                                ",\n    but equality methods should accept `{}` or `{}` instead.", "T.anything",
+                                "BasicObject");
+                        }
+                        e.addErrorNote("Methods marked `{}` are not subject to this constraint{}", "private", eqeqNote);
+
+                        auto selfTypeStr = "T.self_type"sv;
+                        auto replaceLoc =
+                            this->loc.copyEndWithZeroLength().adjustLen(ctx, ": "sv.size(), selfTypeStr.size());
+                        if (replaceLoc.source(ctx) == selfTypeStr) {
+                            if (eqeqNote.empty()) {
+                                e.replaceWith("Use enclosing class name directly", replaceLoc, "{}",
+                                              owningMethod.enclosingClass(ctx).show(ctx));
+                            } else {
+                                e.replaceWith("Use `T.anything` instead", replaceLoc, "T.anything");
+                            }
+                        }
+                    }
+                }
+            }
+
             case core::TypePtr::Tag::AliasType: {
                 auto alias = core::cast_type_nonnull<core::AliasType>(type);
                 auto aliasSym = alias.symbol.dealias(ctx);
@@ -156,9 +185,9 @@ private:
     }
 
 public:
-    static void validatePolarity(const core::Loc loc, const core::Context ctx, const core::Polarity polarity,
-                                 const core::TypePtr &type) {
-        VarianceValidator validator(loc);
+    static void validatePolarity(core::MethodRef owningMethod, const core::Loc loc, const core::Context ctx,
+                                 const core::Polarity polarity, const core::TypePtr &type) {
+        VarianceValidator validator(owningMethod, loc);
         return validator.validate(ctx, polarity, type);
     }
 
@@ -187,12 +216,12 @@ public:
 
         for (auto &param : methodData->parameters) {
             if (param.type != nullptr) {
-                validatePolarity(param.loc, ctx, negated, param.type);
+                validatePolarity(method, param.loc, ctx, negated, param.type);
             }
         }
 
         if (methodData->resultType != nullptr) {
-            validatePolarity(methodData->loc(), ctx, polarity, methodData->resultType);
+            validatePolarity(method, methodData->loc(), ctx, polarity, methodData->resultType);
         }
     }
 };

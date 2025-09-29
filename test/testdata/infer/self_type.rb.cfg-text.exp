@@ -375,11 +375,11 @@ method ::B#takes_self_private {
 
 bb0[firstDead=6]():
     <self>: B = cast(<self>: NilClass, B);
-    x: T.untyped = load_arg(x)
+    x: B = load_arg(x)
     <cfgAlias>$5: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.untyped = <cfgAlias>$5: T.class_of(T).reveal_type(x: T.untyped)
-    <returnMethodTemp>$2: T.untyped = x
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <statTemp>$3: B = <cfgAlias>$5: T.class_of(T).reveal_type(x: B)
+    <returnMethodTemp>$2: B = x
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: B
     <unconditional> -> bb1
 
 # backedges
@@ -409,11 +409,11 @@ method ::B#takes_self_or_integer {
 
 bb0[firstDead=6]():
     <self>: B = cast(<self>: NilClass, B);
-    x: T.untyped = load_arg(x)
+    x: T.any(Integer, B) = load_arg(x)
     <cfgAlias>$5: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.untyped = <cfgAlias>$5: T.class_of(T).reveal_type(x: T.untyped)
-    <returnMethodTemp>$2: T.untyped = x
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <statTemp>$3: T.any(Integer, B) = <cfgAlias>$5: T.class_of(T).reveal_type(x: T.any(Integer, B))
+    <returnMethodTemp>$2: T.any(Integer, B) = x
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(Integer, B)
     <unconditional> -> bb1
 
 # backedges
