@@ -217,7 +217,8 @@ struct AutogenResult {
     vector<pair<int, Serialized>> prints;
 };
 
-void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed,
+                bool leakTrees) {
     {
         core::UnfreezeNameTable nameTableAccess(gs);
         core::UnfreezeSymbolTable symbolAccess(gs);
@@ -242,7 +243,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
     int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
 
     workers.multiplexJob(
-        "runAutogen", [&gs, &autogenVersion, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq]() {
+        "runAutogen", [&gs, &autogenVersion, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq, leakTrees]() {
             AutogenResult out;
             int n = 0;
             {
@@ -261,7 +262,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                     }
 
                     core::Context ctx(gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder, leakTrees);
                     auto file = pf.file;
 
                     AutogenResult::Serialized serialized;
@@ -655,7 +656,7 @@ int realmain(int argc, char *argv[]) {
             }
 
             if (gs->cacheSensitiveOptions.runningUnderAutogen) {
-                runAutogen(*gs, opts, *workers, stratumFiles);
+                runAutogen(*gs, opts, *workers, stratumFiles, intentionallyLeakASTs);
             } else {
                 stratumFiles = move(pipeline::resolve(*gs, move(stratumFiles), opts, *workers).result());
                 if (gs->hadCriticalError()) {

@@ -416,12 +416,14 @@ public:
 // Convert a Sorbet `ParsedFile` into an Autogen `ParsedFile` by walking it as above and also recording the checksum of
 // the current file
 ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const AutogenConfig &autogenCfg,
-                             const CRCBuilder &crcBuilder) {
+                             const CRCBuilder &crcBuilder, bool leakTrees) {
     AutogenWalk walk(autogenCfg);
     ast::ConstTreeWalk::apply(ctx, walk, tree.tree);
 
-    // Leak the tree, as we don't run autogen in an interactive mode
-    intentionallyLeakMemory(tree.tree.release());
+    if (leakTrees) {
+        // Leak the tree, as we don't run autogen in an interactive mode
+        intentionallyLeakMemory(tree.tree.release());
+    }
 
     auto pf = walk.parsedFile();
     pf.path = string(tree.file.data(ctx).path());
