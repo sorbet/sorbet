@@ -48,6 +48,10 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Cannot i
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
      110 |B = e
               ^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/incremental-resolver/expect-failures/constant_override.rb:110:
+     110 |B = e
+          ^
 Errors: 3
 ----- test/cli/incremental-resolver/expect-failures/constant_redefinition.rb ---------------------
 test/cli/incremental-resolver/expect-failures/constant_redefinition.rb:4: Cannot initialize the class `A` by constant assignment https://srb.help/4022
@@ -116,6 +120,10 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:70: Malformed `si
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
     68 |  sig {void}
           ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
+    67 |def z
+        ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Insert `extend T::Sig`
     68 |  sig {void}
@@ -124,6 +132,10 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
     68 |  sig {void}
                ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
+    67 |def z
+        ^
   Did you mean `load`? Use `-a` to autocorrect
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Replace with `load`
     68 |  sig {void}
@@ -135,6 +147,10 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void`
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
     69 |  sig {void}
           ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
+    67 |def z
+        ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Insert `extend T::Sig`
     69 |  sig {void}
@@ -143,6 +159,10 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
     69 |  sig {void}
                ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
+    67 |def z
+        ^
   Did you mean `load`? Use `-a` to autocorrect
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Replace with `load`
     69 |  sig {void}
