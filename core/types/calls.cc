@@ -3317,7 +3317,7 @@ public:
         if (tuple->elems.empty()) {
             res.returnType = Types::nilClass();
         } else {
-            res.returnType = tuple->elementType(gs);
+            res.returnType = Types::dropNil(gs, tuple->elementType(gs));
         }
     }
 } Tuple_minMax;
