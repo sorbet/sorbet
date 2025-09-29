@@ -2896,17 +2896,16 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
             // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
             // But for array literals, we want the splat to have the array's location to match
             // the legacy parser's behavior (important for error messages and hover).
-            auto splatExpr = move(stat);
+            auto var = move(stat);
 
             // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
             // methods from hover. Using the array's loc means that we will get a zero-length loc for
             // the Splat in that case, and non-zero if there was a real Array literal.
-            if (auto send = ast::cast_tree<ast::Send>(splatExpr)) {
-                ENFORCE(send->numPosArgs() == 1, "Splat Send should have exactly 1 argument");
+            if (auto splattedExpr = ast::MK::extractSplattedExpression(var)) {
                 // Extract the argument from the old Send and create a new one with array's location
-                splatExpr = MK::Splat(location, move(send->getPosArg(0)));
+                var = MK::Splat(location, move(splattedExpr));
             }
-            auto var = move(splatExpr);
+
             if (elems.empty()) {
                 if (lastMerge != nullptr) {
                     lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
