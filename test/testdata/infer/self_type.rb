@@ -14,7 +14,7 @@ class Generic < Parent
   extend T::Generic
   TM = type_member()
 
-  sig {returns(Generic[T.self_type])} # error: Only top-level T.self_type is supported
+  sig {returns(Generic[T.self_type])} # error: Only top-level `T.self_type` is supported
   def bad
    Generic[T.untyped].new
   end
@@ -67,7 +67,7 @@ module B
   end
 
   sig { params(blk: T.proc.params(arg0: T.self_type).void).void }
-  #                                     ^^^^^^^^^^^ error: Only top-level T.self_type is supported
+  #                                     ^^^^^^^^^^^ error: Only top-level `T.self_type` is supported
   def yield_self_void(&blk)
     yield self
   end
