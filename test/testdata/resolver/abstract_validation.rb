@@ -100,15 +100,15 @@ class AnonArgParent
   abstract!
   sig { abstract.void }
   def foo(*); end
-#         ^ error: Malformed `sig`. Type not specified for argument `*`
+#         ^ error: Malformed `sig`. Type not specified for parameter `*`
 
   sig { abstract.void }
   def bar(**); end
-#         ^^ error: Malformed `sig`. Type not specified for argument `**`
+#         ^^ error: Malformed `sig`. Type not specified for parameter `**`
 
   sig { abstract.void }
   def baz(&); end
-#         ^ error: Malformed `sig`. Type not specified for argument `&`
+#         ^ error: Malformed `sig`. Type not specified for parameter `&`
 end
 
 class AnonArgChild < AnonArgParent
