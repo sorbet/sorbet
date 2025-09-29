@@ -102,6 +102,8 @@ class Parent
   end
 end
 
+class Child < Parent; end
+
 p = Parent.new.returns_same_type
 T.reveal_type(p) # => `Parent`
 
