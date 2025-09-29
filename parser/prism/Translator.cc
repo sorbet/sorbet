@@ -426,70 +426,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::Array>(location, move(sorbetElements));
             }
 
-            auto locZeroLen = location.copyWithZeroLength();
+            ast::Array::ENTRY_store elements;
+            elements.reserve(arrayNode->elements.size);
 
-            ast::Array::ENTRY_store elems;
-            elems.reserve(sorbetElements.size());
-            ExpressionPtr lastMerge;
+            ENFORCE(sorbetElements.size() == arrayNode->elements.size);
             for (auto &stat : sorbetElements) {
-                if (parser::NodeWithExpr::isa_node<parser::Splat>(stat.get()) ||
-                    parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(stat.get())) {
-                    // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
-
-                    // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
-                    // But for array literals, we want the splat to have the array's location to match
-                    // the legacy parser's behavior (important for error messages and hover).
-                    auto splatExpr = stat->takeDesugaredExpr();
-
-                    // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
-                    // methods from hover. Using the array's loc means that we will get a zero-length loc for
-                    // the Splat in that case, and non-zero if there was a real Array literal.
-                    if (auto send = ast::cast_tree<ast::Send>(splatExpr)) {
-                        ENFORCE(send->numPosArgs() == 1, "Splat Send should have exactly 1 argument");
-                        // Extract the argument from the old Send and create a new one with array's location
-                        splatExpr = MK::Splat(location, move(send->getPosArg(0)));
-                    }
-                    auto var = move(splatExpr);
-                    if (elems.empty()) {
-                        if (lastMerge != nullptr) {
-                            lastMerge =
-                                MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
-                        } else {
-                            lastMerge = move(var);
-                        }
-                    } else {
-                        ExpressionPtr current = MK::Array(location, move(elems));
-                        /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
-                        elems = ast::Array::ENTRY_store();
-                        if (lastMerge != nullptr) {
-                            lastMerge =
-                                MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(current));
-                        } else {
-                            lastMerge = move(current);
-                        }
-                        lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
-                    }
-                } else {
-                    elems.emplace_back(stat->takeDesugaredExpr());
-                }
-            };
-
-            ExpressionPtr res;
-            if (elems.empty()) {
-                if (lastMerge != nullptr) {
-                    res = move(lastMerge);
-                } else {
-                    // Empty array
-                    res = MK::Array(location, move(elems));
-                }
-            } else {
-                res = MK::Array(location, move(elems));
-                if (lastMerge != nullptr) {
-                    res = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(res));
-                }
+                auto expr = stat->takeDesugaredExpr();
+                ENFORCE(expr != nullptr);
+                elements.emplace_back(move(expr));
             }
 
-            return make_node_with_expr<parser::Array>(move(res), location, move(sorbetElements));
+            auto prismElements = absl::MakeSpan(arrayNode->elements.nodes, arrayNode->elements.size);
+            auto expr = desugarArray(location, prismElements, move(elements));
+            return make_node_with_expr<parser::Array>(move(expr), location, move(sorbetElements));
         }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash literal, e.g. the `a: 1` in `{ a: 1 }
             auto assocNode = down_cast<pm_assoc_node>(node);
@@ -2931,6 +2880,76 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blo
     }
 
     return results;
+}
+
+ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
+                                            ast::Array::ENTRY_store elements) {
+    auto locZeroLen = location.copyWithZeroLength();
+
+    ast::Array::ENTRY_store elems;
+    elems.reserve(elements.size());
+
+    ExpressionPtr lastMerge;
+    ENFORCE(elements.size() == prismElements.size());
+    for (int i = 0; i < elements.size(); i++) {
+        auto *node = prismElements[i];
+        auto &stat = elements[i];
+
+        if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
+            // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
+
+            // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
+            // But for array literals, we want the splat to have the array's location to match
+            // the legacy parser's behavior (important for error messages and hover).
+            auto splatExpr = move(stat);
+
+            // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
+            // methods from hover. Using the array's loc means that we will get a zero-length loc for
+            // the Splat in that case, and non-zero if there was a real Array literal.
+            if (auto send = ast::cast_tree<ast::Send>(splatExpr)) {
+                ENFORCE(send->numPosArgs() == 1, "Splat Send should have exactly 1 argument");
+                // Extract the argument from the old Send and create a new one with array's location
+                splatExpr = MK::Splat(location, move(send->getPosArg(0)));
+            }
+            auto var = move(splatExpr);
+            if (elems.empty()) {
+                if (lastMerge != nullptr) {
+                    lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
+                } else {
+                    lastMerge = move(var);
+                }
+            } else {
+                ExpressionPtr current = MK::Array(location, move(elems));
+                /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
+                elems = ast::Array::ENTRY_store();
+                if (lastMerge != nullptr) {
+                    lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(current));
+                } else {
+                    lastMerge = move(current);
+                }
+                lastMerge = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(var));
+            }
+        } else {
+            elems.emplace_back(move(stat));
+        }
+    };
+
+    ExpressionPtr res;
+    if (elems.empty()) {
+        if (lastMerge != nullptr) {
+            res = move(lastMerge);
+        } else {
+            // Empty array
+            res = MK::Array(location, move(elems));
+        }
+    } else {
+        res = MK::Array(location, move(elems));
+        if (lastMerge != nullptr) {
+            res = MK::Send1(location, move(lastMerge), core::Names::concat(), locZeroLen, move(res));
+        }
+    }
+
+    return res;
 }
 
 // Translates the given Prism elements into a `NodeVec` of legacy parser nodes.
