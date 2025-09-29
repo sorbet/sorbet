@@ -1,3 +1,4 @@
+# -- test/testdata/infer/self_type.rb --
 # typed: true
 class Parent
   extend T::Sig
@@ -99,3 +100,4 @@ while (rnd)
 end
 
 puts s
+# ------------------------------
