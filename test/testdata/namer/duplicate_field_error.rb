@@ -6,7 +6,7 @@ class A
   extend T::Sig
   sig { params(x: Integer, x: String).void }
                          # ^ error: Hash key `x` is duplicated
-                         # ^ error: Unknown argument name `x`
+                         # ^ error: Unknown parameter name `x`
   def initialize(x:, x: nil)
                    # ^^ error: Malformed `sig`
                    # ^^^^^^ error: duplicate argument name x

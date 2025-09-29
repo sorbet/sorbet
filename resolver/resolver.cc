@@ -3457,11 +3457,22 @@ private:
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
                 if (!isOverloaded && !isSyntheticBlkArg &&
                     (sig.seen.params.exists() || sig.seen.returns.exists() || sig.seen.void_.exists())) {
-                    // Only error if we have any types
-                    if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
-                                    param.parameterName(ctx.state));
-                        e.addErrorLine(ctx.locAt(exprLoc), "Signature");
+                    auto errLoc = local->loc.exists() ? local->loc : mdef.declLoc;
+                    if (auto e = ctx.beginError(errLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`. Type not specified for parameter `{}`", "sig",
+                                    param.parameterName(ctx));
+                        if (sig.seen.params.exists()) {
+                            e.addErrorLine(ctx.locAt(sig.seen.params), "Add it to the signature's `{}` here", "params");
+                        } else {
+                            e.addErrorLine(ctx.locAt(exprLoc), "Add it to the signature here");
+                        }
+                        if (errLoc != local->loc) {
+                            // This MethodDef doesn't declare the parameter, but it was declared somewhere.
+                            // This means the current MethodDefinition has a synthetic block param, but a different
+                            // sig names it explicitly. The block param is the only param where this is special,
+                            // because any other omission of a parameter would create MangleRename'd method
+                            e.addErrorLine(param.loc, "Parameter `{}` declared here", param.parameterName(ctx));
+                        }
                     }
                 }
             }
@@ -3481,7 +3492,8 @@ private:
         for (const auto &spec : sig.argTypes) {
             info.allArgsMatched = false;
             if (auto e = ctx.beginError(spec.nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Unknown argument name `{}`", spec.name.show(ctx));
+                e.setHeader("Unknown parameter name `{}`", spec.name.show(ctx));
+                e.addErrorLine(ctx.locAt(mdef.declLoc), "Parameter not in method definition here");
             }
         }
 
