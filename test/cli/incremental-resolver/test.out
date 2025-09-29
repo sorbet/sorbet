@@ -6,14 +6,14 @@ No errors! Great job.
 test/cli/incremental-resolver/expect-failures/abstract_impl.rb:5: Malformed `sig`. Type not specified for parameter `foo` https://srb.help/5003
      5 |  def foo(*foo)end
                    ^^^
-    test/cli/incremental-resolver/expect-failures/abstract_impl.rb:4: Signature
+    test/cli/incremental-resolver/expect-failures/abstract_impl.rb:4: Add it to the signature here
      4 |  sig { overridable.void }
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/incremental-resolver/expect-failures/abstract_impl.rb:123: Malformed `sig`. Type not specified for parameter `foo` https://srb.help/5003
      123 |  def foo(*foo)end
                      ^^^
-    test/cli/incremental-resolver/expect-failures/abstract_impl.rb:122: Signature
+    test/cli/incremental-resolver/expect-failures/abstract_impl.rb:122: Add it to the signature here
      122 |  sig { overridable.void }
             ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -81,14 +81,14 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Unused type an
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:5: Malformed `sig`. Type not specified for parameter `f` https://srb.help/5003
      5 |  def-f
               ^
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Signature
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:3: Add it to the signature here
      3 |  sig {void}
           ^^^^^^^^^^
 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:5: Malformed `sig`. Type not specified for parameter `f` https://srb.help/5003
      5 |  def-f
               ^
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:4: Signature
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:4: Add it to the signature here
      4 |  sig {void}
           ^^^^^^^^^^
 
@@ -102,14 +102,14 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Unused type a
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:70: Malformed `sig`. Type not specified for parameter `f` https://srb.help/5003
     70 |  def-f
               ^
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Signature
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Add it to the signature here
     68 |  sig {void}
           ^^^^^^^^^^
 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:70: Malformed `sig`. Type not specified for parameter `f` https://srb.help/5003
     70 |  def-f
               ^
-    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Signature
+    test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Add it to the signature here
     69 |  sig {void}
           ^^^^^^^^^^
 
