@@ -1,5 +1,8 @@
 # Version history
 
+## 0.3.46
+- Exclude Ruby files outside the target workspace from triggering IntelliSense events.
+
 ## 0.3.45
 - `Copy Symbol to Clipboard` is enabled and visible only when a workspace is open.
 
