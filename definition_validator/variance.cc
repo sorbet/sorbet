@@ -161,6 +161,7 @@ private:
                         }
                     }
                 }
+                break;
             }
 
             case core::TypePtr::Tag::AliasType: {
