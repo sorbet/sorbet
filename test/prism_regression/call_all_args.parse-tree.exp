@@ -1,13 +1,11 @@
 Begin {
   stmts = [
     Send {
-      receiver = Send {
-        receiver = NULL
-        method = <U receiver>
-        args = [
-        ]
+      receiver = Const {
+        scope = NULL
+        name = <C <U RECEIVER1>>
       }
-      method = <U foo>
+      method = <U m1>
       args = [
         Integer {
           val = "1"
@@ -21,57 +19,51 @@ Begin {
               Integer {
                 val = "3"
               }
+              Integer {
+                val = "4"
+              }
             ]
           }
+        }
+        Integer {
+          val = "5"
         }
         Hash {
           kwargs = true
           pairs = [
             Pair {
               key = Symbol {
-                val = <U d>
-              }
-              value = Integer {
-                val = "4"
-              }
-            }
-            Pair {
-              key = Symbol {
                 val = <U e>
-              }
-              value = Integer {
-                val = "5"
-              }
-            }
-            Pair {
-              key = Symbol {
-                val = <U f>
               }
               value = Integer {
                 val = "6"
               }
             }
+            Kwsplat {
+              expr = Send {
+                receiver = NULL
+                method = <U f>
+                args = [
+                ]
+              }
+            }
           ]
         }
         BlockPass {
-          block = Send {
-            receiver = NULL
-            method = <U forwarded_block>
-            args = [
-            ]
+          block = Const {
+            scope = NULL
+            name = <C <U FORWARDED_BLOCK>>
           }
         }
       ]
     }
     Block {
       send = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U receiver>
-          args = [
-          ]
+        receiver = Const {
+          scope = NULL
+          name = <C <U RECEIVER2>>
         }
-        method = <U foo>
+        method = <U m2>
         args = [
           Integer {
             val = "1"
@@ -85,34 +77,32 @@ Begin {
                 Integer {
                   val = "3"
                 }
+                Integer {
+                  val = "4"
+                }
               ]
             }
+          }
+          Integer {
+            val = "5"
           }
           Hash {
             kwargs = true
             pairs = [
               Pair {
                 key = Symbol {
-                  val = <U d>
-                }
-                value = Integer {
-                  val = "4"
-                }
-              }
-              Pair {
-                key = Symbol {
                   val = <U e>
                 }
                 value = Integer {
-                  val = "5"
+                  val = "6"
                 }
               }
-              Pair {
-                key = Symbol {
-                  val = <U f>
-                }
-                value = Integer {
-                  val = "6"
+              Kwsplat {
+                expr = Send {
+                  receiver = NULL
+                  method = <U f>
+                  args = [
+                  ]
                 }
               }
             ]
@@ -127,16 +117,16 @@ Begin {
           Param {
             name = <U b>
           }
-          Param {
+          RestParam {
             name = <U c>
           }
-          Kwarg {
+          Param {
             name = <U d>
           }
           Kwarg {
             name = <U e>
           }
-          Kwarg {
+          Kwrestarg {
             name = <U f>
           }
           BlockParam {
@@ -150,13 +140,11 @@ Begin {
     }
     Block {
       send = Send {
-        receiver = Send {
-          receiver = NULL
-          method = <U receiver>
-          args = [
-          ]
+        receiver = Const {
+          scope = NULL
+          name = <C <U RECEIVER3>>
         }
-        method = <U foo>
+        method = <U m3>
         args = [
           Integer {
             val = "1"
@@ -170,34 +158,32 @@ Begin {
                 Integer {
                   val = "3"
                 }
+                Integer {
+                  val = "4"
+                }
               ]
             }
+          }
+          Integer {
+            val = "5"
           }
           Hash {
             kwargs = true
             pairs = [
               Pair {
                 key = Symbol {
-                  val = <U d>
-                }
-                value = Integer {
-                  val = "4"
-                }
-              }
-              Pair {
-                key = Symbol {
                   val = <U e>
                 }
                 value = Integer {
-                  val = "5"
+                  val = "6"
                 }
               }
-              Pair {
-                key = Symbol {
-                  val = <U f>
-                }
-                value = Integer {
-                  val = "6"
+              Kwsplat {
+                expr = Send {
+                  receiver = NULL
+                  method = <U f>
+                  args = [
+                  ]
                 }
               }
             ]
@@ -212,16 +198,16 @@ Begin {
           Param {
             name = <U b>
           }
-          Param {
+          RestParam {
             name = <U c>
           }
-          Kwarg {
+          Param {
             name = <U d>
           }
           Kwarg {
             name = <U e>
           }
-          Kwarg {
+          Kwrestarg {
             name = <U f>
           }
           BlockParam {
