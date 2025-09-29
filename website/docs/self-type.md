@@ -171,5 +171,3 @@ end
 ```
 
 If it helps, think of `T.self_type` as a [type_member](generics.md#type_member--type_template) that is [covariant](generics.md#covariance-out) and [upper bounded](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower) by itself (i.e., a recursively-defined type). Just as covariant type members are not allowed in input positions, neither is `T.self_type`, unless [the method is private](generics.md#variance-positions-and-private).
-
-
