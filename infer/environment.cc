@@ -708,8 +708,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             if (!recvType.isUntyped() && recvType.derivesFrom(ctx, core::Symbols::Class())) {
                 argType = core::Types::tClass(argSymData->externalType());
 
-                // Can't add noTypeTest for module types, because Ruby has multiple inheritance for modules
-                // Even if the current recv doesn't include argSym, that doesn't mean that a subclass couldn't.
+                // Can't add noTypeTest for module types, because approximateSubtract would drop the
+                // subtypes of `::Class` from the type, not just our `T::Class[argSymModule]` type.
+                // That is, approximateSubtract isn't very sophisticated in the AppliedType case:
+                // https://github.com/sorbet/sorbet/issues/9397
                 canAddNoTypeTest = false;
             } else {
                 // Can't support this case until we have T::Module
