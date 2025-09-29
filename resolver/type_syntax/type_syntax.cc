@@ -70,24 +70,15 @@ namespace {
 // `underlying` of that literal. The effect of using `underlying` is that `T.deprecated_enum(["a", "b", true])` will be
 // parsed as the type `T.any(String, TrueClass)`.
 core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr) {
-    core::TypePtr result;
-    typecase(
-        expr,
-        [&](const ast::Literal &lit) {
-            result = lit.value;
-            if (core::isa_type<core::NamedLiteralType>(result)) {
-                result = core::cast_type_nonnull<core::NamedLiteralType>(result).underlying(ctx);
-            }
-        },
-        [&](const ast::ExpressionPtr &e) {
-            if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Unsupported type literal");
-            }
-            result = core::Types::untypedUntracked();
-        });
-    ENFORCE(result != nullptr);
-    result.sanityCheck(ctx);
-    return result;
+    if (auto lit = ast::cast_tree<ast::Literal>(expr)) {
+        return core::Types::widen(ctx, lit->value);
+    }
+
+    if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+        e.setHeader("Unsupported type literal");
+    }
+
+    return core::Types::untypedUntracked();
 }
 
 bool isTProc(core::Context ctx, const ast::Send *send) {
@@ -910,8 +901,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto result = getResultLiteral(ctx, arrayElements[0]);
-            for (auto &e : arrayElements.subspan(1)) {
+            auto result = core::Types::bottom();
+            for (auto &e : arrayElements) {
                 result = core::Types::any(ctx, result, getResultLiteral(ctx, e));
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};

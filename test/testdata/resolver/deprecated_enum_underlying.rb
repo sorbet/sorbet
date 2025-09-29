@@ -11,4 +11,13 @@ class A
     T.reveal_type(x) # error: Revealed type: `T.any(String, Integer, Symbol, TrueClass, FalseClass)`
   end
 
+  sig { params(x: T.deprecated_enum([:foo])).void }
+  def symbol_foo(x)
+    T.reveal_type(x) # error: `Symbol`
+  end
+
+  sig { params(x: T.deprecated_enum([0])).void }
+  def integer_0(x)
+    T.reveal_type(x) # error: `Integer`
+  end
 end
