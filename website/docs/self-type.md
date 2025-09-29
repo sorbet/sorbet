@@ -74,7 +74,7 @@ def ==(other)
 end
 ```
 
-Ruby equality methods must accept values of an arbitrary class, even if they will return `false` when `self.class != other.class`. As such, equality methods must return something broad, like `BasicObject` or `T.anything`:
+Ruby equality methods must accept values of an arbitrary class, even if they will return `false` when `self.class != other.class`. As such, equality methods must accept something broad, like `BasicObject` or `T.anything`:
 
 ```ruby
 sig { params(other: T.anything).returns(T::Boolean) }
