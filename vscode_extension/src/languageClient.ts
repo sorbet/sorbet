@@ -33,7 +33,9 @@ export function createClient(
     ...Object.entries(initializationOptions).map(([k, v]) => `${k}:${v}`),
   );
 
-  const pattern = workspaceFolder ? `${workspaceFolder.uri.path}/**/*` : undefined;
+  const pattern = workspaceFolder
+    ? `${workspaceFolder.uri.path}/**/*`
+    : undefined;
   const client = new CustomLanguageClient("ruby", "Sorbet", serverOptions, {
     documentSelector: [
       { language: "ruby", scheme: "file", pattern },
