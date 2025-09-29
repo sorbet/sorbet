@@ -2549,13 +2549,12 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         auto literal = core::cast_type_nonnull<core::NamedLiteralType>(literalNode->value);
-        if (literal.literalKind != core::NamedLiteralType::LiteralTypeKind::String) {
+        if (literal.kind != core::NamedLiteralType::Kind::String) {
             // Infer will report a type error
             return;
         }
 
-        auto name = literal.asName();
-        auto shortName = name.shortName(ctx);
+        auto shortName = literal.name.shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("The string given to `{}` must not be empty", method);

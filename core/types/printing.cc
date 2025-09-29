@@ -78,10 +78,10 @@ string NamedLiteralType::show(const GlobalState &gs, ShowOptions options) const 
 }
 
 string NamedLiteralType::showValue(const GlobalState &gs) const {
-    switch (literalKind) {
-        case NamedLiteralType::LiteralTypeKind::String:
-            return fmt::format("\"{}\"", absl::CEscape(asName().show(gs)));
-        case NamedLiteralType::LiteralTypeKind::Symbol: {
+    switch (kind) {
+        case NamedLiteralType::Kind::String:
+            return fmt::format("\"{}\"", absl::CEscape(name.show(gs)));
+        case NamedLiteralType::Kind::Symbol: {
             return name.showAsSymbolLiteral(gs);
         }
     }
@@ -179,9 +179,9 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
         // properties beginning with $ need to be printed as :$prop => type.
         if (isa_type<NamedLiteralType>(key)) {
             const auto &keyLiteral = cast_type_nonnull<NamedLiteralType>(key);
-            if (keyLiteral.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol &&
-                !absl::StartsWith(keyLiteral.asName().shortName(gs), "$")) {
-                keyStr = keyLiteral.asName().show(gs);
+            if (keyLiteral.kind == core::NamedLiteralType::Kind::Symbol &&
+                !absl::StartsWith(keyLiteral.name.shortName(gs), "$")) {
+                keyStr = keyLiteral.name.show(gs);
                 sepStr = ": ";
             } else {
                 keyStr = options.useValidSyntax ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);

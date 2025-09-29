@@ -168,14 +168,14 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
 com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, const NamedLiteralType &lit) {
     com::stripe::rubytyper::Type::Literal proto;
 
-    switch (lit.literalKind) {
-        case NamedLiteralType::LiteralTypeKind::String:
+    switch (lit.kind) {
+        case NamedLiteralType::Kind::String:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::STRING);
-            proto.set_string(lit.asName().show(gs));
+            proto.set_string(lit.name.show(gs));
             break;
-        case NamedLiteralType::LiteralTypeKind::Symbol:
+        case NamedLiteralType::Kind::Symbol:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::SYMBOL);
-            proto.set_symbol(lit.asName().show(gs));
+            proto.set_symbol(lit.name.show(gs));
             break;
     }
     return proto;

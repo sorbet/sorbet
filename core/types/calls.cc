@@ -1077,8 +1077,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
                 if (!isa_type<NamedLiteralType>(key->type) ||
-                    cast_type_nonnull<NamedLiteralType>(key->type).literalKind !=
-                        NamedLiteralType::LiteralTypeKind::Symbol) {
+                    cast_type_nonnull<NamedLiteralType>(key->type).kind != NamedLiteralType::Kind::Symbol) {
                     // it's not possible to tell if this is hash will be used as kwargs yet, so we can't raise a useful
                     // error here.
 
@@ -1090,7 +1089,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto &val = *kwit++;
                 keys.emplace_back(key->type);
                 values.emplace_back(val->type);
-                kwargLocs[cast_type_nonnull<NamedLiteralType>(key->type).asName()] = kwArgLoc;
+                kwargLocs[cast_type_nonnull<NamedLiteralType>(key->type).name] = kwArgLoc;
             }
         }
 
@@ -1330,7 +1329,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                        NameRef arg = key.asName();
+                        NameRef arg = key.name;
                         if (consumed.contains(arg)) {
                             continue;
                         }
@@ -1357,7 +1356,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto lit = cast_type_nonnull<NamedLiteralType>(litType);
                     auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
-                           lit.asName() == kwParam.name;
+                           lit.name == kwParam.name;
                 });
                 if (arg == hash->keys.end()) {
                     if (!kwParam.flags.isDefault) {
@@ -1409,13 +1408,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto key = cast_type_nonnull<NamedLiteralType>(keyType);
                 auto underlying = key.underlying(gs);
                 ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
-                if (klass == Symbols::Symbol() && consumed.contains(key.asName())) {
+                if (klass == Symbols::Symbol() && consumed.contains(key.name)) {
                     continue;
                 }
-                NameRef arg = key.asName();
+                NameRef arg = key.name;
 
                 auto kwargErrLoc = kwargsLoc;
-                auto it = kwargLocs.find(key.asName());
+                auto it = kwargLocs.find(key.name);
                 // TODO(jez) This papers over some stuff around kwsplats which might get in our way
                 // of getting a loc for known keyword args. In those cases, we simply give up right now.
                 if (it != kwargLocs.end()) {
@@ -2457,7 +2456,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName();
+        NameRef fn = lit.name;
 
         auto &receiver = args.args[0];
         if (receiver->type.isUntyped()) {
@@ -2719,7 +2718,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName();
+        NameRef fn = lit.name;
         auto &receiver = args.args[0];
         if (receiver->type.isUntyped()) {
             auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, receiver->type);
@@ -2811,7 +2810,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName();
+        NameRef fn = lit.name;
 
         auto &receiver = args.args[0];
         if (receiver->type.isUntyped()) {
@@ -2936,11 +2935,11 @@ public:
 
         if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::UntypedFieldSuggestion)) {
             const auto &fieldKindTy = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
-            auto fieldKind = fieldKindTy.asName().show(gs);
+            auto fieldKind = fieldKindTy.name.show(gs);
             const auto &definingMethodNameTy = cast_type_nonnull<NamedLiteralType>(args.args[2]->type);
-            auto definingMethodName = definingMethodNameTy.asName();
+            auto definingMethodName = definingMethodNameTy.name;
             const auto &fieldNameTy = cast_type_nonnull<NamedLiteralType>(args.args[3]->type);
-            auto fieldName = fieldNameTy.asName().show(gs);
+            auto fieldName = fieldNameTy.name.show(gs);
 
             auto suggestType = res.returnType;
             if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit() &&
@@ -3050,7 +3049,7 @@ public:
         if (!lit.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
-        auto fun = lit.asName();
+        auto fun = lit.name;
 
         uint16_t numPosArgs = args.numPosArgs - 3;
 
@@ -3479,8 +3478,8 @@ public:
 
                     if (args.fullType.origins.size() == 1 && isa_type<NamedLiteralType>(arg)) {
                         auto argLit = cast_type_nonnull<NamedLiteralType>(arg);
-                        if (argLit.literalKind == NamedLiteralType::LiteralTypeKind::Symbol) {
-                            auto key = argLit.asName();
+                        if (argLit.kind == NamedLiteralType::Kind::Symbol) {
+                            auto key = argLit.name;
                             auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
 
                             if (loc.has_value() && loc->exists()) {
@@ -3553,7 +3552,7 @@ public:
             }
 
             auto keylit = cast_type_nonnull<NamedLiteralType>(keyType);
-            if (keylit.literalKind != NamedLiteralType::LiteralTypeKind::Symbol) {
+            if (keylit.kind != NamedLiteralType::Kind::Symbol) {
                 return;
             }
 

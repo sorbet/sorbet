@@ -1186,8 +1186,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         fun == core::Names::callWithBlockPass() || fun == core::Names::callWithSplatAndBlockPass()) {
                         ENFORCE(send.numPosArgs > 2, "Desugar invariant");
                         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(args[1]->type);
-                        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
-                        fun = lit.asName();
+                        ENFORCE(lit.kind == core::NamedLiteralType::Kind::Symbol);
+                        fun = lit.name;
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, send.fun,

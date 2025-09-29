@@ -33,11 +33,7 @@ uint32_t NamedLiteralType::hash(const GlobalState &gs) const {
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     result = mix(result, undSymbol.id());
 
-    switch (literalKind) {
-        case NamedLiteralType::LiteralTypeKind::String:
-        case NamedLiteralType::LiteralTypeKind::Symbol:
-            return mix(result, _hash(asName().shortName(gs)));
-    }
+    return mix(result, _hash(name.shortName(gs)));
 }
 
 uint32_t FloatLiteralType::hash(const GlobalState &gs) const {
