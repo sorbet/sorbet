@@ -71,7 +71,7 @@ namespace {
 // parsed as the type `T.any(String, TrueClass)`.
 core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr) {
     if (auto lit = ast::cast_tree<ast::Literal>(expr)) {
-        return lit->value.underlying(ctx);
+        return core::Types::widen(ctx, lit->value);
     }
 
     if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
