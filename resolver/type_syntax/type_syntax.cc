@@ -72,13 +72,7 @@ namespace {
 core::TypePtr getResultLiteral(core::Context ctx, const ast::ExpressionPtr &expr) {
     core::TypePtr result;
     typecase(
-        expr,
-        [&](const ast::Literal &lit) {
-            result = lit.value;
-            if (core::isa_type<core::NamedLiteralType>(result)) {
-                result = core::cast_type_nonnull<core::NamedLiteralType>(result).underlying(ctx);
-            }
-        },
+        expr, [&](const ast::Literal &lit) { result = lit.value.underlying(ctx); },
         [&](const ast::ExpressionPtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type literal");
@@ -910,8 +904,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto result = getResultLiteral(ctx, arrayElements[0]);
-            for (auto &e : arrayElements.subspan(1)) {
+            auto result = core::Types::bottom();
+            for (auto &e : arrayElements) {
                 result = core::Types::any(ctx, result, getResultLiteral(ctx, e));
             }
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
