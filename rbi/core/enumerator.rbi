@@ -461,7 +461,7 @@ class Enumerator < Object
       arg0: T.type_parameter(:U),
       blk: T.proc.params(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject)
     )
-                       .returns(T.untyped)
+                       .returns(T.type_parameter(:U))
   end
   sig do
     type_parameters(:U).params(
