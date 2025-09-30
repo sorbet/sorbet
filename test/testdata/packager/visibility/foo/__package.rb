@@ -22,7 +22,7 @@ class Foo < PackageSpec
            # ^^^^^^ error: Unable to resolve constant `Nested`
   visible_to Nested::* {}
            # ^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or
-           # ^^^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
+           #           ^^ error: Invalid expression in package: `Block` not allowed
            # ^^^^^^ error: Unable to resolve constant `Nested`
 
   visible_to Nested::*::Blah
