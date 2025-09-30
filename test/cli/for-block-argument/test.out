@@ -5,6 +5,17 @@ test.rb:17: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass)
     test.rb:4:
      4 |sig { params(blk: T.proc.void).void }
                      ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:17: Replaced with `T.must(blk)`
+    17 |  takes_block(&blk)
+                       ^^^
 
 test.rb:19: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass))` for block argument https://srb.help/7002
     19 |  takes_block &blk
@@ -13,6 +24,17 @@ test.rb:19: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass)
     test.rb:4:
      4 |sig { params(blk: T.proc.void).void }
                      ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:19: Replaced with `T.must(blk)`
+    19 |  takes_block &blk
+                       ^^^
 
 test.rb:21: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass))` for block argument https://srb.help/7002
     21 |  takes_block(*[], &blk)
@@ -21,6 +43,17 @@ test.rb:21: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass)
     test.rb:4:
      4 |sig { params(blk: T.proc.void).void }
                      ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:21: Replaced with `T.must(blk)`
+    21 |  takes_block(*[], &blk)
+                            ^^^
 
 test.rb:23: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass))` for block argument https://srb.help/7002
     23 |  takes_block *[], &blk
@@ -29,6 +62,17 @@ test.rb:23: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass)
     test.rb:4:
      4 |sig { params(blk: T.proc.void).void }
                      ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:23: Replaced with `T.must(blk)`
+    23 |  takes_block *[], &blk
+                            ^^^
 
 test.rb:32: Method `to_proc` does not exist on `NilClass` component of `T.all(NilClass, T.type_parameter(:U) (of Object#example_with_generics))` https://srb.help/7003
     32 |  takes_block(&x)
@@ -68,13 +112,13 @@ def example
     blk = nil
   end
 
-  takes_block(&blk)
+  takes_block(&T.must(blk))
 
-  takes_block &blk
+  takes_block &T.must(blk)
 
-  takes_block(*[], &blk)
+  takes_block(*[], &T.must(blk))
 
-  takes_block *[], &blk
+  takes_block *[], &T.must(blk)
 end
 
 sig {

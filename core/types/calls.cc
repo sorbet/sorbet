@@ -2653,7 +2653,9 @@ private:
                 if (!dispatched.secondary) {
                     Magic_callWithBlockPass::showLocationOfParamDefn(gs, e, blockPreType, dispatched.main);
                 }
+                e.addErrorSection(passedInBlockTpo.explainGot(gs, innerArgs.originForUninitialized));
                 e.addErrorSections(move(errorDetailsCollector));
+                TypeErrorDiagnostics::maybeAutocorrect(gs, e, callLoc, *constr, blockPreType, passedInBlockType);
             }
         }
 
