@@ -2408,9 +2408,18 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
         // We don't have an enclosing block arg to start off.
         DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
                             core::NameRef::noName(), false, false, preserveConcreteSyntax);
+        auto liftedClassDefLoc = what->loc;
         auto result = node2TreeImpl(dctx, what);
-        auto loc = result.loc();
-        result = liftTopLevel(dctx, loc, move(result));
+        if (result.loc().exists()) {
+            // If the desugared expression has a different loc, we want to use that. This can happen
+            // because (:block (:send)) desugars to (:send (:block)), but the (:block) node just has
+            // the loc of the `do ... end`, while the (:send) has the whole loc
+            //
+            // But if we desugared to EmptyTree (either intentionally or because there was an
+            // unsupported node type), we want to use the loc of the original node.
+            liftedClassDefLoc = result.loc();
+        }
+        result = liftTopLevel(dctx, liftedClassDefLoc, move(result));
         auto verifiedResult = Verifier::run(ctx, move(result));
         return verifiedResult;
     } catch (SorbetException &) {
