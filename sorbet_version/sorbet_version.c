@@ -43,7 +43,7 @@ const int sorbet_is_with_debug_symbols = 1;
 const int sorbet_is_with_debug_symbols = 0;
 #endif
 
-const char sorbet_version[] = "0.5"; // 0.01 alpha
+const char sorbet_version[] = "0.6"; // 0.01 alpha
 const char sorbet_codename[] = "";   // We Try Furiously
 
 const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD_SCM_COMMIT_COUNT)

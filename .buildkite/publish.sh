@@ -26,6 +26,7 @@ if [ "$BUILDKITE_BRANCH" == 'master' ]; then
 fi
 
 git_commit_count=$(git rev-list --count HEAD)
+# NOTE: Be sure you also changed `sorbet_version.c`
 prefix="0.6"
 release_version="$prefix.${git_commit_count}"
 long_release_version="${release_version}.$(git log --format=%cd-%h --date=format:%Y%m%d%H%M%S -1)"
