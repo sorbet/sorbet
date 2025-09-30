@@ -48,6 +48,7 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
 // definition of keyword arguments.
 pair<const core::lsp::SendResponse *, core::NameRef>
 enclosingSendForKwarg(const core::GlobalState &gs, const core::lsp::LiteralResponse &l,
+                      const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                       const vector<unique_ptr<core::lsp::QueryResponse>>::iterator respIt) {
     if (!core::isa_type<core::NamedLiteralType>(l.retType.type)) {
         return {nullptr, core::NameRef::noName()};
@@ -55,6 +56,10 @@ enclosingSendForKwarg(const core::GlobalState &gs, const core::lsp::LiteralRespo
 
     auto litType = core::cast_type_nonnull<core::NamedLiteralType>(l.retType.type);
     if (litType.kind != core::NamedLiteralType::Kind::Symbol) {
+        return {nullptr, core::NameRef::noName()};
+    }
+
+    if (respIt == queryResponses.end() || respIt + 1 == queryResponses.end()) {
         return {nullptr, core::NameRef::noName()};
     }
 
@@ -208,7 +213,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
         typeString = retType.showWithMoreInfo(gs);
     } else if (auto l = resp->isLiteral()) {
-        auto [send, kwargName] = enclosingSendForKwarg(gs, *l, respIt);
+        auto [send, kwargName] = enclosingSendForKwarg(gs, *l, queryResponses, respIt);
         if (send != nullptr) {
             typeString = handleHoverKeywordArg(gs, send, kwargName);
         }
