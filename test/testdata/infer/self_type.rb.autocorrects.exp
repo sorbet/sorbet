@@ -1,3 +1,4 @@
+# -- test/testdata/infer/self_type.rb --
 # typed: true
 class Parent
   extend T::Sig
@@ -53,7 +54,7 @@ module B
      self
   end
 
-  sig { params(x: T.self_type).void }
+  sig { params(x: B).void }
   #            ^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def takes_self_public(x)
     #                   ^ error: Expression does not have a fully-defined type
@@ -78,7 +79,7 @@ module B
     x
   end
 
-  sig { params(other: T.self_type).void }
+  sig { params(other: T.anything).void }
   #            ^^^^^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def ==(other)
     #    ^^^^^ error: Expression does not have a fully-defined type
@@ -99,3 +100,4 @@ while (rnd)
 end
 
 puts s
+# ------------------------------
