@@ -2529,9 +2529,9 @@ class Magic_callWithBlockPass : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlockPass;
 
 private:
-    static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
-                              LocOffsets callLoc, LocOffsets receiverLoc, LocOffsets funLoc, Loc originForUninitialized,
-                              bool suppressErrors) {
+    static TypeAndOrigins typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
+                                     LocOffsets callLoc, LocOffsets receiverLoc, LocOffsets funLoc,
+                                     Loc originForUninitialized, bool suppressErrors) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (blockType.type.isUntyped()) {
@@ -2539,7 +2539,7 @@ private:
             // This avoids reporting a typed: strong error for `&x` where `x` is untyped--we may
             // still want to report an error later when matching this `T.untyped` we're about to
             // return with the method's block parameter.
-            return blockType.type;
+            return blockType;
         }
 
         if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
@@ -2547,7 +2547,7 @@ private:
             typeIsNilable = true;
 
             if (nonNilBlockType.type.isBottom()) {
-                return blockType.type;
+                return blockType;
             }
         }
 
@@ -2571,11 +2571,10 @@ private:
             gs._error(std::move(err));
         }
 
-        if (typeIsNilable) {
-            return Types::any(gs, dispatched.returnType, Types::nilClass());
-        } else {
-            return dispatched.returnType;
-        }
+        return {
+            typeIsNilable ? Types::any(gs, dispatched.returnType, Types::nilClass()) : dispatched.returnType,
+            blockType.origins,
+        };
     }
 
     static optional<int> getArityForBlock(const TypePtr &blockType) {
@@ -2614,7 +2613,8 @@ private:
     }
 
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
-                             TypePtr passedInBlockType, Loc callLoc, Loc blockLoc, DispatchResult &res) {
+                             const TypeAndOrigins &passedInBlockTpo, Loc callLoc, Loc blockLoc, DispatchResult &res) {
+        auto passedInBlockType = passedInBlockTpo.type;
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
@@ -2756,10 +2756,10 @@ public:
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType =
+        auto finalBlockType =
             Magic_callWithBlockPass::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType.type);
         core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
@@ -2871,10 +2871,10 @@ public:
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType =
+        auto finalBlockType =
             Magic_callWithBlockPass::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
-        optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
+        optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType.type);
         core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
