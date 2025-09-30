@@ -43,7 +43,7 @@ struct DesugarContext final {
                    bool inModule, bool preserveConcreteSyntax)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockParamName(enclosingBlockParamName),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), inAnyBlock(inAnyBlock),
-          inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax){};
+          inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax) {};
 
     core::NameRef freshNameUnique(core::NameRef name) {
         return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
@@ -1956,7 +1956,91 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::True *t) { desugaredByPrismTranslator(t); },
             [&](parser::False *t) { desugaredByPrismTranslator(t); },
-            [&](parser::Case *case_) { desugaredByPrismTranslator(case_); },
+            [&](parser::Case *case_) {
+                // Case nodes can fallback from the Prism Translator when patterns don't have desugared expressions
+                // (e.g., regex literals). Handle them here like in the original Desugar.cc.
+                if (dctx.preserveConcreteSyntax) {
+                    // Desugar to:
+                    //   Magic.caseWhen(condition, numPatterns, <pattern 1>, ..., <pattern N>, <body 1>, ..., <body M>)
+                    // Putting all the patterns at the start so that we can skip them when checking which body to insert
+                    // into.
+                    Send::ARGS_store args;
+                    args.emplace_back(node2TreeImpl(dctx, case_->condition));
+
+                    Send::ARGS_store patterns;
+                    Send::ARGS_store bodies;
+                    for (auto it = case_->whens.begin(); it != case_->whens.end(); ++it) {
+                        auto when = parser::NodeWithExpr::cast_node<parser::When>(it->get());
+                        ENFORCE(when != nullptr, "case without a when?");
+                        for (auto &cnode : when->patterns) {
+                            patterns.emplace_back(node2TreeImpl(dctx, cnode));
+                        }
+                        bodies.emplace_back(node2TreeImpl(dctx, when->body));
+                    }
+                    bodies.emplace_back(node2TreeImpl(dctx, case_->else_));
+
+                    auto locZeroLen = loc.copyWithZeroLength();
+                    args.emplace_back(MK::Int(locZeroLen, patterns.size()));
+                    move(patterns.begin(), patterns.end(), back_inserter(args));
+                    move(bodies.begin(), bodies.end(), back_inserter(args));
+
+                    result = MK::Send(loc, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, args.size(),
+                                      move(args));
+                    return;
+                }
+
+                ExpressionPtr assign;
+                auto temp = core::NameRef::noName();
+                core::LocOffsets cloc;
+
+                if (case_->condition != nullptr) {
+                    cloc = case_->condition->loc;
+                    temp = dctx.freshNameUnique(core::Names::assignTemp());
+                    assign = MK::Assign(cloc, temp, node2TreeImpl(dctx, case_->condition));
+                }
+                ExpressionPtr res = node2TreeImpl(dctx, case_->else_);
+                for (auto it = case_->whens.rbegin(); it != case_->whens.rend(); ++it) {
+                    auto when = parser::NodeWithExpr::cast_node<parser::When>(it->get());
+                    ENFORCE(when != nullptr, "case without a when?");
+                    ExpressionPtr cond;
+                    for (auto &cnode : when->patterns) {
+                        ExpressionPtr test;
+                        if (parser::isa_node<parser::Splat>(cnode.get())) {
+                            ENFORCE(temp.exists(), "splats need something to test against");
+                            auto recv = MK::Magic(loc);
+                            auto local = MK::Local(cloc, temp);
+                            // TODO(froydnj): use the splat's var directly so we can elide the
+                            // coercion to an array where possible.
+                            auto splat = node2TreeImpl(dctx, cnode);
+                            auto patternloc = splat.loc();
+                            test = MK::Send2(patternloc, move(recv), core::Names::checkMatchArray(),
+                                             patternloc.copyWithZeroLength(), move(local), move(splat));
+                        } else {
+                            auto ctree = node2TreeImpl(dctx, cnode);
+                            if (temp.exists()) {
+                                auto local = MK::Local(cloc, temp);
+                                auto patternloc = ctree.loc();
+                                test = MK::Send1(patternloc, move(ctree), core::Names::tripleEq(),
+                                                 patternloc.copyWithZeroLength(), move(local));
+                            } else {
+                                test = move(ctree);
+                            }
+                        }
+                        if (cond == nullptr) {
+                            cond = move(test);
+                        } else {
+                            auto true_ = MK::True(test.loc());
+                            auto testloc = test.loc();
+                            cond = MK::If(testloc, move(test), move(true_), move(cond));
+                        }
+                    }
+                    res = MK::If(when->loc, move(cond), node2TreeImpl(dctx, when->body), move(res));
+                }
+                if (assign != nullptr) {
+                    res = MK::InsSeq1(loc, move(assign), move(res));
+                }
+                result = move(res);
+            },
             [&](parser::Splat *splat) {
                 auto res = MK::Splat(loc, node2TreeImpl(dctx, splat->var));
                 result = move(res);

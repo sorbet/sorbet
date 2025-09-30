@@ -1168,7 +1168,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             NodeVec whenNodes;
             whenNodes.reserve(prismWhenNodes.size());
 
-            size_t totalPatterns = 0; // TODO: move this above
+            size_t totalPatterns = 0;
+            bool allWhensHaveDesugaredExpr = true;
 
             for (auto *whenNodePtr : prismWhenNodes) {
                 auto *whenNode = down_cast<pm_when_node>(whenNodePtr);
@@ -1182,6 +1183,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 totalPatterns += patternNodes.size();
 
                 auto statementsNode = translateStatements(whenNode->statements);
+                allWhensHaveDesugaredExpr =
+                    allWhensHaveDesugaredExpr && hasExpr(statementsNode) && hasExpr(patternNodes);
 
                 // A single `when` clause does not desugar into a standalone Ruby expression; it only
                 // becomes meaningful when the enclosing `case` stitches together all clauses. Wrapping it
@@ -1194,7 +1197,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto elseClause = translate(up_cast(caseNode->else_clause));
 
-            if (!directlyDesugar || !hasExpr(predicate, elseClause, whenNodes)) {
+            if (!directlyDesugar || !allWhensHaveDesugaredExpr || !hasExpr(predicate, elseClause)) {
                 return make_unique<Case>(location, move(predicate), move(whenNodes), move(elseClause));
             }
 
