@@ -1,0 +1,43 @@
+suggest-instance-vs-singleton.rb:8: Method `my_singleton_class_method` does not exist on `A` https://srb.help/7003
+     8 |    my_singleton_class_method
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  There is a singleton class method with the same name:
+    suggest-instance-vs-singleton.rb:5: Defined here
+     5 |  def self.my_singleton_class_method; end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Either:
+    - use `.class` to call it,
+    - remove `self.` from its definition to make it an instance method, or
+    - define the current method as a singleton class method using `def self.`
+  Autocorrect: Done
+    suggest-instance-vs-singleton.rb:8: Inserted `self.class.`
+     8 |    my_singleton_class_method
+            ^
+
+suggest-instance-vs-singleton.rb:11: Method `my_instance_method` does not exist on `T.class_of(A)` https://srb.help/7003
+    11 |    my_instance_method
+            ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest-instance-vs-singleton.rb:11: Replaced with `instance_method`
+    11 |    my_instance_method
+            ^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1048: Defined here
+    1048 |  def instance_method(arg0); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class A
+  def my_instance_method; end
+  def self.my_singleton_class_method; end
+
+  def example1
+    self.class.my_singleton_class_method
+  end
+  def self.example2
+    instance_method
+  end
+end
