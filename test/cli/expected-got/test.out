@@ -44,6 +44,10 @@ test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but
     test/cli/expected-got/expected-got.rb:32:
     32 |sig {params(blk: T.proc.returns(Integer)).void}
                     ^^^
+  Got `T.proc.returns(String)` originating from:
+    test/cli/expected-got/expected-got.rb:41:
+    41 |def takes_string_block(&blk)
+                                ^^^
   Detailed explanation:
     `String` is not a subtype of `Integer` for covariant type member `Proc0::Return`
 
