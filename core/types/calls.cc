@@ -2533,7 +2533,7 @@ class Magic_callWithBlockPass : public IntrinsicMethod {
 
 private:
     static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
-                              LocOffsets receiverLoc, Loc originForUninitialized, bool suppressErrors) {
+                              LocOffsets blockArgLoc, Loc originForUninitialized, bool suppressErrors) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (blockType.type.isUntyped()) {
