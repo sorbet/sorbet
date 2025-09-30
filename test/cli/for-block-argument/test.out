@@ -1,0 +1,137 @@
+test.rb:17: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass))` for block argument https://srb.help/7002
+    17 |  takes_block(&blk)
+          ^^^^^^^^^^^^^^^^^
+  Expected `T.proc.void` for block parameter `blk` of method `Object#takes_block`:
+    test.rb:4:
+     4 |sig { params(blk: T.proc.void).void }
+                     ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:17: Replaced with `T.must(blk)`
+    17 |  takes_block(&blk)
+                       ^^^
+
+test.rb:19: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass))` for block argument https://srb.help/7002
+    19 |  takes_block &blk
+          ^^^^^^^^^^^^^^^^
+  Expected `T.proc.void` for block parameter `blk` of method `Object#takes_block`:
+    test.rb:4:
+     4 |sig { params(blk: T.proc.void).void }
+                     ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:19: Replaced with `T.must(blk)`
+    19 |  takes_block &blk
+                       ^^^
+
+test.rb:21: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass))` for block argument https://srb.help/7002
+    21 |  takes_block(*[], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^
+  Expected `T.proc.void` for block parameter `blk` of method `Object#takes_block`:
+    test.rb:4:
+     4 |sig { params(blk: T.proc.void).void }
+                     ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:21: Replaced with `T.must(blk)`
+    21 |  takes_block(*[], &blk)
+                            ^^^
+
+test.rb:23: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass))` for block argument https://srb.help/7002
+    23 |  takes_block *[], &blk
+          ^^^^^^^^^^^^^^^^^^^^^
+  Expected `T.proc.void` for block parameter `blk` of method `Object#takes_block`:
+    test.rb:4:
+     4 |sig { params(blk: T.proc.void).void }
+                     ^^^
+  Got `T.nilable(T.proc.returns(NilClass))` originating from:
+    test.rb:12:
+    12 |    blk = -> (){}
+                  ^^^^^^^
+    test.rb:14:
+    14 |    blk = nil
+                  ^^^
+  Autocorrect: Done
+    test.rb:23: Replaced with `T.must(blk)`
+    23 |  takes_block *[], &blk
+                            ^^^
+
+test.rb:32: Method `to_proc` does not exist on `NilClass` component of `T.all(NilClass, T.type_parameter(:U) (of Object#example_with_generics))` https://srb.help/7003
+    32 |  takes_block(&x)
+          ^^^^^^^^^^^
+  Got `T.all(NilClass, T.type_parameter(:U) (of Object#example_with_generics))` originating from:
+    test.rb:31:
+    31 |def example_with_generics(x)
+                                  ^
+  Autocorrect: Done
+    test.rb:32: Replaced with `T.must(x)`
+    32 |  takes_block(&x)
+                       ^
+
+test.rb:36: This code is unreachable https://srb.help/7006
+    36 |    takes_block(&T.must(x))
+            ^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:36: This expression always raises or can never be computed
+    36 |    takes_block(&T.must(x))
+                         ^^^^^^^^^
+Errors: 6
+
+--------------------------------------------------------------------------
+
+# typed: strict
+extend T::Sig
+
+sig { params(blk: T.proc.void).void }
+def takes_block(&blk)
+  # ...
+end
+
+sig { void }
+def example
+  if [true, false].sample
+    blk = -> (){}
+  else
+    blk = nil
+  end
+
+  takes_block(&T.must(blk))
+
+  takes_block &T.must(blk)
+
+  takes_block(*[], &T.must(blk))
+
+  takes_block *[], &T.must(blk)
+end
+
+sig {
+  type_parameters(:U)
+    .params(x: T.all(NilClass, T.type_parameter(:U)))
+    .void
+}
+def example_with_generics(x)
+  takes_block(&T.must(x))
+
+  # ^ It's unclear whether we actually want an autocorrect there, because if you accept it, you get this, but the situation is really rare anyways.
+  if T.unsafe(nil)
+    takes_block(&T.must(x))
+  end
+end
+

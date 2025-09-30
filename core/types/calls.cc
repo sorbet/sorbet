@@ -2547,7 +2547,7 @@ private:
             typeIsNilable = true;
 
             if (nonNilBlockType.type.isBottom()) {
-                return Types::nilClass();
+                return blockType.type;
             }
         }
 
@@ -2614,7 +2614,8 @@ private:
     }
 
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
-                             TypePtr passedInBlockType, Loc callLoc, Loc blockLoc, DispatchResult &res) {
+                             TypePtr passedInBlockType, const InlinedVector<Loc, 1> &blockTypeOrigins, Loc callLoc,
+                             Loc blockLoc, DispatchResult &res) {
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
@@ -2653,7 +2654,10 @@ private:
                 if (!dispatched.secondary) {
                     Magic_callWithBlockPass::showLocationOfParamDefn(gs, e, blockPreType, dispatched.main);
                 }
+                auto passedInBlockTpo = TypeAndOrigins{passedInBlockType, blockTypeOrigins};
+                e.addErrorSection(passedInBlockTpo.explainGot(gs, innerArgs.originForUninitialized));
                 e.addErrorSections(move(errorDetailsCollector));
+                TypeErrorDiagnostics::maybeAutocorrect(gs, e, callLoc, *constr, blockPreType, passedInBlockType);
             }
         }
 
@@ -2756,8 +2760,9 @@ public:
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType =
-            Magic_callWithBlockPass::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
+        auto &blockArgTpo = *args.args[2];
+        auto finalBlockType =
+            Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.call, args.locs.args[2],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
@@ -2776,8 +2781,8 @@ public:
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
 
-        Magic_callWithBlockPass::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(2), args.callLoc(),
-                                              res);
+        Magic_callWithBlockPass::simulateCall(gs, receiver, innerArgs, finalBlockType, blockArgTpo.origins,
+                                              args.argLoc(2), args.callLoc(), res);
     }
 } Magic_callWithBlockPass;
 
@@ -2871,8 +2876,9 @@ public:
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType =
-            Magic_callWithBlockPass::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
+        auto &blockArgTpo = *args.args[4];
+        auto finalBlockType =
+            Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.call, args.locs.args[4],
                                                 args.locs.fun, args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
@@ -2891,8 +2897,8 @@ public:
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
 
-        Magic_callWithBlockPass::simulateCall(gs, receiver, innerArgs, finalBlockType, args.argLoc(4), args.callLoc(),
-                                              res);
+        Magic_callWithBlockPass::simulateCall(gs, receiver, innerArgs, finalBlockType, blockArgTpo.origins,
+                                              args.argLoc(4), args.callLoc(), res);
     }
 } Magic_callWithSplatAndBlockPass;
 

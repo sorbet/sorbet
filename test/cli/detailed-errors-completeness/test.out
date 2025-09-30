@@ -169,6 +169,10 @@ test.rb:24: Expected `T.proc.params(arg0: [Integer]).returns([Integer])` but fou
     test.rb:19:
     19 |sig {params(blk: T.proc.params(x: [Integer]).returns([Integer])).void}
                     ^^^
+  Got `T.proc.params(arg0: [String]).returns([String])` originating from:
+    test.rb:23:
+    23 |p = T.let(T.unsafe(nil), T.proc.params(x: [String]).returns([String]))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Detailed explanation:
     `[String]` is not a subtype of `[Integer]` for covariant type member `Proc1::Return`
       `String` is not a subtype of `Integer` for index `0` of `1`-tuple
