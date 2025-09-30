@@ -171,9 +171,8 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
     }
 }
 
-ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
-                           unique_ptr<parser::Node> &blockSend, parser::Node *blockParams,
-                           unique_ptr<parser::Node> &blockBody) {
+ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &blockSend,
+                           parser::Node *blockParams, unique_ptr<parser::Node> &blockBody) {
     blockSend->loc = loc;
     auto recv = node2TreeImpl(dctx, blockSend);
     Send *send;
@@ -186,7 +185,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         res = move(recv);
         auto is = cast_tree<InsSeq>(res);
         if (!is) {
-            if (auto e = dctx.ctx.beginIndexerError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
+            if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::UnsupportedNode)) {
                 e.setHeader("No body in block");
             }
             return MK::EmptyTree();
@@ -1079,7 +1078,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
             [&](parser::Block *block) {
-                result = desugarBlock(dctx, loc, block->loc, block->send, block->params.get(), block->body);
+                result = desugarBlock(dctx, loc, block->send, block->params.get(), block->body);
             },
             [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
