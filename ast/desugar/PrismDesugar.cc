@@ -140,7 +140,7 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
 
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &blockSend,
                            parser::Node *blockParams, unique_ptr<parser::Node> &blockBody) {
-    blockSend->loc = loc;
+    blockSend->loc = blockSend->loc.join(loc);
     auto recv = node2TreeImpl(dctx, blockSend);
     Send *send;
     ExpressionPtr res;

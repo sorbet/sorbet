@@ -537,11 +537,11 @@ public:
             }
         }
 
+        auto blockLoc = tokLoc(begin).join(tokLoc(end));
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
-            return make_unique<Block>(methodCall->loc.join(tokLoc(end)), std::move(methodCall), std::move(args),
-                                      std::move(body));
+            return make_unique<Block>(blockLoc, std::move(methodCall), std::move(args), std::move(body));
         }
 
         sorbet::parser::NodeVec *exprs;
@@ -555,7 +555,6 @@ public:
             [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
-        core::LocOffsets blockLoc = send->loc.join(tokLoc(end));
         unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
         exprs->front().swap(block);
         return methodCall;

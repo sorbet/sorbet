@@ -173,7 +173,7 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
 
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &blockSend,
                            parser::Node *blockParams, unique_ptr<parser::Node> &blockBody) {
-    blockSend->loc = loc;
+    blockSend->loc = blockSend->loc.join(loc);
     auto recv = node2TreeImpl(dctx, blockSend);
     Send *send;
     ExpressionPtr res;
@@ -204,7 +204,6 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, unique_ptr
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     auto desugaredBody = desugarBody(dctx1, loc, blockBody, move(destructures));
 
-    // TODO the send->block's loc is too big and includes the whole send
     send->setBlock(MK::Block(loc, move(desugaredBody), move(Params)));
     return res;
 }
