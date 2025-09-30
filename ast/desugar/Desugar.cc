@@ -90,8 +90,7 @@ ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls)
 
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what);
 
-pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext dctx, core::LocOffsets loc,
-                                                                 parser::Node *anyParamsNode) {
+pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext dctx, parser::Node *anyParamsNode) {
     MethodDef::PARAMS_store params;
     InsSeq::STATS_store destructures;
 
@@ -197,7 +196,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         send = cast_tree<Send>(iff->elsep);
         ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
     }
-    auto [Params, destructures] = desugarParams(dctx, loc, blockParams);
+    auto [Params, destructures] = desugarParams(dctx, blockParams);
 
     checkBlockRestParam(dctx, Params);
 
@@ -369,7 +368,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     auto inModule = dctx.inModule && !isSelf;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamName, declLoc, name, dctx.inAnyBlock,
                          inModule, dctx.preserveConcreteSyntax);
-    auto [params, destructures] = desugarParams(dctx1, loc, argnode);
+    auto [params, destructures] = desugarParams(dctx1, argnode);
 
     if (params.empty() || !isa_tree<BlockParam>(params.back())) {
         auto blkLoc = core::LocOffsets::none();
