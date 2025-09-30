@@ -201,6 +201,9 @@ void CommentsAssociatorPrism::associateSignatureCommentsToNode(pm_node_t *node) 
         it++;
     }
 
+    // if (!comments.empty()) {
+    //     fmt::print("Comments.first: {}\n", comments.front().string);
+    // }
     signaturesForNode[node] = move(comments);
 }
 
@@ -396,7 +399,7 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
     if (node == nullptr) {
         return;
     }
-    fmt::print("WALKING NODE, TYPE: {}\n", PM_NODE_TYPE(node));
+    // fmt::print("WALKING NODE, TYPE: {}\n", PM_NODE_TYPE(node));
 
     switch (PM_NODE_TYPE(node)) {
         case PM_AND_NODE: {

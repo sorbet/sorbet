@@ -25,7 +25,7 @@ namespace sorbet::rbs {
 namespace {
 
 // Forward declarations
-core::LocOffsets translateLocation(pm_location_t location);
+// core::LocOffsets translateLocation(pm_location_t location);
 
 struct RBSArg {
     core::LocOffsets loc;
@@ -185,15 +185,15 @@ string nodeKindToString(const pm_node_t *node) {
 }
 */
 
-core::LocOffsets translateLocation(pm_location_t location) {
-    // TODO: This should be shared with CommentsAssociatorPrism
-    // Use proper pointer arithmetic for location translation
-    const uint8_t *sourceStart = location.start;
-    const uint8_t *sourceEnd = location.end;
-    uint32_t start = static_cast<uint32_t>(sourceStart - sourceStart); // This will be 0 for now
-    uint32_t end = static_cast<uint32_t>(sourceEnd - sourceStart);
-    return core::LocOffsets{start, end};
-}
+// core::LocOffsets translateLocation(pm_location_t location) {
+//     // TODO: This should be shared with CommentsAssociatorPrism
+//     // Use proper pointer arithmetic for location translation
+//     const uint8_t *sourceStart = location.start;
+//     const uint8_t *sourceEnd = location.end;
+//     uint32_t start = static_cast<uint32_t>(sourceStart - sourceStart); // This will be 0 for now
+//     uint32_t end = static_cast<uint32_t>(sourceEnd - sourceStart);
+//     return core::LocOffsets{start, end};
+// }
 
 /* TODO: Implement when needed
 bool checkParameterKindMatch(const RBSArg &arg, const pm_node_t *methodArg) {
@@ -455,6 +455,11 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     auto firstLineTypeLoc = declaration.firstLineTypeLoc();
     auto commentLoc = declaration.commentLoc();
 
+    // Pre-calculate frequently used locations to avoid redundant calculations
+    pm_location_t full_loc = convertLocOffsets(fullTypeLoc);
+    pm_location_t tiny_loc = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
+    pm_location_t end_zero_loc = convertLocOffsets(fullTypeLoc.copyEndWithZeroLength());
+
     // Add method names to constant pool
     pm_constant_id_t sig_method_id = addConstantToPool("sig");
     if (sig_method_id == PM_CONSTANT_ID_UNSET) {
@@ -504,14 +509,14 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
             // Fallback to method parameter name when RBS omitted it
             if (!methodParams.empty() && paramIndex < methodParams.size() &&
                 methodParams[paramIndex].nameId != PM_CONSTANT_ID_UNSET) {
-                symbolNode = createSymbolNodeFromConstant(methodParams[paramIndex].nameId,
-                                                          firstLineTypeLoc.copyWithZeroLength());
+                core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
+                symbolNode = createSymbolNodeFromConstant(methodParams[paramIndex].nameId, tinyLocOffsets);
             }
             if (!symbolNode) {
                 // As a last resort, synthesize a tiny constant name 'arg'
                 symbolNode = createConstantReadNode("arg");
                 if (symbolNode) {
-                    symbolNode->location = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
+                    symbolNode->location = tiny_loc;
                 }
             }
         }
@@ -528,25 +533,16 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         typeNode->location = convertLocOffsets(arg.loc);
 
         // Create association node (key-value pair) with consistent zero-width location
-        core::LocOffsets tinyLoc = firstLineTypeLoc.copyWithZeroLength();
-        fmt::print("DEBUG: Creating assoc with tinyLoc: {}..{} (was arg.loc: {}..{})\n", tinyLoc.beginPos(),
-                   tinyLoc.endPos(), arg.loc.beginPos(), arg.loc.endPos());
-        pm_node_t *pairNode = createAssocNode(symbolNode, typeNode, tinyLoc);
+        core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
+        fmt::print("DEBUG: Creating assoc with tinyLoc: {}..{} (was arg.loc: {}..{})\n",
+                   tinyLocOffsets.beginPos(), tinyLocOffsets.endPos(),
+                   arg.loc.beginPos(), arg.loc.endPos());
+        pm_node_t *pairNode = createAssocNode(symbolNode, typeNode, tinyLocOffsets);
         if (pairNode) {
             sigParams.push_back(pairNode);
-            auto p = prismParser->getInternalParser();
-            auto off = [&](pm_location_t l) -> pair<size_t, size_t> {
-                size_t b = l.start ? (size_t)(l.start - p->start) : (size_t)0;
-                size_t e = l.end ? (size_t)(l.end - p->start) : (size_t)0;
-                return {b, e};
-            };
-            auto pr = [&](const char *label, pm_location_t l) {
-                auto [b, e] = off(l);
-                fmt::print("DEBUG {}: {}..{}\n", label, b, e);
-            };
-            pr("param.symbol.base", symbolNode->location);
-            pr("param.type.base", typeNode->location);
-            pr("param.pair.base", pairNode->location);
+            debugPrintLocation("param.symbol.base", symbolNode->location);
+            debugPrintLocation("param.type.base", typeNode->location);
+            debugPrintLocation("param.pair.base", pairNode->location);
         }
         paramIndex++;
     }
@@ -578,42 +574,24 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         }
 
         // Create .params() method call
-        pm_call_node_t *paramsCall = allocateNode<pm_call_node_t>();
+        pm_call_node_t *paramsCall = createMethodCall(sigReceiver, params_id, paramsArgs, tiny_loc, full_loc, tiny_loc);
         if (!paramsCall) {
             return nullptr;
         }
 
-        pm_location_t full_loc = convertLocOffsets(fullTypeLoc);
-        pm_location_t tiny = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
-
-        *paramsCall = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
-                                       .receiver = sigReceiver,
-                                       .call_operator_loc = tiny,
-                                       .name = params_id,
-                                       .message_loc = tiny,
-                                       .opening_loc = tiny,
-                                       .arguments = down_cast<pm_arguments_node_t>(paramsArgs),
-                                       .closing_loc = tiny,
-                                       .block = nullptr};
-        paramsCall->base.location = full_loc;
-
         sigReceiver = up_cast(paramsCall);
-        auto p2 = prismParser->getInternalParser();
-        auto off2 = [&](pm_location_t l) -> pair<size_t, size_t> {
-            size_t b = l.start ? (size_t)(l.start - p2->start) : (size_t)0;
-            size_t e = l.end ? (size_t)(l.end - p2->start) : (size_t)0;
-            return {b, e};
-        };
-        auto pr2 = [&](const char *label, pm_location_t l) {
-            auto [b, e] = off2(l);
-            fmt::print("DEBUG {}: {}..{}\n", label, b, e);
-        };
-        pr2("params.call.base", paramsCall->base.location);
-        pr2("params.call.msg", paramsCall->message_loc);
+        debugPrintLocation("params.call.base", paramsCall->base.location);
+        debugPrintLocation("params.call.msg", paramsCall->message_loc);
     }
 
     // Add return type call (.void() or .returns(Type))
     pm_node_t *blockBody = nullptr;
+
+    // Pre-calculate return type locations to avoid redundant calculations
+    pm_location_t return_type_full_loc =
+        convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg));
+    pm_location_t return_type_zero_loc = convertLocOffsets(
+        declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
 
     if (functionType->return_type->type == RBS_TYPES_BASES_VOID) {
         // Create: sigReceiver.void()
@@ -621,38 +599,12 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         if (void_id == PM_CONSTANT_ID_UNSET)
             return nullptr;
 
-        pm_call_node_t *voidCall = allocateNode<pm_call_node_t>();
+        pm_call_node_t *voidCall = createMethodCall(sigReceiver, void_id, nullptr, return_type_zero_loc, full_loc, tiny_loc);
         if (!voidCall)
             return nullptr;
-
-        pm_location_t full_loc = convertLocOffsets(fullTypeLoc);
-        pm_location_t tiny = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
-        pm_location_t return_loc = convertLocOffsets(
-            declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
-
-        *voidCall = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
-                                     .receiver = sigReceiver,
-                                     .call_operator_loc = tiny,
-                                     .name = void_id,
-                                     .message_loc = return_loc,
-                                     .opening_loc = tiny,
-                                     .arguments = nullptr,
-                                     .closing_loc = tiny,
-                                     .block = nullptr};
-        voidCall->base.location = full_loc;
         blockBody = up_cast(voidCall);
-        auto p3 = prismParser->getInternalParser();
-        auto off3 = [&](pm_location_t l) -> pair<size_t, size_t> {
-            size_t b = l.start ? (size_t)(l.start - p3->start) : (size_t)0;
-            size_t e = l.end ? (size_t)(l.end - p3->start) : (size_t)0;
-            return {b, e};
-        };
-        auto pr3 = [&](const char *label, pm_location_t l) {
-            auto [b, e] = off3(l);
-            fmt::print("DEBUG {}: {}..{}\n", label, b, e);
-        };
-        pr3("void.call.base", voidCall->base.location);
-        pr3("void.call.msg", voidCall->message_loc);
+        debugPrintLocation("void.call.base", voidCall->base.location);
+        debugPrintLocation("void.call.msg", voidCall->message_loc);
     } else {
         // Create: sigReceiver.returns(Type)
         pm_constant_id_t returns_id = addConstantToPool("returns");
@@ -660,54 +612,24 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
             return nullptr;
 
         // Convert actual return type from RBS AST
-        auto typeToPrismNode = TypeToParserNodePrism(ctx, typeParams, parser, prismParser);
-        // Compute return type location once to use for both call message_loc and node location
-        pm_location_t return_loc =
-            convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg));
         pm_node_t *returnTypeNode = typeToPrismNode.toPrismNode(functionType->return_type, declaration);
         if (!returnTypeNode)
             return nullptr;
 
         // Set return type node base.location to actual return type span
-        returnTypeNode->location = return_loc;
+        returnTypeNode->location = return_type_full_loc;
 
         pm_node_t *returnsArguments = createSingleArgumentNode(returnTypeNode);
         if (!returnsArguments)
             return nullptr;
 
-        pm_call_node_t *returnsCall = allocateNode<pm_call_node_t>();
+        pm_call_node_t *returnsCall =
+            createMethodCall(sigReceiver, returns_id, returnsArguments, return_type_zero_loc, full_loc, tiny_loc);
         if (!returnsCall)
             return nullptr;
-
-        pm_location_t full_loc = convertLocOffsets(fullTypeLoc);
-        pm_location_t tiny = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
-        // Use a zero-width message location anchored at the start of return type
-        pm_location_t return_message_loc = convertLocOffsets(
-            declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
-
-        *returnsCall = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
-                                        .receiver = sigReceiver,
-                                        .call_operator_loc = tiny,
-                                        .name = returns_id,
-                                        .message_loc = return_message_loc,
-                                        .opening_loc = tiny,
-                                        .arguments = down_cast<pm_arguments_node_t>(returnsArguments),
-                                        .closing_loc = tiny,
-                                        .block = nullptr};
-        returnsCall->base.location = full_loc;
         blockBody = up_cast(returnsCall);
-        auto p4 = prismParser->getInternalParser();
-        auto off4 = [&](pm_location_t l) -> pair<size_t, size_t> {
-            size_t b = l.start ? (size_t)(l.start - p4->start) : (size_t)0;
-            size_t e = l.end ? (size_t)(l.end - p4->start) : (size_t)0;
-            return {b, e};
-        };
-        auto pr4 = [&](const char *label, pm_location_t l) {
-            auto [b, e] = off4(l);
-            fmt::print("DEBUG {}: {}..{}\n", label, b, e);
-        };
-        pr4("returns.call.base", returnsCall->base.location);
-        pr4("returns.call.msg", returnsCall->message_loc);
+        debugPrintLocation("returns.call.base", returnsCall->base.location);
+        debugPrintLocation("returns.call.msg", returnsCall->message_loc);
     }
 
     if (!blockBody)
@@ -718,55 +640,26 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     if (!block)
         return nullptr;
 
-    pm_location_t full_loc = convertLocOffsets(fullTypeLoc);
-    pm_location_t end_zero = convertLocOffsets(fullTypeLoc.copyEndWithZeroLength());
-
-    pm_location_t first_line_tiny = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
-
     *block = (pm_block_node_t){.base = initializeBaseNode(PM_BLOCK_NODE),
                                .locals = {.size = 0, .capacity = 0, .ids = nullptr},
                                .parameters = nullptr,
                                .body = blockBody,
-                               .opening_loc = first_line_tiny,
-                               .closing_loc = end_zero};
+                               .opening_loc = tiny_loc,
+                               .closing_loc = end_zero_loc};
     // Ensure block base.location covers the full RBS type span
     block->base.location = full_loc;
 
     // Create the main sig call
-    pm_call_node_t *call = allocateNode<pm_call_node_t>();
+    pm_call_node_t *call =
+        createMethodCall(receiver, sig_method_id, arguments, tiny_loc, full_loc, tiny_loc, up_cast(block));
     if (!call)
         return nullptr;
 
-    pm_location_t first_line_loc = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
-
-    *call = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
-                             .receiver = receiver,
-                             .call_operator_loc = first_line_loc,
-                             .name = sig_method_id,
-                             .message_loc = first_line_loc,
-                             .opening_loc = first_line_loc,
-                             .arguments = down_cast<pm_arguments_node_t>(arguments),
-                             .closing_loc = first_line_loc,
-                             .block = up_cast(block)};
-
-    // Set overall call location to cover the full RBS span
-    call->base.location = full_loc;
-
     // Debug print important locations to diagnose substr crashes
-    auto p = prismParser->getInternalParser();
-    auto off = [&](pm_location_t l) -> pair<size_t, size_t> {
-        size_t b = l.start ? (size_t)(l.start - p->start) : (size_t)0;
-        size_t e = l.end ? (size_t)(l.end - p->start) : (size_t)0;
-        return {b, e};
-    };
-    auto pr = [&](const char *label, pm_location_t l) {
-        auto [b, e] = off(l);
-        fmt::print("DEBUG {}: {}..{}\n", label, b, e);
-    };
-    pr("sig.call.base", call->base.location);
-    pr("sig.call.msg", call->message_loc);
-    pr("block.open", block->opening_loc);
-    pr("block.close", block->closing_loc);
+    debugPrintLocation("sig.call.base", call->base.location);
+    debugPrintLocation("sig.call.msg", call->message_loc);
+    debugPrintLocation("block.open", block->opening_loc);
+    debugPrintLocation("block.close", block->closing_loc);
 
     (void)commentLoc; // Suppress unused warning
     return up_cast(call);
@@ -1080,6 +973,41 @@ pm_node_t *MethodTypeToParserNodePrism::createKeywordHashNode(const std::vector<
     hashNode->base.location = base_loc;
 
     return up_cast(hashNode);
+}
+
+void MethodTypeToParserNodePrism::debugPrintLocation(const char *label, pm_location_t loc) {
+    if (!prismParser) {
+        fmt::print("DEBUG {}: parser not available\n", label);
+        return;
+    }
+
+    pm_parser_t *p = prismParser->getInternalParser();
+    size_t b = loc.start ? (size_t)(loc.start - p->start) : (size_t)0;
+    size_t e = loc.end ? (size_t)(loc.end - p->start) : (size_t)0;
+    fmt::print("DEBUG {}: {}..{}\n", label, b, e);
+}
+
+pm_call_node_t *MethodTypeToParserNodePrism::createMethodCall(pm_node_t *receiver, pm_constant_id_t method_id,
+                                                              pm_node_t *arguments, pm_location_t message_loc,
+                                                              pm_location_t full_loc, pm_location_t tiny_loc,
+                                                              pm_node_t *block) {
+    pm_call_node_t *call = allocateNode<pm_call_node_t>();
+    if (!call) {
+        return nullptr;
+    }
+
+    *call = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
+                             .receiver = receiver,
+                             .call_operator_loc = tiny_loc,
+                             .name = method_id,
+                             .message_loc = message_loc,
+                             .opening_loc = tiny_loc,
+                             .arguments = down_cast<pm_arguments_node_t>(arguments),
+                             .closing_loc = tiny_loc,
+                             .block = block};
+    call->base.location = full_loc;
+
+    return call;
 }
 
 } // namespace sorbet::rbs

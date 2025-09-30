@@ -13,55 +13,71 @@ extern "C" {
 namespace sorbet::rbs {
 
 class MethodTypeToParserNodePrism {
-    core::MutableContext ctx;
-    Parser parser;
-    const parser::Prism::Parser *prismParser; // For Prism node creation
+  core::MutableContext ctx;
+  Parser parser;
+  const parser::Prism::Parser *prismParser; // For Prism node creation
 
 public:
-    MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser)
-        : ctx(ctx), parser(parser), prismParser(nullptr) {}
-    MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser, const parser::Prism::Parser &prismParser)
-        : ctx(ctx), parser(parser), prismParser(&prismParser) {}
+  MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser)
+      : ctx(ctx), parser(parser), prismParser(nullptr) {}
+  MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser,
+                              const parser::Prism::Parser &prismParser)
+      : ctx(ctx), parser(parser), prismParser(&prismParser) {}
 
-    /**
-     * Create a Prism signature node from RBS method signature.
-     *
-     * For example the signature comment `#: () -> void` will be translated as `sig { void }`.
-     */
-    pm_node_t *methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
-                               const RBSDeclaration &declaration, const std::vector<Comment> &annotations);
+  /**
+   * Create a Prism signature node from RBS method signature.
+   *
+   * For example the signature comment `#: () -> void` will be translated as
+   * `sig { void }`.
+   */
+  pm_node_t *methodSignature(const pm_node_t *methodDef,
+                             const rbs_method_type_t *methodType,
+                             const RBSDeclaration &declaration,
+                             const std::vector<Comment> &annotations);
 
-    /**
-     * Convert an RBS attribute type comment to a Sorbet signature.
-     *
-     * For example the attribute type comment `#: Integer` will be translated as `sig { returns(Integer) }`.
-     */
-    std::unique_ptr<parser::Node> attrSignature(const pm_call_node_t *call, const rbs_node_t *type,
-                                                const RBSDeclaration &declaration,
-                                                const std::vector<Comment> &annotations);
+  /**
+   * Convert an RBS attribute type comment to a Sorbet signature.
+   *
+   * For example the attribute type comment `#: Integer` will be translated as
+   * `sig { returns(Integer) }`.
+   */
+  std::unique_ptr<parser::Node>
+  attrSignature(const pm_call_node_t *call, const rbs_node_t *type,
+                const RBSDeclaration &declaration,
+                const std::vector<Comment> &annotations);
 
 private:
-    // Prism node creation helpers
-    template <typename T> T *allocateNode();
-    pm_node_t initializeBaseNode(pm_node_type_t type);
-    pm_node_t *createConstantReadNode(const char *name);
-    pm_node_t *createConstantPathNode(pm_node_t *parent, const char *name);
-    pm_node_t *createSingleArgumentNode(pm_node_t *arg);
+  // Prism node creation helpers
+  template <typename T> T *allocateNode();
+  pm_node_t initializeBaseNode(pm_node_type_t type);
+  pm_node_t *createConstantReadNode(const char *name);
+  pm_node_t *createConstantPathNode(pm_node_t *parent, const char *name);
+  pm_node_t *createSingleArgumentNode(pm_node_t *arg);
 
-    // High-level node creators
-    pm_node_t *createSorbetPrivateStaticConstant();
-    pm_node_t *createTSigWithoutRuntimeConstant();
-    pm_node_t *createSelfNode();
-    pm_node_t *createSymbolNode(rbs_ast_symbol_t *name, core::LocOffsets nameLoc);
-    pm_node_t *createAssocNode(pm_node_t *key, pm_node_t *value, core::LocOffsets loc);
-    pm_node_t *createHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
-    pm_node_t *createKeywordHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
-    pm_node_t *createSymbolNodeFromConstant(pm_constant_id_t nameId, core::LocOffsets nameLoc);
+  // High-level node creators
+  pm_node_t *createSorbetPrivateStaticConstant();
+  pm_node_t *createTSigWithoutRuntimeConstant();
+  pm_node_t *createSelfNode();
+  pm_node_t *createSymbolNode(rbs_ast_symbol_t *name, core::LocOffsets nameLoc);
+  pm_node_t *createAssocNode(pm_node_t *key, pm_node_t *value,
+                             core::LocOffsets loc);
+  pm_node_t *createHashNode(const std::vector<pm_node_t *> &pairs,
+                            core::LocOffsets loc);
+  pm_node_t *createKeywordHashNode(const std::vector<pm_node_t *> &pairs,
+                                   core::LocOffsets loc);
+  pm_node_t *createSymbolNodeFromConstant(pm_constant_id_t nameId,
+                                          core::LocOffsets nameLoc);
 
-    // Utility helpers
-    pm_constant_id_t addConstantToPool(const char *name);
-    pm_location_t getZeroWidthLocation();
-    pm_location_t convertLocOffsets(core::LocOffsets loc);
+  // Utility helpers
+  pm_constant_id_t addConstantToPool(const char *name);
+  pm_location_t getZeroWidthLocation();
+  pm_location_t convertLocOffsets(core::LocOffsets loc);
+  void debugPrintLocation(const char *label, pm_location_t loc);
+  pm_call_node_t *
+  createMethodCall(pm_node_t *receiver, pm_constant_id_t method_id,
+                   pm_node_t *arguments, pm_location_t message_loc,
+                   pm_location_t full_loc, pm_location_t tiny_loc,
+                   pm_node_t *block = nullptr);
 };
 
 } // namespace sorbet::rbs
