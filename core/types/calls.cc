@@ -2547,7 +2547,7 @@ private:
             typeIsNilable = true;
 
             if (nonNilBlockType.type.isBottom()) {
-                return Types::nilClass();
+                return blockType.type;
             }
         }
 
