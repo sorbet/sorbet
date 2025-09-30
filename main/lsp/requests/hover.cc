@@ -48,8 +48,7 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
 // definition of keyword arguments.
 pair<const core::lsp::SendResponse *, core::NameRef>
 enclosingSendForKwarg(const core::GlobalState &gs, const core::lsp::LiteralResponse &l,
-                      const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
-                      const vector<unique_ptr<core::lsp::QueryResponse>>::iterator respIt) {
+                      const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     if (!core::isa_type<core::NamedLiteralType>(l.retType.type)) {
         return {nullptr, core::NameRef::noName()};
     }
@@ -59,7 +58,13 @@ enclosingSendForKwarg(const core::GlobalState &gs, const core::lsp::LiteralRespo
         return {nullptr, core::NameRef::noName()};
     }
 
-    if (respIt == queryResponses.end() || respIt + 1 == queryResponses.end()) {
+    auto respIt = queryResponses.begin();
+    while (respIt != queryResponses.end() && (*respIt) != nullptr) {
+        respIt++;
+    }
+
+    if (respIt == queryResponses.end() || respIt + 1 == queryResponses.end() || *respIt != nullptr) {
+        // Didn't find the gap in the query responses where we stole the canonical response
         return {nullptr, core::NameRef::noName()};
     }
 
@@ -212,7 +217,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
         typeString = retType.showWithMoreInfo(gs);
     } else if (auto l = resp->isLiteral()) {
-        auto [send, kwargName] = enclosingSendForKwarg(gs, *l, queryResponses, respIt);
+        auto [send, kwargName] = enclosingSendForKwarg(gs, *l, queryResponses);
         if (send != nullptr) {
             typeString = handleHoverKeywordArg(gs, send, kwargName);
         }
