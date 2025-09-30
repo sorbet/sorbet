@@ -43,7 +43,7 @@ struct DesugarContext final {
                    bool inModule, bool preserveConcreteSyntax)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockParamName(enclosingBlockParamName),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), inAnyBlock(inAnyBlock),
-          inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax) {};
+          inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax){};
 
     core::NameRef freshNameUnique(core::NameRef name) {
         return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
@@ -1957,8 +1957,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             [&](parser::True *t) { desugaredByPrismTranslator(t); },
             [&](parser::False *t) { desugaredByPrismTranslator(t); },
             [&](parser::Case *case_) {
-                // Case nodes can fallback from the Prism Translator when patterns don't have desugared expressions
-                // (e.g., regex literals). Handle them here like in the original Desugar.cc.
                 if (dctx.preserveConcreteSyntax) {
                     // Desugar to:
                     //   Magic.caseWhen(condition, numPatterns, <pattern 1>, ..., <pattern N>, <body 1>, ..., <body M>)
@@ -1979,7 +1977,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     bodies.emplace_back(node2TreeImpl(dctx, case_->else_));
 
-                    auto locZeroLen = loc.copyWithZeroLength();
                     args.emplace_back(MK::Int(locZeroLen, patterns.size()));
                     move(patterns.begin(), patterns.end(), back_inserter(args));
                     move(bodies.begin(), bodies.end(), back_inserter(args));
@@ -2005,7 +2002,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     ExpressionPtr cond;
                     for (auto &cnode : when->patterns) {
                         ExpressionPtr test;
-                        if (parser::isa_node<parser::Splat>(cnode.get())) {
+                        if (parser::NodeWithExpr::isa_node<parser::Splat>(cnode.get())) {
                             ENFORCE(temp.exists(), "splats need something to test against");
                             auto recv = MK::Magic(loc);
                             auto local = MK::Local(cloc, temp);
@@ -2030,8 +2027,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             cond = move(test);
                         } else {
                             auto true_ = MK::True(test.loc());
-                            auto testloc = test.loc();
-                            cond = MK::If(testloc, move(test), move(true_), move(cond));
+                            auto loc = test.loc();
+                            cond = MK::If(loc, move(test), move(true_), move(cond));
                         }
                     }
                     res = MK::If(when->loc, move(cond), node2TreeImpl(dctx, when->body), move(res));
