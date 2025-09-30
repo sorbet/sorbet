@@ -23,3 +23,16 @@ end
 
 x, y = [1, T.let('', T.nilable(String))]
 y.split
+
+class B
+  extend T::Sig
+
+  sig {
+    type_parameters(:U)
+      .params(x: T.all(NilClass, T.type_parameter(:U)))
+      .void
+  }
+  def nil_type_parameter(x)
+    x.foo
+  end
+end

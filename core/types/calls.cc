@@ -764,7 +764,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.addErrorNote("For help fixing `{}` errors: {}", "super", "https://sorbet.org/docs/typed-super");
             } else if (args.receiverLoc().exists() &&
                        (gs.suggestUnsafe.has_value() ||
-                        (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
+                        (args.fullType.type != args.thisType && symbol == Symbols::NilClass() &&
+                         // Don't suggest T.must if the suggestion will produce bottom
+                         !Types::dropNil(gs, args.fullType.type).isBottom()))) {
                 auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
                 if (args.receiverLoc().empty()) {
                     auto shortName = args.name.shortName(gs);
@@ -847,6 +849,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
 
+                canSkipFuzzyMatch = canSkipFuzzyMatch || !args.funLoc().exists() || args.funLoc().empty();
                 if (!canSkipFuzzyMatch) {
                     auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                     for (auto alternative : alternatives) {
@@ -2530,8 +2533,7 @@ class Magic_callWithBlockPass : public IntrinsicMethod {
 
 private:
     static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
-                              LocOffsets callLoc, LocOffsets receiverLoc, LocOffsets funLoc, Loc originForUninitialized,
-                              bool suppressErrors) {
+                              LocOffsets blockArgLoc, Loc originForUninitialized, bool suppressErrors) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (blockType.type.isUntyped()) {
@@ -2553,7 +2555,13 @@ private:
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
-        CallLocs sendLocs{file, callLoc, receiverLoc, funLoc, sendArgLocs};
+        CallLocs sendLocs{
+            .file = file,
+            .call = blockArgLoc,
+            .receiver = blockArgLoc,
+            .fun = blockArgLoc.copyWithZeroLength(),
+            .args = sendArgLocs,
+        };
         DispatchArgs innerArgs{core::Names::toProc(),
                                sendLocs,
                                0,
@@ -2761,9 +2769,8 @@ public:
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
         auto &blockArgTpo = *args.args[2];
-        auto finalBlockType =
-            Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.call, args.locs.args[2],
-                                                args.locs.fun, args.originForUninitialized, args.suppressErrors);
+        auto finalBlockType = Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.args[2],
+                                                                  args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
@@ -2877,9 +2884,8 @@ public:
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
         auto &blockArgTpo = *args.args[4];
-        auto finalBlockType =
-            Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.call, args.locs.args[4],
-                                                args.locs.fun, args.originForUninitialized, args.suppressErrors);
+        auto finalBlockType = Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.args[4],
+                                                                  args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
         core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();

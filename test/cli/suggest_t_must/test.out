@@ -65,7 +65,25 @@ suggest_t_must.rb:20: Expected `Integer` but found `T.nilable(Integer)` for fiel
     suggest_t_must.rb:20: Replaced with `T.must(xs[i])`
     20 |    @result = xs[i]
                       ^^^^^
-Errors: 5
+
+suggest_t_must.rb:36: Method `foo` does not exist on `NilClass` component of `T.all(NilClass, T.type_parameter(:U) (of B#nil_type_parameter))` https://srb.help/7003
+    36 |    x.foo
+              ^^^
+  Got `T.all(NilClass, T.type_parameter(:U) (of B#nil_type_parameter))` originating from:
+    suggest_t_must.rb:35:
+    35 |  def nil_type_parameter(x)
+                                 ^
+
+suggest_t_must.rb:36: Call to method `foo` on generic type `T.type_parameter(:U) (of B#nil_type_parameter)` component of `T.all(NilClass, T.type_parameter(:U) (of B#nil_type_parameter))` https://srb.help/7038
+    36 |    x.foo
+              ^^^
+  Got `T.all(NilClass, T.type_parameter(:U) (of B#nil_type_parameter))` originating from:
+    suggest_t_must.rb:35:
+    35 |  def nil_type_parameter(x)
+                                 ^
+  Note:
+    Consider using `T.all(T.type_parameter(:U), Constraint)` to place a constraint on this type
+Errors: 7
 
 --------------------------------------------------------------------------
 
@@ -94,3 +112,16 @@ end
 
 x, y = [1, T.let('', T.nilable(String))]
 T.must(y).split
+
+class B
+  extend T::Sig
+
+  sig {
+    type_parameters(:U)
+      .params(x: T.all(NilClass, T.type_parameter(:U)))
+      .void
+  }
+  def nil_type_parameter(x)
+    x.foo
+  end
+end

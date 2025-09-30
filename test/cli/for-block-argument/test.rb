@@ -30,10 +30,5 @@ sig {
 }
 def example_with_generics(x)
   takes_block(&x)
-
-  # ^ It's unclear whether we actually want an autocorrect there, because if you accept it, you get this, but the situation is really rare anyways.
-  if T.unsafe(nil)
-    takes_block(&T.must(x))
-  end
 end
 

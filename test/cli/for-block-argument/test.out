@@ -76,23 +76,12 @@ test.rb:23: Expected `T.proc.void` but found `T.nilable(T.proc.returns(NilClass)
 
 test.rb:32: Method `to_proc` does not exist on `NilClass` component of `T.all(NilClass, T.type_parameter(:U) (of Object#example_with_generics))` https://srb.help/7003
     32 |  takes_block(&x)
-          ^^^^^^^^^^^
+                       ^
   Got `T.all(NilClass, T.type_parameter(:U) (of Object#example_with_generics))` originating from:
     test.rb:31:
     31 |def example_with_generics(x)
                                   ^
-  Autocorrect: Done
-    test.rb:32: Replaced with `T.must(x)`
-    32 |  takes_block(&x)
-                       ^
-
-test.rb:36: This code is unreachable https://srb.help/7006
-    36 |    takes_block(&T.must(x))
-            ^^^^^^^^^^^^^^^^^^^^^^^
-    test.rb:36: This expression always raises or can never be computed
-    36 |    takes_block(&T.must(x))
-                         ^^^^^^^^^
-Errors: 6
+Errors: 5
 
 --------------------------------------------------------------------------
 
@@ -127,11 +116,6 @@ sig {
     .void
 }
 def example_with_generics(x)
-  takes_block(&T.must(x))
-
-  # ^ It's unclear whether we actually want an autocorrect there, because if you accept it, you get this, but the situation is really rare anyways.
-  if T.unsafe(nil)
-    takes_block(&T.must(x))
-  end
+  takes_block(&x)
 end
 
