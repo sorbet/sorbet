@@ -17,40 +17,55 @@ private:
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
     void validate(const core::Context ctx, const core::Polarity polarity, const core::TypePtr &type) {
-        typecase(
-            type, [&](const core::ClassType &klass) {},
+        switch (type.tag()) {
+            case core::TypePtr::Tag::ClassType:
+            case core::TypePtr::Tag::BlamedUntyped:
+            case core::TypePtr::Tag::UnresolvedClassType:
+            case core::TypePtr::Tag::UnresolvedAppliedType:
+                break;
 
-            [&](const core::NamedLiteralType &lit) {},
+            case core::TypePtr::Tag::IntegerLiteralType:
+            case core::TypePtr::Tag::FloatLiteralType:
+            case core::TypePtr::Tag::NamedLiteralType:
+                break;
 
-            [&](const core::SelfType &self) {},
+            case core::TypePtr::Tag::SelfType:
+            case core::TypePtr::Tag::SelfTypeParam:
+            case core::TypePtr::Tag::TypeVar:
+                break;
 
-            [&](const core::SelfTypeParam &sp) {},
-
-            [&](const core::TypeVar &tvar) {},
-
-            [&](const core::OrType &any) {
+            case core::TypePtr::Tag::OrType: {
+                auto &any = core::cast_type_nonnull<core::OrType>(type);
                 validate(ctx, polarity, any.left);
                 validate(ctx, polarity, any.right);
-            },
+                break;
+            }
 
-            [&](const core::AndType &all) {
+            case core::TypePtr::Tag::AndType: {
+                auto &all = core::cast_type_nonnull<core::AndType>(type);
                 validate(ctx, polarity, all.left);
                 validate(ctx, polarity, all.right);
-            },
+                break;
+            }
 
-            [&](const core::ShapeType &shape) {
+            case core::TypePtr::Tag::ShapeType: {
+                auto &shape = core::cast_type_nonnull<core::ShapeType>(type);
                 for (auto value : shape.values) {
                     validate(ctx, polarity, value);
                 }
-            },
+                break;
+            }
 
-            [&](const core::TupleType &tuple) {
+            case core::TypePtr::Tag::TupleType: {
+                auto &tuple = core::cast_type_nonnull<core::TupleType>(type);
                 for (auto value : tuple.elems) {
                     validate(ctx, polarity, value);
                 }
-            },
+                break;
+            }
 
-            [&](const core::AppliedType &app) {
+            case core::TypePtr::Tag::AppliedType: {
+                auto &app = core::cast_type_nonnull<core::AppliedType>(type);
                 auto members = app.klass.data(ctx)->typeMembers();
                 auto params = app.targs;
 
@@ -82,10 +97,11 @@ private:
 
                     validate(ctx, paramPolarity, typeArg);
                 }
-            },
+                break;
+            }
 
-            // This is where the actual variance checks are done.
-            [&](const core::LambdaParam &param) {
+            case core::TypePtr::Tag::LambdaParam: {
+                auto &param = core::cast_type_nonnull<core::LambdaParam>(type);
                 auto paramData = param.definition.data(ctx);
                 auto paramVariance = paramData->variance();
 
@@ -115,9 +131,11 @@ private:
                         }
                     }
                 }
-            },
+                break;
+            }
 
-            [&](const core::AliasType &alias) {
+            case core::TypePtr::Tag::AliasType: {
+                auto alias = core::cast_type_nonnull<core::AliasType>(type);
                 auto aliasSym = alias.symbol.dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
@@ -128,11 +146,13 @@ private:
                 } else {
                     Exception::raise("Unexpected type alias: {}", type.toString(ctx));
                 }
-            },
+                break;
+            }
 
-            [&](const core::TypePtr &skipped) {
-                Exception::raise("Unexpected type in variance checking: {}", skipped.toString(ctx));
-            });
+            case core::TypePtr::Tag::MetaType:
+                ENFORCE(false, "Please add a test case!");
+                break;
+        }
     }
 
 public:
