@@ -15,7 +15,8 @@ class A::B::C::D
 
   example(account: 0)
   #                ^ error: Expected `T.any(String, Account)`
-  #         ^ hover: Symbol(:account)
+  #         ^ hover-line: 2 # A::B::C::D.example
+  #         ^ hover-line: 3 (kwparam) account: T.any(String, Account)
 
   account = ""
   example(account:)
@@ -48,7 +49,8 @@ class A::B::C::D
   end
 
   takes_untyped(arg0: "hello, world")
-  #              ^ hover: Symbol(:arg0)
+  #              ^ hover-line: 2 # A::B::C::D.takes_untyped
+  #              ^ hover-line: 3 (kwparam) arg0: T.untyped
 
   def self.kwargs_example(**kwargs)
   end
@@ -71,5 +73,10 @@ sig {
 }
 def takes_any(x)
   x.example(account: '')
-  #           ^ hover: Symbol(:acount)
+  #           ^ hover-line 1 ```
+  #           ^ hover-line 2 # A::B::C::D.example
+  #           ^ hover-line 3 (kwparam) account: T.any(String, Account
+  #           ^ hover-line 4 # Other.example
+  #           ^ hover-line 5 (kwparam) account: String
+  #           ^ hover-line 6 ```
 end
