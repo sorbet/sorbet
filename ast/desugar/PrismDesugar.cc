@@ -2180,8 +2180,8 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
         // We don't have an enclosing block arg to start off.
         DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
                             core::NameRef::noName(), false, false, preserveConcreteSyntax);
-        auto loc = what->loc;
         auto result = node2TreeImpl(dctx, what);
+        auto loc = result.loc();
         result = liftTopLevel(dctx, loc, move(result));
         auto verifiedResult = Verifier::run(ctx, move(result));
         return verifiedResult;

@@ -393,7 +393,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "begin");
         },
         [&](parser::Block *block) {
-            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), block->send->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
 
             associateAssertionCommentsToNode(node);

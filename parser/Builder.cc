@@ -425,6 +425,8 @@ public:
         core::LocOffsets loc;
         if (begin != nullptr) {
             loc = tokLoc(begin).join(tokLoc(end));
+        } else if (auto *block = parser::cast_node<Block>(body.get())) {
+            loc = block->send->loc.join(block->loc);
         } else {
             loc = body->loc;
         }
@@ -470,8 +472,14 @@ public:
             auto elseLoc = tokLoc(elseTok).join(maybe_loc(else_));
             else_stmts.emplace_back(std::move(else_));
             stmts.emplace_back(make_unique<Begin>(elseLoc, std::move(else_stmts)));
+            auto loc = collectionLoc(stmts);
+            if (!stmts.empty()) {
+                if (auto *block = parser::cast_node<Block>(body.get())) {
+                    loc = block->send->loc.join(loc);
+                }
+            }
 
-            body = make_unique<Begin>(collectionLoc(stmts), std::move(stmts));
+            body = make_unique<Begin>(loc, std::move(stmts));
         }
 
         if (ensure_tok != nullptr) {
@@ -686,8 +694,13 @@ public:
                 return nullptr;
             case 1:
                 return std::move(nodes.back());
-            default:
-                return make_unique<Begin>(collectionLoc(nodes), std::move(nodes));
+            default: {
+                auto loc = collectionLoc(nodes);
+                if (auto *block = parser::cast_node<Block>(nodes[0].get())) {
+                    loc = block->send->loc.join(loc);
+                }
+                return make_unique<Begin>(loc, std::move(nodes));
+            }
         }
     }
 
