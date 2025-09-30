@@ -921,10 +921,11 @@ class SendAndBlockLink {
 public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
     std::vector<ParamInfo::Flags> paramFlags;
-    core::NameRef fun;
     std::shared_ptr<DispatchResult> result;
+    LocOffsets loc;
+    core::NameRef fun;
 
-    SendAndBlockLink(NameRef fun, std::vector<ParamInfo::Flags> &&paramFlags);
+    SendAndBlockLink(NameRef fun, LocOffsets loc, std::vector<ParamInfo::Flags> &&paramFlags);
     std::optional<int> fixedArity() const;
 };
 
@@ -1029,7 +1030,9 @@ struct DispatchArgs {
 
         return callLoc().copyEndWithZeroLength();
     }
-    Loc blockLoc(const GlobalState &gs) const;
+    Loc blockLoc(const GlobalState &gs) const {
+        return core::Loc(locs.file, block->loc);
+    }
 
     Loc errLoc() const {
         auto funLoc = this->funLoc();

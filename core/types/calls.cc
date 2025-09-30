@@ -2774,7 +2774,7 @@ public:
         auto finalBlockType = Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.args[2],
                                                                   args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
+        core::SendAndBlockLink link{fn, args.locs.args[2], Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2889,7 +2889,7 @@ public:
         auto finalBlockType = Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.args[4],
                                                                   args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
+        core::SendAndBlockLink link{fn, args.locs.args[4], Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
