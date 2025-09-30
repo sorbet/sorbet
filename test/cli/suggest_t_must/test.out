@@ -73,10 +73,6 @@ suggest_t_must.rb:36: Method `foo` does not exist on `NilClass` component of `T.
     suggest_t_must.rb:35:
     35 |  def nil_type_parameter(x)
                                  ^
-  Autocorrect: Done
-    suggest_t_must.rb:36: Replaced with `T.must(x)`
-    36 |    x.foo
-            ^
 
 suggest_t_must.rb:36: Call to method `foo` on generic type `T.type_parameter(:U) (of B#nil_type_parameter)` component of `T.all(NilClass, T.type_parameter(:U) (of B#nil_type_parameter))` https://srb.help/7038
     36 |    x.foo
@@ -126,6 +122,6 @@ class B
       .void
   }
   def nil_type_parameter(x)
-    T.must(x).foo
+    x.foo
   end
 end
