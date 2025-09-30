@@ -77,9 +77,6 @@ autocorrect-t-combinator-kwargs.rb:14: Method `to_hash` does not exist on `T::Ar
     autocorrect-t-combinator-kwargs.rb:14:
     14 |      splat: T.class_of(**TYPES),
                                 ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#L1424: Did you mean: `Array#hash`
-    1424 |  def hash; end
-            ^^^^^^^^
 
 autocorrect-t-combinator-kwargs.rb:15: Method `to_hash` does not exist on `T::Array[T.any(T.class_of(Integer), T.class_of(String))]` https://srb.help/7003
     15 |      pos_and_splat: T.class_of(Float, **TYPES),
@@ -88,9 +85,6 @@ autocorrect-t-combinator-kwargs.rb:15: Method `to_hash` does not exist on `T::Ar
     autocorrect-t-combinator-kwargs.rb:15:
     15 |      pos_and_splat: T.class_of(Float, **TYPES),
                                                ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#L1424: Did you mean: `Array#hash`
-    1424 |  def hash; end
-            ^^^^^^^^
 Errors: 14
 
 --------------------------------------------------------------------------
