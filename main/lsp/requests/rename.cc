@@ -325,7 +325,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         return response;
     }
 
-    auto resp = move(*skipLiteralIfMethodDef(gs, queryResponses));
+    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
     if (auto constResp = resp->isConstant()) {
         // Sanity check the text.
         if (islower(params->newName[0])) {

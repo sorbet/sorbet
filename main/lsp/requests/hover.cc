@@ -145,8 +145,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         return response;
     }
 
-    auto respIt = skipLiteralIfMethodDef(gs, queryResponses);
-    auto resp = move(*respIt);
+    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
     auto options = core::ShowOptions();
     vector<core::Loc> documentationLocations;
     string typeString;
