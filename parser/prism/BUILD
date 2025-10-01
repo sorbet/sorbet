@@ -1,6 +1,7 @@
 cc_library(
     name = "prism",
     srcs = [
+        "Helpers.cc",
         "Parser.cc",
         "Translator.cc",
     ],

@@ -3,6 +3,9 @@
 
 #include <string_view>
 #include <type_traits>
+#include <vector>
+#include <cstdlib>
+#include "core/LocOffsets.h"
 extern "C" {
 #include "prism.h"
 }
@@ -209,6 +212,54 @@ inline std::string_view cast_prism_string(const uint8_t *source, size_t length) 
     static_assert(std::is_same_v<const unsigned char *, const uint8_t *>, "Sorbet assumes that `char` is 8 bits long");
     return std::string_view(reinterpret_cast<const char *>(source), length);
 }
+
+// Forward declarations
+class Parser;
+
+// Node creation helpers
+class PMK {
+public:
+    // Parser management
+    static void setParser(const Parser *parser);
+
+    // Memory allocation and node initialization
+    template <typename T> static T *allocateNode() {
+        T *node = (T *)calloc(1, sizeof(T));
+        return node;
+    }
+    static pm_node_t initializeBaseNode(pm_node_type_t type);
+
+    // Basic node creators
+    static pm_node_t *createConstantReadNode(const char *name);
+    static pm_node_t *createConstantPathNode(pm_node_t *parent, const char *name);
+    static pm_node_t *createSingleArgumentNode(pm_node_t *arg);
+    static pm_node_t *createSelfNode();
+
+    // Symbol and hash node creators
+    static pm_node_t *createSymbolNode(const char *name, core::LocOffsets nameLoc);
+    static pm_node_t *createSymbolNodeFromConstant(pm_constant_id_t nameId, core::LocOffsets nameLoc);
+    static pm_node_t *createAssocNode(pm_node_t *key, pm_node_t *value, core::LocOffsets loc);
+    static pm_node_t *createHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
+    static pm_node_t *createKeywordHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
+
+    // Method call creation
+    static pm_call_node_t *createMethodCall(pm_node_t *receiver, pm_constant_id_t method_id,
+                                            pm_node_t *arguments, pm_location_t message_loc,
+                                            pm_location_t full_loc, pm_location_t tiny_loc,
+                                            pm_node_t *block = nullptr);
+
+    // Utility functions
+    static pm_constant_id_t addConstantToPool(const char *name);
+    static pm_location_t getZeroWidthLocation();
+    static pm_location_t convertLocOffsets(core::LocOffsets loc);
+
+    // Debug helpers
+    static void debugPrintLocation(const char *label, pm_location_t loc);
+
+    // High-level node creators
+    static pm_node_t *createSorbetPrivateStaticConstant();
+    static pm_node_t *createTSigWithoutRuntimeConstant();
+};
 
 } // namespace sorbet::parser::Prism
 

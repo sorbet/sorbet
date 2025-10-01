@@ -130,14 +130,13 @@ unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const pm_no
             // no-op, `final` is handled in the `sig()` call later
         } else if (annotation.string == "abstract") {
             sigBuilder =
-                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::abstract(), annotation.typeLoc);
+                parser::PMK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::abstract(), annotation.typeLoc);
             ensureAbstractMethodRaises(ctx, node);
         } else if (annotation.string == "overridable") {
             sigBuilder =
-                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::overridable(), annotation.typeLoc);
-        } else if (annotation.string == "override") {
-            sigBuilder =
-                parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::override_(), annotation.typeLoc);
+                parser::PMK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::overridable(),
+annotation.typeLoc); } else if (annotation.string == "override") { sigBuilder = parser::PMK::Send0(annotation.typeLoc,
+move(sigBuilder), core::Names::override_(), annotation.typeLoc);
         }
         // TODO: Add support for other annotations like override(allow_incompatible: true)
     }
@@ -383,19 +382,19 @@ unique_ptr<parser::Node> MethodTypeToParserNodePrism::attrSignature(const pm_cal
     auto firstLineTypeLoc = declaration.firstLineTypeLoc();
 
     // Build a minimal sig { void } signature
-    auto sigBuilder = parser::MK::Send0(fullTypeLoc, parser::MK::Self(fullTypeLoc), core::Names::void_(), fullTypeLoc);
+    auto sigBuilder = parser::PMK::Send0(fullTypeLoc, parser::PMK::Self(fullTypeLoc), core::Names::void_(),
+fullTypeLoc);
 
     auto sigArgs = parser::NodeVec();
-    sigArgs.emplace_back(parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc));
+    sigArgs.emplace_back(parser::PMK::T_Sig_WithoutRuntime(firstLineTypeLoc));
 
-    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::SorbetPrivateStatic(fullTypeLoc), core::Names::sig(),
+    auto sig = parser::PMK::Send(fullTypeLoc, parser::PMK::SorbetPrivateStatic(fullTypeLoc), core::Names::sig(),
                                 firstLineTypeLoc, move(sigArgs));
 
     return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
 }
 */
 
-// Prism node creation methods
 pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
                                                         const RBSDeclaration &declaration,
                                                         const std::vector<Comment> &annotations) {
@@ -404,6 +403,9 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     if (!prismParser) {
         return nullptr; // Need Prism parser for node creation
     }
+
+    // Set up shared helpers
+    PMK::setParser(prismParser);
 
     // Parse the RBS method type and create appropriate signature nodes
     const auto &node = *methodType;
@@ -456,28 +458,28 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     auto commentLoc = declaration.commentLoc();
 
     // Pre-calculate frequently used locations to avoid redundant calculations
-    pm_location_t full_loc = convertLocOffsets(fullTypeLoc);
-    pm_location_t tiny_loc = convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
-    pm_location_t end_zero_loc = convertLocOffsets(fullTypeLoc.copyEndWithZeroLength());
+    pm_location_t full_loc = PMK::convertLocOffsets(fullTypeLoc);
+    pm_location_t tiny_loc = PMK::convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
+    pm_location_t end_zero_loc = PMK::convertLocOffsets(fullTypeLoc.copyEndWithZeroLength());
 
     // Add method names to constant pool
-    pm_constant_id_t sig_method_id = addConstantToPool("sig");
+    pm_constant_id_t sig_method_id = PMK::addConstantToPool("sig");
     if (sig_method_id == PM_CONSTANT_ID_UNSET) {
         return nullptr;
     }
 
     // Create receiver: Sorbet::Private::Static
-    pm_node_t *receiver = createSorbetPrivateStaticConstant();
+    pm_node_t *receiver = PMK::createSorbetPrivateStaticConstant();
     if (!receiver)
         return nullptr;
 
     // Create argument: T::Sig::WithoutRuntime
-    pm_node_t *t_sig_arg = createTSigWithoutRuntimeConstant();
+    pm_node_t *t_sig_arg = PMK::createTSigWithoutRuntimeConstant();
     if (!t_sig_arg)
         return nullptr;
 
     // Create arguments list
-    pm_node_t *arguments = createSingleArgumentNode(t_sig_arg);
+    pm_node_t *arguments = PMK::createSingleArgumentNode(t_sig_arg);
     if (!arguments)
         return nullptr;
 
@@ -499,7 +501,8 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     size_t paramIndex = 0;
     for (const auto &arg : args) {
-        // fmt::print("DEBUG: Processing arg, hasName={}, kind={}\n", (arg.name != nullptr), static_cast<int>(arg.kind));
+        // fmt::print("DEBUG: Processing arg, hasName={}, kind={}\n", (arg.name != nullptr),
+        // static_cast<int>(arg.kind));
 
         // Create symbol node for parameter name
         pm_node_t *symbolNode = nullptr;
@@ -510,11 +513,11 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
             if (!methodParams.empty() && paramIndex < methodParams.size() &&
                 methodParams[paramIndex].nameId != PM_CONSTANT_ID_UNSET) {
                 core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
-                symbolNode = createSymbolNodeFromConstant(methodParams[paramIndex].nameId, tinyLocOffsets);
+                symbolNode = PMK::createSymbolNodeFromConstant(methodParams[paramIndex].nameId, tinyLocOffsets);
             }
             if (!symbolNode) {
                 // As a last resort, synthesize a tiny constant name 'arg'
-                symbolNode = createConstantReadNode("arg");
+                symbolNode = PMK::createConstantReadNode("arg");
                 if (symbolNode) {
                     symbolNode->location = tiny_loc;
                 }
@@ -530,13 +533,13 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
             continue;
         }
         // Ensure type node has a valid location within the file (use the arg span)
-        typeNode->location = convertLocOffsets(arg.loc);
+        typeNode->location = PMK::convertLocOffsets(arg.loc);
 
         // Create association node (key-value pair) with consistent zero-width location
         core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
         // fmt::print("DEBUG: Creating assoc with tinyLoc: {}..{} (was arg.loc: {}..{})\n", tinyLocOffsets.beginPos(),
         //            tinyLocOffsets.endPos(), arg.loc.beginPos(), arg.loc.endPos());
-        pm_node_t *pairNode = createAssocNode(symbolNode, typeNode, tinyLocOffsets);
+        pm_node_t *pairNode = PMK::createAssocNode(symbolNode, typeNode, tinyLocOffsets);
         if (pairNode) {
             sigParams.push_back(pairNode);
             // debugPrintLocation("param.symbol.base", symbolNode->location);
@@ -547,33 +550,34 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     }
 
     // Build sig chain: self -> .params(hash) -> .void()/.returns(Type)
-    pm_node_t *sigReceiver = createSelfNode();
+    pm_node_t *sigReceiver = PMK::createSelfNode();
     if (!sigReceiver)
         return nullptr;
 
     // Add .params() call if we have parameters
     // fmt::print("DEBUG: sigParams.size() = {}\n", sigParams.size());
     if (sigParams.size() > 0) {
-        pm_constant_id_t params_id = addConstantToPool("params");
+        pm_constant_id_t params_id = PMK::addConstantToPool("params");
         if (params_id == PM_CONSTANT_ID_UNSET) {
             return nullptr;
         }
 
         core::LocOffsets hashLoc = fullTypeLoc;
         // Use KeywordHash for params (bare keyword args)
-        pm_node_t *paramsHash = createKeywordHashNode(sigParams, hashLoc);
+        pm_node_t *paramsHash = PMK::createKeywordHashNode(sigParams, hashLoc);
         if (!paramsHash) {
             return nullptr;
         }
 
         // Create arguments node containing the hash
-        pm_node_t *paramsArgs = createSingleArgumentNode(paramsHash);
+        pm_node_t *paramsArgs = PMK::createSingleArgumentNode(paramsHash);
         if (!paramsArgs) {
             return nullptr;
         }
 
         // Create .params() method call
-        pm_call_node_t *paramsCall = createMethodCall(sigReceiver, params_id, paramsArgs, tiny_loc, full_loc, tiny_loc);
+        pm_call_node_t *paramsCall =
+            PMK::createMethodCall(sigReceiver, params_id, paramsArgs, tiny_loc, full_loc, tiny_loc);
         if (!paramsCall) {
             return nullptr;
         }
@@ -588,18 +592,18 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     // Pre-calculate return type locations to avoid redundant calculations
     pm_location_t return_type_full_loc =
-        convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg));
-    pm_location_t return_type_zero_loc =
-        convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
+        PMK::convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg));
+    pm_location_t return_type_zero_loc = PMK::convertLocOffsets(
+        declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
 
     if (functionType->return_type->type == RBS_TYPES_BASES_VOID) {
         // Create: sigReceiver.void()
-        pm_constant_id_t void_id = addConstantToPool("void");
+        pm_constant_id_t void_id = PMK::addConstantToPool("void");
         if (void_id == PM_CONSTANT_ID_UNSET)
             return nullptr;
 
         pm_call_node_t *voidCall =
-            createMethodCall(sigReceiver, void_id, nullptr, return_type_zero_loc, full_loc, tiny_loc);
+            PMK::createMethodCall(sigReceiver, void_id, nullptr, return_type_zero_loc, full_loc, tiny_loc);
         if (!voidCall)
             return nullptr;
         blockBody = up_cast(voidCall);
@@ -607,7 +611,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         // debugPrintLocation("void.call.msg", voidCall->message_loc);
     } else {
         // Create: sigReceiver.returns(Type)
-        pm_constant_id_t returns_id = addConstantToPool("returns");
+        pm_constant_id_t returns_id = PMK::addConstantToPool("returns");
         if (returns_id == PM_CONSTANT_ID_UNSET)
             return nullptr;
 
@@ -619,12 +623,12 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         // Set return type node base.location to actual return type span
         returnTypeNode->location = return_type_full_loc;
 
-        pm_node_t *returnsArguments = createSingleArgumentNode(returnTypeNode);
+        pm_node_t *returnsArguments = PMK::createSingleArgumentNode(returnTypeNode);
         if (!returnsArguments)
             return nullptr;
 
         pm_call_node_t *returnsCall =
-            createMethodCall(sigReceiver, returns_id, returnsArguments, return_type_zero_loc, full_loc, tiny_loc);
+            PMK::createMethodCall(sigReceiver, returns_id, returnsArguments, return_type_zero_loc, full_loc, tiny_loc);
         if (!returnsCall)
             return nullptr;
         blockBody = up_cast(returnsCall);
@@ -636,11 +640,11 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         return nullptr;
 
     // Create block node
-    pm_block_node_t *block = allocateNode<pm_block_node_t>();
+    pm_block_node_t *block = PMK::allocateNode<pm_block_node_t>();
     if (!block)
         return nullptr;
 
-    *block = (pm_block_node_t){.base = initializeBaseNode(PM_BLOCK_NODE),
+    *block = (pm_block_node_t){.base = PMK::initializeBaseNode(PM_BLOCK_NODE),
                                .locals = {.size = 0, .capacity = 0, .ids = nullptr},
                                .parameters = nullptr,
                                .body = blockBody,
@@ -651,7 +655,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     // Create the main sig call
     pm_call_node_t *call =
-        createMethodCall(receiver, sig_method_id, arguments, tiny_loc, full_loc, tiny_loc, up_cast(block));
+        PMK::createMethodCall(receiver, sig_method_id, arguments, tiny_loc, full_loc, tiny_loc, up_cast(block));
     if (!call)
         return nullptr;
 
@@ -665,354 +669,16 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     return up_cast(call);
 }
 
-// Node creation helper implementations (moved from SignatureTranslatorPrism)
-
-template <typename T> T *MethodTypeToParserNodePrism::allocateNode() {
-    T *node = (T *)calloc(1, sizeof(T));
-    return node; // Returns nullptr on allocation failure
-}
-
-pm_node_t MethodTypeToParserNodePrism::initializeBaseNode(pm_node_type_t type) {
-    if (!prismParser) {
-        // Return a default-initialized node if parser is not available
-        return (pm_node_t){.type = type, .flags = 0, .node_id = 0, .location = {.start = nullptr, .end = nullptr}};
-    }
-
-    pm_parser_t *p = prismParser->getInternalParser();
-    pm_location_t loc = getZeroWidthLocation();
-
-    return (pm_node_t){.type = type, .flags = 0, .node_id = ++p->node_id, .location = loc};
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createConstantReadNode(const char *name) {
-    // fmt::print("MethodTypeToParserNodePrism::createConstantReadNode\n");
-    pm_constant_id_t constant_id = addConstantToPool(name);
-    if (constant_id == PM_CONSTANT_ID_UNSET)
-        return nullptr;
-
-    pm_constant_read_node_t *node = allocateNode<pm_constant_read_node_t>();
-    if (!node)
-        return nullptr;
-
-    *node = (pm_constant_read_node_t){.base = initializeBaseNode(PM_CONSTANT_READ_NODE), .name = constant_id};
-
-    return up_cast(node);
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createConstantPathNode(pm_node_t *parent, const char *name) {
-    // fmt::print("MethodTypeToParserNodePrism::createConstantPathNode\n");
-    pm_constant_id_t name_id = addConstantToPool(name);
-    if (name_id == PM_CONSTANT_ID_UNSET)
-        return nullptr;
-
-    pm_constant_path_node_t *node = allocateNode<pm_constant_path_node_t>();
-    if (!node)
-        return nullptr;
-
-    pm_location_t loc = getZeroWidthLocation();
-
-    *node = (pm_constant_path_node_t){.base = initializeBaseNode(PM_CONSTANT_PATH_NODE),
-                                      .parent = parent,
-                                      .name = name_id,
-                                      .delimiter_loc = loc,
-                                      .name_loc = loc};
-
-    return up_cast(node);
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createSingleArgumentNode(pm_node_t *arg) {
-    pm_arguments_node_t *arguments = allocateNode<pm_arguments_node_t>();
-    if (!arguments)
-        return nullptr;
-
-    pm_node_t **arg_nodes = (pm_node_t **)calloc(1, sizeof(pm_node_t *));
-    if (!arg_nodes) {
-        free(arguments);
-        return nullptr;
-    }
-    arg_nodes[0] = arg;
-
-    *arguments = (pm_arguments_node_t){.base = initializeBaseNode(PM_ARGUMENTS_NODE),
-                                       .arguments = {.size = 1, .capacity = 1, .nodes = arg_nodes}};
-    // Align base.location with contained argument's location (tiny point)
-    arguments->base.location = arg->location;
-
-    return up_cast(arguments);
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createSorbetPrivateStaticConstant() {
-    // Build a root-anchored constant path ::Sorbet::Private::Static
-    pm_node_t *sorbet = createConstantPathNode(nullptr, "Sorbet");
-    if (!sorbet)
-        return nullptr;
-
-    pm_node_t *sorbet_private = createConstantPathNode(sorbet, "Private");
-    if (!sorbet_private)
-        return nullptr;
-
-    return createConstantPathNode(sorbet_private, "Static");
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createTSigWithoutRuntimeConstant() {
-    // Build a root-anchored constant path ::T::Sig::WithoutRuntime
-    pm_node_t *t_const = createConstantPathNode(nullptr, "T");
-    if (!t_const)
-        return nullptr;
-
-    pm_node_t *t_sig = createConstantPathNode(t_const, "Sig");
-    if (!t_sig)
-        return nullptr;
-
-    return createConstantPathNode(t_sig, "WithoutRuntime");
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createSelfNode() {
-    pm_self_node_t *selfNode = allocateNode<pm_self_node_t>();
-    if (!selfNode)
-        return nullptr;
-
-    *selfNode = (pm_self_node_t){.base = initializeBaseNode(PM_SELF_NODE)};
-
-    return up_cast(selfNode);
-}
-
-pm_constant_id_t MethodTypeToParserNodePrism::addConstantToPool(const char *name) {
-    // fmt::print("MethodTypeToParserNodePrism::addConstantToPool\n");
-    if (!prismParser)
-        return PM_CONSTANT_ID_UNSET;
-
-    pm_parser_t *p = prismParser->getInternalParser();
-    size_t name_len = strlen(name);
-    uint8_t *stable = (uint8_t *)calloc(name_len, sizeof(uint8_t));
-    if (!stable) {
-        return PM_CONSTANT_ID_UNSET;
-    }
-    memcpy(stable, name, name_len);
-    pm_constant_id_t id = pm_constant_pool_insert_constant(&p->constant_pool, stable, name_len);
-    return id; // Returns PM_CONSTANT_ID_UNSET on failure
-}
-
-pm_location_t MethodTypeToParserNodePrism::getZeroWidthLocation() {
-    if (!prismParser) {
-        return {.start = nullptr, .end = nullptr};
-    }
-
-    pm_parser_t *p = prismParser->getInternalParser();
-    const uint8_t *source_start = p->start;
-    return {.start = source_start, .end = source_start};
-}
-
-pm_location_t MethodTypeToParserNodePrism::convertLocOffsets(core::LocOffsets loc) {
-    if (!prismParser) {
-        return {.start = nullptr, .end = nullptr};
-    }
-
-    pm_parser_t *p = prismParser->getInternalParser();
-    const uint8_t *source_start = p->start;
-
-    // Convert byte offsets to pointers
-    const uint8_t *start_ptr = source_start + loc.beginPos();
-    const uint8_t *end_ptr = source_start + loc.endPos();
-
-    return {.start = start_ptr, .end = end_ptr};
-}
-
 pm_node_t *MethodTypeToParserNodePrism::createSymbolNode(rbs_ast_symbol_t *name, core::LocOffsets nameLoc) {
-    if (!name || !prismParser) {
+    if (!name) {
         return nullptr;
     }
 
-    pm_symbol_node_t *symbolNode = allocateNode<pm_symbol_node_t>();
-    if (!symbolNode) {
-        return nullptr;
-    }
-
-    // Access parser only if needed; currently unused
-    // Get the symbol name string
+    // Convert RBS symbol to string and use shared helper
     auto nameStr = parser.resolveConstant(name);
-    std::string nameString(nameStr); // Convert string_view to string
+    std::string nameString(nameStr);
 
-    // Copy symbol text into a stable buffer to avoid dangling pointer
-    uint8_t *stable = (uint8_t *)calloc(nameString.size(), sizeof(uint8_t));
-    if (!stable) {
-        return nullptr;
-    }
-    memcpy(stable, nameString.data(), nameString.size());
-
-    // Create a string literal for the unescaped field
-    pm_string_t unescaped_string;
-    unescaped_string.source = stable;
-    unescaped_string.length = nameString.length();
-
-    pm_location_t location = convertLocOffsets(nameLoc.copyWithZeroLength());
-
-    *symbolNode = (pm_symbol_node_t){.base = initializeBaseNode(PM_SYMBOL_NODE),
-                                     .opening_loc = location,
-                                     .value_loc = location,
-                                     .closing_loc = location,
-                                     .unescaped = unescaped_string};
-    symbolNode->base.location = location;
-
-    return up_cast(symbolNode);
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createSymbolNodeFromConstant(pm_constant_id_t nameId,
-                                                                     core::LocOffsets nameLoc) {
-    if (!prismParser || nameId == PM_CONSTANT_ID_UNSET) {
-        return nullptr;
-    }
-
-    auto nameView = prismParser->resolveConstant(nameId);
-    std::string nameString(nameView);
-
-    uint8_t *stable = (uint8_t *)calloc(nameString.size(), sizeof(uint8_t));
-    if (!stable) {
-        return nullptr;
-    }
-    memcpy(stable, nameString.data(), nameString.size());
-
-    pm_symbol_node_t *symbolNode = allocateNode<pm_symbol_node_t>();
-    if (!symbolNode) {
-        return nullptr;
-    }
-
-    pm_location_t location = convertLocOffsets(nameLoc.copyWithZeroLength());
-
-    pm_string_t unescaped_string;
-    unescaped_string.source = stable;
-    unescaped_string.length = nameString.length();
-
-    *symbolNode = (pm_symbol_node_t){.base = initializeBaseNode(PM_SYMBOL_NODE),
-                                     .opening_loc = location,
-                                     .value_loc = location,
-                                     .closing_loc = location,
-                                     .unescaped = unescaped_string};
-    symbolNode->base.location = location;
-
-    return up_cast(symbolNode);
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createAssocNode(pm_node_t *key, pm_node_t *value, core::LocOffsets loc) {
-    if (!key || !value) {
-        return nullptr;
-    }
-
-    pm_assoc_node_t *assocNode = allocateNode<pm_assoc_node_t>();
-    if (!assocNode) {
-        return nullptr;
-    }
-
-    pm_location_t location = convertLocOffsets(loc.copyWithZeroLength());
-
-    *assocNode = (pm_assoc_node_t){
-        .base = initializeBaseNode(PM_ASSOC_NODE), .key = key, .value = value, .operator_loc = location};
-    assocNode->base.location = location;
-
-    return up_cast(assocNode);
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc) {
-    if (pairs.empty()) {
-        return nullptr;
-    }
-
-    pm_hash_node_t *hashNode = allocateNode<pm_hash_node_t>();
-    if (!hashNode) {
-        return nullptr;
-    }
-
-    // Allocate array of pm_node_t* for elements
-    pm_node_t **elements = nullptr;
-    if (!pairs.empty()) {
-        // Use calloc to zero-initialize and avoid uninitialized memory
-        elements = (pm_node_t **)calloc(pairs.size(), sizeof(pm_node_t *));
-        if (!elements) {
-            return nullptr;
-        }
-        for (size_t i = 0; i < pairs.size(); i++) {
-            elements[i] = pairs[i];
-        }
-    }
-
-    // Base span covers the whole hash. For keyword-arg style (no braces), opening/closing are null.
-    pm_location_t base_loc = convertLocOffsets(loc);
-    pm_location_t opening_loc = {.start = nullptr, .end = nullptr};
-    pm_location_t closing_loc = {.start = nullptr, .end = nullptr};
-
-    *hashNode = (pm_hash_node_t){.base = initializeBaseNode(PM_HASH_NODE),
-                                 .opening_loc = opening_loc,
-                                 .elements = {.size = pairs.size(), .capacity = pairs.size(), .nodes = elements},
-                                 .closing_loc = closing_loc};
-    hashNode->base.location = base_loc;
-
-    return up_cast(hashNode);
-}
-
-pm_node_t *MethodTypeToParserNodePrism::createKeywordHashNode(const std::vector<pm_node_t *> &pairs,
-                                                              core::LocOffsets loc) {
-    if (pairs.empty()) {
-        return nullptr;
-    }
-
-    pm_keyword_hash_node_t *hashNode = allocateNode<pm_keyword_hash_node_t>();
-    if (!hashNode) {
-        return nullptr;
-    }
-
-    pm_node_t **elements = nullptr;
-    elements = (pm_node_t **)calloc(pairs.size(), sizeof(pm_node_t *));
-    if (!elements) {
-        return nullptr;
-    }
-    for (size_t i = 0; i < pairs.size(); i++) {
-        elements[i] = pairs[i];
-    }
-
-    pm_location_t base_loc = convertLocOffsets(loc);
-
-    *hashNode =
-        (pm_keyword_hash_node_t){.base = initializeBaseNode(PM_KEYWORD_HASH_NODE),
-                                 .elements = {.size = pairs.size(), .capacity = pairs.size(), .nodes = elements}};
-    hashNode->base.location = base_loc;
-
-    return up_cast(hashNode);
-}
-
-void MethodTypeToParserNodePrism::debugPrintLocation(const char *label, pm_location_t loc) {
-    (void)label; // Suppress unused warning
-    (void)loc;   // Suppress unused warning
-    if (!prismParser) {
-        // fmt::print("DEBUG {}: parser not available\n", label);
-        return;
-    }
-
-    // pm_parser_t *p = prismParser->getInternalParser();
-    // size_t b = loc.start ? (size_t)(loc.start - p->start) : (size_t)0;
-    // size_t e = loc.end ? (size_t)(loc.end - p->start) : (size_t)0;
-    // fmt::print("DEBUG {}: {}..{}\n", label, b, e);
-}
-
-pm_call_node_t *MethodTypeToParserNodePrism::createMethodCall(pm_node_t *receiver, pm_constant_id_t method_id,
-                                                              pm_node_t *arguments, pm_location_t message_loc,
-                                                              pm_location_t full_loc, pm_location_t tiny_loc,
-                                                              pm_node_t *block) {
-    pm_call_node_t *call = allocateNode<pm_call_node_t>();
-    if (!call) {
-        return nullptr;
-    }
-
-    *call = (pm_call_node_t){.base = initializeBaseNode(PM_CALL_NODE),
-                             .receiver = receiver,
-                             .call_operator_loc = tiny_loc,
-                             .name = method_id,
-                             .message_loc = message_loc,
-                             .opening_loc = tiny_loc,
-                             .arguments = down_cast<pm_arguments_node_t>(arguments),
-                             .closing_loc = tiny_loc,
-                             .block = block};
-    call->base.location = full_loc;
-
-    return call;
+    return PMK::createSymbolNode(nameString.c_str(), nameLoc);
 }
 
 } // namespace sorbet::rbs
