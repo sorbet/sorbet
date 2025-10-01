@@ -28,12 +28,12 @@ class A::B::C::D
 
   example(:account)
   #       ^^^^^^^^ error: Too many positional arguments
-  #       ^^^^^^^^ error: Missing required keyword argument `account`
+  #               ^ error: Missing required keyword argument `account`
   #         ^ hover: Symbol(:account)
 
   example("account")
   #       ^^^^^^^^^ error: Too many positional arguments
-  #       ^^^^^^^^^ error: Missing required keyword argument `account`
+  #                ^ error: Missing required keyword argument `account`
   #         ^ hover: String("account")
 
   example("account" => 0)
@@ -41,7 +41,7 @@ class A::B::C::D
   #         ^ hover: String("account")
 
   example(does_not_exist: 0)
-  #       ^^^^^^^^^^^^^^^^^ error: Missing required keyword argument `account`
+  #                        ^ error: Missing required keyword argument `account`
   #       ^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `does_not_exist`
   #         ^ hover: Symbol(:does_not_exist)
 
