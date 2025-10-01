@@ -29,7 +29,7 @@ class Child < Parent
   #       ^ error: `include` must only contain constant literals
   #       ^ error: Expected `Module` but found `Integer(3)` for argument `arg0`
   include Mixin do; end
-  #            ^^^^^^^^ error: Method `Module#include` does not take a block
+  #             ^^^^^^^ error: Method `Module#include` does not take a block
 # ^^^^^^^^^^^^^^^^^^^^^ error: `include` can not be passed a block
   whatever.include OtherMixin # error: Method `whatever` does not exist on `T.class_of(Child)`
 end
