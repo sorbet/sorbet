@@ -22,11 +22,11 @@ class TestArgs
     required {}
     #       ^ error: Not enough arguments
     required()
-    #       ^^ error: Not enough arguments
+    #        ^ error: Not enough arguments
     required( )
-    #       ^^^ error: Not enough arguments
+    #        ^ error: Not enough arguments
     required() {}
-    #       ^ error: Not enough arguments
+    #        ^ error: Not enough arguments
     required(0) {}
     #        ^ error: Not enough arguments
     required(0, )
@@ -144,17 +144,17 @@ class TestArgs
     #             ^ error: Not enough arguments
     #             ^ error: Missing required keyword argument
     requires_mixed()
-    #             ^^ error: Not enough arguments
-    #             ^^ error: Missing required keyword argument
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
     requires_mixed( )
-    #             ^^^ error: Not enough arguments
-    #             ^^^ error: Missing required keyword argument
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
     requires_mixed() {}
-    #             ^ error: Not enough arguments
-    #             ^ error: Missing required keyword argument
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
     requires_mixed(  ) {}
-    #             ^ error: Not enough arguments
-    #             ^ error: Missing required keyword argument
+    #              ^^ error: Not enough arguments
+    #              ^^ error: Missing required keyword argument
     requires_mixed(0)
     #              ^ error: Not enough arguments
     #              ^ error: Missing required keyword argument
