@@ -26,7 +26,7 @@ pm_node_t PMK::initializeBaseNode(pm_node_type_t type) {
     return (pm_node_t){.type = type, .flags = 0, .node_id = ++p->node_id, .location = loc};
 }
 
-pm_node_t *PMK::createConstantReadNode(const char *name) {
+pm_node_t *PMK::ConstantReadNode(const char *name) {
     pm_constant_id_t constant_id = addConstantToPool(name);
     if (constant_id == PM_CONSTANT_ID_UNSET)
         return nullptr;
@@ -40,7 +40,7 @@ pm_node_t *PMK::createConstantReadNode(const char *name) {
     return up_cast(node);
 }
 
-pm_node_t *PMK::createConstantPathNode(pm_node_t *parent, const char *name) {
+pm_node_t *PMK::ConstantPathNode(core::LocOffsets loc, pm_node_t *parent, const char *name) {
     pm_constant_id_t name_id = addConstantToPool(name);
     if (name_id == PM_CONSTANT_ID_UNSET)
         return nullptr;
@@ -49,18 +49,19 @@ pm_node_t *PMK::createConstantPathNode(pm_node_t *parent, const char *name) {
     if (!node)
         return nullptr;
 
-    pm_location_t loc = getZeroWidthLocation();
+    pm_location_t pm_loc = convertLocOffsets(loc);
+    pm_location_t tiny_loc = getZeroWidthLocation();
 
     *node = (pm_constant_path_node_t){.base = initializeBaseNode(PM_CONSTANT_PATH_NODE),
                                       .parent = parent,
                                       .name = name_id,
-                                      .delimiter_loc = loc,
-                                      .name_loc = loc};
+                                      .delimiter_loc = tiny_loc,
+                                      .name_loc = pm_loc};
 
     return up_cast(node);
 }
 
-pm_node_t *PMK::createSingleArgumentNode(pm_node_t *arg) {
+pm_node_t *PMK::SingleArgumentNode(pm_node_t *arg) {
     pm_arguments_node_t *arguments = allocateNode<pm_arguments_node_t>();
     if (!arguments)
         return nullptr;
@@ -79,12 +80,15 @@ pm_node_t *PMK::createSingleArgumentNode(pm_node_t *arg) {
     return up_cast(arguments);
 }
 
-pm_node_t *PMK::createSelfNode() {
+pm_node_t *PMK::Self(core::LocOffsets loc) {
     pm_self_node_t *selfNode = allocateNode<pm_self_node_t>();
     if (!selfNode)
         return nullptr;
 
     *selfNode = (pm_self_node_t){.base = initializeBaseNode(PM_SELF_NODE)};
+    if (loc != core::LocOffsets::none()) {
+        selfNode->base.location = convertLocOffsets(loc);
+    }
 
     return up_cast(selfNode);
 }
@@ -128,7 +132,7 @@ pm_location_t PMK::convertLocOffsets(core::LocOffsets loc) {
     return {.start = start_ptr, .end = end_ptr};
 }
 
-pm_call_node_t *PMK::createMethodCall(pm_node_t *receiver, pm_constant_id_t method_id,
+pm_call_node_t *PMK::Send(pm_node_t *receiver, pm_constant_id_t method_id,
                                                        pm_node_t *arguments, pm_location_t message_loc,
                                                        pm_location_t full_loc, pm_location_t tiny_loc,
                                                        pm_node_t *block) {
@@ -151,7 +155,7 @@ pm_call_node_t *PMK::createMethodCall(pm_node_t *receiver, pm_constant_id_t meth
     return call;
 }
 
-pm_node_t *PMK::createSymbolNodeFromConstant(pm_constant_id_t nameId, core::LocOffsets nameLoc) {
+pm_node_t *PMK::SymbolFromConstant(core::LocOffsets nameLoc, pm_constant_id_t nameId) {
     if (!g_prismParser || nameId == PM_CONSTANT_ID_UNSET) {
         return nullptr;
     }
@@ -186,7 +190,7 @@ pm_node_t *PMK::createSymbolNodeFromConstant(pm_constant_id_t nameId, core::LocO
     return up_cast(symbolNode);
 }
 
-pm_node_t *PMK::createAssocNode(pm_node_t *key, pm_node_t *value, core::LocOffsets loc) {
+pm_node_t *PMK::AssocNode(core::LocOffsets loc, pm_node_t *key, pm_node_t *value) {
     if (!key || !value) {
         return nullptr;
     }
@@ -205,7 +209,7 @@ pm_node_t *PMK::createAssocNode(pm_node_t *key, pm_node_t *value, core::LocOffse
     return up_cast(assocNode);
 }
 
-pm_node_t *PMK::createHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc) {
+pm_node_t *PMK::Hash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs) {
     if (pairs.empty()) {
         return nullptr;
     }
@@ -239,7 +243,7 @@ pm_node_t *PMK::createHashNode(const std::vector<pm_node_t *> &pairs, core::LocO
     return up_cast(hashNode);
 }
 
-pm_node_t *PMK::createKeywordHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc) {
+pm_node_t *PMK::KeywordHash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs) {
     if (pairs.empty()) {
         return nullptr;
     }
@@ -274,39 +278,76 @@ void PMK::debugPrintLocation(const char *label, pm_location_t loc) {
     // Debug implementation commented out for performance
 }
 
-pm_node_t *PMK::createSorbetPrivateStaticConstant() {
+pm_node_t *PMK::SorbetPrivateStatic() {
     // Build a root-anchored constant path ::Sorbet::Private::Static
-    pm_node_t *sorbet = createConstantPathNode(nullptr, "Sorbet");
+    pm_node_t *sorbet = ConstantPathNode(core::LocOffsets::none(), nullptr, "Sorbet");
     if (!sorbet)
         return nullptr;
 
-    pm_node_t *sorbet_private = createConstantPathNode(sorbet, "Private");
+    pm_node_t *sorbet_private = ConstantPathNode(core::LocOffsets::none(), sorbet, "Private");
     if (!sorbet_private)
         return nullptr;
 
-    return createConstantPathNode(sorbet_private, "Static");
+    return ConstantPathNode(core::LocOffsets::none(), sorbet_private, "Static");
 }
 
-pm_node_t *PMK::createTSigWithoutRuntimeConstant() {
+pm_node_t *PMK::TSigWithoutRuntime() {
     // Build a root-anchored constant path ::T::Sig::WithoutRuntime
-    pm_node_t *t_const = createConstantPathNode(nullptr, "T");
+    pm_node_t *t_const = ConstantPathNode(core::LocOffsets::none(), nullptr, "T");
     if (!t_const)
         return nullptr;
 
-    pm_node_t *t_sig = createConstantPathNode(t_const, "Sig");
+    pm_node_t *t_sig = ConstantPathNode(core::LocOffsets::none(), t_const, "Sig");
     if (!t_sig)
         return nullptr;
 
-    return createConstantPathNode(t_sig, "WithoutRuntime");
+    return ConstantPathNode(core::LocOffsets::none(), t_sig, "WithoutRuntime");
 }
 
-pm_node_t *PMK::createSymbolNode(const char *name, core::LocOffsets nameLoc) {
+pm_node_t *PMK::Symbol(core::LocOffsets nameLoc, const char *name) {
     if (!name) {
         return nullptr;
     }
 
     pm_constant_id_t nameId = addConstantToPool(name);
-    return createSymbolNodeFromConstant(nameId, nameLoc);
+    return SymbolFromConstant(nameLoc, nameId);
+}
+
+pm_node_t *PMK::Send0(core::LocOffsets loc, pm_node_t *receiver, const char *method) {
+    if (!receiver || !method) {
+        return nullptr;
+    }
+
+    pm_constant_id_t method_id = addConstantToPool(method);
+    if (method_id == PM_CONSTANT_ID_UNSET) {
+        return nullptr;
+    }
+
+    pm_location_t full_loc = convertLocOffsets(loc);
+    pm_location_t tiny_loc = convertLocOffsets(loc.copyWithZeroLength());
+
+    return up_cast(Send(receiver, method_id, nullptr, tiny_loc, full_loc, tiny_loc));
+}
+
+pm_node_t *PMK::Send1(core::LocOffsets loc, pm_node_t *receiver, const char *method, pm_node_t *arg1) {
+    if (!receiver || !method || !arg1) {
+        return nullptr;
+    }
+
+    pm_constant_id_t method_id = addConstantToPool(method);
+    if (method_id == PM_CONSTANT_ID_UNSET) {
+        return nullptr;
+    }
+
+    pm_node_t *arguments = SingleArgumentNode(arg1);
+    if (!arguments) {
+        return nullptr;
+    }
+
+    pm_location_t full_loc = convertLocOffsets(loc);
+    pm_location_t tiny_loc = convertLocOffsets(loc.copyWithZeroLength());
+
+    return up_cast(Send(receiver, method_id, arguments, tiny_loc, full_loc, tiny_loc));
 }
 
 } // namespace sorbet::parser::Prism

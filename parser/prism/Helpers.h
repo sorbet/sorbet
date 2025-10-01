@@ -230,23 +230,28 @@ public:
     static pm_node_t initializeBaseNode(pm_node_type_t type);
 
     // Basic node creators
-    static pm_node_t *createConstantReadNode(const char *name);
-    static pm_node_t *createConstantPathNode(pm_node_t *parent, const char *name);
-    static pm_node_t *createSingleArgumentNode(pm_node_t *arg);
-    static pm_node_t *createSelfNode();
+    static pm_node_t *ConstantReadNode(const char *name);
+    static pm_node_t *ConstantPathNode(core::LocOffsets loc, pm_node_t *parent, const char *name);
+    static pm_node_t *SingleArgumentNode(pm_node_t *arg);
+    static pm_node_t *Self(core::LocOffsets loc = core::LocOffsets::none());
 
     // Symbol and hash node creators
-    static pm_node_t *createSymbolNode(const char *name, core::LocOffsets nameLoc);
-    static pm_node_t *createSymbolNodeFromConstant(pm_constant_id_t nameId, core::LocOffsets nameLoc);
-    static pm_node_t *createAssocNode(pm_node_t *key, pm_node_t *value, core::LocOffsets loc);
-    static pm_node_t *createHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
-    static pm_node_t *createKeywordHashNode(const std::vector<pm_node_t *> &pairs, core::LocOffsets loc);
+    static pm_node_t *Symbol(core::LocOffsets nameLoc, const char *name);
+    static pm_node_t *SymbolFromConstant(core::LocOffsets nameLoc, pm_constant_id_t nameId);
+    static pm_node_t *AssocNode(core::LocOffsets loc, pm_node_t *key, pm_node_t *value);
+    static pm_node_t *Hash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs);
+    static pm_node_t *KeywordHash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs);
 
     // Method call creation
-    static pm_call_node_t *createMethodCall(pm_node_t *receiver, pm_constant_id_t method_id,
-                                            pm_node_t *arguments, pm_location_t message_loc,
-                                            pm_location_t full_loc, pm_location_t tiny_loc,
-                                            pm_node_t *block = nullptr);
+    static pm_call_node_t *Send(pm_node_t *receiver, pm_constant_id_t method_id,
+                                pm_node_t *arguments, pm_location_t message_loc,
+                                pm_location_t full_loc, pm_location_t tiny_loc,
+                                pm_node_t *block = nullptr);
+
+    // Convenient method call builders (similar to ast::MK)
+    static pm_node_t *Send0(core::LocOffsets loc, pm_node_t *receiver, const char *method);
+    static pm_node_t *Send1(core::LocOffsets loc, pm_node_t *receiver, const char *method,
+                           pm_node_t *arg1);
 
     // Utility functions
     static pm_constant_id_t addConstantToPool(const char *name);
@@ -257,8 +262,8 @@ public:
     static void debugPrintLocation(const char *label, pm_location_t loc);
 
     // High-level node creators
-    static pm_node_t *createSorbetPrivateStaticConstant();
-    static pm_node_t *createTSigWithoutRuntimeConstant();
+    static pm_node_t *SorbetPrivateStatic();
+    static pm_node_t *TSigWithoutRuntime();
 };
 
 } // namespace sorbet::parser::Prism

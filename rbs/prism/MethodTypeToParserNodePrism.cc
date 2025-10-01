@@ -469,17 +469,17 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     }
 
     // Create receiver: Sorbet::Private::Static
-    pm_node_t *receiver = PMK::createSorbetPrivateStaticConstant();
+    pm_node_t *receiver = PMK::SorbetPrivateStatic();
     if (!receiver)
         return nullptr;
 
     // Create argument: T::Sig::WithoutRuntime
-    pm_node_t *t_sig_arg = PMK::createTSigWithoutRuntimeConstant();
+    pm_node_t *t_sig_arg = PMK::TSigWithoutRuntime();
     if (!t_sig_arg)
         return nullptr;
 
     // Create arguments list
-    pm_node_t *arguments = PMK::createSingleArgumentNode(t_sig_arg);
+    pm_node_t *arguments = PMK::SingleArgumentNode(t_sig_arg);
     if (!arguments)
         return nullptr;
 
@@ -513,11 +513,11 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
             if (!methodParams.empty() && paramIndex < methodParams.size() &&
                 methodParams[paramIndex].nameId != PM_CONSTANT_ID_UNSET) {
                 core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
-                symbolNode = PMK::createSymbolNodeFromConstant(methodParams[paramIndex].nameId, tinyLocOffsets);
+                symbolNode = PMK::SymbolFromConstant(tinyLocOffsets, methodParams[paramIndex].nameId);
             }
             if (!symbolNode) {
                 // As a last resort, synthesize a tiny constant name 'arg'
-                symbolNode = PMK::createConstantReadNode("arg");
+                symbolNode = PMK::ConstantReadNode("arg");
                 if (symbolNode) {
                     symbolNode->location = tiny_loc;
                 }
@@ -539,7 +539,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
         // fmt::print("DEBUG: Creating assoc with tinyLoc: {}..{} (was arg.loc: {}..{})\n", tinyLocOffsets.beginPos(),
         //            tinyLocOffsets.endPos(), arg.loc.beginPos(), arg.loc.endPos());
-        pm_node_t *pairNode = PMK::createAssocNode(symbolNode, typeNode, tinyLocOffsets);
+        pm_node_t *pairNode = PMK::AssocNode(tinyLocOffsets, symbolNode, typeNode);
         if (pairNode) {
             sigParams.push_back(pairNode);
             // debugPrintLocation("param.symbol.base", symbolNode->location);
@@ -550,7 +550,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     }
 
     // Build sig chain: self -> .params(hash) -> .void()/.returns(Type)
-    pm_node_t *sigReceiver = PMK::createSelfNode();
+    pm_node_t *sigReceiver = PMK::Self();
     if (!sigReceiver)
         return nullptr;
 
@@ -564,20 +564,20 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
         core::LocOffsets hashLoc = fullTypeLoc;
         // Use KeywordHash for params (bare keyword args)
-        pm_node_t *paramsHash = PMK::createKeywordHashNode(sigParams, hashLoc);
+        pm_node_t *paramsHash = PMK::KeywordHash(hashLoc, sigParams);
         if (!paramsHash) {
             return nullptr;
         }
 
         // Create arguments node containing the hash
-        pm_node_t *paramsArgs = PMK::createSingleArgumentNode(paramsHash);
+        pm_node_t *paramsArgs = PMK::SingleArgumentNode(paramsHash);
         if (!paramsArgs) {
             return nullptr;
         }
 
         // Create .params() method call
         pm_call_node_t *paramsCall =
-            PMK::createMethodCall(sigReceiver, params_id, paramsArgs, tiny_loc, full_loc, tiny_loc);
+            PMK::Send(sigReceiver, params_id, paramsArgs, tiny_loc, full_loc, tiny_loc);
         if (!paramsCall) {
             return nullptr;
         }
@@ -590,31 +590,20 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     // Add return type call (.void() or .returns(Type))
     pm_node_t *blockBody = nullptr;
 
-    // Pre-calculate return type locations to avoid redundant calculations
+    // Pre-calculate return type location for setting on the return type node
     pm_location_t return_type_full_loc =
         PMK::convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg));
-    pm_location_t return_type_zero_loc = PMK::convertLocOffsets(
-        declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
 
     if (functionType->return_type->type == RBS_TYPES_BASES_VOID) {
         // Create: sigReceiver.void()
-        pm_constant_id_t void_id = PMK::addConstantToPool("void");
-        if (void_id == PM_CONSTANT_ID_UNSET)
+        blockBody = PMK::Send0(declaration.typeLocFromRange(functionType->return_type->location->rg),
+                              sigReceiver, "void");
+        if (!blockBody)
             return nullptr;
-
-        pm_call_node_t *voidCall =
-            PMK::createMethodCall(sigReceiver, void_id, nullptr, return_type_zero_loc, full_loc, tiny_loc);
-        if (!voidCall)
-            return nullptr;
-        blockBody = up_cast(voidCall);
         // debugPrintLocation("void.call.base", voidCall->base.location);
         // debugPrintLocation("void.call.msg", voidCall->message_loc);
     } else {
         // Create: sigReceiver.returns(Type)
-        pm_constant_id_t returns_id = PMK::addConstantToPool("returns");
-        if (returns_id == PM_CONSTANT_ID_UNSET)
-            return nullptr;
-
         // Convert actual return type from RBS AST
         pm_node_t *returnTypeNode = typeToPrismNode.toPrismNode(functionType->return_type, declaration);
         if (!returnTypeNode)
@@ -623,15 +612,10 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         // Set return type node base.location to actual return type span
         returnTypeNode->location = return_type_full_loc;
 
-        pm_node_t *returnsArguments = PMK::createSingleArgumentNode(returnTypeNode);
-        if (!returnsArguments)
+        blockBody = PMK::Send1(declaration.typeLocFromRange(functionType->return_type->location->rg),
+                              sigReceiver, "returns", returnTypeNode);
+        if (!blockBody)
             return nullptr;
-
-        pm_call_node_t *returnsCall =
-            PMK::createMethodCall(sigReceiver, returns_id, returnsArguments, return_type_zero_loc, full_loc, tiny_loc);
-        if (!returnsCall)
-            return nullptr;
-        blockBody = up_cast(returnsCall);
         // debugPrintLocation("returns.call.base", returnsCall->base.location);
         // debugPrintLocation("returns.call.msg", returnsCall->message_loc);
     }
@@ -655,7 +639,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     // Create the main sig call
     pm_call_node_t *call =
-        PMK::createMethodCall(receiver, sig_method_id, arguments, tiny_loc, full_loc, tiny_loc, up_cast(block));
+        PMK::Send(receiver, sig_method_id, arguments, tiny_loc, full_loc, tiny_loc, up_cast(block));
     if (!call)
         return nullptr;
 
@@ -678,7 +662,7 @@ pm_node_t *MethodTypeToParserNodePrism::createSymbolNode(rbs_ast_symbol_t *name,
     auto nameStr = parser.resolveConstant(name);
     std::string nameString(nameStr);
 
-    return PMK::createSymbolNode(nameString.c_str(), nameLoc);
+    return PMK::Symbol(nameLoc, nameString.c_str());
 }
 
 } // namespace sorbet::rbs
