@@ -1269,9 +1269,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         auto local = MK::Local(predicateLoc, tempName);
                         // Desugar `case x when *patterns` to `::Magic.<check-match-array>(x, patterns)`,
                         // which behaves like `patterns.any?(x)`
-                        testExpr = MK::Send2(patternLoc, MK::Magic(location.copyWithZeroLength()),
-                                             core::Names::checkMatchArray(), patternLoc.copyWithZeroLength(),
-                                             move(local), move(patternExpr));
+                        testExpr = MK::Send2(patternLoc, MK::Magic(location), core::Names::checkMatchArray(),
+                                             patternLoc.copyWithZeroLength(), move(local), move(patternExpr));
                     } else if (hasPredicate) {
                         // regular pattern when case predicate is present, `case a when 1`
                         auto local = MK::Local(predicateLoc, tempName);
