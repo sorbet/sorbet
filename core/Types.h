@@ -1014,31 +1014,8 @@ struct DispatchArgs {
     }
 
     // Attempts to compute a loc that you could use to insert an arg at the beginning end of the current list of args.
-    Loc argsLoc() const {
-        if (!locs.args.empty()) {
-            // Note: there are some limitations here when the args themselves are parenthesized
-            return core::Loc(locs.file, locs.args.front().join(locs.args.back()));
-        }
+    Loc argsLoc() const;
 
-        Loc result;
-        if (this->block != nullptr) {
-            if (!this->block->loc.exists()) {
-                result = callLoc().copyEndWithZeroLength();
-            } else if (!locs.fun.exists()) {
-                result = core::Loc(locs.file, this->block->loc.copyWithZeroLength());
-            } else {
-                result = core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
-            }
-        } else {
-            if (locs.fun.exists()) {
-                result = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
-            } else {
-                result = callLoc().copyEndWithZeroLength();
-            }
-        }
-
-        return result;
-    }
     Loc blockLoc(const GlobalState &gs) const {
         return core::Loc(locs.file, block->loc);
     }
