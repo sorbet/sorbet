@@ -1132,7 +1132,7 @@ DispatchArgs::DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosAr
       thisType(thisType), block(block), originForUninitialized(originForUninitialized), isPrivateOk(isPrivateOk),
       suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
 
-Loc DispatchArgs::argsLoc() const {
+Loc DispatchArgs::argsLoc(const GlobalState &gs) const {
     if (!locs.args.empty()) {
         // Note: there are some limitations here when the args themselves are parenthesized
         return core::Loc(locs.file, locs.args.front().join(locs.args.back()));
@@ -1146,6 +1146,9 @@ Loc DispatchArgs::argsLoc() const {
             result = core::Loc(locs.file, this->block->loc.copyWithZeroLength());
         } else {
             result = core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
+            if (result.copyEndWithZeroLength().adjust(gs, -1, 0).source(gs) == " ") {
+                result = result.adjust(gs, 0, -1);
+            }
         }
     } else {
         if (locs.fun.exists()) {
@@ -1153,6 +1156,21 @@ Loc DispatchArgs::argsLoc() const {
         } else {
             result = callLoc().copyEndWithZeroLength();
         }
+    }
+
+    auto source = result.source(gs);
+    if (!source.has_value()) {
+        return result;
+    }
+
+    auto sourceView = source.value();
+    if (sourceView.size() < 2) {
+        return result;
+    }
+
+    if ((sourceView.front() == '(' || sourceView.front() == '[') &&
+        (sourceView.back() == ')' || sourceView.back() == ']')) {
+        result = result.adjust(gs, 1, -1);
     }
 
     return result;

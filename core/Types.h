@@ -1014,7 +1014,7 @@ struct DispatchArgs {
     }
 
     // Attempts to compute a loc that you could use to insert an arg at the beginning end of the current list of args.
-    Loc argsLoc() const;
+    Loc argsLoc(const GlobalState &gs) const;
 
     Loc blockLoc(const GlobalState &gs) const {
         return core::Loc(locs.file, block->loc);

@@ -1282,7 +1282,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (pit != pend) {
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
-            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+            if (auto e = gs.beginError(args.argsLoc(gs), errors::Infer::MethodArgumentCountMismatch)) {
                 if (args.fullType.type != args.thisType) {
                     e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
                                 "Expected: `{}`, got: `{}`",
@@ -1366,7 +1366,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (arg == hash->keys.end()) {
                     if (!kwParam.flags.isDefault) {
                         if (auto e =
-                                missingArg(gs, args.argsLoc(), args.receiverLoc(), method, kwParam, symbol, targs)) {
+                                missingArg(gs, args.argsLoc(gs), args.receiverLoc(), method, kwParam, symbol, targs)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1441,7 +1441,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (!param.flags.isKeyword || param.flags.isDefault || param.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, param, symbol, targs)) {
+                if (auto e = missingArg(gs, args.argsLoc(gs), args.receiverLoc(), method, param, symbol, targs)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
