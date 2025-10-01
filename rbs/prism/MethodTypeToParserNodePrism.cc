@@ -18,7 +18,7 @@ namespace sorbet::rbs {
 namespace {
 
 bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
-    if (PM_NODE_TYPE_P(node, PM_SELF_NODE)) {
+    if (isa_node<pm_self_node>(node)) {
         return true;
     }
 
@@ -202,7 +202,7 @@ core::NameRef anonymousParamName(core::MutableContext ctx, const pm_node_t *node
 optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, pm_node_t *methodArg, RBSArg arg,
                                                      const parser::Prism::Parser &prismParser,
                                                      const RBSDeclaration &declaration) {
-    if (arg.kind == RBSArg::Kind::Block || PM_NODE_TYPE_P(methodArg, PM_BLOCK_PARAMETER_NODE)) {
+    if (arg.kind == RBSArg::Kind::Block || isa_node<pm_block_parameter_node_t>(methodArg)) {
         // Block arguments are not autocorrected
         return nullopt;
     }

@@ -19,6 +19,7 @@ using sorbet::ast::MK;
 using sorbet::parser::Prism::cast_prism_string;
 using sorbet::parser::Prism::down_cast;
 using sorbet::parser::Prism::down_cast_nonnull;
+using sorbet::parser::Prism::isa_node;
 using sorbet::parser::Prism::Parser;
 using sorbet::parser::Prism::ParseResult;
 using sorbet::parser::Prism::up_cast;
@@ -424,7 +425,7 @@ void Desugarer::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, 
             collectPatternMatchingVarsPrism(vars, elt);
         }
         // Process rest element (skip implicit rest nodes as they don't bind variables)
-        if (arrayPatternNode->rest != nullptr && !PM_NODE_TYPE_P(arrayPatternNode->rest, PM_IMPLICIT_REST_NODE)) {
+        if (arrayPatternNode->rest != nullptr && !isa_node<pm_implicit_rest_node>(arrayPatternNode->rest)) {
             collectPatternMatchingVarsPrism(vars, arrayPatternNode->rest);
         }
         auto posts = absl::MakeSpan(arrayPatternNode->posts.nodes, arrayPatternNode->posts.size);
@@ -520,7 +521,7 @@ bool isCallToBlockGivenP(pm_call_node *callNode, core::NameRef methodName, ast::
         return false;
     }
 
-    return callNode->receiver == nullptr || PM_NODE_TYPE_P(callNode->receiver, PM_SELF_NODE) ||
+    return callNode->receiver == nullptr || isa_node<pm_self_node>(callNode->receiver) ||
            MK::isKernelApproximate(receiverExpr);
 };
 
@@ -533,7 +534,7 @@ void Desugarer::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &d
     auto elements = absl::MakeSpan(kwargsHashNode->elements.nodes, kwargsHashNode->elements.size);
 
     // Check if there are any splats - if so, can't flatten
-    bool hasKwsplat = absl::c_any_of(elements, [](auto *node) { return PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE); });
+    bool hasKwsplat = absl::c_any_of(elements, [](auto *node) { return isa_node<pm_assoc_splat_node>(node); });
 
     if (hasKwsplat) {
         // Desugar the whole hash using desugarKeyValuePairs which handles kwsplats properly
@@ -554,7 +555,7 @@ void Desugarer::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &d
 
                 // For shorthand kwargs like `foo(k5:)` where the value is implicit, keep the colon in the location
                 // to match Whitequark behavior. For regular kwargs like `foo(k5: v)`, drop the colon.
-                bool isImplicitValue = PM_NODE_TYPE_P(assoc->value, PM_IMPLICIT_NODE);
+                bool isImplicitValue = isa_node<pm_implicit_node>(assoc->value);
                 auto symbolLoc = isImplicitValue
                                      ? translateLoc(symbolNode->base.location)
                                      : translateLoc(symbolNode->base.location.start, symbolNode->base.location.end - 1);
@@ -724,7 +725,7 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
     static_assert(is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>);
 
     auto isValidAssignmentTarget = [](pm_node_t *node) -> bool {
-        return parser::Prism::isAssignmentTarget(node) || PM_NODE_TYPE_P(node, PM_REQUIRED_PARAMETER_NODE);
+        return parser::Prism::isAssignmentTarget(node) || isa_node<pm_required_parameter_node>(node);
     };
 
     auto lefts = absl::MakeSpan(lhs->lefts.nodes, lhs->lefts.size);
@@ -749,10 +750,10 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
     int before = 0, after = 0;
     auto zloc = loc.copyWithZeroLength();
 
-    bool hasSplat = lhs->rest && PM_NODE_TYPE_P(lhs->rest, PM_SPLAT_NODE);
+    bool hasSplat = lhs->rest && isa_node<pm_splat_node>(lhs->rest);
 
     auto processTarget = [this, &stats, &i, zloc, tempExpanded](pm_node_t *c) {
-        ENFORCE(!PM_NODE_TYPE_P(c, PM_SPLAT_NODE), "splat already handled");
+        ENFORCE(!isa_node<pm_splat_node>(c), "splat already handled");
 
         auto cloc = translateLoc(c->location);
         auto zcloc = cloc.copyWithZeroLength();
@@ -1907,7 +1908,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             if (isCallToBlockGivenP(callNode, methodName, receiver) && isInMethodDef()) {
                 // Workaround to match legacy desugarer behaviour in `Dugar.cc`'s version of `desugarBlock().
                 // https://github.com/sorbet/sorbet/issues/9860
-                if (callNode->block != nullptr && PM_NODE_TYPE_P(callNode->block, PM_BLOCK_NODE)) {
+                if (callNode->block != nullptr && isa_node<pm_block_node>(callNode->block)) {
                     auto blockLoc = translateLoc(callNode->block->location);
                     if (auto e = ctx.beginIndexerError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
                         e.setHeader("No body in block");
@@ -2110,7 +2111,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     auto patternLoc = pattern.loc();
 
                     ExpressionPtr testExpr;
-                    if (PM_NODE_TYPE_P(prismPattern, PM_SPLAT_NODE)) {
+                    if (isa_node<pm_splat_node>(prismPattern)) {
                         // splat pattern in when clause, predicate is required, `case a when *others`
                         ENFORCE(hasPredicate, "splats need something to test against");
                         auto local = MK::Local(predicateLoc, tempName);
@@ -2497,10 +2498,10 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 // Multi-target: check if all are local variables (no nested multi-targets or other complex targets)
                 auto targets = absl::MakeSpan(mlhs->lefts.nodes, mlhs->lefts.size);
                 canProvideNiceDesugar = absl::c_all_of(
-                    targets, [](pm_node_t *target) { return PM_NODE_TYPE_P(target, PM_LOCAL_VARIABLE_TARGET_NODE); });
+                    targets, [](pm_node_t *target) { return isa_node<pm_local_variable_target_node>(target); });
             } else {
                 // Single variable: check if it's a local variable
-                canProvideNiceDesugar = PM_NODE_TYPE_P(forNode->index, PM_LOCAL_VARIABLE_TARGET_NODE);
+                canProvideNiceDesugar = isa_node<pm_local_variable_target_node>(forNode->index);
             }
 
             auto locZeroLen = location.copyWithZeroLength();
@@ -2641,7 +2642,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             // The value itself might be a rational (e.g. `1ri`), which would desugar to:
             //     ::Kernel.Complex(0, Kernel.Rational("1"))
             ast::ExpressionPtr imaginaryPart;
-            if (PM_NODE_TYPE_P(imaginaryNode->numeric, PM_RATIONAL_NODE)) {
+            if (isa_node<pm_rational_node>(imaginaryNode->numeric)) {
                 // The `i` is already stripped out of `value`, but there is still an `r`, so strip that off too.
                 auto rationalValue = value.substr(0, value.size() - "r"sv.size());
                 auto kernel = MK::Constant(numberLoc, core::Symbols::Kernel());
@@ -3199,7 +3200,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             auto declLoc = translateLoc(classNode->class_keyword_loc);
             auto receiverLoc = translateLoc(classNode->expression->location);
 
-            if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) { // Only `class << self` is supported
+            if (!isa_node<pm_self_node>(classNode->expression)) { // Only `class << self` is supported
                 if (auto e = ctx.beginIndexerError(receiverLoc, core::errors::Desugar::InvalidSingletonDef)) {
                     e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                 }
@@ -3434,8 +3435,7 @@ const uint8_t *endLoc(pm_node_t *anyNode) {
             auto *node = down_cast_nonnull<pm_call_node>(anyNode);
             if (node->arguments && node->arguments->arguments.size > 0) {
                 auto *lastArg = node->arguments->arguments.nodes[node->arguments->arguments.size - 1];
-                if (PM_NODE_TYPE_P(lastArg, PM_X_STRING_NODE) ||
-                    PM_NODE_TYPE_P(lastArg, PM_INTERPOLATED_X_STRING_NODE)) {
+                if (isa_node<pm_x_string_node>(lastArg) || isa_node<pm_interpolated_x_string_node>(lastArg)) {
                     return endLoc(lastArg);
                 }
             }
@@ -3539,7 +3539,7 @@ ast::ExpressionPtr Desugarer::desugarPattern(pm_node_t *node) {
             auto assocNode = down_cast_nonnull<pm_assoc_node>(node);
 
             // If the value is an implicit node, skip creating the pair, and return that value directly.
-            if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
+            if (isa_node<pm_implicit_node>(assocNode->value)) {
                 return desugarPattern(assocNode->value);
             }
 
@@ -3561,7 +3561,7 @@ ast::ExpressionPtr Desugarer::desugarPattern(pm_node_t *node) {
             }
 
             // Implicit rest nodes in array patterns don't need to be translated
-            if (prismRestNode != nullptr && !PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
+            if (prismRestNode != nullptr && !isa_node<pm_implicit_rest_node>(prismRestNode)) {
                 desugarPattern(prismRestNode);
             }
 
@@ -3618,7 +3618,7 @@ ast::ExpressionPtr Desugarer::desugarPattern(pm_node_t *node) {
                 desugarPattern(prismNode);
             }
 
-            if (prismTrailingSplat != nullptr && PM_NODE_TYPE_P(prismTrailingSplat, PM_SPLAT_NODE)) {
+            if (prismTrailingSplat != nullptr && isa_node<pm_splat_node>(prismTrailingSplat)) {
                 desugarPattern(prismTrailingSplat);
             }
 
@@ -3772,7 +3772,7 @@ Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffset
         // Add in the block-local variables, if any.
         paramsStore.reserve(blockLocalVariables.size());
         for (auto *node : blockLocalVariables) {
-            ENFORCE(PM_NODE_TYPE_P(node, PM_BLOCK_LOCAL_VARIABLE_NODE));
+            ENFORCE(isa_node<pm_block_local_variable_node>(node));
             // TODO: move `PM_BLOCK_LOCAL_VARIABLE_NODE` case logic to here
             paramsStore.emplace_back(desugar(node));
         }
@@ -3832,7 +3832,7 @@ Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffset
         // If invalid code tries to use more than one `**nil` (like `def foo(**nil, **nil)`),
         // Prism will report an error, but still place the excess `**nil` nodes in `posts` list (never the others like
         // `requireds` or `optionals`), which we need to skip here.
-        if (!PM_NODE_TYPE_P(prismNode, PM_NO_KEYWORDS_PARAMETER_NODE)) {
+        if (!isa_node<pm_no_keywords_parameter_node>(prismNode)) {
             paramsStore.emplace_back(desugar(prismNode));
         }
     }
@@ -3926,7 +3926,7 @@ Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffset
 
     // Add in the block-local variables, if any.
     for (auto *node : blockLocalVariables) {
-        ENFORCE(PM_NODE_TYPE_P(node, PM_BLOCK_LOCAL_VARIABLE_NODE));
+        ENFORCE(isa_node<pm_block_local_variable_node>(node));
         paramsStore.emplace_back(desugar(node));
     }
 
@@ -4250,7 +4250,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
     // Extend the location to include the full heredoc using endLoc(), which handles heredocs.
     if (!prismArgs.empty()) {
         auto lastArg = prismArgs.back();
-        if (PM_NODE_TYPE_P(lastArg, PM_X_STRING_NODE) || PM_NODE_TYPE_P(lastArg, PM_INTERPOLATED_X_STRING_NODE)) {
+        if (isa_node<pm_x_string_node>(lastArg) || isa_node<pm_interpolated_x_string_node>(lastArg)) {
             auto heredocEnd = translateLoc(lastArg->location.start, endLoc(lastArg));
             location = core::LocOffsets{location.beginPos(), heredocEnd.endPos()};
         }
@@ -4306,7 +4306,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
                                 if (auto *pair = down_cast<pm_assoc_node>(node)) {
                                     return pair->key && PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE);
                                 }
-                                if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) {
+                                if (isa_node<pm_assoc_splat_node>(node)) {
                                     return true;
                                 }
                                 return false;
@@ -4349,9 +4349,9 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         for (auto *arg : prismArgs) {
             if (auto *splatNode = down_cast<pm_splat_node>(arg); splatNode && splatNode->expression == nullptr) {
                 continue; // Skip anonymous splats (like `f(*)`), which are handled separately in `PM_CALL_NODE`
-            } else if (PM_NODE_TYPE_P(arg, PM_FORWARDING_ARGUMENTS_NODE)) {
+            } else if (isa_node<pm_forwarding_arguments_node>(arg)) {
                 continue; // Skip forwarded args (like `f(...)`), which are handled separately in `PM_CALL_NODE`
-            } else if (PM_NODE_TYPE_P(arg, PM_BLOCK_ARGUMENT_NODE)) {
+            } else if (isa_node<pm_block_argument_node>(arg)) {
                 continue; // Skip block args (like `f(&block)`), which are handled by `desugarBlock`
             }
 
@@ -4469,8 +4469,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
     }
 
     // Count args, excluding block arguments which are handled separately
-    int numPosArgs =
-        absl::c_count_if(prismArgs, [](auto *arg) { return !PM_NODE_TYPE_P(arg, PM_BLOCK_ARGUMENT_NODE); });
+    int numPosArgs = absl::c_count_if(prismArgs, [](auto *arg) { return !isa_node<pm_block_argument_node>(arg); });
 
     if (block.hasBlockPass()) {
         // Desugar a call (without splat) with a block pass argument.
@@ -4495,7 +4494,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         }
 
         for (auto *arg : prismArgs) {
-            if (PM_NODE_TYPE_P(arg, PM_BLOCK_ARGUMENT_NODE)) {
+            if (isa_node<pm_block_argument_node>(arg)) {
                 continue; // Skip block args, handled above
             }
             magicSendArgs.emplace_back(desugar(arg));
@@ -4515,7 +4514,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
     // TODO: reserve size for the block, if needed.
     sendArgs.reserve(prismArgs.size());
     for (auto *arg : prismArgs) {
-        if (PM_NODE_TYPE_P(arg, PM_BLOCK_ARGUMENT_NODE)) {
+        if (isa_node<pm_block_argument_node>(arg)) {
             continue; // Skip block args, handled by `desugarBlock`
         }
         sendArgs.emplace_back(desugar(arg));
@@ -5283,8 +5282,8 @@ string_view Desugarer::sliceLocation(pm_location_t loc) const {
 
 // Handle invalid or missing constant paths in class/module declarations.
 ast::ExpressionPtr Desugarer::desugarClassOrModuleName(pm_node_t *constantPath, pm_location_t keywordLoc) {
-    if (constantPath == nullptr || (!PM_NODE_TYPE_P(constantPath, PM_CONSTANT_PATH_NODE) &&
-                                    !PM_NODE_TYPE_P(constantPath, PM_CONSTANT_READ_NODE))) {
+    if (constantPath == nullptr ||
+        (!isa_node<pm_constant_path_node>(constantPath) && !isa_node<pm_constant_read_node>(constantPath))) {
         auto nameLoc = translateLoc(keywordLoc);
         return MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), core::Names::Constants::ConstantNameMissing());
     }
@@ -5307,7 +5306,7 @@ ast::ClassDef::RHS_store Desugarer::desugarClassOrModule(pm_node *prismBodyNode)
         return result;
     }
 
-    ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
+    ENFORCE(isa_node<pm_statements_node>(prismBodyNode));
 
     auto body = desugar(prismBodyNode);
 

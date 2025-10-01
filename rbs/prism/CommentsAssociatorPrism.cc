@@ -543,7 +543,7 @@ void CommentsAssociatorPrism::walkStatements(pm_node_list_t &nodes) {
     for (size_t i = 0; i < nodes.size; i++) {
         auto *stmt = nodes.nodes[i];
 
-        if (PM_NODE_TYPE_P(stmt, PM_ENSURE_NODE)) {
+        if (isa_node<pm_ensure_node_t>(stmt)) {
             // Ensure need to be visited handled differently because of how we desugar their structure.
             // The bind needs to be added _inside_ them and not before if we want the type to be applied
             // properly.

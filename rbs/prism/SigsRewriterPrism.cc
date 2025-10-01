@@ -130,7 +130,7 @@ pm_node_t *maybeWrapBody(pm_node_t *body, core::LocOffsets loc, parser::Prism::P
         return prism.StatementsNode(loc, absl::Span<pm_node_t *>{});
     }
 
-    if (PM_NODE_TYPE_P(body, PM_STATEMENTS_NODE)) {
+    if (isa_node<pm_statements_node_t>(body)) {
         return body; // Already wrapped
     }
 
@@ -157,7 +157,7 @@ bool containsExtendTHelper(pm_statements_node_t *body, const parser::Prism::Pars
             return false;
         }
 
-        if (call->receiver != nullptr && !PM_NODE_TYPE_P(call->receiver, PM_SELF_NODE)) {
+        if (call->receiver != nullptr && !isa_node<pm_self_node_t>(call->receiver)) {
             return false;
         }
 
@@ -214,8 +214,8 @@ void insertHelpers(pm_node_t *body, absl::Span<pm_node_t *const> helpers) {
 } // namespace
 
 void SigsRewriterPrism::insertTypeParams(pm_node_t *node, pm_node_t *body) {
-    ENFORCE(PM_NODE_TYPE_P(node, PM_CLASS_NODE) || PM_NODE_TYPE_P(node, PM_MODULE_NODE) ||
-                PM_NODE_TYPE_P(node, PM_SINGLETON_CLASS_NODE),
+    ENFORCE(isa_node<pm_class_node_t>(node) || isa_node<pm_module_node_t>(node) ||
+                isa_node<pm_singleton_class_node_t>(node),
             "Type parameters can only exist on classes, singleton classes, and modules");
 
     auto comments = commentsForNode(node);
@@ -336,7 +336,7 @@ unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *
     auto signatureTranslator = rbs::SignatureTranslatorPrism{ctx, parser};
 
     for (auto &declaration : comments.signatures) {
-        if (PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
+        if (isa_node<pm_def_node_t>(node)) {
             auto sig = signatureTranslator.translateMethodSignature(node, declaration, comments.annotations);
             if (sig) {
                 signatures->emplace_back(sig);

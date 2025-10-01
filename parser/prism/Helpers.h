@@ -194,18 +194,24 @@ template <typename PrismNode> pm_node_t *up_cast(PrismNode *node) {
     return reinterpret_cast<pm_node_t *>(node);
 }
 
+// Check if a type-erased non-null `pm_node_t` pointer is of a specific Prism node "subclass".
+template <typename PrismNode> inline bool isa_node(pm_node_t *anyNode) {
+    static_assert(isPrismNode<PrismNode>, "The `isa_node` function should only be called on Prism node pointers.");
+
+    ENFORCE(anyNode != nullptr, "Cannot check the type of a null Prism AST Node pointer.");
+
+    return PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID);
+}
+
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass",
 // or return `nullptr` if the node is null or not of the expected type. Matches the convention of other Sorbet
 // downcasting helpers like `cast_tree`, `cast_node`, `cast_type`, and C++'s `dynamic_cast`.
 template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
-    static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
-                  "The `down_cast` function should only be called on Prism node pointers.");
-
     if (anyNode == nullptr) {
         return nullptr;
     }
 
-    if (!PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID)) {
+    if (!isa_node<PrismNode>(anyNode)) {
         return nullptr;
     }
     return reinterpret_cast<PrismNode *>(anyNode);
@@ -214,9 +220,7 @@ template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass".
 // In debug builds, this helper checks the node's type before casting, to ensure it's casted correctly.
 template <typename PrismNode> PrismNode *down_cast_nonnull(pm_node_t *anyNode) {
-    static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
-                  "The `down_cast_nonnull` function should only be called on Prism node pointers.");
-    ENFORCE(anyNode == nullptr || PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID),
+    ENFORCE(anyNode == nullptr || isa_node<PrismNode>(anyNode),
             "Failed to cast a Prism AST Node. Expected {} (#{}), but got {} (#{}).",
             pm_node_type_to_str(PrismNodeTypeHelper<PrismNode>::TypeID), PrismNodeTypeHelper<PrismNode>::TypeID,
             pm_node_type_to_str(PM_NODE_TYPE(anyNode)), PM_NODE_TYPE(anyNode));
