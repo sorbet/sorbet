@@ -117,7 +117,14 @@ arity-messages.rb:30: Too many positional arguments provided for method `Object#
     arity-messages.rb:30: Inserted `y:`
     30 |paperino(2, 3, z: 4)
                     ^
-Errors: 12
+
+arity-messages.rb:38: Missing required keyword argument `qux` for method `A.make` https://srb.help/7004
+    38 |  foo: [1, 2, 3],
+    39 |  bar: "some long string",
+    arity-messages.rb:33: Keyword argument `qux` declared to expect type `T.untyped` here:
+    33 |  def self.make(foo:, bar:, qux:)
+                                    ^^^^
+Errors: 13
 
 --------------------------------------------------------------------------
 
@@ -151,6 +158,16 @@ pluto
 
 def paperino(x, y: nil, **kwargs); end
 paperino(2, y: 3, z: 4)
+
+class A
+  def self.make(foo:, bar:, qux:)
+  end
+end
+
+A.make(
+  foo: [1, 2, 3],
+  bar: "some long string",
+)
 
 --------------------------------------------------------------------------
 
