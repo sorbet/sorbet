@@ -222,6 +222,10 @@ template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
     return casted;
 }
 
+template <typename PrismNode> inline bool isa_node(pm_node_t *anyNode) {
+    return try_down_cast<PrismNode>(anyNode) != nullptr;
+}
+
 inline std::string_view cast_prism_string(const uint8_t *source, size_t length) {
     // Prism conservatively uses `const uint8_t *` for its string types, to support platforms with non-8-bit chars.
     // Sorbet can be a bit more lax, and just assume that characters are 8 bits long.
