@@ -1020,21 +1020,24 @@ struct DispatchArgs {
             return core::Loc(locs.file, locs.args.front().join(locs.args.back()));
         }
 
+        Loc result;
         if (this->block != nullptr) {
             if (!this->block->loc.exists()) {
-                return callLoc().copyEndWithZeroLength();
+                result = callLoc().copyEndWithZeroLength();
             } else if (!locs.fun.exists()) {
-                return core::Loc(locs.file, this->block->loc.copyWithZeroLength());
+                result = core::Loc(locs.file, this->block->loc.copyWithZeroLength());
             } else {
-                return core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
+                result = core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
             }
         } else {
             if (locs.fun.exists()) {
-                return core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+                result = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
             } else {
-                return callLoc().copyEndWithZeroLength();
+                result = callLoc().copyEndWithZeroLength();
             }
         }
+
+        return result;
     }
     Loc blockLoc(const GlobalState &gs) const {
         return core::Loc(locs.file, block->loc);
