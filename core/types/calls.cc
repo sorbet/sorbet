@@ -351,8 +351,8 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method,
-                             const ParamInfo &arg, ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, MethodRef method, const ParamInfo &arg,
+                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
     if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
         auto argName = arg.name.show(gs);
         e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
@@ -1365,8 +1365,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 });
                 if (arg == hash->keys.end()) {
                     if (!kwParam.flags.isDefault) {
-                        if (auto e =
-                                missingArg(gs, args.argsLoc(gs), args.receiverLoc(), method, kwParam, symbol, targs)) {
+                        if (auto e = missingArg(gs, args.argsLoc(gs), method, kwParam, symbol, targs)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1441,7 +1440,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (!param.flags.isKeyword || param.flags.isDefault || param.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingArg(gs, args.argsLoc(gs), args.receiverLoc(), method, param, symbol, targs)) {
+                if (auto e = missingArg(gs, args.argsLoc(gs), method, param, symbol, targs)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
