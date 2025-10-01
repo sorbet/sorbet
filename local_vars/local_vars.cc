@@ -307,6 +307,7 @@ class LocalNameInserter {
 
         core::NameRef newFun = original.fun;
         ast::Send::Flags newFlags = original.flags;
+        auto isStrictFile = ctx.file.data(ctx).strictLevel >= core::StrictLevel::Strict;
 
         for (const auto &arg : enclosingMethodScopeStack.args) {
             ENFORCE(blockArg == nullptr, "Block arg was not in final position");
@@ -353,18 +354,15 @@ class LocalNameInserter {
                     kwArgValueEntries.clear();
                 }
             } else if (arg.flags.block) {
-                auto blockLoc = arg.arg._name == core::Names::blkArg() ? core::LocOffsets::none() : zSuperArgsLoc;
-                blockArg = ast::make_expression<ast::Local>(blockLoc, arg.arg);
+                if (arg.arg._name != core::Names::blkArg() || !isStrictFile) {
+                    blockArg = ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg);
+                }
             } else if (arg.flags.shadow) {
                 ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
             } else {
                 ENFORCE(false, "Unhandled arg kind in ZSuperArgs");
             }
         }
-
-        // At this stage the method should always have a block arg, even if it's synthetic (i.e., wasn't mentioned in
-        // the original source).
-        ENFORCE(blockArg, "Block argument not present");
 
         // If there were any posargs after a positional splat, fold them into the splatted array.
         if (posArgsArray != nullptr && !posArgsEntries.empty()) {
@@ -377,9 +375,6 @@ class LocalNameInserter {
         auto method = ast::MK::Literal(original.loc,
                                        core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
 
-        auto shouldForwardBlockArg =
-            blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict;
-
         ast::ExpressionPtr newRecv = std::move(original.recv);
         ast::Send::ARGS_store newArgs;
         uint16_t newNumPosArgs = 0;
@@ -390,7 +385,6 @@ class LocalNameInserter {
             // bit of a hack, but 'super' is currently treated as untyped anyway.
             // TODO(neil): this probably blames to unsafe, we should find a way to blame to super maybe?
             newArgs.push_back(ast::MK::Unsafe(original.loc, std::move(newRecv)));
-            newRecv = ast::MK::Magic(original.loc);
             newArgs.push_back(std::move(method));
 
             // For <call-with-splat> and <call-with-splat-and-block-pass> posargs are always passed in an array.
@@ -425,24 +419,27 @@ class LocalNameInserter {
 
             if (originalBlock != nullptr) {
                 // <call-with-splat> and "do"
+                newRecv = ast::MK::Magic(original.loc);
                 newFun = core::Names::callWithSplat();
                 // Re-add block argument
                 newFlags.hasBlock = true;
                 newArgs.push_back(std::move(originalBlock));
-            } else if (shouldForwardBlockArg) {
+            } else if (blockArg != nullptr) {
                 // <call-with-splat-and-block-pass>(..., &blk)
+                newRecv = ast::MK::Magic(blockArg.loc());
                 newFun = core::Names::callWithSplatAndBlockPass();
                 newArgs.push_back(std::move(blockArg));
                 newNumPosArgs++;
             } else {
                 // <call-with-splat>(...)
+                newRecv = ast::MK::Magic(original.loc);
                 newFun = core::Names::callWithSplat();
             }
-        } else if (originalBlock == nullptr && shouldForwardBlockArg) {
+        } else if (originalBlock == nullptr && blockArg != nullptr) {
             newArgs.reserve(3 + posArgsEntries.size() + kwArgKeyEntries.size() * 2 +
                             /* hasKwSplat */ int(kwArgsHash != nullptr));
             newArgs.push_back(std::move(newRecv));
-            newRecv = ast::MK::Magic(original.loc);
+            newRecv = ast::MK::Magic(blockArg.loc());
             newArgs.push_back(std::move(method));
             newArgs.push_back(std::move(blockArg));
 

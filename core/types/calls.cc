@@ -1543,7 +1543,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
 
                     if (blockLoc.exists()) {
-                        e.replaceWith("Remove block", blockLoc, "");
+                        auto deleteLoc = expandToLeadingComma(gs, blockLoc);
+                        if (deleteLoc.exists()) {
+                            e.replaceWith("Remove block", deleteLoc, "");
+                        }
                     }
                 }
             }
@@ -2772,7 +2775,8 @@ public:
         auto finalBlockType = Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.args[2],
                                                                   args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
+        // receiver loc is the <Magic> loc, which we're using the thread down the loc of the whole BlockPass node
+        core::SendAndBlockLink link{fn, args.locs.receiver, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2887,7 +2891,8 @@ public:
         auto finalBlockType = Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.args[4],
                                                                   args.originForUninitialized, args.suppressErrors);
         optional<int> blockArity = Magic_callWithBlockPass::getArityForBlock(finalBlockType);
-        core::SendAndBlockLink link{fn, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
+        // receiver loc is the <Magic> loc, which we're using the thread down the loc of the whole BlockPass node
+        core::SendAndBlockLink link{fn, args.locs.receiver, Magic_callWithBlockPass::paramInfoByArity(blockArity)};
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,

@@ -714,6 +714,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             ast::InsSeq::STATS_store blockStatsStore;
             unique_ptr<parser::Node> blockPassNode;
             ast::ExpressionPtr blockPassArg;
+            core::LocOffsets blockPassLoc;
             bool blockPassArgIsSymbol = false;
             bool supportedBlock = false;
             if (prismBlock != nullptr) {
@@ -813,6 +814,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
                     blockPassNode = translate(prismBlock);
+                    blockPassLoc = blockPassNode->loc;
 
                     if (bp->expression) {
                         blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
@@ -832,7 +834,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable reference, like
                         // `f(&&)`.
-                        blockPassArg = MK::Local(location, core::Names::ampersand());
+                        blockPassArg = MK::Local(location.copyEndWithZeroLength(), core::Names::ampersand());
                         supportedBlock = true;
                     }
                 }
@@ -951,8 +953,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     magicSendArgs.emplace_back(move(blockPassArg));
                     numPosArgs++;
 
-                    auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(), messageLoc,
-                                             numPosArgs, move(magicSendArgs), flags);
+                    auto sendExpr = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
+                                             messageLoc, numPosArgs, move(magicSendArgs), flags);
                     return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
                                                              move(args));
                 }
@@ -1049,8 +1051,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(blockPassNode));
                 }
 
-                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), messageLoc, numPosArgs,
-                                         move(magicSendArgs), flags);
+                auto sendExpr = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(), messageLoc,
+                                         numPosArgs, move(magicSendArgs), flags);
 
                 return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
                                                          move(args));
@@ -3240,6 +3242,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
+    auto blockLoc = translateLoc(prismBlockOrLambdaNode->location);
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismBlockNode->parameters);
@@ -3250,12 +3253,6 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         parametersNode = translate(prismLambdaNode->parameters);
         body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
-
-    // There was a TODO in the original Desugarer: "the send->block's loc is too big and includes the whole send."
-    // We'll keep this behaviour for parity for now.
-    // TODO: Switch to using the fixed sendNode loc below after direct desugaring is complete
-    // https://github.com/Shopify/sorbet/issues/671
-    auto blockLoc = sendNode->loc;
 
     // Modify send node's endLoc to be position before first space
     // This fixes location for cases like:

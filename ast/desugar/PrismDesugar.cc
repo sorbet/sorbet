@@ -58,8 +58,7 @@ core::NameRef blockParam2Name(DesugarContext dctx, const BlockParam &blockParam)
 
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what);
 
-pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext dctx, core::LocOffsets loc,
-                                                                 parser::Node *anyParamsNode) {
+pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext dctx, parser::Node *anyParamsNode) {
     MethodDef::PARAMS_store params;
     InsSeq::STATS_store destructures;
 
@@ -139,10 +138,9 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
     }
 }
 
-ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
-                           unique_ptr<parser::Node> &blockSend, parser::Node *blockParams,
-                           unique_ptr<parser::Node> &blockBody) {
-    blockSend->loc = loc;
+ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &blockSend,
+                           parser::Node *blockParams, unique_ptr<parser::Node> &blockBody) {
+    blockSend->loc = blockSend->loc.join(loc);
     auto recv = node2TreeImpl(dctx, blockSend);
     Send *send;
     ExpressionPtr res;
@@ -154,7 +152,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         res = move(recv);
         auto is = cast_tree<InsSeq>(res);
         if (!is) {
-            if (auto e = dctx.ctx.beginIndexerError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
+            if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::UnsupportedNode)) {
                 e.setHeader("No body in block");
             }
             return MK::EmptyTree();
@@ -164,7 +162,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         send = cast_tree<Send>(iff->elsep);
         ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
     }
-    auto [params, destructures] = desugarParams(dctx, loc, blockParams);
+    auto [params, destructures] = desugarParams(dctx, blockParams);
 
     checkBlockRestParam(dctx, params);
 
@@ -336,7 +334,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     auto inModule = dctx.inModule && !isSelf;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamName, declLoc, name, dctx.inAnyBlock,
                          inModule, dctx.preserveConcreteSyntax);
-    auto [params, destructures] = desugarParams(dctx1, loc, argnode);
+    auto [params, destructures] = desugarParams(dctx1, argnode);
 
     if (params.empty() || !isa_tree<BlockParam>(params.back())) {
         auto blkLoc = core::LocOffsets::none();
@@ -689,11 +687,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Note: this does *not* handle regular block arguments (e.g. `foo { }`),
                 //       which are handled separately in the`parser::Block *` case.
                 ExpressionPtr blockPassArg;
+                // We'll using the loc of the `<Magic>` node to communicate the loc of the whole `&blk` BlockPass node
+                // Meanwhile, the blockPassArg will use its own loc, which is the expression to the right of the `&`.
+                core::LocOffsets blockPassLoc;
                 if (!send->args.empty() && parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
                     auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
+                    blockPassLoc = bp->loc;
                     if (bp->block == nullptr) {
                         // Replace an anonymous block pass like `f(&)` with a local variable reference, like `f(&&)`.
-                        blockPassArg = MK::Local(bp->loc, core::Names::ampersand());
+                        blockPassArg = MK::Local(bp->loc.copyEndWithZeroLength(), core::Names::ampersand());
                     } else {
                         blockPassArg = node2TreeImpl(dctx, bp->block);
                     }
@@ -726,6 +728,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         ENFORCE(blockPassArg == nullptr, "The parser should have rejected `foo(&, ...)`");
                         // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &<fwd-block>)`.
                         blockPassArg = MK::Local(loc, core::Names::fwdBlock());
+                        blockPassLoc = loc.copyEndWithZeroLength();
 
                         hasFwdArgs = true;
                         eraseFromArgs = true;
@@ -830,7 +833,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &block)`
 
                             sendargs.emplace_back(move(blockPassArg));
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(),
+                            res = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
                                            send->methodLoc, 5, move(sendargs), flags);
                         }
                     }
@@ -886,8 +889,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 sendargs.emplace_back(move(arg));
                             }
 
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), send->methodLoc,
-                                           numPosArgs, move(sendargs), flags);
+                            res = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(),
+                                           send->methodLoc, numPosArgs, move(sendargs), flags);
                         }
                     }
 
@@ -1037,7 +1040,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
             [&](parser::Block *block) {
-                result = desugarBlock(dctx, loc, block->loc, block->send, block->params.get(), block->body);
+                result = desugarBlock(dctx, loc, block->send, block->params.get(), block->body);
             },
             [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
@@ -2182,9 +2185,18 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
         // We don't have an enclosing block arg to start off.
         DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
                             core::NameRef::noName(), false, false, preserveConcreteSyntax);
-        auto loc = what->loc;
+        auto liftedClassDefLoc = what->loc;
         auto result = node2TreeImpl(dctx, what);
-        result = liftTopLevel(dctx, loc, move(result));
+        if (result.loc().exists()) {
+            // If the desugared expression has a different loc, we want to use that. This can happen
+            // because (:block (:send)) desugars to (:send (:block)), but the (:block) node just has
+            // the loc of the `do ... end`, while the (:send) has the whole loc
+            //
+            // But if we desugared to EmptyTree (either intentionally or because there was an
+            // unsupported node type), we want to use the loc of the original node.
+            liftedClassDefLoc = result.loc();
+        }
+        result = liftTopLevel(dctx, liftedClassDefLoc, move(result));
         auto verifiedResult = Verifier::run(ctx, move(result));
         return verifiedResult;
     } catch (SorbetException &) {

@@ -634,7 +634,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     for (auto &e : blockParamFlags) {
                         paramFlags.emplace_back(e.flags);
                     }
-                    auto link = make_shared<core::SendAndBlockLink>(s.fun, move(paramFlags));
+                    auto link = make_shared<core::SendAndBlockLink>(s.fun, block->loc, move(paramFlags));
                     auto send = make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), args,
                                                 std::move(argLocs), !!s.flags.isPrivateOk, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());

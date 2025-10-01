@@ -49,7 +49,7 @@
                         },
                         "end": {
                             "line": 8,
-                            "character": 2
+                            "character": 29
                         }
                     },
                     "children": [
@@ -74,7 +74,7 @@
                                 },
                                 "end": {
                                     "line": 13,
-                                    "character": 4
+                                    "character": 23
                                 }
                             },
                             "children": []
@@ -100,7 +100,7 @@
                                 },
                                 "end": {
                                     "line": 16,
-                                    "character": 4
+                                    "character": 27
                                 }
                             },
                             "children": []

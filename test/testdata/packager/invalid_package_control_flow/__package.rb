@@ -30,13 +30,13 @@ class MyPackage < PackageSpec
 
   # Methods defs are not OK
   sig {void}
-# ^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
+  #   ^^^^^^ error: Invalid expression in package: `Block` not allowed
   def package_method; end
 # ^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `MethodDef`
 # ^^^^^^^^^^^^^^^^^^      error: Invalid expression in package: `RuntimeMethodDefinition`
 
   sig {void}
-# ^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
+  #   ^^^^^^ error: Invalid expression in package: `Block` not allowed
   def self.static_method; end
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `MethodDef`
 # ^^^^^^^^^^^^^^^^^^^^^^      error: Invalid expression in package: `RuntimeMethodDefinition`

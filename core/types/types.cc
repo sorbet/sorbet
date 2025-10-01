@@ -787,8 +787,8 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ParamInfo::Flags> &&paramFlags)
-    : paramFlags(move(paramFlags)), fun(fun) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, LocOffsets loc, vector<ParamInfo::Flags> &&paramFlags)
+    : paramFlags(move(paramFlags)), loc(loc), fun(fun) {}
 
 optional<int> SendAndBlockLink::fixedArity() const {
     optional<int> arity = 0;
@@ -1131,21 +1131,6 @@ DispatchArgs::DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosAr
     : name(name), locs(locs), numPosArgs(numPosArgs), args(args), selfType(selfType), fullType(fullType),
       thisType(thisType), block(block), originForUninitialized(originForUninitialized), isPrivateOk(isPrivateOk),
       suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
-
-Loc DispatchArgs::blockLoc(const GlobalState &gs) const {
-    ENFORCE(this->block != nullptr);
-    auto blockLoc = core::Loc(locs.file, argsLoc().endPos(), callLoc().endPos());
-    auto blockLocSource = blockLoc.source(gs);
-    if (!blockLocSource.has_value()) {
-        return callLoc();
-    }
-
-    if (absl::StartsWith(blockLocSource.value(), ")") || absl::StartsWith(blockLocSource.value(), "]")) {
-        return blockLoc.adjust(gs, 1, 0);
-    }
-
-    return blockLoc;
-}
 
 DispatchArgs DispatchArgs::withSelfAndThisRef(const TypePtr &newSelfRef) const {
     return DispatchArgs{name,        locs,           numPosArgs,
