@@ -176,8 +176,12 @@ pm_node_t *TypeToParserNodePrism::classSingletonType(const rbs_types_class_singl
 
 pm_node_t *TypeToParserNodePrism::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
                                             const RBSDeclaration &declaration) {
-    // Simplified - should create T.any call with all union members
-    return this->createConstantReadNode("T.any");
+    std::vector<pm_node_t *> args;
+    for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
+        auto innerType = toPrismNode(list_node->node, declaration);
+        args.push_back(innerType);
+    }
+    return PMK::TAny(loc, args);
 }
 
 pm_node_t *TypeToParserNodePrism::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,

@@ -268,6 +268,7 @@ public:
     // T constant and method helpers
     static pm_node_t *T(core::LocOffsets loc);
     static pm_node_t *TNilable(core::LocOffsets loc, pm_node_t *type);
+    static pm_node_t *TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args);
 
     // Utility functions for type checking
     static bool isTUntyped(pm_node_t *node);
