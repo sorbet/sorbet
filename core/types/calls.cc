@@ -2,6 +2,7 @@
 #include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/KwPair.h"
@@ -375,6 +376,23 @@ unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs 
                 e.addErrorLine(arg->loc, "Keyword parameter `{}` declared to expect type `{}` here:", argName,
                                expectedType.show(gs));
             }
+        }
+
+        if (errLoc.exists()) {
+            string_view beforeKwargs;
+            if (args.locs.args.empty()) {
+                if (args.funLoc().exists() && args.funLoc().endPos() == errLoc.beginPos()) {
+                    // No parens, so we need to make sure we put a space between the end of the
+                    // method name and the start of the kwargs
+                    beforeKwargs = " ";
+                }
+            } else {
+                beforeKwargs = ", ";
+            }
+
+            e.replaceWith("Insert required keyword argument labels", errLoc, "{}{}", beforeKwargs,
+                          fmt::map_join(missingKwargs, ", ",
+                                        [&gs](auto *param) { return fmt::format("{}:", param->name.show(gs)); }));
         }
 
         return e.build();
