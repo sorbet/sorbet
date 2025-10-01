@@ -56,7 +56,7 @@ arity-messages.rb:12: Too many positional arguments provided for method `Object#
 
 arity-messages.rb:15: Not enough arguments provided for method `Object#quux`. Expected: `3`, got: `2` https://srb.help/7004
     15 |quux(2, z: 3)
-             ^^^^^^^
+                    ^
     arity-messages.rb:14: `Object#quux` defined here
     14 |def quux(x, y, z); end
         ^^^^^^^^^^^^^^^^^
@@ -118,9 +118,9 @@ arity-messages.rb:30: Too many positional arguments provided for method `Object#
     30 |paperino(2, 3, z: 4)
                     ^
 
-arity-messages.rb:38: Missing required keyword argument `qux` for method `A.make` https://srb.help/7004
-    38 |  foo: [1, 2, 3],
+arity-messages.rb:39: Missing required keyword argument `qux` for method `A.make` https://srb.help/7004
     39 |  bar: "some long string",
+                                 ^
     arity-messages.rb:33: Keyword argument `qux` declared to expect type `T.untyped` here:
     33 |  def self.make(foo:, bar:, qux:)
                                     ^^^^
