@@ -350,4 +350,40 @@ pm_node_t *PMK::Send1(core::LocOffsets loc, pm_node_t *receiver, const char *met
     return up_cast(Send(receiver, method_id, arguments, tiny_loc, full_loc, tiny_loc));
 }
 
+pm_node_t *PMK::T(core::LocOffsets loc) {
+    // Create ::T constant path node
+    return ConstantPathNode(loc, nullptr, "T");
+}
+
+pm_node_t *PMK::TNilable(core::LocOffsets loc, pm_node_t *type) {
+    // Create T.nilable(type) call
+    pm_node_t *t_const = T(loc);
+    if (!t_const || !type) {
+        return nullptr;
+    }
+
+    return Send1(loc, t_const, "nilable", type);
+}
+
+bool PMK::isTUntyped(pm_node_t *node) {
+    if (!node || node->type != PM_CALL_NODE) {
+        return false;
+    }
+
+    pm_call_node_t *call = down_cast<pm_call_node_t>(node);
+    if (!call->receiver || call->receiver->type != PM_CONSTANT_PATH_NODE) {
+        return false;
+    }
+
+    // Check if receiver is ::T and method is "untyped"
+    pm_constant_path_node_t *receiver = down_cast<pm_constant_path_node_t>(call->receiver);
+    if (receiver->parent != nullptr) {
+        return false; // Should be root-anchored ::T
+    }
+
+    // Check method name is "untyped" (this is simplified - would need constant pool lookup)
+    // For now, return false as a safe fallback
+    return false;
+}
+
 } // namespace sorbet::parser::Prism

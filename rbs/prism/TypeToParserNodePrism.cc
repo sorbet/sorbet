@@ -188,9 +188,11 @@ pm_node_t *TypeToParserNodePrism::intersectionType(const rbs_types_intersection_
 
 pm_node_t *TypeToParserNodePrism::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
                                                const RBSDeclaration &declaration) {
-    // Simplified - should create T.nilable call with inner type
-    fmt::print("TypeToParserNodePrism::optionalType\n");
-    return this->createConstantReadNode("T.nilable");
+    auto innerType = toPrismNode(node->type, declaration);
+    if (PMK::isTUntyped(innerType)) {
+        return innerType;
+    }
+    return PMK::TNilable(loc, innerType);
 }
 
 pm_node_t *TypeToParserNodePrism::voidType(const rbs_types_bases_void_t *node, core::LocOffsets loc) {

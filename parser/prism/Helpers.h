@@ -264,6 +264,13 @@ public:
     // High-level node creators
     static pm_node_t *SorbetPrivateStatic();
     static pm_node_t *TSigWithoutRuntime();
+
+    // T constant and method helpers
+    static pm_node_t *T(core::LocOffsets loc);
+    static pm_node_t *TNilable(core::LocOffsets loc, pm_node_t *type);
+
+    // Utility functions for type checking
+    static bool isTUntyped(pm_node_t *node);
 };
 
 } // namespace sorbet::parser::Prism
