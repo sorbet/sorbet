@@ -499,7 +499,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     size_t paramIndex = 0;
     for (const auto &arg : args) {
-        fmt::print("DEBUG: Processing arg, hasName={}, kind={}\n", (arg.name != nullptr), static_cast<int>(arg.kind));
+        // fmt::print("DEBUG: Processing arg, hasName={}, kind={}\n", (arg.name != nullptr), static_cast<int>(arg.kind));
 
         // Create symbol node for parameter name
         pm_node_t *symbolNode = nullptr;
@@ -534,15 +534,14 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
         // Create association node (key-value pair) with consistent zero-width location
         core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
-        fmt::print("DEBUG: Creating assoc with tinyLoc: {}..{} (was arg.loc: {}..{})\n",
-                   tinyLocOffsets.beginPos(), tinyLocOffsets.endPos(),
-                   arg.loc.beginPos(), arg.loc.endPos());
+        // fmt::print("DEBUG: Creating assoc with tinyLoc: {}..{} (was arg.loc: {}..{})\n", tinyLocOffsets.beginPos(),
+        //            tinyLocOffsets.endPos(), arg.loc.beginPos(), arg.loc.endPos());
         pm_node_t *pairNode = createAssocNode(symbolNode, typeNode, tinyLocOffsets);
         if (pairNode) {
             sigParams.push_back(pairNode);
-            debugPrintLocation("param.symbol.base", symbolNode->location);
-            debugPrintLocation("param.type.base", typeNode->location);
-            debugPrintLocation("param.pair.base", pairNode->location);
+            // debugPrintLocation("param.symbol.base", symbolNode->location);
+            // debugPrintLocation("param.type.base", typeNode->location);
+            // debugPrintLocation("param.pair.base", pairNode->location);
         }
         paramIndex++;
     }
@@ -553,7 +552,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         return nullptr;
 
     // Add .params() call if we have parameters
-    fmt::print("DEBUG: sigParams.size() = {}\n", sigParams.size());
+    // fmt::print("DEBUG: sigParams.size() = {}\n", sigParams.size());
     if (sigParams.size() > 0) {
         pm_constant_id_t params_id = addConstantToPool("params");
         if (params_id == PM_CONSTANT_ID_UNSET) {
@@ -580,8 +579,8 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         }
 
         sigReceiver = up_cast(paramsCall);
-        debugPrintLocation("params.call.base", paramsCall->base.location);
-        debugPrintLocation("params.call.msg", paramsCall->message_loc);
+        // debugPrintLocation("params.call.base", paramsCall->base.location);
+        // debugPrintLocation("params.call.msg", paramsCall->message_loc);
     }
 
     // Add return type call (.void() or .returns(Type))
@@ -590,8 +589,8 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     // Pre-calculate return type locations to avoid redundant calculations
     pm_location_t return_type_full_loc =
         convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg));
-    pm_location_t return_type_zero_loc = convertLocOffsets(
-        declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
+    pm_location_t return_type_zero_loc =
+        convertLocOffsets(declaration.typeLocFromRange(functionType->return_type->location->rg).copyWithZeroLength());
 
     if (functionType->return_type->type == RBS_TYPES_BASES_VOID) {
         // Create: sigReceiver.void()
@@ -599,12 +598,13 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         if (void_id == PM_CONSTANT_ID_UNSET)
             return nullptr;
 
-        pm_call_node_t *voidCall = createMethodCall(sigReceiver, void_id, nullptr, return_type_zero_loc, full_loc, tiny_loc);
+        pm_call_node_t *voidCall =
+            createMethodCall(sigReceiver, void_id, nullptr, return_type_zero_loc, full_loc, tiny_loc);
         if (!voidCall)
             return nullptr;
         blockBody = up_cast(voidCall);
-        debugPrintLocation("void.call.base", voidCall->base.location);
-        debugPrintLocation("void.call.msg", voidCall->message_loc);
+        // debugPrintLocation("void.call.base", voidCall->base.location);
+        // debugPrintLocation("void.call.msg", voidCall->message_loc);
     } else {
         // Create: sigReceiver.returns(Type)
         pm_constant_id_t returns_id = addConstantToPool("returns");
@@ -628,8 +628,8 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         if (!returnsCall)
             return nullptr;
         blockBody = up_cast(returnsCall);
-        debugPrintLocation("returns.call.base", returnsCall->base.location);
-        debugPrintLocation("returns.call.msg", returnsCall->message_loc);
+        // debugPrintLocation("returns.call.base", returnsCall->base.location);
+        // debugPrintLocation("returns.call.msg", returnsCall->message_loc);
     }
 
     if (!blockBody)
@@ -656,10 +656,10 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         return nullptr;
 
     // Debug print important locations to diagnose substr crashes
-    debugPrintLocation("sig.call.base", call->base.location);
-    debugPrintLocation("sig.call.msg", call->message_loc);
-    debugPrintLocation("block.open", block->opening_loc);
-    debugPrintLocation("block.close", block->closing_loc);
+    // debugPrintLocation("sig.call.base", call->base.location);
+    // debugPrintLocation("sig.call.msg", call->message_loc);
+    // debugPrintLocation("block.open", block->opening_loc);
+    // debugPrintLocation("block.close", block->closing_loc);
 
     (void)commentLoc; // Suppress unused warning
     return up_cast(call);
@@ -685,6 +685,7 @@ pm_node_t MethodTypeToParserNodePrism::initializeBaseNode(pm_node_type_t type) {
 }
 
 pm_node_t *MethodTypeToParserNodePrism::createConstantReadNode(const char *name) {
+    // fmt::print("MethodTypeToParserNodePrism::createConstantReadNode\n");
     pm_constant_id_t constant_id = addConstantToPool(name);
     if (constant_id == PM_CONSTANT_ID_UNSET)
         return nullptr;
@@ -699,6 +700,7 @@ pm_node_t *MethodTypeToParserNodePrism::createConstantReadNode(const char *name)
 }
 
 pm_node_t *MethodTypeToParserNodePrism::createConstantPathNode(pm_node_t *parent, const char *name) {
+    // fmt::print("MethodTypeToParserNodePrism::createConstantPathNode\n");
     pm_constant_id_t name_id = addConstantToPool(name);
     if (name_id == PM_CONSTANT_ID_UNSET)
         return nullptr;
@@ -775,6 +777,7 @@ pm_node_t *MethodTypeToParserNodePrism::createSelfNode() {
 }
 
 pm_constant_id_t MethodTypeToParserNodePrism::addConstantToPool(const char *name) {
+    // fmt::print("MethodTypeToParserNodePrism::addConstantToPool\n");
     if (!prismParser)
         return PM_CONSTANT_ID_UNSET;
 
@@ -976,15 +979,17 @@ pm_node_t *MethodTypeToParserNodePrism::createKeywordHashNode(const std::vector<
 }
 
 void MethodTypeToParserNodePrism::debugPrintLocation(const char *label, pm_location_t loc) {
+    (void)label; // Suppress unused warning
+    (void)loc;   // Suppress unused warning
     if (!prismParser) {
-        fmt::print("DEBUG {}: parser not available\n", label);
+        // fmt::print("DEBUG {}: parser not available\n", label);
         return;
     }
 
-    pm_parser_t *p = prismParser->getInternalParser();
-    size_t b = loc.start ? (size_t)(loc.start - p->start) : (size_t)0;
-    size_t e = loc.end ? (size_t)(loc.end - p->start) : (size_t)0;
-    fmt::print("DEBUG {}: {}..{}\n", label, b, e);
+    // pm_parser_t *p = prismParser->getInternalParser();
+    // size_t b = loc.start ? (size_t)(loc.start - p->start) : (size_t)0;
+    // size_t e = loc.end ? (size_t)(loc.end - p->start) : (size_t)0;
+    // fmt::print("DEBUG {}: {}..{}\n", label, b, e);
 }
 
 pm_call_node_t *MethodTypeToParserNodePrism::createMethodCall(pm_node_t *receiver, pm_constant_id_t method_id,
