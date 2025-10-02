@@ -1,5 +1,15 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  def another_outer_helper<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
   module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    def self.context<<todo method>>(arg0, &blk)
+      <emptyTree>
+    end
+
+    <runtime method definition of self.context>
+
     module <emptyTree>::<C Core><<C <todo sym>>> < ()
       class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
         def described_class<<todo method>>(&<blk>)
@@ -30,7 +40,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def <it><<todo method>>(&<blk>)
-        <self>.my_helper()
+        begin
+          <self>.my_helper()
+          <self>.described_class()
+        end
       end
 
       def <it 'example'><<todo method>>(&<blk>)
@@ -83,6 +96,55 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.example() do ||
       <self>.outer_helper()
+    end
+
+    <self>.example_group("example_group group") do ||
+      <self>.it() do ||
+        <self>.outer_helper()
+      end
+    end
+
+    <self>.context("context group") do ||
+      <self>.it() do ||
+        <self>.outer_helper()
+      end
+    end
+
+    class <emptyTree>::<C <describe 'contains generic name group'>><<C <todo sym>>> < (<self>)
+      class <emptyTree>::<C <example_group 'example_group group'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <self>.outer_helper()
+        end
+      end
+
+      class <emptyTree>::<C <context 'context group'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <self>.outer_helper()
+        end
+      end
+    end
+
+    class <emptyTree>::<C <xdescribe 'xdescribe group'>><<C <todo sym>>> < (<self>)
+      def <it><<todo method>>(&<blk>)
+        <self>.outer_helper()
+      end
+    end
+  end
+
+  <emptyTree>::<C RSpec>.context("B") do ||
+    begin
+      <runtime method definition of another_outer_helper>
+      <self>.it("inside B") do ||
+        <self>.another_outer_helper()
+      end
+      <self>.context("Nested, no RSpec") do ||
+        <self>.it("inside Nested") do ||
+          begin
+            <self>.another_outer_helper()
+            <self>.described_class()
+          end
+        end
+      end
     end
   end
 end
