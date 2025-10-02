@@ -60,7 +60,7 @@ void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Op
     // We can use the kvstore to read in the cached name table. We read this in after the payload has been initialized,
     // as the cached name table will extend the payload's existing table when the sorbet versions match.
     if (kvstore) {
-        auto maybeUUIDBytes = kvstore->read(core::serialize::Serializer::UUID_KEY);
+        auto maybeUUIDBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_UUID_KEY);
         auto maybeGsBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
         if (maybeUUIDBytes.data != nullptr && maybeGsBytes.data != nullptr) {
             Timer timeit(gs.tracer(), "read_name_table.kvstore");

@@ -9,7 +9,7 @@ public:
     static const uint32_t VERSION = 6;
 
     static constexpr std::string_view NAME_TABLE_KEY = "NameTable";
-    static constexpr std::string_view UUID_KEY = "UUID";
+    static constexpr std::string_view NAME_TABLE_UUID_KEY = "NameTableUUID";
 
     // Serialize only the UUID from a global state.
     static std::vector<uint8_t> storeUUID(const GlobalState &gs);
