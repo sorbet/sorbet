@@ -1164,10 +1164,150 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto caseNode = down_cast<pm_case_node>(node);
 
             auto predicate = translate(caseNode->predicate);
-            auto sorbetConditions = translateMulti(caseNode->conditions);
+
+            auto prismWhenNodes = absl::MakeSpan(caseNode->conditions.nodes, caseNode->conditions.size);
+
+            NodeVec whenNodes;
+            whenNodes.reserve(prismWhenNodes.size());
+
+            size_t totalPatterns = 0;
+            bool allWhensHaveDesugaredExpr = true;
+
+            for (auto *whenNodePtr : prismWhenNodes) {
+                auto *whenNode = down_cast<pm_when_node>(whenNodePtr);
+                auto whenLoc = translateLoc(whenNode->base.location);
+
+                auto prismPatterns = absl::MakeSpan(whenNode->conditions.nodes, whenNode->conditions.size);
+
+                NodeVec patternNodes;
+                patternNodes.reserve(prismPatterns.size());
+                translateMultiInto(patternNodes, prismPatterns);
+                totalPatterns += patternNodes.size();
+
+                auto statementsNode = translateStatements(whenNode->statements);
+                allWhensHaveDesugaredExpr =
+                    allWhensHaveDesugaredExpr && hasExpr(statementsNode) && hasExpr(patternNodes);
+
+                // A single `when` clause does not desugar into a standalone Ruby expression; it only
+                // becomes meaningful when the enclosing `case` stitches together all clauses. Wrapping it
+                // in a NodeWithExpr seeded with `EmptyTree` satisfies the API contract so that
+                // `hasExpr(whenNodes)` can succeed. The enclosing `case` later consumes the real
+                // expressions from the patterns and body when it assembles the final AST.
+                whenNodes.emplace_back(make_node_with_expr<parser::When>(MK::EmptyTree(), whenLoc, move(patternNodes),
+                                                                         move(statementsNode)));
+            }
+
             auto elseClause = translate(up_cast(caseNode->else_clause));
 
-            return make_unique<Case>(location, move(predicate), move(sorbetConditions), move(elseClause));
+            if (!directlyDesugar || !allWhensHaveDesugaredExpr || !hasExpr(predicate, elseClause)) {
+                return make_unique<Case>(location, move(predicate), move(whenNodes), move(elseClause));
+            }
+
+            if (preserveConcreteSyntax) {
+                auto locZeroLen = location.copyWithZeroLength();
+
+                ast::Send::ARGS_store args;
+                args.reserve(2 + whenNodes.size() + totalPatterns); // +2 is for the predicate and the patterns count
+                args.emplace_back(predicate == nullptr ? MK::EmptyTree() : predicate->takeDesugaredExpr());
+                args.emplace_back(MK::Int(locZeroLen, totalPatterns));
+
+                for (auto &whenNodePtr : whenNodes) {
+                    auto whenNodeWrapped = parser::NodeWithExpr::cast_node<parser::When>(whenNodePtr.get());
+                    ENFORCE(whenNodeWrapped != nullptr, "case without a when?");
+                    // Each pattern node already has a desugared expression (populated by translateMulti +
+                    // NodeWithExpr). Consume them now; the wrapper's placeholder expression is intentionally ignored.
+                    for (auto &patternNode : whenNodeWrapped->patterns) {
+                        args.emplace_back(patternNode == nullptr ? MK::EmptyTree() : patternNode->takeDesugaredExpr());
+                    }
+                }
+
+                for (auto &whenNodePtr : whenNodes) {
+                    auto whenNodeWrapped = parser::NodeWithExpr::cast_node<parser::When>(whenNodePtr.get());
+                    ENFORCE(whenNodeWrapped != nullptr, "case without a when?");
+                    // The body node also carries a real expression once translateStatements has run.
+                    auto bodyExpr =
+                        whenNodeWrapped->body == nullptr ? MK::EmptyTree() : whenNodeWrapped->body->takeDesugaredExpr();
+                    args.emplace_back(move(bodyExpr));
+                }
+
+                args.emplace_back(elseClause == nullptr ? MK::EmptyTree() : elseClause->takeDesugaredExpr());
+
+                // Desugar to `::Magic.caseWhen(predicate, num_patterns, patterns..., bodies..., else)`
+                auto expr = MK::Send(location, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, args.size(),
+                                     move(args));
+
+                return make_node_with_expr<Case>(move(expr), location, move(predicate), move(whenNodes),
+                                                 move(elseClause));
+            }
+
+            core::NameRef tempName;
+            core::LocOffsets predicateLoc;
+            bool hasPredicate = (predicate != nullptr);
+
+            if (hasPredicate) {
+                predicateLoc = predicate->loc;
+                tempName = nextUniqueDesugarName(core::Names::assignTemp());
+            } else {
+                tempName = core::NameRef::noName();
+            }
+
+            // The if/else ladder for the entire case statement, starting with the else clause as the final `else` when
+            // building backwards
+            ExpressionPtr resultExpr = elseClause == nullptr ? MK::EmptyTree() : elseClause->takeDesugaredExpr();
+
+            for (auto it = whenNodes.rbegin(); it != whenNodes.rend(); ++it) {
+                auto whenNodeWrapped = parser::NodeWithExpr::cast_node<parser::When>(it->get());
+                ENFORCE(whenNodeWrapped != nullptr, "case without a when?");
+
+                ExpressionPtr patternsResult; // the if/else ladder for this when clause's patterns
+                for (auto &patternNode : whenNodeWrapped->patterns) {
+                    auto patternExpr = patternNode == nullptr ? MK::EmptyTree() : patternNode->takeDesugaredExpr();
+                    auto patternLoc = patternExpr.loc();
+
+                    ExpressionPtr testExpr;
+                    if (parser::NodeWithExpr::isa_node<parser::Splat>(patternNode.get())) {
+                        // splat pattern in when clause, predicate is required, `case a when *others`
+                        ENFORCE(hasPredicate, "splats need something to test against");
+                        auto local = MK::Local(predicateLoc, tempName);
+                        // Desugar `case x when *patterns` to `::Magic.<check-match-array>(x, patterns)`,
+                        // which behaves like `patterns.any?(x)`
+                        testExpr = MK::Send2(patternLoc, MK::Magic(location), core::Names::checkMatchArray(),
+                                             patternLoc.copyWithZeroLength(), move(local), move(patternExpr));
+                    } else if (hasPredicate) {
+                        // regular pattern when case predicate is present, `case a when 1`
+                        auto local = MK::Local(predicateLoc, tempName);
+                        // Desugar `case x when 1` to `1 === x`
+                        testExpr = MK::Send1(patternLoc, move(patternExpr), core::Names::tripleEq(),
+                                             patternLoc.copyWithZeroLength(), move(local));
+                    } else {
+                        // regular pattern when case predicate is not present, `case when 1 then "one" end`
+                        // case # no predicate present
+                        // when 1
+                        //   "one"
+                        // end
+                        testExpr = move(patternExpr);
+                    }
+
+                    if (patternsResult == nullptr) {
+                        patternsResult = move(testExpr);
+                    } else {
+                        auto trueExpr = MK::True(testExpr.loc());
+                        patternsResult = MK::If(testExpr.loc(), move(testExpr), move(trueExpr), move(patternsResult));
+                    }
+                }
+
+                auto thenExpr =
+                    whenNodeWrapped->body != nullptr ? whenNodeWrapped->body->takeDesugaredExpr() : MK::EmptyTree();
+                resultExpr = MK::If(whenNodeWrapped->loc, move(patternsResult), move(thenExpr), move(resultExpr));
+            }
+
+            if (hasPredicate) {
+                auto assignExpr = MK::Assign(predicateLoc, tempName, predicate->takeDesugaredExpr());
+                resultExpr = MK::InsSeq1(location, move(assignExpr), move(resultExpr));
+            }
+
+            return make_node_with_expr<Case>(move(resultExpr), location, move(predicate), move(whenNodes),
+                                             move(elseClause));
         }
         case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
             auto classNode = down_cast<pm_class_node>(node);
