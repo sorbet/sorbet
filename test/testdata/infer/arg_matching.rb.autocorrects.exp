@@ -153,10 +153,10 @@ class TestArgs
     #                    ^ error: Too many positional arguments
     #                     ^ error: Missing required keyword argument `c`
 
-    requires_mixed c:
+    requires_mixed(c:)
     #             ^ error: Not enough arguments
     #             ^ error: Missing required keyword argument
-    requires_mixed c: {}
+    requires_mixed(c:) {}
     #             ^ error: Not enough arguments
     #             ^ error: Missing required keyword argument
     requires_mixed(c:)
@@ -198,10 +198,10 @@ class TestArgs
   end
 
   def call_requires_multiple_kwarg(x)
-    requires_multiple_kwarg x:, y:
+    requires_multiple_kwarg(x:, y:)
     #                      ^ error: Not enough arguments
     #                      ^ error: Missing required keyword arguments
-    requires_multiple_kwarg x:, y: {}
+    requires_multiple_kwarg(x:, y:) {}
     #                      ^ error: Not enough arguments
     #                      ^ error: Missing required keyword arguments
     requires_multiple_kwarg(x:, y:)

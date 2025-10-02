@@ -380,19 +380,23 @@ unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs 
 
         if (errLoc.exists() && !isSymbolBlockPass(gs, args).exists()) {
             string_view beforeKwargs;
+            string_view afterKwargs;
             if (args.locs.args.empty()) {
                 if (args.funLoc().exists() && args.funLoc().endPos() == errLoc.beginPos()) {
-                    // No parens, so we need to make sure we put a space between the end of the
-                    // method name and the start of the kwargs
-                    beforeKwargs = " ";
+                    // No parens. Let's put our own parens, because it's more common to assume that
+                    // people will want parens.
+                    beforeKwargs = "(";
+                    afterKwargs = ")";
                 }
             } else {
                 beforeKwargs = ", ";
+                afterKwargs = "";
             }
 
-            e.replaceWith("Insert required keyword argument labels", errLoc, "{}{}", beforeKwargs,
+            e.replaceWith("Insert required keyword argument labels", errLoc, "{}{}{}", beforeKwargs,
                           fmt::map_join(missingKwargs, ", ",
-                                        [&gs](auto *param) { return fmt::format("{}:", param->name.show(gs)); }));
+                                        [&gs](auto *param) { return fmt::format("{}:", param->name.show(gs)); }),
+                          afterKwargs);
         }
 
         return e.build();
