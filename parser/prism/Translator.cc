@@ -1815,13 +1815,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto isKwargs =
                 PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
                 absl::c_all_of(absl::MakeSpan(keywordHashNode->elements.nodes, keywordHashNode->elements.size),
-                               [](const auto *node) {
+                               [](auto *node) {
                                    // Checks if the given node is a keyword hash element based on the standards of
                                    // Sorbet's legacy parser. Based on `Builder::isKeywordHashElement()`
 
-                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) {
-                                       return true;
+                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_NODE)) { // A regular key/value pair
+                                       auto pair = down_cast<pm_assoc_node>(node);
+                                       return pair->key && PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE);
                                    }
+
+                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) { // A `**h` or `**` kwarg splat
+                                       return true;
+                                   };
 
                                    return false;
                                });
