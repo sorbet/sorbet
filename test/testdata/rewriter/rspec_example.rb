@@ -76,22 +76,22 @@ class A
   end
 
   describe "contains generic name group" do
-    example_group "example_group group" do # error: Method `example_group` does not exist
-      it do # error: does not exist
-        outer_helper # error: Method `outer_helper` does not exist
+    example_group "example_group group" do
+      it do
+        outer_helper
       end
     end
 
-    context "context group" do # error: Method `context` does not exist
-      it do # error: does not exist
-        outer_helper # error: Method `outer_helper` does not exist
+    context "context group" do
+      it do
+        outer_helper
       end
     end
   end
 
-  xdescribe "xdescribe group" do # error: Method `xdescribe` does not exist
-    it do # error: does not exist
-      outer_helper # error: Method `outer_helper` does not exist
+  xdescribe "xdescribe group" do
+    it do
+      outer_helper
     end
   end
 end

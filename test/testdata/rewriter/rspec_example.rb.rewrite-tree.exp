@@ -111,21 +111,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'contains generic name group'>><<C <todo sym>>> < (<self>)
-      <self>.example_group("example_group group") do ||
-        <self>.it() do ||
+      class <emptyTree>::<C <example_group 'example_group group'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
           <self>.outer_helper()
         end
       end
 
-      <self>.context("context group") do ||
-        <self>.it() do ||
+      class <emptyTree>::<C <context 'context group'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
           <self>.outer_helper()
         end
       end
     end
 
-    <self>.xdescribe("xdescribe group") do ||
-      <self>.it() do ||
+    class <emptyTree>::<C <xdescribe 'xdescribe group'>><<C <todo sym>>> < (<self>)
+      def <it><<todo method>>(&<blk>)
         <self>.outer_helper()
       end
     end

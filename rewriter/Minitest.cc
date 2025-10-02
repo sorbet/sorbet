@@ -219,10 +219,14 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
 // depended on methods sharing names with RSpec methods not firing.
 bool requiresSecondFactor(core::NameRef fun) {
     switch (fun.rawId()) {
+        // Example names
         case core::Names::example().rawId():
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId():
+        // ExampleGroup names
+        case core::Names::context().rawId():
+        case core::Names::exampleGroup().rawId():
             return true;
 
         default:
@@ -351,7 +355,13 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
     }
 
     switch (send->fun.rawId()) {
-        case core::Names::describe().rawId(): {
+        case core::Names::describe().rawId():
+        case core::Names::xdescribe().rawId():
+        case core::Names::fdescribe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xcontext().rawId():
+        case core::Names::fcontext().rawId():
+        case core::Names::exampleGroup().rawId(): {
             if (send->numPosArgs() != 1 || !send->hasBlock()) {
                 break;
             }
@@ -555,10 +565,25 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                  send->flags);
         }
 
-        case core::Names::describe().rawId(): {
+        case core::Names::describe().rawId():
+        case core::Names::xdescribe().rawId():
+        case core::Names::fdescribe().rawId():
+        case core::Names::context().rawId():
+        case core::Names::xcontext().rawId():
+        case core::Names::fcontext().rawId():
+        case core::Names::exampleGroup().rawId(): {
             if (block == nullptr || send->numPosArgs() != 1 || !send->recv.isSelfReference()) {
                 return nullptr;
             }
+
+            if (!send->recv.isSelfReference()) {
+                return nullptr;
+            }
+
+            if (requiresSecondFactor(send->fun) && !insideDescribe) {
+                return nullptr;
+            }
+
             auto &arg = send->getPosArg(0);
             auto argString = to_s(ctx, arg);
             ast::ClassDef::ANCESTORS_store ancestors;
@@ -580,8 +605,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             auto rhs = prepareBody(ctx, /* isClass */ true, std::move(block->body), /* insideDescribe */ true);
 
-            auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
-                                                    ctx.state.enterNameConstant("<describe '" + argString + "'>"));
+            auto testName = fmt::format("<{} '{}'>", send->fun.show(ctx), argString);
+            auto name = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
             auto declLoc = declLocForSendWithBlock(*send);
             return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
                                   flattenDescribeBody(move(rhs)));
