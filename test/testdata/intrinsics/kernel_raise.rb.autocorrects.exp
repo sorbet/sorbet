@@ -43,29 +43,29 @@ end
 sig {params(cls: T.any(T.class_of(TypeError), T.class_of(MyError))).void}
 def example(cls)
   0.times do
-    raise MyError
+    raise MyError input:
     #            ^ error: Missing required keyword argument `input` for method `MyError#initialize`
   end
 
   0.times do
-    raise cls
+    raise cls input:
     #        ^ error: Missing required keyword argument `input` for method `MyError#initialize`
   end
 
   0.times do
-    raise MyError
+    raise MyError, input:
     #                   ^ error: Missing required keyword argument `input` for method `MyError#initialize`
     #              ^^^^^ error: Too many positional arguments provided for method `MyError#initialize`. Expected: `0`, got: `1`
   end
 
   0.times do
-    raise cls
+    raise cls, input:
     #               ^ error: Missing required keyword argument `input` for method `MyError#initialize`
     #          ^^^^^ error: Too many positional arguments provided for method `MyError#initialize`. Expected: `0`, got: `1`
   end
 
   0.times do
-    raise MyError.new
+    raise MyError.new input:
     #                ^ error: Missing required keyword argument `input` for method `MyError#initialize`
   end
 
@@ -98,7 +98,7 @@ def example(cls)
   end
 
   0.times do
-    fail MyError
+    fail MyError input:
     #           ^ error: Missing required keyword argument `input` for method `MyError#initialize`
   end
 end
