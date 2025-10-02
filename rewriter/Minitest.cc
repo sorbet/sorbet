@@ -392,7 +392,6 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             break;
         }
 
-        // hello
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
             if (send->hasBlock() || !insideDescribe || send->numPosArgs() != 1) {
