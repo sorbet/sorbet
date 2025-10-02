@@ -686,11 +686,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Note: this does *not* handle regular block arguments (e.g. `foo { }`),
                 //       which are handled separately in the`parser::Block *` case.
                 ExpressionPtr blockPassArg;
+                // We'll using the loc of the `<Magic>` node to communicate the loc of the whole `&blk` BlockPass node
+                // Meanwhile, the blockPassArg will use its own loc, which is the expression to the right of the `&`.
+                core::LocOffsets blockPassLoc;
                 if (!send->args.empty() && parser::NodeWithExpr::isa_node<parser::BlockPass>(send->args.back().get())) {
                     auto *bp = parser::NodeWithExpr::cast_node<parser::BlockPass>(send->args.back().get());
+                    blockPassLoc = bp->loc;
                     if (bp->block == nullptr) {
                         // Replace an anonymous block pass like `f(&)` with a local variable reference, like `f(&&)`.
-                        blockPassArg = MK::Local(bp->loc, core::Names::ampersand());
+                        blockPassArg = MK::Local(bp->loc.copyEndWithZeroLength(), core::Names::ampersand());
                     } else {
                         blockPassArg = node2TreeImpl(dctx, bp->block);
                     }
@@ -723,6 +727,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         ENFORCE(blockPassArg == nullptr, "The parser should have rejected `foo(&, ...)`");
                         // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &<fwd-block>)`.
                         blockPassArg = MK::Local(loc, core::Names::fwdBlock());
+                        blockPassLoc = loc.copyEndWithZeroLength();
 
                         hasFwdArgs = true;
                         eraseFromArgs = true;
@@ -827,7 +832,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &block)`
 
                             sendargs.emplace_back(move(blockPassArg));
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplatAndBlockPass(),
+                            res = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
                                            send->methodLoc, 5, move(sendargs), flags);
                         }
                     }
@@ -883,8 +888,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                 sendargs.emplace_back(move(arg));
                             }
 
-                            res = MK::Send(loc, MK::Magic(loc), core::Names::callWithBlockPass(), send->methodLoc,
-                                           numPosArgs, move(sendargs), flags);
+                            res = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(),
+                                           send->methodLoc, numPosArgs, move(sendargs), flags);
                         }
                     }
 
