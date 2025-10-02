@@ -473,10 +473,8 @@ public:
             else_stmts.emplace_back(std::move(else_));
             stmts.emplace_back(make_unique<Begin>(elseLoc, std::move(else_stmts)));
             auto loc = collectionLoc(stmts);
-            if (!stmts.empty()) {
-                if (auto *block = parser::cast_node<Block>(body.get())) {
-                    loc = block->send->loc.join(loc);
-                }
+            if (auto *block = parser::cast_node<Block>(body.get())) {
+                loc = block->send->loc.join(loc);
             }
 
             body = make_unique<Begin>(loc, std::move(stmts));
