@@ -1057,10 +1057,16 @@ LocOffsets SerializerImpl::unpickleLocOffsets(UnPickler &p) {
     return LocOffsets{start, start + length};
 }
 
-vector<uint8_t> Serializer::storeNameTable(const GlobalState &gs) {
+vector<uint8_t> Serializer::storeUUID(const GlobalState &gs) {
     Pickler p;
     p.putU4(Serializer::VERSION);
     p.putU4(gs.kvstoreUuid);
+    return p.result();
+}
+
+vector<uint8_t> Serializer::storeNameTable(const GlobalState &gs) {
+    Pickler p;
+    p.putU4(Serializer::VERSION);
     SerializerImpl::pickleNameTable(p, gs);
     return p.result();
 }
@@ -1073,15 +1079,22 @@ Serializer::SerializedGlobalState Serializer::store(const GlobalState &gs) {
     return result;
 }
 
-void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const data) {
+void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const uuidData, const uint8_t *const data) {
+    {
+        UnPickler p(uuidData, gs.tracer());
+        if (p.getU4() != Serializer::VERSION) {
+            Exception::raise("Payload version mismatch");
+        }
+
+        ENFORCE(gs.kvstoreUuid == 0, "The name table may only be loaded into a fresh GlobalState");
+        gs.kvstoreUuid = p.getU4();
+    }
+
     UnPickler p(data, gs.tracer());
 
     if (p.getU4() != Serializer::VERSION) {
         Exception::raise("Payload version mismatch");
     }
-
-    ENFORCE(gs.kvstoreUuid == 0, "The name table may only be loaded into a fresh GlobalState");
-    gs.kvstoreUuid = p.getU4();
 
     SerializerImpl::unpickleNameTable(p, gs);
 
