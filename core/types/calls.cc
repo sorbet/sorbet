@@ -171,26 +171,26 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
 namespace {
 void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, const DispatchArgs &args,
                          string_view wrapInFn) {
-                if (args.receiverLoc().empty()) {
-                    auto shortName = args.name.shortName(gs);
-                    auto beginAdjust = -2;                     // (&
-                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
-                    if (blockPassLoc.exists()) {
-                        auto blockPassSource = blockPassLoc.source(gs).value();
-                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                          " {{ |x| {}(x).{} }}", wrapInFn, shortName);
-                        }
-                    }
-                } else if (args.errLoc() == args.funLoc() &&
-                           args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
-                                  args.receiverLoc().source(gs).value(), args.name.shortName(gs));
-                } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
-                                  args.receiverLoc().source(gs).value());
-                }
+    if (args.receiverLoc().empty()) {
+        auto shortName = args.name.shortName(gs);
+        auto beginAdjust = -2;                     // (&
+        auto endAdjust = 1 + shortName.size() + 1; // :foo)
+        auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
+        if (blockPassLoc.exists()) {
+            auto blockPassSource = blockPassLoc.source(gs).value();
+            if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc, " {{ |x| {}(x).{} }}",
+                              wrapInFn, shortName);
+            }
+        }
+    } else if (args.errLoc() == args.funLoc() &&
+               args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
+        e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
+                      args.receiverLoc().source(gs).value(), args.name.shortName(gs));
+    } else {
+        e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
+                      args.receiverLoc().source(gs).value());
+    }
 }
 
 void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, SymbolRef definition, NameRef methodName,
