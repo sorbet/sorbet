@@ -46,16 +46,15 @@ namespace {
  * kvstore (e.g., kvstore has not since been modified).
  */
 bool kvstoreChangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    const uint8_t *maybeGsBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY).data;
-    if (maybeGsBytes) {
-        // If `NAME_TABLE_KEY` is in kvstore but it's not what `gs.kvstoreUuid` contains,
-        // this implies that some other process wrote a different GlobalState to the cache.
-        return gs.kvstoreUuid != core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
+    const uint8_t *maybeUUIDBytes = kvstore->read(core::serialize::Serializer::UUID_KEY).data;
+    if (maybeUUIDBytes) {
+        // If `UUID_KEY` is in kvstore but it's not what `gs.kvstoreUuid` contains, this implies that some other process
+        // wrote a different GlobalState to the cache.
+        return gs.kvstoreUuid != core::serialize::Serializer::loadGlobalStateUUID(gs, maybeUUIDBytes);
     } else {
-        // `NAME_TABLE_KEY` is not in kvstore, which implies the cache is empty.
-        // If kvstoreUuid != 0, that implies we tried to write GlobalState to the cache once before,
-        // and since we don't see `NAME_TABLE_KEY` in there now, someone else overwrote/dropped
-        // the cache.
+        // `UUID_KEY` is not in kvstore, which implies the cache is empty. If kvstoreUuid != 0, that implies we tried to
+        // write GlobalState to the cache once before, and since we don't see `UUID_KEY` in there now, someone else
+        // overwrote/dropped the cache.
         return gs.kvstoreUuid != 0;
     }
 }
@@ -94,6 +93,7 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
     if (gs.wasNameTableModified()) {
         Timer timeit(gs.tracer(), "retainGlobalState.writeNameTable");
         gs.kvstoreUuid = Random::uniformU4();
+        kvstore->write(core::serialize::Serializer::UUID_KEY, core::serialize::Serializer::storeUUID(gs));
         kvstore->write(core::serialize::Serializer::NAME_TABLE_KEY, core::serialize::Serializer::storeNameTable(gs));
     }
 
