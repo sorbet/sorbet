@@ -28,9 +28,7 @@ class A
   end
 end
 
-A.unary_block do |${1:Integer}|
-  ${2}
-end${0} # error: does not exist
+A.unary_block${0} # error: does not exist
 #           ^ apply-completion: [A] item: 0
 A.binary_bloc # error: does not exist
 #            ^ apply-completion: [B] item: 0

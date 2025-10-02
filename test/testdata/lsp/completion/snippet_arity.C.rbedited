@@ -16,7 +16,7 @@ Test.new.test_method_null # error: does not exist
 Test.new.test_method_unar # error: does not exist
 #                        ^ apply-completion: [B] item: 0
 
-Test.new.test_method_binary(${1}, ${2})${0} # error: does not exist
+Test.new.test_method_binary${0} # error: does not exist
 #                        ^ apply-completion: [C] item: 0
 
 Test.new.test_method_kwar # error: does not exist

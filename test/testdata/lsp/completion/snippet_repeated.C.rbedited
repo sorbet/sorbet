@@ -25,7 +25,7 @@ A.new.method_using_kwar # error: does not exist
 A.new.method_using_rest_ar # error: does not exist
 #                         ^ apply-completion: [B] item: 0
 
-A.new.positional_then_kwarg(${1:Integer})${0} # error: does not exist
+A.new.positional_then_kwarg${0} # error: does not exist
 #                         ^ apply-completion: [C] item: 0
 
 A.new.positional_then_rest_ar # error: does not exist
