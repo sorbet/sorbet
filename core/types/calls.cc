@@ -378,7 +378,7 @@ unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs 
             }
         }
 
-        if (errLoc.exists()) {
+        if (errLoc.exists() && !isSymbolBlockPass(gs, args).exists()) {
             string_view beforeKwargs;
             if (args.locs.args.empty()) {
                 if (args.funLoc().exists() && args.funLoc().endPos() == errLoc.beginPos()) {
