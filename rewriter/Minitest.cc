@@ -677,7 +677,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 // to resolve constant" error, so better to be defensive.
 
                 auto emptyLoc = declLoc.copyEndWithZeroLength();
-                static const auto parts = vector<core::NameRef>{
+                static const core::NameRef parts[3] = {
                     core::Names::Constants::RSpec(),
                     core::Names::Constants::Core(),
                     core::Names::Constants::ExampleGroup(),
