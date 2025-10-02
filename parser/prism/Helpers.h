@@ -191,16 +191,39 @@ template <typename PrismNode> pm_node_t *up_cast(PrismNode *node) {
     return reinterpret_cast<pm_node_t *>(node);
 }
 
+// Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass",
+// or return `nullptr` if the node is not of the expected type.
+template <typename PrismNode> PrismNode *try_down_cast(pm_node_t *anyNode) {
+    static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
+                  "The `down_cast` function should only be called on Prism node pointers.");
+
+    if (anyNode == nullptr) {
+        return nullptr;
+    }
+
+    if (!PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID)) {
+        return nullptr;
+    }
+
+    return reinterpret_cast<PrismNode *>(anyNode);
+}
+
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass".
 // In debug builds, this helper checks the node's type before casting, to ensure it's casted correctly.
 template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
-    static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
-                  "The `down_cast` function should only be called on Prism node pointers.");
-    ENFORCE(anyNode == nullptr || PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID),
-            "Failed to cast a Prism AST Node. Expected {} (#{}), but got {} (#{}).",
+    ENFORCE(anyNode != nullptr, "Failed to cast nullptr to {}.", PrismNodeTypeHelper<PrismNode>::TypeID);
+
+    auto *casted = try_down_cast<PrismNode>(anyNode);
+
+    ENFORCE(casted != nullptr, "Failed to cast a Prism AST Node. Expected {} (#{}), but got {} (#{}).",
             pm_node_type_to_str(PrismNodeTypeHelper<PrismNode>::TypeID), PrismNodeTypeHelper<PrismNode>::TypeID,
             pm_node_type_to_str(PM_NODE_TYPE(anyNode)), PM_NODE_TYPE(anyNode));
-    return reinterpret_cast<PrismNode *>(anyNode);
+
+    return casted;
+}
+
+template <typename PrismNode> inline bool isa_node(pm_node_t *anyNode) {
+    return try_down_cast<PrismNode>(anyNode) != nullptr;
 }
 
 inline std::string_view cast_prism_string(const uint8_t *source, size_t length) {

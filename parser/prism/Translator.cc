@@ -577,7 +577,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Handle `~[Integer]`, like `~42`
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
-            if (constantNameString == "~" && PM_NODE_TYPE_P(callNode->receiver, PM_INTEGER_NODE)) {
+            if (constantNameString == "~" && isa_node<pm_integer_node>(callNode->receiver)) {
                 string valueString(sliceLocation(callNode->base.location));
 
                 if (!directlyDesugar) {
@@ -619,7 +619,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
 
                 // Pop the Kwargs Hash off the end of the arguments, if there is one.
-                if (!prismArgs.empty() && PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
+                if (!prismArgs.empty() && isa_node<pm_keyword_hash_node>(prismArgs.back())) {
                     auto h = translate(prismArgs.back());
                     auto hash = unique_ptr<parser::Hash>(reinterpret_cast<parser::Hash *>(h.release()));
                     ENFORCE(hash != nullptr);
@@ -677,7 +677,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `a&.b`
 
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                if (isa_node<pm_block_argument_node>(prismBlock)) {
                     // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
                     // but not a literal block with `{ ... }` or `do ... end`
 
@@ -689,7 +689,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 // TODO: Direct desugaring support for conditional sends is not implemented yet.
 
-                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                if (isa_node<pm_block_node>(prismBlock)) {
                     // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
                     // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
                     // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
@@ -717,9 +717,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             bool blockPassArgIsSymbol = false;
             bool supportedBlock = false;
             if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
-
-                    auto blockNode = down_cast<pm_block_node>(prismBlock);
+                if (auto *blockNode = try_down_cast<pm_block_node>(prismBlock)) { // a literal block
+                    // like in `foo { ... }` or `foo do ... end`
 
                     blockBody = this->enterBlockContext().translate(blockNode->body);
 
@@ -807,15 +806,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     } else {
                         supportedBlock = true;
                     }
-                } else {
-                    ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
-
-                    auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-
+                } else if (auto *bp = try_down_cast<pm_block_argument_node>(prismBlock)) { // the `&b` in `a.map(&b)`
                     blockPassNode = translate(prismBlock);
 
                     if (bp->expression) {
-                        blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
+                        blockPassArgIsSymbol = isa_node<pm_symbol_node>(bp->expression);
 
                         if (blockPassArgIsSymbol) {
                             supportedBlock = true;
@@ -835,6 +830,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         blockPassArg = MK::Local(location, core::Names::ampersand());
                         supportedBlock = true;
                     }
+                } else {
+                    unreachable("Expected blocks to always be either PM_BLOCK_NODE or PM_BLOCK_ARGUMENT_NODE");
                 }
             } else {
                 // There is no block, so we support direct desugaring of this method call.
@@ -850,7 +847,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(kwargsHash));
                 }
 
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                if (isa_node<pm_block_argument_node>(prismBlock)) {
                     // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
                     // but not a literal block with `{ ... }` or `do ... end`
 
@@ -859,7 +856,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
 
-                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                if (isa_node<pm_block_node>(prismBlock)) {
                     // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
                     // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
                     // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
@@ -1013,7 +1010,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
             int numPosArgs = args.size();
 
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) && !blockPassArgIsSymbol) {
+            if (prismBlock != nullptr && isa_node<pm_block_argument_node>(prismBlock) && !blockPassArgIsSymbol) {
                 // Special handling for non-Symbol block pass args, like `a.map(&block)`
                 // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
                 // and handled separately below.
@@ -1044,7 +1041,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(kwargsHash));
                 }
 
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                if (isa_node<pm_block_argument_node>(prismBlock)) {
                     // Add the parser node back into the wq tree, to pass the parser tests.
                     args.emplace_back(move(blockPassNode));
                 }
@@ -1074,15 +1071,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
+                if (isa_node<pm_block_node>(prismBlock) || blockPassArgIsSymbol) {
                     // A literal block arg (like `foo { ... }` or `foo do ... end`),
                     // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
 
                     ast::ExpressionPtr blockExpr;
                     if (blockPassArgIsSymbol) {
-                        ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
+                        ENFORCE(isa_node<pm_block_argument_node>(prismBlock));
                         auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-                        ENFORCE(bp->expression && PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE));
+                        ENFORCE(isa_node<pm_symbol_node>(bp->expression));
 
                         auto symbol = down_cast<pm_symbol_node>(bp->expression);
                         blockExpr = desugarSymbolProc(symbol);
@@ -1093,7 +1090,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                     sendArgs.emplace_back(move(blockExpr));
                     flags.hasBlock = true;
-                } else if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
+                } else if (isa_node<pm_block_argument_node>(prismBlock)) {
                     // A forwarded block like the `&b` in `a.map(&b)`
                     unreachable("This should be desugar to `Magic.callWithBlockPass()` above.");
                 } else {
@@ -1105,7 +1102,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
 
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+            if (isa_node<pm_block_node>(prismBlock)) {
                 // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
                 // but the legacy parser inverts this, with a parent "Block" with a child "Send".
                 //
@@ -1314,8 +1311,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             unique_ptr<parser::Node> body;
             if (defNode->body != nullptr) {
-                if (PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
-                    auto beginNode = down_cast<pm_begin_node>(defNode->body);
+                if (auto *beginNode = try_down_cast<pm_begin_node>(defNode->body)) {
                     auto statements = this->translateEnsure(beginNode);
 
                     // Prism uses a PM_BEGIN_NODE to model the body of a method that has a top level rescue/ensure, e.g.
@@ -1819,12 +1815,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                    // Checks if the given node is a keyword hash element based on the standards of
                                    // Sorbet's legacy parser. Based on `Builder::isKeywordHashElement()`
 
-                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_NODE)) { // A regular key/value pair
-                                       auto pair = down_cast<pm_assoc_node>(node);
-                                       return pair->key && PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE);
+                                   if (auto *pair = try_down_cast<pm_assoc_node>(node)) { // A regular key/value pair
+                                       return isa_node<pm_symbol_node>(pair->key);
                                    }
 
-                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) { // A `**h` or `**` kwarg splat
+                                   if (isa_node<pm_assoc_splat_node>(node)) { // A `**h` or `**` kwarg splat
                                        return true;
                                    };
 
@@ -2270,7 +2265,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
             }
 
-            if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) {
+            if (!isa_node<pm_self_node>(classNode->expression)) {
                 if (auto e = ctx.beginIndexerError(receiver->loc, core::errors::Desugar::InvalidSingletonDef)) {
                     e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                 }
@@ -2356,7 +2351,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto blockArgumentNode = superNode->block;
             NodeVec returnValues;
 
-            if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
+            if (isa_node<pm_block_node>(blockArgumentNode)) {
                 returnValues = translateArguments(superNode->arguments);
                 auto superNode = make_unique<parser::Super>(location, move(returnValues));
                 return translateCallWithBlock(blockArgumentNode, move(superNode));
@@ -2607,7 +2602,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto key = patternTranslate(assocNode->key);
             auto value = patternTranslate(assocNode->value);
 
-            if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
+            if (isa_node<pm_implicit_node>(assocNode->value)) {
                 return value;
             }
 
@@ -2627,16 +2622,15 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             patternTranslateMultiInto(sorbetElements, prismPrefixNodes);
 
             // Implicit rest nodes in array patterns don't need to be translated
-            if (prismRestNode != nullptr && !PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
+            if (prismRestNode != nullptr && !isa_node<pm_implicit_rest_node>(prismRestNode)) {
                 sorbetElements.emplace_back(patternTranslate(prismRestNode));
             }
 
             patternTranslateMultiInto(sorbetElements, prismSuffixNodes);
 
             unique_ptr<parser::Node> arrayPattern = nullptr;
-
             // When the pattern ends with an implicit rest node, we need to return an `ArrayPatternWithTail` instead
-            if (prismRestNode != nullptr && PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
+            if (isa_node<pm_implicit_rest_node>(prismRestNode)) {
                 arrayPattern = make_unique<parser::ArrayPatternWithTail>(location, move(sorbetElements));
             } else {
                 arrayPattern = make_unique<parser::ArrayPattern>(location, move(sorbetElements));
@@ -2680,9 +2674,8 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             patternTranslateMultiInto(sorbetElements, prismMiddleNodes);
 
-            if (prismTrailingSplat != nullptr && PM_NODE_TYPE_P(prismTrailingSplat, PM_SPLAT_NODE)) {
+            if (auto *prismSplatNode = try_down_cast<pm_splat_node>(prismTrailingSplat)) {
                 // TODO: handle PM_NODE_TYPE_P(prismTrailingSplat, PM_MISSING_NODE)
-                auto prismSplatNode = down_cast<pm_splat_node>(prismTrailingSplat);
                 auto expr = patternTranslate(prismSplatNode->expression);
                 auto splatLoc = translateLoc(prismSplatNode->base.location);
                 sorbetElements.emplace_back(make_unique<MatchRest>(splatLoc, move(expr)));
@@ -2744,18 +2737,17 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             unique_ptr<parser::Node> sorbetGuard;
             auto statements = translateStatements(inNode->statements);
 
-            if (prismPattern != nullptr &&
-                (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE) || PM_NODE_TYPE_P(prismPattern, PM_UNLESS_NODE))) {
-                pm_statements_node *conditionalStatements = nullptr;
+            if (isa_node<pm_if_node>(prismPattern) || isa_node<pm_unless_node>(prismPattern)) {
+                pm_statements_node *conditionalStatements;
 
-                if (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE)) {
-                    auto ifNode = down_cast<pm_if_node>(prismPattern);
+                if (auto *ifNode = try_down_cast<pm_if_node>(prismPattern)) {
                     conditionalStatements = ifNode->statements;
                     sorbetGuard = make_unique<parser::IfGuard>(location, translate(ifNode->predicate));
-                } else { // PM_UNLESS_NODE
-                    auto unlessNode = down_cast<pm_unless_node>(prismPattern);
+                } else if (auto *unlessNode = try_down_cast<pm_unless_node>(prismPattern)) {
                     conditionalStatements = unlessNode->statements;
                     sorbetGuard = make_unique<parser::UnlessGuard>(location, translate(unlessNode->predicate));
+                } else {
+                    unreachable("Expected PM_IF_NODE or PM_UNLESS_NODE");
                 }
 
                 ENFORCE(
@@ -3018,7 +3010,7 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
         auto *node = prismElements[i];
         auto &stat = elements[i];
 
-        if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
+        if (isa_node<pm_splat_node>(node)) {
             // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
 
             // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
@@ -3089,8 +3081,7 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     sorbetElements.reserve(prismElements.size());
 
     for (auto &pair : prismElements) {
-        if (PM_NODE_TYPE_P(pair, PM_ASSOC_SPLAT_NODE)) {
-            auto prismSplatNode = down_cast<pm_assoc_splat_node>(pair);
+        if (auto *prismSplatNode = try_down_cast<pm_assoc_splat_node>(pair)) {
             auto splatLoc = translateLoc(prismSplatNode->base.location);
             auto value = translate(prismSplatNode->value);
 
@@ -3102,10 +3093,11 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
             }
 
             sorbetElements.emplace_back(move(sorbetSplatNode));
-        } else {
-            ENFORCE(PM_NODE_TYPE_P(pair, PM_ASSOC_NODE))
+        } else if (isa_node<pm_assoc_node>(pair)) {
             unique_ptr<parser::Node> sorbetKVPair = translate(pair);
             sorbetElements.emplace_back(move(sorbetKVPair));
+        } else {
+            unreachable("Expected PM_ASSOC_SPLAT_NODE or PM_ASSOC_NODE");
         }
     }
 
@@ -3245,15 +3237,14 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
-    if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
-        auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
+    if (auto *prismBlockNode = try_down_cast<pm_block_node>(prismBlockOrLambdaNode)) {
         parametersNode = translate(prismBlockNode->parameters);
         body = this->enterBlockContext().translate(prismBlockNode->body);
-    } else {
-        ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
-        auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
+    } else if (auto *prismLambdaNode = try_down_cast<pm_lambda_node>(prismBlockOrLambdaNode)) {
         parametersNode = translate(prismLambdaNode->parameters);
         body = this->enterBlockContext().translate(prismLambdaNode->body);
+    } else {
+        unreachable("Expected PM_BLOCK_NODE or PM_LAMBDA_NODE");
     }
 
     // There was a TODO in the original Desugarer: "the send->block's loc is too big and includes the whole send."
@@ -3679,8 +3670,7 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
                 auto location = translateLoc(splatNode->base.location);
                 auto expression = splatNode->expression;
 
-                if (expression != nullptr && PM_NODE_TYPE_P(expression, PM_REQUIRED_PARAMETER_NODE)) {
-                    auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
+                if (auto *requiredParamNode = try_down_cast<pm_required_parameter_node>(expression)) {
                     auto name = translateConstantName(requiredParamNode->name);
                     sorbetLhs.emplace_back(
                         make_unique<parser::RestParam>(location, name, translateLoc(requiredParamNode->base.location)));
@@ -3717,7 +3707,7 @@ optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_nod
         return result;
     }
 
-    ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
+    ENFORCE(isa_node<pm_statements_node>(prismBodyNode));
 
     if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
         if (!hasExpr(scopeBody)) {
