@@ -1,8 +1,26 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def described_class<<todo method>>(&<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of described_class>
+      end
+    end
+  end
+
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def self.test_each<<todo method>>(arg, &blk)
+      ::<Magic>.<call-with-block-pass>(arg, :each, blk)
+    end
+
     def outer_helper<<todo method>>(&<blk>)
       <emptyTree>
     end
+
+    <runtime method definition of self.test_each>
 
     <runtime method definition of outer_helper>
 
@@ -23,7 +41,44 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.my_helper()
       end
 
+      def <it 'has access to defined_in_shared_examples'><<todo method>>(&<blk>)
+        [].each() do |x|
+          <self>.defined_in_shared_examples()
+        end
+      end
+
       <runtime method definition of my_helper>
+
+      module <emptyTree>::<C <shared_examples 'some examples'>><<C <todo sym>>> < ()
+        def defined_in_shared_examples<<todo method>>(&<blk>)
+          "foo"
+        end
+
+        def <it 'a shared example'><<todo method>>(&<blk>)
+          <self>.described_class()
+        end
+
+        <runtime method definition of defined_in_shared_examples>
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+
+      class <emptyTree>::<C <describe 'will include shared examples'>><<C <todo sym>>> < (<self>)
+        def <it 'has access to defined_in_shared_examples'><<todo method>>(&<blk>)
+          <self>.defined_in_shared_examples()
+        end
+
+        <self>.include(<emptyTree>::<C <shared_examples 'some examples'>>)
+      end
+
+      <self>.test_each([]) do |x|
+        begin
+          <self>.include(<emptyTree>::<C <shared_examples 'some examples'>>)
+          <runtime method definition of <it 'has access to defined_in_shared_examples'>>
+        end
+      end
     end
 
     <self>.example() do ||
