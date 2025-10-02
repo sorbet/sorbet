@@ -717,9 +717,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             bool blockPassArgIsSymbol = false;
             bool supportedBlock = false;
             if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
-
-                    auto blockNode = down_cast<pm_block_node>(prismBlock);
+                if (auto *blockNode = try_down_cast<pm_block_node>(prismBlock)) { // a literal block
+                    // like in `foo { ... }` or `foo do ... end`
 
                     blockBody = this->enterBlockContext().translate(blockNode->body);
 
@@ -807,11 +806,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     } else {
                         supportedBlock = true;
                     }
-                } else {
-                    ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
-
-                    auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-
+                } else if (auto *bp = try_down_cast<pm_block_argument_node>(prismBlock)) { // the `&b` in `a.map(&b)`
                     blockPassNode = translate(prismBlock);
 
                     if (bp->expression) {
@@ -835,6 +830,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         blockPassArg = MK::Local(location, core::Names::ampersand());
                         supportedBlock = true;
                     }
+                } else {
+                    unreachable("Expected blocks to always be either PM_BLOCK_NODE or PM_BLOCK_ARGUMENT_NODE");
                 }
             } else {
                 // There is no block, so we support direct desugaring of this method call.
@@ -1314,8 +1311,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             unique_ptr<parser::Node> body;
             if (defNode->body != nullptr) {
-                if (PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
-                    auto beginNode = down_cast<pm_begin_node>(defNode->body);
+                if (auto *beginNode = try_down_cast<pm_begin_node>(defNode->body)) {
                     auto statements = this->translateEnsure(beginNode);
 
                     // Prism uses a PM_BEGIN_NODE to model the body of a method that has a top level rescue/ensure, e.g.
@@ -1819,8 +1815,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                    // Checks if the given node is a keyword hash element based on the standards of
                                    // Sorbet's legacy parser. Based on `Builder::isKeywordHashElement()`
 
-                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_NODE)) { // A regular key/value pair
-                                       auto pair = down_cast<pm_assoc_node>(node);
+                                   if (auto *pair = try_down_cast<pm_assoc_node>(node)) { // A regular key/value pair
                                        return pair->key && PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE);
                                    }
 
@@ -2680,9 +2675,8 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             patternTranslateMultiInto(sorbetElements, prismMiddleNodes);
 
-            if (prismTrailingSplat != nullptr && PM_NODE_TYPE_P(prismTrailingSplat, PM_SPLAT_NODE)) {
+            if (auto *prismSplatNode = try_down_cast<pm_splat_node>(prismTrailingSplat)) {
                 // TODO: handle PM_NODE_TYPE_P(prismTrailingSplat, PM_MISSING_NODE)
-                auto prismSplatNode = down_cast<pm_splat_node>(prismTrailingSplat);
                 auto expr = patternTranslate(prismSplatNode->expression);
                 auto splatLoc = translateLoc(prismSplatNode->base.location);
                 sorbetElements.emplace_back(make_unique<MatchRest>(splatLoc, move(expr)));
@@ -2746,16 +2740,16 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             if (prismPattern != nullptr &&
                 (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE) || PM_NODE_TYPE_P(prismPattern, PM_UNLESS_NODE))) {
-                pm_statements_node *conditionalStatements = nullptr;
+                pm_statements_node *conditionalStatements;
 
-                if (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE)) {
-                    auto ifNode = down_cast<pm_if_node>(prismPattern);
+                if (auto *ifNode = try_down_cast<pm_if_node>(prismPattern)) {
                     conditionalStatements = ifNode->statements;
                     sorbetGuard = make_unique<parser::IfGuard>(location, translate(ifNode->predicate));
-                } else { // PM_UNLESS_NODE
-                    auto unlessNode = down_cast<pm_unless_node>(prismPattern);
+                } else if (auto *unlessNode = try_down_cast<pm_unless_node>(prismPattern)) {
                     conditionalStatements = unlessNode->statements;
                     sorbetGuard = make_unique<parser::UnlessGuard>(location, translate(unlessNode->predicate));
+                } else {
+                    unreachable("Expected PM_IF_NODE or PM_UNLESS_NODE");
                 }
 
                 ENFORCE(
@@ -3089,8 +3083,7 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     sorbetElements.reserve(prismElements.size());
 
     for (auto &pair : prismElements) {
-        if (PM_NODE_TYPE_P(pair, PM_ASSOC_SPLAT_NODE)) {
-            auto prismSplatNode = down_cast<pm_assoc_splat_node>(pair);
+        if (auto *prismSplatNode = try_down_cast<pm_assoc_splat_node>(pair)) {
             auto splatLoc = translateLoc(prismSplatNode->base.location);
             auto value = translate(prismSplatNode->value);
 
@@ -3106,6 +3099,8 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
             ENFORCE(PM_NODE_TYPE_P(pair, PM_ASSOC_NODE))
             unique_ptr<parser::Node> sorbetKVPair = translate(pair);
             sorbetElements.emplace_back(move(sorbetKVPair));
+        } else {
+            unreachable("Expected PM_ASSOC_SPLAT_NODE or PM_ASSOC_NODE");
         }
     }
 
@@ -3245,15 +3240,14 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
-    if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
-        auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
+    if (auto *prismBlockNode = try_down_cast<pm_block_node>(prismBlockOrLambdaNode)) {
         parametersNode = translate(prismBlockNode->parameters);
         body = this->enterBlockContext().translate(prismBlockNode->body);
-    } else {
-        ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
-        auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
+    } else if (auto *prismLambdaNode = try_down_cast<pm_lambda_node>(prismBlockOrLambdaNode)) {
         parametersNode = translate(prismLambdaNode->parameters);
         body = this->enterBlockContext().translate(prismLambdaNode->body);
+    } else {
+        unreachable("Expected PM_BLOCK_NODE or PM_LAMBDA_NODE");
     }
 
     // There was a TODO in the original Desugarer: "the send->block's loc is too big and includes the whole send."
@@ -3679,8 +3673,7 @@ template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMult
                 auto location = translateLoc(splatNode->base.location);
                 auto expression = splatNode->expression;
 
-                if (expression != nullptr && PM_NODE_TYPE_P(expression, PM_REQUIRED_PARAMETER_NODE)) {
-                    auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
+                if (auto *requiredParamNode = try_down_cast<pm_required_parameter_node>(expression)) {
                     auto name = translateConstantName(requiredParamNode->name);
                     sorbetLhs.emplace_back(
                         make_unique<parser::RestParam>(location, name, translateLoc(requiredParamNode->base.location)));
