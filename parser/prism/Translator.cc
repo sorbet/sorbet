@@ -3245,6 +3245,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
     unique_ptr<parser::Node> body;
+    auto blockLoc = translateLoc(prismBlockOrLambdaNode->location);
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         parametersNode = translate(prismBlockNode->parameters);
@@ -3255,12 +3256,6 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         parametersNode = translate(prismLambdaNode->parameters);
         body = this->enterBlockContext().translate(prismLambdaNode->body);
     }
-
-    // There was a TODO in the original Desugarer: "the send->block's loc is too big and includes the whole send."
-    // We'll keep this behaviour for parity for now.
-    // TODO: Switch to using the fixed sendNode loc below after direct desugaring is complete
-    // https://github.com/Shopify/sorbet/issues/671
-    auto blockLoc = sendNode->loc;
 
     // Modify send node's endLoc to be position before first space
     // This fixes location for cases like:
