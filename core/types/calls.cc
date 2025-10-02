@@ -169,26 +169,41 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
 }
 
 namespace {
-void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc receiverLoc,
-                         core::NameRef methodName) {
-    if (receiverLoc.exists() && (gs.suggestUnsafe.has_value())) {
-        auto wrapInFn = gs.suggestUnsafe.value();
-        if (receiverLoc.empty()) {
-            auto shortName = methodName.shortName(gs);
-            auto beginAdjust = -2;                     // (&
-            auto endAdjust = 1 + shortName.size() + 1; // :foo)
-            auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
-            if (blockPassLoc.exists()) {
-                auto blockPassSource = blockPassLoc.source(gs).value();
-                if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                    e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                  " {{ |x| {}(x).{} }}", wrapInFn, shortName);
-                }
-            }
-        } else {
-            e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
-                          receiverLoc.source(gs).value());
-        }
+
+Loc isSymbolBlockPass(const GlobalState &gs, const DispatchArgs &args) {
+    if (!args.receiverLoc().empty()) {
+        return Loc::none();
+    }
+
+    auto shortName = args.name.shortName(gs);
+    auto beginAdjust = -2;                     // (&
+    auto endAdjust = 1 + shortName.size() + 1; // :foo)
+    auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
+    if (!blockPassLoc.exists()) {
+        return Loc::none();
+    }
+
+    auto blockPassSource = blockPassLoc.source(gs).value();
+    if (blockPassSource != fmt::format("(&:{})", shortName)) {
+        return Loc::none();
+    }
+
+    return blockPassLoc;
+}
+
+void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, const DispatchArgs &args,
+                         string_view wrapInFn) {
+    auto symbolBlockPassLoc = isSymbolBlockPass(gs, args);
+    if (symbolBlockPassLoc.exists()) {
+        e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), symbolBlockPassLoc, " {{ |x| {}(x).{} }}",
+                      wrapInFn, args.name.shortName(gs));
+    } else if (args.errLoc() == args.funLoc() &&
+               args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
+        e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
+                      args.receiverLoc().source(gs).value(), args.name.shortName(gs));
+    } else {
+        e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
+                      args.receiverLoc().source(gs).value());
     }
 }
 
@@ -230,7 +245,10 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 e.setHeader("Call to method `{}` on unconstrained generic type `{}`", args.name.show(gs), thisStr);
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-            autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
+            if (args.receiverLoc().exists() && gs.suggestUnsafe.has_value()) {
+                auto wrapInFn = gs.suggestUnsafe.value();
+                autocorrectReceiver(gs, e, args, wrapInFn);
+            }
             addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, "parameter");
         }
         emptyResult.main.errors.emplace_back(e.build());
@@ -258,7 +276,10 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                     e.setHeader("Call to method `{}` on unbounded type {} `{}`", args.name.show(gs), member, thisStr);
                 }
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-                autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
+                if (args.receiverLoc().exists() && gs.suggestUnsafe.has_value()) {
+                    auto wrapInFn = gs.suggestUnsafe.value();
+                    autocorrectReceiver(gs, e, args, wrapInFn);
+                }
                 addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, member);
             }
             emptyResult.main.errors.emplace_back(e.build());
@@ -768,26 +789,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                          // Don't suggest T.must if the suggestion will produce bottom
                          !Types::dropNil(gs, args.fullType.type).isBottom()))) {
                 auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
-                if (args.receiverLoc().empty()) {
-                    auto shortName = args.name.shortName(gs);
-                    auto beginAdjust = -2;                     // (&
-                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
-                    if (blockPassLoc.exists()) {
-                        auto blockPassSource = blockPassLoc.source(gs).value();
-                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                          " {{ |x| {}(x).{} }}", wrapInFn, shortName);
-                        }
-                    }
-                } else if (args.errLoc() == args.funLoc() &&
-                           args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
-                                  args.receiverLoc().source(gs).value(), args.name.shortName(gs));
-                } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
-                                  args.receiverLoc().source(gs).value());
-                }
+                autocorrectReceiver(gs, e, args, wrapInFn);
             } else {
                 auto canSkipFuzzyMatch = false;
                 if (symbol.data(gs)->isModule()) {
