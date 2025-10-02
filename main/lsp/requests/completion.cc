@@ -315,7 +315,6 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
     } else {
         fmt::format_to(std::back_inserter(result), "{}", shortName);
     }
-    auto nextTabstop = 1;
 
     /* If we are completing an existing send that either has some arguments
      * or a block specified already then simply complete the method name
@@ -339,59 +338,6 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
     if (isSetter) {
         fmt::format_to(std::back_inserter(result), " = ${{0}}");
         return to_string(result);
-    }
-
-    auto method = maybeAlias.data(gs)->dealiasMethod(gs);
-    vector<string> typeAndArgNames;
-    for (auto &paramInfo : method.data(gs)->parameters) {
-        fmt::memory_buffer argBuf;
-        if (paramInfo.flags.isBlock) {
-            // Blocks are handled below
-            continue;
-        }
-        if (paramInfo.flags.isDefault) {
-            continue;
-        }
-        if (paramInfo.flags.isRepeated) {
-            continue;
-        }
-        if (paramInfo.flags.isKeyword) {
-            fmt::format_to(std::back_inserter(argBuf), "{}: ", paramInfo.name.shortName(gs));
-        }
-        if (paramInfo.type) {
-            auto resultType = core::source_generator::getResultType(gs, paramInfo.type, method, receiverType).show(gs);
-            fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
-        } else {
-            fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
-        }
-        typeAndArgNames.emplace_back(to_string(argBuf));
-    }
-
-    if (!typeAndArgNames.empty()) {
-        fmt::format_to(std::back_inserter(result), "({})", fmt::join(typeAndArgNames, ", "));
-    }
-
-    ENFORCE(!method.data(gs)->parameters.empty());
-    auto &blkParam = method.data(gs)->parameters.back();
-    ENFORCE(blkParam.flags.isBlock);
-
-    auto hasBlockType = blkParam.type != nullptr && !blkParam.type.isUntyped();
-    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkParam.type)) {
-        string blkArgs;
-        if (auto appliedType = core::cast_type<core::AppliedType>(blkParam.type)) {
-            if (appliedType->targs.size() >= 2) {
-                // The first element in targs is the return type.
-                auto targs_it = appliedType->targs.begin();
-                targs_it++;
-                blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
-                                          auto resultType =
-                                              core::source_generator::getResultType(gs, targ, method, receiverType);
-                                          return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
-                                      }));
-            }
-        }
-
-        fmt::format_to(std::back_inserter(result), " do{}\n  ${{{}}}\nend", blkArgs, nextTabstop++);
     }
 
     fmt::format_to(std::back_inserter(result), "${{0}}");
