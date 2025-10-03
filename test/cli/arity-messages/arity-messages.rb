@@ -38,3 +38,8 @@ A.make(
   foo: [1, 2, 3],
   bar: "some long string",
 )
+
+def requires_multiple_keyword_args(x:, y:)
+end
+
+requires_multiple_keyword_args
