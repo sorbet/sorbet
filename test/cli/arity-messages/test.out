@@ -121,10 +121,28 @@ arity-messages.rb:30: Too many positional arguments provided for method `Object#
 arity-messages.rb:39: Missing required keyword argument `qux` for method `A.make` https://srb.help/7004
     39 |  bar: "some long string",
                                  ^
-    arity-messages.rb:33: Keyword argument `qux` declared to expect type `T.untyped` here:
+    arity-messages.rb:33: Keyword parameter `qux` declared here:
     33 |  def self.make(foo:, bar:, qux:)
                                     ^^^^
-Errors: 13
+  Autocorrect: Done
+    arity-messages.rb:39: Inserted `, qux:`
+    39 |  bar: "some long string",
+                                 ^
+
+arity-messages.rb:45: Missing 2 required keyword arguments for method `Object#requires_multiple_keyword_args` https://srb.help/7004
+    45 |requires_multiple_keyword_args
+                                      ^
+    arity-messages.rb:42: Keyword parameter `x` declared here:
+    42 |def requires_multiple_keyword_args(x:, y:)
+                                           ^^
+    arity-messages.rb:42: Keyword parameter `y` declared here:
+    42 |def requires_multiple_keyword_args(x:, y:)
+                                               ^^
+  Autocorrect: Done
+    arity-messages.rb:45: Inserted `(x:, y:)`
+    45 |requires_multiple_keyword_args
+                                      ^
+Errors: 14
 
 --------------------------------------------------------------------------
 
@@ -166,8 +184,13 @@ end
 
 A.make(
   foo: [1, 2, 3],
-  bar: "some long string",
+  bar: "some long string", qux:,
 )
+
+def requires_multiple_keyword_args(x:, y:)
+end
+
+requires_multiple_keyword_args(x:, y:)
 
 --------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 #include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/KwPair.h"
@@ -351,18 +352,53 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingKwarg(const GlobalState &gs, const DispatchArgs &args, MethodRef method, const ParamInfo &arg,
-                               ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs &args, MethodRef method,
+                                      const vector<const ParamInfo *> &missingKwargs, ClassOrModuleRef inClass,
+                                      const vector<TypePtr> &targs) {
     auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
+    if (missingKwargs.empty()) {
+        return nullptr;
+    }
     if (auto e = gs.beginError(errLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        auto argName = arg.name.show(gs);
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
-        auto expectedType = Types::resultTypeAsSeenFrom(gs, arg.type, method.data(gs)->owner, inClass, targs);
-        if (expectedType == nullptr) {
-            expectedType = Types::untyped(method);
+        if (missingKwargs.size() == 1) {
+            e.setHeader("Missing required keyword argument `{}` for method `{}`", missingKwargs[0]->name.show(gs),
+                        method.show(gs));
+        } else {
+            e.setHeader("Missing {} required keyword arguments for method `{}`", missingKwargs.size(), method.show(gs));
         }
-        e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
-                       expectedType.show(gs));
+
+        for (auto *arg : missingKwargs) {
+            auto argName = arg->name.show(gs);
+            auto expectedType = Types::resultTypeAsSeenFrom(gs, arg->type, method.data(gs)->owner, inClass, targs);
+            if (expectedType == nullptr) {
+                e.addErrorLine(arg->loc, "Keyword parameter `{}` declared here:", argName);
+            } else {
+                e.addErrorLine(arg->loc, "Keyword parameter `{}` declared to expect type `{}` here:", argName,
+                               expectedType.show(gs));
+            }
+        }
+
+        if (errLoc.exists() && !isSymbolBlockPass(gs, args).exists()) {
+            string_view beforeKwargs;
+            string_view afterKwargs;
+            if (args.locs.args.empty()) {
+                if (args.funLoc().exists() && args.funLoc().endPos() == errLoc.beginPos()) {
+                    // No parens. Let's put our own parens, because it's more common to assume that
+                    // people will want parens.
+                    beforeKwargs = "(";
+                    afterKwargs = ")";
+                }
+            } else {
+                beforeKwargs = ", ";
+                afterKwargs = "";
+            }
+
+            e.replaceWith("Insert required keyword argument labels", errLoc, "{}{}{}", beforeKwargs,
+                          fmt::map_join(missingKwargs, ", ",
+                                        [&gs](auto *param) { return fmt::format("{}:", param->name.show(gs)); }),
+                          afterKwargs);
+        }
+
         return e.build();
     }
     return nullptr;
@@ -1323,6 +1359,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             pend = kwit;
 
             bool sawKwSplat = false;
+            vector<const ParamInfo *> missingKwargs;
             while (kwit != methodData->parameters.end()) {
                 const ParamInfo &kwParam = *kwit;
                 if (kwParam.flags.isBlock) {
@@ -1367,9 +1404,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 });
                 if (arg == hash->keys.end()) {
                     if (!kwParam.flags.isDefault) {
-                        if (auto e = missingKwarg(gs, args, method, kwParam, symbol, targs)) {
-                            result.main.errors.emplace_back(std::move(e));
-                        }
+                        missingKwargs.emplace_back(&kwParam);
                     }
                     continue;
                 }
@@ -1410,6 +1445,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
+            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs)) {
+                result.main.errors.emplace_back(std::move(e));
+            }
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_nonnull<NamedLiteralType>(keyType);
                 auto underlying = key.underlying(gs);
@@ -1438,13 +1476,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         } else if (kwargs == nullptr) {
             // The method has keyword arguments, but none were provided. Report an error for each missing argument.
+            vector<const ParamInfo *> missingKwargs;
             for (auto &param : methodData->parameters) {
                 if (!param.flags.isKeyword || param.flags.isDefault || param.flags.isRepeated) {
                     continue;
                 }
-                if (auto e = missingKwarg(gs, args, method, param, symbol, targs)) {
-                    result.main.errors.emplace_back(std::move(e));
-                }
+                missingKwargs.emplace_back(&param);
+            }
+            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs)) {
+                result.main.errors.emplace_back(std::move(e));
             }
         }
     }
