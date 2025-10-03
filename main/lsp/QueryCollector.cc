@@ -6,26 +6,32 @@ namespace {
 // In the case of location ties, determines which query response takes priority in the vector constructed by
 // flushErrors. Larger values means greater specificity.
 uint16_t getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
-    if (q.isEdit()) {
-        // Only reported for autocomplete, and should take precedence over anything else reported
-        return 9;
-    } else if (q.isMethodDef()) {
-        return 8;
-    } else if (q.isSend()) {
-        return 7;
-    } else if (q.isField()) {
-        return 6;
-    } else if (q.isIdent()) {
-        return 5;
-    } else if (q.isConstant()) {
-        return 4;
-    } else if (q.isKeywordArg()) {
-        return 3;
-    } else if (q.isLiteral()) {
-        return 2;
-    } else {
-        return 1;
-    }
+    // TODO(jez) C++26: Convert this to variant::visit instance method
+    return visit(
+        [](auto &&res) -> uint16_t {
+            using T = decay_t<decltype(res)>;
+            if constexpr (is_same_v<T, core::lsp::EditResponse>) {
+                // Only reported for autocomplete, and should take precedence over anything else reported
+                return 9;
+            } else if constexpr (is_same_v<T, core::lsp::MethodDefResponse>) {
+                return 8;
+            } else if constexpr (is_same_v<T, core::lsp::SendResponse>) {
+                return 7;
+            } else if constexpr (is_same_v<T, core::lsp::FieldResponse>) {
+                return 6;
+            } else if constexpr (is_same_v<T, core::lsp::IdentResponse>) {
+                return 5;
+            } else if constexpr (is_same_v<T, core::lsp::ConstantResponse>) {
+                return 4;
+            } else if constexpr (is_same_v<T, core::lsp::KeywordArgResponse>) {
+                return 3;
+            } else if constexpr (is_same_v<T, core::lsp::LiteralResponse>) {
+                return 2;
+            } else {
+                static_assert(always_false_v<T>, "Should never happen, as the above checks should be exhaustive.");
+            }
+        },
+        q.asResponse());
 }
 } // namespace
 void QueryCollector::flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,

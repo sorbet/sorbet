@@ -155,6 +155,10 @@ public:
 
     QueryResponse(QueryResponseVariant response);
 
+    const QueryResponseVariant &asResponse() const {
+        return this->response;
+    };
+
     /**
      * Returns nullptr unless this is a Send.
      */
