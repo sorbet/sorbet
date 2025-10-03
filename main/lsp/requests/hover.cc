@@ -44,73 +44,13 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
     return contents;
 }
 
-// TODO(jez) There's an opportunity here to use this helper in places like definition.cc to go to the
-// definition of keyword arguments.
-pair<const core::lsp::SendResponse *, core::NameRef>
-enclosingSendForKwarg(const core::GlobalState &gs, const core::lsp::LiteralResponse &l,
-                      const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
-    if (!core::isa_type<core::NamedLiteralType>(l.retType.type)) {
-        return {nullptr, core::NameRef::noName()};
+void handleHoverKeywordArg(const core::GlobalState &gs, const core::lsp::KeywordArgResponse *kw, string &typeString) {
+    if (!typeString.empty()) {
+        typeString += '\n';
     }
-
-    auto litType = core::cast_type_nonnull<core::NamedLiteralType>(l.retType.type);
-    if (litType.kind != core::NamedLiteralType::Kind::Symbol) {
-        return {nullptr, core::NameRef::noName()};
-    }
-
-    auto respIt = queryResponses.begin();
-    while (respIt != queryResponses.end() && (*respIt) != nullptr) {
-        respIt++;
-    }
-
-    if (respIt == queryResponses.end() || respIt + 1 == queryResponses.end() || *respIt != nullptr) {
-        // Didn't find the gap in the query responses where we stole the canonical response
-        return {nullptr, core::NameRef::noName()};
-    }
-
-    auto &nextResp = *(respIt + 1);
-    auto send = nextResp->isSend();
-    if (send == nullptr) {
-        return {nullptr, core::NameRef::noName()};
-    }
-
-    auto argLoc =
-        absl::c_find_if(send->argLocOffsets, [&](auto loc) { return l.termLoc == core::Loc(send->file, loc); });
-    if (argLoc == send->argLocOffsets.end()) {
-        return {nullptr, core::NameRef::noName()};
-    }
-
-    auto argIdx = distance(send->argLocOffsets.begin(), argLoc);
-    if (argIdx < send->numPosArgs) {
-        return {nullptr, core::NameRef::noName()};
-    }
-
-    return {send, litType.name};
-}
-
-string handleHoverKeywordArg(const core::GlobalState &gs, const core::lsp::SendResponse *send,
-                             core::NameRef kwargName) {
-    string typeString;
-    auto curr = send->dispatchResult.get();
-    while (curr != nullptr) {
-        if (curr->main.method.exists() && !curr->main.receiver.isUntyped()) {
-            auto &parameters = curr->main.method.data(gs)->parameters;
-            auto param = absl::c_find_if(
-                parameters, [&](auto &p) { return p.flags.isKeyword && !p.flags.isRepeated && p.name == kwargName; });
-            if (param != parameters.end()) {
-                if (!typeString.empty()) {
-                    typeString += '\n';
-                }
-                // nullptr implies no type provided in sig
-                auto paramType = param->type == nullptr ? "T.untyped" : param->type.showWithMoreInfo(gs);
-                typeString += fmt::format("# {}\n(kwparam) {}: {}", curr->main.method.show(gs),
-                                          param->parameterName(gs), paramType);
-            }
-        }
-        curr = curr->secondary.get();
-    }
-
-    return typeString;
+    // nullptr implies no type provided in sig
+    auto paramType = kw->paramType == nullptr ? "T.untyped" : kw->paramType.showWithMoreInfo(gs);
+    typeString += fmt::format("# {}\n(kwparam) {}: {}", kw->owner.show(gs), kw->paramName.show(gs), paramType);
 }
 
 HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, unique_ptr<TextDocumentPositionParams> params)
@@ -216,15 +156,20 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             retType = core::Types::untypedUntracked();
         }
         typeString = retType.showWithMoreInfo(gs);
-    } else if (auto l = resp->isLiteral()) {
-        auto [send, kwargName] = enclosingSendForKwarg(gs, *l, queryResponses);
-        if (send != nullptr) {
-            typeString = handleHoverKeywordArg(gs, send, kwargName);
-        }
+    } else if (auto *kw = resp->isKeywordArg()) {
+        // Have do do this one separate, because it was stolen out of the queryResponses vector
+        handleHoverKeywordArg(gs, kw, typeString);
+        // Want to find everything, for the case of methods with multiple dispatch components.
+        for (const auto &resp : queryResponses) {
+            if (resp == nullptr) {
+                continue;
+            }
+            auto *kw = resp->isKeywordArg();
+            if (kw == nullptr) {
+                continue;
+            }
 
-        if (typeString.empty()) {
-            // fallback, in case it wasn't a keyword arg
-            typeString = resp->getRetType().showWithMoreInfo(gs);
+            handleHoverKeywordArg(gs, kw, typeString);
         }
     } else {
         auto retType = resp->getRetType();

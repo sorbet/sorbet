@@ -11,6 +11,10 @@ void QueryResponse::pushQueryResponse(core::Context ctx, QueryResponseVariant re
     ctx.state.errorQueue->pushQueryResponse(ctx.file, make_unique<QueryResponse>(std::move(response)));
 }
 
+void QueryResponse::pushQueryResponse(const GlobalState &gs, FileRef file, QueryResponseVariant response) {
+    gs.errorQueue->pushQueryResponse(file, make_unique<QueryResponse>(std::move(response)));
+}
+
 QueryResponse::QueryResponse(QueryResponseVariant response) : response(std::move(response)) {}
 
 const SendResponse *QueryResponse::isSend() const {
@@ -28,6 +32,10 @@ const IdentResponse *QueryResponse::isIdent() const {
 
 const LiteralResponse *QueryResponse::isLiteral() const {
     return get_if<LiteralResponse>(&response);
+}
+
+const KeywordArgResponse *QueryResponse::isKeywordArg() const {
+    return get_if<KeywordArgResponse>(&response);
 }
 
 const ConstantResponse *QueryResponse::isConstant() const {
@@ -56,6 +64,8 @@ core::Loc QueryResponse::getLoc() const {
                 return res.termLoc();
             } else if constexpr (is_same_v<T, LiteralResponse>) {
                 return res.termLoc;
+            } else if constexpr (is_same_v<T, KeywordArgResponse>) {
+                return res.termLoc;
             } else if constexpr (is_same_v<T, ConstantResponse>) {
                 return res.termLoc;
             } else if constexpr (is_same_v<T, FieldResponse>) {
@@ -82,6 +92,8 @@ core::TypePtr QueryResponse::getRetType() const {
                 return res.dispatchResult->returnType;
             } else if constexpr (is_same_v<T, LiteralResponse>) {
                 return res.retType.type;
+            } else if constexpr (is_same_v<T, KeywordArgResponse>) {
+                return res.paramType;
             } else if constexpr (is_same_v<T, ConstantResponse>) {
                 return res.retType.type;
             } else if constexpr (is_same_v<T, FieldResponse>) {

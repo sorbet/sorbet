@@ -8,16 +8,18 @@ namespace {
 uint16_t getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
     if (q.isEdit()) {
         // Only reported for autocomplete, and should take precedence over anything else reported
-        return 8;
+        return 9;
     } else if (q.isMethodDef()) {
-        return 7;
+        return 8;
     } else if (q.isSend()) {
-        return 6;
+        return 7;
     } else if (q.isField()) {
-        return 5;
+        return 6;
     } else if (q.isIdent()) {
-        return 4;
+        return 5;
     } else if (q.isConstant()) {
+        return 4;
+    } else if (q.isKeywordArg()) {
         return 3;
     } else if (q.isLiteral()) {
         return 2;
