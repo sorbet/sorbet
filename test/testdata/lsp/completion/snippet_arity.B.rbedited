@@ -13,7 +13,7 @@ end
 Test.new.test_method_null # error: does not exist
 #                        ^ apply-completion: [A] item: 0
 
-Test.new.test_method_unary(${1})${0} # error: does not exist
+Test.new.test_method_unary${0} # error: does not exist
 #                        ^ apply-completion: [B] item: 0
 
 Test.new.test_method_bina # error: does not exist

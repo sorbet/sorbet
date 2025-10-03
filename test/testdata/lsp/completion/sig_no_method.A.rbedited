@@ -13,9 +13,7 @@ class Outer
     # Even though there are method defs after this, none are in the right
     # scope, so no suggested sig.
 
-    sig do
-      ${1}
-    end${0} # error: no block
+    sig${0} # error: no block
     #  ^ apply-completion: [A] item: 0
   end
 

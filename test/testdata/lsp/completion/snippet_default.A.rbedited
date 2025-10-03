@@ -7,5 +7,5 @@ class Test
   def method_with_defaults(x, y:, z: ''); end
 end
 
-Test.new.method_with_defaults(${1:Integer}, y: ${2:Symbol})${0} # error: does not exist
+Test.new.method_with_defaults${0} # error: does not exist
 #                           ^ apply-completion: [A] item: 0

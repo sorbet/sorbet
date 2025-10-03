@@ -2,7 +2,5 @@
 
 extend T::Sig
 
-sig do
-  ${1}
-end${0} # error: no block
+sig${0} # error: no block
 #  ^ apply-completion: [A] item: 0

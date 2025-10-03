@@ -7,7 +7,7 @@ class Test
   def x_is_integer(x); end
 end
 
-Test.new.x_is_integer(${1:Integer})${0} # error: does not exist
+Test.new.x_is_integer${0} # error: does not exist
 #             ^ apply-completion: [A] item: 0
 
 # Snippet for applied generic should respect TypeConstraint
