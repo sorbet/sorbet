@@ -20,7 +20,8 @@ class A::B::C::D
 
   account = ""
   example(account:)
-  #         ^ hover: String("")
+  #         ^ hover-line: 2 # A::B::C::D.example
+  #         ^ hover-line: 3 (kwparam) account: T.any(String, Account)
 
   # Imperfect, does not reimplement calls.cc's hash literal -> kwparam logic
   example({account: ""})
