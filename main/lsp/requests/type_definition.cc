@@ -117,6 +117,22 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
             for (auto loc : locsForType(gs, resp->getRetType())) {
                 addLocIfExists(gs, locations, loc);
             }
+        } else if (fileIsTyped && resp->isKeywordArg()) {
+            // We only store one loc for a ParamInfo, which disguises the full set of locs if there are multiple.
+            for (auto loc : locsForType(gs, resp->getRetType())) {
+                addLocIfExists(gs, locations, loc);
+            }
+
+            // Loop over all (in case of multiple dispatch targets)
+            for (const auto &resp : queryResponses) {
+                if (resp == nullptr || !resp->isKeywordArg()) {
+                    continue;
+                }
+
+                for (auto loc : locsForType(gs, resp->getRetType())) {
+                    addLocIfExists(gs, locations, loc);
+                }
+            }
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
             // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
