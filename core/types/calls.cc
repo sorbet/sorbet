@@ -1091,7 +1091,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     // Extract the kwargs hash if there are keyword args present in the send
     TypePtr kwargs;
-    UnorderedMap<NameRef, Loc> kwargLocs;
+    UnorderedMap<NameRef, pair<LocOffsets, LocOffsets>> kwargLocs;
     Loc kwargsLoc;
     if (numKwargs > 0 || hasKwsplat) {
         // for cases where the method accepts keyword arguments, none were given, but more positional arguments were
@@ -1114,8 +1114,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto kwend = kwbegin + numKwargs;
             while (kwit != kwend) {
                 auto kwArgIdx = distance(kwbegin, kwit);
-                auto kwArgLoc =
-                    args.argLoc(args.numPosArgs + kwArgIdx).join(args.argLoc(args.numPosArgs + kwArgIdx + 1));
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
                 if (!isa_type<NamedLiteralType>(key->type) ||
@@ -1131,7 +1129,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto &val = *kwit++;
                 keys.emplace_back(key->type);
                 values.emplace_back(val->type);
-                kwargLocs[cast_type_nonnull<NamedLiteralType>(key->type).name] = kwArgLoc;
+                auto kwKeyLoc = args.locs.args[args.numPosArgs + kwArgIdx];
+                auto kwValLoc = args.locs.args[args.numPosArgs + kwArgIdx + 1];
+                kwargLocs[cast_type_nonnull<NamedLiteralType>(key->type).name] = {kwKeyLoc, kwValLoc};
             }
         }
 
@@ -1344,8 +1344,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
     if (hasKwparams) {
-        // Remember where the kwargs started
-        auto kwait = aPosEnd;
         // Mark the keyword args as consumed
         ait += numKwargs;
 
@@ -1418,27 +1416,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // offset * 2 skips kwargs we have already seen.
                 // + 1 moves us to the value being passed.
                 ENFORCE(!sawKwSplat);
-                auto kwaValue = kwait + (offset * 2) + 1;
                 ENFORCE(args.args.size() == args.locs.args.size(), "Send arg and loc vectors did not match in length");
-                // This in-bounds check is unusual, but it's necessary for cases
-                // where we are processing a kwarg that comes from a non-kwsplat
-                // shapely-typed hash.  In such cases, our kwargOffset will appear to
-                // be out-of-bounds with respect to the actual number of arguments in
-                // the call.  (We could track the location information of kwargs from
-                // such a hash, but that would require rewriting a good chunk of this
-                // function.)  We actually do something slightly stronger, which is
-                // to check whether the thing we're pointing at lives inside the range
-                // of passed kwargs in the call.
-                //
-                // If we encounter this case, we've already setup kwargsLoc to reflect
-                // as closely as possible the location of the entire shapely-typed
-                // hash, so use that for the "origin" of the argument and say that the
-                // argument has no location.  The latter also inhibits type-driven
-                // autocorrects from kicking in.
-                bool argInBounds = kwaValue < ait;
-                auto kwargOffset = kwaValue - args.args.begin();
-                auto originLoc = argInBounds ? args.argLoc(kwargOffset) : kwargsLoc;
-                auto argLoc = argInBounds ? args.argLoc(kwargOffset) : args.callLoc();
+                Loc originLoc = kwargsLoc;
+                Loc argLoc = args.callLoc();
+                auto kwargLocsIt = kwargLocs.find(kwParam.name);
+                if (kwargLocsIt != kwargLocs.end()) {
+                    auto [kwKeyLoc, kwValLoc] = kwargLocsIt->second;
+                    originLoc = core::Loc(args.locs.file, kwValLoc);
+                    argLoc = originLoc;
+                }
                 TypeAndOrigins tpe{hash->values[offset], originLoc};
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam, args.selfType,
                                           targs, argLoc, args.originForUninitialized)) {
@@ -1462,7 +1448,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // TODO(jez) This papers over some stuff around kwsplats which might get in our way
                 // of getting a loc for known keyword args. In those cases, we simply give up right now.
                 if (it != kwargLocs.end()) {
-                    kwargErrLoc = it->second;
+                    auto [kwKeyLoc, kwValLoc] = it->second;
+                    kwargErrLoc = core::Loc(args.locs.file, kwKeyLoc.join(kwValLoc));
                 }
                 if (auto e = gs.beginError(kwargErrLoc, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(gs),
