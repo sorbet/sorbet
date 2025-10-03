@@ -32,5 +32,5 @@ A.unary_bloc # error: does not exist
 #           ^ apply-completion: [A] item: 0
 A.binary_bloc # error: does not exist
 #            ^ apply-completion: [B] item: 0
-A.arg0_arg1_blk${0} # error: does not exist
+A.arg0_arg1_blk(${0}) # error: does not exist
 #             ^ apply-completion: [C] item: 0
