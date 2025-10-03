@@ -265,6 +265,8 @@ autocorrect.rb:23: Expected `T.nilable(Integer)` but found `T.nilable(Numeric)` 
     autocorrect.rb:23:
     23 |foo(a: a)
                ^
+  Detailed explanation:
+    `Numeric` (the left side of the `T.any`) is not a subtype of `T.nilable(Integer)`
 
 autocorrect.rb:26: Expected `Integer` but found `NilClass` for argument `arg1` https://srb.help/7002
     26 |a[:a] = nil
