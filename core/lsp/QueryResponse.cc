@@ -47,58 +47,80 @@ const EditResponse *QueryResponse::isEdit() const {
 }
 
 core::Loc QueryResponse::getLoc() const {
-    if (auto ident = isIdent()) {
-        return ident->termLoc;
-    } else if (auto send = isSend()) {
-        return send->termLoc();
-    } else if (auto literal = isLiteral()) {
-        return literal->termLoc;
-    } else if (auto constant = isConstant()) {
-        return constant->termLoc;
-    } else if (auto field = isField()) {
-        return field->termLoc;
-    } else if (auto def = isMethodDef()) {
-        return def->termLoc;
-    } else if (auto edit = isEdit()) {
-        return edit->loc;
-    } else {
-        return core::Loc::none();
-    }
+    return visit(
+        [](auto &&res) -> core::Loc {
+            using T = decay_t<decltype(res)>;
+            if constexpr (is_same_v<T, IdentResponse>) {
+                return res.termLoc;
+            } else if constexpr (is_same_v<T, SendResponse>) {
+                return res.termLoc();
+            } else if constexpr (is_same_v<T, LiteralResponse>) {
+                return res.termLoc;
+            } else if constexpr (is_same_v<T, ConstantResponse>) {
+                return res.termLoc;
+            } else if constexpr (is_same_v<T, FieldResponse>) {
+                return res.termLoc;
+            } else if constexpr (is_same_v<T, MethodDefResponse>) {
+                return res.termLoc;
+            } else if constexpr (is_same_v<T, EditResponse>) {
+                return res.loc;
+            } else {
+                static_assert(always_false_v<T>, "Should never happen, as the above checks should be exhaustive.");
+            }
+        },
+        this->response);
 }
 
 core::TypePtr QueryResponse::getRetType() const {
-    if (auto ident = isIdent()) {
-        return ident->retType.type;
-    } else if (auto send = isSend()) {
-        return send->dispatchResult->returnType;
-    } else if (auto literal = isLiteral()) {
-        return literal->retType.type;
-    } else if (auto constant = isConstant()) {
-        return constant->retType.type;
-    } else if (auto field = isField()) {
-        return field->retType.type;
-    } else if (auto def = isMethodDef()) {
-        return def->retType.type;
-    } else {
-        // Should never happen, as the above checks should be exhaustive.
-        Exception::raise("QueryResponse is of type that does not have retType.");
-    }
+    // TODO(jez) C++26: Convert this to variant::visit instance method
+    return visit(
+        [](auto &&res) -> core::TypePtr {
+            using T = decay_t<decltype(res)>;
+            if constexpr (is_same_v<T, IdentResponse>) {
+                return res.retType.type;
+            } else if constexpr (is_same_v<T, SendResponse>) {
+                return res.dispatchResult->returnType;
+            } else if constexpr (is_same_v<T, LiteralResponse>) {
+                return res.retType.type;
+            } else if constexpr (is_same_v<T, ConstantResponse>) {
+                return res.retType.type;
+            } else if constexpr (is_same_v<T, FieldResponse>) {
+                return res.retType.type;
+            } else if constexpr (is_same_v<T, MethodDefResponse>) {
+                return res.retType.type;
+            } else if constexpr (is_same_v<T, EditResponse>) {
+                Exception::raise("QueryResponse is of type that does not have retType.");
+            } else {
+                static_assert(always_false_v<T>, "Should never happen, as the above checks should be exhaustive.");
+            }
+        },
+        this->response);
 }
 
 const core::TypeAndOrigins &QueryResponse::getTypeAndOrigins() const {
-    if (auto ident = isIdent()) {
-        return ident->retType;
-    } else if (auto literal = isLiteral()) {
-        return literal->retType;
-    } else if (auto constant = isConstant()) {
-        return constant->retType;
-    } else if (auto field = isField()) {
-        return field->retType;
-    } else if (auto def = isMethodDef()) {
-        return def->retType;
-    } else {
-        Exception::raise("QueryResponse is of type that does not have TypeAndOrigins.");
-    }
+    // TODO(jez) C++26: Convert this to variant::visit instance method
+    return visit(
+        [](auto &&res) -> const core::TypeAndOrigins & {
+            using T = decay_t<decltype(res)>;
+            if constexpr (is_same_v<T, IdentResponse>) {
+                return res.retType;
+            } else if constexpr (is_same_v<T, LiteralResponse>) {
+                return res.retType;
+            } else if constexpr (is_same_v<T, ConstantResponse>) {
+                return res.retType;
+            } else if constexpr (is_same_v<T, FieldResponse>) {
+                return res.retType;
+            } else if constexpr (is_same_v<T, MethodDefResponse>) {
+                return res.retType;
+            } else if constexpr (is_same_v<T, SendResponse>) {
+                Exception::raise("QueryResponse is of type that does not have retType.");
+            } else if constexpr (is_same_v<T, EditResponse>) {
+                Exception::raise("QueryResponse is of type that does not have retType.");
+            } else {
+                static_assert(always_false_v<T>, "Should never happen, as the above checks should be exhaustive.");
+            }
+        },
+        this->response);
 }
 
 } // namespace sorbet::core::lsp
