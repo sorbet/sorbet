@@ -17,12 +17,12 @@ end
 sig {params(m: M, a: Integer, b: Integer).void}
 def AAA_example1(m, a, b)
   AAA_example1()
-  #           ^^ error: Not enough arguments
+  #            ^ error: Not enough arguments
   #            ^ completion: a, b, m, AAA_example1, ...
 
   # No locals here because !isPrivateOk 🙃
   m.aaa_only_on_m()
-  #              ^^ error: Not enough arguments
+  #               ^ error: Not enough arguments
   #               ^ completion: aaa_only_on_m, ...
 
   # In addition to the above wonkiness, this case is even wonkier, because of
@@ -30,12 +30,12 @@ def AAA_example1(m, a, b)
   # block.
 
   AAA_example1() {}
-  #           ^ error: Not enough arguments
+  #            ^ error: Not enough arguments
   #            ^ completion: (nothing)
   #               ^ completion: (nothing)
 
   m.aaa_only_on_m() {}
-  #              ^ error: Not enough arguments
+  #               ^ error: Not enough arguments
   #               ^ completion: (nothing)
   #                  ^ completion: (nothing)
 end

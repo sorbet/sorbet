@@ -6,7 +6,7 @@ def test_must_because # error: does not have a `sig`
 
   T.must_because(x) {'reason'}
   T.must_because()
-  #             ^^ error: Not enough arguments
+  #              ^ error: Not enough arguments
   #               ^ error: requires a block parameter
 
   T.must_because(x) # error: requires a block parameter

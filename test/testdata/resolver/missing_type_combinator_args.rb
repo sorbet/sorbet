@@ -10,6 +10,6 @@ T.let(1)
 #     ^ error: Not enough arguments provided for method
 T.let(1, 2, 3) # error: Unsupported literal in type syntax
 T.reveal_type()
-#            ^^ error: Not enough arguments provided for method
+#             ^ error: Not enough arguments provided for method
 T.reveal_type(1, 2)
 #                ^ error: Too many arguments provided for method

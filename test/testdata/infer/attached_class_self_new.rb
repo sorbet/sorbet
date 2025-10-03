@@ -27,7 +27,7 @@ class PosArgs
 
     # Not matching initialize
     T.reveal_type(self.new())
-    #                     ^^ error: Not enough arguments provided
+    #                      ^ error: Not enough arguments provided
   # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Revealed type: `T.attached_class (of PosArgs)`
   end
 end

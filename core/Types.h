@@ -1012,24 +1012,10 @@ struct DispatchArgs {
     Loc argLoc(size_t i) const {
         return core::Loc(locs.file, locs.args[i]);
     }
-    Loc argsLoc() const {
-        if (!locs.args.empty()) {
-            return core::Loc(locs.file, locs.args.front().join(locs.args.back()));
-        }
 
-        if (this->block != nullptr) {
-            if (locs.fun.exists()) {
-                return funLoc().copyEndWithZeroLength();
-            }
-            return callLoc().copyEndWithZeroLength();
-        }
+    // Attempts to compute a loc that you could use to insert an arg at the beginning end of the current list of args.
+    Loc argsLoc(const GlobalState &gs) const;
 
-        if (locs.fun.exists()) {
-            return core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
-        }
-
-        return callLoc().copyEndWithZeroLength();
-    }
     Loc blockLoc(const GlobalState &gs) const {
         return core::Loc(locs.file, block->loc);
     }

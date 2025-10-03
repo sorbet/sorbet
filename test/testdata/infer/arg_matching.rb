@@ -16,6 +16,27 @@ class TestArgs
     required(1, 2)
     required(1, 2, 3)
     #              ^ error: Expected: `2`, got: `3`
+
+    required
+    #       ^ error: Not enough arguments
+    required {}
+    #       ^ error: Not enough arguments
+    required()
+    #        ^ error: Not enough arguments
+    required( )
+    #        ^ error: Not enough arguments
+    required() {}
+    #        ^ error: Not enough arguments
+    required(0) {}
+    #        ^ error: Not enough arguments
+    required(0, )
+    #        ^ error: Not enough arguments
+    required(any:)
+    #        ^^^^ error: Not enough arguments
+    required(any:,)
+    #        ^^^^ error: Not enough arguments
+    required((0))
+    #         ^ error: Not enough arguments
   end
 
   def optional(a, b=1)
@@ -112,4 +133,50 @@ class TestArgs
     #     ^^^^^^^    error: Missing required keyword argument `u` for method `TestArgs#optkw`
     #           ^ error: Too many positional arguments provided for method `TestArgs#optkw`. Expected: `1..2`, got: `3`
   end
+
+  def requires_mixed(a, b, c:); end
+
+  def call_requires_three
+    requires_mixed
+    #             ^ error: Not enough arguments
+    #             ^ error: Missing required keyword argument
+    requires_mixed {}
+    #             ^ error: Not enough arguments
+    #             ^ error: Missing required keyword argument
+    requires_mixed()
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
+    requires_mixed( )
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
+    requires_mixed() {}
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
+    requires_mixed(  ) {}
+    #              ^^ error: Not enough arguments
+    #              ^^ error: Missing required keyword argument
+    requires_mixed(0)
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
+    requires_mixed(0, )
+    #              ^ error: Not enough arguments
+    #              ^ error: Missing required keyword argument
+    requires_mixed(any:)
+    #              ^^^^ error: Not enough arguments
+    #              ^^^^ error: Missing required keyword argument
+    requires_mixed(any:,)
+    #              ^^^^ error: Not enough arguments
+    #              ^^^^ error: Missing required keyword argument
+    requires_mixed((0))
+    #               ^ error: Not enough arguments
+    #               ^ error: Missing required keyword argument
+    requires_mixed((0), (1))
+    #               ^^^^^^ error: Missing required keyword argument
+    requires_mixed(0, (1))
+    #              ^^^^^ error: Missing required keyword argument
+    requires_mixed((0), 1)
+    #               ^^^^^ error: Missing required keyword argument
+  end
+
+
 end
