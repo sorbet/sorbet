@@ -926,9 +926,13 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             if (!owningPackage.exists() || data->flags.isExported) {
                 continue;
             }
+            if (owningPackage.owner.show(gs) == "Opus::Log") {
+                fmt::print("Opus::Log: {} {}\n", sym.show(gs), data->referencingFiles.size());
+            }
             for (auto &f : data->referencingFiles) {
                 auto packageForF = gs.packageDB().getPackageNameForFile(f);
-                if (packageForF != owningPackage && !gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+                // if (packageForF != owningPackage && !gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+                if (packageForF != owningPackage) {
                     fmt::print("exporting {} in {}\n", sym.show(gs), owningPackage.owner.show(gs));
                     toExport[owningPackage].push_back(sym);
                     break;
