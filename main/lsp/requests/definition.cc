@@ -132,6 +132,23 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
                     start = start->secondary.get();
                 }
             }
+        } else if (fileIsTyped && resp->isKeywordArg()) {
+            auto kw = resp->isKeywordArg();
+            // We only store one loc for a ParamInfo, which disguises the full set of locs if there are multiple.
+            addLocIfExists(gs, locations, kw->paramLoc);
+
+            // Loop over all (in case of multiple dispatch targets)
+            for (const auto &resp : queryResponses) {
+                if (resp == nullptr) {
+                    continue;
+                }
+                auto *kw = resp->isKeywordArg();
+                if (kw == nullptr) {
+                    continue;
+                }
+
+                addLocIfExists(gs, locations, kw->paramLoc);
+            }
         }
     }
     response->result = move(locations);
