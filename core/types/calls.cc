@@ -12,6 +12,7 @@
 #include "core/TypeErrorDiagnostics.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
+#include "core/lsp/QueryResponse.h"
 #include <algorithm> // find_if, sort
 
 #include "absl/strings/str_cat.h"
@@ -1429,6 +1430,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam, args.selfType,
                                           targs, argLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
+                }
+
+                if (kwargLocsIt != kwargLocs.end()) {
+                    auto [kwKeyLoc, kwValLoc] = kwargLocsIt->second;
+                    auto termLoc = core::Loc(args.locs.file, kwKeyLoc);
+                    if (gs.lspQuery.matchesLoc(termLoc)) {
+                        lsp::QueryResponse::pushQueryResponse(gs, args.locs.file,
+                                                              lsp::KeywordArgResponse(termLoc, method, kwParam));
+                    }
                 }
             }
             if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs)) {

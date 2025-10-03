@@ -78,6 +78,18 @@ public:
 };
 CheckSize(LiteralResponse, 48, 8);
 
+class KeywordArgResponse final {
+public:
+    KeywordArgResponse(Loc termLoc, const MethodRef owner, const ParamInfo &param)
+        : termLoc(termLoc), owner(owner), paramLoc(param.loc), paramName(param.name), paramType(param.type) {}
+    const Loc termLoc;
+    MethodRef owner;
+    Loc paramLoc;
+    NameRef paramName;
+    TypePtr paramType;
+};
+CheckSize(KeywordArgResponse, 40, 8);
+
 class ConstantResponse final {
 public:
     using Scopes = InlinedVector<core::SymbolRef, 1>;
@@ -125,7 +137,7 @@ public:
 CheckSize(EditResponse, 40, 8);
 
 using QueryResponseVariant = std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse,
-                                          MethodDefResponse, EditResponse>;
+                                          MethodDefResponse, EditResponse, KeywordArgResponse>;
 
 /**
  * Represents a response to a LSP query. Wraps a variant that contains one of several response types.
@@ -139,8 +151,13 @@ public:
      * Pushes the given query response on to the error queue.
      */
     static void pushQueryResponse(core::Context ctx, QueryResponseVariant rawResponse);
+    static void pushQueryResponse(const GlobalState &gs, FileRef file, QueryResponseVariant rawResponse);
 
     QueryResponse(QueryResponseVariant response);
+
+    const QueryResponseVariant &asResponse() const {
+        return this->response;
+    };
 
     /**
      * Returns nullptr unless this is a Send.
@@ -156,6 +173,11 @@ public:
      * Returns nullptr unless this is a Literal.
      */
     const LiteralResponse *isLiteral() const;
+
+    /**
+     * Returns nullptr unless this is a KeywordArg.
+     */
+    const KeywordArgResponse *isKeywordArg() const;
 
     /**
      * Returns nullptr unless this is a Constant.
@@ -187,12 +209,6 @@ public:
      * Returns the type of this expression's rval.
      */
     core::TypePtr getRetType() const;
-
-    /**
-     * Returns a reference to this response's TypeAndOrigins, if it has any.
-     * If response is of a type without TypeAndOrigins, it throws an exception.
-     */
-    const core::TypeAndOrigins &getTypeAndOrigins() const;
 };
 
 } // namespace sorbet::core::lsp
