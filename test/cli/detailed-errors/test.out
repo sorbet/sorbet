@@ -32,6 +32,7 @@ type_members.rb:49: Expected `Box[T.any(Integer, String)]` but found `Box[Intege
   Detailed explanation:
     `Integer` is not equivalent to `T.any(Integer, String)` for invariant type member `Box::Elem`
       `Integer` is a subtype of `T.any(Integer, String)` but not the reverse, so they are not equivalent
+        `String` (the right side of the `T.any`) is not a subtype of `Integer`
 
 type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
     21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
@@ -253,6 +254,7 @@ hash.rb:10: Expected `T.nilable(T::Hash[String, Integer])` but found `T.nilable(
   Detailed explanation:
     `Symbol` is not a subtype of `String` for covariant type member `Hash::K`
     `Hash` does not derive from `NilClass`
+    `T::Hash[Symbol, Integer]` (the left side of the `T.any`) is not a subtype of `T.nilable(T::Hash[String, Integer])`
 
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
     10 |takes_tuple([])

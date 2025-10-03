@@ -119,6 +119,8 @@ test.rb:29: Expected `String` for keyword parameter `x` but found `T.nilable(Int
     test.rb:29:
     29 |optional_x(0, 1, 2, **nilble_opts)
                             ^^^^^^^^^^^^^
+  Detailed explanation:
+    `Integer` (the left side of the `T.any`) is not a subtype of `String`
   Note:
     A `Hash` passed as a keyword splat must match the type of all keyword parameters
     because Sorbet cannot see what specific keys exist in the `Hash`.
