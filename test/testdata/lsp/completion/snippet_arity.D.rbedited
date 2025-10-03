@@ -19,5 +19,5 @@ Test.new.test_method_unar # error: does not exist
 Test.new.test_method_bina # error: does not exist
 #                        ^ apply-completion: [C] item: 0
 
-Test.new.test_method_kwarg${0} # error: does not exist
+Test.new.test_method_kwarg(${0}) # error: does not exist
 #                        ^ apply-completion: [D] item: 0

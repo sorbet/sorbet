@@ -340,6 +340,29 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         return to_string(result);
     }
 
+    auto method = maybeAlias.data(gs)->dealiasMethod(gs);
+    auto &parameters = method.data(gs)->parameters;
+    auto requiresArguments = absl::c_any_of(parameters, [](const auto &param) {
+        return !param.flags.isDefault && !param.flags.isRepeated && !param.flags.isBlock;
+    });
+    if (requiresArguments) {
+        fmt::format_to(back_inserter(result), "(${{0}})");
+        return to_string(result);
+    }
+
+    ENFORCE(!method.data(gs)->parameters.empty());
+    if (parameters.size() == 1) {
+        auto &blkParam = method.data(gs)->parameters.back();
+        ENFORCE(blkParam.flags.isBlock);
+
+        auto hasBlockType = blkParam.type != nullptr && !blkParam.type.isUntyped();
+        if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkParam.type)) {
+            // If the method has no parameters except a required block, put the cursor inside `{|}`.
+            fmt::format_to(back_inserter(result), " {{${{0}}}}");
+            return to_string(result);
+        }
+    }
+
     fmt::format_to(std::back_inserter(result), "${{0}}");
     return to_string(result);
 }

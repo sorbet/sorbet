@@ -25,7 +25,7 @@ class A
   end
 end
 
-A.required_block${0} # error: does not exist
+A.required_block {${0}} # error: does not exist
 #              ^ apply-completion: [A] item: 0
 A.nilable_bloc # error: does not exist
 #             ^ apply-completion: [B] item: 0
