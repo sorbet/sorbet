@@ -43,3 +43,10 @@ def requires_multiple_keyword_args(x:, y:)
 end
 
 requires_multiple_keyword_args
+
+extend T::Sig
+sig { params(x: Integer, y: String).void }
+def requires_multiple_keyword_args_typed(x:, y:)
+end
+
+requires_multiple_keyword_args_typed
