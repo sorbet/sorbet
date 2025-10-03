@@ -9,7 +9,7 @@ class A
 end
 
 begin
-  A.example${0}
+  A.example(${0})
   # ^ completion: example, ...
   # ^ apply-completion: [B] item: 0
 

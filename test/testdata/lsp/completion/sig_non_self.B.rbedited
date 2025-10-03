@@ -10,7 +10,7 @@ class A
   #                         ^ apply-completion: [A] item: 0
   def without_runtime; ''; end
 
-  Sorbet::Private::Static.sig${0}
+  Sorbet::Private::Static.sig(${0})
   #                          ^ error: Not enough arguments
   #                          ^ error: no block
   #                          ^ apply-completion: [B] item: 0

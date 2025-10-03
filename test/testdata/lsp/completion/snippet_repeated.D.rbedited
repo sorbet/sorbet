@@ -28,5 +28,5 @@ A.new.method_using_rest_ar # error: does not exist
 A.new.positional_then_kwar # error: does not exist
 #                         ^ apply-completion: [C] item: 0
 
-A.new.positional_then_rest_arg${0} # error: does not exist
+A.new.positional_then_rest_arg(${0}) # error: does not exist
 #                            ^ apply-completion: [D] item: 0

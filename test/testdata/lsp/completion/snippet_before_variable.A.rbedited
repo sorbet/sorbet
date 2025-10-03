@@ -15,7 +15,7 @@ begin
 
   x = nil # error: does not exist
 
-  A.example${0}
+  A.example(${0})
   # ^ completion: example, ...
   # ^ apply-completion: [A] item: 0
 
