@@ -199,40 +199,40 @@ class TestArgs
   def call_requires_multiple_kwarg(x)
     requires_multiple_kwarg
     #                      ^ error: Not enough arguments
-    #                      ^ error: Missing required keyword arguments
+    #                      ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg {}
     #                      ^ error: Not enough arguments
-    #                      ^ error: Missing required keyword arguments
+    #                      ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg()
     #                       ^ error: Not enough arguments
-    #                       ^ error: Missing required keyword arguments
+    #                       ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg( )
     #                        ^ error: Not enough arguments
-    #                        ^ error: Missing required keyword arguments
+    #                        ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg() {}
     #                       ^ error: Not enough arguments
-    #                       ^ error: Missing required keyword arguments
+    #                       ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg(  ) {}
     #                         ^ error: Not enough arguments
-    #                         ^ error: Missing required keyword arguments
+    #                         ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg(0)
-    #                        ^ error: Missing required keyword arguments
+    #                        ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg(0, )
-    #                        ^ error: Missing required keyword arguments
+    #                        ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg(any:)
-    #                           ^ error: Missing required keyword arguments
+    #                           ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg(any:,)
-    #                           ^ error: Missing required keyword arguments
+    #                           ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg((0))
-    #                         ^ error: Missing required keyword arguments
+    #                         ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg((0), (1))
     #                             ^ error: Too many positional
-    #                              ^ error: Missing required keyword arguments
+    #                              ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg(0, (1))
     #                           ^ error: Too many positional
-    #                            ^ error: Missing required keyword arguments
+    #                            ^ error: Missing 2 required keyword arguments
     requires_multiple_kwarg((0), 1)
     #                            ^ error: Too many positional
-    #                             ^ error: Missing required keyword arguments
+    #                             ^ error: Missing 2 required keyword arguments
   end
 end

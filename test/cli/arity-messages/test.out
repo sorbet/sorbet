@@ -129,7 +129,7 @@ arity-messages.rb:39: Missing required keyword argument `qux` for method `A.make
     39 |  bar: "some long string",
                                  ^
 
-arity-messages.rb:45: Missing required keyword arguments for method `Object#requires_multiple_keyword_args` https://srb.help/7004
+arity-messages.rb:45: Missing 2 required keyword arguments for method `Object#requires_multiple_keyword_args` https://srb.help/7004
     45 |requires_multiple_keyword_args
                                       ^
     arity-messages.rb:42: Keyword parameter `x` declared here:

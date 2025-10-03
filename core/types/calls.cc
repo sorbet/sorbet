@@ -364,7 +364,7 @@ unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs 
             e.setHeader("Missing required keyword argument `{}` for method `{}`", missingKwargs[0]->name.show(gs),
                         method.show(gs));
         } else {
-            e.setHeader("Missing required keyword arguments for method `{}`", method.show(gs));
+            e.setHeader("Missing {} required keyword arguments for method `{}`", missingKwargs.size(), method.show(gs));
         }
 
         for (auto *arg : missingKwargs) {
