@@ -462,12 +462,6 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     pm_location_t tiny_loc = PMK::convertLocOffsets(firstLineTypeLoc.copyWithZeroLength());
     pm_location_t end_zero_loc = PMK::convertLocOffsets(fullTypeLoc.copyEndWithZeroLength());
 
-    // Add method names to constant pool
-    pm_constant_id_t sig_method_id = PMK::addConstantToPool("sig");
-    if (sig_method_id == PM_CONSTANT_ID_UNSET) {
-        return nullptr;
-    }
-
     // Create receiver: Sorbet::Private::Static
     pm_node_t *receiver = PMK::SorbetPrivateStatic();
     if (!receiver)
@@ -476,11 +470,6 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     // Create argument: T::Sig::WithoutRuntime
     pm_node_t *t_sig_arg = PMK::TSigWithoutRuntime();
     if (!t_sig_arg)
-        return nullptr;
-
-    // Create arguments list
-    pm_node_t *arguments = PMK::SingleArgumentNode(t_sig_arg);
-    if (!arguments)
         return nullptr;
 
     // Create sig parameter pairs for .params() call
@@ -569,20 +558,13 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
             return nullptr;
         }
 
-        // Create arguments node containing the hash
-        pm_node_t *paramsArgs = PMK::SingleArgumentNode(paramsHash);
-        if (!paramsArgs) {
-            return nullptr;
-        }
-
         // Create .params() method call
-        pm_call_node_t *paramsCall =
-            PMK::Send(sigReceiver, params_id, paramsArgs, tiny_loc, full_loc, tiny_loc);
+        pm_node_t *paramsCall = PMK::Send1(fullTypeLoc, sigReceiver, "params", paramsHash);
         if (!paramsCall) {
             return nullptr;
         }
 
-        sigReceiver = up_cast(paramsCall);
+        sigReceiver = paramsCall;
         // debugPrintLocation("params.call.base", paramsCall->base.location);
         // debugPrintLocation("params.call.msg", paramsCall->message_loc);
     }
@@ -637,9 +619,9 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     // Ensure block base.location covers the full RBS type span
     block->base.location = full_loc;
 
-    // Create the main sig call
-    pm_call_node_t *call =
-        PMK::Send(receiver, sig_method_id, arguments, tiny_loc, full_loc, tiny_loc, up_cast(block));
+    // Create the main sig call with block
+    std::vector<pm_node_t *> sig_args = {t_sig_arg};
+    pm_node_t *call = PMK::Send(fullTypeLoc, receiver, "sig", sig_args, up_cast(block));
     if (!call)
         return nullptr;
 
@@ -650,7 +632,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     // debugPrintLocation("block.close", block->closing_loc);
 
     (void)commentLoc; // Suppress unused warning
-    return up_cast(call);
+    return call;
 }
 
 pm_node_t *MethodTypeToParserNodePrism::createSymbolNode(rbs_ast_symbol_t *name, core::LocOffsets nameLoc) {

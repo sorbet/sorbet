@@ -242,13 +242,15 @@ public:
     static pm_node_t *Hash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs);
     static pm_node_t *KeywordHash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs);
 
-    // Method call creation
-    static pm_call_node_t *Send(pm_node_t *receiver, pm_constant_id_t method_id,
-                                pm_node_t *arguments, pm_location_t message_loc,
-                                pm_location_t full_loc, pm_location_t tiny_loc,
-                                pm_node_t *block = nullptr);
+    // Low-level method call creation
+    static pm_call_node_t *createSendNode(pm_node_t *receiver, pm_constant_id_t method_id,
+                                          pm_node_t *arguments, pm_location_t message_loc,
+                                          pm_location_t full_loc, pm_location_t tiny_loc,
+                                          pm_node_t *block = nullptr);
 
-    // Convenient method call builders (similar to ast::MK)
+    // High-level method call builders (similar to ast::MK)
+    static pm_node_t *Send(core::LocOffsets loc, pm_node_t *receiver, const char *method,
+                          const std::vector<pm_node_t *> &args, pm_node_t *block = nullptr);
     static pm_node_t *Send0(core::LocOffsets loc, pm_node_t *receiver, const char *method);
     static pm_node_t *Send1(core::LocOffsets loc, pm_node_t *receiver, const char *method,
                            pm_node_t *arg1);
@@ -269,6 +271,8 @@ public:
     static pm_node_t *T(core::LocOffsets loc);
     static pm_node_t *TNilable(core::LocOffsets loc, pm_node_t *type);
     static pm_node_t *TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args);
+    static pm_node_t *TAll(core::LocOffsets loc, const std::vector<pm_node_t *> &args);
+    static pm_node_t *TTypeParameter(core::LocOffsets loc, pm_node_t *name);
 
     // Utility functions for type checking
     static bool isTUntyped(pm_node_t *node);

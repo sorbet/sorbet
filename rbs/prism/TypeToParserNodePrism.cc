@@ -165,7 +165,20 @@ pm_node_t *TypeToParserNodePrism::classInstanceType(const rbs_types_class_instan
     fmt::print("TypeToParserNodePrism::classInstanceType\n");
     auto argsValue = node->args;
     auto isGeneric = argsValue != nullptr && argsValue->length > 0;
-    return typeNameType(node->name, isGeneric, declaration);
+    auto typeConstant = typeNameType(node->name, isGeneric, declaration);
+
+    if (isGeneric) {
+        std::vector<pm_node_t *> args;
+        args.reserve(argsValue->length);
+        for (rbs_node_list_node *list_node = argsValue->head; list_node != nullptr; list_node = list_node->next) {
+            auto argType = toPrismNode(list_node->node, declaration);
+            args.push_back(argType);
+        }
+
+        return PMK::Send(loc, typeConstant, "syntheticSquareBrackets", args);
+    }
+
+    return typeConstant;
 }
 
 pm_node_t *TypeToParserNodePrism::classSingletonType(const rbs_types_class_singleton_t *node, core::LocOffsets loc,
@@ -186,8 +199,12 @@ pm_node_t *TypeToParserNodePrism::unionType(const rbs_types_union_t *node, core:
 
 pm_node_t *TypeToParserNodePrism::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
                                                    const RBSDeclaration &declaration) {
-    // Simplified - should create T.all call with all intersection members
-    return this->createConstantReadNode("T.all");
+    std::vector<pm_node_t *> args;
+    for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
+        auto innerType = toPrismNode(list_node->node, declaration);
+        args.push_back(innerType);
+    }
+    return PMK::TAll(loc, args);
 }
 
 pm_node_t *TypeToParserNodePrism::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
@@ -236,7 +253,8 @@ pm_node_t *TypeToParserNodePrism::variableType(const rbs_types_variable_t *node,
     rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node->name;
     auto nameStr = parser.resolveConstant(symbol);
     string nameString(nameStr);
-    return this->createConstantReadNode(nameString);
+    pm_node_t *symbolNode = PMK::Symbol(loc, nameString.c_str());
+    return PMK::TTypeParameter(loc, symbolNode);
 }
 
 pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSDeclaration &declaration) {

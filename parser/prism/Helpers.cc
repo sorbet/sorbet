@@ -14,7 +14,6 @@ void PMK::setParser(const Parser *parser) {
     g_prismParser = parser;
 }
 
-
 pm_node_t PMK::initializeBaseNode(pm_node_type_t type) {
     if (!g_prismParser) {
         return (pm_node_t){.type = type, .flags = 0, .node_id = 0, .location = {.start = nullptr, .end = nullptr}};
@@ -132,10 +131,9 @@ pm_location_t PMK::convertLocOffsets(core::LocOffsets loc) {
     return {.start = start_ptr, .end = end_ptr};
 }
 
-pm_call_node_t *PMK::Send(pm_node_t *receiver, pm_constant_id_t method_id,
-                                                       pm_node_t *arguments, pm_location_t message_loc,
-                                                       pm_location_t full_loc, pm_location_t tiny_loc,
-                                                       pm_node_t *block) {
+pm_call_node_t *PMK::createSendNode(pm_node_t *receiver, pm_constant_id_t method_id, pm_node_t *arguments,
+                                    pm_location_t message_loc, pm_location_t full_loc, pm_location_t tiny_loc,
+                                    pm_node_t *block) {
     pm_call_node_t *call = allocateNode<pm_call_node_t>();
     if (!call) {
         return nullptr;
@@ -326,7 +324,7 @@ pm_node_t *PMK::Send0(core::LocOffsets loc, pm_node_t *receiver, const char *met
     pm_location_t full_loc = convertLocOffsets(loc);
     pm_location_t tiny_loc = convertLocOffsets(loc.copyWithZeroLength());
 
-    return up_cast(Send(receiver, method_id, nullptr, tiny_loc, full_loc, tiny_loc));
+    return up_cast(createSendNode(receiver, method_id, nullptr, tiny_loc, full_loc, tiny_loc));
 }
 
 pm_node_t *PMK::Send1(core::LocOffsets loc, pm_node_t *receiver, const char *method, pm_node_t *arg1) {
@@ -347,7 +345,44 @@ pm_node_t *PMK::Send1(core::LocOffsets loc, pm_node_t *receiver, const char *met
     pm_location_t full_loc = convertLocOffsets(loc);
     pm_location_t tiny_loc = convertLocOffsets(loc.copyWithZeroLength());
 
-    return up_cast(Send(receiver, method_id, arguments, tiny_loc, full_loc, tiny_loc));
+    return up_cast(createSendNode(receiver, method_id, arguments, tiny_loc, full_loc, tiny_loc));
+}
+
+pm_node_t *PMK::Send(core::LocOffsets loc, pm_node_t *receiver, const char *method,
+                    const std::vector<pm_node_t *> &args, pm_node_t *block) {
+    if (!receiver || !method || args.empty()) {
+        return nullptr;
+    }
+
+    pm_constant_id_t method_id = addConstantToPool(method);
+    if (method_id == PM_CONSTANT_ID_UNSET) {
+        return nullptr;
+    }
+
+    // Create arguments node with multiple arguments
+    pm_arguments_node_t *arguments = allocateNode<pm_arguments_node_t>();
+    if (!arguments) {
+        return nullptr;
+    }
+
+    pm_node_t **arg_nodes = (pm_node_t **)calloc(args.size(), sizeof(pm_node_t *));
+    if (!arg_nodes) {
+        free(arguments);
+        return nullptr;
+    }
+
+    for (size_t i = 0; i < args.size(); i++) {
+        arg_nodes[i] = args[i];
+    }
+
+    *arguments = (pm_arguments_node_t){.base = initializeBaseNode(PM_ARGUMENTS_NODE),
+                                       .arguments = {.size = args.size(), .capacity = args.size(), .nodes = arg_nodes}};
+    arguments->base.location = convertLocOffsets(loc);
+
+    pm_location_t full_loc = convertLocOffsets(loc);
+    pm_location_t tiny_loc = convertLocOffsets(loc.copyWithZeroLength());
+
+    return up_cast(createSendNode(receiver, method_id, up_cast(arguments), tiny_loc, full_loc, tiny_loc, block));
 }
 
 pm_node_t *PMK::T(core::LocOffsets loc) {
@@ -400,7 +435,56 @@ pm_node_t *PMK::TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args)
     pm_location_t full_loc = convertLocOffsets(loc);
     pm_location_t tiny_loc = convertLocOffsets(loc.copyWithZeroLength());
 
-    return up_cast(Send(t_const, method_id, up_cast(arguments), tiny_loc, full_loc, tiny_loc));
+    return up_cast(createSendNode(t_const, method_id, up_cast(arguments), tiny_loc, full_loc, tiny_loc));
+}
+
+pm_node_t *PMK::TAll(core::LocOffsets loc, const std::vector<pm_node_t *> &args) {
+    // Create T.all(args...) call
+    pm_node_t *t_const = T(loc);
+    if (!t_const || args.empty()) {
+        return nullptr;
+    }
+
+    // Create arguments node with multiple arguments
+    pm_arguments_node_t *arguments = allocateNode<pm_arguments_node_t>();
+    if (!arguments) {
+        return nullptr;
+    }
+
+    pm_node_t **arg_nodes = (pm_node_t **)calloc(args.size(), sizeof(pm_node_t *));
+    if (!arg_nodes) {
+        free(arguments);
+        return nullptr;
+    }
+
+    for (size_t i = 0; i < args.size(); i++) {
+        arg_nodes[i] = args[i];
+    }
+
+    *arguments = (pm_arguments_node_t){.base = initializeBaseNode(PM_ARGUMENTS_NODE),
+                                       .arguments = {.size = args.size(), .capacity = args.size(), .nodes = arg_nodes}};
+    arguments->base.location = convertLocOffsets(loc);
+
+    pm_constant_id_t method_id = addConstantToPool("all");
+    if (method_id == PM_CONSTANT_ID_UNSET) {
+        return nullptr;
+    }
+
+    pm_location_t full_loc = convertLocOffsets(loc);
+    pm_location_t tiny_loc = convertLocOffsets(loc.copyWithZeroLength());
+
+    return up_cast(createSendNode(t_const, method_id, up_cast(arguments), tiny_loc, full_loc, tiny_loc));
+}
+
+pm_node_t *PMK::TTypeParameter(core::LocOffsets loc, pm_node_t *name) {
+    // Create T.type_parameter(name) call
+    pm_node_t *t_const = T(loc);
+    if (!t_const || !name) {
+        return nullptr;
+    }
+
+    fmt::print("DEBUG: Creating type parameter reference:\n");
+    return Send1(loc, t_const, "type_parameter", name);
 }
 
 bool PMK::isTUntyped(pm_node_t *node) {
