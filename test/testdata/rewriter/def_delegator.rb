@@ -70,7 +70,7 @@ class IgnoredUsages
   not_def_delegator :thing, :foo # error: Method `not_def_delegator` does not exist
   def_delegator # error: Not enough arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing
-  #             ^^^^^^ error: Not enough arguments provided for method `Forwardable#def_delegator`
+  #                   ^ error: Not enough arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, :foo, :bar, :baz
   #                                 ^^^^ error: Too many arguments provided for method `Forwardable#def_delegator`
   def_delegator :thing, :foo, :bar, kwarg: :thing
@@ -84,7 +84,7 @@ class IgnoredUsages
   def_delegator 234, :foo
   #             ^^^ error: Expected `T.any(Symbol, String)` but found `Integer(234)` for argument `accessor`
   def_delegator :thing => :foo
-  #             ^^^^^^^^^^^^^^ error: Not enough arguments provided for method `Forwardable#def_delegator
+  #                           ^ error: Not enough arguments provided for method `Forwardable#def_delegator
   #             ^^^^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{thing: Symbol(:foo)}` for argument `accessor`
 
 

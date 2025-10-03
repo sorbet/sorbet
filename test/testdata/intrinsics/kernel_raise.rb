@@ -53,13 +53,13 @@ def example(cls)
 
   0.times do
     raise MyError, "arg"
-    #              ^^^^^ error: Missing required keyword argument `input` for method `MyError#initialize`
+    #                   ^ error: Missing required keyword argument `input` for method `MyError#initialize`
     #              ^^^^^ error: Too many positional arguments provided for method `MyError#initialize`. Expected: `0`, got: `1`
   end
 
   0.times do
     raise cls, "arg"
-    #          ^^^^^ error: Missing required keyword argument `input` for method `MyError#initialize`
+    #               ^ error: Missing required keyword argument `input` for method `MyError#initialize`
     #          ^^^^^ error: Too many positional arguments provided for method `MyError#initialize`. Expected: `0`, got: `1`
   end
 
@@ -93,7 +93,7 @@ def example(cls)
   0.times do
     raise MultipleRequired, "one", "two"
     #                              ^^^^^ error: Expected `T.nilable(T::Array[String])` but found `String("two")` for argument `arg2`
-    #                       ^^^^^ error: Not enough arguments provided for method `MultipleRequired#initialize`. Expected: `2`, got: `1`
+    #                            ^ error: Not enough arguments provided for method `MultipleRequired#initialize`. Expected: `2`, got: `1`
   end
 
   0.times do

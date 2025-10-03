@@ -28,6 +28,6 @@ A.test(mess)
 A.test(message: "hi", ar)
 #                       ^ apply-completion: [B] item: 0
 #                     ^^  error: Method `ar` does not exist
-#      ^^^^^^^^^^^^^^^^^  error: Missing required keyword argument
+#                       ^  error: Missing required keyword argument
 #                     ^^  error: Unrecognized keyword argument
 #                     ^^  error: positional arg

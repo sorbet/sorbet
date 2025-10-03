@@ -28,3 +28,13 @@ pluto
 
 def paperino(x, y: nil, **kwargs); end
 paperino(2, 3, z: 4)
+
+class A
+  def self.make(foo:, bar:, qux:)
+  end
+end
+
+A.make(
+  foo: [1, 2, 3],
+  bar: "some long string",
+)
