@@ -165,6 +165,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
         if (!error->autocorrects.empty()) {
             diagnostic->message += " (fix available)";
         }
+        bool alreadyAppendedToMessage = false;
 
         vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
         for (auto &section : error->sections) {
@@ -178,37 +179,28 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
 
             if (section.messages.empty()) {
                 // Sometimes we just use section headers to report extra information, not connected
-                // to a specific line. The LSP spec needs a location, so let's just re-use the error->loc.
-                auto location = config->loc2Location(gs, error->loc);
-                relatedInformation.push_back(
-                    make_unique<DiagnosticRelatedInformation>(move(location), move(sectionHeader)));
+                // to a specific line. Let's tack that on to the end of the message.
+                diagnostic->message += fmt::format("\n\n{}", sectionHeader);
                 continue;
             }
 
             bool usedSectionHeader = false;
             for (auto &errorLine : section.messages) {
                 auto location = config->loc2Location(gs, errorLine.loc);
-                if (location == nullptr) {
-                    // This was probably from an addErrorNote call. Still want to report the note.
-                    location = config->loc2Location(gs, error->loc);
-                }
-                if (location == nullptr) {
-                    continue;
-                }
 
                 string message;
                 if (section.isAutocorrectDescription && section.isDidYouMean) {
                     message = fmt::format("{} (fix available)", sectionHeader);
                     usedSectionHeader = true;
-                } else if (errorLine.formattedMessage.length() > 0) {
+                } else {
                     if (!usedSectionHeader) {
-                        relatedInformation.push_back(
-                            make_unique<DiagnosticRelatedInformation>(location->copy(), sectionHeader));
+                        message = sectionHeader;
                         usedSectionHeader = true;
                     }
-                    message = errorLine.formattedMessage;
-                } else {
-                    message = sectionHeader;
+                    auto maybeSpace = message.empty() ? "" : " ";
+                    if (!errorLine.formattedMessage.empty()) {
+                        message = fmt::format("{}{}{}", message, maybeSpace, errorLine.formattedMessage);
+                    }
                 }
 
                 // VSCode strips out leading whitespace, but we use leading whitespaces to convey
@@ -219,7 +211,21 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                     message.replace(pos, 1, "\u00A0");
                     pos += 1;
                 }
-                relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(std::move(location), message));
+
+                if (location == nullptr) {
+                    // This was probably from an addErrorNote call. Still want to report the note,
+                    // but let's put it in the message instead of the related information.
+                    if (!alreadyAppendedToMessage) {
+                        diagnostic->message += "\n\n";
+                        alreadyAppendedToMessage = true;
+                    } else {
+                        diagnostic->message += "\n";
+                    }
+                    diagnostic->message += message;
+                } else {
+                    relatedInformation.push_back(
+                        make_unique<DiagnosticRelatedInformation>(move(location), move(message)));
+                }
             }
         }
         // Add link to error documentation.
