@@ -324,7 +324,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             if (auto e = gs.beginError(argLoc, what)) {
                 e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.parameterName(gs), "T.untyped");
                 auto for_ =
-                    ErrorColors::format("argument `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
+                    ErrorColors::format("parameter `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
                 e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, argTpe, originForUninitialized);
                 return e.build();
@@ -338,9 +338,9 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.parameterName(gs),
                         expectedType.show(gs));
         } else {
-            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
+            e.setHeader("Expected `{}` but found `{}` for parameter `{}`", expectedType.show(gs), argTpe.type.show(gs),
                         argSym.parameterName(gs));
-            auto for_ = ErrorColors::format("argument `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
+            auto for_ = ErrorColors::format("parameter `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
@@ -361,7 +361,7 @@ unique_ptr<Error> missingKwarg(const GlobalState &gs, const DispatchArgs &args, 
         if (expectedType == nullptr) {
             expectedType = Types::untyped(method);
         }
-        e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
+        e.addErrorLine(arg.loc, "Keyword parameter `{}` declared to expect type `{}` here:", argName,
                        expectedType.show(gs));
         return e.build();
     }
@@ -1258,7 +1258,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
                             e.setHeader("Expected `{}` for keyword parameter `{}` but found `{}` from keyword splat",
                                         kwParamType.show(gs), kwParam->parameterName(gs), kwSplatValueType.show(gs));
-                            auto for_ = ErrorColors::format("argument `{}` of method `{}`", kwParam->parameterName(gs),
+                            auto for_ = ErrorColors::format("parameter `{}` of method `{}`", kwParam->parameterName(gs),
                                                             method.show(gs));
                             e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
                             e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
