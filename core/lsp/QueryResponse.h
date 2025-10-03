@@ -81,14 +81,14 @@ CheckSize(LiteralResponse, 48, 8);
 class KeywordArgResponse final {
 public:
     KeywordArgResponse(Loc termLoc, const MethodRef owner, const ParamInfo &param)
-        : termLoc(termLoc), owner(owner), paramName(param.name), paramLoc(param.loc), paramType(param.type) {}
+        : termLoc(termLoc), owner(owner), paramLoc(param.loc), paramName(param.name), paramType(param.type) {}
     const Loc termLoc;
     MethodRef owner;
-    NameRef paramName;
     Loc paramLoc;
+    NameRef paramName;
     TypePtr paramType;
 };
-CheckSize(KeywordArgResponse, 48, 8);
+CheckSize(KeywordArgResponse, 40, 8);
 
 class ConstantResponse final {
 public:
