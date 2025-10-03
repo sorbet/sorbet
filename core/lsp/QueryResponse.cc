@@ -97,30 +97,4 @@ core::TypePtr QueryResponse::getRetType() const {
         this->response);
 }
 
-const core::TypeAndOrigins &QueryResponse::getTypeAndOrigins() const {
-    // TODO(jez) C++26: Convert this to variant::visit instance method
-    return visit(
-        [](auto &&res) -> const core::TypeAndOrigins & {
-            using T = decay_t<decltype(res)>;
-            if constexpr (is_same_v<T, IdentResponse>) {
-                return res.retType;
-            } else if constexpr (is_same_v<T, LiteralResponse>) {
-                return res.retType;
-            } else if constexpr (is_same_v<T, ConstantResponse>) {
-                return res.retType;
-            } else if constexpr (is_same_v<T, FieldResponse>) {
-                return res.retType;
-            } else if constexpr (is_same_v<T, MethodDefResponse>) {
-                return res.retType;
-            } else if constexpr (is_same_v<T, SendResponse>) {
-                Exception::raise("QueryResponse is of type that does not have retType.");
-            } else if constexpr (is_same_v<T, EditResponse>) {
-                Exception::raise("QueryResponse is of type that does not have retType.");
-            } else {
-                static_assert(always_false_v<T>, "Should never happen, as the above checks should be exhaustive.");
-            }
-        },
-        this->response);
-}
-
 } // namespace sorbet::core::lsp

@@ -93,9 +93,13 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             }
             std::transform(locMapping.begin(), locMapping.end(), std::back_inserter(locations),
                            [](auto &p) { return std::move(p.second); });
-        } else if (resp->isField() || (fileIsTyped && resp->isIdent())) {
-            const auto &retType = resp->getTypeAndOrigins();
-            for (auto &originLoc : retType.origins) {
+        } else if (auto f = resp->isField()) {
+            for (auto &originLoc : f->retType.origins) {
+                addLocIfExists(gs, locations, originLoc);
+            }
+        } else if (fileIsTyped && resp->isIdent()) {
+            auto identResp = resp->isIdent();
+            for (auto &originLoc : identResp->retType.origins) {
                 addLocIfExists(gs, locations, originLoc);
             }
         } else if (fileIsTyped && resp->isMethodDef()) {

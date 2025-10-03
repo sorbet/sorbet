@@ -187,12 +187,6 @@ public:
      * Returns the type of this expression's rval.
      */
     core::TypePtr getRetType() const;
-
-    /**
-     * Returns a reference to this response's TypeAndOrigins, if it has any.
-     * If response is of a type without TypeAndOrigins, it throws an exception.
-     */
-    const core::TypeAndOrigins &getTypeAndOrigins() const;
 };
 
 } // namespace sorbet::core::lsp

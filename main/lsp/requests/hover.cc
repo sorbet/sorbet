@@ -202,8 +202,8 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
 
         typeString = core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, options);
-    } else if (resp->isField()) {
-        const auto &origins = resp->getTypeAndOrigins().origins;
+    } else if (auto f = resp->isField()) {
+        const auto &origins = f->retType.origins;
         for (auto loc : origins) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
