@@ -1412,12 +1412,10 @@ public:
             value = const_(key);
         }
 
-        auto keyLoc =
-            core::LocOffsets{clamp((uint32_t)key->start()), clamp((uint32_t)key->end() - 1)}; // drop the trailing :
-        auto accessible_value = accessible(std::move(value));
-        return make_unique<Pair>(tokLoc(key).join(maybe_loc(accessible_value)),
-                                 make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())),
-                                 std::move(accessible_value));
+        auto keyLoc = tokLoc(key);
+        auto accessible_value = accessible(move(value));
+        return make_unique<Pair>(keyLoc, make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())),
+                                 move(accessible_value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
