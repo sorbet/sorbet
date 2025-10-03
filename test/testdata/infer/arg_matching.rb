@@ -17,6 +17,12 @@ class TestArgs
     required(1, 2, 3)
     #              ^ error: Expected: `2`, got: `3`
 
+    required 1
+    #         ^ error: Not enough arguments
+    required 1, 2
+    required 1, 2, 3
+    #              ^ error: Too many arguments
+
     required
     #       ^ error: Not enough arguments
     required {}
@@ -137,6 +143,15 @@ class TestArgs
   def requires_mixed(a, b, c:); end
 
   def call_requires_three
+    requires_mixed 1
+    #               ^ error: Not enough arguments
+    #               ^ error: Missing required keyword argument `c`
+    requires_mixed 1, 2
+    #                  ^ error: Missing required keyword argument `c`
+    requires_mixed 1, 2, 3
+    #                    ^ error: Too many positional arguments
+    #                     ^ error: Missing required keyword argument `c`
+
     requires_mixed
     #             ^ error: Not enough arguments
     #             ^ error: Missing required keyword argument
