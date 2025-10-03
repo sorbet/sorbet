@@ -1,0 +1,16 @@
+test/cli/deprecated/t1.rb:19: Method `BasicDeprecated#old_method` is deprecated https://srb.help/7052
+    19 |BasicDeprecated.new.old_method # error: Method `BasicDeprecated#old_method` is deprecated
+                            ^^^^^^^^^^
+    test/cli/deprecated/t1.rb:9: Defined in `BasicDeprecated` here
+     9 |  def old_method
+          ^^^^^^^^^^^^^^
+Errors: 1
+No errors! Great job.
+test/cli/deprecated/t2.rb:18: Method `BasicDeprecated#old_method` is deprecated https://srb.help/7052
+    18 |BasicDeprecated.new.old_method # error: Method `BasicDeprecated#old_method` is deprecated
+                            ^^^^^^^^^^
+    test/cli/deprecated/t2.rb:8: Defined in `BasicDeprecated` here
+     8 |  def old_method
+          ^^^^^^^^^^^^^^
+Errors: 1
+No errors! Great job.
