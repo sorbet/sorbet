@@ -142,7 +142,21 @@ arity-messages.rb:45: Missing 2 required keyword arguments for method `Object#re
     arity-messages.rb:45: Inserted `(x:, y:)`
     45 |requires_multiple_keyword_args
                                       ^
-Errors: 14
+
+arity-messages.rb:52: Missing 2 required keyword arguments for method `Object#requires_multiple_keyword_args_typed` https://srb.help/7004
+    52 |requires_multiple_keyword_args_typed
+                                            ^
+    arity-messages.rb:48: Keyword parameter `x` declared to expect type `Integer` here:
+    48 |sig { params(x: Integer, y: String).void }
+                     ^
+    arity-messages.rb:48: Keyword parameter `y` declared to expect type `String` here:
+    48 |sig { params(x: Integer, y: String).void }
+                                 ^
+  Autocorrect: Done
+    arity-messages.rb:52: Inserted `(x:, y:)`
+    52 |requires_multiple_keyword_args_typed
+                                            ^
+Errors: 15
 
 --------------------------------------------------------------------------
 
@@ -191,6 +205,13 @@ def requires_multiple_keyword_args(x:, y:)
 end
 
 requires_multiple_keyword_args(x:, y:)
+
+extend T::Sig
+sig { params(x: Integer, y: String).void }
+def requires_multiple_keyword_args_typed(x:, y:)
+end
+
+requires_multiple_keyword_args_typed(x:, y:)
 
 --------------------------------------------------------------------------
 
