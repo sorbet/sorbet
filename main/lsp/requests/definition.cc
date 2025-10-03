@@ -97,17 +97,19 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             for (auto &originLoc : f->retType.origins) {
                 addLocIfExists(gs, locations, originLoc);
             }
-        } else if (fileIsTyped && resp->isIdent()) {
+        } else if (!fileIsTyped) {
+            // everything after this requires a typed: true or higher file
+        } else if (resp->isIdent()) {
             auto identResp = resp->isIdent();
             for (auto &originLoc : identResp->retType.origins) {
                 addLocIfExists(gs, locations, originLoc);
             }
-        } else if (fileIsTyped && resp->isMethodDef()) {
+        } else if (resp->isMethodDef()) {
             auto sym = resp->isMethodDef()->symbol;
             for (auto loc : sym.data(gs)->locs()) {
                 addLocIfExists(gs, locations, loc);
             }
-        } else if (fileIsTyped && resp->isSend()) {
+        } else if (resp->isSend()) {
             auto sendResp = resp->isSend();
             // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
             if (sendResp->funLoc().exists() && sendResp->funLoc().contains(queryLoc)) {
@@ -131,6 +133,22 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
                     }
                     start = start->secondary.get();
                 }
+            }
+        } else if (auto kw = resp->isKeywordArg()) {
+            // We only store one loc for a ParamInfo, which disguises the full set of locs if there are multiple.
+            addLocIfExists(gs, locations, kw->paramLoc);
+
+            // Loop over all (in case of multiple dispatch targets)
+            for (const auto &resp : queryResponses) {
+                if (resp == nullptr) {
+                    continue;
+                }
+                auto *kw = resp->isKeywordArg();
+                if (kw == nullptr) {
+                    continue;
+                }
+
+                addLocIfExists(gs, locations, kw->paramLoc);
             }
         }
     }

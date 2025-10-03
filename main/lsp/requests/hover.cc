@@ -157,7 +157,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
         typeString = retType.showWithMoreInfo(gs);
     } else if (auto *kw = resp->isKeywordArg()) {
-        // Have do do this one separate, because it was stolen out of the queryResponses vector
+        // Have to do this one separately, because it was stolen out of the queryResponses vector
         handleHoverKeywordArg(gs, kw, typeString);
         // Want to find everything, for the case of methods with multiple dispatch components.
         for (const auto &resp : queryResponses) {
