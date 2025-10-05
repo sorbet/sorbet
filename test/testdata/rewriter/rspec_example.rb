@@ -7,6 +7,12 @@ module RSpec
     class ExampleGroup
       def described_class
       end
+
+      def is_expected
+      end
+
+      def eq(arg)
+      end
     end
   end
 end
@@ -15,6 +21,10 @@ class A
   def self.test_each(arg, &blk) = arg.each(&blk)
 
   def outer_helper; end
+
+  def is_expected; end
+
+  def eq(arg); end
 
   describe "inside describe" do
     def my_helper; end
@@ -93,6 +103,12 @@ class A
     it do
       outer_helper
     end
+  end
+
+  describe "its support" do
+    let(:foo) { "bar" }
+
+    its(:bar) { is_expected.to eq(foo) }
   end
 end
 

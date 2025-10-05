@@ -16,7 +16,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>
         end
 
+        def is_expected<<todo method>>(&<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
         <runtime method definition of described_class>
+
+        <runtime method definition of is_expected>
+
+        <runtime method definition of eq>
       end
     end
   end
@@ -30,9 +42,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    def is_expected<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def eq<<todo method>>(arg, &<blk>)
+      <emptyTree>
+    end
+
     <runtime method definition of self.test_each>
 
     <runtime method definition of outer_helper>
+
+    <runtime method definition of is_expected>
+
+    <runtime method definition of eq>
 
     class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
       def my_helper<<todo method>>(&<blk>)
@@ -128,6 +152,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       def <it><<todo method>>(&<blk>)
         <self>.outer_helper()
       end
+    end
+
+    class <emptyTree>::<C <describe 'its support'>><<C <todo sym>>> < (<self>)
+      def foo<<todo method>>(&<blk>)
+        "bar"
+      end
+
+      def <its 'bar'><<todo method>>(&<blk>)
+        <self>.is_expected().to(<self>.eq(<self>.foo()))
+      end
+
+      <runtime method definition of foo>
     end
   end
 

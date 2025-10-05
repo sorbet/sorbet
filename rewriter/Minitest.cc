@@ -224,6 +224,7 @@ bool requiresSecondFactor(core::NameRef fun) {
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId():
+        case core::Names::its().rawId():
         // ExampleGroup names
         case core::Names::context().rawId():
         case core::Names::exampleGroup().rawId():
@@ -267,6 +268,14 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
                 default:
                     return core::NameRef::noName();
             }
+        }
+
+        case core::Names::its().rawId(): {
+            if (arity == 1) {
+                auto name = fmt::format("<{} '{}'>", send.fun.show(ctx), to_s(ctx, send.getPosArg(0)));
+                return ctx.state.enterNameUTF8(name);
+            }
+            return core::NameRef::noName();
         }
 
         default:
@@ -625,7 +634,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::xexample().rawId():
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
-        case core::Names::skip().rawId(): {
+        case core::Names::skip().rawId():
+        case core::Names::its().rawId(): {
             if (block == nullptr || !send->recv.isSelfReference() ||
                 (!insideDescribe && requiresSecondFactor(send->fun))) {
                 return nullptr;
