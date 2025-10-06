@@ -39,13 +39,13 @@ public:
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
     static Query createSymbolQuery(core::SymbolRef symbol);
-    static Query createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
+    static Query createVarQuery(core::MethodRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
     static Query createSuggestSigQuery(core::MethodRef method);
 
-    bool matchesSymbol(const core::SymbolRef &symbol) const;
+    bool matchesSymbol(core::SymbolRef symbol) const;
     bool matchesLoc(const core::Loc &loc) const;
-    bool matchesVar(const core::SymbolRef &owner, const core::LocalVariable &var) const;
-    bool matchesSuggestSig(const core::SymbolRef &method) const;
+    bool matchesVar(core::MethodRef owner, const core::LocalVariable &var) const;
+    bool matchesSuggestSig(core::MethodRef method) const;
     bool isEmpty() const;
 
 private:
