@@ -18,8 +18,16 @@ public:
     };
 
     // Looking for all references to the given symbol.
+    //
+    // Allows searching for multiple symbols (as a performance optimization, instead of having to
+    // run multiple typecheck operations).
     struct Symbol {
-        core::SymbolRef symbol;
+        // 1 will be the most common length by far.
+        //
+        // 4 chosen as the largest number that does not increase the storage above how many bytes an
+        // `InlinedVector<SymbolRef, 1>` would require.
+        using STORAGE = InlinedVector<core::SymbolRef, 4>;
+        STORAGE symbols;
     };
 
     // Looking for all references to the given variable.
@@ -42,6 +50,8 @@ public:
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
     static Query createSymbolQuery(core::SymbolRef symbol);
+    static Query createSymbolQuery(Symbol::STORAGE &&symbols);
+    static Query createSymbolQuery(absl::Span<const core::SymbolRef> symbols);
     static Query createVarQuery(core::MethodRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
     static Query createSuggestSigQuery(core::MethodRef method);
 
@@ -51,7 +61,7 @@ public:
     bool matchesSuggestSig(core::MethodRef method) const;
     bool isEmpty() const;
 };
-CheckSize(Query, 28, 4);
+CheckSize(Query, 32, 8);
 } // namespace sorbet::core::lsp
 
 #endif // SORBET_CORE_LSP_QUERYRESPONSE

@@ -15,7 +15,20 @@ Query Query::createLocQuery(core::Loc loc) {
 
 Query Query::createSymbolQuery(core::SymbolRef symbol) {
     ENFORCE(symbol.exists());
-    return Query{Symbol{symbol}};
+    auto symbols = InlinedVector<core::SymbolRef, 4>{1, symbol};
+    return Query{Symbol{symbols}};
+}
+
+Query Query::createSymbolQuery(Symbol::STORAGE &&symbols) {
+    ENFORCE(absl::c_all_of(symbols, [](auto symbol) { return symbol.exists(); }));
+    return Query{Symbol{move(symbols)}};
+}
+
+Query Query::createSymbolQuery(absl::Span<const core::SymbolRef> symbols) {
+    ENFORCE(absl::c_all_of(symbols, [](auto symbol) { return symbol.exists(); }));
+    auto result = Symbol{};
+    absl::c_copy(symbols, back_inserter(result.symbols));
+    return Query{move(result)};
 }
 
 Query Query::createVarQuery(core::MethodRef owner, core::Loc enclosingLoc, core::LocalVariable variable) {
@@ -31,7 +44,7 @@ Query Query::createSuggestSigQuery(core::MethodRef method) {
 
 bool Query::matchesSymbol(core::SymbolRef symbol) const {
     if (auto *query = get_if<Symbol>(&this->query)) {
-        return query->symbol == symbol;
+        return absl::c_any_of(query->symbols, [symbol](auto curr) { return curr == symbol; });
     }
     return false;
 }

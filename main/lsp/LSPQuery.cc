@@ -97,12 +97,18 @@ LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &confi
 }
 
 LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                  core::SymbolRef symbol, core::packages::MangledName pkgName) {
+                                  absl::Span<const core::SymbolRef> symbols, core::packages::MangledName pkgName) {
     Timer timeit(config.logger, "setupLSPQueryBySymbol");
-    ENFORCE(symbol.exists());
+    ENFORCE(absl::c_all_of(symbols, [](auto symbol) { return symbol.exists(); }));
     vector<core::FileRef> frefs;
     const core::GlobalState &gs = typechecker.state();
-    const core::WithoutUniqueNameHash symShortNameHash(gs, symbol.name(gs));
+    vector<core::WithoutUniqueNameHash> symShortNameHashes;
+    // TODO(jez) Only unique symbol names. When we get to something where we're searching for all
+    // calls to a method, whether abstract or override, they're all going to have the same name--
+    // no need to have 20 identical entries in the vector
+    absl::c_transform(symbols, back_inserter(symShortNameHashes), [&gs](auto symbol) {
+        return core::WithoutUniqueNameHash{gs, symbol.name(gs)};
+    });
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     size_t i = 0;
     // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
@@ -122,12 +128,14 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         const auto &hash = *file->getFileHash();
         const auto &usedSymbolNameHashes = hash.usages.nameHashes;
 
-        if (absl::c_contains(usedSymbolNameHashes, symShortNameHash)) {
+        if (absl::c_any_of(symShortNameHashes, [&](const auto &symShortNameHash) {
+                return absl::c_contains(usedSymbolNameHashes, symShortNameHash);
+            })) {
             frefs.emplace_back(ref);
         }
     }
 
-    return typechecker.query(core::lsp::Query::createSymbolQuery(symbol), frefs);
+    return typechecker.query(core::lsp::Query::createSymbolQuery(symbols), frefs);
 }
 
 } // namespace sorbet::realmain::lsp

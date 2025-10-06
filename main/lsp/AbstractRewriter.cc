@@ -142,7 +142,9 @@ void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
 
     auto symbolQueue = getQueue();
     for (auto sym = symbolQueue->pop(); sym.exists(); sym = symbolQueue->pop()) {
-        auto queryResult = LSPQuery::bySymbol(config, typechecker, sym);
+        // TODO(jez) This is another prime candidate for passing multiple symbols all at once
+        auto symbols = core::lsp::Query::Symbol::STORAGE{1, sym};
+        auto queryResult = LSPQuery::bySymbol(config, typechecker, move(symbols));
         if (queryResult.error) {
             return;
         }

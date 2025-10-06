@@ -32,8 +32,8 @@ core::SymbolRef findSym(const core::GlobalState &gs, const vector<core::NameRef>
     return symToCheck;
 }
 
-vector<core::SymbolRef> getSymsToCheckWithinPackage(const core::GlobalState &gs, core::SymbolRef symInPackage,
-                                                    core::packages::MangledName packageName) {
+core::lsp::Query::Symbol::STORAGE getSymsToCheckWithinPackage(const core::GlobalState &gs, core::SymbolRef symInPackage,
+                                                              core::packages::MangledName packageName) {
     vector<core::NameRef> fullName;
 
     auto sym = symInPackage;
@@ -42,7 +42,7 @@ vector<core::SymbolRef> getSymsToCheckWithinPackage(const core::GlobalState &gs,
         sym = sym.owner(gs);
     }
 
-    vector<core::SymbolRef> result;
+    core::lsp::Query::Symbol::STORAGE result;
     vector<core::SymbolRef> namespacesToCheck = {
         core::Symbols::root(),
         core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE),
@@ -125,20 +125,9 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
 
                 if (!symsToCheck.empty()) {
-                    vector<unique_ptr<Location>> locations;
-
-                    for (auto &symToCheck : symsToCheck) {
-                        for (auto &location :
-                             extractLocations(typechecker.state(),
-                                              getReferencesToSymbolInPackage(typechecker, packageName, symToCheck))) {
-                            locations.emplace_back(std::move(location));
-                        }
-                    }
-
-                    response->result = std::move(locations);
+                    response->result = extractLocations(
+                        gs, getReferencesToSymbolsInPackage(typechecker, packageName, move(symsToCheck)));
                 } else {
-                    // Fall back to normal case when we are not querying for an external symbol, e.g. class Foo <
-                    // PackageSpec declarations, or export statements.
                     response->result = extractLocations(
                         typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
                 }
