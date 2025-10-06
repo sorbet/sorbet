@@ -103,6 +103,25 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     vector<core::FileRef> frefs;
     const core::GlobalState &gs = typechecker.state();
     const core::WithoutUniqueNameHash symShortNameHash(gs, symbol.name(gs));
+
+    // We only need to look for the symbol in packages that import the symbol's home package
+    // or inside an explicitly-requested packge.  If we don't have either of those, we need
+    // to look everywhere.
+    //
+    // A even better refinement would be to only look in application files if the home package
+    // is only `import`'d, test files if the home package is `test_import`'d, etc.
+    optional<UnorderedSet<const core::packages::MangledName>> packageFilter;
+    if (pkgName.exists()) {
+        auto &f = packageFilter.emplace();
+        f.insert(pkgName);
+    } else {
+        auto homePackage = gs.packageDB().getPackageNameForFile(symbol.loc(gs).file());
+        if (homePackage.exists()) {
+            auto &f = packageFilter.emplace(gs.packageDB().allPackagesImporting(homePackage));
+            f.insert(homePackage);
+        }
+    }
+
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     size_t i = 0;
     // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
@@ -114,7 +133,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         }
 
         auto ref = core::FileRef(i);
-        if (pkgName.exists() && gs.packageDB().getPackageNameForFile(ref) != pkgName) {
+        if (packageFilter.has_value() && !packageFilter->contains(gs.packageDB().getPackageNameForFile(ref))) {
             continue;
         }
 

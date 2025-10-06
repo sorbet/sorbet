@@ -40,6 +40,8 @@ public:
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 
+    UnorderedSet<const MangledName> allPackagesImporting(MangledName pkg) const;
+
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.

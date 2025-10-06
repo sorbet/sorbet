@@ -108,6 +108,23 @@ absl::Span<const MangledName> PackageDB::packages() const {
     return absl::MakeSpan(mangledNames);
 }
 
+UnorderedSet<const MangledName> PackageDB::allPackagesImporting(MangledName pkg) const {
+    ENFORCE(pkg.exists());
+
+    UnorderedSet<const MangledName> result;
+
+    for (auto &[name, info] : packages_) {
+        auto i = info->importsPackage(pkg);
+        if (!i.has_value()) {
+            continue;
+        }
+
+        result.insert(name);
+    }
+
+    return result;
+}
+
 absl::Span<const string> PackageDB::skipRBIExportEnforcementDirs() const {
     return absl::MakeSpan(skipRBIExportEnforcementDirs_);
 }
