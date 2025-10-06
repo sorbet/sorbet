@@ -6,35 +6,38 @@
 #include "core/SymbolRef.h"
 
 namespace sorbet::core::lsp {
+
 /**
  * Represents an LSP query.
  */
 class Query final {
 public:
-    // Queries of different kinds have different active fields.
-    enum class Kind {
-        // No query active. The default state.
-        NONE,
-        // Looking for the item at a specific location.
-        LOC,
-        // Looking for all references to the given symbol.
-        SYMBOL,
-        // Looking for all references to the given variable.
-        VAR,
-        // Looking for the definition of a certain method for the purpose of suggesting a sig.
-        SUGGEST_SIG,
+    // Looking for the item at a specific location.
+    struct Loc {
+        core::Loc loc;
     };
 
-    Kind kind;
-    // If Kind == VAR, this is the loc of the MethodDef that encloses the variable
-    // If Kind == LOC, this is the loc to look for.
-    // Otherwise, this is meaningless.
-    core::Loc loc;
-    // If Kind == SYMBOL, this is the symbol that the query is looking for.
-    // If Kind == SUGGEST_SIG, this is the method to suggest a sig for.
-    // If Kind == VAR, this is the owner of the variable.
-    core::SymbolRef symbol;
-    core::LocalVariable variable;
+    // Looking for all references to the given symbol.
+    struct Symbol {
+        core::SymbolRef symbol;
+    };
+
+    // Looking for all references to the given variable.
+    struct Var {
+        // Only look for variables inside this method
+        core::MethodRef owner;
+        // The loc of the MethodDef that encloses the variable
+        core::Loc enclosingLoc;
+        core::LocalVariable variable;
+    };
+
+    // Looking for the definition of a certain method for the purpose of suggesting a sig.
+    struct SuggestSig {
+        core::MethodRef method;
+    };
+
+    // Queries of different kinds have different active fields.
+    std::variant<std::monostate, Loc, Symbol, Var, SuggestSig> query;
 
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
@@ -47,9 +50,6 @@ public:
     bool matchesVar(core::MethodRef owner, const core::LocalVariable &var) const;
     bool matchesSuggestSig(core::MethodRef method) const;
     bool isEmpty() const;
-
-private:
-    Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable);
 };
 CheckSize(Query, 28, 4);
 } // namespace sorbet::core::lsp

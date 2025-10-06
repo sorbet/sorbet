@@ -4,55 +4,64 @@
 using namespace std;
 namespace sorbet::core::lsp {
 
-Query::Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable)
-    : kind(kind), loc(loc), symbol(symbol), variable(variable) {}
-
 Query Query::noQuery() {
-    return Query(Query::Kind::NONE, core::Loc::none(), core::Symbols::noSymbol(), core::LocalVariable());
+    return Query{};
 }
 
 Query Query::createLocQuery(core::Loc loc) {
     ENFORCE(loc.exists());
-    return Query(Query::Kind::LOC, loc, core::Symbols::noSymbol(), core::LocalVariable());
+    return Query{Loc{loc}};
 }
 
 Query Query::createSymbolQuery(core::SymbolRef symbol) {
     ENFORCE(symbol.exists());
-    return Query(Query::Kind::SYMBOL, core::Loc::none(), symbol, core::LocalVariable());
+    return Query{Symbol{symbol}};
 }
 
 Query Query::createVarQuery(core::MethodRef owner, core::Loc enclosingLoc, core::LocalVariable variable) {
     ENFORCE(owner.exists());
     ENFORCE(variable.exists());
-    return Query(Query::Kind::VAR, enclosingLoc, owner, variable);
+    return Query{Var{owner, enclosingLoc, variable}};
 }
 
 Query Query::createSuggestSigQuery(core::MethodRef method) {
     ENFORCE(method.exists());
-    return Query(Query::Kind::SUGGEST_SIG, core::Loc::none(), method, core::LocalVariable());
+    return Query{SuggestSig{method}};
 }
 
 bool Query::matchesSymbol(core::SymbolRef symbol) const {
-    return kind == Query::Kind::SYMBOL && this->symbol == symbol;
+    if (auto *query = get_if<Symbol>(&this->query)) {
+        return query->symbol == symbol;
+    }
+    return false;
 }
 
 bool Query::matchesLoc(const core::Loc &loc) const {
     // N.B.: Sorbet inserts zero-length Locs for items that are implicitly inserted during parsing.
     // Example: `foo` may be translated into `self.foo`, where `self.` has a 0-length loc.
     // We disregard these in LSP matches, as they don't correspond to source text that the user is pointing at.
-    return this->kind == Query::Kind::LOC && loc.exists() && !loc.empty() && loc.contains(this->loc);
+    if (auto *query = get_if<Loc>(&this->query)) {
+        return loc.exists() && !loc.empty() && loc.contains(query->loc);
+    }
+    return false;
 }
 
 bool Query::matchesVar(core::MethodRef owner, const core::LocalVariable &var) const {
-    return kind == Query::Kind::VAR && var.exists() && this->symbol == owner && this->variable == var;
+    if (auto *query = get_if<Var>(&this->query)) {
+        return var.exists() && query->owner == owner && query->variable == var;
+    }
+    return false;
 }
 
 bool Query::matchesSuggestSig(core::MethodRef method) const {
-    return kind == Query::Kind::SUGGEST_SIG && this->symbol == method;
+    if (auto *query = get_if<SuggestSig>(&this->query)) {
+        return query->method == method;
+    }
+    return false;
 }
 
 bool Query::isEmpty() const {
-    return kind == Query::Kind::NONE;
+    return holds_alternative<monostate>(this->query);
 }
 
 } // namespace sorbet::core::lsp
