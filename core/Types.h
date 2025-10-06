@@ -1084,9 +1084,84 @@ struct DispatchResult {
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
           secondaryKind(secondaryKind){};
 
+    template <typename PtrT> struct Iterator {
+        PtrT *it;
+
+        explicit Iterator(PtrT *it) : it(it) {}
+
+        PtrT *operator*() const {
+            return it;
+        }
+
+        Iterator &operator++() {
+            it = it->secondary.get();
+            return *this;
+        }
+
+        Iterator operator++(int) {
+            return Iterator(it->secondary.get());
+        }
+
+        bool operator==(const Iterator &other) const {
+            return this->it == other.it;
+        }
+
+        bool operator!=(const Iterator &other) const {
+            return this->it != other.it;
+        }
+    };
+
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
 };
+
+inline DispatchResult::Iterator<DispatchResult> begin(DispatchResult *dr) {
+    return DispatchResult::Iterator<DispatchResult>(dr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(DispatchResult *dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> begin(DispatchResult &dr) {
+    return DispatchResult::Iterator<DispatchResult>(&dr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(DispatchResult &dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> begin(const std::shared_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(dr.get());
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(const std::shared_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<DispatchResult> begin(const std::unique_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(dr.get());
+}
+
+inline DispatchResult::Iterator<DispatchResult> end(const std::unique_ptr<DispatchResult> &dr) {
+    return DispatchResult::Iterator<DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> begin(const DispatchResult *dr) {
+    return DispatchResult::Iterator<const DispatchResult>(dr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> end(const DispatchResult *dr) {
+    return DispatchResult::Iterator<const DispatchResult>(nullptr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> begin(const DispatchResult &dr) {
+    return DispatchResult::Iterator<const DispatchResult>(&dr);
+}
+
+inline DispatchResult::Iterator<const DispatchResult> end(const DispatchResult &dr) {
+    return DispatchResult::Iterator<const DispatchResult>(nullptr);
+}
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {
 public:

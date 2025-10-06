@@ -15,9 +15,7 @@ namespace sorbet::realmain::lsp {
 string methodInfoString(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                         const core::ShowOptions options) {
     string contents;
-    auto start = &dispatchResult;
-
-    while (start != nullptr) {
+    for (auto start : dispatchResult) {
         auto &component = start->main;
         if (component.method.exists()) {
             if (!contents.empty()) {
@@ -27,7 +25,6 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
                 move(contents), "# ", component.method.show(gs), ":\n",
                 core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver, options));
         }
-        start = start->secondary.get();
     }
 
     // contents being empty implies that there were no components that existed, which means that
@@ -98,15 +95,13 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     if (auto s = resp->isSend()) {
         // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
         if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
-            auto start = s->dispatchResult.get();
-            while (start != nullptr) {
+            for (auto start : s->dispatchResult) {
                 if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                     auto loc = start->main.method.data(gs)->loc();
                     if (loc.exists()) {
                         documentationLocations.emplace_back(loc);
                     }
                 }
-                start = start->secondary.get();
             }
 
             if (s->dispatchResult->main.method.exists() &&

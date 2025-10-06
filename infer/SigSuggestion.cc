@@ -122,8 +122,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         }
 
         core::TypePtr thisType;
-        auto iter = &dispatchInfo;
-        while (iter != nullptr) {
+        for (auto iter : dispatchInfo) {
             if (iter->main.method.exists()) {
                 auto argType = extractArgType(ctx, *snd, iter->main, keyword, argIdx);
                 if (argType && !argType.isUntyped()) {
@@ -135,8 +134,6 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                     }
                 }
             }
-
-            iter = iter->secondary.get();
         }
         if (!thisType) {
             continue;

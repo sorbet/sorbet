@@ -113,8 +113,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             auto sendResp = resp->isSend();
             // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
             if (sendResp->funLoc().exists() && sendResp->funLoc().contains(queryLoc)) {
-                auto start = sendResp->dispatchResult.get();
-                while (start != nullptr) {
+                for (auto start : sendResp->dispatchResult) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         auto loc = start->main.method.data(gs)->loc();
                         if (start->main.method == core::Symbols::T_Private_Methods_DeclBuilder_override()) {
@@ -131,7 +130,6 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
 
                         addLocIfExists(gs, locations, loc);
                     }
-                    start = start->secondary.get();
                 }
             }
         } else if (auto kw = resp->isKeywordArg()) {

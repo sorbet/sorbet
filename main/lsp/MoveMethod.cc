@@ -141,7 +141,7 @@ public:
         if (auto sendResp = response->isSend()) {
             // if the call site is not trivial, don't attempt to rename
             // the typecheck error will guide user how to fix it
-            for (auto dr = sendResp->dispatchResult.get(); dr != nullptr; dr = dr->secondary.get()) {
+            for (auto dr : sendResp->dispatchResult) {
                 if (dr->main.method != originalSymbol.asMethodRef()) {
                     return;
                 }
