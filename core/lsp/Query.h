@@ -51,6 +51,7 @@ public:
 private:
     Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable);
 };
+CheckSize(Query, 28, 4);
 } // namespace sorbet::core::lsp
 
 #endif // SORBET_CORE_LSP_QUERYRESPONSE
