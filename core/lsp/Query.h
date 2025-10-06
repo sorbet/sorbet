@@ -3,6 +3,7 @@
 
 #include "core/Loc.h"
 #include "core/LocalVariable.h"
+#include "core/SymbolRef.h"
 
 namespace sorbet::core::lsp {
 /**
