@@ -141,9 +141,11 @@ void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
     addSymbol(symbol);
 
     auto symbolQueue = getQueue();
+    core::lsp::Query::Symbol::STORAGE symbols;
     for (auto sym = symbolQueue->pop(); sym.exists(); sym = symbolQueue->pop()) {
-        // TODO(jez) This is another prime candidate for passing multiple symbols all at once
-        auto symbols = core::lsp::Query::Symbol::STORAGE{1, sym};
+        symbols.emplace_back(sym);
+    }
+
         auto queryResult = LSPQuery::bySymbol(config, typechecker, move(symbols));
         if (queryResult.error) {
             return;
@@ -163,7 +165,6 @@ void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
             // de-duplicates edits at the same location
             rename(response);
         }
-    }
 }
 
 } // namespace sorbet::realmain::lsp
