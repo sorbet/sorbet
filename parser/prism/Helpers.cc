@@ -541,6 +541,41 @@ pm_node_t *PMK::TProcVoid(core::LocOffsets loc, pm_node_t *args) {
     return Send0(loc, builder, "void");
 }
 
+pm_node_t *PMK::T_Array(core::LocOffsets loc) {
+    // Create T::Array constant path
+    return ConstantPathNode(loc, T(loc), "Array");
+}
+
+pm_node_t *PMK::T_Class(core::LocOffsets loc) {
+    // Create T::Class constant path
+    return ConstantPathNode(loc, T(loc), "Class");
+}
+
+pm_node_t *PMK::T_Enumerable(core::LocOffsets loc) {
+    // Create T::Enumerable constant path
+    return ConstantPathNode(loc, T(loc), "Enumerable");
+}
+
+pm_node_t *PMK::T_Enumerator(core::LocOffsets loc) {
+    // Create T::Enumerator constant path
+    return ConstantPathNode(loc, T(loc), "Enumerator");
+}
+
+pm_node_t *PMK::T_Hash(core::LocOffsets loc) {
+    // Create T::Hash constant path
+    return ConstantPathNode(loc, T(loc), "Hash");
+}
+
+pm_node_t *PMK::T_Set(core::LocOffsets loc) {
+    // Create T::Set constant path
+    return ConstantPathNode(loc, T(loc), "Set");
+}
+
+pm_node_t *PMK::T_Range(core::LocOffsets loc) {
+    // Create T::Range constant path
+    return ConstantPathNode(loc, T(loc), "Range");
+}
+
 bool PMK::isTUntyped(pm_node_t *node) {
     if (!node || node->type != PM_CALL_NODE) {
         return false;

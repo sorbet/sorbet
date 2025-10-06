@@ -410,6 +410,20 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     // Parse the RBS method type and create appropriate signature nodes
     const auto &node = *methodType;
 
+    // Collect type parameters
+    vector<pair<core::LocOffsets, core::NameRef>> typeParams;
+    for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
+        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
+
+        ENFORCE(list_node->node->type == RBS_AST_TYPE_PARAM,
+                "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
+                "TypeParam");
+
+        auto node = (rbs_ast_type_param_t *)list_node->node;
+        auto str = parser.resolveConstant(node->name);
+        typeParams.emplace_back(loc, ctx.state.enterNameUTF8(str));
+    }
+
     // Validate that we have a function type
     if (node.type->type != RBS_TYPES_FUNCTION) {
         auto errLoc = declaration.typeLocFromRange(node.type->location->rg);
@@ -544,10 +558,27 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         paramIndex++;
     }
 
-    // Build sig chain: self -> .params(hash) -> .void()/.returns(Type)
+    // Build sig chain: self -> .type_parameters() -> .params(hash) -> .void()/.returns(Type)
     pm_node_t *sigReceiver = PMK::Self();
     if (!sigReceiver)
         return nullptr;
+
+    // Add .type_parameters() call if we have type parameters
+    if (typeParams.size() > 0) {
+        vector<pm_node_t *> typeParamSymbols;
+        typeParamSymbols.reserve(typeParams.size());
+
+        for (auto &param : typeParams) {
+            string nameStr = param.second.show(ctx.state);
+            pm_node_t *symbolNode = PMK::Symbol(param.first, nameStr.c_str());
+            typeParamSymbols.push_back(symbolNode);
+        }
+
+        pm_node_t *typeParamsCall = PMK::Send(fullTypeLoc, sigReceiver, "type_parameters", typeParamSymbols);
+        ENFORCE(typeParamsCall, "Failed to create type parameters call");
+
+        sigReceiver = typeParamsCall;
+    }
 
     // Add .params() call if we have parameters
     // fmt::print("DEBUG: sigParams.size() = {}\n", sigParams.size());
@@ -594,8 +625,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         // Create: sigReceiver.returns(Type)
         // Convert actual return type from RBS AST
         pm_node_t *returnTypeNode = typeToPrismNode.toPrismNode(functionType->return_type, declaration);
-        if (!returnTypeNode)
-            return nullptr;
+        ENFORCE(returnTypeNode, "Failed to create return type node");
 
         // Set return type node base.location to actual return type span
         returnTypeNode->location = return_type_full_loc;

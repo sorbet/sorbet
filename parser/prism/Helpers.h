@@ -276,6 +276,13 @@ public:
     static pm_node_t *TTypeParameter(core::LocOffsets loc, pm_node_t *name);
     static pm_node_t *TProc(core::LocOffsets loc, pm_node_t *args, pm_node_t *returnType);
     static pm_node_t *TProcVoid(core::LocOffsets loc, pm_node_t *args);
+    static pm_node_t *T_Array(core::LocOffsets loc);
+    static pm_node_t *T_Class(core::LocOffsets loc);
+    static pm_node_t *T_Enumerable(core::LocOffsets loc);
+    static pm_node_t *T_Enumerator(core::LocOffsets loc);
+    static pm_node_t *T_Hash(core::LocOffsets loc);
+    static pm_node_t *T_Set(core::LocOffsets loc);
+    static pm_node_t *T_Range(core::LocOffsets loc);
 
     // Utility functions for type checking
     static bool isTUntyped(pm_node_t *node);

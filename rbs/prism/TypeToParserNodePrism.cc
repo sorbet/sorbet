@@ -107,48 +107,49 @@ pm_node_t *TypeToParserNodePrism::namespaceConst(const rbs_namespace_t *rbsNames
 
 pm_node_t *TypeToParserNodePrism::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
                                                const RBSDeclaration &declaration) {
-    // auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location->rg);
+    auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location->rg);
 
     pm_node_t *parent = namespaceConst(typeName->rbs_namespace, declaration);
 
     auto nameStr = parser.resolveConstant(typeName->name);
-    fmt::print("DEBUG nameStr='{}' size={}\n", std::string(nameStr), nameStr.size());
     auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
     auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
-
-    // Ensure proper string conversion from string_view
-    string nameString{nameStr.data(), nameStr.size()};
 
     if (isGeneric) {
         if (!parent) { // Root level constants
             if (nameConstant == core::Names::Constants::Array()) {
-                return this->createConstantReadNode("T::Array");
+                return PMK::T_Array(loc);
             } else if (nameConstant == core::Names::Constants::Class()) {
-                return this->createConstantReadNode("T::Class");
+                return PMK::T_Class(loc);
             } else if (nameConstant == core::Names::Constants::Enumerable()) {
-                return this->createConstantReadNode("T::Enumerable");
+                return PMK::T_Enumerable(loc);
             } else if (nameConstant == core::Names::Constants::Enumerator()) {
-                return this->createConstantReadNode("T::Enumerator");
+                return PMK::T_Enumerator(loc);
             } else if (nameConstant == core::Names::Constants::Hash()) {
-                return this->createConstantReadNode("T::Hash");
+                return PMK::T_Hash(loc);
             } else if (nameConstant == core::Names::Constants::Set()) {
-                return this->createConstantReadNode("T::Set");
+                return PMK::T_Set(loc);
             } else if (nameConstant == core::Names::Constants::Range()) {
-                return this->createConstantReadNode("T::Range");
+                return PMK::T_Range(loc);
             }
         }
     } else {
-        // Check if it's a type parameter
+        // The type may refer to a type parameter, so we need to check if it exists as a NameKind::UTF8
         if (hasTypeParam(typeParams, nameUTF8)) {
-            // Create type parameter reference - this would need special handling
-            // For now, return the name as a constant
-            fmt::print("DEBUG: Creating type parameter reference: {}\n", nameString);
-            return this->createConstantReadNode(nameString);
+            // Ensure proper string conversion from string_view
+            string nameString{nameStr.data(), nameStr.size()};
+            pm_node_t *symbolNode = PMK::Symbol(loc, nameString.c_str());
+            return PMK::TTypeParameter(loc, symbolNode);
         }
     }
 
-    fmt::print("DEBUG: Creating constant read node: {}\n", nameString);
-    return this->createConstantReadNode(nameString);
+    // Create a proper constant path node (parent::name or just name if no parent)
+    string nameString{nameStr.data(), nameStr.size()};
+    if (parent) {
+        return PMK::ConstantPathNode(loc, parent, nameString.c_str());
+    } else {
+        return this->createConstantReadNode(nameString);
+    }
 }
 
 pm_node_t *TypeToParserNodePrism::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
@@ -175,7 +176,8 @@ pm_node_t *TypeToParserNodePrism::classInstanceType(const rbs_types_class_instan
             args.push_back(argType);
         }
 
-        return PMK::Send(loc, typeConstant, "syntheticSquareBrackets", args);
+        string methodName = core::Names::syntheticSquareBrackets().show(ctx.state);
+        return PMK::Send(loc, typeConstant, methodName.c_str(), args);
     }
 
     return typeConstant;
