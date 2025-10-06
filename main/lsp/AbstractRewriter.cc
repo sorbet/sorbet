@@ -161,7 +161,7 @@ void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
 
             // We may process the same send multiple times in case of union types, but this is ok because the renamer
             // de-duplicates edits at the same location
-            rename(response, sym);
+            rename(response);
         }
     }
 }

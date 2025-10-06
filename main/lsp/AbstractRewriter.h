@@ -24,7 +24,7 @@ public:
         : gs(gs), config(config), invalid(false){};
 
     virtual ~AbstractRewriter() = default;
-    virtual void rename(std::unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) = 0;
+    virtual void rename(std::unique_ptr<core::lsp::QueryResponse> &response) = 0;
     std::optional<std::vector<std::unique_ptr<TextDocumentEdit>>> buildTextDocumentEdits();
     std::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>> buildWorkspaceEdit();
     virtual void addSymbol(const core::SymbolRef) = 0;

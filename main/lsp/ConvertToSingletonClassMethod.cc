@@ -95,7 +95,7 @@ public:
         : AbstractRewriter(gs, config), method(method), owner(method.data(gs)->owner) {}
     ~MethodCallSiteRewriter() {}
 
-    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         if (invalid) {
             return;
         }

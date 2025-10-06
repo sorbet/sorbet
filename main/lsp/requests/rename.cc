@@ -53,7 +53,7 @@ public:
     }
 
     ~LocalRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         if (invalid) {
             return;
         }
@@ -97,7 +97,7 @@ public:
     }
 
     ~MethodRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         if (invalid) {
             return;
         }
@@ -201,7 +201,7 @@ public:
     ConstRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string newName)
         : AbstractRewriter(gs, config), newName(newName) {}
     ~ConstRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         if (!source.has_value()) {
@@ -227,7 +227,7 @@ public:
         : AbstractRewriter(gs, config), newName(newName) {}
     ~FieldRenamer() {}
 
-    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         if (!source.has_value() || source.value().empty()) {
@@ -366,7 +366,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             }
 
             shared_ptr<AbstractRewriter> renamer = make_shared<LocalRenamer>(gs, config, params->newName, locations);
-            renamer->rename(resp, core::SymbolRef{});
+            renamer->rename(resp);
             enrichResponse(response, renamer);
         }
     } else if (auto fieldResp = resp->isField()) {
