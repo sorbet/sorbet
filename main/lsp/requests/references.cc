@@ -128,13 +128,15 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                     response->result = extractLocations(
                         gs, getReferencesToSymbolsInPackage(typechecker, packageName, move(symsToCheck)));
                 } else {
-                    response->result = extractLocations(
-                        typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
+                    auto symbols = core::lsp::Query::Symbol::STORAGE{1, constResp->symbolBeforeDealias};
+                    response->result =
+                        extractLocations(typechecker.state(), getReferencesToSymbols(typechecker, move(symbols)));
                 }
             } else {
                 // Normal handling for non-package files
-                response->result = extractLocations(typechecker.state(),
-                                                    getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
+                auto symbols = core::lsp::Query::Symbol::STORAGE{1, constResp->symbolBeforeDealias};
+                response->result =
+                    extractLocations(typechecker.state(), getReferencesToSymbols(typechecker, move(symbols)));
             }
         } else if (auto fieldResp = resp->isField()) {
             // This could be a `prop` or `attr_*`, which have multiple associated symbols.

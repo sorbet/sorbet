@@ -291,12 +291,12 @@ LSPTask::extractLocations(const core::GlobalState &gs,
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                               vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    if (symbol.exists()) {
-        // TODO(jez) Likely there are places calling getReferencesToSymbol that should be calling
-        // something that accepts multiple symbols.
-        auto symbols = core::lsp::Query::Symbol::STORAGE{1, symbol};
+LSPTask::getReferencesToSymbols(LSPTypecheckerDelegate &typechecker, core::lsp::Query::Symbol::STORAGE &&symbols,
+                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
+    symbols.erase(it, symbols.end());
+
+    if (!symbols.empty()) {
         auto run2 = LSPQuery::bySymbol(config, typechecker, move(symbols));
         absl::c_move(run2.responses, back_inserter(priorRefs));
     }
@@ -318,10 +318,14 @@ LSPTask::getReferencesToSymbolsInPackage(LSPTypecheckerDelegate &typechecker, co
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, core::SymbolRef symbol,
-                                     vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    if (symbol.exists() && fref.exists()) {
-        auto run2 = LSPQuery::bySymbolInFiles(config, typechecker, symbol, {fref});
+LSPTask::getReferencesToSymbolsInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref,
+                                      core::lsp::Query::Symbol::STORAGE &&symbols,
+                                      vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
+    symbols.erase(it, symbols.end());
+
+    if (!symbols.empty() && fref.exists()) {
+        auto run2 = LSPQuery::bySymbolsInFiles(config, typechecker, move(symbols), {fref});
         for (auto &resp : run2.responses) {
             // Ignore results in other files (which may have been picked up for typechecking purposes)
             if (resp->getLoc().file() == fref) {
@@ -394,27 +398,37 @@ void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) 
     }
 }
 
+core::lsp::Query::Symbol::STORAGE symbolsForAccessorInfo(const AccessorInfo &info, core::SymbolRef fallback) {
+    auto symbols = core::lsp::Query::Symbol::STORAGE{};
+    switch (info.accessorType) {
+        case FieldAccessorType::None:
+            // Common case: Not an accessor.
+            symbols.emplace_back(fallback);
+            break;
+        case FieldAccessorType::Reader:
+            symbols.emplace_back(info.fieldSymbol);
+            symbols.emplace_back(info.readerSymbol);
+            break;
+        case FieldAccessorType::Writer:
+            symbols.emplace_back(info.fieldSymbol);
+            symbols.emplace_back(info.writerSymbol);
+            break;
+        case FieldAccessorType::Accessor:
+            symbols.emplace_back(info.fieldSymbol);
+            symbols.emplace_back(info.readerSymbol);
+            symbols.emplace_back(info.writerSymbol);
+            break;
+    }
+
+    return symbols;
+}
+
 } // namespace
 
 vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
                                  vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    switch (info.accessorType) {
-        case FieldAccessorType::None:
-            // Common case: Not an accessor.
-            return getReferencesToSymbol(typechecker, fallback, move(priorRefs));
-        case FieldAccessorType::Reader:
-            return getReferencesToSymbol(typechecker, info.fieldSymbol,
-                                         getReferencesToSymbol(typechecker, info.readerSymbol, move(priorRefs)));
-        case FieldAccessorType::Writer:
-            return getReferencesToSymbol(typechecker, info.fieldSymbol,
-                                         getReferencesToSymbol(typechecker, info.writerSymbol, move(priorRefs)));
-        case FieldAccessorType::Accessor:
-            return getReferencesToSymbol(
-                typechecker, info.fieldSymbol,
-                getReferencesToSymbol(typechecker, info.writerSymbol,
-                                      getReferencesToSymbol(typechecker, info.readerSymbol, move(priorRefs))));
-    }
+    return getReferencesToSymbols(typechecker, symbolsForAccessorInfo(info, fallback), move(priorRefs));
 }
 
 AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolRef symbol) const {
@@ -490,25 +504,7 @@ vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
                                        core::SymbolRef fallback,
                                        vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    switch (info.accessorType) {
-        case FieldAccessorType::None:
-            // Common case: Not an accessor.
-            return getReferencesToSymbolInFile(typechecker, fref, fallback, move(priorRefs));
-        case FieldAccessorType::Reader:
-            return getReferencesToSymbolInFile(
-                typechecker, fref, info.fieldSymbol,
-                getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs)));
-        case FieldAccessorType::Writer:
-            return getReferencesToSymbolInFile(
-                typechecker, fref, info.fieldSymbol,
-                getReferencesToSymbolInFile(typechecker, fref, info.writerSymbol, move(priorRefs)));
-        case FieldAccessorType::Accessor:
-            return getReferencesToSymbolInFile(
-                typechecker, fref, info.fieldSymbol,
-                getReferencesToSymbolInFile(
-                    typechecker, fref, info.writerSymbol,
-                    getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs))));
-    }
+    return getReferencesToSymbolsInFile(typechecker, fref, symbolsForAccessorInfo(info, fallback), move(priorRefs));
 }
 
 void LSPTask::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) const {

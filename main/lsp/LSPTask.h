@@ -34,8 +34,8 @@ protected:
     // Task helper methods.
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                          std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    getReferencesToSymbols(LSPTypecheckerDelegate &typechecker, core::lsp::Query::Symbol::STORAGE &&symbols,
+                           std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbolsInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
@@ -43,8 +43,9 @@ protected:
                                     std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file, core::SymbolRef symbol,
-                                std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    getReferencesToSymbolsInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file,
+                                 core::lsp::Query::Symbol::STORAGE &&symbols,
+                                 std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<DocumentHighlight>>
     getHighlights(LSPTypecheckerDelegate &typechecker,

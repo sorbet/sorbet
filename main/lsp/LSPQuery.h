@@ -14,10 +14,11 @@ public:
     static LSPQueryResult byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                 std::string_view uri, const Position &pos, LSPMethod forMethod,
                                 bool emptyResultIfFileIsUntyped = true);
-    static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                          core::SymbolRef symbol, std::vector<core::FileRef> frefs);
+    static LSPQueryResult bySymbolsInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                           core::lsp::Query::Symbol::STORAGE &&symbols,
+                                           std::vector<core::FileRef> frefs);
     static LSPQueryResult bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                   absl::Span<const core::SymbolRef> symbols,
+                                   core::lsp::Query::Symbol::STORAGE &&symbols,
                                    core::packages::MangledName pkgName = core::packages::MangledName());
 };
 
