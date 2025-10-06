@@ -146,25 +146,25 @@ void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
         symbols.emplace_back(sym);
     }
 
-        auto queryResult = LSPQuery::bySymbol(config, typechecker, move(symbols));
-        if (queryResult.error) {
+    auto queryResult = LSPQuery::bySymbol(config, typechecker, move(symbols));
+    if (queryResult.error) {
+        return;
+    }
+
+    // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
+    // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
+    // expression.
+    for (auto &response : LSPQuery::filterAndDedup(gs, queryResult.responses)) {
+        auto loc = response->getLoc();
+        if (loc.file().data(gs).isPayload()) {
+            // We don't support renaming things in payload files.
             return;
         }
 
-        // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
-        // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
-        // expression.
-        for (auto &response : LSPQuery::filterAndDedup(gs, queryResult.responses)) {
-            auto loc = response->getLoc();
-            if (loc.file().data(gs).isPayload()) {
-                // We don't support renaming things in payload files.
-                return;
-            }
-
-            // We may process the same send multiple times in case of union types, but this is ok because the renamer
-            // de-duplicates edits at the same location
-            rename(response);
-        }
+        // We may process the same send multiple times in case of union types, but this is ok because the renamer
+        // de-duplicates edits at the same location
+        rename(response);
+    }
 }
 
 } // namespace sorbet::realmain::lsp
