@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace std;
 using namespace sorbet::parser::Prism;
 
 namespace sorbet::parser::Prism {
@@ -159,7 +160,7 @@ pm_node_t *PMK::SymbolFromConstant(core::LocOffsets nameLoc, pm_constant_id_t na
     }
 
     auto nameView = g_prismParser->resolveConstant(nameId);
-    std::string nameString(nameView);
+    string nameString(nameView);
 
     uint8_t *stable = (uint8_t *)calloc(nameString.size(), sizeof(uint8_t));
     if (!stable) {
@@ -207,7 +208,7 @@ pm_node_t *PMK::AssocNode(core::LocOffsets loc, pm_node_t *key, pm_node_t *value
     return up_cast(assocNode);
 }
 
-pm_node_t *PMK::Hash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs) {
+pm_node_t *PMK::Hash(core::LocOffsets loc, const vector<pm_node_t *> &pairs) {
     if (pairs.empty()) {
         return nullptr;
     }
@@ -241,7 +242,7 @@ pm_node_t *PMK::Hash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs
     return up_cast(hashNode);
 }
 
-pm_node_t *PMK::KeywordHash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs) {
+pm_node_t *PMK::KeywordHash(core::LocOffsets loc, const vector<pm_node_t *> &pairs) {
     if (pairs.empty()) {
         return nullptr;
     }
@@ -349,7 +350,7 @@ pm_node_t *PMK::Send1(core::LocOffsets loc, pm_node_t *receiver, const char *met
 }
 
 pm_node_t *PMK::Send(core::LocOffsets loc, pm_node_t *receiver, const char *method,
-                    const std::vector<pm_node_t *> &args, pm_node_t *block) {
+                     const vector<pm_node_t *> &args, pm_node_t *block) {
     if (!receiver || !method || args.empty()) {
         return nullptr;
     }
@@ -410,7 +411,7 @@ pm_node_t *PMK::TNilable(core::LocOffsets loc, pm_node_t *type) {
     return Send1(loc, t_const, "nilable", type);
 }
 
-pm_node_t *PMK::TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args) {
+pm_node_t *PMK::TAny(core::LocOffsets loc, const vector<pm_node_t *> &args) {
     // Create T.any(args...) call
     pm_node_t *t_const = T(loc);
     if (!t_const || args.empty()) {
@@ -448,7 +449,7 @@ pm_node_t *PMK::TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args)
     return up_cast(createSendNode(t_const, method_id, up_cast(arguments), tiny_loc, full_loc, tiny_loc));
 }
 
-pm_node_t *PMK::TAll(core::LocOffsets loc, const std::vector<pm_node_t *> &args) {
+pm_node_t *PMK::TAll(core::LocOffsets loc, const vector<pm_node_t *> &args) {
     // Create T.all(args...) call
     pm_node_t *t_const = T(loc);
     if (!t_const || args.empty()) {
@@ -493,7 +494,6 @@ pm_node_t *PMK::TTypeParameter(core::LocOffsets loc, pm_node_t *name) {
         return nullptr;
     }
 
-    fmt::print("DEBUG: Creating type parameter reference:\n");
     return Send1(loc, t_const, "type_parameter", name);
 }
 

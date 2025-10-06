@@ -397,7 +397,7 @@ fullTypeLoc);
 
 pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodDef, const rbs_method_type_t *methodType,
                                                         const RBSDeclaration &declaration,
-                                                        const std::vector<Comment> &annotations) {
+                                                        const vector<Comment> &annotations) {
     // fmt::print("DEBUG: MethodTypeToParserNodePrism::methodSignature called\n");
 
     if (!prismParser) {
@@ -426,7 +426,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     (void)annotations; // Suppress unused warning for now
 
     // Collect RBS parameters for sig params
-    std::vector<RBSArg> args;
+    vector<RBSArg> args;
     collectArgs(declaration, functionType->required_positionals, args, RBSArg::Kind::Positional);
 
     collectArgs(declaration, functionType->optional_positionals, args, RBSArg::Kind::OptionalPositional);
@@ -473,15 +473,14 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         return nullptr;
 
     // Create sig parameter pairs for .params() call
-    std::vector<pm_node_t *> sigParams;
+    vector<pm_node_t *> sigParams;
     sigParams.reserve(args.size());
 
     // Create type converter for RBS types to Prism nodes
-    std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams; // Empty for now
     auto typeToPrismNode = TypeToParserNodePrism(ctx, typeParams, parser, prismParser);
 
     // Collect Ruby method parameter names once (mirror WQ)
-    std::vector<MethodParamInfo> methodArgs;
+    vector<MethodParamInfo> methodArgs;
     if (PM_NODE_TYPE_P((pm_node_t *)methodDef, PM_DEF_NODE)) {
         auto def = down_cast<pm_def_node_t>((pm_node_t *)methodDef);
         methodArgs = getMethodArgs(def);
@@ -627,7 +626,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     block->base.location = full_loc;
 
     // Create the main sig call with block
-    std::vector<pm_node_t *> sig_args = {t_sig_arg};
+    vector<pm_node_t *> sig_args = {t_sig_arg};
     pm_node_t *call = PMK::Send(fullTypeLoc, receiver, "sig", sig_args, up_cast(block));
     if (!call)
         return nullptr;
@@ -649,7 +648,7 @@ pm_node_t *MethodTypeToParserNodePrism::createSymbolNode(rbs_ast_symbol_t *name,
 
     // Convert RBS symbol to string and use shared helper
     auto nameStr = parser.resolveConstant(name);
-    std::string nameString(nameStr);
+    string nameString(nameStr);
 
     return PMK::Symbol(nameLoc, nameString.c_str());
 }

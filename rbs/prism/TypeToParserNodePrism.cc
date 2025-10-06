@@ -20,7 +20,7 @@ bool hasTypeParam(absl::Span<const pair<core::LocOffsets, core::NameRef>> typePa
 } // namespace
 
 // Helper methods for Prism node creation (copied from MethodTypeToParserNodePrism)
-pm_node_t *TypeToParserNodePrism::createConstantReadNode(const std::string &name) {
+pm_node_t *TypeToParserNodePrism::createConstantReadNode(const string &name) {
     fmt::print("TypeToParserNodePrism::createConstantReadNode\n");
     pm_constant_id_t constant_id = addConstantToPool(name.c_str());
     if (constant_id == PM_CONSTANT_ID_UNSET)
@@ -168,7 +168,7 @@ pm_node_t *TypeToParserNodePrism::classInstanceType(const rbs_types_class_instan
     auto typeConstant = typeNameType(node->name, isGeneric, declaration);
 
     if (isGeneric) {
-        std::vector<pm_node_t *> args;
+        vector<pm_node_t *> args;
         args.reserve(argsValue->length);
         for (rbs_node_list_node *list_node = argsValue->head; list_node != nullptr; list_node = list_node->next) {
             auto argType = toPrismNode(list_node->node, declaration);
@@ -189,7 +189,7 @@ pm_node_t *TypeToParserNodePrism::classSingletonType(const rbs_types_class_singl
 
 pm_node_t *TypeToParserNodePrism::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
                                             const RBSDeclaration &declaration) {
-    std::vector<pm_node_t *> args;
+    vector<pm_node_t *> args;
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = toPrismNode(list_node->node, declaration);
         args.push_back(innerType);
@@ -199,7 +199,7 @@ pm_node_t *TypeToParserNodePrism::unionType(const rbs_types_union_t *node, core:
 
 pm_node_t *TypeToParserNodePrism::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
                                                    const RBSDeclaration &declaration) {
-    std::vector<pm_node_t *> args;
+    vector<pm_node_t *> args;
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = toPrismNode(list_node->node, declaration);
         args.push_back(innerType);
@@ -222,11 +222,11 @@ pm_node_t *TypeToParserNodePrism::voidType(const rbs_types_bases_void_t *node, c
 
 pm_node_t *TypeToParserNodePrism::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
                                                const RBSDeclaration &declaration) {
-    std::vector<pm_node_t *> pairs;
+    vector<pm_node_t *> pairs;
     int i = 0;
     for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
          list_node = list_node->next) {
-        std::string argNameStr = "arg" + std::to_string(i);
+        string argNameStr = "arg" + to_string(i);
         auto key = PMK::Symbol(loc, argNameStr.c_str());
 
         rbs_node_t *paramNode = list_node->node;
