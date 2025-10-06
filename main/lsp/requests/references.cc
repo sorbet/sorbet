@@ -17,9 +17,23 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
     return true;
 }
 
-vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs,
-                                                                    core::SymbolRef symInPackage,
-                                                                    core::packages::MangledName packageName) {
+namespace {
+
+core::SymbolRef findSym(const core::GlobalState &gs, const vector<core::NameRef> &fullName,
+                        core::SymbolRef underNamespace) {
+    core::SymbolRef symToCheck = underNamespace;
+    for (auto part = fullName.rbegin(); part != fullName.rend(); ++part) {
+        symToCheck = symToCheck.asClassOrModuleRef().data(gs)->findMember(gs, *part);
+        if (!symToCheck.exists()) {
+            return symToCheck;
+        }
+    }
+
+    return symToCheck;
+}
+
+vector<core::SymbolRef> getSymsToCheckWithinPackage(const core::GlobalState &gs, core::SymbolRef symInPackage,
+                                                    core::packages::MangledName packageName) {
     vector<core::NameRef> fullName;
 
     auto sym = symInPackage;
@@ -50,18 +64,7 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
     return result;
 }
 
-core::SymbolRef ReferencesTask::findSym(const core::GlobalState &gs, const vector<core::NameRef> &fullName,
-                                        core::SymbolRef underNamespace) {
-    core::SymbolRef symToCheck = underNamespace;
-    for (auto part = fullName.rbegin(); part != fullName.rend(); ++part) {
-        symToCheck = symToCheck.asClassOrModuleRef().data(gs)->findMember(gs, *part);
-        if (!symToCheck.exists()) {
-            return symToCheck;
-        }
-    }
-
-    return symToCheck;
-}
+} // namespace
 
 unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
