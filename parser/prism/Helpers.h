@@ -269,6 +269,7 @@ public:
 
     // T constant and method helpers
     static pm_node_t *T(core::LocOffsets loc);
+    static pm_node_t *TUntyped(core::LocOffsets loc);
     static pm_node_t *TNilable(core::LocOffsets loc, pm_node_t *type);
     static pm_node_t *TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args);
     static pm_node_t *TAll(core::LocOffsets loc, const std::vector<pm_node_t *> &args);

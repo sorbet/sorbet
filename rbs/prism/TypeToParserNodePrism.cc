@@ -237,7 +237,7 @@ pm_node_t *TypeToParserNodePrism::functionType(const rbs_types_function_t *node,
                 e.setHeader("Unexpected node type `{}` in function parameter type, expected `{}`",
                             rbs_node_type_name(paramNode), "FunctionParam");
             }
-            innerType = this->createConstantReadNode("T.untyped");
+            innerType = PMK::TUntyped(loc);
         } else {
             innerType = toPrismNode(((rbs_types_function_param_t *)paramNode)->type, declaration);
         }
@@ -266,10 +266,39 @@ pm_node_t *TypeToParserNodePrism::procType(const rbs_types_proc_t *node, core::L
 
 pm_node_t *TypeToParserNodePrism::blockType(const rbs_types_block_t *node, core::LocOffsets loc,
                                             const RBSDeclaration &declaration) {
-    auto function = functionType((rbs_types_function_t *)node->type, loc, declaration);
-    if (!node->required) {
-        // Should make it nilable, but simplified for now
+    pm_node_t *function = PMK::TUntyped(loc);
+
+    rbs_node_t *functionTypeNode = node->type;
+    switch (functionTypeNode->type) {
+        case RBS_TYPES_FUNCTION: {
+            function = functionType((rbs_types_function_t *)functionTypeNode, loc, declaration);
+            break;
+        }
+        case RBS_TYPES_UNTYPED_FUNCTION: {
+            return function;
+        }
+        default: {
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
+            if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
+                            rbs_node_type_name(functionTypeNode), "Function");
+            }
+
+            return function;
+        }
     }
+
+    rbs_node_t *selfNode = node->self_type;
+    if (selfNode != nullptr) {
+        auto selfLoc = declaration.typeLocFromRange(selfNode->location->rg);
+        auto selfType = toPrismNode(selfNode, declaration);
+        function = PMK::Send1(selfLoc, function, "bind", selfType);
+    }
+
+    if (!node->required) {
+        return PMK::TNilable(loc, function);
+    }
+
     return function;
 }
 
@@ -299,7 +328,7 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
         case RBS_TYPES_ALIAS:
             return aliasType((rbs_types_alias_t *)node, nodeLoc, declaration);
         case RBS_TYPES_BASES_ANY:
-            return this->createConstantReadNode("T.untyped");
+            return PMK::TUntyped(nodeLoc);
         case RBS_TYPES_BASES_BOOL:
             return this->createConstantReadNode("T::Boolean");
         case RBS_TYPES_BASES_BOTTOM:
@@ -308,7 +337,7 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
             if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS type `{}` is not supported", "class");
             }
-            return this->createConstantReadNode("T.untyped");
+            return PMK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_BASES_INSTANCE:
             return this->createConstantReadNode("T.attached_class");
@@ -332,7 +361,7 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
             if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS interfaces are not supported");
             }
-            return this->createConstantReadNode("T.untyped");
+            return PMK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_INTERSECTION:
             return intersectionType((rbs_types_intersection_t *)node, nodeLoc, declaration);
@@ -340,7 +369,7 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
             if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS literal types are not supported");
             }
-            return this->createConstantReadNode("T.untyped");
+            return PMK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_OPTIONAL:
             return optionalType((rbs_types_optional_t *)node, nodeLoc, declaration);
@@ -359,7 +388,7 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
                 e.setHeader("Unexpected node type `{}`", rbs_node_type_name((rbs_node_t *)node));
             }
 
-            return this->createConstantReadNode("T.untyped");
+            return PMK::TUntyped(nodeLoc);
         }
     }
 }

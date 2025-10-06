@@ -390,6 +390,16 @@ pm_node_t *PMK::T(core::LocOffsets loc) {
     return ConstantPathNode(loc, nullptr, "T");
 }
 
+pm_node_t *PMK::TUntyped(core::LocOffsets loc) {
+    // Create T.untyped call
+    pm_node_t *t_const = T(loc);
+    if (!t_const) {
+        return nullptr;
+    }
+
+    return Send0(loc, t_const, "untyped");
+}
+
 pm_node_t *PMK::TNilable(core::LocOffsets loc, pm_node_t *type) {
     // Create T.nilable(type) call
     pm_node_t *t_const = T(loc);
