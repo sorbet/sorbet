@@ -273,6 +273,8 @@ public:
     static pm_node_t *TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args);
     static pm_node_t *TAll(core::LocOffsets loc, const std::vector<pm_node_t *> &args);
     static pm_node_t *TTypeParameter(core::LocOffsets loc, pm_node_t *name);
+    static pm_node_t *TProc(core::LocOffsets loc, pm_node_t *args, pm_node_t *returnType);
+    static pm_node_t *TProcVoid(core::LocOffsets loc, pm_node_t *args);
 
     // Utility functions for type checking
     static bool isTUntyped(pm_node_t *node);

@@ -315,7 +315,7 @@ void appendParamName(vector<MethodParamInfo> &out, pm_node_t *paramNode) {
     }
 }
 
-vector<MethodParamInfo> collectMethodParamsFromDef(pm_def_node_t *def) {
+vector<MethodParamInfo> getMethodArgs(pm_def_node_t *def) {
     vector<MethodParamInfo> result;
     if (!def || def->parameters == nullptr) {
         return result;
@@ -477,15 +477,14 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
     sigParams.reserve(args.size());
 
     // Create type converter for RBS types to Prism nodes
-    // TODO: Collect type parameters like the original
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams; // Empty for now
     auto typeToPrismNode = TypeToParserNodePrism(ctx, typeParams, parser, prismParser);
 
     // Collect Ruby method parameter names once (mirror WQ)
-    std::vector<MethodParamInfo> methodParams;
+    std::vector<MethodParamInfo> methodArgs;
     if (PM_NODE_TYPE_P((pm_node_t *)methodDef, PM_DEF_NODE)) {
         auto def = down_cast<pm_def_node_t>((pm_node_t *)methodDef);
-        methodParams = collectMethodParamsFromDef(def);
+        methodArgs = getMethodArgs(def);
     }
 
     size_t paramIndex = 0;
@@ -493,16 +492,30 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         // fmt::print("DEBUG: Processing arg, hasName={}, kind={}\n", (arg.name != nullptr),
         // static_cast<int>(arg.kind));
 
+        // Create type node from RBS type
+        pm_node_t *typeNode = typeToPrismNode.toPrismNode(arg.type, declaration);
+        if (!typeNode) {
+            continue;
+        }
+
+        if (methodArgs.empty() || paramIndex >= methodArgs.size()) {
+            if (auto e = ctx.beginIndexerError(fullTypeLoc, core::errors::Rewriter::RBSParameterMismatch)) {
+                e.setHeader("RBS signature has more parameters than in the method definition");
+            }
+
+            return nullptr;
+        }
+
         // Create symbol node for parameter name
         pm_node_t *symbolNode = nullptr;
         if (arg.name) {
             symbolNode = createSymbolNode(arg.name, arg.nameLoc);
         } else {
             // Fallback to method parameter name when RBS omitted it
-            if (!methodParams.empty() && paramIndex < methodParams.size() &&
-                methodParams[paramIndex].nameId != PM_CONSTANT_ID_UNSET) {
+            if (!methodArgs.empty() && paramIndex < methodArgs.size() &&
+                methodArgs[paramIndex].nameId != PM_CONSTANT_ID_UNSET) {
                 core::LocOffsets tinyLocOffsets = firstLineTypeLoc.copyWithZeroLength();
-                symbolNode = PMK::SymbolFromConstant(tinyLocOffsets, methodParams[paramIndex].nameId);
+                symbolNode = PMK::SymbolFromConstant(tinyLocOffsets, methodArgs[paramIndex].nameId);
             }
             if (!symbolNode) {
                 // As a last resort, synthesize a tiny constant name 'arg'
@@ -513,12 +526,6 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
             }
         }
         if (!symbolNode) {
-            continue;
-        }
-
-        // Create type node from RBS type
-        pm_node_t *typeNode = typeToPrismNode.toPrismNode(arg.type, declaration);
-        if (!typeNode) {
             continue;
         }
         // Ensure type node has a valid location within the file (use the arg span)
@@ -578,8 +585,8 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
 
     if (functionType->return_type->type == RBS_TYPES_BASES_VOID) {
         // Create: sigReceiver.void()
-        blockBody = PMK::Send0(declaration.typeLocFromRange(functionType->return_type->location->rg),
-                              sigReceiver, "void");
+        blockBody =
+            PMK::Send0(declaration.typeLocFromRange(functionType->return_type->location->rg), sigReceiver, "void");
         if (!blockBody)
             return nullptr;
         // debugPrintLocation("void.call.base", voidCall->base.location);
@@ -594,8 +601,8 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         // Set return type node base.location to actual return type span
         returnTypeNode->location = return_type_full_loc;
 
-        blockBody = PMK::Send1(declaration.typeLocFromRange(functionType->return_type->location->rg),
-                              sigReceiver, "returns", returnTypeNode);
+        blockBody = PMK::Send1(declaration.typeLocFromRange(functionType->return_type->location->rg), sigReceiver,
+                               "returns", returnTypeNode);
         if (!blockBody)
             return nullptr;
         // debugPrintLocation("returns.call.base", returnsCall->base.location);

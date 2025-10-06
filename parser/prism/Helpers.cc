@@ -487,6 +487,50 @@ pm_node_t *PMK::TTypeParameter(core::LocOffsets loc, pm_node_t *name) {
     return Send1(loc, t_const, "type_parameter", name);
 }
 
+pm_node_t *PMK::TProc(core::LocOffsets loc, pm_node_t *args, pm_node_t *returnType) {
+    // Create T.proc.params(args).returns(returnType) call
+    pm_node_t *builder = T(loc);
+    if (!builder || !returnType) {
+        return nullptr;
+    }
+
+    builder = Send0(loc, builder, "proc");
+    if (!builder) {
+        return nullptr;
+    }
+
+    if (args != nullptr) {
+        builder = Send1(loc, builder, "params", args);
+        if (!builder) {
+            return nullptr;
+        }
+    }
+
+    return Send1(loc, builder, "returns", returnType);
+}
+
+pm_node_t *PMK::TProcVoid(core::LocOffsets loc, pm_node_t *args) {
+    // Create T.proc.params(args).void call
+    pm_node_t *builder = T(loc);
+    if (!builder) {
+        return nullptr;
+    }
+
+    builder = Send0(loc, builder, "proc");
+    if (!builder) {
+        return nullptr;
+    }
+
+    if (args != nullptr) {
+        builder = Send1(loc, builder, "params", args);
+        if (!builder) {
+            return nullptr;
+        }
+    }
+
+    return Send0(loc, builder, "void");
+}
+
 bool PMK::isTUntyped(pm_node_t *node) {
     if (!node || node->type != PM_CALL_NODE) {
         return false;

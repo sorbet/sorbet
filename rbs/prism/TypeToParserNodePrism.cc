@@ -222,7 +222,41 @@ pm_node_t *TypeToParserNodePrism::voidType(const rbs_types_bases_void_t *node, c
 
 pm_node_t *TypeToParserNodePrism::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
                                                const RBSDeclaration &declaration) {
-    return this->createConstantReadNode("T.proc");
+    std::vector<pm_node_t *> pairs;
+    int i = 0;
+    for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
+         list_node = list_node->next) {
+        std::string argNameStr = "arg" + std::to_string(i);
+        auto key = PMK::Symbol(loc, argNameStr.c_str());
+
+        rbs_node_t *paramNode = list_node->node;
+        pm_node_t *innerType;
+
+        if (paramNode->type != RBS_TYPES_FUNCTION_PARAM) {
+            if (auto e = ctx.beginIndexerError(loc, core::errors::Internal::InternalError)) {
+                e.setHeader("Unexpected node type `{}` in function parameter type, expected `{}`",
+                            rbs_node_type_name(paramNode), "FunctionParam");
+            }
+            innerType = this->createConstantReadNode("T.untyped");
+        } else {
+            innerType = toPrismNode(((rbs_types_function_param_t *)paramNode)->type, declaration);
+        }
+
+        pm_node_t *pairNode = PMK::AssocNode(loc, key, innerType);
+        pairs.push_back(pairNode);
+
+        i++;
+    }
+
+    rbs_node_t *returnValue = node->return_type;
+    pm_node_t *argsHash = pairs.empty() ? nullptr : PMK::Hash(loc, pairs);
+
+    if (returnValue->type == RBS_TYPES_BASES_VOID) {
+        return PMK::TProcVoid(loc, argsHash);
+    }
+
+    auto returnType = toPrismNode(returnValue, declaration);
+    return PMK::TProc(loc, argsHash, returnType);
 }
 
 pm_node_t *TypeToParserNodePrism::procType(const rbs_types_proc_t *node, core::LocOffsets loc,
