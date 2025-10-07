@@ -712,9 +712,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 }
             };
 
-            ast::ExpressionPtr itBody = std::move(block->body);
             IsExpectedTransformer transformer(attributeName, isExpectedName, expectName);
-            itBody = ast::TreeMap::apply(ctx, transformer, std::move(itBody));
+            itBody = ast::TreeMap::apply(ctx, transformer, move(block->body));
 
             // Create it block
             auto itName = ctx.state.enterNameUTF8("<it>");
