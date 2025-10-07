@@ -361,7 +361,7 @@ public:
     TypeParameter deepCopy(const GlobalState &gs) const;
 
     Flags flags;
-    // Method for TypeArgument, ClassOrModule for TypeMember.
+    // Method for TypeParameter, ClassOrModule for TypeMember.
     SymbolRef owner;
     NameRef name;
     TypePtr resultType;
