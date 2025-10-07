@@ -232,7 +232,7 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, Symb
 
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     auto emptyResult = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-    if (this->definition.isTypeArgument()) {
+    if (this->definition.isTypeParameter()) {
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
             return emptyResult;

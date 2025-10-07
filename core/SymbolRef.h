@@ -431,7 +431,7 @@ public:
         return kind() == Kind::FieldOrStaticField;
     }
 
-    inline bool isTypeArgument() const {
+    inline bool isTypeParameter() const {
         return kind() == Kind::TypeParameter;
     }
 

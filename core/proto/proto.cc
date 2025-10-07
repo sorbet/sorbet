@@ -102,7 +102,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::METHOD);
     } else if (sym.isTypeMember()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_MEMBER);
-    } else if (sym.isTypeArgument()) {
+    } else if (sym.isTypeParameter()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
     }
 
