@@ -677,14 +677,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             // Create the describe block name
             auto describeTestName = fmt::format("<describe '{}'>", argString);
-            auto describeName = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
+            auto describeName =
+                ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
 
-            // Enter names before creating the transformer (can't call enterNameUTF8 in const context)
             auto isExpectedName = ctx.state.enterNameUTF8("is_expected");
             auto expectName = ctx.state.enterNameUTF8("expect");
 
             // Transform the its block body to replace is_expected with expect(subject.attribute)
-            // This allows proper type inference without needing super support
             class IsExpectedTransformer {
             private:
                 core::NameRef attributeName;
@@ -692,10 +691,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 core::NameRef expectName;
 
             public:
-                IsExpectedTransformer(core::NameRef attributeName, core::NameRef isExpectedName, core::NameRef expectName)
-                    : attributeName(attributeName),
-                      isExpectedName(isExpectedName),
-                      expectName(expectName) {}
+                IsExpectedTransformer(core::NameRef attributeName, core::NameRef isExpectedName,
+                                      core::NameRef expectName)
+                    : attributeName(attributeName), isExpectedName(isExpectedName), expectName(expectName) {}
 
                 ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
                     auto send = ast::cast_tree<ast::Send>(tree);
@@ -706,13 +704,12 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                     // Look for is_expected calls
                     if (send->fun == isExpectedName && send->recv.isSelfReference()) {
                         // Replace is_expected with expect(subject.attribute)
-                        auto subjectCall = ast::MK::Send0(send->loc, ast::MK::Self(send->loc),
-                                                         core::Names::subject(), send->loc.copyWithZeroLength());
-                        auto attributeCall = ast::MK::Send0(send->loc, std::move(subjectCall),
-                                                           attributeName, send->loc.copyWithZeroLength());
-                        return ast::MK::Send1(send->loc, ast::MK::Self(send->loc),
-                                            expectName, send->loc.copyWithZeroLength(),
-                                            std::move(attributeCall));
+                        auto subjectCall = ast::MK::Send0(send->loc, ast::MK::Self(send->loc), core::Names::subject(),
+                                                          send->loc.copyWithZeroLength());
+                        auto attributeCall = ast::MK::Send0(send->loc, std::move(subjectCall), attributeName,
+                                                            send->loc.copyWithZeroLength());
+                        return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), expectName,
+                                              send->loc.copyWithZeroLength(), std::move(attributeCall));
                     }
 
                     return tree;
