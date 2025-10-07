@@ -602,7 +602,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return make_type<AppliedType>(klass, move(targs));
         }
         case TypePtr::Tag::TypeVar: {
-            auto sym = TypeArgumentRef::fromRaw(p.getU4());
+            auto sym = TypeParameterRef::fromRaw(p.getU4());
             return make_type<TypeVar>(sym);
         }
         case TypePtr::Tag::SelfType: {
@@ -672,7 +672,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     if (typeParamsSize != 0) {
         auto &vec = result.getOrCreateTypeArguments();
         for (int i = 0; i < typeParamsSize; i++) {
-            vec.emplace_back(TypeArgumentRef::fromRaw(p.getU4()));
+            vec.emplace_back(TypeParameterRef::fromRaw(p.getU4()));
         }
     }
 

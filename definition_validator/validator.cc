@@ -68,7 +68,7 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
 
     // We're only using the TypeConstraint as a way to have an easy way to replace a `TypeVar` with
     // a "skolem" type variable (type variable representing an unknown but specific type). In
-    // Sorbet, those skolems are SelfTypeParam types that wrap a TypeArgumentRef.
+    // Sorbet, those skolems are SelfTypeParam types that wrap a TypeParameterRef.
     //
     // Types::approximate does this "replace all the TypeVar with SelfTypeParam" naturally and in a
     // predictable way (i.e., respecting polarity), so it's convenient do to this with approximate

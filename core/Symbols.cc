@@ -80,11 +80,11 @@ bool TypeMemberRef::operator!=(const TypeMemberRef &rhs) const {
     return rhs._id != this->_id;
 }
 
-bool TypeArgumentRef::operator==(const TypeArgumentRef &rhs) const {
+bool TypeParameterRef::operator==(const TypeParameterRef &rhs) const {
     return rhs._id == this->_id;
 }
 
-bool TypeArgumentRef::operator!=(const TypeArgumentRef &rhs) const {
+bool TypeParameterRef::operator!=(const TypeParameterRef &rhs) const {
     return rhs._id != this->_id;
 }
 
@@ -203,7 +203,7 @@ MethodRef Method::ref(const GlobalState &gs) const {
 SymbolRef TypeParameter::ref(const GlobalState &gs) const {
     if (flags.isTypeArgument) {
         uint32_t distance = this - gs.typeArguments.data();
-        return TypeArgumentRef(gs, distance);
+        return TypeParameterRef(gs, distance);
     } else {
         ENFORCE_NO_TIMER(flags.isTypeMember);
         uint32_t distance = this - gs.typeMembers.data();
@@ -311,19 +311,19 @@ TypeParameterData TypeMemberRef::dataAllowingNone(GlobalState &gs) const {
     return TypeParameterData(gs.typeMembers[_id], gs);
 }
 
-TypeParameterData TypeArgumentRef::data(GlobalState &gs) const {
+TypeParameterData TypeParameterRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
     return TypeParameterData(gs.typeArguments[_id], gs);
 }
 
-ConstTypeParameterData TypeArgumentRef::data(const GlobalState &gs) const {
+ConstTypeParameterData TypeParameterRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
     return ConstTypeParameterData(gs.typeArguments[_id], gs);
 }
 
-TypeParameterData TypeArgumentRef::dataAllowingNone(GlobalState &gs) const {
+TypeParameterData TypeParameterRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
     return TypeParameterData(gs.typeArguments[_id], gs);
 }
@@ -367,7 +367,7 @@ SymbolRef::SymbolRef(FieldRef field) : SymbolRef(nullptr, SymbolRef::Kind::Field
 
 SymbolRef::SymbolRef(TypeMemberRef typeMember) : SymbolRef(nullptr, SymbolRef::Kind::TypeMember, typeMember.id()) {}
 
-SymbolRef::SymbolRef(TypeArgumentRef typeArg) : SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, typeArg.id()) {}
+SymbolRef::SymbolRef(TypeParameterRef typeArg) : SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, typeArg.id()) {}
 
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
@@ -377,7 +377,7 @@ FieldRef::FieldRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
 TypeMemberRef::TypeMemberRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
-TypeArgumentRef::TypeArgumentRef(const GlobalState &from, uint32_t id) : _id(id) {}
+TypeParameterRef::TypeParameterRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
 string SymbolRef::show(const GlobalState &gs, ShowOptions options) const {
     switch (kind()) {
@@ -424,7 +424,7 @@ string FieldRef::show(const GlobalState &gs, ShowOptions options) const {
     return showInternal(gs, sym->owner, sym->name, sym->flags.isStaticField ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
-string TypeArgumentRef::show(const GlobalState &gs, ShowOptions options) const {
+string TypeParameterRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
     if (options.useValidSyntax) {
         return fmt::format("T.type_parameter(:{})", sym->name.show(gs));
@@ -1121,7 +1121,7 @@ string FieldRef::showFullName(const GlobalState &gs) const {
     return showFullNameInternal(gs, sym->owner, sym->name, sym->flags.isStaticField ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
-string TypeArgumentRef::showFullName(const GlobalState &gs) const {
+string TypeParameterRef::showFullName(const GlobalState &gs) const {
     auto sym = data(gs);
     return showFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
 }
@@ -1162,7 +1162,7 @@ string FieldRef::toStringFullName(const GlobalState &gs) const {
                                     sym->flags.isStaticField ? COLON_SEPARATOR : HASH_SEPARATOR);
 }
 
-string TypeArgumentRef::toStringFullName(const GlobalState &gs) const {
+string TypeParameterRef::toStringFullName(const GlobalState &gs) const {
     auto sym = data(gs);
     return toStringFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
 }
@@ -1260,7 +1260,7 @@ string_view TypeMemberRef::showKind(const GlobalState &gs) const {
     return "type-member"sv;
 }
 
-string_view TypeArgumentRef::showKind(const GlobalState &gs) const {
+string_view TypeParameterRef::showKind(const GlobalState &gs) const {
     return "type-argument"sv;
 }
 
@@ -1373,7 +1373,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
                        fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
     }
 
-    InlinedVector<TypeArgumentRef, 4> typeMembers;
+    InlinedVector<TypeParameterRef, 4> typeMembers;
     typeMembers.assign(sym->typeArguments().begin(), sym->typeArguments().end());
     auto it = remove_if(typeMembers.begin(), typeMembers.end(),
                         [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
@@ -1464,7 +1464,7 @@ string TypeMemberRef::toStringWithOptions(const GlobalState &gs, int tabs, bool 
     return to_string(buf);
 }
 
-string TypeArgumentRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+string TypeParameterRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
     fmt::memory_buffer buf;
 
     printTabs(buf, tabs);
@@ -2169,7 +2169,7 @@ Method Method::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     if (this->typeArgs) {
-        result.typeArgs = make_unique<InlinedVector<TypeArgumentRef, 4>>(*this->typeArgs);
+        result.typeArgs = make_unique<InlinedVector<TypeParameterRef, 4>>(*this->typeArgs);
     }
     result.parameters.reserve(this->parameters.size());
     for (auto &mem : this->parameters) {

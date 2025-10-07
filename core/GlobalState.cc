@@ -334,7 +334,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::noMethod());
     FieldRef field = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE_NO_TIMER(field == Symbols::noField());
-    TypeArgumentRef typeArgument =
+    TypeParameterRef typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::noTypeArgument());
     TypeMemberRef typeMember =
@@ -1285,7 +1285,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     return result;
 }
 
-TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
+TypeParameterRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
     ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeArgument() ||
                      name == Names::Constants::TodoTypeArgument());
     ENFORCE_NO_TIMER(name.exists());
@@ -1318,7 +1318,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto result = TypeArgumentRef(*this, this->typeArguments.size());
+    auto result = TypeParameterRef(*this, this->typeArguments.size());
     this->typeArguments.emplace_back();
 
     TypeParameterData data = result.dataAllowingNone(*this);

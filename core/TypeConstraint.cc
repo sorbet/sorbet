@@ -11,7 +11,7 @@ bool TypeConstraint::isEmpty() const {
     return upperBounds.empty() && lowerBounds.empty();
 }
 
-void TypeConstraint::defineDomain(const GlobalState &gs, absl::Span<const TypeArgumentRef> typeParams) {
+void TypeConstraint::defineDomain(const GlobalState &gs, absl::Span<const TypeParameterRef> typeParams) {
     // ENFORCE(isEmpty()); // unfortunately this is false. See
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &ta : typeParams) {
@@ -136,7 +136,7 @@ bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1,
     }
 }
 
-TypePtr TypeConstraint::getInstantiation(TypeArgumentRef sym) const {
+TypePtr TypeConstraint::getInstantiation(TypeParameterRef sym) const {
     ENFORCE(wasSolved);
     return findSolution(sym);
 }
@@ -155,7 +155,7 @@ TypeConstraint TypeConstraint::makeEmptyFrozenConstraint() {
 
 TypeConstraint TypeConstraint::EmptyFrozenConstraint(makeEmptyFrozenConstraint());
 
-bool TypeConstraint::hasUpperBound(TypeArgumentRef forWhat) const {
+bool TypeConstraint::hasUpperBound(TypeParameterRef forWhat) const {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return true;
@@ -164,7 +164,7 @@ bool TypeConstraint::hasUpperBound(TypeArgumentRef forWhat) const {
     return false;
 }
 
-bool TypeConstraint::hasLowerBound(TypeArgumentRef forWhat) const {
+bool TypeConstraint::hasLowerBound(TypeParameterRef forWhat) const {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return true;
@@ -173,7 +173,7 @@ bool TypeConstraint::hasLowerBound(TypeArgumentRef forWhat) const {
     return false;
 }
 
-TypePtr &TypeConstraint::findUpperBound(TypeArgumentRef forWhat) {
+TypePtr &TypeConstraint::findUpperBound(TypeParameterRef forWhat) {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -184,7 +184,7 @@ TypePtr &TypeConstraint::findUpperBound(TypeArgumentRef forWhat) {
     return inserted.second;
 }
 
-TypePtr &TypeConstraint::findLowerBound(TypeArgumentRef forWhat) {
+TypePtr &TypeConstraint::findLowerBound(TypeParameterRef forWhat) {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -195,7 +195,7 @@ TypePtr &TypeConstraint::findLowerBound(TypeArgumentRef forWhat) {
     return inserted.second;
 }
 
-TypePtr &TypeConstraint::findSolution(TypeArgumentRef forWhat) {
+TypePtr &TypeConstraint::findSolution(TypeParameterRef forWhat) {
     for (auto &entry : this->solution) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -206,7 +206,7 @@ TypePtr &TypeConstraint::findSolution(TypeArgumentRef forWhat) {
     return inserted.second;
 }
 
-TypePtr TypeConstraint::findUpperBound(TypeArgumentRef forWhat) const {
+TypePtr TypeConstraint::findUpperBound(TypeParameterRef forWhat) const {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -215,7 +215,7 @@ TypePtr TypeConstraint::findUpperBound(TypeArgumentRef forWhat) const {
     Exception::raise("Failed to find entry in TypeConstraint::upperBounds for type argument");
 }
 
-TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
+TypePtr TypeConstraint::findLowerBound(TypeParameterRef forWhat) const {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -224,7 +224,7 @@ TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
     Exception::raise("Failed to find entry in TypeConstraint::lowerBounds for type argument");
 }
 
-TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
+TypePtr TypeConstraint::findSolution(TypeParameterRef forWhat) const {
     for (auto &entry : this->solution) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -242,8 +242,8 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     return ret;
 }
 
-UnorderedMap<TypeArgumentRef, pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
-    auto collated = UnorderedMap<TypeArgumentRef, pair<TypePtr, TypePtr>>{};
+UnorderedMap<TypeParameterRef, pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
+    auto collated = UnorderedMap<TypeParameterRef, pair<TypePtr, TypePtr>>{};
 
     for (const auto &[sym, lowerBound] : this->lowerBounds) {
         auto &[lowerRef, _upperRef] = collated[sym];

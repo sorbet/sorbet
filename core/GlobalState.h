@@ -24,7 +24,7 @@ class SymbolRef;
 class ClassOrModuleRef;
 class MethodRef;
 class FieldRef;
-class TypeArgumentRef;
+class TypeParameterRef;
 class TypeMemberRef;
 class NameSubstitution;
 class ErrorQueue;
@@ -50,7 +50,7 @@ class GlobalState final {
     friend ClassOrModuleRef;
     friend MethodRef;
     friend TypeMemberRef;
-    friend TypeArgumentRef;
+    friend TypeParameterRef;
     friend FieldRef;
     friend File;
     friend FileRef;
@@ -103,7 +103,7 @@ public:
 
     ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
-    TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
+    TypeParameterRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, uint32_t num,
                                      const std::vector<bool> &paramsToKeep);
