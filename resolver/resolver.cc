@@ -1900,7 +1900,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 // as the `T.cast` is listed in.
                 auto typeArgLocOffsets = typeArgLoc.file() == job.file ? typeArgLoc.offsets()
                                                                        : job.cast->typeExpr.loc().copyWithZeroLength();
-                emptySig.typeArgs.emplace_back(ParsedSig::TypeArgSpec{typeArgLocOffsets, name, data->resultType});
+                emptySig.typeArgs.emplace_back(ParsedSig::TypeParamSpec{typeArgLocOffsets, name, data->resultType});
             }
         }
         auto allowSelfType = true;
