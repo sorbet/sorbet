@@ -66,8 +66,6 @@ public:
         }
     }
 
-    void addSymbol(const core::SymbolRef symbol) override {}
-
 private:
     string newName;
     vector<core::Loc> localUsages;
@@ -78,8 +76,8 @@ class MethodRenamer : public AbstractRewriter {
     string newName;
 
 public:
-    MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
-                  const string newName)
+    MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, core::MethodRef method,
+                  const string oldName, const string newName)
         : AbstractRewriter(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
@@ -94,6 +92,8 @@ public:
             error = fmt::format("The `{}` method cannot be renamed.", oldName);
             invalid = true;
         }
+
+        addSubclassRelatedMethods(gs, method, getQueue());
     }
 
     ~MethodRenamer() {}
@@ -123,11 +123,6 @@ public:
             return;
         }
         edits[loc] = newsrc;
-    }
-    void addSymbol(const core::SymbolRef symbol) override {
-        if (symbol.isMethod()) {
-            addSubclassRelatedMethods(gs, symbol.asMethodRef(), getQueue());
-        }
     }
 
 private:
@@ -198,9 +193,16 @@ class ConstRenamer : public AbstractRewriter {
     string newName;
 
 public:
-    ConstRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string newName)
-        : AbstractRewriter(gs, config), newName(newName) {}
+    ConstRenamer(const core::GlobalState &gs, const LSPConfiguration &config, core::SymbolRef symbol,
+                 const string newName)
+        : AbstractRewriter(gs, config), newName(newName) {
+        if (!symbol.isMethod()) {
+            getQueue()->tryEnqueue(symbol);
+        }
+    }
+
     ~ConstRenamer() {}
+
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
@@ -212,19 +214,18 @@ public:
         auto newsrc = absl::StrJoin(strs, "::");
         edits[loc] = newsrc;
     }
-    void addSymbol(const core::SymbolRef symbol) override {
-        if (!symbol.isMethod()) {
-            getQueue()->tryEnqueue(symbol);
-        }
-    }
 };
 
 class FieldRenamer : public AbstractRewriter {
     string newName;
 
 public:
-    FieldRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string newName)
-        : AbstractRewriter(gs, config), newName(newName) {}
+    FieldRenamer(const core::GlobalState &gs, const LSPConfiguration &config, core::FieldRef field,
+                 const string newName)
+        : AbstractRewriter(gs, config), newName(newName) {
+        getQueue()->tryEnqueue(field);
+    }
+
     ~FieldRenamer() {}
 
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
@@ -249,22 +250,16 @@ public:
 
         edits[loc] = newsrc;
     }
-
-    void addSymbol(const core::SymbolRef symbol) override {
-        if (symbol.isField(gs)) {
-            getQueue()->tryEnqueue(symbol);
-        }
-    }
 };
 
-void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<AbstractRewriter> renamer) {
-    responseMsg->result = renamer->buildWorkspaceEdit();
-    if (renamer->getInvalid()) {
-        responseMsg->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, renamer->getError());
+void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, AbstractRewriter &renamer) {
+    responseMsg->result = renamer.buildWorkspaceEdit();
+    if (renamer.getInvalid()) {
+        responseMsg->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, renamer.getError());
     }
 }
 
-shared_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
+unique_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
                                          const sorbet::realmain::lsp::LSPConfiguration &config, core::SymbolRef symbol,
                                          const string newName) {
     auto loc = symbol.loc(gs);
@@ -282,11 +277,11 @@ shared_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
         }
 
         auto originalName = name.show(gs);
-        return make_shared<MethodRenamer>(gs, config, originalName, newName);
+        return make_unique<MethodRenamer>(gs, config, method, originalName, newName);
     } else if (symbol.isField(gs)) {
-        return make_shared<FieldRenamer>(gs, config, newName);
+        return make_unique<FieldRenamer>(gs, config, symbol.asFieldRef(), newName);
     } else {
-        return make_shared<ConstRenamer>(gs, config, newName);
+        return make_unique<ConstRenamer>(gs, config, symbol, newName);
     }
 }
 
@@ -335,23 +330,23 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         }
         if (isValidRenameLocation(constResp->symbolBeforeDealias, gs, response)) {
             if (auto renamer = makeRenamer(gs, config, constResp->symbolBeforeDealias, params->newName)) {
-                renamer->getEdits(typechecker, constResp->symbolBeforeDealias);
-                enrichResponse(response, renamer);
+                renamer->getEdits(typechecker);
+                enrichResponse(response, *renamer);
             }
         }
     } else if (auto defResp = resp->isMethodDef()) {
         if (isValidRenameLocation(defResp->symbol, gs, response)) {
             if (auto renamer = makeRenamer(gs, config, defResp->symbol, params->newName)) {
-                renamer->getEdits(typechecker, defResp->symbol);
-                enrichResponse(response, renamer);
+                renamer->getEdits(typechecker);
+                enrichResponse(response, *renamer);
             }
         }
     } else if (auto sendResp = resp->isSend()) {
         // We don't need to handle dispatchResult->secondary here, because it will be checked in getEdits.
         auto method = sendResp->dispatchResult->main.method;
         if (auto renamer = makeRenamer(gs, config, method, params->newName)) {
-            renamer->getEdits(typechecker, method);
-            enrichResponse(response, renamer);
+            renamer->getEdits(typechecker);
+            enrichResponse(response, *renamer);
         }
     } else if (auto identResp = resp->isIdent()) {
         if (identResp->enclosingMethod.exists()) {
@@ -365,14 +360,14 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
                 locations.emplace_back(reference->getLoc());
             }
 
-            shared_ptr<AbstractRewriter> renamer = make_shared<LocalRenamer>(gs, config, params->newName, locations);
+            unique_ptr<AbstractRewriter> renamer = make_unique<LocalRenamer>(gs, config, params->newName, locations);
             renamer->rename(resp);
-            enrichResponse(response, renamer);
+            enrichResponse(response, *renamer);
         }
     } else if (auto fieldResp = resp->isField()) {
         if (auto renamer = makeRenamer(gs, config, fieldResp->symbol, params->newName)) {
-            renamer->getEdits(typechecker, fieldResp->symbol);
-            enrichResponse(response, renamer);
+            renamer->getEdits(typechecker);
+            enrichResponse(response, *renamer);
         }
     }
 

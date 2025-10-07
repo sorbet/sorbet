@@ -107,8 +107,8 @@ class MethodCallSiteRenamer : public AbstractRewriter {
     string newName;
 
 public:
-    MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
-                          const string newName)
+    MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, core::MethodRef method,
+                          const string oldName, const string newName)
         : AbstractRewriter(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
@@ -118,6 +118,8 @@ public:
                 return;
             }
         }
+
+        addSubclassRelatedMethods(gs, method, getQueue());
     }
 
     ~MethodCallSiteRenamer() {}
@@ -147,12 +149,6 @@ public:
 
             edits[sendResp->receiverLoc()] = newName;
         }
-    }
-    void addSymbol(const core::SymbolRef symbol) override {
-        if (!symbol.isMethod()) {
-            return;
-        }
-        addSubclassRelatedMethods(gs, symbol.asMethodRef(), getQueue());
     }
 }; // MethodCallSiteRenamer
 
@@ -210,9 +206,10 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &
 
     auto edits = moveMethod(typechecker, config, definition, newModuleName.value());
 
-    auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
-    renamer->getEdits(typechecker, definition.symbol);
-    auto callSiteEdits = renamer->buildTextDocumentEdits();
+    auto renamer =
+        MethodCallSiteRenamer{gs, config, definition.symbol, definition.name.show(gs), newModuleName.value()};
+    renamer.getEdits(typechecker);
+    auto callSiteEdits = renamer.buildTextDocumentEdits();
 
     if (callSiteEdits.has_value()) {
         for (auto &edit : callSiteEdits.value()) {

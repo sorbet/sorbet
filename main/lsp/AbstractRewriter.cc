@@ -134,10 +134,8 @@ void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs,
     }
 }
 
-void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) {
+void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker) {
     const core::GlobalState &gs = typechecker.state();
-
-    addSymbol(symbol);
 
     auto symbolQueue = getQueue();
     core::lsp::Query::Symbol::STORAGE symbols;
