@@ -20,6 +20,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>
         end
 
+        def expect<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
         def eq<<todo method>>(arg, &<blk>)
           <emptyTree>
         end
@@ -27,6 +31,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <runtime method definition of described_class>
 
         <runtime method definition of is_expected>
+
+        <runtime method definition of expect>
 
         <runtime method definition of eq>
       end
@@ -46,6 +52,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    def expect<<todo method>>(arg, &<blk>)
+      <emptyTree>
+    end
+
     def eq<<todo method>>(arg, &<blk>)
       <emptyTree>
     end
@@ -55,6 +65,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of outer_helper>
 
     <runtime method definition of is_expected>
+
+    <runtime method definition of expect>
 
     <runtime method definition of eq>
 
@@ -162,27 +174,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of foo>
 
       class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
-        def subject<<todo method>>(&<blk>)
-          <self>.subject().bar()
-        end
-
         def <it><<todo method>>(&<blk>)
-          <self>.is_expected().to(<self>.eq(<self>.foo()))
+          <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
         end
-
-        <runtime method definition of subject>
       end
 
       class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
-        def subject<<todo method>>(&<blk>)
-          <self>.subject().size()
-        end
-
         def <it><<todo method>>(&<blk>)
           <emptyTree>::<C T>.reveal_type(<self>)
         end
-
-        <runtime method definition of subject>
       end
     end
 
@@ -214,30 +214,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of subject>
 
       class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
-        def subject<<todo method>>(&<blk>)
-          <self>.subject().size()
-        end
-
         def <it><<todo method>>(&<blk>)
           begin
             <emptyTree>::<C T>.reveal_type(<self>.subject())
-            <self>.is_expected().to(<self>.eq(42))
+            <self>.expect(<self>.subject().size()).to(<self>.eq(42))
           end
         end
-
-        <runtime method definition of subject>
       end
 
       class <emptyTree>::<C <describe 'no_such_method'>><<C <todo sym>>> < (<self>)
-        def subject<<todo method>>(&<blk>)
-          <self>.subject().no_such_method()
-        end
-
         def <it><<todo method>>(&<blk>)
-          <self>.is_expected().to(<self>.eq(0))
+          <self>.expect(<self>.subject().no_such_method()).to(<self>.eq(0))
         end
-
-        <runtime method definition of subject>
       end
     end
   end

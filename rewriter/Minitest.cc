@@ -679,8 +679,49 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             auto describeTestName = fmt::format("<describe '{}'>", argString);
             auto describeName = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
 
-            // Create the it block body - keep original as-is since is_expected works with subject
+            // Enter names before creating the transformer (can't call enterNameUTF8 in const context)
+            auto isExpectedName = ctx.state.enterNameUTF8("is_expected");
+            auto expectName = ctx.state.enterNameUTF8("expect");
+
+            // Transform the its block body to replace is_expected with expect(subject.attribute)
+            // This allows proper type inference without needing super support
+            class IsExpectedTransformer {
+            private:
+                core::NameRef attributeName;
+                core::NameRef isExpectedName;
+                core::NameRef expectName;
+
+            public:
+                IsExpectedTransformer(core::NameRef attributeName, core::NameRef isExpectedName, core::NameRef expectName)
+                    : attributeName(attributeName),
+                      isExpectedName(isExpectedName),
+                      expectName(expectName) {}
+
+                ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+                    auto send = ast::cast_tree<ast::Send>(tree);
+                    if (send == nullptr) {
+                        return tree;
+                    }
+
+                    // Look for is_expected calls
+                    if (send->fun == isExpectedName && send->recv.isSelfReference()) {
+                        // Replace is_expected with expect(subject.attribute)
+                        auto subjectCall = ast::MK::Send0(send->loc, ast::MK::Self(send->loc),
+                                                         core::Names::subject(), send->loc.copyWithZeroLength());
+                        auto attributeCall = ast::MK::Send0(send->loc, std::move(subjectCall),
+                                                           attributeName, send->loc.copyWithZeroLength());
+                        return ast::MK::Send1(send->loc, ast::MK::Self(send->loc),
+                                            expectName, send->loc.copyWithZeroLength(),
+                                            std::move(attributeCall));
+                    }
+
+                    return tree;
+                }
+            };
+
             ast::ExpressionPtr itBody = std::move(block->body);
+            IsExpectedTransformer transformer(attributeName, isExpectedName, expectName);
+            itBody = ast::TreeMap::apply(ctx, transformer, std::move(itBody));
 
             // Create it block
             auto itName = ctx.state.enterNameUTF8("<it>");
@@ -696,22 +737,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             itMethod = addSigVoid(ctx, move(itMethod));
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
 
-            // Create let(:subject) that calls super.attribute_name
-            // In RSpec, its() creates a nested let(:subject) that calls super + the attribute.
-            // We model this by creating a method that would call the parent's subject.
-            // Note: Calling self.subject() would recurse infinitely. In real Ruby, we'd use
-            // super, but we can't generate that in the rewriter. For now, we create the
-            // structure correctly even though it won't work at runtime without super support.
-            auto subjectCallBody = ast::MK::Send0(arg.loc(),
-                                                  ast::MK::Send0(arg.loc(), ast::MK::Self(arg.loc()),
-                                                                core::Names::subject(), arg.loc().copyWithZeroLength()),
-                                                  attributeName, arg.loc().copyWithZeroLength());
-            auto subjectLetMethod = ast::MK::SyntheticMethod0(arg.loc(), arg.loc().copyWithZeroLength(),
-                                                              core::Names::subject(), std::move(subjectCallBody));
-
-            // Combine subject let and it method in the describe body
+            // No need to create a subject method - the body now calls subject.attribute directly
             ast::ClassDef::RHS_store describeBody;
-            describeBody.emplace_back(std::move(subjectLetMethod));
             describeBody.emplace_back(std::move(itMethod));
 
             // Create describe block containing the subject and it methods

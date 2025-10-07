@@ -11,6 +11,9 @@ module RSpec
       def is_expected
       end
 
+      def expect(arg)
+      end
+
       def eq(arg)
       end
     end
@@ -23,6 +26,8 @@ class A
   def outer_helper; end
 
   def is_expected; end
+
+  def expect(arg); end
 
   def eq(arg); end
 
@@ -108,7 +113,7 @@ class A
   describe "its support" do
     let(:foo) { "bar" }
 
-    its(:bar) { is_expected.to eq(foo) }
+    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
 
     # The correct desugaring is:
     #   its(:size) { is_expected.to eq(1) }
@@ -138,17 +143,18 @@ class A
     sig {returns(ThingWithSize)}
     let(:subject) { ThingWithSize.new }
 
-    # The nested describe's subject method calls self.subject().size()
-    # This demonstrates the structure is correct (nested describe with subject method),
-    # though type inference is limited because calling self.subject()
-    # recursively calls the same method (which would cause infinite recursion at runtime)
+    # The rewriter transforms `its(:size) { is_expected.to eq(42) }`
+    # into `describe "size" do; it { expect(subject.size).to eq(42) }; end`
+    # This allows proper type inference since subject is called directly
     its(:size) do
-      T.reveal_type(subject) # error: Revealed type: `T.untyped`
+      # subject should be ThingWithSize (from the parent describe)
+      T.reveal_type(subject) # error: Revealed type: `A::<describe 'its with typed subject'>::ThingWithSize`
       is_expected.to eq(42)
     end
 
+    # This should error because no_such_method doesn't exist on ThingWithSize
     its(:no_such_method) do
-      is_expected.to eq(0)
+      is_expected.to eq(0) # error: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize`
     end
   end
 end
