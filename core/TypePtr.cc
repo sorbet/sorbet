@@ -343,6 +343,7 @@ TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
 #undef _INSTANTIATE
 }
 
+// Returns nullptr to indicate no change.
 TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                           const vector<TypePtr> &targs) const {
     switch (tag()) {
@@ -356,7 +357,10 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<cons
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
         case Tag::SelfType:
-            return *this;
+            // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
+            // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
+            // have to allocate another type.
+            return nullptr;
 
         case Tag::TupleType:
             return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs);
