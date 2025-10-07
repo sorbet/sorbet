@@ -176,6 +176,11 @@ TypePtr Types::todo() {
     return make_type<ClassType>(Symbols::todo());
 }
 
+TypePtr Types::selfTypeAsSelfTypeParam() {
+    auto tSelfType = SymbolRef(core::Symbols::T_SelfType());
+    return make_type<SelfTypeParam>(tSelfType);
+}
+
 TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::Span<const ClassOrModuleRef> klasses) {
     TypePtr result;
 
@@ -664,9 +669,12 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
 /**
  * fromWhat - where the generic type was written
  * inWhat   - where the generic type is observed
+ *
+ * selfType - Every class has an "implicit" type member corresponding to itself.
+ *            This parameter is the recursion: we pass ourself down once we know what ourself is.
  */
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
-                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
+                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs, TypePtr selfType) {
     auto originalOwner = fromWhat;
 
     // TODO: the ENFORCE below should be above this conditional, but there is
@@ -682,7 +690,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);
 
-    auto result = what._instantiateLambdaParams(gs, currentAlignment, targs);
+    auto result = what._instantiateLambdaParams(gs, currentAlignment, targs, selfType);
     if (result != nullptr) {
         return result;
     }
@@ -889,7 +897,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         },
         [&](const SelfTypeParam &param) {
             auto sym = param.definition;
-            if (sym.owner(ctx) == ctx.owner) {
+            if (sym.owner(ctx) == ctx.owner || !sym.owner(ctx).exists()) {
                 ENFORCE(isa_type<LambdaParam>(sym.resultType(ctx)));
                 ret = sym.resultType(ctx);
             } else {

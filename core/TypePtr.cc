@@ -345,7 +345,7 @@ TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
 
 // Returns nullptr to indicate no change.
 TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                          const vector<TypePtr> &targs) const {
+                                          const vector<TypePtr> &targs, TypePtr selfType) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
@@ -363,17 +363,17 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<cons
             return nullptr;
 
         case Tag::TupleType:
-            return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::ShapeType:
-            return cast_type_nonnull<ShapeType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<ShapeType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::OrType:
-            return cast_type_nonnull<OrType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<OrType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::AndType:
-            return cast_type_nonnull<AndType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<AndType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::AppliedType:
-            return cast_type_nonnull<AppliedType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<AppliedType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::LambdaParam:
-            return cast_type_nonnull<LambdaParam>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<LambdaParam>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
 
         case Tag::MetaType:
         case Tag::AliasType:

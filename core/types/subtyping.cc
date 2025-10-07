@@ -1207,6 +1207,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
                 if (auto lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
+                    // TODO(jez) This case is easier: passing `Parent` to `T.self_type` should error always,
+                    // and that's what a lower bound of T.noreturn does.
                     auto result = Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
                                                                   errorDetailsCollector);
                     if constexpr (shouldAddErrorDetails) {
@@ -1220,6 +1222,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return false;
                 }
             } else if (!isSelfTypeT2) {
+                // TODO(jez) How should T.self_type interact with other types?
+                // If you pass a `T.self_type` to a method that takes Parent it should work.
                 auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
                 if (auto lambdaParam = cast_type<LambdaParam>(self1.definition.resultType(gs))) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
@@ -1234,6 +1238,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return true;
                 }
 
+                // TODO(jez) Another example where, if t1 is a T.self_type, the upperBound is wrong.
                 auto lambda1 = cast_type<LambdaParam>(self1.definition.resultType(gs));
                 auto lambda2 = cast_type<LambdaParam>(self2.definition.resultType(gs));
                 return lambda1 && lambda2 &&

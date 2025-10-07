@@ -340,6 +340,15 @@ void GlobalState::initEmpty() {
     TypeMemberRef typeMember =
         enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeMember == Symbols::noTypeMember());
+    typeMember =
+        enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::T_SelfType(), Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeMember == Symbols::T_SelfType());
+    // This is kind of wrong. The lower bound is fine, but the upper bound is a lie.
+    // It would probably be more accurate to say that each class has a `T.self_type` type member,
+    // each with a bound of itself.
+    //
+    // TODO(jez) This means you have to audit ~all uses of upperBound.
+    typeMember.data(*this)->resultType = make_type<LambdaParam>(typeMember, Types::bottom(), Types::top());
 
     klass = synthesizeClass(core::Names::Constants::Top(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::top());
@@ -1244,7 +1253,8 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     TypeParameter::Flags flags;
-    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeMember());
+    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeMember() ||
+                     name == Names::Constants::T_SelfType());
     ENFORCE_NO_TIMER(name.exists());
     if (variance == Variance::Invariant) {
         flags.isInvariant = true;

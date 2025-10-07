@@ -1266,7 +1266,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             tp.type = core::Types::resultTypeAsSeenFrom(
                                 ctx, field.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
                                 ctx.owner.enclosingClass(ctx),
-                                ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
+                                ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx),
+                                core::Types::selfTypeAsSelfTypeParam());
                         } else {
                             tp.type = resultType;
                         }
@@ -1289,7 +1290,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     auto klass = owner.enclosingClass(ctx);
                     ENFORCE(sym.data(ctx)->resultType != nullptr);
                     auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, sym.data(ctx)->resultType, klass, klass,
-                                                                          klass.data(ctx)->selfTypeArgs(ctx));
+                                                                          klass.data(ctx)->selfTypeArgs(ctx),
+                                                                          core::Types::selfTypeAsSelfTypeParam());
                     if (owner.data(ctx)->flags.isGenericMethod) {
                         // instantiate requires a frozen constraint, but the constraint might not be
                         // frozen when we're running in guessTypes mode (and we never guess types if
@@ -1641,7 +1643,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 auto klass = ctx.owner.enclosingClass(ctx);
 
                 auto castType =
-                    core::Types::resultTypeAsSeenFrom(ctx, c.type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
+                    core::Types::resultTypeAsSeenFrom(ctx, c.type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx),
+                                                      core::Types::selfTypeAsSelfTypeParam());
 
                 if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
                     // ^ This mimics the check in LoadArg's call to parameterTypeAsSeenByImplementation

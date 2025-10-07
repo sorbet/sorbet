@@ -950,7 +950,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             if (args.allowSelfType) {
-                return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
+                return TypeSyntax::ResultType{core::Types::selfTypeAsSelfTypeParam(), core::Symbols::noClassOrModule()};
             }
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level `{}` is supported", "T.self_type");

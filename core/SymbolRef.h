@@ -862,6 +862,10 @@ public:
         return TypeMemberRef::fromRaw(0);
     }
 
+    static TypeMemberRef T_SelfType() {
+        return TypeMemberRef::fromRaw(1);
+    }
+
     static TypeParameterRef todoTypeParameter() {
         return TypeParameterRef::fromRaw(1);
     }
