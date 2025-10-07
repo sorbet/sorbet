@@ -1900,7 +1900,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 // as the `T.cast` is listed in.
                 auto typeArgLocOffsets = typeArgLoc.file() == job.file ? typeArgLoc.offsets()
                                                                        : job.cast->typeExpr.loc().copyWithZeroLength();
-                emptySig.typeArgs.emplace_back(ParsedSig::TypeParamSpec{typeArgLocOffsets, name, data->resultType});
+                emptySig.typeParams.emplace_back(ParsedSig::TypeParamSpec{typeArgLocOffsets, name, data->resultType});
             }
         }
         auto allowSelfType = true;
@@ -3321,9 +3321,9 @@ private:
         } else if (sig.seen.incompatibleOverrideVisibility.exists()) {
             method.data(ctx)->flags.allowIncompatibleOverrideVisibility = true;
         }
-        if (!sig.typeArgs.empty()) {
+        if (!sig.typeParams.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;
-            for (auto &typeSpec : sig.typeArgs) {
+            for (auto &typeSpec : sig.typeParams) {
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
                     auto sym =

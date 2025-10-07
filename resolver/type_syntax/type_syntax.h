@@ -26,7 +26,7 @@ struct ParsedSig {
         core::NameRef name;
         core::TypePtr type;
     };
-    std::vector<TypeParamSpec> typeArgs;
+    std::vector<TypeParamSpec> typeParams;
 
     struct {
         core::LocOffsets sig = core::LocOffsets::none();

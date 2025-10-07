@@ -1531,12 +1531,12 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParams(core::Co
 } // namespace
 
 ParsedSig::TypeParamSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
-    for (auto &current : typeArgs) {
+    for (auto &current : typeParams) {
         if (current.name == name) {
             return current;
         }
     }
-    auto &inserted = typeArgs.emplace_back();
+    auto &inserted = typeParams.emplace_back();
     inserted.name = name;
     return inserted;
 }
@@ -1544,7 +1544,7 @@ ParsedSig::TypeParamSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
 const ParsedSig::TypeParamSpec emptyTypeArgSpec;
 
 const ParsedSig::TypeParamSpec &ParsedSig::findTypeArgByName(core::NameRef name) const {
-    for (auto &current : typeArgs) {
+    for (auto &current : typeParams) {
         if (current.name == name) {
             return current;
         }
