@@ -45,7 +45,6 @@ private:
     const parser::Prism::Parser& parser;
     std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> *commentsByNode;
 
-    pm_node_t *rewriteBegin(pm_node_t *node);
     pm_node_t *rewriteBody(pm_node_t *node);
     pm_node_t *rewriteNode(pm_node_t *node);
     void rewriteNodes(pm_node_list_t &nodes);

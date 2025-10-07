@@ -558,7 +558,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(const pm_node_t *methodD
         paramIndex++;
     }
 
-    // Build sig chain: self -> .type_parameters() -> .params(hash) -> .void()/.returns(Type)
+    // Build sig chain
     pm_node_t *sigReceiver = PMK::Self();
     if (!sigReceiver)
         return nullptr;

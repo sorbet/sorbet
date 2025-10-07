@@ -365,69 +365,48 @@ void SigsRewriterPrism::rewriteNodes(pm_node_list_t &nodes) {
     }
 }
 
-pm_node_t *SigsRewriterPrism::rewriteBegin(pm_node_t *node) {
-    if (!PM_NODE_TYPE_P(node, PM_BEGIN_NODE)) {
-        return node;
-    }
-
-    auto *begin = down_cast<pm_begin_node_t>(node);
-    if (begin->statements == nullptr) {
-        return node;
-    }
-
-    // TODO: Implement signature insertion logic for Prism
-    // This should follow the same pattern as the original rewriteBegin:
-    //
-    // 1. Save old statements
-    // 2. Clear the statements list
-    // 3. For each statement:
-    //    - Check if it's a signature target (method/attr/visibility)
-    //    - If yes, insert signatures before the statement
-    //    - Add the rewritten statement
-    //
-    // Original logic:
-    // auto oldStmts = move(begin->stmts);
-    // begin->stmts = parser::NodeVec();
-    // for (auto &stmt : oldStmts) {
-    //     if (auto target = signaturesTarget(stmt.get())) {
-    //         if (auto signatures = signaturesForNode(target)) {
-    //             for (auto &declaration : *signatures) {
-    //                 begin->stmts.emplace_back(move(declaration));
-    //             }
-    //         }
-    //     }
-    //     begin->stmts.emplace_back(rewriteNode(move(stmt)));
-    // }
-
-    // For now, just rewrite the existing statements
-    for (size_t i = 0; i < begin->statements->body.size; i++) {
-        begin->statements->body.nodes[i] = rewriteNode(begin->statements->body.nodes[i]);
-    }
-
-    return node;
-}
-
 pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
     if (node == nullptr) {
         return node;
     }
+    fmt::print("rewriting body: {}\n", PM_NODE_TYPE(node));
 
-    if (PM_NODE_TYPE_P(node, PM_BEGIN_NODE)) {
-        return rewriteBegin(node);
+    // Handle statements nodes (class/module bodies with multiple statements)
+    if (PM_NODE_TYPE_P(node, PM_STATEMENTS_NODE)) {
+        auto *statements = down_cast<pm_statements_node_t>(node);
+
+        // Save old statements
+        pm_node_list_t oldStmts = statements->body;
+        statements->body = (pm_node_list_t){.size = 0, .capacity = 0, .nodes = nullptr};
+
+        // For each statement, insert signatures before it if it's a signature target
+        for (size_t i = 0; i < oldStmts.size; i++) {
+            pm_node_t *stmt = oldStmts.nodes[i];
+
+            if (auto target = signaturesTargetForPrism(stmt)) {
+                if (auto signatures = signaturesForNode(target)) {
+                    // Add all signatures
+                    for (auto sig : *signatures) {
+                        pm_node_list_append(&statements->body, sig);
+                    }
+                }
+            }
+
+            // Add the rewritten statement
+            pm_node_list_append(&statements->body, rewriteNode(stmt));
+        }
+
+        // Free the old list structure (not the nodes themselves, as they were moved)
+        free(oldStmts.nodes);
+
+        return node;
     }
 
+    // Handle single node that is a signature target
     if (auto target = signaturesTargetForPrism(node)) {
-        auto comments = commentsForNode(target);
-        if (!comments.signatures.empty()) {
-            // TODO: For signature insertion, we need to create a new PM_BEGIN_NODE
-            // and insert signature nodes before the target node.
-            // This requires:
-            // 1. Creating signature parser nodes from RBS comments
-            // 2. Creating a new PM_BEGIN_NODE structure
-            // 3. Adding signatures + target node to the begin block
-            //
-            // For now, just return the node as-is until we implement
-            // the signature-to-parser-node translation and begin node creation
+        if (auto signatures = signaturesForNode(target)) {
+            // Wrap in a statements node with signatures + node
+            return createStatementsWithSignatures(rewriteNode(node), move(signatures));
         }
     }
 
@@ -486,21 +465,13 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
         return node;
     }
 
-    // Check if this node is a signature target and add signatures if needed
-    if (auto target = signaturesTargetForPrism(node)) {
-        if (auto signatures = signaturesForNode(target)) {
-            return createStatementsWithSignatures(node, std::move(signatures));
-        }
-    }
+    fmt::print("rewriting node: {}\n", PM_NODE_TYPE(node));
 
     switch (PM_NODE_TYPE(node)) {
         case PM_BLOCK_NODE: {
             auto *block = down_cast<pm_block_node_t>(node);
             block->body = rewriteBody(block->body);
             return node;
-        }
-        case PM_BEGIN_NODE: {
-            return rewriteBegin(node);
         }
         case PM_LOCAL_VARIABLE_WRITE_NODE: {
             auto *n = down_cast<pm_local_variable_write_node_t>(node);
@@ -669,7 +640,7 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
         }
         case PM_PROGRAM_NODE: {
             auto *program = down_cast<pm_program_node_t>(node);
-            rewriteNodes(program->statements->body);
+            rewriteBody(up_cast(program->statements));
             return node;
         }
         case PM_STATEMENTS_NODE: {

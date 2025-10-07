@@ -533,58 +533,18 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
             contextAllowingTypeAlias.pop_back();
             break;
         }
-        // case PM_CALL_NODE: {
-        //     auto *call = (pm_call_node_t *)node;
-        //     // Handle setter methods (foo.x=(y) or foo&.x=(y))
-        //     if (call->name.isSetter(ctx.state) && call->arguments != nullptr && call->arguments->arguments.size == 1)
-        //     {
-        //         // This is a `foo&.x=(y)` method, we treat it as a `x = y` assignment
-        //         associateAssertionCommentsToNode((pm_node_t *)call->arguments->arguments.nodes[0]);
-        //         walkNode(call->receiver);
-        //         consumeCommentsInsideNode(node, "call");
-        //         return;
-        //     }
+        case PM_CALL_NODE: {
+            // TODO: More handling from CommentsAssociator's send case
 
-        //     // TODO: Implement isVisibilitySend for Prism nodes
-        //     if (false) {
-        //         associateSignatureCommentsToNode(call);
-        //         consumeCommentsInsideNode(node, "call");
-        //         return;
-        //     }
+            auto *call = down_cast<pm_call_node_t>(node);
 
-        //     // TODO: Implement isAttrAccessorSend for Prism nodes
-        //     if (false) {
-        //         associateSignatureCommentsToNode(call);
-        //         associateAssertionCommentsToNode(call);
-        //         walkNode(call->receiver);
-        //         if (call->arguments != nullptr) {
-        //             walkNodes(call->arguments->arguments);
-        //         }
-        //         consumeCommentsInsideNode(node, "call");
-        //         return;
-        //     }
-
-        //     if (call->name == core::Names::squareBracketsEq() || call->name.isSetter(ctx.state)) {
-        //         // This is an assign through a send, either: `foo[key]=(y)` or `foo.x=(y)`
-        //         //
-        //         // Note: the parser groups the args on the right hand side of the assignment into an array node:
-        //         //  * for `foo.x = 1, 2` the args are `[1, 2]`
-        //         //  * for `foo[k1, k2] = 1, 2` the args are `[k1, k2, [1, 2]]`
-        //         //
-        //         // We always apply the cast starting from the last arg.
-        //         // TODO: Fix iterator access for Prism arguments
-        //         walkNode(call->receiver);
-        //         consumeCommentsInsideNode(node, "call");
-        //     } else {
-        //         associateAssertionCommentsToNode(call);
-        //         walkNode(call->receiver);
-        //         if (call->arguments != nullptr) {
-        //             walkNodes(call->arguments->arguments);
-        //         }
-        //         consumeCommentsInsideNode(node, "call");
-        //     }
-        // break;
-        // }
+            walkNode(call->block);
+            walkNode(call->receiver);
+            // if (call->arguments != nullptr) {
+            //     walkNodes(call->arguments->arguments);
+            // }
+            break;
+        }
         case PM_DEF_NODE: {
             auto *def = down_cast<pm_def_node_t>(node);
             auto defKeywordLoc = translateLocation(def->def_keyword_loc);
