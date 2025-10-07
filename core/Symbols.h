@@ -183,7 +183,7 @@ public:
     TypePtr resultType;
     ParametersStore parameters;
 
-    InlinedVector<TypeParameterRef, 4> &getOrCreateTypeArguments() {
+    InlinedVector<TypeParameterRef, 4> &getOrCreateTypeParameters() {
         if (typeArgs) {
             return *typeArgs;
         }

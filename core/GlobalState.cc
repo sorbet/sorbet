@@ -1328,7 +1328,7 @@ TypeParameterRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRe
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
 
-    owner.dataAllowingNone(*this)->getOrCreateTypeArguments().emplace_back(result);
+    owner.dataAllowingNone(*this)->getOrCreateTypeParameters().emplace_back(result);
     return result;
 }
 

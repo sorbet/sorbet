@@ -670,7 +670,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
 
     int typeParamsSize = p.getU4();
     if (typeParamsSize != 0) {
-        auto &vec = result.getOrCreateTypeArguments();
+        auto &vec = result.getOrCreateTypeParameters();
         for (int i = 0; i < typeParamsSize; i++) {
             vec.emplace_back(TypeParameterRef::fromRaw(p.getU4()));
         }
