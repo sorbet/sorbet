@@ -14,6 +14,7 @@ public:
     public:
         bool tryEnqueue(core::SymbolRef s);
         core::SymbolRef pop();
+        bool hasSymbols() const;
 
     private:
         std::deque<core::SymbolRef> symbols;
