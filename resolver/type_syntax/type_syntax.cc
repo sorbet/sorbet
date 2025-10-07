@@ -851,7 +851,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto fnd = sig.findTypeArgByName(arr->asSymbol());
+            auto fnd = sig.findTypeParamByName(arr->asSymbol());
             if (!fnd.type) {
                 if (args.allowUnspecifiedTypeParameter) {
                     // Return nullopt, which will indicate that we couldn't parse the sig at this time.
@@ -1543,7 +1543,7 @@ ParsedSig::TypeParamSpec &ParsedSig::enterTypeParamByName(core::NameRef name) {
 
 const ParsedSig::TypeParamSpec emptyTypeArgSpec;
 
-const ParsedSig::TypeParamSpec &ParsedSig::findTypeArgByName(core::NameRef name) const {
+const ParsedSig::TypeParamSpec &ParsedSig::findTypeParamByName(core::NameRef name) const {
     for (auto &current : typeParams) {
         if (current.name == name) {
             return current;

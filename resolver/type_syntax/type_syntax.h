@@ -45,7 +45,7 @@ struct ParsedSig {
     } seen;
 
     TypeParamSpec &enterTypeParamByName(core::NameRef name);
-    const TypeParamSpec &findTypeArgByName(core::NameRef name) const;
+    const TypeParamSpec &findTypeParamByName(core::NameRef name) const;
 };
 
 struct TypeSyntaxArgs {
