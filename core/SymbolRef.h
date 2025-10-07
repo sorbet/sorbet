@@ -459,7 +459,7 @@ public:
         return unsafeTableIndex();
     }
 
-    uint32_t typeArgumentIndex() const {
+    uint32_t typeParameterIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::TypeParameter);
         return unsafeTableIndex();
     }

@@ -337,7 +337,7 @@ bool SymbolRef::isSynthetic() const {
         case Kind::FieldOrStaticField:
             return fieldIndex() < Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS;
         case Kind::TypeParameter:
-            return typeArgumentIndex() < Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS;
+            return typeParameterIndex() < Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS;
         case Kind::TypeMember:
             return typeMemberIndex() < Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS;
     }
