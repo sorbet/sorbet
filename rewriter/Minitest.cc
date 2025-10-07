@@ -725,11 +725,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             itMethod = addSigVoid(ctx, move(itMethod));
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
 
-            // No need to create a subject method - the body now calls subject.attribute directly
+            // Create the class body containing the it method
             ast::ClassDef::RHS_store describeBody;
             describeBody.emplace_back(std::move(itMethod));
 
-            // Create describe block containing the subject and it methods
+            // Create the class with Self as ancestor
             ast::ClassDef::ANCESTORS_store ancestors;
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
 
