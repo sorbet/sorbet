@@ -288,7 +288,7 @@ class TypeParameter final {
     friend class GlobalState;
     friend class serialize::SerializerImpl;
 
-    // This is to allow updating `GlobalState::typeArguments` in place with a new type argument,
+    // This is to allow updating `GlobalState::typeParameters` in place with a new type argument,
     // over top of an existing method
     TypeParameter &operator=(TypeParameter &&) = default;
 

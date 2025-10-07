@@ -303,7 +303,7 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
     methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
     fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
-    typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+    typeParameters.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
     typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
     int namesByHashSize = nextPowerOfTwo(
@@ -958,8 +958,8 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(typeMembers.size() == Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS,
                      "Too many synthetic typeMember symbols? have: {} expected: {}", typeMembers.size(),
                      Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS);
-    ENFORCE_NO_TIMER(typeArguments.size() == Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS,
-                     "Too many synthetic typeArgument symbols? have: {} expected: {}", typeArguments.size(),
+    ENFORCE_NO_TIMER(typeParameters.size() == Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS,
+                     "Too many synthetic typeArgument symbols? have: {} expected: {}", typeParameters.size(),
                      Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS);
 
     installIntrinsics();
@@ -1040,14 +1040,14 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     classAndModules.reserve(classAndModulesSizeScaled);
     methods.reserve(methodsSizeScaled);
     fields.reserve(fieldsSizeScaled);
-    typeArguments.reserve(typeArgumentsSizeScaled);
+    typeParameters.reserve(typeArgumentsSizeScaled);
     typeMembers.reserve(typeMembersSizeScaled);
     expandNames(utf8NameSizeScaled, constantNameSizeScaled, uniqueNameSizeScaled);
     sanityCheck();
 
-    trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeArguments={} "
+    trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeParameters={} "
                       "typeMembers={} utf8Names={} constantNames={} uniqueNames={}",
-                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeArguments.capacity(),
+                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeParameters.capacity(),
                       typeMembers.capacity(), utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity()));
 }
 
@@ -1318,8 +1318,8 @@ TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameR
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto result = TypeParameterRef(*this, this->typeArguments.size());
-    this->typeArguments.emplace_back();
+    auto result = TypeParameterRef(*this, this->typeParameters.size());
+    this->typeParameters.emplace_back();
 
     TypeParameterData data = result.dataAllowingNone(*this);
     data->name = name;
@@ -1861,7 +1861,7 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE_NO_TIMER(fnd->second == what);
     ownerMembers.erase(fnd);
     for (const auto typeArgument : whatData->typeParameters()) {
-        this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
+        this->typeParameters[typeArgument.id()] = this->typeParameters[0].deepCopy(*this);
     }
     // This drops the existing core::Method, which drops the `ParamInfo`s the method owned.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
@@ -1919,7 +1919,7 @@ unsigned int GlobalState::fieldsUsed() const {
 }
 
 unsigned int GlobalState::typeParametersUsed() const {
-    return typeArguments.size();
+    return typeParameters.size();
 }
 
 unsigned int GlobalState::typeMembersUsed() const {
@@ -2042,7 +2042,7 @@ void GlobalState::sanityCheck() const {
         }
 
         i = -1;
-        for (auto &sym : typeArguments) {
+        for (auto &sym : typeParameters) {
             i++;
             if (i != 0) {
                 sym.sanityCheck(*this);
@@ -2183,9 +2183,9 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     for (auto &sym : this->fields) {
         result->fields.emplace_back(sym.deepCopy(*result));
     }
-    result->typeArguments.reserve(this->typeArguments.capacity());
-    for (auto &sym : this->typeArguments) {
-        result->typeArguments.emplace_back(sym.deepCopy(*result));
+    result->typeParameters.reserve(this->typeParameters.capacity());
+    for (auto &sym : this->typeParameters) {
+        result->typeParameters.emplace_back(sym.deepCopy(*result));
     }
     result->typeMembers.reserve(this->typeMembers.capacity());
     for (auto &sym : this->typeMembers) {
@@ -2261,7 +2261,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     result->classAndModules.reserve(this->classAndModules.capacity());
     result->methods.reserve(this->methods.capacity());
     result->fields.reserve(this->fields.capacity());
-    result->typeArguments.reserve(this->typeArguments.capacity());
+    result->typeParameters.reserve(this->typeParameters.capacity());
     result->typeMembers.reserve(this->typeMembers.capacity());
 
     if (packageDB().enabled()) {

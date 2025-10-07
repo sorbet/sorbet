@@ -400,7 +400,7 @@ private:
     std::vector<Method> methods;
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
-    std::vector<TypeParameter> typeArguments;
+    std::vector<TypeParameter> typeParameters;
     struct Bucket {
         unsigned int hash;
         uint32_t rawId;

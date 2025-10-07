@@ -202,7 +202,7 @@ MethodRef Method::ref(const GlobalState &gs) const {
 
 SymbolRef TypeParameter::ref(const GlobalState &gs) const {
     if (flags.isTypeParameter) {
-        uint32_t distance = this - gs.typeArguments.data();
+        uint32_t distance = this - gs.typeParameters.data();
         return TypeParameterRef(gs, distance);
     } else {
         ENFORCE_NO_TIMER(flags.isTypeMember);
@@ -314,18 +314,18 @@ TypeParameterData TypeMemberRef::dataAllowingNone(GlobalState &gs) const {
 TypeParameterData TypeParameterRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeParametersUsed());
-    return TypeParameterData(gs.typeArguments[_id], gs);
+    return TypeParameterData(gs.typeParameters[_id], gs);
 }
 
 ConstTypeParameterData TypeParameterRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.typeParametersUsed());
-    return ConstTypeParameterData(gs.typeArguments[_id], gs);
+    return ConstTypeParameterData(gs.typeParameters[_id], gs);
 }
 
 TypeParameterData TypeParameterRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.typeParametersUsed());
-    return TypeParameterData(gs.typeArguments[_id], gs);
+    return TypeParameterData(gs.typeParameters[_id], gs);
 }
 
 bool SymbolRef::isSynthetic() const {

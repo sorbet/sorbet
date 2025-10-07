@@ -908,8 +908,8 @@ void SerializerImpl::pickleSymbolTable(Pickler &p, const GlobalState &gs) {
         pickle(p, s);
     }
 
-    p.putU4(gs.typeArguments.size());
-    for (const TypeParameter &s : gs.typeArguments) {
+    p.putU4(gs.typeParameters.size());
+    for (const TypeParameter &s : gs.typeParameters) {
         pickle(p, s);
     }
 
@@ -923,7 +923,7 @@ void SerializerImpl::unpickleSymbolTable(UnPickler &p, GlobalState &result) {
     result.classAndModules.clear();
     result.methods.clear();
     result.fields.clear();
-    result.typeArguments.clear();
+    result.typeParameters.clear();
     result.typeMembers.clear();
 
     {
@@ -952,9 +952,9 @@ void SerializerImpl::unpickleSymbolTable(UnPickler &p, GlobalState &result) {
 
         int typeArgumentSize = p.getU4();
         ENFORCE_NO_TIMER(typeArgumentSize > 0);
-        result.typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
+        result.typeParameters.reserve(nextPowerOfTwo(typeArgumentSize));
         for (int i = 0; i < typeArgumentSize; i++) {
-            result.typeArguments.emplace_back(unpickleTypeParameter(p, &result));
+            result.typeParameters.emplace_back(unpickleTypeParameter(p, &result));
         }
 
         int typeMemberSize = p.getU4();
