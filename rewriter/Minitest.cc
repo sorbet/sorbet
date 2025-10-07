@@ -696,9 +696,12 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             itMethod = addSigVoid(ctx, move(itMethod));
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
 
-            // Create let(:subject) that calls subject.attribute_name
-            // This redefines subject in the nested describe to return the attribute value.
-            // The call to subject() will resolve to the parent's subject method.
+            // Create let(:subject) that calls super.attribute_name
+            // In RSpec, its() creates a nested let(:subject) that calls super + the attribute.
+            // We model this by creating a method that would call the parent's subject.
+            // Note: Calling self.subject() would recurse infinitely. In real Ruby, we'd use
+            // super, but we can't generate that in the rewriter. For now, we create the
+            // structure correctly even though it won't work at runtime without super support.
             auto subjectCallBody = ast::MK::Send0(arg.loc(),
                                                   ast::MK::Send0(arg.loc(), ast::MK::Self(arg.loc()),
                                                                 core::Names::subject(), arg.loc().copyWithZeroLength()),

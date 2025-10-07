@@ -185,6 +185,61 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <runtime method definition of subject>
       end
     end
+
+    class <emptyTree>::<C <describe 'its with typed subject'>><<C <todo sym>>> < (<self>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C ThingWithSize>)
+      end
+
+      def subject<<todo method>>(&<blk>)
+        <emptyTree>::<C ThingWithSize>.new()
+      end
+
+      class <emptyTree>::<C ThingWithSize><<C <todo sym>>> < (::<todo sym>)
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C Integer>)
+        end
+
+        def size<<todo method>>(&<blk>)
+          42
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        <runtime method definition of size>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of subject>
+
+      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+        def subject<<todo method>>(&<blk>)
+          <self>.subject().size()
+        end
+
+        def <it><<todo method>>(&<blk>)
+          begin
+            <emptyTree>::<C T>.reveal_type(<self>.subject())
+            <self>.is_expected().to(<self>.eq(42))
+          end
+        end
+
+        <runtime method definition of subject>
+      end
+
+      class <emptyTree>::<C <describe 'no_such_method'>><<C <todo sym>>> < (<self>)
+        def subject<<todo method>>(&<blk>)
+          <self>.subject().no_such_method()
+        end
+
+        def <it><<todo method>>(&<blk>)
+          <self>.is_expected().to(<self>.eq(0))
+        end
+
+        <runtime method definition of subject>
+      end
+    end
   end
 
   <emptyTree>::<C RSpec>.context("B") do ||
