@@ -388,7 +388,7 @@ string SymbolRef::show(const GlobalState &gs, ShowOptions options) const {
         case Kind::FieldOrStaticField:
             return asFieldRef().show(gs, options);
         case Kind::TypeParameter:
-            return asTypeArgumentRef().show(gs, options);
+            return asTypeParameterRef().show(gs, options);
         case Kind::TypeMember:
             return asTypeMemberRef().show(gs, options);
     }
@@ -1100,7 +1100,7 @@ string SymbolRef::showFullName(const GlobalState &gs) const {
         case Kind::FieldOrStaticField:
             return asFieldRef().showFullName(gs);
         case Kind::TypeParameter:
-            return asTypeArgumentRef().showFullName(gs);
+            return asTypeParameterRef().showFullName(gs);
         case Kind::TypeMember:
             return asTypeMemberRef().showFullName(gs);
     }
@@ -1140,7 +1140,7 @@ string SymbolRef::toStringFullName(const GlobalState &gs) const {
         case Kind::FieldOrStaticField:
             return asFieldRef().toStringFullName(gs);
         case Kind::TypeParameter:
-            return asTypeArgumentRef().toStringFullName(gs);
+            return asTypeParameterRef().toStringFullName(gs);
         case Kind::TypeMember:
             return asTypeMemberRef().toStringFullName(gs);
     }
@@ -1223,7 +1223,7 @@ string_view SymbolRef::showKind(const GlobalState &gs) const {
         case Kind::Method:
             return asMethodRef().showKind(gs);
         case Kind::TypeParameter:
-            return asTypeArgumentRef().showKind(gs);
+            return asTypeParameterRef().showKind(gs);
         case Kind::TypeMember:
             return asTypeMemberRef().showKind(gs);
     }
@@ -1492,7 +1492,7 @@ string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().toStringWithOptions(gs, tabs, showFull, showRaw);
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+            return asTypeParameterRef().toStringWithOptions(gs, tabs, showFull, showRaw);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().toStringWithOptions(gs, tabs, showFull, showRaw);
     }
@@ -1507,7 +1507,7 @@ NameRef SymbolRef::name(const GlobalState &gs) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->name;
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->name;
+            return asTypeParameterRef().data(gs)->name;
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->name;
     }
@@ -1522,7 +1522,7 @@ SymbolRef SymbolRef::owner(const GlobalState &gs) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->owner;
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->owner;
+            return asTypeParameterRef().data(gs)->owner;
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->owner;
     }
@@ -1537,7 +1537,7 @@ Loc SymbolRef::loc(const GlobalState &gs) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->loc();
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->loc();
+            return asTypeParameterRef().data(gs)->loc();
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->loc();
     }
@@ -1552,7 +1552,7 @@ bool SymbolRef::isPrintable(const GlobalState &gs) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->isPrintable(gs);
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->isPrintable(gs);
+            return asTypeParameterRef().data(gs)->isPrintable(gs);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->isPrintable(gs);
     }
@@ -1567,7 +1567,7 @@ absl::Span<const Loc> SymbolRef::locs(const GlobalState &gs) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->locs();
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->locs();
+            return asTypeParameterRef().data(gs)->locs();
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->locs();
     }
@@ -1582,7 +1582,7 @@ void SymbolRef::removeLocsForFile(GlobalState &gs, core::FileRef file) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->removeLocsForFile(file);
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->removeLocsForFile(file);
+            return asTypeParameterRef().data(gs)->removeLocsForFile(file);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->removeLocsForFile(file);
     }
@@ -1597,7 +1597,7 @@ const TypePtr &SymbolRef::resultType(const GlobalState &gs) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->resultType;
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->resultType;
+            return asTypeParameterRef().data(gs)->resultType;
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->resultType;
     }
@@ -1615,7 +1615,7 @@ void SymbolRef::setResultType(GlobalState &gs, const TypePtr &typePtr) const {
             asFieldRef().data(gs)->resultType = typePtr;
             return;
         case SymbolRef::Kind::TypeParameter:
-            asTypeArgumentRef().data(gs)->resultType = typePtr;
+            asTypeParameterRef().data(gs)->resultType = typePtr;
             return;
         case SymbolRef::Kind::TypeMember:
             asTypeMemberRef().data(gs)->resultType = typePtr;
@@ -1632,7 +1632,7 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
         case SymbolRef::Kind::FieldOrStaticField:
             return asFieldRef().data(gs)->dealias(gs);
         case SymbolRef::Kind::TypeParameter:
-            return asTypeArgumentRef().data(gs)->dealias(gs);
+            return asTypeParameterRef().data(gs)->dealias(gs);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->dealias(gs);
     }
@@ -2324,7 +2324,7 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
             break;
         case SymbolRef::Kind::TypeParameter:
             // Typeargs are owned by methods.
-            result = asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+            result = asTypeParameterRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
             break;
         case SymbolRef::Kind::TypeMember:
             // TypeMembers are only owned by classes or modules.

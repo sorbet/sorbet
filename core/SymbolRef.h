@@ -521,7 +521,7 @@ public:
         return TypeMemberRef::fromRaw(unsafeTableIndex());
     }
 
-    TypeParameterRef asTypeArgumentRef() const {
+    TypeParameterRef asTypeParameterRef() const {
         ENFORCE_NO_TIMER(kind() == Kind::TypeParameter);
         return TypeParameterRef::fromRaw(unsafeTableIndex());
     }

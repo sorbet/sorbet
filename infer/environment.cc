@@ -1281,7 +1281,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     tp.origins.emplace_back(sym.data(ctx)->loc());
                     tp.type = core::make_type<core::MetaType>(sym.data(ctx)->resultType);
                 } else if (symbol.isTypeParameter()) {
-                    auto sym = symbol.asTypeArgumentRef();
+                    auto sym = symbol.asTypeParameterRef();
                     ENFORCE(sym.data(ctx)->resultType != nullptr);
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
 
