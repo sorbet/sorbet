@@ -1197,7 +1197,7 @@ bool Method::isPrintable(const GlobalState &gs) const {
         return true;
     }
 
-    for (auto typeParam : this->typeArguments()) {
+    for (auto typeParam : this->typeParameters()) {
         if (typeParam.data(gs)->isPrintable(gs)) {
             return true;
         }
@@ -1374,7 +1374,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     }
 
     InlinedVector<TypeParameterRef, 4> typeMembers;
-    typeMembers.assign(sym->typeArguments().begin(), sym->typeArguments().end());
+    typeMembers.assign(sym->typeParameters().begin(), sym->typeParameters().end());
     auto it = remove_if(typeMembers.begin(), typeMembers.end(),
                         [&gs](auto &sym) -> bool { return sym.data(gs)->flags.isFixed; });
     typeMembers.erase(it, typeMembers.end());
@@ -1397,7 +1397,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
     fmt::format_to(std::back_inserter(buf), "\n");
-    for (auto ta : sym->typeArguments()) {
+    for (auto ta : sym->typeParameters()) {
         ENFORCE_NO_TIMER(ta.exists());
 
         if (!showFull && !ta.data(gs)->isPrintable(gs)) {
@@ -2236,7 +2236,7 @@ void Method::sanityCheck(const GlobalState &gs) const {
     MethodRef current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
 
     ENFORCE_NO_TIMER(current == current2);
-    for (auto &tp : typeArguments()) {
+    for (auto &tp : typeParameters()) {
         ENFORCE_NO_TIMER(tp.data(gs)->name.exists(), "{} has a member symbol without a name", name.toString(gs));
         ENFORCE_NO_TIMER(tp.exists(), "{}.{} corresponds to a core::Symbols::noTypeArgument()", name.toString(gs),
                          tp.data(gs)->name.toString(gs));
@@ -2440,7 +2440,7 @@ uint32_t Method::hash(const GlobalState &gs) const {
         }
         result = mix(result, type.hash(gs));
     }
-    for (const auto &e : typeArguments()) {
+    for (const auto &e : typeParameters()) {
         if (e.exists()) {
             result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }

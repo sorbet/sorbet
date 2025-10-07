@@ -191,7 +191,7 @@ public:
         return *typeParams;
     }
 
-    absl::Span<const TypeParameterRef> typeArguments() const {
+    absl::Span<const TypeParameterRef> typeParameters() const {
         if (typeParams) {
             return *typeParams;
         }

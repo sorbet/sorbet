@@ -1892,7 +1892,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // Also, if we're in a field assign like `@x = ...`, don't use typeArguments, fields are
         // technically in class scope, not method scope.
         if (job.owner.isMethod() && !job.inFieldAssign) {
-            for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeArguments()) {
+            for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeParameters()) {
                 const auto &data = typeArg.data(gs);
                 auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
                 auto typeArgLoc = data->loc();

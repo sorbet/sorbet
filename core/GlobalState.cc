@@ -1303,7 +1303,7 @@ TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameR
 
     auto ownerScope = owner.dataAllowingNone(*this);
 
-    for (auto typeArg : ownerScope->typeArguments()) {
+    for (auto typeArg : ownerScope->typeParameters()) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE_NO_TIMER(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
             if (!symbolTableFrozen) {
@@ -1860,7 +1860,7 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE_NO_TIMER(fnd != ownerMembers.end());
     ENFORCE_NO_TIMER(fnd->second == what);
     ownerMembers.erase(fnd);
-    for (const auto typeArgument : whatData->typeArguments()) {
+    for (const auto typeArgument : whatData->typeParameters()) {
         this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
     }
     // This drops the existing core::Method, which drops the `ParamInfo`s the method owned.

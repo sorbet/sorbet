@@ -282,8 +282,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
     auto *constr = &core::TypeConstraint::EmptyFrozenConstraint;
     if (method.data(ctx)->flags.isGenericMethod) {
         ENFORCE(superMethod.data(ctx)->flags.isGenericMethod);
-        const auto &methodTypeArguments = method.data(ctx)->typeArguments();
-        const auto &superMethodTypeArguments = superMethod.data(ctx)->typeArguments();
+        const auto &methodTypeArguments = method.data(ctx)->typeParameters();
+        const auto &superMethodTypeArguments = superMethod.data(ctx)->typeParameters();
         if (methodTypeArguments.size() != superMethodTypeArguments.size()) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",

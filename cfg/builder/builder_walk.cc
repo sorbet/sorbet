@@ -165,7 +165,7 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     }
 
     core::TypeParameterRef typeParam;
-    for (const auto &it : method.data(ctx)->typeArguments()) {
+    for (const auto &it : method.data(ctx)->typeParameters()) {
         if (it.data(ctx)->name == typeVarName) {
             typeParam = it;
         }

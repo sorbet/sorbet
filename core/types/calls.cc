@@ -473,7 +473,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         // `T::Array[T.type_parameter(:U)]` based on whether the argument is `String`--in that case,
         // it doesn't matter what the `T.type_parameter(:U)` is, because `String` is not an `Array`.
         auto constr = make_unique<TypeConstraint>();
-        for (auto typeArgument : candidate.data(gs)->typeArguments()) {
+        for (auto typeArgument : candidate.data(gs)->typeParameters()) {
             constr->rememberIsSubtype(gs, typeArgument.data(gs)->resultType, Types::untypedUntracked());
         }
         if (!constr->solve(gs)) {
@@ -1017,7 +1017,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (methodData->flags.isGenericMethod) {
-        constr->defineDomain(gs, methodData->typeArguments());
+        constr->defineDomain(gs, methodData->typeParameters());
     }
     auto posArgs = args.numPosArgs;
     bool hasKwparams = absl::c_any_of(methodData->parameters, [](const auto &param) { return param.flags.isKeyword; });

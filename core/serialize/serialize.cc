@@ -640,8 +640,8 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     p.putU4(what.name.rawId());
     p.putU4(what.rebind.id());
     p.putU4(what.flags.serialize());
-    p.putU4(what.typeArguments().size());
-    for (auto s : what.typeArguments()) {
+    p.putU4(what.typeParameters().size());
+    for (auto s : what.typeParameters()) {
         p.putU4(s.id());
     }
     p.putU4(what.parameters.size());

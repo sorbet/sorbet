@@ -73,9 +73,9 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
         flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
     string typeParamString = "";
-    if (!sym->typeArguments().empty()) {
+    if (!sym->typeParameters().empty()) {
         typeParamString =
-            fmt::format("type_parameters({}).", fmt::map_join(sym->typeArguments(), ", ", [&](const auto &typeParam) {
+            fmt::format("type_parameters({}).", fmt::map_join(sym->typeParameters(), ", ", [&](const auto &typeParam) {
                             return typeParam.data(gs)->name.showAsSymbolLiteral(gs);
                         }));
     }
@@ -88,9 +88,9 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (oneline <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
         return fmt::format("{} {{ {}{}{}{} }}", sigCall, flagString, typeParamString, paramsString, methodReturnType);
     }
-    if (!sym->typeArguments().empty()) {
+    if (!sym->typeParameters().empty()) {
         typeParamString = fmt::format("type_parameters({})\n  .",
-                                      fmt::map_join(sym->typeArguments(), ", ", [&](const auto &typeParam) {
+                                      fmt::map_join(sym->typeParameters(), ", ", [&](const auto &typeParam) {
                                           return typeParam.data(gs)->name.showAsSymbolLiteral(gs);
                                       }));
     }
