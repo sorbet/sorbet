@@ -97,8 +97,7 @@ private:
     core::NameRef attributeName;
 
 public:
-    IsExpectedTransformer(core::NameRef attributeName)
-        : attributeName(attributeName) {}
+    IsExpectedTransformer(core::NameRef attributeName) : attributeName(attributeName) {}
 
     ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
@@ -108,8 +107,8 @@ public:
             // Replace is_expected with expect(subject.attribute)
             auto subjectCall = ast::MK::Send0(send.loc, ast::MK::Self(send.loc), core::Names::subject(),
                                               send.loc.copyWithZeroLength());
-            auto attributeCall = ast::MK::Send0(send.loc, std::move(subjectCall), attributeName,
-                                                send.loc.copyWithZeroLength());
+            auto attributeCall =
+                ast::MK::Send0(send.loc, std::move(subjectCall), attributeName, send.loc.copyWithZeroLength());
             return ast::MK::Send1(send.loc, ast::MK::Self(send.loc), core::Names::expect(),
                                   send.loc.copyWithZeroLength(), std::move(attributeCall));
         }
@@ -725,11 +724,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             itMethod = addSigVoid(ctx, move(itMethod));
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
 
-            // Create the class body containing the it method
             ast::ClassDef::RHS_store describeBody;
             describeBody.emplace_back(std::move(itMethod));
 
-            // Create the class with Self as ancestor
             ast::ClassDef::ANCESTORS_store ancestors;
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
 
