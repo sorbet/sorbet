@@ -1024,7 +1024,7 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     uint32_t classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
     uint32_t methodsSizeScaled = nextPowerOfTwo(methodsSize);
     uint32_t fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
-    uint32_t typeArgumentsSizeScaled = nextPowerOfTwo(typeParametersSize);
+    uint32_t typeParametersSizeScaled = nextPowerOfTwo(typeParametersSize);
     uint32_t typeMembersSizeScaled = nextPowerOfTwo(typeMembersSize);
     uint32_t utf8NameSizeScaled = nextPowerOfTwo(utf8NameSize);
     uint32_t constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
@@ -1040,7 +1040,7 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     classAndModules.reserve(classAndModulesSizeScaled);
     methods.reserve(methodsSizeScaled);
     fields.reserve(fieldsSizeScaled);
-    typeParameters.reserve(typeArgumentsSizeScaled);
+    typeParameters.reserve(typeParametersSizeScaled);
     typeMembers.reserve(typeMembersSizeScaled);
     expandNames(utf8NameSizeScaled, constantNameSizeScaled, uniqueNameSizeScaled);
     sanityCheck();
