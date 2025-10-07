@@ -88,9 +88,11 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
     const auto &subSelfTypeArgs = subOwner.data(ctx)->selfTypeArgs(ctx);
 
     auto subType = core::Types::approximateTypeVars(ctx, sub, constr);
-    subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs);
+    subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs,
+                                                core::Types::selfTypeAsSelfTypeParam());
     auto superType = core::Types::approximateTypeVars(ctx, super, constr);
-    superType = core::Types::resultTypeAsSeenFrom(ctx, superType, superOwner, subOwner, subSelfTypeArgs);
+    superType = core::Types::resultTypeAsSeenFrom(ctx, superType, superOwner, subOwner, subSelfTypeArgs,
+                                                  core::Types::selfTypeAsSelfTypeParam());
 
     switch (polarity) {
         case core::Polarity::Negative:

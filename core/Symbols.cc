@@ -26,7 +26,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 51;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 70;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 71;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -105,11 +105,12 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
 }
 TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
     // todo: in dotty it made sense to cache those.
-    if (typeMembers().empty()) {
-        return externalType();
-    } else {
-        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
-    }
+    // if (typeMembers().empty()) {
+    //    return externalType();
+    //} else {
+    //    return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+    //}
+    return Types::selfTypeAsSelfTypeParam();
 }
 
 // ClassOrModule::resultType is computed by unsafeComputeExternalType,
@@ -455,7 +456,9 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
 TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner.asMethodRef();
     auto klass = owner.enclosingClass(ctx);
-    auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
+    // TODO(jez) It might make sense to make a "resultTypeAsSeenFromSelf" helper that cuts some of this verbosity
+    auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx),
+                                                    Types::selfTypeAsSelfTypeParam());
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(owner);
     }

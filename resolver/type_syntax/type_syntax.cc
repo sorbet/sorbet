@@ -950,7 +950,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             if (args.allowSelfType) {
-                return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
+                return TypeSyntax::ResultType{core::Types::selfTypeAsSelfTypeParam(), core::Symbols::noClassOrModule()};
             }
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level `{}` is supported", "T.self_type");
@@ -1486,6 +1486,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         }
         result.type = core::Types::untypedUntracked();
     } else if (ast::isa_tree<ast::Self>(expr)) {
+        // TODO(jez) What's up with this use of selfType--probably don't want to parse to a LambdaParam
         result.type = ctxOwnerData->selfType(ctx);
     } else if (ast::isa_tree<ast::Literal>(expr)) {
         const auto &lit = ast::cast_tree_nonnull<ast::Literal>(expr);
