@@ -246,7 +246,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
 
                 auto name = c->asSymbol();
-                auto &typeArgSpec = sig.enterTypeArgByName(name);
+                auto &typeArgSpec = sig.enterTypeParamByName(name);
                 if (typeArgSpec.type) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig", name.show(ctx));
@@ -1530,7 +1530,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParams(core::Co
 
 } // namespace
 
-ParsedSig::TypeParamSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
+ParsedSig::TypeParamSpec &ParsedSig::enterTypeParamByName(core::NameRef name) {
     for (auto &current : typeParams) {
         if (current.name == name) {
             return current;

@@ -44,7 +44,7 @@ struct ParsedSig {
         core::LocOffsets incompatibleOverrideVisibility = core::LocOffsets::none();
     } seen;
 
-    TypeParamSpec &enterTypeArgByName(core::NameRef name);
+    TypeParamSpec &enterTypeParamByName(core::NameRef name);
     const TypeParamSpec &findTypeArgByName(core::NameRef name) const;
 };
 
