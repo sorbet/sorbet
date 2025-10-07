@@ -91,6 +91,33 @@ public:
     }
 };
 
+// Transforms is_expected calls to expect(subject.attribute) for RSpec's `its` DSL
+class IsExpectedTransformer {
+private:
+    core::NameRef attributeName;
+
+public:
+    IsExpectedTransformer(core::NameRef attributeName)
+        : attributeName(attributeName) {}
+
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+
+        // Look for is_expected calls
+        if (send.fun == core::Names::isExpected() && send.recv.isSelfReference()) {
+            // Replace is_expected with expect(subject.attribute)
+            auto subjectCall = ast::MK::Send0(send.loc, ast::MK::Self(send.loc), core::Names::subject(),
+                                              send.loc.copyWithZeroLength());
+            auto attributeCall = ast::MK::Send0(send.loc, std::move(subjectCall), attributeName,
+                                                send.loc.copyWithZeroLength());
+            return ast::MK::Send1(send.loc, ast::MK::Self(send.loc), core::Names::expect(),
+                                  send.loc.copyWithZeroLength(), std::move(attributeCall));
+        }
+
+        return tree;
+    }
+};
+
 ast::ExpressionPtr addSigVoid(core::Context ctx, ast::ExpressionPtr expr) {
     if (ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict) {
         // Only add a dummy sig if it would be required (because the file is `# typed: strict`).
@@ -681,32 +708,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
 
             // Transform the its block body to replace is_expected with expect(subject.attribute)
-            class IsExpectedTransformer {
-            private:
-                core::NameRef attributeName;
-
-            public:
-                IsExpectedTransformer(core::NameRef attributeName)
-                    : attributeName(attributeName) {}
-
-                ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
-                    auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-
-                    // Look for is_expected calls
-                    if (send.fun == core::Names::isExpected() && send.recv.isSelfReference()) {
-                        // Replace is_expected with expect(subject.attribute)
-                        auto subjectCall = ast::MK::Send0(send.loc, ast::MK::Self(send.loc), core::Names::subject(),
-                                                          send.loc.copyWithZeroLength());
-                        auto attributeCall = ast::MK::Send0(send.loc, std::move(subjectCall), attributeName,
-                                                            send.loc.copyWithZeroLength());
-                        return ast::MK::Send1(send.loc, ast::MK::Self(send.loc), core::Names::expect(),
-                                              send.loc.copyWithZeroLength(), std::move(attributeCall));
-                    }
-
-                    return tree;
-                }
-            };
-
             IsExpectedTransformer transformer(attributeName);
             ast::ExpressionPtr itBody = ast::TreeMap::apply(ctx, transformer, move(block->body));
 
