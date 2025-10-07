@@ -958,9 +958,9 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(typeMembers.size() == Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS,
                      "Too many synthetic typeMember symbols? have: {} expected: {}", typeMembers.size(),
                      Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS);
-    ENFORCE_NO_TIMER(typeParameters.size() == Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS,
+    ENFORCE_NO_TIMER(typeParameters.size() == Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS,
                      "Too many synthetic typeArgument symbols? have: {} expected: {}", typeParameters.size(),
-                     Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS);
+                     Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS);
 
     installIntrinsics();
     computeLinearization();

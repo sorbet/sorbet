@@ -25,7 +25,7 @@ using namespace std;
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 51;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
-const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 6;
+const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 70;
 
 namespace {
@@ -337,7 +337,7 @@ bool SymbolRef::isSynthetic() const {
         case Kind::FieldOrStaticField:
             return fieldIndex() < Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS;
         case Kind::TypeParameter:
-            return typeArgumentIndex() < Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS;
+            return typeArgumentIndex() < Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS;
         case Kind::TypeMember:
             return typeMemberIndex() < Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS;
     }
@@ -2289,7 +2289,7 @@ void TypeParameter::sanityCheck(const GlobalState &gs) const {
                 break;
             case SymbolRef::Kind::TypeParameter:
                 current2 = const_cast<GlobalState &>(gs).enterTypeParameter(this->loc(), this->owner.asMethodRef(),
-                                                                           this->name, this->variance());
+                                                                            this->name, this->variance());
                 break;
             case SymbolRef::Kind::TypeMember:
                 current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner.asClassOrModuleRef(),

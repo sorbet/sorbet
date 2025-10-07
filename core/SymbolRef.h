@@ -1189,7 +1189,7 @@ public:
     static const int MAX_SYNTHETIC_CLASS_SYMBOLS;
     static const int MAX_SYNTHETIC_METHOD_SYMBOLS;
     static const int MAX_SYNTHETIC_FIELD_SYMBOLS;
-    static const int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS;
+    static const int MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS;
     static const int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS;
 };
 
