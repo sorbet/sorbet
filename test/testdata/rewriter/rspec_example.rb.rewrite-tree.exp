@@ -187,6 +187,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
         def <it><<todo method>>(&<blk>)
+          begin
+            ::Module.const_set(:X, 1)
+            <self>.expect(<self>.subject().size()).to(<self>.eq(<emptyTree>::<C X>))
+          end
+        end
+
+        begin
+          <emptyTree>::<C X> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          <emptyTree>
+        end
+      end
+
+      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
           <emptyTree>::<C T>.reveal_type(<self>)
         end
       end
