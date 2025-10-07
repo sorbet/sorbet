@@ -3327,7 +3327,7 @@ private:
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
                     auto sym =
-                        ctx.state.enterTypeArgument(ctx.locAt(typeSpec.loc), method, name, core::Variance::CoVariant);
+                        ctx.state.enterTypeParameter(ctx.locAt(typeSpec.loc), method, name, core::Variance::CoVariant);
                     auto asTypeVar = core::cast_type<core::TypeVar>(typeSpec.type);
                     ENFORCE(asTypeVar != nullptr);
                     asTypeVar->sym = sym;

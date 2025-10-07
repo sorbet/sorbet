@@ -335,7 +335,7 @@ void GlobalState::initEmpty() {
     FieldRef field = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE_NO_TIMER(field == Symbols::noField());
     TypeParameterRef typeArgument =
-        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
+        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::noTypeArgument());
     TypeMemberRef typeMember =
         enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
@@ -473,13 +473,13 @@ void GlobalState::initEmpty() {
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
     typeArgument =
-        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
+        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::todoTypeArgument());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
     method =
         enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder());
-    typeArgument = enterTypeArgument(
+    typeArgument = enterTypeParameter(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredReturnType(), 1),
         core::Variance::ContraVariant);
@@ -487,7 +487,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(
         typeArgument ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
-    typeArgument = enterTypeArgument(
+    typeArgument = enterTypeParameter(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredArgumentType(), 1),
         core::Variance::CoVariant);
@@ -657,7 +657,7 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::Kernel(), Names::lambda()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_lambda());
 
-    typeArgument = enterTypeArgument(Loc::none(), Symbols::Kernel_lambda(), Names::returnType(), Variance::CoVariant);
+    typeArgument = enterTypeParameter(Loc::none(), Symbols::Kernel_lambda(), Names::returnType(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_lambda_returnType());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
 
@@ -678,7 +678,7 @@ void GlobalState::initEmpty() {
             .build();
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
 
-    typeArgument = enterTypeArgument(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
+    typeArgument = enterTypeParameter(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_proc_returnType());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
 
@@ -1285,7 +1285,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     return result;
 }
 
-TypeParameterRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
+TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance) {
     ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeArgument() ||
                      name == Names::Constants::TodoTypeArgument());
     ENFORCE_NO_TIMER(name.exists());

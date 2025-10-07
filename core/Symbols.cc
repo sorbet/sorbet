@@ -2288,7 +2288,7 @@ void TypeParameter::sanityCheck(const GlobalState &gs) const {
                 ENFORCE(false, "Should not happen");
                 break;
             case SymbolRef::Kind::TypeArgument:
-                current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner.asMethodRef(),
+                current2 = const_cast<GlobalState &>(gs).enterTypeParameter(this->loc(), this->owner.asMethodRef(),
                                                                            this->name, this->variance());
                 break;
             case SymbolRef::Kind::TypeMember:
