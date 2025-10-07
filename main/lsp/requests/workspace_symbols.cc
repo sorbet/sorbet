@@ -52,7 +52,7 @@ private:
                 return methodMatches[ref.methodIndex()];
             case core::SymbolRef::Kind::FieldOrStaticField:
                 return fieldMatches[ref.fieldIndex()];
-            case core::SymbolRef::Kind::TypeArgument:
+            case core::SymbolRef::Kind::TypeParameter:
                 return typeArgumentMatches[ref.typeArgumentIndex()];
             case core::SymbolRef::Kind::TypeMember:
                 return typeMemberMatches[ref.typeMemberIndex()];

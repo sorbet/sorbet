@@ -432,7 +432,7 @@ public:
     }
 
     inline bool isTypeArgument() const {
-        return kind() == Kind::TypeArgument;
+        return kind() == Kind::TypeParameter;
     }
 
     inline bool isTypeMember() const {
@@ -460,7 +460,7 @@ public:
     }
 
     uint32_t typeArgumentIndex() const {
-        ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
+        ENFORCE_NO_TIMER(kind() == Kind::TypeParameter);
         return unsafeTableIndex();
     }
 
@@ -522,7 +522,7 @@ public:
     }
 
     TypeParameterRef asTypeArgumentRef() const {
-        ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
+        ENFORCE_NO_TIMER(kind() == Kind::TypeParameter);
         return TypeParameterRef::fromRaw(unsafeTableIndex());
     }
 

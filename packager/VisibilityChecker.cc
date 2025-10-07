@@ -156,7 +156,7 @@ class PropagateVisibility final {
 
             case core::SymbolRef::Kind::TypeMember:
             case core::SymbolRef::Kind::Method:
-            case core::SymbolRef::Kind::TypeArgument:
+            case core::SymbolRef::Kind::TypeParameter:
                 break;
         }
     }
@@ -332,7 +332,7 @@ public:
                 kind = "method"sv;
                 break;
             }
-            case core::SymbolRef::Kind::TypeArgument: {
+            case core::SymbolRef::Kind::TypeParameter: {
                 kind = "type argument"sv;
                 break;
             }

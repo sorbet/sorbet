@@ -734,7 +734,7 @@ private:
                 // Consider adding a test and removing this assertion if it fires
                 ENFORCE(false, "Should not call prettySymbolKind on method in namer")
                 return "method";
-            case core::SymbolRef::Kind::TypeArgument:
+            case core::SymbolRef::Kind::TypeParameter:
                 // Consider adding a test and removing this assertion if it fires
                 ENFORCE(false, "Should not call prettySymbolKind on type arguument in namer");
                 return "type argument";
@@ -1505,7 +1505,7 @@ private:
                         ctx.state.deleteTypeMemberSymbol(oldSymbol.asTypeMemberRef());
                         break;
                     case core::SymbolRef::Kind::ClassOrModule:
-                    case core::SymbolRef::Kind::TypeArgument:
+                    case core::SymbolRef::Kind::TypeParameter:
                         ENFORCE(false);
                         break;
                 }
