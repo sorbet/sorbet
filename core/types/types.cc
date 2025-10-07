@@ -682,7 +682,11 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);
 
-    return instantiate(gs, what, currentAlignment, targs);
+    auto result = what._instantiateLambdaParams(gs, currentAlignment, targs);
+    if (result != nullptr) {
+        return result;
+    }
+    return what;
 }
 
 TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType) {
@@ -717,7 +721,8 @@ bool AliasType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const
 }
 
 bool TypeVar::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
+    Exception::raise("should never happen. You're missing a call to either Types::approximateTypeVars or "
+                     "Types::instantiateTypeVars");
 }
 
 MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {

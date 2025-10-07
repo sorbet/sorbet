@@ -460,7 +460,7 @@ TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeCo
         instantiated = core::Types::untyped(owner);
     }
     if (owner.data(ctx)->flags.isGenericMethod) {
-        instantiated = core::Types::instantiate(ctx, instantiated, constr);
+        instantiated = core::Types::instantiateTypeVars(ctx, instantiated, constr);
     } else {
         // You might expect us to instantiate with the constr to be null for a non-generic method,
         // but you might have the constraint that is used to guess return type of

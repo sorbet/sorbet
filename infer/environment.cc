@@ -1294,7 +1294,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         // instantiate requires a frozen constraint, but the constraint might not be
                         // frozen when we're running in guessTypes mode (and we never guess types if
                         // the method is already generic).
-                        instantiated = core::Types::instantiate(ctx, instantiated, constr);
+                        instantiated = core::Types::instantiateTypeVars(ctx, instantiated, constr);
                     }
                     tp.type = core::make_type<core::MetaType>(instantiated);
                 } else {
@@ -1317,7 +1317,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                         type = core::Types::untypedUntracked();
                     } else {
-                        type = core::Types::instantiate(ctx, main.returnTypeBeforeSolve, *main.constr);
+                        type = core::Types::instantiateTypeVars(ctx, main.returnTypeBeforeSolve, *main.constr);
                     }
                     // Write back into the DispatchResult so that retained results affect LSP queries.
                     // (Note that the SendResponse has already been pushed, with a shared_ptr to the
@@ -1626,13 +1626,14 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
 
-                auto castType = core::Types::instantiate(ctx, c.type, klass.data(ctx)->typeMembers(),
-                                                         klass.data(ctx)->selfTypeArgs(ctx));
+                auto castType =
+                    core::Types::resultTypeAsSeenFrom(ctx, c.type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
+
                 if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
                     // ^ This mimics the check in LoadArg's call to parameterTypeAsSeenByImplementation
                     // It instantiates any `T.type_parameter(:U)`'s in the type (which are only
                     // valid in a method body if the method's signature is generic).
-                    castType = core::Types::instantiate(ctx, castType, constr);
+                    castType = core::Types::instantiateTypeVars(ctx, castType, constr);
                 }
 
                 tp.type = castType;

@@ -70,9 +70,9 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
     // a "skolem" type variable (type variable representing an unknown but specific type). In
     // Sorbet, those skolems are SelfTypeParam types that wrap a TypeParameterRef.
     //
-    // Types::approximate does this "replace all the TypeVar with SelfTypeParam" naturally and in a
-    // predictable way (i.e., respecting polarity), so it's convenient do to this with approximate
-    // rather than build a dedicated function for this.
+    // Types::approximateTypeVars does this "replace all the TypeVar with SelfTypeParam" naturally
+    // and in a predictable way (i.e., respecting polarity), so it's convenient do to this with
+    // approximateTypeVars rather than build a dedicated function for this.
     //
     // However, it's neither required nor desired to use that constraint to type check the two types
     // themselves. If we somehow managed to construct the constr incorrectly, there might still be
@@ -87,9 +87,9 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
     // in the child class, so we always instantiate with the sub class types
     const auto &subSelfTypeArgs = subOwner.data(ctx)->selfTypeArgs(ctx);
 
-    auto subType = core::Types::approximate(ctx, sub, constr);
+    auto subType = core::Types::approximateTypeVars(ctx, sub, constr);
     subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs);
-    auto superType = core::Types::approximate(ctx, super, constr);
+    auto superType = core::Types::approximateTypeVars(ctx, super, constr);
     superType = core::Types::resultTypeAsSeenFrom(ctx, superType, superOwner, subOwner, subSelfTypeArgs);
 
     switch (polarity) {

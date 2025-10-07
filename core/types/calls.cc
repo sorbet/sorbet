@@ -693,8 +693,8 @@ void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePt
     }
 
     component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
-    blockType = component.constr->isSolved() ? Types::instantiate(gs, blockType, *component.constr)
-                                             : Types::approximate(gs, blockType, *component.constr);
+    blockType = component.constr->isSolved() ? Types::instantiateTypeVars(gs, blockType, *component.constr)
+                                             : Types::approximateTypeVars(gs, blockType, *component.constr);
     component.blockPreType = blockType;
 }
 
@@ -1046,7 +1046,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             break;
         }
         if (ait + 1 == aend && hasKwparams && (param.flags.isDefault || param.flags.isRepeated) &&
-            Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
+            Types::approximateTypeVars(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
             break;
         }
 
@@ -1144,7 +1144,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         TypePtr kwSplatArgType;
         if (hasKwsplat) {
             auto &kwSplatArg = *(aend - 1);
-            kwSplatArgType = Types::approximate(gs, kwSplatArg->type, *constr);
+            kwSplatArgType = Types::approximateTypeVars(gs, kwSplatArg->type, *constr);
 
             if (hasKwparams) {
                 if (auto *hash = fromKwargsHash(gs, kwSplatArgType)) {
@@ -1651,7 +1651,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     if (!resultType) {
         resultType = Types::untyped(method);
     } else if (!constr->isEmpty() && constr->isSolved()) {
-        resultType = Types::instantiate(gs, resultType, *constr);
+        resultType = Types::instantiateTypeVars(gs, resultType, *constr);
     }
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
@@ -2411,7 +2411,7 @@ class Magic_expandSplat : public IntrinsicMethod {
         }
 
         auto tuple = cast_type<TupleType>(type);
-        if (tuple == nullptr && core::Types::approximate(gs, type, core::TypeConstraint::EmptyFrozenConstraint)
+        if (tuple == nullptr && core::Types::approximateTypeVars(gs, type, core::TypeConstraint::EmptyFrozenConstraint)
                                     .derivesFrom(gs, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
             // can't say anything about the elements.
@@ -2739,7 +2739,7 @@ private:
             }
 
             if (!constr->isEmpty() && constr->isSolved()) {
-                dispatched.returnType = Types::instantiate(gs, dispatched.returnType, *(constr));
+                dispatched.returnType = Types::instantiateTypeVars(gs, dispatched.returnType, *(constr));
             }
         }
         res = std::move(dispatched);

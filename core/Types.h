@@ -153,12 +153,11 @@ public:
                                                              const std::vector<TypePtr> &targs, ClassOrModuleRef asIf);
     // Extract the return value type from a proc.
     static TypePtr getProcReturnType(const GlobalState &gs, const TypePtr &procType);
-    static TypePtr instantiate(const GlobalState &gs, const TypePtr &what, absl::Span<const TypeMemberRef> params,
-                               const std::vector<TypePtr> &targs);
+
     /** Replace all type variables in `what` with their instantiations.
      * Requires that `tc` has already been solved.
      */
-    static TypePtr instantiate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
+    static TypePtr instantiateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
 
     static TypePtr replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver);
     /** Get rid of type variables in `what` and return a type that we deem close enough to continue
@@ -166,7 +165,7 @@ public:
      * We should do proper instantiation and subtype test after we have guessed type variables with
      * tc.solve(). If the constraint has already been solved, use `instantiate` instead.
      */
-    static TypePtr approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
+    static TypePtr approximateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
     static TypePtr dropLiteral(const GlobalState &gs, const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
@@ -443,8 +442,8 @@ public:
 
     void _sanityCheck(const GlobalState &gs) const;
 
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                     const std::vector<TypePtr> &targs) const;
 };
 CheckSize(LambdaParam, 24, 8);
 
@@ -683,8 +682,8 @@ public:
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
-    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 };
 CheckSize(TypeVar, 8, 8);
 
@@ -705,10 +704,10 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         const std::vector<TypePtr> &targs) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
-    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                     const std::vector<TypePtr> &targs) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
 private:
@@ -765,11 +764,11 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                     const std::vector<TypePtr> &targs) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
-    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
 private:
     /*
@@ -812,10 +811,10 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         const std::vector<TypePtr> &targs) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
-    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                     const std::vector<TypePtr> &targs) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 
@@ -845,11 +844,11 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                     const std::vector<TypePtr> &targs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
-    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
     // Return the type of the underlying array that this tuple decays into
     TypePtr elementType(const GlobalState &gs) const;
@@ -874,14 +873,14 @@ public:
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                     const std::vector<TypePtr> &targs) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
-    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 };
 CheckSize(AppliedType, 32, 8);
 

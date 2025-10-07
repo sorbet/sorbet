@@ -45,13 +45,13 @@ GENERATE_CALL_MEMBER(dispatchCall,
                                       TypePtr::tagToString(TypePtr::TypeToTag<typename remove_const<T>::type>::value));
                      return DispatchResult{};, std::declval<const GlobalState &>(), std::declval<DispatchArgs>())
 
-GENERATE_CALL_MEMBER(_instantiate, return nullptr, std::declval<const GlobalState &>(),
+GENERATE_CALL_MEMBER(_instantiateTypeVars, return nullptr, std::declval<const GlobalState &>(),
                      std::declval<const TypeConstraint &>())
 
 GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState &>(), declval<const TypePtr &>())
 
-GENERATE_CALL_MEMBER(_approximate, return nullptr, declval<const GlobalState &>(), declval<const TypeConstraint &>(),
-                     declval<core::Polarity>())
+GENERATE_CALL_MEMBER(_approximateTypeVars, return nullptr, declval<const GlobalState &>(),
+                     declval<const TypeConstraint &>(), declval<core::Polarity>())
 
 GENERATE_CALL_MEMBER(underlying,
                      Exception::raise("TypePtr::underlying called on non-proxy-type `{}`",
@@ -323,8 +323,9 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
     }
 }
 
-TypePtr TypePtr::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
-#define _APPROXIMATE(T) return CALL_MEMBER__approximate<const T>::call(cast_type_nonnull<T>(*this), gs, tc, polarity);
+TypePtr TypePtr::_approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+#define _APPROXIMATE(T) \
+    return CALL_MEMBER__approximateTypeVars<const T>::call(cast_type_nonnull<T>(*this), gs, tc, polarity);
     GENERATE_TAG_SWITCH(tag(), _APPROXIMATE)
 #undef _APPROXIMATE
 }
@@ -336,14 +337,15 @@ TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver
 #undef _REPLACE_SELF_TYPE
 }
 
-TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-#define _INSTANTIATE(T) return CALL_MEMBER__instantiate<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
+TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
+#define _INSTANTIATE(T) return CALL_MEMBER__instantiateTypeVars<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
     GENERATE_TAG_SWITCH(tag(), _INSTANTIATE)
 #undef _INSTANTIATE
 }
 
-TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                              const vector<TypePtr> &targs) const {
+// Returns nullptr to indicate no change.
+TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                          const vector<TypePtr> &targs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
@@ -355,24 +357,27 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
         case Tag::SelfType:
+            // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
+            // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
+            // have to allocate another type.
             return nullptr;
 
         case Tag::TupleType:
-            return cast_type_nonnull<TupleType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::ShapeType:
-            return cast_type_nonnull<ShapeType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<ShapeType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::OrType:
-            return cast_type_nonnull<OrType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<OrType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::AndType:
-            return cast_type_nonnull<AndType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<AndType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::AppliedType:
-            return cast_type_nonnull<AppliedType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<AppliedType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::LambdaParam:
-            return cast_type_nonnull<LambdaParam>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<LambdaParam>(*this)._instantiateLambdaParams(gs, params, targs);
 
         case Tag::MetaType:
         case Tag::AliasType:
-            Exception::raise("should never happen: _instantiate on `{}`", typeName());
+            Exception::raise("should never happen: _instantiateLambdaParams on `{}`", typeName());
     }
 }
 
