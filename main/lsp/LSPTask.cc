@@ -291,49 +291,46 @@ LSPTask::extractLocations(const core::GlobalState &gs,
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbols(LSPTypecheckerDelegate &typechecker, core::lsp::Query::Symbol::STORAGE &&symbols,
-                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+LSPTask::getReferencesToSymbols(LSPTypecheckerDelegate &typechecker,
+                                core::lsp::Query::Symbol::STORAGE &&symbols) const {
     auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
     symbols.erase(it, symbols.end());
 
     if (!symbols.empty()) {
         auto run2 = LSPQuery::bySymbol(config, typechecker, move(symbols));
-        absl::c_move(run2.responses, back_inserter(priorRefs));
+        return move(run2.responses);
     }
-    return move(priorRefs);
+    return {};
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbolsInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
-                                         core::lsp::Query::Symbol::STORAGE &&symbols,
-                                         vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+                                         core::lsp::Query::Symbol::STORAGE &&symbols) const {
     auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
     symbols.erase(it, symbols.end());
 
     if (!symbols.empty()) {
         auto run2 = LSPQuery::bySymbol(config, typechecker, move(symbols), packageName);
-        absl::c_move(run2.responses, back_inserter(priorRefs));
+        return move(run2.responses);
     }
-    return move(priorRefs);
+    return {};
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbolsInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref,
-                                      core::lsp::Query::Symbol::STORAGE &&symbols,
-                                      vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+                                      core::lsp::Query::Symbol::STORAGE &&symbols) const {
     auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
     symbols.erase(it, symbols.end());
 
     if (!symbols.empty() && fref.exists()) {
         auto run2 = LSPQuery::bySymbolsInFiles(config, typechecker, move(symbols), {fref});
-        for (auto &resp : run2.responses) {
-            // Ignore results in other files (which may have been picked up for typechecking purposes)
-            if (resp->getLoc().file() == fref) {
-                priorRefs.emplace_back(move(resp));
-            }
-        }
+        // Ignore results in other files (which may have been picked up for typechecking purposes)
+        auto it = remove_if(run2.responses.begin(), run2.responses.end(),
+                            [fref](auto &resp) { return resp->getLoc().file() != fref; });
+        run2.responses.erase(it, run2.responses.end());
+        return move(run2.responses);
     }
-    return move(priorRefs);
+    return {};
 }
 
 vector<unique_ptr<DocumentHighlight>>

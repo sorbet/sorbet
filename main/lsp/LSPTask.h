@@ -25,18 +25,15 @@ protected:
     // Task helper methods.
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbols(LSPTypecheckerDelegate &typechecker, core::lsp::Query::Symbol::STORAGE &&symbols,
-                           std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    getReferencesToSymbols(LSPTypecheckerDelegate &typechecker, core::lsp::Query::Symbol::STORAGE &&symbols) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbolsInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
-                                    core::lsp::Query::Symbol::STORAGE &&symbols,
-                                    std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+                                    core::lsp::Query::Symbol::STORAGE &&symbols) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbolsInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file,
-                                 core::lsp::Query::Symbol::STORAGE &&symbols,
-                                 std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+                                 core::lsp::Query::Symbol::STORAGE &&symbols) const;
 
     std::vector<std::unique_ptr<DocumentHighlight>>
     getHighlights(LSPTypecheckerDelegate &typechecker,
