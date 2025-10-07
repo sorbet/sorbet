@@ -309,7 +309,7 @@ public:
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
-    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
     TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;

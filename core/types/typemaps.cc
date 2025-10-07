@@ -19,13 +19,13 @@ TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, absl::Spa
     return what;
 }
 
-TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
+TypePtr Types::instantiateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
     ENFORCE(tc.isSolved());
     if (tc.isEmpty()) {
         return what;
     }
     ENFORCE(what != nullptr);
-    auto t = what._instantiate(gs, tc);
+    auto t = what._instantiateTypeVars(gs, tc);
     if (t) {
         return t;
     }
@@ -41,7 +41,7 @@ TypePtr Types::approximate(const GlobalState &gs, const TypePtr &what, const Typ
     return what;
 }
 
-TypePtr TypeVar::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+TypePtr TypeVar::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
     return tc.getInstantiation(sym);
 }
 
@@ -84,13 +84,43 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
 
 namespace {
 
-template <typename... MethodArgs>
-optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const MethodArgs &...methodArgs) {
+optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const GlobalState &gs,
+                                           absl::Span<const TypeMemberRef> params, const vector<TypePtr> &targs) {
     optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {
         ++i;
-        auto t = e._instantiate(methodArgs...);
+        auto t = e._instantiate(gs, params, targs);
+        if (!newElems.has_value() && !t) {
+            continue;
+        }
+
+        if (!newElems.has_value()) {
+            // Oops, need to fixup all the elements that should be there.
+            newElems.emplace();
+            newElems->reserve(elems.size());
+            for (int j = 0; j < i; ++j) {
+                newElems->emplace_back(elems[j]);
+            }
+        }
+
+        if (!t) {
+            t = e;
+        }
+
+        ENFORCE(newElems->size() == i);
+        newElems->emplace_back(move(t));
+    }
+    return newElems;
+}
+
+optional<vector<TypePtr>> instantiateTypeVarsInElems(const vector<TypePtr> &elems, const GlobalState &gs,
+                                                     const TypeConstraint &tc) {
+    optional<vector<TypePtr>> newElems;
+    int i = -1;
+    for (auto &e : elems) {
+        ++i;
+        auto t = e._instantiateTypeVars(gs, tc);
         if (!newElems.has_value() && !t) {
             continue;
         }
@@ -158,8 +188,8 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemb
     return make_type<TupleType>(move(*newElems));
 }
 
-TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, tc);
+TypePtr TupleType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newElems = instantiateTypeVarsInElems(this->elems, gs, tc);
     if (!newElems) {
         return nullptr;
     }
@@ -184,8 +214,8 @@ TypePtr ShapeType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemb
     return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
-TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newValues = instantiateElems(this->values, gs, tc);
+TypePtr ShapeType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newValues = instantiateTypeVarsInElems(this->values, gs, tc);
     if (!newValues) {
         return nullptr;
     }
@@ -217,9 +247,9 @@ TypePtr OrType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberR
     return nullptr;
 }
 
-TypePtr OrType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    auto left = this->left._instantiate(gs, tc);
-    auto right = this->right._instantiate(gs, tc);
+TypePtr OrType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._instantiateTypeVars(gs, tc);
+    auto right = this->right._instantiateTypeVars(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -263,9 +293,9 @@ TypePtr AndType::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
     return nullptr;
 }
 
-TypePtr AndType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    auto left = this->left._instantiate(gs, tc);
-    auto right = this->right._instantiate(gs, tc);
+TypePtr AndType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._instantiateTypeVars(gs, tc);
+    auto right = this->right._instantiateTypeVars(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -302,8 +332,8 @@ TypePtr AppliedType::_instantiate(const GlobalState &gs, absl::Span<const TypeMe
     return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
-TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newTargs = instantiateElems(this->targs, gs, tc);
+TypePtr AppliedType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newTargs = instantiateTypeVarsInElems(this->targs, gs, tc);
     if (!newTargs) {
         return nullptr;
     }

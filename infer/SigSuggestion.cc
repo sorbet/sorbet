@@ -335,7 +335,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             return nullopt;
         }
 
-        guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
+        guessedReturnType = core::Types::widen(ctx, core::Types::instantiateTypeVars(ctx, methodReturnType, constr));
 
         if (!guessedReturnType.isFullyDefined()) {
             guessedReturnType = core::Types::untypedUntracked();

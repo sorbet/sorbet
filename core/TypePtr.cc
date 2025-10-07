@@ -45,7 +45,7 @@ GENERATE_CALL_MEMBER(dispatchCall,
                                       TypePtr::tagToString(TypePtr::TypeToTag<typename remove_const<T>::type>::value));
                      return DispatchResult{};, std::declval<const GlobalState &>(), std::declval<DispatchArgs>())
 
-GENERATE_CALL_MEMBER(_instantiate, return nullptr, std::declval<const GlobalState &>(),
+GENERATE_CALL_MEMBER(_instantiateTypeVars, return nullptr, std::declval<const GlobalState &>(),
                      std::declval<const TypeConstraint &>())
 
 GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState &>(), declval<const TypePtr &>())
@@ -336,8 +336,8 @@ TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver
 #undef _REPLACE_SELF_TYPE
 }
 
-TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-#define _INSTANTIATE(T) return CALL_MEMBER__instantiate<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
+TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
+#define _INSTANTIATE(T) return CALL_MEMBER__instantiateTypeVars<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
     GENERATE_TAG_SWITCH(tag(), _INSTANTIATE)
 #undef _INSTANTIATE
 }

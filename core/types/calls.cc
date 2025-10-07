@@ -693,7 +693,7 @@ void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePt
     }
 
     component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
-    blockType = component.constr->isSolved() ? Types::instantiate(gs, blockType, *component.constr)
+    blockType = component.constr->isSolved() ? Types::instantiateTypeVars(gs, blockType, *component.constr)
                                              : Types::approximate(gs, blockType, *component.constr);
     component.blockPreType = blockType;
 }
@@ -1651,7 +1651,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     if (!resultType) {
         resultType = Types::untyped(method);
     } else if (!constr->isEmpty() && constr->isSolved()) {
-        resultType = Types::instantiate(gs, resultType, *constr);
+        resultType = Types::instantiateTypeVars(gs, resultType, *constr);
     }
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
@@ -2739,7 +2739,7 @@ private:
             }
 
             if (!constr->isEmpty() && constr->isSolved()) {
-                dispatched.returnType = Types::instantiate(gs, dispatched.returnType, *(constr));
+                dispatched.returnType = Types::instantiateTypeVars(gs, dispatched.returnType, *(constr));
             }
         }
         res = std::move(dispatched);
