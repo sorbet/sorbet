@@ -854,7 +854,7 @@ public:
         return FieldRef::fromRaw(0);
     }
 
-    static TypeParameterRef noTypeArgument() {
+    static TypeParameterRef noTypeParameter() {
         return TypeParameterRef::fromRaw(0);
     }
 

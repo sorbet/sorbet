@@ -336,7 +336,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(field == Symbols::noField());
     TypeParameterRef typeArgument =
         enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::noTypeArgument());
+    ENFORCE_NO_TIMER(typeArgument == Symbols::noTypeParameter());
     TypeMemberRef typeMember =
         enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeMember == Symbols::noTypeMember());

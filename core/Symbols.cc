@@ -2238,7 +2238,7 @@ void Method::sanityCheck(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(current == current2);
     for (auto &tp : typeParameters()) {
         ENFORCE_NO_TIMER(tp.data(gs)->name.exists(), "{} has a member symbol without a name", name.toString(gs));
-        ENFORCE_NO_TIMER(tp.exists(), "{}.{} corresponds to a core::Symbols::noTypeArgument()", name.toString(gs),
+        ENFORCE_NO_TIMER(tp.exists(), "{}.{} corresponds to a core::Symbols::noTypeParameter()", name.toString(gs),
                          tp.data(gs)->name.toString(gs));
     }
 
