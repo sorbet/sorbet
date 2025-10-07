@@ -282,9 +282,9 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
     auto *constr = &core::TypeConstraint::EmptyFrozenConstraint;
     if (method.data(ctx)->flags.isGenericMethod) {
         ENFORCE(superMethod.data(ctx)->flags.isGenericMethod);
-        const auto &methodTypeArguments = method.data(ctx)->typeParameters();
-        const auto &superMethodTypeArguments = superMethod.data(ctx)->typeParameters();
-        if (methodTypeArguments.size() != superMethodTypeArguments.size()) {
+        const auto &methodTypeParameters = method.data(ctx)->typeParameters();
+        const auto &superMethodTypeParameters = superMethod.data(ctx)->typeParameters();
+        if (methodTypeParameters.size() != superMethodTypeParameters.size()) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must declare the same number of type parameters as the base method",
                             implementationOf(ctx, superMethod), superMethod.show(ctx));
@@ -310,9 +310,9 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         // attempt to find a substitution from one method's type params to the other method's type
         // params, and report an error if no substitution exists, but this tends to result in errors
         // that look like "it failed" with no further context.)
-        for (size_t i = 0; i < methodTypeArguments.size(); i++) {
-            auto typeArgument = methodTypeArguments[i];
-            auto superTypeArgument = superMethodTypeArguments[i];
+        for (size_t i = 0; i < methodTypeParameters.size(); i++) {
+            auto typeArgument = methodTypeParameters[i];
+            auto superTypeArgument = superMethodTypeParameters[i];
 
             constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(superTypeArgument));
