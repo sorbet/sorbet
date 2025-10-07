@@ -136,7 +136,6 @@ void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs,
 
 void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) {
     const core::GlobalState &gs = typechecker.state();
-    auto originalName = symbol.name(gs).show(gs);
 
     addSymbol(symbol);
 
