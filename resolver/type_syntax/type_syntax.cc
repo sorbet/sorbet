@@ -252,7 +252,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig", name.show(ctx));
                     }
                 }
-                typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
+                typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeParameter());
                 typeArgSpec.loc = arg.loc();
             }
 

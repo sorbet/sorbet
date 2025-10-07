@@ -474,7 +474,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
     typeArgument =
         enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::todoTypeArgument());
+    ENFORCE_NO_TIMER(typeArgument == Symbols::todoTypeParameter());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
     method =
         enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();

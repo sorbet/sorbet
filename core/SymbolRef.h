@@ -862,7 +862,7 @@ public:
         return TypeMemberRef::fromRaw(0);
     }
 
-    static TypeParameterRef todoTypeArgument() {
+    static TypeParameterRef todoTypeParameter() {
         return TypeParameterRef::fromRaw(1);
     }
 
