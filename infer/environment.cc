@@ -1626,8 +1626,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
 
-                auto castType = core::Types::instantiate(ctx, c.type, klass.data(ctx)->typeMembers(),
-                                                         klass.data(ctx)->selfTypeArgs(ctx));
+                auto castType = core::Types::instantiateLambdaParams(ctx, c.type, klass.data(ctx)->typeMembers(),
+                                                                     klass.data(ctx)->selfTypeArgs(ctx));
                 if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
                     // ^ This mimics the check in LoadArg's call to parameterTypeAsSeenByImplementation
                     // It instantiates any `T.type_parameter(:U)`'s in the type (which are only

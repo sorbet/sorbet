@@ -682,7 +682,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);
 
-    return instantiate(gs, what, currentAlignment, targs);
+    return instantiateLambdaParams(gs, what, currentAlignment, targs);
 }
 
 TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType) {

@@ -342,8 +342,8 @@ TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
 #undef _INSTANTIATE
 }
 
-TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                              const vector<TypePtr> &targs) const {
+TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                          const vector<TypePtr> &targs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
@@ -358,21 +358,21 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
             return nullptr;
 
         case Tag::TupleType:
-            return cast_type_nonnull<TupleType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::ShapeType:
-            return cast_type_nonnull<ShapeType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<ShapeType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::OrType:
-            return cast_type_nonnull<OrType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<OrType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::AndType:
-            return cast_type_nonnull<AndType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<AndType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::AppliedType:
-            return cast_type_nonnull<AppliedType>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<AppliedType>(*this)._instantiateLambdaParams(gs, params, targs);
         case Tag::LambdaParam:
-            return cast_type_nonnull<LambdaParam>(*this)._instantiate(gs, params, targs);
+            return cast_type_nonnull<LambdaParam>(*this)._instantiateLambdaParams(gs, params, targs);
 
         case Tag::MetaType:
         case Tag::AliasType:
-            Exception::raise("should never happen: _instantiate on `{}`", typeName());
+            Exception::raise("should never happen: _instantiateLambdaParams on `{}`", typeName());
     }
 }
 

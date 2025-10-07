@@ -8,10 +8,10 @@
 using namespace std;
 namespace sorbet::core {
 
-TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, absl::Span<const TypeMemberRef> params,
-                           const vector<TypePtr> &targs) {
+TypePtr Types::instantiateLambdaParams(const GlobalState &gs, const TypePtr &what,
+                                       absl::Span<const TypeMemberRef> params, const vector<TypePtr> &targs) {
     ENFORCE(what != nullptr);
-    auto t = what._instantiate(gs, params, targs);
+    auto t = what._instantiateLambdaParams(gs, params, targs);
     if (t) {
         return t;
     }
@@ -83,13 +83,14 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
 
 namespace {
 
-optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const GlobalState &gs,
-                                           absl::Span<const TypeMemberRef> params, const vector<TypePtr> &targs) {
+optional<vector<TypePtr>> instantiateLambdaParamsInElems(const vector<TypePtr> &elems, const GlobalState &gs,
+                                                         absl::Span<const TypeMemberRef> params,
+                                                         const vector<TypePtr> &targs) {
     optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {
         ++i;
-        auto t = e._instantiate(gs, params, targs);
+        auto t = e._instantiateLambdaParams(gs, params, targs);
         if (!newElems.has_value() && !t) {
             continue;
         }
@@ -178,9 +179,9 @@ optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const G
 
 } // anonymous namespace
 
-TypePtr TupleType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, params, targs);
+TypePtr TupleType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                            const vector<TypePtr> &targs) const {
+    optional<vector<TypePtr>> newElems = instantiateLambdaParamsInElems(this->elems, gs, params, targs);
     if (!newElems) {
         return nullptr;
     }
@@ -204,9 +205,9 @@ TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc,
     return make_type<TupleType>(move(*newElems));
 };
 
-TypePtr ShapeType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newValues = instantiateElems(this->values, gs, params, targs);
+TypePtr ShapeType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                            const vector<TypePtr> &targs) const {
+    optional<vector<TypePtr>> newValues = instantiateLambdaParamsInElems(this->values, gs, params, targs);
     if (!newValues) {
         return nullptr;
     }
@@ -230,10 +231,10 @@ TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc,
     return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
-TypePtr OrType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                             const vector<TypePtr> &targs) const {
-    auto left = this->left._instantiate(gs, params, targs);
-    auto right = this->right._instantiate(gs, params, targs);
+TypePtr OrType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                         const vector<TypePtr> &targs) const {
+    auto left = this->left._instantiateLambdaParams(gs, params, targs);
+    auto right = this->right._instantiateLambdaParams(gs, params, targs);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -276,10 +277,10 @@ TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc, co
     return nullptr;
 }
 
-TypePtr AndType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                              const vector<TypePtr> &targs) const {
-    auto left = this->left._instantiate(gs, params, targs);
-    auto right = this->right._instantiate(gs, params, targs);
+TypePtr AndType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                          const vector<TypePtr> &targs) const {
+    auto left = this->left._instantiateLambdaParams(gs, params, targs);
+    auto right = this->right._instantiateLambdaParams(gs, params, targs);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -322,9 +323,9 @@ TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
     return nullptr;
 }
 
-TypePtr AppliedType::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                  const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newTargs = instantiateElems(this->targs, gs, params, targs);
+TypePtr AppliedType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                              const vector<TypePtr> &targs) const {
+    optional<vector<TypePtr>> newTargs = instantiateLambdaParamsInElems(this->targs, gs, params, targs);
     if (!newTargs) {
         return nullptr;
     }
@@ -360,8 +361,8 @@ TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &t
     return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
-TypePtr LambdaParam::_instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                  const vector<TypePtr> &targs) const {
+TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                              const vector<TypePtr> &targs) const {
     ENFORCE(params.size() == targs.size());
     for (auto &el : params) {
         if (el == this->definition) {

@@ -15,5 +15,5 @@ class Parent
   K = type_member
   sig {returns(K)}
   def foo; T.unsafe(nil); end
-  puts PreChild.new.foo() # this line previously caused a failed ENFORCE in LambdaParam::_instantiate
+  puts PreChild.new.foo() # this line previously caused a failed ENFORCE in LambdaParam::_instantiateLambdaParams
 end

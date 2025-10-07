@@ -311,8 +311,8 @@ public:
 
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
-    TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                         const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
+                                     const std::vector<TypePtr> &targs) const;
 
     // If this TypePtr `is_proxy_type`, returns its underlying type.
     TypePtr underlying(const GlobalState &gs) const;
