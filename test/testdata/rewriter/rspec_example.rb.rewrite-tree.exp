@@ -179,6 +179,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
 
+      class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
+        end
+      end
+
       class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
         def <it><<todo method>>(&<blk>)
           <emptyTree>::<C T>.reveal_type(<self>)

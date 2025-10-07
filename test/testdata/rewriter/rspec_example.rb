@@ -115,6 +115,9 @@ class A
 
     its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
 
+    # String arguments should work the same as symbols for simple attributes
+    its('bar') { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
+
     # The correct desugaring is:
     #   its(:size) { is_expected.to eq(1) }
     # should generate:
