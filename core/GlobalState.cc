@@ -1305,7 +1305,8 @@ TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameR
 
     for (auto typeParam : ownerScope->typeParameters()) {
         if (typeParam.dataAllowingNone(*this)->name == name) {
-            ENFORCE_NO_TIMER(typeParam.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
+            ENFORCE_NO_TIMER(typeParam.dataAllowingNone(*this)->flags.hasFlags(flags),
+                             "existing symbol has wrong flags");
             if (!symbolTableFrozen) {
                 typeParam.data(*this)->addLoc(*this, loc);
             } else {
