@@ -163,7 +163,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
         def subject<<todo method>>(&<blk>)
-          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          <self>.subject().bar()
         end
 
         def <it><<todo method>>(&<blk>)
@@ -175,7 +175,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
         def subject<<todo method>>(&<blk>)
-          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          <self>.subject().size()
         end
 
         def <it><<todo method>>(&<blk>)

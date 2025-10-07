@@ -696,19 +696,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             itMethod = addSigVoid(ctx, move(itMethod));
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
 
-            // In RSpec, its() redefines subject to return the attribute value.
-            // We can't use super in the rewriter, so we model it as returning T.untyped.
-            // The type system won't be perfect, but the structure will be correct.
-            //
-            // In a future improvement, we could model this by having the parent store
-            // its subject in a differently-named method that the child can call.
-            auto subjectBody = ast::MK::RaiseUnimplemented(arg.loc());
-            auto subjectMethod = ast::MK::SyntheticMethod0(arg.loc(), arg.loc().copyWithZeroLength(),
-                                                           core::Names::subject(), std::move(subjectBody));
+            // Create let(:subject) that calls subject.attribute_name
+            // This redefines subject in the nested describe to return the attribute value.
+            // The call to subject() will resolve to the parent's subject method.
+            auto subjectCallBody = ast::MK::Send0(arg.loc(),
+                                                  ast::MK::Send0(arg.loc(), ast::MK::Self(arg.loc()),
+                                                                core::Names::subject(), arg.loc().copyWithZeroLength()),
+                                                  attributeName, arg.loc().copyWithZeroLength());
+            auto subjectLetMethod = ast::MK::SyntheticMethod0(arg.loc(), arg.loc().copyWithZeroLength(),
+                                                              core::Names::subject(), std::move(subjectCallBody));
 
-            // Combine subject method and it method in the describe body
+            // Combine subject let and it method in the describe body
             ast::ClassDef::RHS_store describeBody;
-            describeBody.emplace_back(std::move(subjectMethod));
+            describeBody.emplace_back(std::move(subjectLetMethod));
             describeBody.emplace_back(std::move(itMethod));
 
             // Create describe block containing the subject and it methods
