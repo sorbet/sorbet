@@ -24,7 +24,7 @@ class SymbolRef;
 class ClassOrModuleRef;
 class MethodRef;
 class FieldRef;
-class TypeArgumentRef;
+class TypeParameterRef;
 class TypeMemberRef;
 class NameSubstitution;
 class ErrorQueue;
@@ -50,7 +50,7 @@ class GlobalState final {
     friend ClassOrModuleRef;
     friend MethodRef;
     friend TypeMemberRef;
-    friend TypeArgumentRef;
+    friend TypeParameterRef;
     friend FieldRef;
     friend File;
     friend FileRef;
@@ -93,7 +93,7 @@ public:
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
     void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
-                           uint32_t typeArgumentsSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
+                           uint32_t typeParametersSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
                            uint32_t constantNameSize, uint32_t uniqueNameSize);
 
     GlobalState(const GlobalState &) = delete;
@@ -103,7 +103,7 @@ public:
 
     ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
-    TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
+    TypeParameterRef enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, uint32_t num,
                                      const std::vector<bool> &paramsToKeep);
@@ -192,7 +192,7 @@ public:
     unsigned int classAndModulesUsed() const;
     unsigned int methodsUsed() const;
     unsigned int fieldsUsed() const;
-    unsigned int typeArgumentsUsed() const;
+    unsigned int typeParametersUsed() const;
     unsigned int typeMembersUsed() const;
     unsigned int filesUsed() const;
     unsigned int symbolsUsedTotal() const;
@@ -400,7 +400,7 @@ private:
     std::vector<Method> methods;
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
-    std::vector<TypeParameter> typeArguments;
+    std::vector<TypeParameter> typeParameters;
     struct Bucket {
         unsigned int hash;
         uint32_t rawId;

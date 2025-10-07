@@ -1889,18 +1889,18 @@ class ResolveTypeMembersAndFieldsWalk {
     [[nodiscard]] static bool resolveCastItem(const core::GlobalState &gs, ResolveCastItem &job, bool lastTry) {
         ParsedSig emptySig;
         // Owner might be a class, because we haven't made the <static-init> methods yet.
-        // Also, if we're in a field assign like `@x = ...`, don't use typeArguments, fields are
+        // Also, if we're in a field assign like `@x = ...`, don't use typeParameters, fields are
         // technically in class scope, not method scope.
         if (job.owner.isMethod() && !job.inFieldAssign) {
-            for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeArguments()) {
-                const auto &data = typeArg.data(gs);
+            for (const auto &typeParam : job.owner.asMethodRef().data(gs)->typeParameters()) {
+                const auto &data = typeParam.data(gs);
                 auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
                 auto typeArgLoc = data->loc();
                 // TypeParameter might be defined in an RBI file, and thus not be in the same file
                 // as the `T.cast` is listed in.
                 auto typeArgLocOffsets = typeArgLoc.file() == job.file ? typeArgLoc.offsets()
                                                                        : job.cast->typeExpr.loc().copyWithZeroLength();
-                emptySig.typeArgs.emplace_back(ParsedSig::TypeArgSpec{typeArgLocOffsets, name, data->resultType});
+                emptySig.typeParams.emplace_back(ParsedSig::TypeParamSpec{typeArgLocOffsets, name, data->resultType});
             }
         }
         auto allowSelfType = true;
@@ -3321,13 +3321,13 @@ private:
         } else if (sig.seen.incompatibleOverrideVisibility.exists()) {
             method.data(ctx)->flags.allowIncompatibleOverrideVisibility = true;
         }
-        if (!sig.typeArgs.empty()) {
+        if (!sig.typeParams.empty()) {
             method.data(ctx)->flags.isGenericMethod = true;
-            for (auto &typeSpec : sig.typeArgs) {
+            for (auto &typeSpec : sig.typeParams) {
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
                     auto sym =
-                        ctx.state.enterTypeArgument(ctx.locAt(typeSpec.loc), method, name, core::Variance::CoVariant);
+                        ctx.state.enterTypeParameter(ctx.locAt(typeSpec.loc), method, name, core::Variance::CoVariant);
                     auto asTypeVar = core::cast_type<core::TypeVar>(typeSpec.type);
                     ENFORCE(asTypeVar != nullptr);
                     asTypeVar->sym = sym;

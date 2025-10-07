@@ -125,7 +125,7 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
         return SymbolKind::Constant;
     } else if (symbol.isTypeMember()) {
         return SymbolKind::TypeParameter;
-    } else if (symbol.isTypeArgument()) {
+    } else if (symbol.isTypeParameter()) {
         return SymbolKind::TypeParameter;
     }
     return SymbolKind::Unknown;

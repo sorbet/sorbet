@@ -75,7 +75,7 @@ private:
 
                 for (int i = 0; i < members.size(); ++i) {
                     auto memberVariance = members[i].data(ctx)->variance();
-                    auto typeArg = params[i];
+                    auto typeParam = params[i];
 
                     // The polarity used to check the parameter is negated
                     // when the parameter is defined as ContraVariant, for
@@ -95,7 +95,7 @@ private:
                             break;
                     }
 
-                    validate(ctx, paramPolarity, typeArg);
+                    validate(ctx, paramPolarity, typeParam);
                 }
                 break;
             }

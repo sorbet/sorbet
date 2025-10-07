@@ -52,8 +52,8 @@ private:
                 return methodMatches[ref.methodIndex()];
             case core::SymbolRef::Kind::FieldOrStaticField:
                 return fieldMatches[ref.fieldIndex()];
-            case core::SymbolRef::Kind::TypeArgument:
-                return typeArgumentMatches[ref.typeArgumentIndex()];
+            case core::SymbolRef::Kind::TypeParameter:
+                return typeArgumentMatches[ref.typeParameterIndex()];
             case core::SymbolRef::Kind::TypeMember:
                 return typeMemberMatches[ref.typeMemberIndex()];
         }
@@ -65,7 +65,7 @@ private:
 
 SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs)
     : config(config), gs(gs), classOrModuleMatches(gs.classAndModulesUsed()), methodMatches(gs.methodsUsed()),
-      fieldMatches(gs.fieldsUsed()), typeArgumentMatches(gs.typeArgumentsUsed()),
+      fieldMatches(gs.fieldsUsed()), typeArgumentMatches(gs.typeParametersUsed()),
       typeMemberMatches(gs.typeMembersUsed()) {}
 
 /**

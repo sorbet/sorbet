@@ -471,7 +471,7 @@ template <> inline TypePtr make_type<SelfTypeParam, core::SymbolRef &>(core::Sym
     return TypePtr(TypePtr::Tag::SelfTypeParam, definition.rawId());
 }
 
-template <> inline TypePtr make_type<SelfTypeParam, core::TypeArgumentRef &>(core::TypeArgumentRef &definition) {
+template <> inline TypePtr make_type<SelfTypeParam, core::TypeParameterRef &>(core::TypeParameterRef &definition) {
     auto sym = SymbolRef(definition);
     return make_type<SelfTypeParam>(sym);
 }
@@ -669,8 +669,8 @@ template <> inline TypePtr make_type<FloatLiteralType, float &&>(float &&val) {
  */
 TYPE(TypeVar) final : public Refcounted {
 public:
-    TypeArgumentRef sym;
-    TypeVar(TypeArgumentRef sym);
+    TypeParameterRef sym;
+    TypeVar(TypeParameterRef sym);
     TypeVar(const TypeVar &) = delete;
     TypeVar &operator=(const TypeVar &) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;

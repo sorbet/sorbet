@@ -604,7 +604,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveFieldTableCapacity)), "<n>");
     options.add_options(section)(
         "reserve-type-argument-table-capacity", "Preallocate <n> slots in the type argument table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeArgumentTableCapacity)), "<n>");
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeParameterTableCapacity)), "<n>");
     options.add_options(section)(
         "reserve-type-member-table-capacity", "Preallocate <n> slots in the type member table",
         cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeMemberTableCapacity)), "<n>");
@@ -1210,7 +1210,7 @@ void readOptions(Options &opts,
         opts.reserveClassTableCapacity = raw["reserve-class-table-capacity"].as<uint32_t>();
         opts.reserveMethodTableCapacity = raw["reserve-method-table-capacity"].as<uint32_t>();
         opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<uint32_t>();
-        opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
+        opts.reserveTypeParameterTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
         opts.cacheSensitiveOptions.sorbetPackages =

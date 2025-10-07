@@ -183,29 +183,29 @@ public:
     TypePtr resultType;
     ParametersStore parameters;
 
-    InlinedVector<TypeArgumentRef, 4> &getOrCreateTypeArguments() {
-        if (typeArgs) {
-            return *typeArgs;
+    InlinedVector<TypeParameterRef, 4> &getOrCreateTypeParameters() {
+        if (typeParams) {
+            return *typeParams;
         }
-        typeArgs = std::make_unique<InlinedVector<TypeArgumentRef, 4>>();
-        return *typeArgs;
+        typeParams = std::make_unique<InlinedVector<TypeParameterRef, 4>>();
+        return *typeParams;
     }
 
-    absl::Span<const TypeArgumentRef> typeArguments() const {
-        if (typeArgs) {
-            return *typeArgs;
+    absl::Span<const TypeParameterRef> typeParameters() const {
+        if (typeParams) {
+            return *typeParams;
         }
         return {};
     }
 
-    InlinedVector<TypeArgumentRef, 4> &existingTypeArguments() {
-        ENFORCE(typeArgs != nullptr);
-        return *typeArgs;
+    InlinedVector<TypeParameterRef, 4> &existingTypeParameters() {
+        ENFORCE(typeParams != nullptr);
+        return *typeParams;
     }
 
 private:
     SymbolRef::LOC_store locs_;
-    std::unique_ptr<InlinedVector<TypeArgumentRef, 4>> typeArgs;
+    std::unique_ptr<InlinedVector<TypeParameterRef, 4>> typeParams;
 };
 CheckSize(Method, 136, 8);
 
@@ -288,7 +288,7 @@ class TypeParameter final {
     friend class GlobalState;
     friend class serialize::SerializerImpl;
 
-    // This is to allow updating `GlobalState::typeArguments` in place with a new type argument,
+    // This is to allow updating `GlobalState::typeParameters` in place with a new type argument,
     // over top of an existing method
     TypeParameter &operator=(TypeParameter &&) = default;
 
@@ -299,7 +299,7 @@ public:
 
     class Flags {
     public:
-        bool isTypeArgument : 1;
+        bool isTypeParameter : 1;
         bool isTypeMember : 1;
 
         // Type flags
@@ -312,7 +312,7 @@ public:
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
-            : isTypeArgument(false), isTypeMember(false), isCovariant(false), isInvariant(false),
+            : isTypeParameter(false), isTypeMember(false), isCovariant(false), isInvariant(false),
               isContravariant(false), isFixed(false) {}
 
         uint8_t serialize() const {
@@ -361,7 +361,7 @@ public:
     TypeParameter deepCopy(const GlobalState &gs) const;
 
     Flags flags;
-    // Method for TypeArgument, ClassOrModule for TypeMember.
+    // Method for TypeParameter, ClassOrModule for TypeMember.
     SymbolRef owner;
     NameRef name;
     TypePtr resultType;

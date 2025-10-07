@@ -303,7 +303,7 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
     methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
     fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
-    typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+    typeParameters.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
     typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
     int namesByHashSize = nextPowerOfTwo(
@@ -334,9 +334,9 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::noMethod());
     FieldRef field = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE_NO_TIMER(field == Symbols::noField());
-    TypeArgumentRef typeArgument =
-        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::noTypeArgument());
+    TypeParameterRef typeParameter =
+        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeParameter(), Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeParameter == Symbols::noTypeParameter());
     TypeMemberRef typeMember =
         enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeMember == Symbols::noTypeMember());
@@ -472,28 +472,28 @@ void GlobalState::initEmpty() {
         enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
-    typeArgument =
-        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::todoTypeArgument());
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter = enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeParameter(),
+                                       Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeParameter == Symbols::todoTypeParameter());
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
     method =
         enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder());
-    typeArgument = enterTypeArgument(
+    typeParameter = enterTypeParameter(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredReturnType(), 1),
         core::Variance::ContraVariant);
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
     ENFORCE_NO_TIMER(
-        typeArgument ==
+        typeParameter ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
-    typeArgument = enterTypeArgument(
+    typeParameter = enterTypeParameter(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredArgumentType(), 1),
         core::Variance::CoVariant);
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
     ENFORCE_NO_TIMER(
-        typeArgument ==
+        typeParameter ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig());
@@ -657,9 +657,9 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::Kernel(), Names::lambda()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_lambda());
 
-    typeArgument = enterTypeArgument(Loc::none(), Symbols::Kernel_lambda(), Names::returnType(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_lambda_returnType());
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter = enterTypeParameter(Loc::none(), Symbols::Kernel_lambda(), Names::returnType(), Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeParameter == Symbols::Kernel_lambda_returnType());
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
 
     method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::arg0(), Types::top()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_lambdaTLet());
@@ -678,9 +678,9 @@ void GlobalState::initEmpty() {
             .build();
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
 
-    typeArgument = enterTypeArgument(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_proc_returnType());
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter = enterTypeParameter(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeParameter == Symbols::Kernel_proc_returnType());
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
 
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -958,9 +958,9 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(typeMembers.size() == Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS,
                      "Too many synthetic typeMember symbols? have: {} expected: {}", typeMembers.size(),
                      Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS);
-    ENFORCE_NO_TIMER(typeArguments.size() == Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS,
-                     "Too many synthetic typeArgument symbols? have: {} expected: {}", typeArguments.size(),
-                     Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS);
+    ENFORCE_NO_TIMER(typeParameters.size() == Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS,
+                     "Too many synthetic typeParameter symbols? have: {} expected: {}", typeParameters.size(),
+                     Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS);
 
     installIntrinsics();
     computeLinearization();
@@ -1019,12 +1019,12 @@ void GlobalState::computeLinearization() {
 }
 
 void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
-                                    uint32_t typeArgumentsSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
+                                    uint32_t typeParametersSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
                                     uint32_t constantNameSize, uint32_t uniqueNameSize) {
     uint32_t classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
     uint32_t methodsSizeScaled = nextPowerOfTwo(methodsSize);
     uint32_t fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
-    uint32_t typeArgumentsSizeScaled = nextPowerOfTwo(typeArgumentsSize);
+    uint32_t typeParametersSizeScaled = nextPowerOfTwo(typeParametersSize);
     uint32_t typeMembersSizeScaled = nextPowerOfTwo(typeMembersSize);
     uint32_t utf8NameSizeScaled = nextPowerOfTwo(utf8NameSize);
     uint32_t constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
@@ -1040,14 +1040,14 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     classAndModules.reserve(classAndModulesSizeScaled);
     methods.reserve(methodsSizeScaled);
     fields.reserve(fieldsSizeScaled);
-    typeArguments.reserve(typeArgumentsSizeScaled);
+    typeParameters.reserve(typeParametersSizeScaled);
     typeMembers.reserve(typeMembersSizeScaled);
     expandNames(utf8NameSizeScaled, constantNameSizeScaled, uniqueNameSizeScaled);
     sanityCheck();
 
-    trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeArguments={} "
+    trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeParameters={} "
                       "typeMembers={} utf8Names={} constantNames={} uniqueNames={}",
-                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeArguments.capacity(),
+                      classAndModules.capacity(), methods.capacity(), fields.capacity(), typeParameters.capacity(),
                       typeMembers.capacity(), utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity()));
 }
 
@@ -1285,9 +1285,9 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     return result;
 }
 
-TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
-    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeArgument() ||
-                     name == Names::Constants::TodoTypeArgument());
+TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance) {
+    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeParameter() ||
+                     name == Names::Constants::TodoTypeParameter());
     ENFORCE_NO_TIMER(name.exists());
     TypeParameter::Flags flags;
     if (variance == Variance::Invariant) {
@@ -1299,27 +1299,28 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     } else {
         Exception::notImplemented();
     }
-    flags.isTypeArgument = true;
+    flags.isTypeParameter = true;
 
     auto ownerScope = owner.dataAllowingNone(*this);
 
-    for (auto typeArg : ownerScope->typeArguments()) {
-        if (typeArg.dataAllowingNone(*this)->name == name) {
-            ENFORCE_NO_TIMER(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
+    for (auto typeParam : ownerScope->typeParameters()) {
+        if (typeParam.dataAllowingNone(*this)->name == name) {
+            ENFORCE_NO_TIMER(typeParam.dataAllowingNone(*this)->flags.hasFlags(flags),
+                             "existing symbol has wrong flags");
             if (!symbolTableFrozen) {
-                typeArg.data(*this)->addLoc(*this, loc);
+                typeParam.data(*this)->addLoc(*this, loc);
             } else {
                 // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
                 // checking. Don't mutate the symbol table in those cases. This loc should already be there.
-                ENFORCE(!loc.exists() || absl::c_count(typeArg.data(*this)->locs(), loc) == 1);
+                ENFORCE(!loc.exists() || absl::c_count(typeParam.data(*this)->locs(), loc) == 1);
             }
-            return typeArg;
+            return typeParam;
         }
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto result = TypeArgumentRef(*this, this->typeArguments.size());
-    this->typeArguments.emplace_back();
+    auto result = TypeParameterRef(*this, this->typeParameters.size());
+    this->typeParameters.emplace_back();
 
     TypeParameterData data = result.dataAllowingNone(*this);
     data->name = name;
@@ -1328,7 +1329,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
 
-    owner.dataAllowingNone(*this)->getOrCreateTypeArguments().emplace_back(result);
+    owner.dataAllowingNone(*this)->getOrCreateTypeParameters().emplace_back(result);
     return result;
 }
 
@@ -1860,8 +1861,8 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE_NO_TIMER(fnd != ownerMembers.end());
     ENFORCE_NO_TIMER(fnd->second == what);
     ownerMembers.erase(fnd);
-    for (const auto typeArgument : whatData->typeArguments()) {
-        this->typeArguments[typeArgument.id()] = this->typeArguments[0].deepCopy(*this);
+    for (const auto typeParameter : whatData->typeParameters()) {
+        this->typeParameters[typeParameter.id()] = this->typeParameters[0].deepCopy(*this);
     }
     // This drops the existing core::Method, which drops the `ParamInfo`s the method owned.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
@@ -1918,8 +1919,8 @@ unsigned int GlobalState::fieldsUsed() const {
     return fields.size();
 }
 
-unsigned int GlobalState::typeArgumentsUsed() const {
-    return typeArguments.size();
+unsigned int GlobalState::typeParametersUsed() const {
+    return typeParameters.size();
 }
 
 unsigned int GlobalState::typeMembersUsed() const {
@@ -1947,7 +1948,7 @@ unsigned int GlobalState::uniqueNamesUsed() const {
 }
 
 unsigned int GlobalState::symbolsUsedTotal() const {
-    return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeArgumentsUsed() + typeMembersUsed();
+    return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeParametersUsed() + typeMembersUsed();
 }
 
 string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
@@ -2042,7 +2043,7 @@ void GlobalState::sanityCheck() const {
         }
 
         i = -1;
-        for (auto &sym : typeArguments) {
+        for (auto &sym : typeParameters) {
             i++;
             if (i != 0) {
                 sym.sanityCheck(*this);
@@ -2183,9 +2184,9 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     for (auto &sym : this->fields) {
         result->fields.emplace_back(sym.deepCopy(*result));
     }
-    result->typeArguments.reserve(this->typeArguments.capacity());
-    for (auto &sym : this->typeArguments) {
-        result->typeArguments.emplace_back(sym.deepCopy(*result));
+    result->typeParameters.reserve(this->typeParameters.capacity());
+    for (auto &sym : this->typeParameters) {
+        result->typeParameters.emplace_back(sym.deepCopy(*result));
     }
     result->typeMembers.reserve(this->typeMembers.capacity());
     for (auto &sym : this->typeMembers) {
@@ -2261,7 +2262,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     result->classAndModules.reserve(this->classAndModules.capacity());
     result->methods.reserve(this->methods.capacity());
     result->fields.reserve(this->fields.capacity());
-    result->typeArguments.reserve(this->typeArguments.capacity());
+    result->typeParameters.reserve(this->typeParameters.capacity());
     result->typeMembers.reserve(this->typeMembers.capacity());
 
     if (packageDB().enabled()) {

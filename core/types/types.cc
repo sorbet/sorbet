@@ -728,7 +728,7 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
-TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {
+TypeVar::TypeVar(TypeParameterRef sym) : sym(sym) {
     recordAllocatedType("typevar");
 }
 
@@ -774,7 +774,7 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) c
 
 void LambdaParam::_sanityCheck(const GlobalState &gs) const {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {
-    ENFORCE(definition.isTypeMember() || definition.isTypeArgument());
+    ENFORCE(definition.isTypeMember() || definition.isTypeParameter());
 }
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {

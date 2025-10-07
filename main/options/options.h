@@ -229,7 +229,7 @@ struct Options {
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
     uint32_t reserveFieldTableCapacity = 0;
-    uint32_t reserveTypeArgumentTableCapacity = 0;
+    uint32_t reserveTypeParameterTableCapacity = 0;
     uint32_t reserveTypeMemberTableCapacity = 0;
     uint32_t reserveUtf8NameTableCapacity = 0;
     uint32_t reserveConstantNameTableCapacity = 0;

@@ -21,12 +21,12 @@ struct ParsedSig {
     core::TypePtr returns;
     core::LocOffsets returnsLoc;
 
-    struct TypeArgSpec {
+    struct TypeParamSpec {
         core::LocOffsets loc;
         core::NameRef name;
         core::TypePtr type;
     };
-    std::vector<TypeArgSpec> typeArgs;
+    std::vector<TypeParamSpec> typeParams;
 
     struct {
         core::LocOffsets sig = core::LocOffsets::none();
@@ -44,8 +44,8 @@ struct ParsedSig {
         core::LocOffsets incompatibleOverrideVisibility = core::LocOffsets::none();
     } seen;
 
-    TypeArgSpec &enterTypeArgByName(core::NameRef name);
-    const TypeArgSpec &findTypeArgByName(core::NameRef name) const;
+    TypeParamSpec &enterTypeParamByName(core::NameRef name);
+    const TypeParamSpec &findTypeParamByName(core::NameRef name) const;
 };
 
 struct TypeSyntaxArgs {

@@ -333,7 +333,7 @@ public:
 };
 CheckSize(TypeMemberRef, 4, 4);
 
-class TypeArgumentRef final {
+class TypeParameterRef final {
     uint32_t _id;
 
     friend class SymbolRef;
@@ -344,8 +344,8 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    TypeArgumentRef() : _id(0){};
-    TypeArgumentRef(const GlobalState &from, uint32_t id);
+    TypeParameterRef() : _id(0){};
+    TypeParameterRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
         return _id;
@@ -355,8 +355,8 @@ public:
         return _id != 0;
     }
 
-    static TypeArgumentRef fromRaw(uint32_t id) {
-        TypeArgumentRef ref;
+    static TypeParameterRef fromRaw(uint32_t id) {
+        TypeParameterRef ref;
         ref._id = id;
         return ref;
     }
@@ -372,11 +372,11 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const TypeArgumentRef &rhs) const;
+    bool operator==(const TypeParameterRef &rhs) const;
 
-    bool operator!=(const TypeArgumentRef &rhs) const;
+    bool operator!=(const TypeParameterRef &rhs) const;
 };
-CheckSize(TypeArgumentRef, 4, 4);
+CheckSize(TypeParameterRef, 4, 4);
 
 class SymbolRef final {
     friend class GlobalState;
@@ -401,7 +401,7 @@ public:
         ClassOrModule = 0,
         Method = 1,
         FieldOrStaticField = 2,
-        TypeArgument = 3,
+        TypeParameter = 3,
         TypeMember = 4,
     };
 
@@ -431,8 +431,8 @@ public:
         return kind() == Kind::FieldOrStaticField;
     }
 
-    inline bool isTypeArgument() const {
-        return kind() == Kind::TypeArgument;
+    inline bool isTypeParameter() const {
+        return kind() == Kind::TypeParameter;
     }
 
     inline bool isTypeMember() const {
@@ -459,8 +459,8 @@ public:
         return unsafeTableIndex();
     }
 
-    uint32_t typeArgumentIndex() const {
-        ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
+    uint32_t typeParameterIndex() const {
+        ENFORCE_NO_TIMER(kind() == Kind::TypeParameter);
         return unsafeTableIndex();
     }
 
@@ -477,7 +477,7 @@ public:
     SymbolRef(MethodRef kls);
     SymbolRef(FieldRef kls);
     SymbolRef(TypeMemberRef kls);
-    SymbolRef(TypeArgumentRef kls);
+    SymbolRef(TypeParameterRef kls);
     SymbolRef() : _id(0){};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
@@ -521,9 +521,9 @@ public:
         return TypeMemberRef::fromRaw(unsafeTableIndex());
     }
 
-    TypeArgumentRef asTypeArgumentRef() const {
-        ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
-        return TypeArgumentRef::fromRaw(unsafeTableIndex());
+    TypeParameterRef asTypeParameterRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::TypeParameter);
+        return TypeParameterRef::fromRaw(unsafeTableIndex());
     }
 
 public:
@@ -854,30 +854,30 @@ public:
         return FieldRef::fromRaw(0);
     }
 
-    static TypeArgumentRef noTypeArgument() {
-        return TypeArgumentRef::fromRaw(0);
+    static TypeParameterRef noTypeParameter() {
+        return TypeParameterRef::fromRaw(0);
     }
 
     static TypeMemberRef noTypeMember() {
         return TypeMemberRef::fromRaw(0);
     }
 
-    static TypeArgumentRef todoTypeArgument() {
-        return TypeArgumentRef::fromRaw(1);
+    static TypeParameterRef todoTypeParameter() {
+        return TypeParameterRef::fromRaw(1);
     }
 
     static MethodRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
         return MethodRef::fromRaw(2);
     }
 
-    static TypeArgumentRef
+    static TypeParameterRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
-        return TypeArgumentRef::fromRaw(2);
+        return TypeParameterRef::fromRaw(2);
     }
 
-    static TypeArgumentRef
+    static TypeParameterRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
-        return TypeArgumentRef::fromRaw(3);
+        return TypeParameterRef::fromRaw(3);
     }
 
     static ClassOrModuleRef T_Sig() {
@@ -1072,8 +1072,8 @@ public:
         return MethodRef::fromRaw(13);
     }
 
-    static TypeArgumentRef Kernel_lambda_returnType() {
-        return TypeArgumentRef::fromRaw(4);
+    static TypeParameterRef Kernel_lambda_returnType() {
+        return TypeParameterRef::fromRaw(4);
     }
 
     static MethodRef Kernel_lambdaTLet() {
@@ -1092,8 +1092,8 @@ public:
         return MethodRef::fromRaw(17);
     }
 
-    static TypeArgumentRef Kernel_proc_returnType() {
-        return TypeArgumentRef::fromRaw(5);
+    static TypeParameterRef Kernel_proc_returnType() {
+        return TypeParameterRef::fromRaw(5);
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
@@ -1189,7 +1189,7 @@ public:
     static const int MAX_SYNTHETIC_CLASS_SYMBOLS;
     static const int MAX_SYNTHETIC_METHOD_SYMBOLS;
     static const int MAX_SYNTHETIC_FIELD_SYMBOLS;
-    static const int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS;
+    static const int MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS;
     static const int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS;
 };
 
@@ -1209,7 +1209,7 @@ template <typename H> H AbslHashValue(H h, const FieldRef &m) {
     return H::combine(std::move(h), m.id());
 }
 
-template <typename H> H AbslHashValue(H h, const TypeArgumentRef &m) {
+template <typename H> H AbslHashValue(H h, const TypeParameterRef &m) {
     return H::combine(std::move(h), m.id());
 }
 

@@ -462,7 +462,7 @@ int realmain(int argc, char *argv[]) {
     // We want to be able to use setGlobalStateOptions in places like makeEmptyGlobalStateForFile,
     // which will only ever need enough memory for one file's worth of definition (not one codebase's worth).
     gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
-                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                          opts.reserveFieldTableCapacity, opts.reserveTypeParameterTableCapacity,
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
                           opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
 

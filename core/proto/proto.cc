@@ -102,7 +102,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::METHOD);
     } else if (sym.isTypeMember()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_MEMBER);
-    } else if (sym.isTypeArgument()) {
+    } else if (sym.isTypeParameter()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
     }
 
@@ -150,15 +150,15 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             *symbolProto.add_children() = toProto(gs, pair.second, showFull);
         }
     } else if (sym.isMethod()) {
-        for (auto typeArg : sym.asMethodRef().data(gs)->typeArguments()) {
-            if (!typeArg.exists()) {
+        for (auto typeParam : sym.asMethodRef().data(gs)->typeParameters()) {
+            if (!typeParam.exists()) {
                 continue;
             }
 
-            if (!showFull && !typeArg.data(gs)->isPrintable(gs)) {
+            if (!showFull && !typeParam.data(gs)->isPrintable(gs)) {
                 continue;
             }
-            *symbolProto.add_children() = toProto(gs, typeArg, showFull);
+            *symbolProto.add_children() = toProto(gs, typeParam, showFull);
         }
     }
 

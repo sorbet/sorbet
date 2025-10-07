@@ -602,7 +602,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return make_type<AppliedType>(klass, move(targs));
         }
         case TypePtr::Tag::TypeVar: {
-            auto sym = TypeArgumentRef::fromRaw(p.getU4());
+            auto sym = TypeParameterRef::fromRaw(p.getU4());
             return make_type<TypeVar>(sym);
         }
         case TypePtr::Tag::SelfType: {
@@ -640,8 +640,8 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
     p.putU4(what.name.rawId());
     p.putU4(what.rebind.id());
     p.putU4(what.flags.serialize());
-    p.putU4(what.typeArguments().size());
-    for (auto s : what.typeArguments()) {
+    p.putU4(what.typeParameters().size());
+    for (auto s : what.typeParameters()) {
         p.putU4(s.id());
     }
     p.putU4(what.parameters.size());
@@ -670,9 +670,9 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
 
     int typeParamsSize = p.getU4();
     if (typeParamsSize != 0) {
-        auto &vec = result.getOrCreateTypeArguments();
+        auto &vec = result.getOrCreateTypeParameters();
         for (int i = 0; i < typeParamsSize; i++) {
-            vec.emplace_back(TypeArgumentRef::fromRaw(p.getU4()));
+            vec.emplace_back(TypeParameterRef::fromRaw(p.getU4()));
         }
     }
 
@@ -908,8 +908,8 @@ void SerializerImpl::pickleSymbolTable(Pickler &p, const GlobalState &gs) {
         pickle(p, s);
     }
 
-    p.putU4(gs.typeArguments.size());
-    for (const TypeParameter &s : gs.typeArguments) {
+    p.putU4(gs.typeParameters.size());
+    for (const TypeParameter &s : gs.typeParameters) {
         pickle(p, s);
     }
 
@@ -923,7 +923,7 @@ void SerializerImpl::unpickleSymbolTable(UnPickler &p, GlobalState &result) {
     result.classAndModules.clear();
     result.methods.clear();
     result.fields.clear();
-    result.typeArguments.clear();
+    result.typeParameters.clear();
     result.typeMembers.clear();
 
     {
@@ -950,11 +950,11 @@ void SerializerImpl::unpickleSymbolTable(UnPickler &p, GlobalState &result) {
             result.fields.emplace_back(unpickleField(p, &result));
         }
 
-        int typeArgumentSize = p.getU4();
-        ENFORCE_NO_TIMER(typeArgumentSize > 0);
-        result.typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
-        for (int i = 0; i < typeArgumentSize; i++) {
-            result.typeArguments.emplace_back(unpickleTypeParameter(p, &result));
+        int typeParameterSize = p.getU4();
+        ENFORCE_NO_TIMER(typeParameterSize > 0);
+        result.typeParameters.reserve(nextPowerOfTwo(typeParameterSize));
+        for (int i = 0; i < typeParameterSize; i++) {
+            result.typeParameters.emplace_back(unpickleTypeParameter(p, &result));
         }
 
         int typeMemberSize = p.getU4();

@@ -57,9 +57,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     if (cfg->symbol.data(ctx)->flags.isGenericMethod) {
         _constr = make_unique<core::TypeConstraint>();
         constr = _constr.get();
-        for (auto typeArgument : cfg->symbol.data(ctx)->typeArguments()) {
-            constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
-                                      core::make_type<core::SelfTypeParam>(typeArgument));
+        for (auto typeParameter : cfg->symbol.data(ctx)->typeParameters()) {
+            constr->rememberIsSubtype(ctx, typeParameter.data(ctx)->resultType,
+                                      core::make_type<core::SelfTypeParam>(typeParameter));
         }
         if (!constr->solve(ctx)) {
             Exception::raise("Constraint should always solve after creating empty TypeConstraint with all upper bounds "
@@ -83,7 +83,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             constr = _constr.get();
             auto returnTypeVar = core::Symbols::
                 Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant();
-            InlinedVector<core::TypeArgumentRef, 4> domainTemp;
+            InlinedVector<core::TypeParameterRef, 4> domainTemp;
             domainTemp.emplace_back(returnTypeVar);
             methodReturnType = returnTypeVar.data(ctx)->resultType;
 

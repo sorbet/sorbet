@@ -232,7 +232,7 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, Symb
 
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     auto emptyResult = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-    if (this->definition.isTypeArgument()) {
+    if (this->definition.isTypeParameter()) {
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
             return emptyResult;
@@ -473,8 +473,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         // `T::Array[T.type_parameter(:U)]` based on whether the argument is `String`--in that case,
         // it doesn't matter what the `T.type_parameter(:U)` is, because `String` is not an `Array`.
         auto constr = make_unique<TypeConstraint>();
-        for (auto typeArgument : candidate.data(gs)->typeArguments()) {
-            constr->rememberIsSubtype(gs, typeArgument.data(gs)->resultType, Types::untypedUntracked());
+        for (auto typeParameter : candidate.data(gs)->typeParameters()) {
+            constr->rememberIsSubtype(gs, typeParameter.data(gs)->resultType, Types::untypedUntracked());
         }
         if (!constr->solve(gs)) {
             Exception::raise("Constraint should always solve after creating TypeConstraint with only untyped bounds");
@@ -1017,7 +1017,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (methodData->flags.isGenericMethod) {
-        constr->defineDomain(gs, methodData->typeArguments());
+        constr->defineDomain(gs, methodData->typeParameters());
     }
     auto posArgs = args.numPosArgs;
     bool hasKwparams = absl::c_any_of(methodData->parameters, [](const auto &param) { return param.flags.isKeyword; });

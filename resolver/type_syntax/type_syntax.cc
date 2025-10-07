@@ -246,13 +246,13 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                 }
 
                 auto name = c->asSymbol();
-                auto &typeArgSpec = sig.enterTypeArgByName(name);
+                auto &typeArgSpec = sig.enterTypeParamByName(name);
                 if (typeArgSpec.type) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`: Type argument `{}` was specified twice", "sig", name.show(ctx));
                     }
                 }
-                typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
+                typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeParameter());
                 typeArgSpec.loc = arg.loc();
             }
 
@@ -851,7 +851,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto fnd = sig.findTypeArgByName(arr->asSymbol());
+            auto fnd = sig.findTypeParamByName(arr->asSymbol());
             if (!fnd.type) {
                 if (args.allowUnspecifiedTypeParameter) {
                     // Return nullopt, which will indicate that we couldn't parse the sig at this time.
@@ -1530,21 +1530,21 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParams(core::Co
 
 } // namespace
 
-ParsedSig::TypeArgSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
-    for (auto &current : typeArgs) {
+ParsedSig::TypeParamSpec &ParsedSig::enterTypeParamByName(core::NameRef name) {
+    for (auto &current : typeParams) {
         if (current.name == name) {
             return current;
         }
     }
-    auto &inserted = typeArgs.emplace_back();
+    auto &inserted = typeParams.emplace_back();
     inserted.name = name;
     return inserted;
 }
 
-const ParsedSig::TypeArgSpec emptyTypeArgSpec;
+const ParsedSig::TypeParamSpec emptyTypeArgSpec;
 
-const ParsedSig::TypeArgSpec &ParsedSig::findTypeArgByName(core::NameRef name) const {
-    for (auto &current : typeArgs) {
+const ParsedSig::TypeParamSpec &ParsedSig::findTypeParamByName(core::NameRef name) const {
+    for (auto &current : typeParams) {
         if (current.name == name) {
             return current;
         }
