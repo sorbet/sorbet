@@ -68,3 +68,17 @@ end
 public def defModifier
   nil #: Integer?
 end
+
+class DefModifiers
+  private
+
+  #: -> Integer?
+  def foo
+    nil #: Integer?
+  end
+
+  #: -> Integer?
+  public def bar
+    nil #: Integer?
+  end
+end

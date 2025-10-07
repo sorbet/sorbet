@@ -137,4 +137,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of defReturn5>
 
   <self>.public(<runtime method definition of defModifier>)
+
+  class <emptyTree>::<C DefModifiers><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+    end
+
+    <self>.private()
+
+    <runtime method definition of foo>
+
+    <self>.public(<runtime method definition of bar>)
+  end
 end
