@@ -959,7 +959,7 @@ void GlobalState::initEmpty() {
                      "Too many synthetic typeMember symbols? have: {} expected: {}", typeMembers.size(),
                      Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS);
     ENFORCE_NO_TIMER(typeParameters.size() == Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS,
-                     "Too many synthetic typeArgument symbols? have: {} expected: {}", typeParameters.size(),
+                     "Too many synthetic typeParameter symbols? have: {} expected: {}", typeParameters.size(),
                      Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS);
 
     installIntrinsics();
