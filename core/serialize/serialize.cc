@@ -950,10 +950,10 @@ void SerializerImpl::unpickleSymbolTable(UnPickler &p, GlobalState &result) {
             result.fields.emplace_back(unpickleField(p, &result));
         }
 
-        int typeArgumentSize = p.getU4();
-        ENFORCE_NO_TIMER(typeArgumentSize > 0);
-        result.typeParameters.reserve(nextPowerOfTwo(typeArgumentSize));
-        for (int i = 0; i < typeArgumentSize; i++) {
+        int typeParameterSize = p.getU4();
+        ENFORCE_NO_TIMER(typeParameterSize > 0);
+        result.typeParameters.reserve(nextPowerOfTwo(typeParameterSize));
+        for (int i = 0; i < typeParameterSize; i++) {
             result.typeParameters.emplace_back(unpickleTypeParameter(p, &result));
         }
 
