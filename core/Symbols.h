@@ -198,7 +198,7 @@ public:
         return {};
     }
 
-    InlinedVector<TypeParameterRef, 4> &existingTypeArguments() {
+    InlinedVector<TypeParameterRef, 4> &existingTypeParameters() {
         ENFORCE(typeArgs != nullptr);
         return *typeArgs;
     }
