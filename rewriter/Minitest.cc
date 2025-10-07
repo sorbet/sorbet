@@ -655,16 +655,15 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
 
         case core::Names::its().rawId(): {
-            if (block == nullptr || !send->recv.isSelfReference() ||
-                !insideDescribe) {
+            if (block == nullptr || !send.recv.isSelfReference() || !insideDescribe) {
                 return nullptr;
             }
 
-            if (send->numPosArgs() != 1) {
+            if (send.numPosArgs() != 1) {
                 return nullptr;
             }
 
-            auto &arg = send->getPosArg(0);
+            auto &arg = send.getPosArg(0);
 
             // Only handle symbol arguments for now (its(:attribute))
             auto argLit = ast::cast_tree<ast::Literal>(arg);
@@ -699,14 +698,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                     auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
                     // Look for is_expected calls
-                    if (send->fun == isExpectedName && send->recv.isSelfReference()) {
+                    if (send.fun == isExpectedName && send.recv.isSelfReference()) {
                         // Replace is_expected with expect(subject.attribute)
-                        auto subjectCall = ast::MK::Send0(send->loc, ast::MK::Self(send->loc), core::Names::subject(),
-                                                          send->loc.copyWithZeroLength());
-                        auto attributeCall = ast::MK::Send0(send->loc, std::move(subjectCall), attributeName,
-                                                            send->loc.copyWithZeroLength());
-                        return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), expectName,
-                                              send->loc.copyWithZeroLength(), std::move(attributeCall));
+                        auto subjectCall = ast::MK::Send0(send.loc, ast::MK::Self(send.loc), core::Names::subject(),
+                                                          send.loc.copyWithZeroLength());
+                        auto attributeCall = ast::MK::Send0(send.loc, std::move(subjectCall), attributeName,
+                                                            send.loc.copyWithZeroLength());
+                        return ast::MK::Send1(send.loc, ast::MK::Self(send.loc), expectName,
+                                              send.loc.copyWithZeroLength(), std::move(attributeCall));
                     }
 
                     return tree;
@@ -719,17 +718,17 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             // Create it block
             auto itName = ctx.state.enterNameUTF8("<it>");
-            auto itDeclLoc = send->loc.copyWithZeroLength();
+            auto itDeclLoc = send.loc.copyWithZeroLength();
 
             ConstantMover constantMover;
             ast::TreeWalk::apply(ctx, constantMover, itBody);
 
-            auto itMethod = ast::MK::SyntheticMethod0(send->loc, itDeclLoc, itName,
+            auto itMethod = ast::MK::SyntheticMethod0(send.loc, itDeclLoc, itName,
                                                       prepareBody(ctx, /* isClass */ true, std::move(itBody),
                                                                   /* insideDescribe */ true));
             ast::cast_tree_nonnull<ast::MethodDef>(itMethod).flags.discardDef = true;
             itMethod = addSigVoid(ctx, move(itMethod));
-            itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
+            itMethod = constantMover.addConstantsToExpression(send.loc, move(itMethod));
 
             // No need to create a subject method - the body now calls subject.attribute directly
             ast::ClassDef::RHS_store describeBody;
@@ -740,7 +739,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
 
             auto describeDeclLoc = declLocForSendWithBlock(*send);
-            return ast::MK::Class(send->loc, describeDeclLoc, std::move(describeName), std::move(ancestors),
+            return ast::MK::Class(send.loc, describeDeclLoc, std::move(describeName), std::move(ancestors),
                                   std::move(describeBody));
         }
 
