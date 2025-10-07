@@ -201,7 +201,7 @@ MethodRef Method::ref(const GlobalState &gs) const {
 }
 
 SymbolRef TypeParameter::ref(const GlobalState &gs) const {
-    if (flags.isTypeArgument) {
+    if (flags.isTypeParameter) {
         uint32_t distance = this - gs.typeArguments.data();
         return TypeParameterRef(gs, distance);
     } else {

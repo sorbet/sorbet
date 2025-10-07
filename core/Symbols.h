@@ -299,7 +299,7 @@ public:
 
     class Flags {
     public:
-        bool isTypeArgument : 1;
+        bool isTypeParameter : 1;
         bool isTypeMember : 1;
 
         // Type flags
@@ -312,7 +312,7 @@ public:
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
-            : isTypeArgument(false), isTypeMember(false), isCovariant(false), isInvariant(false),
+            : isTypeParameter(false), isTypeMember(false), isCovariant(false), isInvariant(false),
               isContravariant(false), isFixed(false) {}
 
         uint8_t serialize() const {

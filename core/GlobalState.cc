@@ -1299,7 +1299,7 @@ TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameR
     } else {
         Exception::notImplemented();
     }
-    flags.isTypeArgument = true;
+    flags.isTypeParameter = true;
 
     auto ownerScope = owner.dataAllowingNone(*this);
 
