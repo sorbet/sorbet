@@ -334,9 +334,9 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::noMethod());
     FieldRef field = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE_NO_TIMER(field == Symbols::noField());
-    TypeParameterRef typeArgument =
+    TypeParameterRef typeParameter =
         enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeParameter(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::noTypeParameter());
+    ENFORCE_NO_TIMER(typeParameter == Symbols::noTypeParameter());
     TypeMemberRef typeMember =
         enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeMember == Symbols::noTypeMember());
@@ -472,28 +472,28 @@ void GlobalState::initEmpty() {
         enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
-    typeArgument =
-        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeParameter(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::todoTypeParameter());
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter = enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeParameter(),
+                                       Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeParameter == Symbols::todoTypeParameter());
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
     method =
         enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder());
-    typeArgument = enterTypeParameter(
+    typeParameter = enterTypeParameter(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredReturnType(), 1),
         core::Variance::ContraVariant);
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
     ENFORCE_NO_TIMER(
-        typeArgument ==
+        typeParameter ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
-    typeArgument = enterTypeParameter(
+    typeParameter = enterTypeParameter(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredArgumentType(), 1),
         core::Variance::CoVariant);
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
     ENFORCE_NO_TIMER(
-        typeArgument ==
+        typeParameter ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig());
@@ -657,9 +657,9 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::Kernel(), Names::lambda()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_lambda());
 
-    typeArgument = enterTypeParameter(Loc::none(), Symbols::Kernel_lambda(), Names::returnType(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_lambda_returnType());
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter = enterTypeParameter(Loc::none(), Symbols::Kernel_lambda(), Names::returnType(), Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeParameter == Symbols::Kernel_lambda_returnType());
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
 
     method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::arg0(), Types::top()).build();
     ENFORCE_NO_TIMER(method == Symbols::Kernel_lambdaTLet());
@@ -678,9 +678,9 @@ void GlobalState::initEmpty() {
             .build();
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_typeMember());
 
-    typeArgument = enterTypeParameter(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
-    ENFORCE_NO_TIMER(typeArgument == Symbols::Kernel_proc_returnType());
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    typeParameter = enterTypeParameter(Loc::none(), Symbols::Kernel_proc(), Names::returnType(), Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeParameter == Symbols::Kernel_proc_returnType());
+    typeParameter.data(*this)->resultType = make_type<core::TypeVar>(typeParameter);
 
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -1860,8 +1860,8 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
     ENFORCE_NO_TIMER(fnd != ownerMembers.end());
     ENFORCE_NO_TIMER(fnd->second == what);
     ownerMembers.erase(fnd);
-    for (const auto typeArgument : whatData->typeParameters()) {
-        this->typeParameters[typeArgument.id()] = this->typeParameters[0].deepCopy(*this);
+    for (const auto typeParameter : whatData->typeParameters()) {
+        this->typeParameters[typeParameter.id()] = this->typeParameters[0].deepCopy(*this);
     }
     // This drops the existing core::Method, which drops the `ParamInfo`s the method owned.
     this->methods[what.id()] = this->methods[0].deepCopy(*this);
