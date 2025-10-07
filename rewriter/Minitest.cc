@@ -680,32 +680,26 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             auto describeName =
                 ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
 
-            auto isExpectedName = ctx.state.enterNameUTF8("is_expected");
-            auto expectName = ctx.state.enterNameUTF8("expect");
-
             // Transform the its block body to replace is_expected with expect(subject.attribute)
             class IsExpectedTransformer {
             private:
                 core::NameRef attributeName;
-                core::NameRef isExpectedName;
-                core::NameRef expectName;
 
             public:
-                IsExpectedTransformer(core::NameRef attributeName, core::NameRef isExpectedName,
-                                      core::NameRef expectName)
-                    : attributeName(attributeName), isExpectedName(isExpectedName), expectName(expectName) {}
+                IsExpectedTransformer(core::NameRef attributeName)
+                    : attributeName(attributeName) {}
 
                 ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
                     auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
                     // Look for is_expected calls
-                    if (send.fun == isExpectedName && send.recv.isSelfReference()) {
+                    if (send.fun == core::Names::isExpected() && send.recv.isSelfReference()) {
                         // Replace is_expected with expect(subject.attribute)
                         auto subjectCall = ast::MK::Send0(send.loc, ast::MK::Self(send.loc), core::Names::subject(),
                                                           send.loc.copyWithZeroLength());
                         auto attributeCall = ast::MK::Send0(send.loc, std::move(subjectCall), attributeName,
                                                             send.loc.copyWithZeroLength());
-                        return ast::MK::Send1(send.loc, ast::MK::Self(send.loc), expectName,
+                        return ast::MK::Send1(send.loc, ast::MK::Self(send.loc), core::Names::expect(),
                                               send.loc.copyWithZeroLength(), std::move(attributeCall));
                     }
 
@@ -713,11 +707,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 }
             };
 
-            IsExpectedTransformer transformer(attributeName, isExpectedName, expectName);
+            IsExpectedTransformer transformer(attributeName);
             ast::ExpressionPtr itBody = ast::TreeMap::apply(ctx, transformer, move(block->body));
 
             // Create it block
-            auto itName = ctx.state.enterNameUTF8("<it>");
+            auto itName = core::Names::itAngles();
             auto itDeclLoc = send->loc.copyWithZeroLength();
 
             ConstantMover constantMover;

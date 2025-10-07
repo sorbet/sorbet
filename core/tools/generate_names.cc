@@ -280,6 +280,8 @@ NameDef names[] = {
     {"pending"},
     {"skip"},
     {"its"},
+    {"isExpected", "is_expected"},
+    {"expect"},
     {"before"},
     {"beforeAngles", "<before>"},
     {"after"},
