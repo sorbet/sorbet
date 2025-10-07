@@ -335,7 +335,7 @@ void GlobalState::initEmpty() {
     FieldRef field = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE_NO_TIMER(field == Symbols::noField());
     TypeParameterRef typeArgument =
-        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
+        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeParameter(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::noTypeParameter());
     TypeMemberRef typeMember =
         enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
@@ -1286,7 +1286,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
 }
 
 TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance) {
-    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeArgument() ||
+    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeParameter() ||
                      name == Names::Constants::TodoTypeArgument());
     ENFORCE_NO_TIMER(name.exists());
     TypeParameter::Flags flags;

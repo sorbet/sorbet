@@ -526,7 +526,7 @@ NameDef names[] = {
     {"NoSymbol", "<none>", true},
     {"noFieldOrStaticField", "<no-field-or-static-field>", false},
     {"noMethod", "<no-method>", false},
-    {"NoTypeArgument", "<no-type-argument>", true},
+    {"NoTypeParameter", "<no-type-argument>", true},
     {"NoTypeMember", "<no-type-member>", true},
     {"Opus", "Opus", true},
     {"T", "T", true},
