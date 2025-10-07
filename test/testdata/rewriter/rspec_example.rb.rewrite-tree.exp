@@ -228,57 +228,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
     end
-
-    class <emptyTree>::<C <describe 'its with string argument'>><<C <todo sym>>> < (<self>)
-      <self>.sig() do ||
-        <self>.returns(<emptyTree>::<C ThingWithChainedMethods>)
-      end
-
-      def subject<<todo method>>(&<blk>)
-        <emptyTree>::<C ThingWithChainedMethods>.new()
-      end
-
-      class <emptyTree>::<C ThingWithChainedMethods><<C <todo sym>>> < (::<todo sym>)
-        <self>.sig() do ||
-          <self>.returns(<emptyTree>::<C ChainedValue>)
-        end
-
-        def size<<todo method>>(&<blk>)
-          <emptyTree>::<C ChainedValue>.new()
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        <runtime method definition of size>
-      end
-
-      class <emptyTree>::<C ChainedValue><<C <todo sym>>> < (::<todo sym>)
-        <self>.sig() do ||
-          <self>.returns(<emptyTree>::<C T>::<C Boolean>)
-        end
-
-        def foobar<<todo method>>(&<blk>)
-          true
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        <runtime method definition of foobar>
-      end
-
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      <runtime method definition of subject>
-
-      class <emptyTree>::<C <describe 'size.foobar'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          begin
-            <emptyTree>::<C T>.reveal_type(<self>.subject())
-            <self>.expect(<self>.subject().size.foobar()).to(<self>.eq(true))
-          end
-        end
-      end
-    end
   end
 
   <emptyTree>::<C RSpec>.context("B") do ||

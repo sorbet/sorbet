@@ -157,36 +157,6 @@ class A
       is_expected.to eq(0) # error: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize`
     end
   end
-
-  describe "its with string argument" do
-    class ThingWithChainedMethods
-      extend T::Sig
-
-      sig {returns(ChainedValue)}
-      def size
-        ChainedValue.new
-      end
-    end
-
-    class ChainedValue
-      extend T::Sig
-
-      sig {returns(T::Boolean)}
-      def foobar
-        true
-      end
-    end
-
-    extend T::Sig
-    sig {returns(ThingWithChainedMethods)}
-    let(:subject) { ThingWithChainedMethods.new }
-
-    # Test method chaining with string argument
-    its("size.foobar") do
-      T.reveal_type(subject) # error: Revealed type: `A::<describe 'its with string argument'>::ThingWithChainedMethods`
-      is_expected.to eq(true) # error: Method `size.foobar` does not exist on `A::<describe 'its with string argument'>::ThingWithChainedMethods`
-    end
-  end
 end
 
 RSpec.context("B") do

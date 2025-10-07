@@ -654,21 +654,6 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
 
-        // From RSpec internal documentation:
-        //   # This ...
-        //   RSpec.describe Array do
-        //     its(:size) { is_expected.to eq(0) }
-        //   end
-        //
-        //   # ... generates the same runtime structure as this:
-        //   RSpec.describe Array do
-        //     describe "size" do
-        //       it "is_expected.to eq(0)" do
-        //         expect(subject.size).to eq(0)
-        //       end
-        //     end
-        //   end
-        //
         case core::Names::its().rawId(): {
             if (block == nullptr || !send->recv.isSelfReference() ||
                 (!insideDescribe && requiresSecondFactor(send->fun))) {
@@ -681,63 +666,35 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
             auto &arg = send->getPosArg(0);
 
-            // Handle both symbol arguments (its(:attribute)) and string arguments (its("attribute.chain"))
+            // Only handle symbol arguments for now (its(:attribute))
             auto argLit = ast::cast_tree<ast::Literal>(arg);
-            if (argLit == nullptr) {
+            if (argLit == nullptr || !argLit->isName()) {
                 return nullptr;
             }
 
-            std::string argString;
-            std::vector<core::NameRef> attributeChain;
-
-            if (argLit->isName()) {
-                // Symbol argument: its(:attribute)
-                auto attributeName = argLit->asName();
-                argString = attributeName.show(ctx);
-                attributeChain.push_back(attributeName);
-            } else if (argLit->isString()) {
-                // String argument: its("attribute.chain")
-                auto stringName = argLit->asString();
-                argString = stringName.show(ctx);
-
-                // Parse the method chain by splitting on '.'
-                size_t start = 0;
-                size_t end = argString.find('.');
-
-                while (end != std::string::npos) {
-                    std::string methodName = argString.substr(start, end - start);
-                    attributeChain.push_back(ctx.state.enterNameUTF8(methodName));
-                    start = end + 1;
-                    end = argString.find('.', start);
-                }
-
-                // Add the last method name
-                std::string methodName = argString.substr(start);
-                attributeChain.push_back(ctx.state.enterNameUTF8(methodName));
-            } else {
-                return nullptr;
-            }
+            auto attributeName = argLit->asName();
+            auto argString = attributeName.show(ctx);
 
             // Create the describe block name
             auto describeTestName = fmt::format("<describe '{}'>", argString);
-            auto describeName =
-                ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
+            auto describeName = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
 
             // Enter names before creating the transformer (can't call enterNameUTF8 in const context)
             auto isExpectedName = ctx.state.enterNameUTF8("is_expected");
             auto expectName = ctx.state.enterNameUTF8("expect");
 
-            // Transform the its block body to replace is_expected with expect(subject.attribute.chain)
+            // Transform the its block body to replace is_expected with expect(subject.attribute)
+            // This allows proper type inference without needing super support
             class IsExpectedTransformer {
             private:
-                std::vector<core::NameRef> attributeChain;
+                core::NameRef attributeName;
                 core::NameRef isExpectedName;
                 core::NameRef expectName;
 
             public:
-                IsExpectedTransformer(std::vector<core::NameRef> attributeChain, core::NameRef isExpectedName,
-                                      core::NameRef expectName)
-                    : attributeChain(std::move(attributeChain)), isExpectedName(isExpectedName),
+                IsExpectedTransformer(core::NameRef attributeName, core::NameRef isExpectedName, core::NameRef expectName)
+                    : attributeName(attributeName),
+                      isExpectedName(isExpectedName),
                       expectName(expectName) {}
 
                 ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
@@ -748,19 +705,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
                     // Look for is_expected calls
                     if (send->fun == isExpectedName && send->recv.isSelfReference()) {
-                        // Replace is_expected with expect(subject.attribute.chain)
-                        ast::ExpressionPtr subjectCall =
-                            ast::MK::Send0(send->loc, ast::MK::Self(send->loc), core::Names::subject(),
-                                           send->loc.copyWithZeroLength());
-
-                        // Chain all the attribute calls
-                        for (const auto &attrName : attributeChain) {
-                            subjectCall = ast::MK::Send0(send->loc, std::move(subjectCall), attrName,
-                                                         send->loc.copyWithZeroLength());
-                        }
-
-                        return ast::MK::Send1(send->loc, ast::MK::Self(send->loc), expectName,
-                                              send->loc.copyWithZeroLength(), std::move(subjectCall));
+                        // Replace is_expected with expect(subject.attribute)
+                        auto subjectCall = ast::MK::Send0(send->loc, ast::MK::Self(send->loc),
+                                                         core::Names::subject(), send->loc.copyWithZeroLength());
+                        auto attributeCall = ast::MK::Send0(send->loc, std::move(subjectCall),
+                                                           attributeName, send->loc.copyWithZeroLength());
+                        return ast::MK::Send1(send->loc, ast::MK::Self(send->loc),
+                                            expectName, send->loc.copyWithZeroLength(),
+                                            std::move(attributeCall));
                     }
 
                     return tree;
@@ -768,7 +720,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             };
 
             ast::ExpressionPtr itBody = std::move(block->body);
-            IsExpectedTransformer transformer(attributeChain, isExpectedName, expectName);
+            IsExpectedTransformer transformer(attributeName, isExpectedName, expectName);
             itBody = ast::TreeMap::apply(ctx, transformer, std::move(itBody));
 
             // Create it block
@@ -785,6 +737,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             itMethod = addSigVoid(ctx, move(itMethod));
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
 
+            // No need to create a subject method - the body now calls subject.attribute directly
             ast::ClassDef::RHS_store describeBody;
             describeBody.emplace_back(std::move(itMethod));
 
