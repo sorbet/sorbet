@@ -166,7 +166,7 @@ public:
      * We should do proper instantiation and subtype test after we have guessed type variables with
      * tc.solve(). If the constraint has already been solved, use `instantiate` instead.
      */
-    static TypePtr approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
+    static TypePtr approximateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
     static TypePtr dropLiteral(const GlobalState &gs, const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
@@ -683,7 +683,7 @@ public:
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 };
 CheckSize(TypeVar, 8, 8);
@@ -707,7 +707,7 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
@@ -768,7 +768,7 @@ public:
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
 private:
@@ -814,7 +814,7 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
@@ -848,7 +848,7 @@ public:
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
     // Return the type of the underlying array that this tuple decays into
@@ -880,7 +880,7 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 };
 CheckSize(AppliedType, 32, 8);

@@ -305,7 +305,7 @@ public:
     // for use with LoadYieldParams
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
-    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
+    TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 

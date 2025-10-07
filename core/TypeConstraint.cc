@@ -40,7 +40,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
         if (bound == Types::top()) {
             continue;
         }
-        auto approximation = bound._approximate(gs, *this, core::Polarity::Positive);
+        auto approximation = bound._approximateTypeVars(gs, *this, core::Polarity::Positive);
         if (approximation) {
             findSolution(tv) = approximation;
         } else {
@@ -56,7 +56,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
         if (sol) {
             continue;
         }
-        auto approximation = bound._approximate(gs, *this, core::Polarity::Positive);
+        auto approximation = bound._approximateTypeVars(gs, *this, core::Polarity::Positive);
         if (approximation) {
             sol = approximation;
         } else {

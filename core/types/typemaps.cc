@@ -31,9 +31,9 @@ TypePtr Types::instantiateTypeVars(const GlobalState &gs, const TypePtr &what, c
     return what;
 }
 
-TypePtr Types::approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
+TypePtr Types::approximateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
     ENFORCE(what != nullptr);
-    auto t = what._approximate(gs, tc, core::Polarity::Positive);
+    auto t = what._approximateTypeVars(gs, tc, core::Polarity::Positive);
     if (t) {
         return t;
     }
@@ -44,7 +44,7 @@ TypePtr TypeVar::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
     return tc.getInstantiation(sym);
 }
 
-TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+TypePtr TypeVar::_approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
     switch (polarity) {
         case core::Polarity::Positive:
         case core::Polarity::Neutral: {
@@ -153,7 +153,7 @@ optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const G
     int i = -1;
     for (auto &e : elems) {
         ++i;
-        auto t = e._approximate(gs, tc, polarities[i]);
+        auto t = e._approximateTypeVars(gs, tc, polarities[i]);
         if (!newElems.has_value() && !t) {
             continue;
         }
@@ -196,7 +196,8 @@ TypePtr TupleType::_instantiateTypeVars(const GlobalState &gs, const TypeConstra
     return make_type<TupleType>(move(*newElems));
 }
 
-TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+TypePtr TupleType::_approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc,
+                                        core::Polarity polarity) const {
     PolaritiesStore polarities(this->elems.size(), polarity);
     optional<vector<TypePtr>> newElems = approximateElems(this->elems, gs, tc, polarities);
     if (!newElems) {
@@ -222,7 +223,8 @@ TypePtr ShapeType::_instantiateTypeVars(const GlobalState &gs, const TypeConstra
     return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
-TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+TypePtr ShapeType::_approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc,
+                                        core::Polarity polarity) const {
     PolaritiesStore polarities(this->values.size(), polarity);
     optional<vector<TypePtr>> newValues = approximateElems(this->values, gs, tc, polarities);
     if (!newValues) {
@@ -262,9 +264,9 @@ TypePtr OrType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint
     return nullptr;
 }
 
-TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
-    auto left = this->left._approximate(gs, tc, polarity);
-    auto right = this->right._approximate(gs, tc, polarity);
+TypePtr OrType::_approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+    auto left = this->left._approximateTypeVars(gs, tc, polarity);
+    auto right = this->right._approximateTypeVars(gs, tc, polarity);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -308,9 +310,9 @@ TypePtr AndType::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
     return nullptr;
 }
 
-TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
-    auto left = this->left._approximate(gs, tc, polarity);
-    auto right = this->right._approximate(gs, tc, polarity);
+TypePtr AndType::_approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+    auto left = this->left._approximateTypeVars(gs, tc, polarity);
+    auto right = this->right._approximateTypeVars(gs, tc, polarity);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -340,7 +342,8 @@ TypePtr AppliedType::_instantiateTypeVars(const GlobalState &gs, const TypeConst
     return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
-TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const {
+TypePtr AppliedType::_approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc,
+                                          core::Polarity polarity) const {
     PolaritiesStore polarities;
     for (auto typeMember : this->klass.data(gs)->typeMembers()) {
         switch (typeMember.data(gs)->variance()) {
