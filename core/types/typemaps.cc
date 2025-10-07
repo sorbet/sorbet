@@ -8,16 +8,6 @@
 using namespace std;
 namespace sorbet::core {
 
-TypePtr Types::instantiateLambdaParams(const GlobalState &gs, const TypePtr &what,
-                                       absl::Span<const TypeMemberRef> params, const vector<TypePtr> &targs) {
-    ENFORCE(what != nullptr);
-    auto t = what._instantiateLambdaParams(gs, params, targs);
-    if (t) {
-        return t;
-    }
-    return what;
-}
-
 TypePtr Types::instantiateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
     ENFORCE(tc.isSolved());
     if (tc.isEmpty()) {

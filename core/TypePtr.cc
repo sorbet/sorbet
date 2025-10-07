@@ -356,7 +356,7 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<cons
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
         case Tag::SelfType:
-            return nullptr;
+            return *this;
 
         case Tag::TupleType:
             return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs);
