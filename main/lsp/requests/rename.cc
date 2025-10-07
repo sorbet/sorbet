@@ -76,8 +76,8 @@ class MethodRenamer : public AbstractRewriter {
     string newName;
 
 public:
-    MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, core::MethodRef method,
-                  const string oldName, const string newName)
+    MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config,
+                  core::lsp::Query::Symbol::STORAGE &&symbols, const string oldName, const string newName)
         : AbstractRewriter(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
@@ -93,7 +93,9 @@ public:
             invalid = true;
         }
 
-        addSubclassRelatedMethods(gs, method, getQueue());
+        for (const auto sym : symbols) {
+            addSubclassRelatedMethods(gs, sym.asMethodRef(), getQueue());
+        }
     }
 
     ~MethodRenamer() {}
@@ -259,6 +261,18 @@ void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, AbstractRewriter &
     }
 }
 
+bool canRenameMethod(const core::GlobalState &gs, core::MethodRef method) {
+    if (!method.exists()) {
+        return false;
+    }
+
+    auto data = method.data(gs);
+    auto loc = data->loc();
+    // TODO(jez) We can probably ~trivially support overloaded methods now
+    return loc.exists() && !loc.file().data(gs).isStdlib() && !data->flags.isOverloaded &&
+           !data->name.isOverloadName(gs);
+}
+
 unique_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
                                          const sorbet::realmain::lsp::LSPConfiguration &config, core::SymbolRef symbol,
                                          const string newName) {
@@ -267,18 +281,8 @@ unique_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
         return nullptr;
     }
 
-    if (symbol.isMethod()) {
-        auto method = symbol.asMethodRef();
-        auto name = method.data(gs)->name;
-
-        // TODO: support renaming of overloaded symbols by finding all the overload signatures.
-        if (method.data(gs)->flags.isOverloaded || name.isOverloadName(gs)) {
-            return nullptr;
-        }
-
-        auto originalName = name.show(gs);
-        return make_unique<MethodRenamer>(gs, config, method, originalName, newName);
-    } else if (symbol.isField(gs)) {
+    ENFORCE(!symbol.isMethod(), "Need to make one separately, because renaming methods involves multiple symbols");
+    if (symbol.isField(gs)) {
         return make_unique<FieldRenamer>(gs, config, symbol.asFieldRef(), newName);
     } else {
         return make_unique<ConstRenamer>(gs, config, symbol, newName);
@@ -335,18 +339,30 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             }
         }
     } else if (auto defResp = resp->isMethodDef()) {
-        if (isValidRenameLocation(defResp->symbol, gs, response)) {
-            if (auto renamer = makeRenamer(gs, config, defResp->symbol, params->newName)) {
-                renamer->getEdits(typechecker);
-                enrichResponse(response, *renamer);
-            }
+        if (isValidRenameLocation(defResp->symbol, gs, response) && canRenameMethod(gs, defResp->symbol)) {
+            auto symbols = core::lsp::Query::Symbol::STORAGE{1, defResp->symbol};
+            auto renamer =
+                MethodRenamer{gs, config, move(symbols), defResp->symbol.data(gs)->name.show(gs), params->newName};
+            renamer.getEdits(typechecker);
+            enrichResponse(response, renamer);
         }
     } else if (auto sendResp = resp->isSend()) {
-        // We don't need to handle dispatchResult->secondary here, because it will be checked in getEdits.
-        auto method = sendResp->dispatchResult->main.method;
-        if (auto renamer = makeRenamer(gs, config, method, params->newName)) {
-            renamer->getEdits(typechecker);
-            enrichResponse(response, *renamer);
+        auto symbols = core::lsp::Query::Symbol::STORAGE{};
+        for (auto start = sendResp->dispatchResult.get(); start != nullptr; start = start->secondary.get()) {
+            auto method = start->main.method;
+            if (!canRenameMethod(gs, method)) {
+                continue;
+            }
+
+            symbols.emplace_back(method);
+            // This could be a `prop` or `attr_*`, which has multiple associated symbols.
+            addOtherAccessorSymbols(gs, method, symbols);
+        }
+
+        if (!symbols.empty()) {
+            auto renamer = MethodRenamer{gs, config, move(symbols), sendResp->callerSideName.show(gs), params->newName};
+            renamer.getEdits(typechecker);
+            enrichResponse(response, renamer);
         }
     } else if (auto identResp = resp->isIdent()) {
         if (identResp->enclosingMethod.exists()) {
