@@ -522,7 +522,7 @@ NameDef names[] = {
     {"Time", "Time", true},
     {"Todo", "<todo sym>", true},
     {"TodoMethod", "<todo method>", false},
-    {"TodoTypeArgument", "<todo typeargument>", true},
+    {"TodoTypeParameter", "<todo typeargument>", true},
     {"NoSymbol", "<none>", true},
     {"noFieldOrStaticField", "<no-field-or-static-field>", false},
     {"noMethod", "<no-method>", false},

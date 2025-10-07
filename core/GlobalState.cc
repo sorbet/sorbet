@@ -473,7 +473,7 @@ void GlobalState::initEmpty() {
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
     typeArgument =
-        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
+        enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeParameter(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeArgument == Symbols::todoTypeParameter());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
     method =
@@ -1287,7 +1287,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
 
 TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance) {
     ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeParameter() ||
-                     name == Names::Constants::TodoTypeArgument());
+                     name == Names::Constants::TodoTypeParameter());
     ENFORCE_NO_TIMER(name.exists());
     TypeParameter::Flags flags;
     if (variance == Variance::Invariant) {
