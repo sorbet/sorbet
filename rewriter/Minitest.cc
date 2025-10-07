@@ -656,7 +656,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         case core::Names::its().rawId(): {
             if (block == nullptr || !send->recv.isSelfReference() ||
-                (!insideDescribe && requiresSecondFactor(send->fun))) {
+                !insideDescribe) {
                 return nullptr;
             }
 
