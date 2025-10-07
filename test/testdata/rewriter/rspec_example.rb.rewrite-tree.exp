@@ -163,6 +163,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.is_expected().to(<self>.eq(<self>.foo()))
       end
 
+      def <its 'size'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+
       <runtime method definition of foo>
     end
   end

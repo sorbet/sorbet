@@ -109,6 +109,10 @@ class A
     let(:foo) { "bar" }
 
     its(:bar) { is_expected.to eq(foo) }
+
+    its(:size) do
+      T.reveal_type(self) # error: Revealed type: `A::<describe 'its support'>`
+    end
   end
 end
 
