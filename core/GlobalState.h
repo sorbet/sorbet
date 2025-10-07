@@ -192,7 +192,7 @@ public:
     unsigned int classAndModulesUsed() const;
     unsigned int methodsUsed() const;
     unsigned int fieldsUsed() const;
-    unsigned int typeArgumentsUsed() const;
+    unsigned int typeParametersUsed() const;
     unsigned int typeMembersUsed() const;
     unsigned int filesUsed() const;
     unsigned int symbolsUsedTotal() const;

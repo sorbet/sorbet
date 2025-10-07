@@ -65,7 +65,7 @@ private:
 
 SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalState &gs)
     : config(config), gs(gs), classOrModuleMatches(gs.classAndModulesUsed()), methodMatches(gs.methodsUsed()),
-      fieldMatches(gs.fieldsUsed()), typeArgumentMatches(gs.typeArgumentsUsed()),
+      fieldMatches(gs.fieldsUsed()), typeArgumentMatches(gs.typeParametersUsed()),
       typeMemberMatches(gs.typeMembersUsed()) {}
 
 /**

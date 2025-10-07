@@ -1918,7 +1918,7 @@ unsigned int GlobalState::fieldsUsed() const {
     return fields.size();
 }
 
-unsigned int GlobalState::typeArgumentsUsed() const {
+unsigned int GlobalState::typeParametersUsed() const {
     return typeArguments.size();
 }
 
@@ -1947,7 +1947,7 @@ unsigned int GlobalState::uniqueNamesUsed() const {
 }
 
 unsigned int GlobalState::symbolsUsedTotal() const {
-    return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeArgumentsUsed() + typeMembersUsed();
+    return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeParametersUsed() + typeMembersUsed();
 }
 
 string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {

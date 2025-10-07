@@ -313,18 +313,18 @@ TypeParameterData TypeMemberRef::dataAllowingNone(GlobalState &gs) const {
 
 TypeParameterData TypeParameterRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
-    ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
+    ENFORCE_NO_TIMER(_id < gs.typeParametersUsed());
     return TypeParameterData(gs.typeArguments[_id], gs);
 }
 
 ConstTypeParameterData TypeParameterRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
-    ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
+    ENFORCE_NO_TIMER(_id < gs.typeParametersUsed());
     return ConstTypeParameterData(gs.typeArguments[_id], gs);
 }
 
 TypeParameterData TypeParameterRef::dataAllowingNone(GlobalState &gs) const {
-    ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
+    ENFORCE_NO_TIMER(_id < gs.typeParametersUsed());
     return TypeParameterData(gs.typeArguments[_id], gs);
 }
 

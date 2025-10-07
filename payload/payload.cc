@@ -52,10 +52,10 @@ void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Op
             "`PAYLOAD_MAX_TYPE_MEMBER_COUNT` in `GlobalState`.",
             gs.typeMembersUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_MEMBER_COUNT);
     ENFORCE(
-        gs.typeArgumentsUsed() < core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT,
+        gs.typeParametersUsed() < core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT,
         "Payload defined `{}` type arguments, which is greater than the expected maximum of `{}`. Consider updating "
         "`PAYLOAD_MAX_TYPE_ARGUMENT_COUNT` in `GlobalState`.",
-        gs.typeArgumentsUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+        gs.typeParametersUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
 
     // We can use the kvstore to read in the cached name table. We read this in after the payload has been initialized,
     // as the cached name table will extend the payload's existing table when the sorbet versions match.
