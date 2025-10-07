@@ -367,7 +367,7 @@ SymbolRef::SymbolRef(FieldRef field) : SymbolRef(nullptr, SymbolRef::Kind::Field
 
 SymbolRef::SymbolRef(TypeMemberRef typeMember) : SymbolRef(nullptr, SymbolRef::Kind::TypeMember, typeMember.id()) {}
 
-SymbolRef::SymbolRef(TypeParameterRef typeArg) : SymbolRef(nullptr, SymbolRef::Kind::TypeParameter, typeArg.id()) {}
+SymbolRef::SymbolRef(TypeParameterRef typeParam) : SymbolRef(nullptr, SymbolRef::Kind::TypeParameter, typeParam.id()) {}
 
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, uint32_t id) : _id(id) {}
 

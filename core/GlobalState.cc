@@ -1303,17 +1303,17 @@ TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameR
 
     auto ownerScope = owner.dataAllowingNone(*this);
 
-    for (auto typeArg : ownerScope->typeParameters()) {
-        if (typeArg.dataAllowingNone(*this)->name == name) {
-            ENFORCE_NO_TIMER(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
+    for (auto typeParam : ownerScope->typeParameters()) {
+        if (typeParam.dataAllowingNone(*this)->name == name) {
+            ENFORCE_NO_TIMER(typeParam.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
             if (!symbolTableFrozen) {
-                typeArg.data(*this)->addLoc(*this, loc);
+                typeParam.data(*this)->addLoc(*this, loc);
             } else {
                 // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
                 // checking. Don't mutate the symbol table in those cases. This loc should already be there.
-                ENFORCE(!loc.exists() || absl::c_count(typeArg.data(*this)->locs(), loc) == 1);
+                ENFORCE(!loc.exists() || absl::c_count(typeParam.data(*this)->locs(), loc) == 1);
             }
-            return typeArg;
+            return typeParam;
         }
     }
 

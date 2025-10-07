@@ -1892,8 +1892,8 @@ class ResolveTypeMembersAndFieldsWalk {
         // Also, if we're in a field assign like `@x = ...`, don't use typeParameters, fields are
         // technically in class scope, not method scope.
         if (job.owner.isMethod() && !job.inFieldAssign) {
-            for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeParameters()) {
-                const auto &data = typeArg.data(gs);
+            for (const auto &typeParam : job.owner.asMethodRef().data(gs)->typeParameters()) {
+                const auto &data = typeParam.data(gs);
                 auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
                 auto typeArgLoc = data->loc();
                 // TypeParameter might be defined in an RBI file, and thus not be in the same file
