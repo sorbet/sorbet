@@ -184,28 +184,28 @@ public:
     ParametersStore parameters;
 
     InlinedVector<TypeParameterRef, 4> &getOrCreateTypeParameters() {
-        if (typeArgs) {
-            return *typeArgs;
+        if (typeParams) {
+            return *typeParams;
         }
-        typeArgs = std::make_unique<InlinedVector<TypeParameterRef, 4>>();
-        return *typeArgs;
+        typeParams = std::make_unique<InlinedVector<TypeParameterRef, 4>>();
+        return *typeParams;
     }
 
     absl::Span<const TypeParameterRef> typeArguments() const {
-        if (typeArgs) {
-            return *typeArgs;
+        if (typeParams) {
+            return *typeParams;
         }
         return {};
     }
 
     InlinedVector<TypeParameterRef, 4> &existingTypeParameters() {
-        ENFORCE(typeArgs != nullptr);
-        return *typeArgs;
+        ENFORCE(typeParams != nullptr);
+        return *typeParams;
     }
 
 private:
     SymbolRef::LOC_store locs_;
-    std::unique_ptr<InlinedVector<TypeParameterRef, 4>> typeArgs;
+    std::unique_ptr<InlinedVector<TypeParameterRef, 4>> typeParams;
 };
 CheckSize(Method, 136, 8);
 
