@@ -110,8 +110,16 @@ class A
 
     its(:bar) { is_expected.to eq(foo) }
 
+    # The correct desugaring is:
+    #   its(:size) { is_expected.to eq(1) }
+    # should generate:
+    #   describe "size" do
+    #     it "is_expected.to eq(1)" do
+    #       expect(subject.size).to eq(1)
+    #     end
+    #   end
     its(:size) do
-      T.reveal_type(self) # error: Revealed type: `A::<describe 'its support'>`
+      T.reveal_type(self) # error: Revealed type: `A::<describe 'its support'>::<describe 'size'>`
     end
   end
 end

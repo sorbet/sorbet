@@ -270,14 +270,6 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
             }
         }
 
-        case core::Names::its().rawId(): {
-            if (arity == 1) {
-                auto name = fmt::format("<{} '{}'>", send.fun.show(ctx), to_s(ctx, send.getPosArg(0)));
-                return ctx.state.enterNameUTF8(name);
-            }
-            return core::NameRef::noName();
-        }
-
         default:
             return core::NameRef::noName();
     }
@@ -634,8 +626,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::xexample().rawId():
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
-        case core::Names::skip().rawId():
-        case core::Names::its().rawId(): {
+        case core::Names::skip().rawId(): {
             if (block == nullptr || !send->recv.isSelfReference() ||
                 (!insideDescribe && requiresSecondFactor(send->fun))) {
                 return nullptr;
@@ -661,6 +652,72 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
             }
             return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+
+        case core::Names::its().rawId(): {
+            if (block == nullptr || !send->recv.isSelfReference() ||
+                (!insideDescribe && requiresSecondFactor(send->fun))) {
+                return nullptr;
+            }
+
+            if (send->numPosArgs() != 1) {
+                return nullptr;
+            }
+
+            auto &arg = send->getPosArg(0);
+
+            // Only handle symbol arguments for now (its(:attribute))
+            auto argLit = ast::cast_tree<ast::Literal>(arg);
+            if (argLit == nullptr || !argLit->isName()) {
+                return nullptr;
+            }
+
+            auto attributeName = argLit->asName();
+            auto argString = attributeName.show(ctx);
+
+            // Create the describe block name
+            auto describeTestName = fmt::format("<describe '{}'>", argString);
+            auto describeName = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
+
+            // Create the it block body - keep original as-is since is_expected works with subject
+            ast::ExpressionPtr itBody = std::move(block->body);
+
+            // Create it block
+            auto itName = ctx.state.enterNameUTF8("<it>");
+            auto itDeclLoc = send->loc.copyWithZeroLength();
+
+            ConstantMover constantMover;
+            ast::TreeWalk::apply(ctx, constantMover, itBody);
+
+            auto itMethod = ast::MK::SyntheticMethod0(send->loc, itDeclLoc, itName,
+                                                      prepareBody(ctx, /* isClass */ true, std::move(itBody),
+                                                                  /* insideDescribe */ true));
+            ast::cast_tree_nonnull<ast::MethodDef>(itMethod).flags.discardDef = true;
+            itMethod = addSigVoid(ctx, move(itMethod));
+            itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
+
+            // In RSpec, its() redefines subject to return the attribute value.
+            // We can't use super in the rewriter, so we model it as returning T.untyped.
+            // The type system won't be perfect, but the structure will be correct.
+            //
+            // In a future improvement, we could model this by having the parent store
+            // its subject in a differently-named method that the child can call.
+            auto subjectBody = ast::MK::RaiseUnimplemented(arg.loc());
+            auto subjectMethod = ast::MK::SyntheticMethod0(arg.loc(), arg.loc().copyWithZeroLength(),
+                                                           core::Names::subject(), std::move(subjectBody));
+
+            // Combine subject method and it method in the describe body
+            ast::ClassDef::RHS_store describeBody;
+            describeBody.emplace_back(std::move(subjectMethod));
+            describeBody.emplace_back(std::move(itMethod));
+
+            // Create describe block containing the subject and it methods
+            ast::ClassDef::ANCESTORS_store ancestors;
+            ancestors.emplace_back(ast::MK::Self(arg.loc()));
+
+            auto describeDeclLoc = declLocForSendWithBlock(*send);
+            return ast::MK::Class(send->loc, describeDeclLoc, std::move(describeName), std::move(ancestors),
+                                  std::move(describeBody));
         }
 
         case core::Names::let().rawId():

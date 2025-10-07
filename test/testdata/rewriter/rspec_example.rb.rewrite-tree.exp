@@ -159,15 +159,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         "bar"
       end
 
-      def <its 'bar'><<todo method>>(&<blk>)
-        <self>.is_expected().to(<self>.eq(<self>.foo()))
-      end
-
-      def <its 'size'><<todo method>>(&<blk>)
-        <emptyTree>::<C T>.reveal_type(<self>)
-      end
-
       <runtime method definition of foo>
+
+      class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+        def subject<<todo method>>(&<blk>)
+          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        end
+
+        def <it><<todo method>>(&<blk>)
+          <self>.is_expected().to(<self>.eq(<self>.foo()))
+        end
+
+        <runtime method definition of subject>
+      end
+
+      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+        def subject<<todo method>>(&<blk>)
+          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        end
+
+        def <it><<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(<self>)
+        end
+
+        <runtime method definition of subject>
+      end
     end
   end
 
