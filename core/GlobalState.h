@@ -93,7 +93,7 @@ public:
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
     void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
-                           uint32_t typeArgumentsSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
+                           uint32_t typeParametersSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
                            uint32_t constantNameSize, uint32_t uniqueNameSize);
 
     GlobalState(const GlobalState &) = delete;

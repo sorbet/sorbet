@@ -1019,12 +1019,12 @@ void GlobalState::computeLinearization() {
 }
 
 void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
-                                    uint32_t typeArgumentsSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
+                                    uint32_t typeParametersSize, uint32_t typeMembersSize, uint32_t utf8NameSize,
                                     uint32_t constantNameSize, uint32_t uniqueNameSize) {
     uint32_t classAndModulesSizeScaled = nextPowerOfTwo(classAndModulesSize);
     uint32_t methodsSizeScaled = nextPowerOfTwo(methodsSize);
     uint32_t fieldsSizeScaled = nextPowerOfTwo(fieldsSize);
-    uint32_t typeArgumentsSizeScaled = nextPowerOfTwo(typeArgumentsSize);
+    uint32_t typeArgumentsSizeScaled = nextPowerOfTwo(typeParametersSize);
     uint32_t typeMembersSizeScaled = nextPowerOfTwo(typeMembersSize);
     uint32_t utf8NameSizeScaled = nextPowerOfTwo(utf8NameSize);
     uint32_t constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
