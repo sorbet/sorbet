@@ -401,7 +401,7 @@ public:
         ClassOrModule = 0,
         Method = 1,
         FieldOrStaticField = 2,
-        TypeArgument = 3,
+        TypeParameter = 3,
         TypeMember = 4,
     };
 
