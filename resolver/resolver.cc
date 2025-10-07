@@ -1889,7 +1889,7 @@ class ResolveTypeMembersAndFieldsWalk {
     [[nodiscard]] static bool resolveCastItem(const core::GlobalState &gs, ResolveCastItem &job, bool lastTry) {
         ParsedSig emptySig;
         // Owner might be a class, because we haven't made the <static-init> methods yet.
-        // Also, if we're in a field assign like `@x = ...`, don't use typeArguments, fields are
+        // Also, if we're in a field assign like `@x = ...`, don't use typeParameters, fields are
         // technically in class scope, not method scope.
         if (job.owner.isMethod() && !job.inFieldAssign) {
             for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeParameters()) {
