@@ -17,7 +17,7 @@ public:
     static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                           core::SymbolRef symbol, std::vector<core::FileRef> frefs);
     static LSPQueryResult bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                   core::SymbolRef symbol,
+                                   absl::Span<const core::SymbolRef> symbols,
                                    core::packages::MangledName pkgName = core::packages::MangledName());
 };
 

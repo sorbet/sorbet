@@ -653,28 +653,30 @@ unique_ptr<core::GlobalState> LSPTypechecker::destroy() {
 
 namespace {
 void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
-    if (gs.lspQuery.kind != core::lsp::Query::Kind::VAR) {
+    auto lspQuery = get_if<core::lsp::Query::Var>(&gs.lspQuery.query);
+    if (lspQuery == nullptr) {
         return;
     }
     for (auto &t : indexedCopies) {
         optional<resolver::ParsedSig> signature;
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        if (t.file == gs.lspQuery.loc.file()) {
+        if (t.file == lspQuery->enclosingLoc.file()) {
             // For a VAR query, gs.lspQuery.loc is the enclosing MethodDef's loc, which we can use
             // to find the signature before that MethodDef.
-            auto queryLoc = gs.lspQuery.loc.copyWithZeroLength();
+            auto queryLoc = lspQuery->enclosingLoc.copyWithZeroLength();
             auto result = sig_finder::SigFinder::findSignature(ctx, t.tree, queryLoc);
             if (result.has_value()) {
                 signature = move(result->sig);
             }
         }
-        LocalVarSaver localVarSaver(ctx.locAt(t.tree.loc()), move(signature));
+        LocalVarSaver localVarSaver(ctx.locAt(t.tree.loc()), move(signature), lspQuery->variable);
         ast::ConstTreeWalk::apply(ctx, localVarSaver, t.tree);
     }
 }
 
 void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
-    if (gs.lspQuery.kind != core::lsp::Query::Kind::LOC && gs.lspQuery.kind != core::lsp::Query::Kind::SYMBOL) {
+    if (holds_alternative<core::lsp::Query::Loc>(gs.lspQuery.query) &&
+        holds_alternative<core::lsp::Query::Symbol>(gs.lspQuery.query)) {
         return;
     }
     for (auto &t : indexedCopies) {

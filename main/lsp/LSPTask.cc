@@ -294,18 +294,24 @@ vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
-        auto run2 = LSPQuery::bySymbol(config, typechecker, symbol);
+        // TODO(jez) Likely there are places calling getReferencesToSymbol that should be calling
+        // something that accepts multiple symbols.
+        auto symbols = core::lsp::Query::Symbol::STORAGE{1, symbol};
+        auto run2 = LSPQuery::bySymbol(config, typechecker, move(symbols));
         absl::c_move(run2.responses, back_inserter(priorRefs));
     }
     return move(priorRefs);
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbolInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
-                                        core::SymbolRef symbol,
-                                        vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    if (symbol.exists()) {
-        auto run2 = LSPQuery::bySymbol(config, typechecker, symbol, packageName);
+LSPTask::getReferencesToSymbolsInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
+                                         core::lsp::Query::Symbol::STORAGE &&symbols,
+                                         vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
+    symbols.erase(it, symbols.end());
+
+    if (!symbols.empty()) {
+        auto run2 = LSPQuery::bySymbol(config, typechecker, move(symbols), packageName);
         absl::c_move(run2.responses, back_inserter(priorRefs));
     }
     return move(priorRefs);
