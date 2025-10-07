@@ -311,18 +311,18 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         // params, and report an error if no substitution exists, but this tends to result in errors
         // that look like "it failed" with no further context.)
         for (size_t i = 0; i < methodTypeParameters.size(); i++) {
-            auto typeArgument = methodTypeParameters[i];
-            auto superTypeArgument = superMethodTypeParameters[i];
+            auto typeParameter = methodTypeParameters[i];
+            auto superTypeParameter = superMethodTypeParameters[i];
 
-            constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
-                                      core::make_type<core::SelfTypeParam>(superTypeArgument));
-            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
-                                      superTypeArgument.data(ctx)->resultType);
+            constr->rememberIsSubtype(ctx, typeParameter.data(ctx)->resultType,
+                                      core::make_type<core::SelfTypeParam>(superTypeParameter));
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeParameter),
+                                      superTypeParameter.data(ctx)->resultType);
 
-            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeArgument),
-                                      typeArgument.data(ctx)->resultType);
-            constr->rememberIsSubtype(ctx, superTypeArgument.data(ctx)->resultType,
-                                      core::make_type<core::SelfTypeParam>(superTypeArgument));
+            constr->rememberIsSubtype(ctx, core::make_type<core::SelfTypeParam>(typeParameter),
+                                      typeParameter.data(ctx)->resultType);
+            constr->rememberIsSubtype(ctx, superTypeParameter.data(ctx)->resultType,
+                                      core::make_type<core::SelfTypeParam>(superTypeParameter));
         }
     }
 
