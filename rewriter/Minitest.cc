@@ -696,10 +696,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                     : attributeName(attributeName), isExpectedName(isExpectedName), expectName(expectName) {}
 
                 ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
-                    auto send = ast::cast_tree<ast::Send>(tree);
-                    if (send == nullptr) {
-                        return tree;
-                    }
+                    auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
                     // Look for is_expected calls
                     if (send->fun == isExpectedName && send->recv.isSelfReference()) {
