@@ -364,6 +364,14 @@ public:
     // Method for TypeArgument, ClassOrModule for TypeMember.
     SymbolRef owner;
     NameRef name;
+
+    // For a TypeMember:
+    // - equivalent to `LambdaParam { definition = this->ref(gs), upperBound, lowerBound }`
+    // - the bounds will be todo until filled in by resolver
+    //
+    // For a TypeParameter:
+    // - equivalent to `TypeVar { sym = this->ref(gs) }`
+    // - the sym itself will be `todo` until an entire sig has finished type syntax parsing
     TypePtr resultType;
 
 private:

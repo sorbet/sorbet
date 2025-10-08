@@ -417,15 +417,30 @@ template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
 }
 
 /*
- * This is the type used to represent a use of a type_member or type_template in
- * a signature.
+ * This is the type used to represent a use of a type_member or type_template in a signature.
+ *
+ * The name is a reference to the fact that generic (polymorphic) types are modeled using "big"
+ * lambdas in System F. Something like:
+ *
+ *     Box = Λ Elem. { val : Elem }
+ *     make_box = (∀ Elem. λval : Elem. { val: val }) : Λ Elem. Elem -> Box[Elem]
+ *
+ *     box1 = make_box[Integer](1)
+ *     val = box1.val
+ *
+ * In isolation, a LambdaParam has no meaning: variables are given meaning by substitution.
+ *
+ * A LambdaParam will be substituted eventually, either being replaced with an explicitly applied
+ * type (e.g. `make_box[Integer]` applying `Integer` to the `LambdaParam` of `Elem`), or by being
+ * replaced with a `SelfTypeParam` when we're inside a context where it's understood that this
+ * variable has been bound by "something" but we don't know exactly what (see the SelfTypeParam docs
+ * below).
  */
 TYPE(LambdaParam) final : public Refcounted {
 public:
     TypeMemberRef definition;
 
-    // The type bounds provided in the definition of the type_member or
-    // type_template.
+    // The type bounds provided in the definition of the type_member or type_template.
     TypePtr lowerBound;
     TypePtr upperBound;
 
@@ -448,8 +463,63 @@ public:
 };
 CheckSize(LambdaParam, 24, 8);
 
+// You can think of this type as representing that we've descended under a binder after having
+// placed a bound variable in our context:
+//
+//     Γ, T.type_parameter(:U) ⊢ T.type_parameter(:U) isFullyDefined
+//     Γ, Elem ⊢ Elem isFullyDefined
+//
+// or more precisely,
+//
+//     Γ, TypeVar { sym = T.type_parameter(:U) } ⊢ SelfTypeParam { definition = T.type_parameter(:U) } isFullyDefined
+//     Γ, LambdaParam { sym = Elem } ⊢ SelfTypeParam { definition = Elem } isFullyDefined
+//
+// Sorbet does not actually maintain such a context `Γ`, rather it eagerly substitutes any LambdaParam
+// or TypeVar in a type to construct a new type. As in, `isSubType` does not take such a `Γ`, it
+// takes two `TypePtr` which have had their LambdaParam's or TypeVar's instantiated.
+//
+// You might notice that there *is* `isSubTypeUnderConstraint` which takes something that kind of
+// looks like like a typechecking environment (the `constr`), but that's because our TypeVar class
+// does double duty: inference constraint variables, and polymorphic type variables.
+// E.g., in something like this:
+//
+//     sig {
+//       type_parameters(:U)
+//         .params(u: T.type_parameter(:U))
+//         .returns(T.type_parameter(:U))
+//     }
+//     def id1(u) = u
+//
+//     sig {
+//       type_parameters(:V)
+//         .params(v: T.type_parameter(:V))
+//         .returns(T.type_parameter(:V))
+//     }
+//     def id2(v)
+//       res = id1(v)
+//     end
+//
+// while typechecking the call to `id1` in the body of `id2`, `T.type_parameter(:V)` will have been replaced with
+// `SelfTypeParam`, but `T.type_parameter(:U)` will be in the `TypeConstraint` set, allowing the
+// `TypeVar` representing `T.type_parameter(:U)` to be (lower) bounded by
+// `SelfTypeParam { definition = T.type_parameter(:V) }`.
+// That is, in this context, the constraint set is less a typechecking context and more a way to
+// have constraint variables without needing a separate construct for them.
+//
+// See `SelfType` for the representation of `T.self_type`, which is unrelated (at the moment, but in
+// the future may be handled by reusing some or all of this machinery).
+//
+// An intuition for the "self" in SelfTypeParam is that you're under a binder, which means that
+// you're viewing that type variable within the context of the class or method that defined that
+// type variable. That is, you're viewing it from within yourself.
 TYPE_INLINED(SelfTypeParam) final {
 public:
+    // Will be a TypeParameterRef when used to instantiate a TypeVar
+    //
+    // Will be a TypeMemberRef when used to instantiate a LambdaParam.
+    // Thus, to get the lowerBound and upperBound of a SelfTypeParam, look at:
+    //
+    //     cast_type_nonnull<LambdaParam>(definition.asTypeMemberRef().data(gs)->resultType).{lowerBound,upperBound}
     const SymbolRef definition;
 
     SelfTypeParam(const SymbolRef definition);
@@ -664,7 +734,7 @@ template <> inline TypePtr make_type<FloatLiteralType, float &&>(float &&val) {
 }
 
 /*
- * TypeVars are the used for the type parameters of generic methods.
+ * TypeVars are the used for the type parameters of generic methods, e.g. T.type_parameter(:U)
  * Note: These are mutated post-construction and cannot be inlined.
  */
 TYPE(TypeVar) final : public Refcounted {
