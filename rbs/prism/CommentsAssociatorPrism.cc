@@ -540,9 +540,9 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
 
             walkNode(call->block);
             walkNode(call->receiver);
-            // if (call->arguments != nullptr) {
-            //     walkNodes(call->arguments->arguments);
-            // }
+            if (call->arguments != nullptr) {
+                walkNodes(call->arguments->arguments);
+            }
             break;
         }
         case PM_DEF_NODE: {

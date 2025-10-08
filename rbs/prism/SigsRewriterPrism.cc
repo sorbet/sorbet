@@ -600,6 +600,9 @@ pm_node_t *SigsRewriterPrism::rewriteNode(pm_node_t *node) {
         }
         case PM_CALL_NODE: {
             auto *call = down_cast<pm_call_node_t>(node);
+            if (call->block) {
+                call->block = rewriteNode(call->block);
+            }
             if (call->arguments) {
                 rewriteNodes(call->arguments->arguments);
             }
