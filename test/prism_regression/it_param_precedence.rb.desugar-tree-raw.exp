@@ -1,0 +1,69 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U it>
+      }
+      rhs = Literal{ value = "string" }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U result>
+      }
+      rhs = Send{
+        flags = {}
+        recv = Array{
+          elems = [
+            Literal{ value = 1 }
+            Literal{ value = 2 }
+            Literal{ value = 3 }
+          ]
+        }
+        fun = <U map>
+        block = Block {
+          params = [
+          ]
+          body = Send{
+            flags = {}
+            recv = UnresolvedIdent{
+              kind = Local
+              name = <U it>
+            }
+            fun = <U upcase>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U puts>
+      block = nullptr
+      pos_args = 1
+      args = [
+        UnresolvedIdent{
+          kind = Local
+          name = <U it>
+        }
+      ]
+    }
+  ]
+}

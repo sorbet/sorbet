@@ -1,3 +1,3 @@
 # typed: true
 
-m { || _1 }  # error: can't use numbered params when ordinary params were also defined
+m { || _1 }  # error: can't use anonymous parameters when ordinary parameters are defined
