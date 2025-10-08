@@ -128,27 +128,27 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                     response->result = extractLocations(
                         gs, getReferencesToSymbolsInPackage(typechecker, packageName, move(symsToCheck)));
                 } else {
-                    response->result = extractLocations(
-                        typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
+                    auto symbols = core::lsp::Query::Symbol::STORAGE{1, constResp->symbolBeforeDealias};
+                    response->result =
+                        extractLocations(typechecker.state(), getReferencesToSymbols(typechecker, move(symbols)));
                 }
             } else {
                 // Normal handling for non-package files
-                response->result = extractLocations(typechecker.state(),
-                                                    getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
+                auto symbols = core::lsp::Query::Symbol::STORAGE{1, constResp->symbolBeforeDealias};
+                response->result =
+                    extractLocations(typechecker.state(), getReferencesToSymbols(typechecker, move(symbols)));
             }
         } else if (auto fieldResp = resp->isField()) {
+            auto symbols = core::lsp::Query::Symbol::STORAGE{1, fieldResp->symbol};
             // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-            response->result = extractLocations(
-                typechecker.state(),
-                getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), fieldResp->symbol),
-                                        fieldResp->symbol));
+            addOtherAccessorSymbols(gs, fieldResp->symbol, symbols);
+            response->result = extractLocations(gs, getReferencesToSymbols(typechecker, move(symbols)));
         } else if (auto defResp = resp->isMethodDef()) {
             if (fileIsTyped) {
+                auto symbols = core::lsp::Query::Symbol::STORAGE{1, defResp->symbol};
                 // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                response->result = extractLocations(
-                    typechecker.state(),
-                    getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), defResp->symbol),
-                                            defResp->symbol));
+                addOtherAccessorSymbols(gs, defResp->symbol, symbols);
+                response->result = extractLocations(gs, getReferencesToSymbols(typechecker, move(symbols)));
             } else {
                 notifyAboutUntypedFile = true;
             }
@@ -168,17 +168,17 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
         } else if (auto sendResp = resp->isSend()) {
             if (fileIsTyped) {
                 auto start = sendResp->dispatchResult.get();
-                vector<unique_ptr<core::lsp::QueryResponse>> responses;
+                auto symbols = core::lsp::Query::Symbol::STORAGE{};
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                        symbols.emplace_back(start->main.method);
                         // This could be a `prop` or `attr_*`, which has multiple associated symbols.
-                        responses = getReferencesToAccessor(typechecker,
-                                                            getAccessorInfo(typechecker.state(), start->main.method),
-                                                            start->main.method, move(responses));
+                        addOtherAccessorSymbols(gs, start->main.method, symbols);
                     }
                     start = start->secondary.get();
                 }
-                response->result = extractLocations(typechecker.state(), responses);
+
+                response->result = extractLocations(gs, getReferencesToSymbols(typechecker, move(symbols)));
             } else {
                 notifyAboutUntypedFile = true;
             }

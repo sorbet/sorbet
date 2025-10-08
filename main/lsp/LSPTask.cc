@@ -291,45 +291,46 @@ LSPTask::extractLocations(const core::GlobalState &gs,
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                               vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    if (symbol.exists()) {
-        // TODO(jez) Likely there are places calling getReferencesToSymbol that should be calling
-        // something that accepts multiple symbols.
-        auto symbols = core::lsp::Query::Symbol::STORAGE{1, symbol};
+LSPTask::getReferencesToSymbols(LSPTypecheckerDelegate &typechecker,
+                                core::lsp::Query::Symbol::STORAGE &&symbols) const {
+    auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
+    symbols.erase(it, symbols.end());
+
+    if (!symbols.empty()) {
         auto run2 = LSPQuery::bySymbol(config, typechecker, move(symbols));
-        absl::c_move(run2.responses, back_inserter(priorRefs));
+        return move(run2.responses);
     }
-    return move(priorRefs);
+    return {};
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
 LSPTask::getReferencesToSymbolsInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
-                                         core::lsp::Query::Symbol::STORAGE &&symbols,
-                                         vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+                                         core::lsp::Query::Symbol::STORAGE &&symbols) const {
     auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
     symbols.erase(it, symbols.end());
 
     if (!symbols.empty()) {
         auto run2 = LSPQuery::bySymbol(config, typechecker, move(symbols), packageName);
-        absl::c_move(run2.responses, back_inserter(priorRefs));
+        return move(run2.responses);
     }
-    return move(priorRefs);
+    return {};
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, core::SymbolRef symbol,
-                                     vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    if (symbol.exists() && fref.exists()) {
-        auto run2 = LSPQuery::bySymbolInFiles(config, typechecker, symbol, {fref});
-        for (auto &resp : run2.responses) {
-            // Ignore results in other files (which may have been picked up for typechecking purposes)
-            if (resp->getLoc().file() == fref) {
-                priorRefs.emplace_back(move(resp));
-            }
-        }
+LSPTask::getReferencesToSymbolsInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref,
+                                      core::lsp::Query::Symbol::STORAGE &&symbols) const {
+    auto it = remove_if(symbols.begin(), symbols.end(), [](auto symbol) { return !symbol.exists(); });
+    symbols.erase(it, symbols.end());
+
+    if (!symbols.empty() && fref.exists()) {
+        auto run2 = LSPQuery::bySymbolsInFiles(config, typechecker, move(symbols), {fref});
+        // Ignore results in other files (which may have been picked up for typechecking purposes)
+        auto it = remove_if(run2.responses.begin(), run2.responses.end(),
+                            [fref](auto &resp) { return resp->getLoc().file() != fref; });
+        run2.responses.erase(it, run2.responses.end());
+        return move(run2.responses);
     }
-    return move(priorRefs);
+    return {};
 }
 
 vector<unique_ptr<DocumentHighlight>>
@@ -346,6 +347,12 @@ LSPTask::getHighlights(LSPTypecheckerDelegate &typechecker,
 
 namespace {
 
+struct AccessorInfo {
+    core::FieldRef fieldSymbol;
+    core::MethodRef readerSymbol;
+    core::MethodRef writerSymbol;
+};
+
 static const vector<core::NameRef> accessorNames = {
     core::Names::prop(),        core::Names::tokenProp(),    core::Names::timestampedTokenProp(),
     core::Names::createdProp(), core::Names::attrAccessor(),
@@ -361,7 +368,7 @@ static const vector<core::NameRef> readerNames = {
     core::Names::attrReader(),
 };
 
-void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) {
+bool definedByAccessorMethod(const core::GlobalState &gs, AccessorInfo &info) {
     auto method = info.readerSymbol.exists() ? info.readerSymbol : info.writerSymbol;
     ENFORCE(method.exists());
 
@@ -369,60 +376,39 @@ void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) 
     // `def|prop|const|...`.
     auto methodSource = method.data(gs)->loc().source(gs);
     if (!methodSource.has_value()) {
-        return;
+        return false;
     }
     // Common case: ordinary `def`. Fast reject.
     if (absl::StartsWith(methodSource.value(), "def")) {
-        info.accessorType = FieldAccessorType::None;
-        return;
+        return false;
     }
 
     if (absl::c_any_of(accessorNames, [&methodSource, &gs](auto name) -> bool {
             return absl::StartsWith(methodSource.value(), name.toString(gs));
         })) {
-        info.accessorType = FieldAccessorType::Accessor;
+        return true;
     } else if (absl::c_any_of(writerNames, [&methodSource, &gs](auto name) -> bool {
                    return absl::StartsWith(methodSource.value(), name.toString(gs));
                })) {
-        info.accessorType = FieldAccessorType::Writer;
+        return true;
     } else if (absl::c_any_of(readerNames, [&methodSource, &gs](auto name) -> bool {
                    return absl::StartsWith(methodSource.value(), name.toString(gs));
                })) {
-        info.accessorType = FieldAccessorType::Reader;
+        return true;
     } else {
-        info.accessorType = FieldAccessorType::None;
+        return false;
     }
 }
 
 } // namespace
 
-vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
-                                 vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    switch (info.accessorType) {
-        case FieldAccessorType::None:
-            // Common case: Not an accessor.
-            return getReferencesToSymbol(typechecker, fallback, move(priorRefs));
-        case FieldAccessorType::Reader:
-            return getReferencesToSymbol(typechecker, info.fieldSymbol,
-                                         getReferencesToSymbol(typechecker, info.readerSymbol, move(priorRefs)));
-        case FieldAccessorType::Writer:
-            return getReferencesToSymbol(typechecker, info.fieldSymbol,
-                                         getReferencesToSymbol(typechecker, info.writerSymbol, move(priorRefs)));
-        case FieldAccessorType::Accessor:
-            return getReferencesToSymbol(
-                typechecker, info.fieldSymbol,
-                getReferencesToSymbol(typechecker, info.writerSymbol,
-                                      getReferencesToSymbol(typechecker, info.readerSymbol, move(priorRefs))));
-    }
-}
-
-AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolRef symbol) const {
+void LSPTask::addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
+                                      core::lsp::Query::Symbol::STORAGE &symbols) const {
     AccessorInfo info;
 
     core::SymbolRef owner = symbol.owner(gs);
     if (!owner.exists() || !owner.isClassOrModule()) {
-        return info;
+        return;
     }
     core::ClassOrModuleRef ownerCls = owner.asClassOrModuleRef();
 
@@ -432,19 +418,19 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
     // Extract the base name from `symbol`.
     if (absl::StartsWith(symbolName, "@")) {
         if (!symbol.isField(gs)) {
-            return info;
+            return;
         }
         info.fieldSymbol = symbol.asFieldRef();
         baseName = string_view(symbolName).substr(1);
     } else if (absl::EndsWith(symbolName, "=")) {
         if (!symbol.isMethod()) {
-            return info;
+            return;
         }
         info.writerSymbol = symbol.asMethodRef();
         baseName = string_view(symbolName).substr(0, symbolName.length() - 1);
     } else {
         if (!symbol.isMethod()) {
-            return info;
+            return;
         }
         info.readerSymbol = symbol.asMethodRef();
         baseName = symbolName;
@@ -456,7 +442,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
         auto fieldName = gs.lookupNameUTF8(fieldNameStr);
         if (!fieldName.exists()) {
             // Field is not optional.
-            return info;
+            return;
         }
         info.fieldSymbol = gs.lookupFieldSymbol(ownerCls, fieldName);
     }
@@ -478,36 +464,20 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
 
     // If this is an accessor, we should have a field and _at least_ one of reader or writer.
     if (!info.writerSymbol.exists() && !info.readerSymbol.exists()) {
-        return info;
+        return;
     }
 
     // Use reader or writer to determine what type of field accessor we are dealing with (if any).
-    populateFieldAccessorType(gs, info);
-    return info;
-}
-
-vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
-                                       core::SymbolRef fallback,
-                                       vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
-    switch (info.accessorType) {
-        case FieldAccessorType::None:
-            // Common case: Not an accessor.
-            return getReferencesToSymbolInFile(typechecker, fref, fallback, move(priorRefs));
-        case FieldAccessorType::Reader:
-            return getReferencesToSymbolInFile(
-                typechecker, fref, info.fieldSymbol,
-                getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs)));
-        case FieldAccessorType::Writer:
-            return getReferencesToSymbolInFile(
-                typechecker, fref, info.fieldSymbol,
-                getReferencesToSymbolInFile(typechecker, fref, info.writerSymbol, move(priorRefs)));
-        case FieldAccessorType::Accessor:
-            return getReferencesToSymbolInFile(
-                typechecker, fref, info.fieldSymbol,
-                getReferencesToSymbolInFile(
-                    typechecker, fref, info.writerSymbol,
-                    getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs))));
+    if (definedByAccessorMethod(gs, info)) {
+        if (info.fieldSymbol.exists() && symbol != info.fieldSymbol) {
+            symbols.emplace_back(info.fieldSymbol);
+        }
+        if (info.readerSymbol.exists() && symbol != info.readerSymbol) {
+            symbols.emplace_back(info.readerSymbol);
+        }
+        if (info.writerSymbol.exists() && symbol != info.writerSymbol) {
+            symbols.emplace_back(info.writerSymbol);
+        }
     }
 }
 

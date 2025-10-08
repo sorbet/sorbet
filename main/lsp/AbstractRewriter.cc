@@ -42,6 +42,10 @@ core::SymbolRef AbstractRewriter::UniqueSymbolQueue::pop() {
     return core::Symbols::noSymbol();
 }
 
+bool AbstractRewriter::UniqueSymbolQueue::hasSymbols() const {
+    return !symbols.empty();
+}
+
 optional<vector<unique_ptr<TextDocumentEdit>>> AbstractRewriter::buildTextDocumentEdits() {
     if (invalid) {
         return nullopt;
@@ -134,16 +138,16 @@ void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs,
     }
 }
 
-void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) {
+void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker) {
     const core::GlobalState &gs = typechecker.state();
-    auto originalName = symbol.name(gs).show(gs);
-
-    addSymbol(symbol);
 
     auto symbolQueue = getQueue();
-    for (auto sym = symbolQueue->pop(); sym.exists(); sym = symbolQueue->pop()) {
-        // TODO(jez) This is another prime candidate for passing multiple symbols all at once
-        auto symbols = core::lsp::Query::Symbol::STORAGE{1, sym};
+    while (symbolQueue->hasSymbols()) {
+        core::lsp::Query::Symbol::STORAGE symbols;
+        for (auto sym = symbolQueue->pop(); sym.exists(); sym = symbolQueue->pop()) {
+            symbols.emplace_back(sym);
+        }
+
         auto queryResult = LSPQuery::bySymbol(config, typechecker, move(symbols));
         if (queryResult.error) {
             return;
@@ -161,7 +165,7 @@ void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
 
             // We may process the same send multiple times in case of union types, but this is ok because the renamer
             // de-duplicates edits at the same location
-            rename(response, sym);
+            rename(response);
         }
     }
 }

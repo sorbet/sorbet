@@ -92,10 +92,29 @@ class MethodCallSiteRewriter : public AbstractRewriter {
 
 public:
     MethodCallSiteRewriter(const core::GlobalState &gs, const LSPConfiguration &config, core::MethodRef method)
-        : AbstractRewriter(gs, config), method(method), owner(method.data(gs)->owner) {}
+        : AbstractRewriter(gs, config), method(method), owner(method.data(gs)->owner) {
+        getQueue()->tryEnqueue(method);
+
+        // This doesn't make any attempt to handle methods that are overridden.
+        //
+        // Technically speaking, this code action doesn't make a ton of sense if the method is
+        // overridden, because converting to a singleton method will kill dynamic dispatch.
+        //
+        // We have two options:
+        // 1.  Assume that there are no overrides of this method.
+        //     Pro: no additional work
+        //     Con: might not catch some callsites on child methods
+        // 2.  Detect when there are overrides of this method, and mark the code action `invalid` with an error
+        //     Pro: "safer" because we can error instead of silently changing the meaning of the program
+        //     Con: requires a full scan of the symbol table
+        //
+        // For the time being, we're taking option (1).
+        // Option (2) would involve a call to addSubclassRelatedMethods or something similar here.
+    }
+
     ~MethodCallSiteRewriter() {}
 
-    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         if (invalid) {
             return;
         }
@@ -161,29 +180,6 @@ public:
             edits[newFirstArgLoc] = fmt::format("({})", receiverSource);
         }
     }
-
-    void addSymbol(const core::SymbolRef symbol) override {
-        if (!symbol.isMethod()) {
-            return;
-        }
-        getQueue()->tryEnqueue(symbol);
-
-        // This doesn't make any attempt to handle methods that are overridden.
-        //
-        // Technically speaking, this code action doesn't make a ton of sense if the method is
-        // overridden, because converting to a singleton method will kill dynamic dispatch.
-        //
-        // We have two options:
-        // 1.  Assume that there are no overrides of this method.
-        //     Pro: no additional work
-        //     Con: might not catch some callsites on child methods
-        // 2.  Detect when there are overrides of this method, and mark the code action `invalid` with an error
-        //     Pro: "safer" because we can error instead of silently changing the meaning of the program
-        //     Con: requires a full scan of the symbol table
-        //
-        // For the time being, we're taking option (1).
-        // Option (2) would involve a call to addSubclassRelatedMethods or something similar here.
-    }
 };
 
 } // namespace
@@ -199,9 +195,9 @@ vector<unique_ptr<TextDocumentEdit>> convertToSingletonClassMethod(LSPTypechecke
         return {};
     }
 
-    auto renamer = make_shared<MethodCallSiteRewriter>(gs, config, definition.symbol);
-    renamer->getEdits(typechecker, definition.symbol);
-    auto callSiteEdits = renamer->buildTextDocumentEdits();
+    auto renamer = MethodCallSiteRewriter{gs, config, definition.symbol};
+    renamer.getEdits(typechecker);
+    auto callSiteEdits = renamer.buildTextDocumentEdits();
     if (!callSiteEdits.has_value()) {
         config.logger->error("Failed to buildTextDocumentEdits for convertToSingletonClassMethod");
         return {};

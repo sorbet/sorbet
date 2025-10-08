@@ -12,15 +12,6 @@ class LSPIndexer;
 class LSPPreprocessor;
 class DocumentHighlight;
 
-enum class FieldAccessorType { None, Reader, Writer, Accessor };
-
-struct AccessorInfo {
-    FieldAccessorType accessorType = FieldAccessorType::None;
-    core::FieldRef fieldSymbol;
-    core::MethodRef readerSymbol;
-    core::MethodRef writerSymbol;
-};
-
 /**
  * A work unit that needs to execute on the typechecker thread. Subclasses implement `run`.
  * Contains miscellaneous helper methods that are useful in multiple tasks.
@@ -34,17 +25,15 @@ protected:
     // Task helper methods.
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                          std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    getReferencesToSymbols(LSPTypecheckerDelegate &typechecker, core::lsp::Query::Symbol::STORAGE &&symbols) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbolsInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
-                                    core::lsp::Query::Symbol::STORAGE &&symbols,
-                                    std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+                                    core::lsp::Query::Symbol::STORAGE &&symbols) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file, core::SymbolRef symbol,
-                                std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    getReferencesToSymbolsInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file,
+                                 core::lsp::Query::Symbol::STORAGE &&symbols) const;
 
     std::vector<std::unique_ptr<DocumentHighlight>>
     getHighlights(LSPTypecheckerDelegate &typechecker,
@@ -56,20 +45,9 @@ protected:
                      std::vector<std::unique_ptr<Location>> locations = {}) const;
 
     // Given a method or field symbol, checks if the symbol belongs to a `prop`, `const`, `attr_reader`, `attr_writer`,
-    // etc, and populates an AccessorInfo object.
-    AccessorInfo getAccessorInfo(const core::GlobalState &gs, core::SymbolRef symbol) const;
-
-    // Get references to the given accessor. If `info.accessorType` is `None`, it returns references to `fallback` only.
-    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
-                            std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
-
-    // Get references to the given accessor in the given file. If `info.accessorType` is `None`, it returns highlights
-    // to `fallback` only.
-    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
-                                  core::SymbolRef fallback,
-                                  std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    // etc, and if so, adds any related symbols to the list of symbols to query for.
+    void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
+                                 core::lsp::Query::Symbol::STORAGE &symbols) const;
 
     LSPTask(const LSPConfiguration &config, LSPMethod method);
 

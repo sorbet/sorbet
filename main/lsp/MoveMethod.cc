@@ -107,8 +107,8 @@ class MethodCallSiteRenamer : public AbstractRewriter {
     string newName;
 
 public:
-    MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
-                          const string newName)
+    MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, core::MethodRef method,
+                          const string oldName, const string newName)
         : AbstractRewriter(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
@@ -118,17 +118,18 @@ public:
                 return;
             }
         }
+
+        addSubclassRelatedMethods(gs, method, getQueue());
     }
 
     ~MethodCallSiteRenamer() {}
-    void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         if (invalid) {
             return;
         }
         auto loc = response->getLoc();
 
-        // If we're renaming the exact same place twice, silently ignore it. We reach this condition when we find the
-        // same method send through multiple definitions (e.g. in the case of union types)
+        // If we're renaming the exact same place twice, silently ignore it.
         auto it = edits.find(loc);
         if (it != edits.end()) {
             return;
@@ -139,22 +140,15 @@ public:
             return;
         }
         if (auto sendResp = response->isSend()) {
-            // if the call site is not trivial, don't attempt to rename
-            // the typecheck error will guide user how to fix it
-            for (auto dr = sendResp->dispatchResult.get(); dr != nullptr; dr = dr->secondary.get()) {
-                if (dr->main.method != originalSymbol.asMethodRef()) {
-                    return;
-                }
+            // If the call site is not trivial, don't attempt to rename. Since our receiver is not
+            // going to hard-code one class name, dispatches on union types would see their behavior
+            // change (e.g. the dispatch would no longer be dynamic)
+            if (sendResp->dispatchResult->secondary != nullptr) {
+                return;
             }
 
             edits[sendResp->receiverLoc()] = newName;
         }
-    }
-    void addSymbol(const core::SymbolRef symbol) override {
-        if (!symbol.isMethod()) {
-            return;
-        }
-        addSubclassRelatedMethods(gs, symbol.asMethodRef(), getQueue());
     }
 }; // MethodCallSiteRenamer
 
@@ -212,9 +206,10 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &
 
     auto edits = moveMethod(typechecker, config, definition, newModuleName.value());
 
-    auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
-    renamer->getEdits(typechecker, definition.symbol);
-    auto callSiteEdits = renamer->buildTextDocumentEdits();
+    auto renamer =
+        MethodCallSiteRenamer{gs, config, definition.symbol, definition.name.show(gs), newModuleName.value()};
+    renamer.getEdits(typechecker);
+    auto callSiteEdits = renamer.buildTextDocumentEdits();
 
     if (callSiteEdits.has_value()) {
         for (auto &edit : callSiteEdits.value()) {

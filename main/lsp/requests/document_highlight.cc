@@ -65,21 +65,22 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
 
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
-            response->result = getHighlights(
-                typechecker, getReferencesToSymbolInFile(typechecker, fref, constResp->symbolBeforeDealias));
+            auto symbols = core::lsp::Query::Symbol::STORAGE{1, constResp->symbolBeforeDealias};
+            response->result =
+                getHighlights(typechecker, getReferencesToSymbolsInFile(typechecker, fref, move(symbols)));
         } else if (auto fieldResp = resp->isField()) {
+            auto symbols = core::lsp::Query::Symbol::STORAGE{1, fieldResp->symbol};
             // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-            response->result = getHighlights(
-                typechecker, getReferencesToAccessorInFile(typechecker, fref,
-                                                           getAccessorInfo(typechecker.state(), fieldResp->symbol),
-                                                           fieldResp->symbol));
+            addOtherAccessorSymbols(gs, fieldResp->symbol, symbols);
+            response->result =
+                getHighlights(typechecker, getReferencesToSymbolsInFile(typechecker, fref, move(symbols)));
         } else if (auto defResp = resp->isMethodDef()) {
             if (fileIsTyped) {
+                auto symbols = core::lsp::Query::Symbol::STORAGE{1, defResp->symbol};
                 // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                response->result = getHighlights(
-                    typechecker, getReferencesToAccessorInFile(typechecker, fref,
-                                                               getAccessorInfo(typechecker.state(), defResp->symbol),
-                                                               defResp->symbol));
+                addOtherAccessorSymbols(gs, defResp->symbol, symbols);
+                response->result =
+                    getHighlights(typechecker, getReferencesToSymbolsInFile(typechecker, fref, move(symbols)));
             }
         } else if (fileIsTyped && resp->isIdent()) {
             auto identResp = resp->isIdent();
@@ -95,17 +96,18 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
             auto start = sendResp->dispatchResult.get();
-            vector<unique_ptr<core::lsp::QueryResponse>> references;
+            auto symbols = core::lsp::Query::Symbol::STORAGE{};
             while (start != nullptr) {
                 if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                    // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                    references = getReferencesToAccessorInFile(typechecker, fref,
-                                                               getAccessorInfo(typechecker.state(), start->main.method),
-                                                               start->main.method, move(references));
+                    symbols.emplace_back(start->main.method);
+                    // This could be a `prop` or `attr_*`, which has multiple associated symbols.
+                    addOtherAccessorSymbols(gs, start->main.method, symbols);
                 }
                 start = start->secondary.get();
             }
-            response->result = getHighlights(typechecker, references);
+
+            response->result =
+                getHighlights(typechecker, getReferencesToSymbolsInFile(typechecker, fref, move(symbols)));
         }
     }
     return response;

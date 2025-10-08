@@ -89,15 +89,16 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDel
     return typechecker.query(core::lsp::Query::createLocQuery(loc.value()), {fref});
 }
 
-LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                                   core::SymbolRef symbol, vector<core::FileRef> frefs) {
+LSPQueryResult LSPQuery::LSPQuery::bySymbolsInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                                    core::lsp::Query::Symbol::STORAGE &&symbols,
+                                                    vector<core::FileRef> frefs) {
     Timer timeit(config.logger, "setupLSPQueryBySymbolInFiles");
-    ENFORCE(symbol.exists());
-    return typechecker.query(core::lsp::Query::createSymbolQuery(symbol), frefs);
+    ENFORCE(absl::c_all_of(symbols, [](auto symbol) { return symbol.exists(); }));
+    return typechecker.query(core::lsp::Query::createSymbolQuery(move(symbols)), frefs);
 }
 
 LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                  absl::Span<const core::SymbolRef> symbols, core::packages::MangledName pkgName) {
+                                  core::lsp::Query::Symbol::STORAGE &&symbols, core::packages::MangledName pkgName) {
     Timer timeit(config.logger, "setupLSPQueryBySymbol");
     ENFORCE(absl::c_all_of(symbols, [](auto symbol) { return symbol.exists(); }));
     vector<core::FileRef> frefs;
@@ -135,7 +136,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         }
     }
 
-    return typechecker.query(core::lsp::Query::createSymbolQuery(symbols), frefs);
+    return typechecker.query(core::lsp::Query::createSymbolQuery(move(symbols)), frefs);
 }
 
 } // namespace sorbet::realmain::lsp

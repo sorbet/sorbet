@@ -49,9 +49,7 @@ public:
 
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
-    static Query createSymbolQuery(core::SymbolRef symbol);
     static Query createSymbolQuery(Symbol::STORAGE &&symbols);
-    static Query createSymbolQuery(absl::Span<const core::SymbolRef> symbols);
     static Query createVarQuery(core::MethodRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
     static Query createSuggestSigQuery(core::MethodRef method);
 
