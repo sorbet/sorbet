@@ -2107,6 +2107,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->silenceErrors = other.silenceErrors;
     this->autocorrect = other.autocorrect;
     this->didYouMean = other.didYouMean;
+    this->enableDeprecated = other.enableDeprecated;
     this->ensureCleanStrings = other.ensureCleanStrings;
     this->censorForSnapshotTests = other.censorForSnapshotTests;
     this->sleepInSlowPathSeconds = other.sleepInSlowPathSeconds;

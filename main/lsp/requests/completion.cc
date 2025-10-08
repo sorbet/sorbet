@@ -1122,6 +1122,10 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
         item->deprecated = true;
     }
 
+    if (what.data(gs)->flags.isDeprecated) {
+        item->deprecated = true;
+    }
+
     return item;
 }
 
