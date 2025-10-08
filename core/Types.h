@@ -431,10 +431,10 @@ template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
  * In isolation, a LambdaParam has no meaning: variables are given meaning by substitution.
  *
  * A LambdaParam will be substituted eventually, either being replaced through an explicit type
- * application (e.g. `make_box[Integer]` substituting `Integer` for the `LambdaParam` of `Elem`), or by being
- * replaced with a `SelfTypeParam` when we're inside a context where it's understood that this
- * variable has been bound by "something" but we don't know exactly what (see the SelfTypeParam docs
- * below).
+ * application (e.g. `make_box[Integer]` substituting `Integer` for the `LambdaParam` of `Elem`), or
+ * by being replaced with a `SelfTypeParam` when we're inside a context where it's understood that
+ * this variable has been bound by "something" but we don't know exactly what (see the SelfTypeParam
+ * docs below).
  */
 TYPE(LambdaParam) final : public Refcounted {
 public:
@@ -499,12 +499,12 @@ CheckSize(LambdaParam, 24, 8);
 //       res = id1(v)
 //     end
 //
-// while typechecking the call to `id1` in the body of `id2`, `T.type_parameter(:V)` will have been replaced with
-// `SelfTypeParam`, but `T.type_parameter(:U)` will be in the `TypeConstraint` set, allowing the
-// `TypeVar` representing `T.type_parameter(:U)` to be (lower) bounded by
-// `SelfTypeParam { definition = T.type_parameter(:V) }`.
-// That is, in this context, the constraint set is less a typechecking context and more a way to
-// have constraint variables without needing a separate construct for them.
+// while typechecking the call to `id1` in the body of `id2`, `T.type_parameter(:V)` will have been
+// replaced with `SelfTypeParam`, but `T.type_parameter(:U)` will be in the `TypeConstraint` set,
+// allowing the `TypeVar` representing `T.type_parameter(:U)` to be (lower) bounded by
+// `SelfTypeParam { definition = T.type_parameter(:V) }`. That is, in this context, the constraint
+// set is less a typechecking context and more a way to have constraint variables without needing a
+// separate construct for them.
 //
 // See `SelfType` for the representation of `T.self_type`, which is unrelated (at the moment, but in
 // the future may be handled by reusing some or all of this machinery).
