@@ -58,7 +58,7 @@ tuple<string, string> MESSAGES[] = {
     {"BlockGivenToYield", "block given to yield"},
     {"InvalidReturn", "invalid return in class/module body"},
     {"CSendInLHSOfMAsgn", "&. inside multiple assignment destination"},
-    {"OrdinaryParamDefined", "can't use numbered params when ordinary params were also defined"},
+    {"OrdinaryParamDefined", "can't use anonymous parameters when ordinary parameters are defined"},
     {"NumparamUsedInOuterScope", "numbered parameter is already used in an outer scope"},
     {"CircularArgumentReference", "circular argument reference {}"},
     {"PatternInterpInVarName", "symbol literal with interpolation is not allowed"},
