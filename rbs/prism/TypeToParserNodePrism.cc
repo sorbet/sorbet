@@ -251,7 +251,7 @@ pm_node_t *TypeToParserNodePrism::functionType(const rbs_types_function_t *node,
     }
 
     rbs_node_t *returnValue = node->return_type;
-    pm_node_t *argsHash = pairs.empty() ? nullptr : PMK::Hash(loc, pairs);
+    pm_node_t *argsHash = pairs.empty() ? nullptr : PMK::KeywordHash(loc, pairs);
 
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
         return PMK::TProcVoid(loc, argsHash);
