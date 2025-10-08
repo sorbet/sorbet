@@ -430,8 +430,8 @@ template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
  *
  * In isolation, a LambdaParam has no meaning: variables are given meaning by substitution.
  *
- * A LambdaParam will be substituted eventually, either being replaced with an explicitly applied
- * type (e.g. `make_box[Integer]` applying `Integer` to the `LambdaParam` of `Elem`), or by being
+ * A LambdaParam will be substituted eventually, either being replaced through an explicit type
+ * application (e.g. `make_box[Integer]` substituting `Integer` for the `LambdaParam` of `Elem`), or by being
  * replaced with a `SelfTypeParam` when we're inside a context where it's understood that this
  * variable has been bound by "something" but we don't know exactly what (see the SelfTypeParam docs
  * below).
