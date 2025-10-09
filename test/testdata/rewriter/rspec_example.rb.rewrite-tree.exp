@@ -16,7 +16,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>
         end
 
+        def is_expected<<todo method>>(&<blk>)
+          <emptyTree>
+        end
+
+        def expect<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
         <runtime method definition of described_class>
+
+        <runtime method definition of is_expected>
+
+        <runtime method definition of expect>
+
+        <runtime method definition of eq>
       end
     end
   end
@@ -30,9 +48,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    def is_expected<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def expect<<todo method>>(arg, &<blk>)
+      <emptyTree>
+    end
+
+    def eq<<todo method>>(arg, &<blk>)
+      <emptyTree>
+    end
+
     <runtime method definition of self.test_each>
 
     <runtime method definition of outer_helper>
+
+    <runtime method definition of is_expected>
+
+    <runtime method definition of expect>
+
+    <runtime method definition of eq>
 
     class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
       def my_helper<<todo method>>(&<blk>)
@@ -127,6 +163,89 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     class <emptyTree>::<C <xdescribe 'xdescribe group'>><<C <todo sym>>> < (<self>)
       def <it><<todo method>>(&<blk>)
         <self>.outer_helper()
+      end
+    end
+
+    class <emptyTree>::<C <describe 'its support'>><<C <todo sym>>> < (<self>)
+      def foo<<todo method>>(&<blk>)
+        "bar"
+      end
+
+      <runtime method definition of foo>
+
+      class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
+        end
+      end
+
+      class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
+        end
+      end
+
+      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          begin
+            ::Module.const_set(:X, 1)
+            <self>.expect(<self>.subject().size()).to(<self>.eq(<emptyTree>::<C X>))
+          end
+        end
+
+        begin
+          <emptyTree>::<C X> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          <emptyTree>
+        end
+      end
+
+      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(<self>)
+        end
+      end
+    end
+
+    class <emptyTree>::<C <describe 'its with typed subject'>><<C <todo sym>>> < (<self>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C ThingWithSize>)
+      end
+
+      def subject<<todo method>>(&<blk>)
+        <emptyTree>::<C ThingWithSize>.new()
+      end
+
+      class <emptyTree>::<C ThingWithSize><<C <todo sym>>> < (::<todo sym>)
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C Integer>)
+        end
+
+        def size<<todo method>>(&<blk>)
+          42
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        <runtime method definition of size>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of subject>
+
+      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          begin
+            <emptyTree>::<C T>.reveal_type(<self>.subject())
+            <self>.expect(<self>.subject().size()).to(<self>.eq(42))
+          end
+        end
+      end
+
+      class <emptyTree>::<C <describe 'no_such_method'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <self>.expect(<self>.subject().no_such_method()).to(<self>.eq(0))
+        end
       end
     end
   end
