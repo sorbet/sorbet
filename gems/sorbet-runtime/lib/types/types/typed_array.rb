@@ -22,8 +22,8 @@ module T::Types
       obj.is_a?(Array)
     end
 
-    def new(*args)
-      Array.new(*T.unsafe(args))
+    def new(...)
+      Array.new(...)
     end
 
     module Private
