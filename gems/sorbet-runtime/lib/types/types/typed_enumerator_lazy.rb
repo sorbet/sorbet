@@ -22,8 +22,8 @@ module T::Types
       obj.is_a?(Enumerator::Lazy)
     end
 
-    def new(*args, &blk)
-      T.unsafe(Enumerator::Lazy).new(*args, &blk)
+    def new(...)
+      T.unsafe(Enumerator::Lazy).new(...)
     end
 
     class Untyped < TypedEnumeratorLazy

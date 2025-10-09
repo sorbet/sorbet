@@ -28,11 +28,11 @@ module T::Types
       obj.is_a?(Set)
     end
 
-    def new(*args)
+    def new(...)
       # Fine for this to blow up, because hopefully if they're trying to make a
       # Set, they don't mind putting (or already have put) a `require 'set'` in
       # their program directly.
-      Set.new(*T.unsafe(args))
+      T.unsafe(Set).new(...)
     end
 
     class Untyped < TypedSet

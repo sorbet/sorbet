@@ -41,8 +41,8 @@ module T::Types
       obj.is_a?(Hash)
     end
 
-    def new(*args, &blk)
-      Hash.new(*T.unsafe(args), &blk)
+    def new(...)
+      T.unsafe(Hash).new(...)
     end
 
     class Untyped < TypedHash
