@@ -279,7 +279,7 @@ class T::Types::TypedArray < T::Types::TypedEnumerable
   sig { override.returns(Module) }
   def underlying_class; end
 
-  def new(*args); end
+  def new(...); end
   def recursively_valid?(obj); end
 end
 
@@ -300,6 +300,8 @@ class T::Types::TypedHash < T::Types::TypedEnumerable
 
   sig { override.returns(Module) }
   def underlying_class; end
+
+  def new(...); end
 end
 
 class T::Types::TypedEnumerable < T::Types::Base
@@ -330,7 +332,7 @@ class T::Types::TypedSet < T::Types::TypedEnumerable
 
   def recursively_valid?(obj); end
 
-  def new(*args); end
+  def new(...); end
 
   sig { override.returns(Module) }
   def underlying_class; end
@@ -345,7 +347,7 @@ class T::Types::TypedRange < T::Types::TypedEnumerable
 
   def recursively_valid?(obj); end
 
-  def new(*args); end
+  def new(...); end
 
   sig { override.returns(Module) }
   def underlying_class; end
@@ -360,7 +362,7 @@ class T::Types::TypedEnumerator < T::Types::TypedEnumerable
 
   def recursively_valid?(obj); end
 
-  def new(*args); end
+  def new(...); end
 
   sig { override.returns(Module) }
   def underlying_class; end
@@ -375,7 +377,7 @@ class T::Types::TypedEnumeratorLazy < T::Types::TypedEnumerable
 
   def recursively_valid?(obj); end
 
-  def new(*args); end
+  def new(...); end
 
   sig { override.returns(Module) }
   def underlying_class; end
@@ -390,7 +392,7 @@ class T::Types::TypedEnumeratorChain < T::Types::TypedEnumerable
 
   def recursively_valid?(obj); end
 
-  def new(*args); end
+  def new(...); end
 
   sig { override.returns(Module) }
   def underlying_class; end
