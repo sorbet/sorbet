@@ -1630,40 +1630,79 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             ENFORCE(arg != nullptr);
             ENFORCE(arg->hasDesugaredExpr());
 
-            // Desugar to `::Magic.defined_instance_var(ivar)` or `::Magic.defined_class_var(cvar)`
-            if (auto *ivar = parser::NodeWithExpr::cast_node<parser::IVar>(arg.get())) {
-                auto sym = MK::Symbol(arg->loc, ivar->name);
-                auto expr = MK::Send1(arg->loc, MK::Magic(arg->loc), core::Names::definedInstanceVar(),
-                                      location.copyWithZeroLength(), move(sym));
-                return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
-            }
+            auto valueNode = definedNode->value;
 
-            if (auto *cvar = parser::NodeWithExpr::cast_node<parser::CVar>(arg.get())) {
-                auto sym = MK::Symbol(arg->loc, cvar->name);
-                auto expr = MK::Send1(arg->loc, MK::Magic(arg->loc), core::Names::definedClassVar(),
-                                      location.copyWithZeroLength(), move(sym));
-                return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
-            }
+            switch (PM_NODE_TYPE(valueNode)) {
+                // Desugar `defined?(@ivar)` to `::Magic.defined_instance_var(:@ivar)`
+                case PM_INSTANCE_VARIABLE_READ_NODE: {
+                    auto ivarNode = down_cast<pm_instance_variable_read_node>(valueNode);
+                    auto loc = translateLoc(valueNode->location);
+                    auto name = translateConstantName(ivarNode->name);
+                    auto sym = MK::Symbol(loc, name);
 
-            // Desugar to `defined?(A::B::C)` to `::Magic.defined_p("A", "B", "C")`,
-            //       or `defined?(::A::B::C)` to `::Magic.defined_p()`.
-            ast::Send::ARGS_store args;
-            auto constPathNode = arg->takeDesugaredExpr();
+                    auto expr = MK::Send1(loc, MK::Magic(loc), core::Names::definedInstanceVar(),
+                                          location.copyWithZeroLength(), move(sym));
 
-            while (!ast::isa_tree<ast::EmptyTree>(constPathNode)) {
-                auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(constPathNode);
-                if (lit == nullptr) {
-                    args.clear();
-                    break;
+                    return make_node_with_expr<parser::Defined>(move(expr), location.join(loc), move(arg));
                 }
-                args.emplace_back(MK::String(lit->loc, lit->cnst));
-                constPathNode = move(lit->scope);
-            }
-            absl::c_reverse(args);
 
-            auto expr = MK::Send(arg->loc, MK::Magic(arg->loc), core::Names::defined_p(), location.copyWithZeroLength(),
-                                 args.size(), move(args));
-            return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
+                // Desugar `defined?(@@cvar)` to `::Magic.defined_instance_var(:@@cvar)`
+                case PM_CLASS_VARIABLE_READ_NODE: {
+                    auto cvarNode = down_cast<pm_class_variable_read_node>(valueNode);
+                    auto loc = translateLoc(valueNode->location);
+                    auto name = translateConstantName(cvarNode->name);
+                    auto sym = MK::Symbol(loc, name);
+
+                    auto expr = MK::Send1(loc, MK::Magic(loc), core::Names::definedClassVar(),
+                                          location.copyWithZeroLength(), move(sym));
+
+                    return make_node_with_expr<parser::Defined>(move(expr), location.join(loc), move(arg));
+                }
+
+                // Desugar `defined?(A::B::C)` to `::Magic.defined_p("A", "B", "C")`
+                // or `defined?(::A::B::C)` to `::Magic.defined_p()`
+                case PM_CONSTANT_READ_NODE:
+                case PM_CONSTANT_PATH_NODE: {
+                    ast::Send::ARGS_store args;
+                    auto current = valueNode;
+
+                    while (true) {
+                        if (PM_NODE_TYPE_P(current, PM_CONSTANT_PATH_NODE)) {
+                            auto pathNode = down_cast<pm_constant_path_node>(current);
+
+                            args.emplace_back(MK::String(translateLoc(pathNode->base.location),
+                                                         translateConstantName(pathNode->name)));
+
+                            if (pathNode->parent == nullptr) {
+                                args.clear();
+                                break;
+                            }
+
+                            current = pathNode->parent;
+                        } else if (PM_NODE_TYPE_P(current, PM_CONSTANT_READ_NODE)) {
+                            auto constNode = down_cast<pm_constant_read_node>(current);
+                            args.emplace_back(MK::String(translateLoc(constNode->base.location),
+                                                         translateConstantName(constNode->name)));
+                            break;
+                        } else {
+                            args.clear();
+                            break;
+                        }
+                    }
+
+                    absl::c_reverse(args);
+                    auto expr = MK::Send(arg->loc, MK::Magic(arg->loc), core::Names::defined_p(),
+                                         location.copyWithZeroLength(), args.size(), move(args));
+                    return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
+                }
+                default: {
+                    // All other cases desugar to `::Magic.defined?()` with 0 arguments
+                    ast::Send::ARGS_store args;
+                    auto expr = MK::Send(arg->loc, MK::Magic(arg->loc), core::Names::defined_p(),
+                                         location.copyWithZeroLength(), args.size(), move(args));
+                    return make_node_with_expr<parser::Defined>(move(expr), location.join(arg->loc), move(arg));
+                }
+            }
         }
         case PM_ELSE_NODE: { // An `else` clauses, which can pertain to an `if`, `begin`, `case`, etc.
             auto elseNode = down_cast<pm_else_node>(node);
