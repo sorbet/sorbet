@@ -1578,8 +1578,34 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
     if (auto o1 = cast_type<OrType>(t1)) { // 7, 8, 9
-        return Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, errorDetailsCollector) &&
-               Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode, errorDetailsCollector);
+        auto subCollectorLeft = errorDetailsCollector.newCollector();
+        auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, errorDetailsCollector);
+        if (!isSubTypeOfLeft) {
+            if constexpr (shouldAddErrorDetails) {
+                // This if is to handle the T.nilable(X) < X case; it's not useful say that nil is not a subtype of X
+                if (!o1->left.isNilClass()) {
+                    auto message = ErrorColors::format("`{}` (the left side of the `{}`) is not a subtype of `{}`",
+                                                       o1->left.show(gs), "T.any", t2.show(gs));
+                    subCollectorLeft.message = message;
+                    errorDetailsCollector.addErrorDetails(move(subCollectorLeft));
+                }
+            }
+            return isSubTypeOfLeft;
+        }
+        auto subCollectorRight = errorDetailsCollector.newCollector();
+        auto isSubTypeOfRight = Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode, errorDetailsCollector);
+        if (!isSubTypeOfRight) {
+            if constexpr (shouldAddErrorDetails) {
+                // This if is to handle the T.nilable(X) < X case; it's not useful say that nil is not a subtype of X
+                if (!o1->right.isNilClass()) {
+                    auto message = ErrorColors::format("`{}` (the right side of the `{}`) is not a subtype of `{}`",
+                                                       o1->right.show(gs), "T.any", t2.show(gs));
+                    subCollectorRight.message = message;
+                    errorDetailsCollector.addErrorDetails(move(subCollectorRight));
+                }
+            }
+        }
+        return isSubTypeOfRight;
     }
 
     if (auto a2 = cast_type<AndType>(t2)) { // 2, 5
