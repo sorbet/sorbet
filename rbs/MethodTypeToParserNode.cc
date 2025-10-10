@@ -155,6 +155,18 @@ unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const parse
 
             sigBuilder = parser::MK::Send(annotation.typeLoc, move(sigBuilder), core::Names::override_(),
                                           annotation.typeLoc, move(args));
+        } else if (annotation.string == "override(allow_incompatible: :visibility)") {
+            auto pairs = parser::NodeVec();
+            auto key = parser::MK::Symbol(annotation.typeLoc, core::Names::allowIncompatible());
+            auto value = parser::MK::Symbol(annotation.typeLoc, core::Names::visibility());
+            pairs.emplace_back(make_unique<parser::Pair>(annotation.typeLoc, move(key), move(value)));
+            auto hash = parser::MK::Hash(annotation.typeLoc, true, move(pairs));
+
+            auto args = parser::NodeVec();
+            args.emplace_back(move(hash));
+
+            sigBuilder = parser::MK::Send(annotation.typeLoc, move(sigBuilder), core::Names::override_(),
+                                          annotation.typeLoc, move(args));
         }
     }
 

@@ -600,6 +600,30 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of method>
     end
 
+    class <emptyTree>::<C OverrideIncompatibleVisibility><<C <todo sym>>> < (<emptyTree>::<C Parent>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.override().params(:x, <emptyTree>::<C Integer>).void()
+      end
+
+      def method<<todo method>>(x, &<blk>)
+        <emptyTree>::<C T>.reveal_type(x)
+      end
+
+      <self>.private(<runtime method definition of method>)
+    end
+
+    class <emptyTree>::<C OverrideAllowIncompatibleVisibility><<C <todo sym>>> < (<emptyTree>::<C Parent>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.override(:allow_incompatible, :visibility).params(:x, <emptyTree>::<C Integer>).void()
+      end
+
+      def method<<todo method>>(x, &<blk>)
+        <emptyTree>::<C T>.reveal_type(x)
+      end
+
+      <self>.private(<runtime method definition of method>)
+    end
+
     class <emptyTree>::<C Abstract><<C <todo sym>>> < (::<todo sym>)
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
