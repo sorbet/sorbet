@@ -36,25 +36,17 @@ ClassDef{
             flags = {}
             recv = Send{
               flags = {}
-              recv = Array{
-                elems = [
-                ]
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
               }
-              fun = <U concat>
+              fun = <U <splat>>
               block = nullptr
               pos_args = 1
               args = [
-                Send{
-                  flags = {}
-                  recv = UnresolvedIdent{
-                    kind = Local
-                    name = <U <fwd-args>>
-                  }
-                  fun = <U to_a>
-                  block = nullptr
-                  pos_args = 0
-                  args = [
-                  ]
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U <fwd-args>>
                 }
               ]
             }

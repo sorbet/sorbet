@@ -45,6 +45,9 @@ class Foo
   def foo_fwd(...)
     r1 = T.unsafe(self).bar(...)
     T.reveal_type(r1) # error: Revealed type: `T.untyped`
+
+    r2 = self.bar(...)
+    T.reveal_type(r2) # error: Revealed type: `T.untyped`
   end
 
   sig do
@@ -87,7 +90,8 @@ class Foo
     T.reveal_type(a) # error: Revealed type: `T.untyped`
     T.reveal_type(b) # error: Revealed type: `T.untyped`
     T.reveal_type(c) # error: Revealed type: `T.untyped`
-    d = T.unsafe(self).bar(a, b, c, ...)
+    d = self.bar(a, b, c, ...) # error: Splats are only supported where the size of the array is known statically
+    T.reveal_type(d) # error: T.untyped
   end
 end
 

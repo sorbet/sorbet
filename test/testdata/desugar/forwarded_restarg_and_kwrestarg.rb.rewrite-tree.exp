@@ -1,0 +1,98 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.sig() do ||
+    <self>.params(:a, <emptyTree>::<C Integer>, :b, <emptyTree>::<C Integer>, :c, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+  end
+
+  def pos_args<<todo method>>(a, b, c, &<blk>)
+    a.to_s()
+  end
+
+  def req_kwargs<<todo method>>(a:, b:, c:, &<blk>)
+    <emptyTree>
+  end
+
+  def opt_kwargs<<todo method>>(a: = 1, b: = 2, c: = 3, &<blk>)
+    <emptyTree>
+  end
+
+  def all_the_args<<todo method>>(a, b: = 2, &blk)
+    <emptyTree>
+  end
+
+  def foo<<todo method>>(**, &<blk>)
+    begin
+      res = ::<Magic>.<call-with-splat>(<self>, :pos_args, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
+      <emptyTree>::<C T>.reveal_type(res)
+      ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
+      ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [1].concat(::T.unsafe(<fwd-args>.to_a())), nil)
+      ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [1, 2].concat(::T.unsafe(<fwd-args>.to_a())), nil)
+    end
+  end
+
+  def bar<<todo method>>(***$2:, &<blk>)
+    begin
+      <self>.req_kwargs(begin
+          <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+          <hashTemp>$2
+        end)
+      <self>.req_kwargs(begin
+          <hashTemp>$3 = {:a => 1}
+          <hashTemp>$3 = ::<Magic>.<merge-hash>(<hashTemp>$3, ::<Magic>.<to-hash-nodup>(::T.unsafe(<fwd-kwargs>)))
+          <hashTemp>$3
+        end)
+      <self>.req_kwargs(begin
+          <hashTemp>$4 = {:a => 1, :b => 2}
+          <hashTemp>$4 = ::<Magic>.<merge-hash>(<hashTemp>$4, ::<Magic>.<to-hash-nodup>(::T.unsafe(<fwd-kwargs>)))
+          <hashTemp>$4
+        end)
+      <self>.opt_kwargs(begin
+          <hashTemp>$5 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+          <hashTemp>$5
+        end)
+      <self>.opt_kwargs(begin
+          <hashTemp>$6 = {:a => 1}
+          <hashTemp>$6 = ::<Magic>.<merge-hash>(<hashTemp>$6, ::<Magic>.<to-hash-nodup>(::T.unsafe(<fwd-kwargs>)))
+          <hashTemp>$6
+        end)
+      <self>.opt_kwargs(begin
+          <hashTemp>$7 = {:a => 1, :b => 2}
+          <hashTemp>$7 = ::<Magic>.<merge-hash>(<hashTemp>$7, ::<Magic>.<to-hash-nodup>(::T.unsafe(<fwd-kwargs>)))
+          <hashTemp>$7
+        end)
+    end
+  end
+
+  def baz<<todo method>>(**, ***$3:, &&$4)
+    begin
+      ::<Magic>.<call-with-splat-and-block-pass>(<self>, :all_the_args, [].concat(::T.unsafe(<fwd-args>.to_a())), [begin
+            <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+            <hashTemp>$2
+          end], &)
+      ::<Magic>.<call-with-splat-and-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :all_the_args, [].concat(::T.unsafe(<fwd-args>.to_a())), [begin
+            <hashTemp>$3 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+            <hashTemp>$3
+          end], &)
+      ::<Magic>.<call-with-block-pass>(<self>, :all_the_args, &, 1, begin
+          <hashTemp>$4 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+          <hashTemp>$4
+        end)
+      ::<Magic>.<call-with-block-pass>(<self>, :all_the_args, &, 1, :b, 3)
+    end
+  end
+
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <runtime method definition of pos_args>
+
+  <runtime method definition of req_kwargs>
+
+  <runtime method definition of opt_kwargs>
+
+  <runtime method definition of all_the_args>
+
+  <runtime method definition of foo>
+
+  <runtime method definition of bar>
+
+  <runtime method definition of baz>
+end
