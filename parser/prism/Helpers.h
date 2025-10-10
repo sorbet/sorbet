@@ -1,11 +1,11 @@
 #ifndef SORBET_PARSER_PRISM_HELPERS_H
 #define SORBET_PARSER_PRISM_HELPERS_H
 
+#include "core/LocOffsets.h"
+#include <cstdlib>
 #include <string_view>
 #include <type_traits>
 #include <vector>
-#include <cstdlib>
-#include "core/LocOffsets.h"
 extern "C" {
 #include "prism.h"
 }
@@ -243,17 +243,15 @@ public:
     static pm_node_t *KeywordHash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs);
 
     // Low-level method call creation
-    static pm_call_node_t *createSendNode(pm_node_t *receiver, pm_constant_id_t method_id,
-                                          pm_node_t *arguments, pm_location_t message_loc,
-                                          pm_location_t full_loc, pm_location_t tiny_loc,
+    static pm_call_node_t *createSendNode(pm_node_t *receiver, pm_constant_id_t method_id, pm_node_t *arguments,
+                                          pm_location_t message_loc, pm_location_t full_loc, pm_location_t tiny_loc,
                                           pm_node_t *block = nullptr);
 
     // High-level method call builders (similar to ast::MK)
     static pm_node_t *Send(core::LocOffsets loc, pm_node_t *receiver, const char *method,
-                          const std::vector<pm_node_t *> &args, pm_node_t *block = nullptr);
+                           const std::vector<pm_node_t *> &args, pm_node_t *block = nullptr);
     static pm_node_t *Send0(core::LocOffsets loc, pm_node_t *receiver, const char *method);
-    static pm_node_t *Send1(core::LocOffsets loc, pm_node_t *receiver, const char *method,
-                           pm_node_t *arg1);
+    static pm_node_t *Send1(core::LocOffsets loc, pm_node_t *receiver, const char *method, pm_node_t *arg1);
 
     // Utility functions
     static pm_constant_id_t addConstantToPool(const char *name);

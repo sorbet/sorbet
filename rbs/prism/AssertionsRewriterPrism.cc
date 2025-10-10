@@ -29,7 +29,7 @@ const regex absurd_pattern_prism("^\\s*absurd\\s*(#.*)?$");
  */
 optional<pair<unique_ptr<parser::Node>, InlineCommentPrism::Kind>>
 parseCommentPrism(core::MutableContext ctx, InlineCommentPrism comment,
-             vector<pair<core::LocOffsets, core::NameRef>> typeParams) {
+                  vector<pair<core::LocOffsets, core::NameRef>> typeParams) {
     if (comment.kind == InlineCommentPrism::Kind::MUST || comment.kind == InlineCommentPrism::Kind::UNSAFE ||
         comment.kind == InlineCommentPrism::Kind::ABSURD) {
         return pair<unique_ptr<parser::Node>, InlineCommentPrism::Kind>{
@@ -116,11 +116,12 @@ bool sameConstantPrism(core::MutableContext ctx, unique_ptr<parser::Node> &a, un
         return false;
     }
 
-    return (aConst->scope == nullptr && bConst->scope == nullptr) || sameConstantPrism(ctx, aConst->scope, bConst->scope);
+    return (aConst->scope == nullptr && bConst->scope == nullptr) ||
+           sameConstantPrism(ctx, aConst->scope, bConst->scope);
 }
 
 void maybeSupplyGenericTypeArgumentsPrism(core::MutableContext ctx, unique_ptr<parser::Node> *node,
-                                     unique_ptr<parser::Node> *type) {
+                                          unique_ptr<parser::Node> *type) {
     // We only rewrite `.new` calls
     auto newSend = parser::cast_node<parser::Send>(node->get());
     if (newSend == nullptr || newSend->method != core::Names::new_()) {
@@ -259,7 +260,7 @@ bool AssertionsRewriterPrism::saveTypeParams(parser::Block *block) {
  */
 unique_ptr<parser::Node>
 AssertionsRewriterPrism::insertCast(unique_ptr<parser::Node> node,
-                               optional<pair<unique_ptr<parser::Node>, InlineCommentPrism::Kind>> pair) {
+                                    optional<pair<unique_ptr<parser::Node>, InlineCommentPrism::Kind>> pair) {
     if (!pair) {
         return node;
     }
@@ -340,7 +341,8 @@ unique_ptr<parser::Node> AssertionsRewriterPrism::replaceSyntheticBind(unique_pt
 /**
  * Rewrite a collection of nodes, wrap them in an array and cast the array.
  */
-parser::NodeVec AssertionsRewriterPrism::rewriteNodesAsArray(const unique_ptr<parser::Node> &node, parser::NodeVec nodes) {
+parser::NodeVec AssertionsRewriterPrism::rewriteNodesAsArray(const unique_ptr<parser::Node> &node,
+                                                             parser::NodeVec nodes) {
     if (auto inlineComment = commentForNode(node)) {
         if (nodes.size() > 1) {
             auto loc = nodes.front()->loc.join(nodes.back()->loc);
@@ -679,7 +681,7 @@ unique_ptr<parser::Node> AssertionsRewriterPrism::rewriteNode(unique_ptr<parser:
     return result;
 }
 
-pm_node_t * AssertionsRewriterPrism::run(pm_node_t *node) {
+pm_node_t *AssertionsRewriterPrism::run(pm_node_t *node) {
     // TODO: Implement actual Prism node rewriting
     // For now, just return the node unchanged
     return node;

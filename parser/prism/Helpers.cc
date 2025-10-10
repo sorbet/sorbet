@@ -349,8 +349,8 @@ pm_node_t *PMK::Send1(core::LocOffsets loc, pm_node_t *receiver, const char *met
     return up_cast(createSendNode(receiver, method_id, arguments, tiny_loc, full_loc, tiny_loc));
 }
 
-pm_node_t *PMK::Send(core::LocOffsets loc, pm_node_t *receiver, const char *method,
-                     const vector<pm_node_t *> &args, pm_node_t *block) {
+pm_node_t *PMK::Send(core::LocOffsets loc, pm_node_t *receiver, const char *method, const vector<pm_node_t *> &args,
+                     pm_node_t *block) {
     if (!receiver || !method || args.empty()) {
         return nullptr;
     }

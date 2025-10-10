@@ -129,7 +129,7 @@ std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from
 pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileRef file, pm_node_t *node,
                               const std::vector<sorbet::core::LocOffsets> &commentLocations,
                               const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx,
-                              const parser::Prism::Parser& parser);
+                              const parser::Prism::Parser &parser);
 
 } // namespace sorbet::realmain::pipeline
 

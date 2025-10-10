@@ -34,29 +34,29 @@ struct CommentsPrism {
 
 class SigsRewriterPrism {
 public:
-    SigsRewriterPrism(core::MutableContext ctx,
-                      const parser::Prism::Parser& parser,
+    SigsRewriterPrism(core::MutableContext ctx, const parser::Prism::Parser &parser,
                       std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> &commentsByNode)
         : ctx(ctx), parser(parser), commentsByNode(&commentsByNode){};
     pm_node_t *run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
-    const parser::Prism::Parser& parser;
+    const parser::Prism::Parser &parser;
     std::map<pm_node_t *, std::vector<rbs::CommentNodePrism>> *commentsByNode;
 
     pm_node_t *rewriteBody(pm_node_t *node);
     pm_node_t *rewriteNode(pm_node_t *node);
     void rewriteNodes(pm_node_list_t &nodes);
     pm_node_t *rewriteClass(pm_node_t *node);
-    std::unique_ptr<std::vector<pm_node_t*>> signaturesForNode(pm_node_t *node);
+    std::unique_ptr<std::vector<pm_node_t *>> signaturesForNode(pm_node_t *node);
     CommentsPrism commentsForNode(pm_node_t *node);
     void insertTypeParams(parser::Node *node, std::unique_ptr<parser::Node> *body);
     std::unique_ptr<parser::Node> replaceSyntheticTypeAlias(std::unique_ptr<parser::Node> node);
-    pm_node_t *createStatementsWithSignatures(pm_node_t *originalNode, std::unique_ptr<std::vector<pm_node_t*>> signatures);
+    pm_node_t *createStatementsWithSignatures(pm_node_t *originalNode,
+                                              std::unique_ptr<std::vector<pm_node_t *>> signatures);
 
     // Helper methods for statements management
-    bool addNodeToStatements(pm_statements_node_t* stmts, pm_node_t* node);
+    bool addNodeToStatements(pm_statements_node_t *stmts, pm_node_t *node);
 };
 
 } // namespace sorbet::rbs

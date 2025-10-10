@@ -14,8 +14,9 @@ class TypeToParserNodePrism {
     const parser::Prism::Parser *prismParser;
 
 public:
-    TypeToParserNodePrism(core::MutableContext ctx, absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams,
-                          Parser parser, const parser::Prism::Parser *prismParser)
+    TypeToParserNodePrism(core::MutableContext ctx,
+                          absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams, Parser parser,
+                          const parser::Prism::Parser *prismParser)
         : ctx(ctx), typeParams(typeParams), parser(parser), prismParser(prismParser) {}
 
     /**
@@ -38,11 +39,9 @@ private:
     pm_node_t *intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
                                 const RBSDeclaration &declaration);
     pm_node_t *unionType(const rbs_types_union_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
-    pm_node_t *optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
-                            const RBSDeclaration &declaration);
+    pm_node_t *optionalType(const rbs_types_optional_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
     pm_node_t *voidType(const rbs_types_bases_void_t *node, core::LocOffsets loc);
-    pm_node_t *functionType(const rbs_types_function_t *node, core::LocOffsets loc,
-                            const RBSDeclaration &declaration);
+    pm_node_t *functionType(const rbs_types_function_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
     pm_node_t *procType(const rbs_types_proc_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
     pm_node_t *blockType(const rbs_types_block_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
     pm_node_t *tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
@@ -52,7 +51,7 @@ private:
     // Helper methods for Prism node creation
     pm_node_t *createConstantReadNode(const std::string &name);
     pm_constant_id_t addConstantToPool(const char *name);
-    template<typename NodeType> NodeType *allocateNode();
+    template <typename NodeType> NodeType *allocateNode();
     pm_node_t initializeBaseNode(pm_node_type_t type);
 };
 

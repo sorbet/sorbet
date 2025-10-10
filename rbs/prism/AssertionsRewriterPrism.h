@@ -29,11 +29,13 @@ struct InlineCommentPrism {
 
 class AssertionsRewriterPrism {
 public:
-    AssertionsRewriterPrism(core::MutableContext ctx, std::map<parser::Node *, std::vector<CommentNodePrism>> &commentsByNode)
+    AssertionsRewriterPrism(core::MutableContext ctx,
+                            std::map<parser::Node *, std::vector<CommentNodePrism>> &commentsByNode)
         : ctx(ctx), legacyCommentsByNode(&commentsByNode), prismCommentsByNode(nullptr){};
-    AssertionsRewriterPrism(core::MutableContext ctx, std::map<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode)
+    AssertionsRewriterPrism(core::MutableContext ctx,
+                            std::map<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode)
         : ctx(ctx), legacyCommentsByNode(nullptr), prismCommentsByNode(&commentsByNode){};
-    pm_node_t * run(pm_node_t *node);
+    pm_node_t *run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
