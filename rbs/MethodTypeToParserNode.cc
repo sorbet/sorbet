@@ -235,7 +235,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, c
 
     string corrected;
     auto source = ctx.file.data(ctx.state).source();
-    auto typeString = source.substr(type->loc.beginPos(), type->loc.endPos() - type->loc.beginPos());
+    auto typeString = source.substr(type->loc.beginPos(), type->loc.length());
 
     typecase(
         methodParam,

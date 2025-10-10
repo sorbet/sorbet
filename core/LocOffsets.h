@@ -20,6 +20,10 @@ struct LocOffsets {
     uint32_t endPos() const {
         return endLoc;
     }
+    uint32_t length() const {
+        ENFORCE_NO_TIMER(exists());
+        return endPos() - beginPos();
+    }
     bool exists() const {
         return endLoc != INVALID_POS_LOC && beginLoc != INVALID_POS_LOC;
     }

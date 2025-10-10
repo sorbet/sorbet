@@ -49,8 +49,8 @@ vector<unique_ptr<core::lsp::QueryResponse>> QueryCollector::drainQueryResponses
         construction, but threading artifact might reorder them, thus we'd like to sort them */
         auto leftTermLoc = left->getLoc();
         auto rightTermLoc = right->getLoc();
-        auto leftLength = leftTermLoc.endPos() - leftTermLoc.beginPos();
-        auto rightLength = rightTermLoc.endPos() - rightTermLoc.beginPos();
+        auto leftLength = leftTermLoc.length();
+        auto rightLength = rightTermLoc.length();
         if (leftLength != rightLength) {
             return leftLength < rightLength;
         }

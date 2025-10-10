@@ -90,7 +90,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
     core::LocOffsets rvLoc;
     if (cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value)) {
-        auto beginAdjust = md.loc.endPos() - md.loc.beginPos() - 3;
+        auto beginAdjust = md.loc.length() - 3;
         auto endLoc = ctx.locAt(md.loc).adjust(ctx, beginAdjust, 0);
         if (endLoc.source(ctx) == "end") {
             rvLoc = endLoc.offsets();
