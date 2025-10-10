@@ -127,6 +127,7 @@ LSPTask::~LSPTask() {
     latencyTimer->setTag("method", methodString());
 }
 
+// Used for timers/counters, so we use `.` instead of `/` as a separator.
 ConstExprStr LSPTask::methodString() const {
     switch (method) {
         case LSPMethod::$CancelRequest:
@@ -161,6 +162,8 @@ ConstExprStr LSPTask::methodString() const {
             return "sorbet.indexerInitialization";
         case LSPMethod::SorbetShowSymbol:
             return "sorbet.showSymbol";
+        case LSPMethod::SorbetHierarchyReferences:
+            return "sorbet.hierarchyReferences";
         case LSPMethod::SorbetWatchmanFileChange:
             return "sorbet.watchmanFileChange";
         case LSPMethod::SorbetWatchmanStateEnter:

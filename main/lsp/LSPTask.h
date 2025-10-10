@@ -61,7 +61,7 @@ public:
         RUN = 3,
     };
 
-    // Get this task's method as a string.
+    // Get this task's method as a string that can be used in timers and counters.
     ConstExprStr methodString() const;
 
     /**

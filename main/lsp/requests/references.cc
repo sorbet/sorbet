@@ -10,8 +10,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, unique_ptr<ReferenceParams> params)
-    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)) {}
+ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, unique_ptr<ReferenceParams> params,
+                               bool hierarchyReferences)
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)),
+      hierarchyReferences(hierarchyReferences) {}
 
 bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
     return true;
