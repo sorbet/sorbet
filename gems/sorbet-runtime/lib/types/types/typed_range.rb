@@ -22,8 +22,8 @@ module T::Types
       obj.is_a?(Range)
     end
 
-    def new(*args)
-      T.unsafe(Range).new(*args)
+    def new(...)
+      Range.new(...)
     end
   end
 end

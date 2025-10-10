@@ -22,8 +22,8 @@ module T::Types
       obj.is_a?(Enumerator)
     end
 
-    def new(*args, &blk)
-      T.unsafe(Enumerator).new(*args, &blk)
+    def new(...)
+      Enumerator.new(...)
     end
 
     class Untyped < TypedEnumerator

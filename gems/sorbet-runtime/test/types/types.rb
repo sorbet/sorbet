@@ -622,6 +622,7 @@ module Opus::Types::Test
       it 'can have its metatype instantiated' do
         assert_equal([], T::Array[Integer].new)
         assert_equal([nil, nil, nil], T::Array[Integer].new(3))
+        assert_equal([true, true, true], T::Array[Integer].new(3) { true })
       end
 
       it 'is coerced from plain array' do
