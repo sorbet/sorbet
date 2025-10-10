@@ -23,7 +23,7 @@ module T::Types
     end
 
     def new(...)
-      T.unsafe(Enumerator).new(...)
+      Enumerator.new(...)
     end
 
     class Untyped < TypedEnumerator

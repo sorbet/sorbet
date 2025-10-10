@@ -23,7 +23,7 @@ module T::Types
     end
 
     def new(...)
-      T.unsafe(Enumerator::Lazy).new(...)
+      Enumerator::Lazy.new(...)
     end
 
     class Untyped < TypedEnumeratorLazy

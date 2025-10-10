@@ -42,7 +42,7 @@ module T::Types
     end
 
     def new(...)
-      T.unsafe(Hash).new(...)
+      Hash.new(...)
     end
 
     class Untyped < TypedHash

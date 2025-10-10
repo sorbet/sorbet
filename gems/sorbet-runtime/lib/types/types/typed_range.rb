@@ -23,7 +23,7 @@ module T::Types
     end
 
     def new(...)
-      T.unsafe(Range).new(...)
+      Range.new(...)
     end
   end
 end

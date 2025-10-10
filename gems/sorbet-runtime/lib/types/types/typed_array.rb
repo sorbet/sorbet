@@ -23,7 +23,7 @@ module T::Types
     end
 
     def new(...)
-      T.unsafe(Array).new(...)
+      Array.new(...)
     end
 
     module Private
