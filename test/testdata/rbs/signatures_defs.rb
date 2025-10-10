@@ -313,6 +313,22 @@ module Annotations
     end
   end
 
+  class OverrideIncompatibleVisibility < Parent
+    # @override
+    #: (Integer) -> void
+    private def method(x) # error: Method `method` is private in `Annotations::OverrideIncompatibleVisibility` but not in `Annotations::Parent`
+      T.reveal_type(x) # error: Revealed type: `Integer`
+    end
+  end
+
+  class OverrideAllowIncompatibleVisibility < Parent
+    # @override(allow_incompatible: :visibility)
+    #: (Integer) -> void
+    private def method(x)
+      T.reveal_type(x) # error: Revealed type: `Integer`
+    end
+  end
+
   # @abstract
   class Abstract
     # @abstract
