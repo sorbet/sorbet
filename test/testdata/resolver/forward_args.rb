@@ -46,7 +46,7 @@ class Foo
     r1 = T.unsafe(self).bar(...)
     T.reveal_type(r1) # error: Revealed type: `T.untyped`
 
-    r2 = self.bar(...) # error: Splats are only supported where the size of the array is known statically
+    r2 = self.bar(...)
     T.reveal_type(r2) # error: Revealed type: `T.untyped`
   end
 
