@@ -7,9 +7,11 @@ namespace sorbet::realmain::lsp {
 class ReferenceParams;
 class ReferencesTask final : public LSPRequestTask {
     std::unique_ptr<ReferenceParams> params;
+    bool hierarchyReferences;
 
 public:
-    ReferencesTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ReferenceParams> params);
+    ReferencesTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ReferenceParams> params,
+                   bool hierarchyReferences);
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 

@@ -324,6 +324,19 @@ _Response_:
 
 - result: [`TextDocumentItem`]
 
+### `sorbet/hierarchyReferences` request
+
+<!-- TODO(jez) Document this -->
+
+_Request_:
+
+- method: `sorbet/hierarchyReferences`
+- params: [`ReferenceParams`]
+
+_Response_:
+
+- result: <code><a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#location">Location</a>[] | null </code>
+
 ### `sorbet.savePackageFiles` command
 
 The Sorbet language server will sometimes request that the `sorbet.savePackageFiles` command is run. This command is meant to be implemented by language clients.
@@ -369,3 +382,4 @@ Thus, to use Sorbet with watchman in a project that does not use Git, create an 
 [`TextDocumentIdentifier`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentIdentifier
 [`TextDocumentItem`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
 [`DiagnosticSeverity`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity
+[`ReferenceParams`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#referenceParams
