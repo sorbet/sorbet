@@ -2086,8 +2086,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // In `rescue; ...; end`, we don't want the magic <rescueTemp> variable to look
                     // as if its loc is the entire `rescue; ...; end` span. Better to just point at
                     // the `rescue` keyword.
-                    varLoc = (loc.endPos() - loc.beginPos()) > 6 ? core::LocOffsets{loc.beginPos(), loc.beginPos() + 6}
-                                                                 : loc.copyWithZeroLength();
+                    varLoc = (loc.length() > 6) ? core::LocOffsets{loc.beginPos(), loc.beginPos() + 6}
+                                                : loc.copyWithZeroLength();
                 } else if (varExpr != nullptr) {
                     body = MK::InsSeq1(varLoc, MK::Assign(varLoc, move(varExpr), MK::Local(varLoc, var)), move(body));
                 }

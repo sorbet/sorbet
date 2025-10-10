@@ -55,6 +55,9 @@ public:
     uint32_t endPos() const {
         return storage.offsets.endLoc;
     }
+    uint32_t length() const {
+        return storage.offsets.length();
+    }
     const LocOffsets &offsets() const {
         return storage.offsets;
     }
