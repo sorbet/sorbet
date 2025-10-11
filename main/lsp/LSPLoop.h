@@ -97,19 +97,18 @@ std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::stri
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym, bool isAttrBestEffortUIOnly);
 
-// Returns all subclasses of ClassOrModuleRef (including itself)
+// Returns all subclasses of ClassOrModuleRef (including itself if includeRoot is true)
 //
-// This method scans the entire list of classes or modules, which means scanning tens of thousands,
-// at least.
+// This method scans the entire list of classes or modules, which means scanning tens of thousands, at least.
 //
 // This method MUST NOT be used in Sorbet's core type checking pipeline, because it would be
 // prohibitively expensive. It is defined here in lsp_helpers for use implementing certain LSP
 // methods where performance is not a constraint (i.e., where the user is ok waiting for multiple
 // seconds for a response). This means it must not be used to respond to e.g. completion requests.
 //
-// @param includeSelf Whether to include `sym` in the list of subclasses or not.
-std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef sym,
-                                                      bool includeSelf);
+// @param includeRoot Whether to include `root` in the list of subclasses or not.
+std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef root,
+                                                      bool includeRoot);
 
 std::unique_ptr<core::lsp::QueryResponse>
 skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,

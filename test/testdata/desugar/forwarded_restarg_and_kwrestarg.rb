@@ -1,13 +1,16 @@
 # typed: true
+extend T::Sig
 
-def pos_args(a, b, c); end
+sig { params(a: Integer, b: Integer, c: Integer).returns(String) }
+def pos_args(a, b, c); a.to_s; end
 def req_kwargs(a:, b:, c:); end
 def opt_kwargs(a: 1, b: 2, c: 3); end
 def all_the_args(a, b: 2, &blk); end
 
 def foo(*)
-  pos_args(*)
-# ^^^^^^^^^^^ error: Splats are only supported where the size of the array is known statically
+  res = pos_args(*)
+  #     ^^^^^^^^^^^ error: Splats are only supported where the size of the array is known statically
+  T.reveal_type(res) # error: `T.untyped`
 
   T.unsafe(self).pos_args(*)
   T.unsafe(self).pos_args(1, *)

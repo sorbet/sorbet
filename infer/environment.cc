@@ -1345,8 +1345,22 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(ctx.owner == i.method);
 
                 const auto &argInfo = i.argument(ctx);
-                auto argType = argInfo.parameterTypeAsSeenByImplementation(ctx, constr);
-                tp.type = std::move(argType);
+                if (bind.bind.variable.data(inWhat)._name == core::Names::fwdArgs()) {
+                    // This is a bit of a hack. Right now, using `...` is particularly punishing.
+                    // It's frequently used by low-level code that doesn't actually benefit from
+                    // tracking types on the method call, and then the user gets an error saying
+                    // "Splats are only supported where the size of the array is known statically"
+                    // to which the only answer is downgrade the file or tack on a T.unsafe,
+                    // assuming you can't refactor the code to pass arguments explicitly.
+                    // In performance-sensitive code, even using `T.unsafe` sometimes might slow
+                    // down a piece of code, and it's just noise.
+                    //
+                    // Eventually, we might want to have first-class support for argument
+                    // forwarding, but in the mean time, let's just ignore it.
+                    tp.type = core::Types::untyped(i.method);
+                } else {
+                    tp.type = argInfo.parameterTypeAsSeenByImplementation(ctx, constr);
+                }
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 if (lspQuery.matchesLoc(argInfo.loc)) {

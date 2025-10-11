@@ -797,14 +797,16 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call mechanism.
 
+                    auto argsEmpty = send->args.empty();
                     unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, move(send->args));
                     auto args = node2TreeImpl(dctx, array);
 
                     if (hasFwdArgs) {
                         auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
-                        auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), locZeroLen);
+                        auto argsSplat = MK::Splat(loc, move(fwdArgs));
                         auto argsConcat =
-                            MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(argsSplat));
+                            argsEmpty ? move(argsSplat)
+                                      : MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(argsSplat));
 
                         auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
                         auto kwargsSplat =

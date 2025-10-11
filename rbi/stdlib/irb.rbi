@@ -460,6 +460,14 @@ end
 # [`IRB.irb_abort`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-irb_abort)
 class IRB::Abort < ::Exception; end
 
+module IRB::Color
+  class << self
+    # https://github.com/ruby/irb/blob/d43c3d76/lib/irb/color.rb#L120-L124
+    sig { params(text: String, seq: T::Enumerable[T.any(String, Symbol)], colorable: T::Boolean).returns(String) }
+    def colorize(text, seq, colorable: false); end
+  end
+end
+
 # A class that wraps the current state of the irb session, including the
 # configuration of
 # [`IRB.conf`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-conf).
