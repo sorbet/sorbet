@@ -314,6 +314,26 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
     return subclasses;
 }
 
+// This is slow. See the comment in the header file.
+vector<core::ClassOrModuleRef> getSubclassesSlowMulti(const core::GlobalState &gs,
+                                                      absl::Span<const core::ClassOrModuleRef> roots) {
+    vector<bool> memoized(gs.classAndModulesUsed());
+    vector<bool> visited(gs.classAndModulesUsed());
+    for (auto root : roots) {
+        memoized[root.id()] = true;
+        visited[root.id()] = true;
+    }
+
+    vector<core::ClassOrModuleRef> subclasses;
+    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto s = core::ClassOrModuleRef(gs, i);
+        if (isSubclassOrMixin(gs, s, memoized, visited)) {
+            subclasses.emplace_back(s);
+        }
+    }
+    return subclasses;
+}
+
 unique_ptr<core::lsp::QueryResponse>
 skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,
                               vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
