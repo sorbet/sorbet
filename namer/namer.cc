@@ -2059,8 +2059,6 @@ public:
 
             // one of fixed or bounds were provided
             if (fixed != bounded) {
-                asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
-
                 // Leave it in the tree for the resolver to chew on.
                 return tree;
             } else if (fixed) {

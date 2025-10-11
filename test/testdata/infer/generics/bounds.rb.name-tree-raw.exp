@@ -132,7 +132,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T2)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T2>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -162,7 +165,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T3)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T3>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -199,7 +205,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T4)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T4>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -229,7 +238,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T5)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T5>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -266,7 +278,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T6)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T6>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -311,7 +326,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T7)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T7>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -417,7 +435,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T10)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T10>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -447,7 +468,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T11)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T11>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -477,7 +501,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T12)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T12>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -528,7 +555,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A1::T13)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T13>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -639,7 +669,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::M::X)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U X>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
@@ -727,7 +760,10 @@ ClassDef{
         Assign{
           lhs = ConstantLit{
             symbol = (type-member ::A2::X)
-            orig = nullptr
+            orig = UnresolvedConstantLit{
+              cnst = <C <U X>>
+              scope = EmptyTree
+            }
           }
           rhs = Send{
             flags = {privateOk}
