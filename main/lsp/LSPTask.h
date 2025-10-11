@@ -44,11 +44,6 @@ protected:
                      const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
                      std::vector<std::unique_ptr<Location>> locations = {}) const;
 
-    // Given a method or field symbol, checks if the symbol belongs to a `prop`, `const`, `attr_reader`, `attr_writer`,
-    // etc, and if so, adds any related symbols to the list of symbols to query for.
-    void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
-                                 core::lsp::Query::Symbol::STORAGE &symbols) const;
-
     LSPTask(const LSPConfiguration &config, LSPMethod method);
 
 public:

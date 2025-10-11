@@ -97,6 +97,9 @@ std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::stri
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym, bool isAttrBestEffortUIOnly);
 
+void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
+                             core::lsp::Query::Symbol::STORAGE &symbols);
+
 // Returns all subclasses of ClassOrModuleRef (including itself if includeRoot is true)
 //
 // This method scans the entire list of classes or modules, which means scanning tens of thousands, at least.
