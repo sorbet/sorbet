@@ -112,6 +112,11 @@ void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol
 // @param includeRoot Whether to include `root` in the list of subclasses or not.
 std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef root,
                                                       bool includeRoot);
+// Version of getSubclassesSlow that find subclasses of multiple root symbols
+//
+// Be sure to read the comment on getSubclassesSlow!
+std::vector<core::ClassOrModuleRef> getSubclassesSlowMulti(const core::GlobalState &gs,
+                                                           absl::Span<const core::ClassOrModuleRef> roots);
 
 std::unique_ptr<core::lsp::QueryResponse>
 skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,
