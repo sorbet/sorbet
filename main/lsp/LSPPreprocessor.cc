@@ -273,7 +273,11 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 return make_unique<SignatureHelpTask>(*config, id,
                                                       move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
             case LSPMethod::TextDocumentReferences:
-                return make_unique<ReferencesTask>(*config, id, move(get<unique_ptr<ReferenceParams>>(rawParams)));
+                return make_unique<ReferencesTask>(*config, id, move(get<unique_ptr<ReferenceParams>>(rawParams)),
+                                                   /* hierarchyReferences */ false);
+            case LSPMethod::SorbetHierarchyReferences:
+                return make_unique<ReferencesTask>(*config, id, move(get<unique_ptr<ReferenceParams>>(rawParams)),
+                                                   /* hierarchyReferences */ true);
             case LSPMethod::TextDocumentImplementation:
                 return make_unique<ImplementationTask>(*config, id,
                                                        move(get<unique_ptr<ImplementationParams>>(rawParams)));

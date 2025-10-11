@@ -296,6 +296,7 @@ const UnorderedMap<
         {"show-symbol", ShowSymbolAssertion::make},
         {"enable-typed-false-completion-nudges", BooleanPropertyAssertion::make},
         {"go-to-def-special", GoToDefSpecialAssertion::make},
+        {"hierarchy-ref", HierarchyReferenceAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -2420,4 +2421,54 @@ optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
 string StringPropertyAssertions::toString() const {
     return fmt::format("selective-apply-code-action: {}", fmt::join(values, ", "));
 }
+
+HierarchyReferenceAssertion::HierarchyReferenceAssertion(string_view filename, unique_ptr<Range> &range,
+                                                         int assertionLine, string_view symbol)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+
+shared_ptr<HierarchyReferenceAssertion> HierarchyReferenceAssertion::make(string_view filename,
+                                                                          unique_ptr<Range> &range, int assertionLine,
+                                                                          string_view assertionContents,
+                                                                          string_view assertionType) {
+    auto [symbol, _, __] = getSymbolVersionAndOption(assertionContents);
+    return make_shared<HierarchyReferenceAssertion>(filename, range, assertionLine, symbol);
+}
+
+void HierarchyReferenceAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                        LSPWrapper &wrapper, int &nextId,
+                                        const vector<shared_ptr<HierarchyReferenceAssertion>> &allReferences) const {
+    const auto &config = wrapper.config();
+    auto location = this->getLocation(config);
+
+    const int id = nextId++;
+
+    auto referenceParams =
+        make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(location->uri), this->range->start->copy(),
+                                     make_unique<ReferenceContext>(true));
+    auto request = make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::SorbetHierarchyReferences, move(referenceParams)));
+    auto responses = getLSPResponsesFor(wrapper, move(request));
+    REQUIRE_EQ(1, responses.size());
+    assertResponseMessage(id, *responses.at(0));
+
+    auto &respMsg = responses.at(0)->asResponse();
+    REQUIRE(respMsg.result.has_value());
+    REQUIRE_FALSE(respMsg.error.has_value());
+
+    auto &locations = extractLocations(respMsg);
+
+    auto locSourceLine = getLine(config, sourceFileContents, *location);
+    auto line = this->range->start->line;
+    auto character = this->range->start->character;
+
+    // upcast explicitly by copying
+    vector<shared_ptr<RangeAssertion>> allRanges(allReferences.begin(), allReferences.end());
+    assertLocationsMatch(config, sourceFileContents, this->symbol, allRanges, line, character, locSourceLine,
+                         this->filename, locations, "hierarchy reference");
+}
+
+string HierarchyReferenceAssertion::toString() const {
+    return fmt::format("hierarchy-ref: {}", symbol);
+}
+
 } // namespace sorbet::test

@@ -10,8 +10,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, unique_ptr<ReferenceParams> params)
-    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)) {}
+ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, unique_ptr<ReferenceParams> params,
+                               bool hierarchyReferences)
+    : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)),
+      hierarchyReferences(hierarchyReferences) {}
 
 bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
     return true;
@@ -62,6 +64,72 @@ core::lsp::Query::Symbol::STORAGE getSymsToCheckWithinPackage(const core::Global
     }
 
     return result;
+}
+
+// This will find *all* classes which own a member with the given name, in any ancestor.
+//
+// That might find "too many" methods. For example, if you want to find all references to a method
+// called `load` that you've defined in some module of yours, it will *also* find references to
+// `Kernel#load`.
+//
+// Maybe we could be smarter about this, maybe looking at whether either the parent or child method
+// had `override` or `abstract` or something, and only show references like that. But then again,
+// there are cases where you're not currently required to put any annotation (e.g., if you don't have
+// a sig but you override a parent method). So for now, I'm punting on this and returning all
+// references. Maybe at some point we could bound the search somewhere, but hopefully in practice
+// people only use this for compatibly-overridden methods.
+void parentsWithMember(const core::GlobalState &gs, core::ClassOrModuleRef owner, core::NameRef name,
+                       vector<core::ClassOrModuleRef> &result) {
+    auto ownerData = owner.data(gs);
+    ENFORCE(ownerData->flags.isLinearizationComputed, "This algorithm does not look through mixins transitively");
+    for (const auto mixin : ownerData->mixins()) {
+        // No dealias: show the definition of the alias, but not calls to the new method.
+        auto parentMember = mixin.data(gs)->findMemberNoDealias(name);
+        if (parentMember.exists()) {
+            result.emplace_back(mixin);
+        }
+    }
+
+    // BasicObject has no superClass, so this terminates
+    auto superClass = ownerData->superClass();
+    if (superClass.exists()) {
+        auto parentMember = superClass.data(gs)->findMemberNoDealias(name);
+        if (parentMember.exists()) {
+            result.emplace_back(superClass);
+        }
+
+        parentsWithMember(gs, superClass, name, result);
+    }
+}
+
+// TODO(jez) This method is an example of a place where we could possibly end up with lots of symbols
+// We're currently searching through a vector of symbols for a query match--if we see this being
+// slow, we might want to change the STORAGE to an UnorderedSet instead of a vector.
+void addHierarchyRelatedSymbols(const core::GlobalState &gs, core::lsp::Query::Symbol::STORAGE &symbols) {
+    auto names = vector<core::NameRef>{};
+    auto parentClasses = vector<core::ClassOrModuleRef>{};
+    for (const auto sym : symbols) {
+        auto name = sym.name(gs);
+        names.emplace_back(name);
+        auto owner = sym.enclosingClass(gs);
+        parentClasses.emplace_back(owner);
+        parentsWithMember(gs, owner, name, parentClasses);
+    }
+
+    // There may be duplicate parents accumulated into parentClasses, but they will be deduplicated as
+    // the first step of getSubclassesSlowMulti, so it's fine to skip de-duplicating on our own.
+    for (const auto subclass : getSubclassesSlowMulti(gs, parentClasses)) {
+        for (auto name : names) {
+            auto subclassMember = subclass.data(gs)->findMemberNoDealias(name);
+            if (subclassMember.exists()) {
+                symbols.emplace_back(subclassMember);
+                // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+                if (subclassMember.isMethod() || subclassMember.isField(gs)) {
+                    addOtherAccessorSymbols(gs, subclassMember, symbols);
+                }
+            }
+        }
+    }
 }
 
 } // namespace
@@ -135,6 +203,11 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
             } else {
                 // Normal handling for non-package files
                 auto symbols = core::lsp::Query::Symbol::STORAGE{1, constResp->symbolBeforeDealias};
+                if (constResp->symbolBeforeDealias.isTypeMember() && hierarchyReferences) {
+                    // Only type member constants behave like inherited/overridden methods.
+                    // Normal static field constants do not, and we should not treat them as such.
+                    addHierarchyRelatedSymbols(gs, symbols);
+                }
                 response->result =
                     extractLocations(typechecker.state(), getReferencesToSymbols(typechecker, move(symbols)));
             }
@@ -142,12 +215,20 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
             auto symbols = core::lsp::Query::Symbol::STORAGE{1, fieldResp->symbol};
             // This could be a `prop` or `attr_*`, which have multiple associated symbols.
             addOtherAccessorSymbols(gs, fieldResp->symbol, symbols);
+            if (hierarchyReferences) {
+                addHierarchyRelatedSymbols(gs, symbols);
+            }
             response->result = extractLocations(gs, getReferencesToSymbols(typechecker, move(symbols)));
         } else if (auto defResp = resp->isMethodDef()) {
             if (fileIsTyped) {
                 auto symbols = core::lsp::Query::Symbol::STORAGE{1, defResp->symbol};
                 // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                 addOtherAccessorSymbols(gs, defResp->symbol, symbols);
+
+                if (hierarchyReferences) {
+                    addHierarchyRelatedSymbols(gs, symbols);
+                }
+
                 response->result = extractLocations(gs, getReferencesToSymbols(typechecker, move(symbols)));
             } else {
                 notifyAboutUntypedFile = true;
@@ -176,6 +257,10 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                         addOtherAccessorSymbols(gs, start->main.method, symbols);
                     }
                     start = start->secondary.get();
+                }
+
+                if (hierarchyReferences) {
+                    addHierarchyRelatedSymbols(gs, symbols);
                 }
 
                 response->result = extractLocations(gs, getReferencesToSymbols(typechecker, move(symbols)));
