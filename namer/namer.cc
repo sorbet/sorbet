@@ -2059,8 +2059,6 @@ public:
 
             // one of fixed or bounds were provided
             if (fixed != bounded) {
-                // Leave it in the tree for the resolver to chew on.
-                return tree;
             } else if (fixed) {
                 // both fixed and bounds were specified
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {

@@ -19,7 +19,7 @@ class Invalids
   BadArg = type_member {{junk: 1}}
   #                      ^^^^ error: Unknown key `junk` provided in block to `type_member`
   #                            ^ error: Unsupported literal in type syntax
-  OneWithFixed = type_member(1) {{fixed: Integer}}
+  OneWithFixed = type_member(1) {{fixed: Integer}} # error: Invalid param, must be a :symbol
   #                          ^ error: Expected `Symbol` but found `Integer(1)`
 end
 
