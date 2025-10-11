@@ -2050,23 +2050,22 @@ public:
                             return tree;
                     }
                 }
+
+                // one of fixed or bounds were provided
+                if (fixed && bounded) {
+                    // both fixed and bounds were specified
+                    if (auto e = ctx.beginError(hash->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Type member is defined with bounds and `{}`", "fixed");
+                    }
+                } else if (!fixed && !bounded) {
+                    if (auto e = ctx.beginError(hash->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Type member bounds must use either `{}` or `{}`/`{}`", "fixed", "lower", "upper");
+                    }
+                }
             } else {
                 if (auto e = ctx.beginError(send->block()->body.loc(), core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Block given to `{}` must contain a single `{}` literal", send->fun.show(ctx), "Hash");
                     return tree;
-                }
-            }
-
-            // one of fixed or bounds were provided
-            if (fixed != bounded) {
-            } else if (fixed) {
-                // both fixed and bounds were specified
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Type member is defined with bounds and `{}`", "fixed");
-                }
-            } else {
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Missing required param `{}`", "fixed");
                 }
             }
         }
