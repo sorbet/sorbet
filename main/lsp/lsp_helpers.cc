@@ -133,6 +133,142 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
 
 namespace {
 
+struct AccessorInfo {
+    core::FieldRef fieldSymbol;
+    core::MethodRef readerSymbol;
+    core::MethodRef writerSymbol;
+};
+
+static const vector<core::NameRef> accessorNames = {
+    core::Names::prop(),        core::Names::tokenProp(),    core::Names::timestampedTokenProp(),
+    core::Names::createdProp(), core::Names::attrAccessor(),
+};
+
+static const vector<core::NameRef> writerNames = {
+    core::Names::attrWriter(),
+};
+
+static const vector<core::NameRef> readerNames = {
+    core::Names::const_(),
+    core::Names::merchantProp(),
+    core::Names::attrReader(),
+};
+
+bool definedByAccessorMethod(const core::GlobalState &gs, AccessorInfo &info) {
+    auto method = info.readerSymbol.exists() ? info.readerSymbol : info.writerSymbol;
+    ENFORCE(method.exists());
+
+    // Check definition site of method for `prop`, `const`, etc. The loc for the method should begin with
+    // `def|prop|const|...`.
+    auto methodSource = method.data(gs)->loc().source(gs);
+    if (!methodSource.has_value()) {
+        return false;
+    }
+    // Common case: ordinary `def`. Fast reject.
+    if (absl::StartsWith(methodSource.value(), "def")) {
+        return false;
+    }
+
+    if (absl::c_any_of(accessorNames, [&methodSource, &gs](auto name) -> bool {
+            return absl::StartsWith(methodSource.value(), name.toString(gs));
+        })) {
+        return true;
+    } else if (absl::c_any_of(writerNames, [&methodSource, &gs](auto name) -> bool {
+                   return absl::StartsWith(methodSource.value(), name.toString(gs));
+               })) {
+        return true;
+    } else if (absl::c_any_of(readerNames, [&methodSource, &gs](auto name) -> bool {
+                   return absl::StartsWith(methodSource.value(), name.toString(gs));
+               })) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+} // namespace
+
+void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
+                             core::lsp::Query::Symbol::STORAGE &symbols) {
+    AccessorInfo info;
+
+    core::SymbolRef owner = symbol.owner(gs);
+    if (!owner.exists() || !owner.isClassOrModule()) {
+        return;
+    }
+    core::ClassOrModuleRef ownerCls = owner.asClassOrModuleRef();
+
+    string_view baseName;
+
+    string symbolName = symbol.name(gs).toString(gs);
+    // Extract the base name from `symbol`.
+    if (absl::StartsWith(symbolName, "@")) {
+        if (!symbol.isField(gs)) {
+            return;
+        }
+        info.fieldSymbol = symbol.asFieldRef();
+        baseName = string_view(symbolName).substr(1);
+    } else if (absl::EndsWith(symbolName, "=")) {
+        if (!symbol.isMethod()) {
+            return;
+        }
+        info.writerSymbol = symbol.asMethodRef();
+        baseName = string_view(symbolName).substr(0, symbolName.length() - 1);
+    } else {
+        if (!symbol.isMethod()) {
+            return;
+        }
+        info.readerSymbol = symbol.asMethodRef();
+        baseName = symbolName;
+    }
+
+    // Find the other associated symbols.
+    if (!info.fieldSymbol.exists()) {
+        auto fieldNameStr = absl::StrCat("@", baseName);
+        auto fieldName = gs.lookupNameUTF8(fieldNameStr);
+        if (!fieldName.exists()) {
+            // Field is not optional.
+            return;
+        }
+        info.fieldSymbol = gs.lookupFieldSymbol(ownerCls, fieldName);
+    }
+
+    if (!info.readerSymbol.exists()) {
+        auto readerName = gs.lookupNameUTF8(baseName);
+        if (readerName.exists()) {
+            info.readerSymbol = gs.lookupMethodSymbol(ownerCls, readerName);
+        }
+    }
+
+    if (!info.writerSymbol.exists()) {
+        auto writerNameStr = absl::StrCat(baseName, "=");
+        auto writerName = gs.lookupNameUTF8(writerNameStr);
+        if (writerName.exists()) {
+            info.writerSymbol = gs.lookupMethodSymbol(ownerCls, writerName);
+        }
+    }
+
+    // If this is an accessor, we should have a field and _at least_ one of reader or writer.
+    if (!info.writerSymbol.exists() && !info.readerSymbol.exists()) {
+        return;
+    }
+
+    // Use reader or writer to determine what type of field accessor we are dealing with (if any).
+    if (definedByAccessorMethod(gs, info)) {
+        if (info.fieldSymbol.exists() && symbol != info.fieldSymbol) {
+            symbols.emplace_back(info.fieldSymbol);
+        }
+        if (info.readerSymbol.exists() && symbol != info.readerSymbol) {
+            symbols.emplace_back(info.readerSymbol);
+        }
+        if (info.writerSymbol.exists() && symbol != info.writerSymbol) {
+            symbols.emplace_back(info.writerSymbol);
+        }
+    }
+}
+
+namespace {
+
 // Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
 bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef s, vector<bool> &memoized,
                        vector<bool> &visited) {
