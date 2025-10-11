@@ -59,6 +59,9 @@ class A1
   # should fail: multiple fixed values provided
   T13 = type_member {{fixed: Integer, fixed: String}}
                                     # ^^^^^ error: Hash key `fixed` is duplicated
+
+  T14 = type_member { {} }
+  #     ^^^^^^^^^^^^^^^^^^ error: Missing required param `fixed`
 end
 
 module M
