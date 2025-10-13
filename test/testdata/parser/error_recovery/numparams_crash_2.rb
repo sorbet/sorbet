@@ -1,6 +1,6 @@
 # typed: false
 
 f (1) { |x| _1 }
-          # ^^ error: can't use anonymous parameters when ordinary parameters are defined
+          # ^^ error: numbered parameters are not allowed when an ordinary parameter is defined
 
 _1

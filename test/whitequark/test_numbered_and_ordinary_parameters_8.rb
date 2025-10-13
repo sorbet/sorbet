@@ -1,3 +1,3 @@
 # typed: true
 
-->() do _1 end  # error: can't use anonymous parameters when ordinary parameters are defined
+->() do _1 end  # error: numbered parameters are not allowed when an ordinary parameter is defined

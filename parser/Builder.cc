@@ -198,7 +198,7 @@ public:
             auto name_str = id->name.shortName(gs_);
             if (isNumberedParameterName(name_str) && driver_->lex.context.allowNumparams) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
-                    error(ruby_parser::dclass::OrdinaryParamDefined, id->loc);
+                    error(ruby_parser::dclass::NumberedParamWithOrdinaryParam, id->loc);
                 }
 
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
