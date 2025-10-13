@@ -1,0 +1,1013 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    ClassDef{
+      kind = class
+      name = ConstantLit{
+        symbol = (class ::Animal)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U Animal>>
+          scope = EmptyTree
+        }
+      }
+      symbol = <C <U Animal>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = ConstantLit{
+        symbol = (class ::Cat)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U Cat>>
+          scope = EmptyTree
+        }
+      }
+      symbol = <C <U Cat>>
+      ancestors = [UnresolvedConstantLit{
+          cnst = <C <U Animal>>
+          scope = EmptyTree
+        }]
+      rhs = [
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = ConstantLit{
+        symbol = (class ::Persian)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U Persian>>
+          scope = EmptyTree
+        }
+      }
+      symbol = <C <U Persian>>
+      ancestors = [UnresolvedConstantLit{
+          cnst = <C <U Cat>>
+          scope = EmptyTree
+        }]
+      rhs = [
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = ConstantLit{
+        symbol = (class ::A1)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U A1>>
+          scope = EmptyTree
+        }
+      }
+      symbol = <C <U A1>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Generic>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T1)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T1>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T2)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T2>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U T1>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T3)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T3>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U T2>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U T1>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T4)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T4>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :fixed }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U T1>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T5)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T5>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Animal>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Persian>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T6)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T6>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :fixed }
+                    value = Send{
+                      flags = {}
+                      recv = UnresolvedConstantLit{
+                        cnst = <C <U Array>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U T>>
+                          scope = EmptyTree
+                        }
+                      }
+                      fun = <U []>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        UnresolvedConstantLit{
+                          cnst = <C <U T1>>
+                          scope = EmptyTree
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T7)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T7>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :lower }
+                    value = Send{
+                      flags = {}
+                      recv = UnresolvedConstantLit{
+                        cnst = <C <U Array>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U T>>
+                          scope = EmptyTree
+                        }
+                      }
+                      fun = <U []>
+                      block = nullptr
+                      pos_args = 1
+                      args = [
+                        UnresolvedConstantLit{
+                          cnst = <C <U T1>>
+                          scope = EmptyTree
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T8)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T8>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :fixed }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Cat>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Persian>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Animal>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (static-field ::A1::T9)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T9>>
+              scope = EmptyTree
+            }
+          }
+          rhs = UnresolvedConstantLit{
+            cnst = <C <U T1>>
+            scope = EmptyTree
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T10)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T10>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :fixed }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U T9>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T11)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T11>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U T9>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T12)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T12>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Integer>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U String>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U BasicObject>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U TrueClass>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T13)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T13>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :fixed }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Integer>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :fixed }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U String>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A1::T14)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U T14>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+
+    ClassDef{
+      kind = module
+      name = ConstantLit{
+        symbol = (module ::M)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U M>>
+          scope = EmptyTree
+        }
+      }
+      symbol = <C <U M>>
+      ancestors = []
+      rhs = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Generic>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::M::X)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U X>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Persian>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Animal>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = ConstantLit{
+        symbol = (class ::A2)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U A2>>
+          scope = EmptyTree
+        }
+      }
+      symbol = <C <U A2>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Generic>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Assign{
+          lhs = ConstantLit{
+            symbol = (type-member ::A2::X)
+            orig = UnresolvedConstantLit{
+              cnst = <C <U X>>
+              scope = EmptyTree
+            }
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U type_member>
+            block = Block {
+              params = [
+              ]
+              body = Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :lower }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Persian>>
+                      scope = EmptyTree
+                    }
+                  ]
+                  [
+                    key = Literal{ value = :upper }
+                    value = UnresolvedConstantLit{
+                      cnst = <C <U Animal>>
+                      scope = EmptyTree
+                    }
+                  ]
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = ConstantLit{
+        symbol = (class ::Test)
+        orig = UnresolvedConstantLit{
+          cnst = <C <U Test>>
+          scope = EmptyTree
+        }
+      }
+      symbol = <C <U Test>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U sig>
+          block = Block {
+            params = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg1 }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U A2>>
+                      scope = EmptyTree
+                    }
+                    fun = <U []>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedConstantLit{
+                        cnst = <C <U Animal>>
+                        scope = EmptyTree
+                      }
+                    ]
+                  }
+                  Literal{ value = :arg2 }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U A2>>
+                      scope = EmptyTree
+                    }
+                    fun = <U []>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedConstantLit{
+                        cnst = <C <U Cat>>
+                        scope = EmptyTree
+                      }
+                    ]
+                  }
+                  Literal{ value = :arg3 }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U A2>>
+                      scope = EmptyTree
+                    }
+                    fun = <U []>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedConstantLit{
+                        cnst = <C <U Persian>>
+                        scope = EmptyTree
+                      }
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 0
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U test1><<U test1>>
+          params = [Local{
+              localVariable = <U arg1>
+            }, Local{
+              localVariable = <U arg2>
+            }, Local{
+              localVariable = <U arg3>
+            }, Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = EmptyTree
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U sig>
+          block = Block {
+            params = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg1 }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U A2>>
+                      scope = EmptyTree
+                    }
+                    fun = <U []>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedConstantLit{
+                        cnst = <C <U Integer>>
+                        scope = EmptyTree
+                      }
+                    ]
+                  }
+                  Literal{ value = :arg2 }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U A2>>
+                      scope = EmptyTree
+                    }
+                    fun = <U []>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedConstantLit{
+                        cnst = <C <U BasicObject>>
+                        scope = EmptyTree
+                      }
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 0
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U test2><<U test2>>
+          params = [Local{
+              localVariable = <U arg1>
+            }, Local{
+              localVariable = <U arg2>
+            }, Local{
+              localVariable = <U <blk>>
+            }]
+          rhs = EmptyTree
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        <runtime method definition of test1>
+
+        <runtime method definition of test2>
+      ]
+    }
+  ]
+}

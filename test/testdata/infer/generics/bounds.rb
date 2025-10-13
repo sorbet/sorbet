@@ -37,7 +37,7 @@ class A1
 
   # should fail: both bounds and a fixed type are specified
   T8 = type_member {{fixed: Cat, lower: Persian, upper: Animal}}
-     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member is defined with bounds and `fixed`
+  #                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Type member is defined with bounds and `fixed`
 
   # should pass: just an alias to a type member
   T9 = T1
@@ -59,6 +59,9 @@ class A1
   # should fail: multiple fixed values provided
   T13 = type_member {{fixed: Integer, fixed: String}}
                                     # ^^^^^ error: Hash key `fixed` is duplicated
+
+  T14 = type_member { {} }
+  #                   ^^ error: Type member bounds must use either `fixed` or `lower`/`upper`
 end
 
 module M
