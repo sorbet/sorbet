@@ -34,7 +34,7 @@ build --incompatible_strict_action_env
 
 # C / C++ Options
 # Don't depend on system compiler
-build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
+build --cxxopt=-std=c++20 --host_cxxopt=-std=c++20
 
 build --copt=-fno-omit-frame-pointer
 
