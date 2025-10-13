@@ -1,0 +1,26 @@
+Block {
+  send = Send {
+    receiver = NULL
+    method = <U lambda>
+    args = [
+    ]
+  }
+  params = NumParams {
+    decls = [
+      LVar {
+        name = <U it>
+      }
+    ]
+  }
+  body = Send {
+    receiver = LVar {
+      name = <U it>
+    }
+    method = <U +>
+    args = [
+      Integer {
+        val = "1"
+      }
+    ]
+  }
+}
