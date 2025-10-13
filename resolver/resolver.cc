@@ -3341,9 +3341,13 @@ private:
         if (sig.seen.override_.exists()) {
             method.data(ctx)->flags.isOverride = true;
         }
+        if (sig.seen.deprecated_.exists()) {
+            method.data(ctx)->flags.isDeprecated = true;
+        }
         if (sig.seen.final.exists()) {
             method.data(ctx)->flags.isFinal = true;
         }
+
         if (sig.seen.bind.exists()) {
             if (sig.bind == core::Symbols::MagicBindToAttachedClass()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::BindNonBlockParameter)) {
