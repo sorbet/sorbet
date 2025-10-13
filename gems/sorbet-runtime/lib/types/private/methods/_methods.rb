@@ -114,11 +114,6 @@ module T::Private::Methods
 
   private_class_method def self.signature_for_key(key)
     maybe_run_sig_block_for_key(key)
-
-    # If a subclass Sub inherits a method `foo` from Base, then
-    # Sub.instance_method(:foo) != Base.instance_method(:foo) even though they resolve to the
-    # same method. Similarly, Foo.method(:bar) != Foo.singleton_class.instance_method(:bar).
-    # So, we always do the look up by the method on the owner (Base in this example).
     @signatures_by_method[key]
   end
 
@@ -611,6 +606,10 @@ module T::Private::Methods
   end
 
   private_class_method def self.method_to_key(method)
+    # If a subclass Sub inherits a method `foo` from Base, then
+    # Sub.instance_method(:foo) != Base.instance_method(:foo) even though they resolve to the
+    # same method. Similarly, Foo.method(:bar) != Foo.singleton_class.instance_method(:bar).
+    # So, we always do the look up by the method on the owner (Base in this example).
     method_owner_and_name_to_key(method.owner, method.name)
   end
 
