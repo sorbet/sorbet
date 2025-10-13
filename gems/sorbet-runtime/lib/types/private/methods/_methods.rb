@@ -104,24 +104,6 @@ module T::Private::Methods
     T::Types::Proc.new(decl.params, decl.returns)
   end
 
-  # Returns the signature for a method whose definition was preceded by `sig`.
-  #
-  # @param method [UnboundMethod]
-  # @return [T::Private::Methods::Signature]
-  def self.signature_for_method(method)
-    signature_for_key(method_to_key(method))
-  end
-
-  private_class_method def self.signature_for_key(key)
-    maybe_run_sig_block_for_key(key)
-
-    # If a subclass Sub inherits a method `foo` from Base, then
-    # Sub.instance_method(:foo) != Base.instance_method(:foo) even though they resolve to the
-    # same method. Similarly, Foo.method(:bar) != Foo.singleton_class.instance_method(:bar).
-    # So, we always do the look up by the method on the owner (Base in this example).
-    @signatures_by_method[key]
-  end
-
   # Fetch the directory name of the file that defines the `T::Private` constant and
   # add a trailing slash to allow us to match it as a directory prefix.
   SORBET_RUNTIME_LIB_PATH = File.dirname(T.const_source_location(:Private).first) + File::SEPARATOR
@@ -407,6 +389,19 @@ module T::Private::Methods
     end
   end
 
+  # Returns the signature for a method whose definition was preceded by `sig`.
+  #
+  # @param method [UnboundMethod]
+  # @return [T::Private::Methods::Signature]
+  def self.signature_for_method(method)
+    signature_for_key(method_to_key(method))
+  end
+
+  private_class_method def self.signature_for_key(key)
+    maybe_run_sig_block_for_key(key)
+    @signatures_by_method[key]
+  end
+
   def self.unwrap_method(mod, signature, original_method)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
@@ -431,6 +426,25 @@ module T::Private::Methods
 
   def self.run_sig_block_for_method(method)
     run_sig_block_for_key(method_to_key(method))
+  end
+
+  # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
+  private_class_method def self.method_owner_and_name_to_key(owner, name)
+    "#{owner.object_id}##{name}"
+  end
+
+  private_class_method def self.method_to_key(method)
+    # If a subclass Sub inherits a method `foo` from Base, then
+    # Sub.instance_method(:foo) != Base.instance_method(:foo) even though they resolve to the
+    # same method. Similarly, Foo.method(:bar) != Foo.singleton_class.instance_method(:bar).
+    # So, we always do the look up by the method on the owner (Base in this example).
+    method_owner_and_name_to_key(method.owner, method.name)
+  end
+
+  private_class_method def self.key_to_method(key)
+    id, name = key.split("#")
+    obj = ObjectSpace._id2ref(id.to_i)
+    obj.instance_method(name)
   end
 
   private_class_method def self.run_sig_block_for_key(key, force_type_init: false)
@@ -603,21 +617,6 @@ module T::Private::Methods
       # cause tests to fail if they were dependent on hard coding errors).
       mod.method(name)
     end
-  end
-
-  # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
-  private_class_method def self.method_owner_and_name_to_key(owner, name)
-    "#{owner.object_id}##{name}"
-  end
-
-  private_class_method def self.method_to_key(method)
-    method_owner_and_name_to_key(method.owner, method.name)
-  end
-
-  private_class_method def self.key_to_method(key)
-    id, name = key.split("#")
-    obj = ObjectSpace._id2ref(id.to_i)
-    obj.instance_method(name)
   end
 end
 
