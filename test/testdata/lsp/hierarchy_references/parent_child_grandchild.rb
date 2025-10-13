@@ -6,19 +6,19 @@ class Parent
   abstract!
   sig { abstract.void }
   def foo; end
-  #   ^ hierarchy-ref: foo
+  #   ^ hierarchy-ref-set: foo
 end
 
 class Child < Parent
   sig { override.void }
   def foo; end
-  #   ^ hierarchy-ref: foo
+  #   ^ hierarchy-ref-set: foo
 end
 
 class GrandChild < Child
   sig { override.void }
   def foo; end
-  #   ^ hierarchy-ref: foo
+  #   ^ hierarchy-ref-set: foo
 end
 
 sig {
@@ -29,5 +29,5 @@ sig {
 }
 def example(parent)
   parent.foo
-  #      ^ hierarchy-ref: foo
+  #      ^ hierarchy-ref-set: foo
 end

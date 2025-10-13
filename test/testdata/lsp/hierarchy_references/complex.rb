@@ -6,7 +6,7 @@ class Parent
   abstract!
   sig { abstract.returns(Integer) }
   def foo; end
-  #   ^ hierarchy-ref: foo
+  #   ^ hierarchy-ref-set: foo
 end
 
 module IFoo
@@ -14,7 +14,7 @@ module IFoo
   abstract!
   sig { abstract.returns(Integer) }
   def foo; end
-  #   ^ hierarchy-ref: foo
+  #   ^ hierarchy-ref-set: foo
 end
 
 class EmptyInBetween < Parent
@@ -25,32 +25,32 @@ class Child < EmptyInBetween
   include IFoo
   sig { override.returns(Integer) }
   def foo; 0; end
-  #   ^ hierarchy-ref: foo
+  #   ^ hierarchy-ref-set: foo
 end
 
 class ChildViaProp < Parent
   include T::Props
 
   prop :foo, Integer, override: :reader
-  # ^ hierarchy-ref: foo
-  #     ^ hierarchy-ref: foo
+  # ^ hierarchy-ref-set: foo
+  #     ^ hierarchy-ref-set: foo
 
   sig { params(foo: Integer).void }
   def initialize(foo:)
     @foo = foo
-    #^ hierarchy-ref: foo
+    #^ hierarchy-ref-set: foo
   end
 
   def example
     @foo
-    #^ hierarchy-ref: foo
+    #^ hierarchy-ref-set: foo
   end
 end
 
 class GrandChild < Child
   sig { override.returns(Integer) }
   def foo; 0; end
-  #   ^ hierarchy-ref: foo
+  #   ^ hierarchy-ref-set: foo
 end
 
 sig {
@@ -67,17 +67,17 @@ sig {
 
 def example(parent, ifoo, empty_in_between, child, child_via_prop, grand_child)
   parent.foo
-  #      ^ hierarchy-ref: foo
+  #      ^ hierarchy-ref-set: foo
   ifoo.foo
-  #    ^ hierarchy-ref: foo
+  #    ^ hierarchy-ref-set: foo
   empty_in_between.foo
-  #                ^ hierarchy-ref: foo
+  #                ^ hierarchy-ref-set: foo
   child.foo
-  #     ^ hierarchy-ref: foo
+  #     ^ hierarchy-ref-set: foo
   child_via_prop.foo
-  #              ^ hierarchy-ref: foo
+  #              ^ hierarchy-ref-set: foo
   child_via_prop.foo = 1
-  #              ^ hierarchy-ref: foo
+  #              ^ hierarchy-ref-set: foo
   grand_child.foo
-  #           ^ hierarchy-ref: foo
+  #           ^ hierarchy-ref-set: foo
 end

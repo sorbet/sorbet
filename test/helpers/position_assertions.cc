@@ -296,7 +296,7 @@ const UnorderedMap<
         {"show-symbol", ShowSymbolAssertion::make},
         {"enable-typed-false-completion-nudges", BooleanPropertyAssertion::make},
         {"go-to-def-special", GoToDefSpecialAssertion::make},
-        {"hierarchy-ref", HierarchyReferenceAssertion::make},
+        {"hierarchy-ref-set", HierarchyRefSetAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -2422,21 +2422,20 @@ string StringPropertyAssertions::toString() const {
     return fmt::format("selective-apply-code-action: {}", fmt::join(values, ", "));
 }
 
-HierarchyReferenceAssertion::HierarchyReferenceAssertion(string_view filename, unique_ptr<Range> &range,
-                                                         int assertionLine, string_view symbol)
+HierarchyRefSetAssertion::HierarchyRefSetAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   string_view symbol)
     : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
 
-shared_ptr<HierarchyReferenceAssertion> HierarchyReferenceAssertion::make(string_view filename,
-                                                                          unique_ptr<Range> &range, int assertionLine,
-                                                                          string_view assertionContents,
-                                                                          string_view assertionType) {
+shared_ptr<HierarchyRefSetAssertion> HierarchyRefSetAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
     auto [symbol, _, __] = getSymbolVersionAndOption(assertionContents);
-    return make_shared<HierarchyReferenceAssertion>(filename, range, assertionLine, symbol);
+    return make_shared<HierarchyRefSetAssertion>(filename, range, assertionLine, symbol);
 }
 
-void HierarchyReferenceAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                        LSPWrapper &wrapper, int &nextId,
-                                        const vector<shared_ptr<HierarchyReferenceAssertion>> &allReferences) const {
+void HierarchyRefSetAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &wrapper, int &nextId,
+                                     const vector<shared_ptr<HierarchyRefSetAssertion>> &allReferences) const {
     const auto &config = wrapper.config();
     auto location = this->getLocation(config);
 
@@ -2467,8 +2466,8 @@ void HierarchyReferenceAssertion::check(const UnorderedMap<string, shared_ptr<co
                          this->filename, locations, "hierarchy reference");
 }
 
-string HierarchyReferenceAssertion::toString() const {
-    return fmt::format("hierarchy-ref: {}", symbol);
+string HierarchyRefSetAssertion::toString() const {
+    return fmt::format("hierarchy-ref-set: {}", symbol);
 }
 
 } // namespace sorbet::test

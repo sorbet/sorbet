@@ -578,17 +578,17 @@ public:
     std::string toString() const override;
 };
 
-// # ^^^ hierarchy-ref: symbol
-class HierarchyReferenceAssertion final : public RangeAssertion {
+// # ^^^ hierarchy-ref-set: symbol
+class HierarchyRefSetAssertion final : public RangeAssertion {
 public:
-    HierarchyReferenceAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                                std::string_view symbol);
-    static std::shared_ptr<HierarchyReferenceAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                                             int assertionLine, std::string_view assertionContents,
-                                                             std::string_view assertionType);
+    HierarchyRefSetAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                             std::string_view symbol);
+    static std::shared_ptr<HierarchyRefSetAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                          int assertionLine, std::string_view assertionContents,
+                                                          std::string_view assertionType);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, const std::vector<std::shared_ptr<HierarchyReferenceAssertion>> &allLocs) const;
+               int &nextId, const std::vector<std::shared_ptr<HierarchyRefSetAssertion>> &allLocs) const;
 
     const std::string symbol;
     std::string toString() const override;

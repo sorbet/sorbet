@@ -671,8 +671,8 @@ TEST_CASE("LSPTest") {
                      pair<vector<shared_ptr<ImplementationAssertion>>, vector<shared_ptr<FindImplementationAssertion>>>>
             implementationMap;
 
-        // symbol => HierarchyReferenceAssertion[]
-        UnorderedMap<string, vector<shared_ptr<HierarchyReferenceAssertion>>> hierarchyReferenceMap;
+        // symbol => HierarchyRefSetAssertion[]
+        UnorderedMap<string, vector<shared_ptr<HierarchyRefSetAssertion>>> hierarchyReferenceMap;
 
         for (auto &assertion : assertions) {
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
@@ -700,9 +700,9 @@ TEST_CASE("LSPTest") {
             } else if (auto findImplAssertion = dynamic_pointer_cast<FindImplementationAssertion>(assertion)) {
                 auto &[_impls, implAssertions] = implementationMap[findImplAssertion->symbol];
                 implAssertions.emplace_back(findImplAssertion);
-            } else if (auto hierarchyRefAssertion = dynamic_pointer_cast<HierarchyReferenceAssertion>(assertion)) {
-                auto &hierarchyRefAssertions = hierarchyReferenceMap[hierarchyRefAssertion->symbol];
-                hierarchyRefAssertions.emplace_back(hierarchyRefAssertion);
+            } else if (auto hierarchyRefSetAssertion = dynamic_pointer_cast<HierarchyRefSetAssertion>(assertion)) {
+                auto &hierarchyRefSetAssertions = hierarchyReferenceSetMap[hierarchyRefSetAssertion->symbol];
+                hierarchyRefSetAssertions.emplace_back(hierarchyRefSetAssertion);
             }
         }
 
@@ -820,9 +820,9 @@ TEST_CASE("LSPTest") {
         }
 
         // Check each hierarchy-ref assertion.
-        for (const auto &[symbol, hierarchyRefAssertions] : hierarchyReferenceMap) {
-            for (const auto &hierarchyRefAssertion : hierarchyRefAssertions) {
-                hierarchyRefAssertion->check(test.sourceFileContents, *lspWrapper, nextId, hierarchyRefAssertions);
+        for (const auto &[symbol, hierarchyRefSetAssertions] : hierarchyReferenceSetMap) {
+            for (const auto &hierarchyRefAssertion : hierarchyRefSetAssertions) {
+                hierarchyRefAssertion->check(test.sourceFileContents, *lspWrapper, nextId, hierarchyRefSetAssertions);
             }
         }
     }
