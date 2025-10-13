@@ -821,8 +821,11 @@ TEST_CASE("LSPTest") {
 
         // Check each hierarchy-ref assertion.
         for (const auto &[symbol, hierarchyRefSetAssertions] : hierarchyReferenceSetMap) {
+            // upcast explicitly by copying
+            vector<shared_ptr<RangeAssertion>> allReferences(hierarchyRefSetAssertions.begin(),
+                                                             hierarchyRefSetAssertions.end());
             for (const auto &hierarchyRefAssertion : hierarchyRefSetAssertions) {
-                hierarchyRefAssertion->check(test.sourceFileContents, *lspWrapper, nextId, hierarchyRefSetAssertions);
+                hierarchyRefAssertion->check(test.sourceFileContents, *lspWrapper, nextId, allReferences);
             }
         }
     }

@@ -588,7 +588,7 @@ public:
                                                           std::string_view assertionType);
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
-               int &nextId, const std::vector<std::shared_ptr<HierarchyRefSetAssertion>> &allLocs) const;
+               int &nextId, const std::vector<std::shared_ptr<RangeAssertion>> &allReferences) const;
 
     const std::string symbol;
     std::string toString() const override;

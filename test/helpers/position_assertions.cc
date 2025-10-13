@@ -2422,28 +2422,17 @@ string StringPropertyAssertions::toString() const {
     return fmt::format("selective-apply-code-action: {}", fmt::join(values, ", "));
 }
 
-HierarchyRefSetAssertion::HierarchyRefSetAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                                   string_view symbol)
-    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
-
-shared_ptr<HierarchyRefSetAssertion> HierarchyRefSetAssertion::make(string_view filename, unique_ptr<Range> &range,
-                                                                    int assertionLine, string_view assertionContents,
-                                                                    string_view assertionType) {
-    auto [symbol, _, __] = getSymbolVersionAndOption(assertionContents);
-    return make_shared<HierarchyRefSetAssertion>(filename, range, assertionLine, symbol);
-}
-
-void HierarchyRefSetAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
-                                     LSPWrapper &wrapper, int &nextId,
-                                     const vector<shared_ptr<HierarchyRefSetAssertion>> &allReferences) const {
+namespace {
+void checkOneHierarchyRef(const RangeAssertion &self, string_view symbol,
+                          const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+                          int &nextId, const vector<shared_ptr<RangeAssertion>> &allReferences) {
     const auto &config = wrapper.config();
-    auto location = this->getLocation(config);
+    auto location = self.getLocation(config);
 
     const int id = nextId++;
 
-    auto referenceParams =
-        make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(location->uri), this->range->start->copy(),
-                                     make_unique<ReferenceContext>(true));
+    auto referenceParams = make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(location->uri),
+                                                        self.range->start->copy(), make_unique<ReferenceContext>(true));
     auto request = make_unique<LSPMessage>(
         make_unique<RequestMessage>("2.0", id, LSPMethod::SorbetHierarchyReferences, move(referenceParams)));
     auto responses = getLSPResponsesFor(wrapper, move(request));
@@ -2457,13 +2446,29 @@ void HierarchyRefSetAssertion::check(const UnorderedMap<string, shared_ptr<core:
     auto &locations = extractLocations(respMsg);
 
     auto locSourceLine = getLine(config, sourceFileContents, *location);
-    auto line = this->range->start->line;
-    auto character = this->range->start->character;
+    auto line = self.range->start->line;
+    auto character = self.range->start->character;
 
-    // upcast explicitly by copying
-    vector<shared_ptr<RangeAssertion>> allRanges(allReferences.begin(), allReferences.end());
-    assertLocationsMatch(config, sourceFileContents, this->symbol, allRanges, line, character, locSourceLine,
-                         this->filename, locations, "hierarchy reference");
+    assertLocationsMatch(config, sourceFileContents, symbol, allReferences, line, character, locSourceLine,
+                         self.filename, locations, "hierarchy reference");
+}
+} // namespace
+
+HierarchyRefSetAssertion::HierarchyRefSetAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                   string_view symbol)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+
+shared_ptr<HierarchyRefSetAssertion> HierarchyRefSetAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                    int assertionLine, string_view assertionContents,
+                                                                    string_view assertionType) {
+    auto [symbol, _, __] = getSymbolVersionAndOption(assertionContents);
+    return make_shared<HierarchyRefSetAssertion>(filename, range, assertionLine, symbol);
+}
+
+void HierarchyRefSetAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                     LSPWrapper &wrapper, int &nextId,
+                                     const vector<shared_ptr<RangeAssertion>> &allReferences) const {
+    checkOneHierarchyRef(*this, this->symbol, sourceFileContents, wrapper, nextId, allReferences);
 }
 
 string HierarchyRefSetAssertion::toString() const {
