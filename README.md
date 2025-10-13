@@ -41,6 +41,8 @@ docs about Stripe-specific development workflows and historical Stripe context.
     - [Testing hover](#testing-hover)
     - [Testing completion](#testing-completion)
     - [Testing workspace symbols (symbol search)](#testing-workspace-symbols-symbol-search)
+    - [Testing "Go to Implementation"](#testing-go-to-implementation)
+    - [Testing rename constant](#testing-rename-constant)
     - [Testing incremental type checking](#testing-incremental-type-checking)
   - [LSP recorded tests](#lsp-recorded-tests)
   - [Updating tests](#updating-tests)
@@ -51,6 +53,9 @@ docs about Stripe-specific development workflows and historical Stripe context.
   - [Shell](#shell)
   - [Formatting files](#formatting-files)
   - [Editor setup for C++](#editor-setup-for-c)
+  - [Editor setup for test/testdata](#editor-setup-for-testtestdata)
+    - [@jez setup](#jez-setup)
+    - [others](#others)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
