@@ -1,7 +1,7 @@
 #include "main/lsp/ErrorReporter.h"
+#include "absl/strings/match.h"
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
-#include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/DiagnosticSeverity.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
@@ -223,6 +223,10 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                     }
                     diagnostic->message += message;
                 } else {
+                    // trailing `:` look weird in LSP diagnostic messages, even though they look good in CLI output
+                    if (absl::EndsWith(message, ":")) {
+                        message.pop_back();
+                    }
                     relatedInformation.push_back(
                         make_unique<DiagnosticRelatedInformation>(move(location), move(message)));
                 }
