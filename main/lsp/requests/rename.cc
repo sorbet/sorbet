@@ -129,12 +129,6 @@ public:
 
 private:
     string replaceMethodNameInSend(string source, const core::lsp::SendResponse *sendResp) {
-        // For sends with multiple components, traverse the list of dispatch components and add them to the
-        // queue of symbols to be renamed
-        if (sendResp->dispatchResult->secondary) {
-            addDispatchRelatedMethods(gs, sendResp->dispatchResult.get(), getQueue());
-        }
-
         // find the method in the send expression
         auto methodNameLoc = sendResp->getMethodNameLoc(gs);
         if (!methodNameLoc) {

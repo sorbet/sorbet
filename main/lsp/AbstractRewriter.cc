@@ -124,20 +124,6 @@ void AbstractRewriter::addSubclassRelatedMethods(const core::GlobalState &gs, co
     }
 }
 
-// Add methods that are related because of dispatching via secondary components in sends (union types).
-void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs,
-                                                 const core::DispatchResult *dispatchResult,
-                                                 shared_ptr<UniqueSymbolQueue> methods) {
-    for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
-        auto method = dr->main.method;
-        ENFORCE(method.exists());
-        auto isNew = methods->tryEnqueue(method);
-        if (isNew) {
-            addSubclassRelatedMethods(gs, method, methods);
-        }
-    }
-}
-
 void AbstractRewriter::getEdits(LSPTypecheckerDelegate &typechecker) {
     const core::GlobalState &gs = typechecker.state();
 

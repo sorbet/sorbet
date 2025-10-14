@@ -45,9 +45,6 @@ protected:
 
     static void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
                                           std::shared_ptr<UniqueSymbolQueue> methods);
-
-    static void addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
-                                          std::shared_ptr<UniqueSymbolQueue> methods);
 };
 
 } // namespace sorbet::realmain::lsp
