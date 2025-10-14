@@ -96,7 +96,7 @@ def example(x)
 end
 ```
 
-Sorbet does not assume that `.is_a?` and `.nil?` exist on an untyped value (for example, objects that inherit directly from `BasicObject` do not have these methods). As a result, Sorbet flags that they might not exist, and requiring using more robust mechanisms in `# typed: strong` files.
+Sorbet does not assume that `.is_a?` and `.nil?` exist on an untyped value (for example, objects that inherit directly from `BasicObject` do not have these methods). As a result, Sorbet flags that they might not exist, and requires using more robust mechanisms in `# typed: strong` files.
 
 ## Why is this feature in beta?
 
