@@ -243,7 +243,7 @@ void addIsaUntypedNote(const GlobalState &gs, const DispatchArgs &args, ErrorBui
             args.args.empty() ? Symbols::noClassOrModule() : core::Types::getRepresentedClass(gs, args.args[0]->type);
 
         if (klass.exists() && args.receiverLoc().exists()) {
-            e.addErrorNote("Use `{}` instead of `{}` to check the type of untyped value",
+            e.addErrorNote("Use `{}` instead of `{}` to check the type of an untyped value",
                            fmt::format("case ... when {}", klass.show(gs)), args.name.show(gs));
         } else {
             e.addErrorNote("Use a `{}` statement instead of `{}` to check the type of an untyped value", "case",

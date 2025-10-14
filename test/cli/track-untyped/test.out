@@ -58,7 +58,7 @@ a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
   Note:
-    Use `case ... when Integer` instead of `is_a?` to check the type of untyped value
+    Use `case ... when Integer` instead of `is_a?` to check the type of an untyped value
 
 a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
     12 |  if arg0.is_a?(Integer)
@@ -236,7 +236,7 @@ a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
   Note:
-    Use `case ... when Integer` instead of `is_a?` to check the type of untyped value
+    Use `case ... when Integer` instead of `is_a?` to check the type of an untyped value
 
 a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
     12 |  if arg0.is_a?(Integer)
@@ -412,7 +412,7 @@ a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
   Note:
-    Use `case ... when Integer` instead of `is_a?` to check the type of untyped value
+    Use `case ... when Integer` instead of `is_a?` to check the type of an untyped value
 
 a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
     12 |  if arg0.is_a?(Integer)
