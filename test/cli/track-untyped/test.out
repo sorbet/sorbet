@@ -57,6 +57,8 @@ a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when Integer` instead of `is_a?` to check the type of untyped value
 
 a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
     12 |  if arg0.is_a?(Integer)
@@ -94,6 +96,8 @@ a.rb:14: Call to method `nil?` on `T.untyped` https://srb.help/7018
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when nil` instead of `nil?` to check whether an untyped value is nil
 
 a.rb:14: Conditional branch on `T.untyped` https://srb.help/7018
     14 |  elsif arg0.nil?
@@ -231,6 +235,8 @@ a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when Integer` instead of `is_a?` to check the type of untyped value
 
 a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
     12 |  if arg0.is_a?(Integer)
@@ -268,6 +274,8 @@ a.rb:14: Call to method `nil?` on `T.untyped` https://srb.help/7018
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when nil` instead of `nil?` to check whether an untyped value is nil
 
 a.rb:14: Conditional branch on `T.untyped` https://srb.help/7018
     14 |  elsif arg0.nil?
@@ -403,6 +411,8 @@ a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when Integer` instead of `is_a?` to check the type of untyped value
 
 a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
     12 |  if arg0.is_a?(Integer)
@@ -440,6 +450,8 @@ a.rb:14: Call to method `nil?` on `T.untyped` https://srb.help/7018
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when nil` instead of `nil?` to check whether an untyped value is nil
 
 a.rb:14: Conditional branch on `T.untyped` https://srb.help/7018
     14 |  elsif arg0.nil?

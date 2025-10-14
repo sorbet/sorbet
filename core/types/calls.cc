@@ -236,6 +236,25 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, cons
         e.addErrorNote("Consider using `{}` to place a constraint on this type", wrapped);
     }
 }
+
+void addIsaUntypedNote(const GlobalState &gs, const DispatchArgs &args, ErrorBuilder &e) {
+    if (args.name == Names::isA_p()) {
+        auto klass =
+            args.args.empty() ? Symbols::noClassOrModule() : core::Types::getRepresentedClass(gs, args.args[0]->type);
+
+        if (klass.exists() && args.receiverLoc().exists()) {
+            e.addErrorNote("Use `{}` instead of `{}` to check the type of untyped value",
+                           fmt::format("case ... when {}", klass.show(gs)), args.name.show(gs));
+        } else {
+            e.addErrorNote("Use a `{}` statement instead of `{}` to check the type of an untyped value", "case",
+                           args.name.show(gs));
+        }
+    } else if (args.name == Names::nil_p()) {
+        e.addErrorNote("Use `{}` instead of `{}` to check whether an untyped value is nil", "case ... when nil",
+                       args.name.show(gs));
+    }
+}
+
 } // namespace
 
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -721,6 +740,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (auto e = gs.beginError(args.errLoc(), what)) {
             e.setHeader("Call to method `{}` on `{}`", args.name.show(gs), "T.untyped");
             TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
+            addIsaUntypedNote(gs, args, e);
         }
 
         return DispatchResult(Types::untyped(args.thisType.untypedBlame()), std::move(args.selfType),
