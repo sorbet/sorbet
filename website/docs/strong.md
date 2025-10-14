@@ -77,6 +77,27 @@ Ultimately, fixing the error is similar to fixing any other type error.
 
 [`t.cast`]: type-assertions.md#tcast
 
+## What if I want to check `.is_a?` or `.nil?`
+
+Calls to `.is_a?` and `.nil?` on an untyped expression look like calls to any other method on an untyped expression, and Sorbet will complain about them. To validate the type of something that's untyped, use a `case` statement or the `===` ("case equality operator") directly:
+
+```ruby
+sig { params(x: T.untyped).void }
+def example(x)
+  case x
+  when Integer
+    # ...
+  end
+
+  case x
+  when nil
+    # ...
+  end
+end
+```
+
+Sorbet does not assume that `.is_a?` and `.nil?` exist on an untyped value (for example, objects that inherit directly from `BasicObject` do not have these methods). As a result, Sorbet flags that they might not exist, and requiring using more robust mechanisms in `# typed: strong` files.
+
 ## Why is this feature in beta?
 
 This feature is currently under development, and we'd love your feedback!
