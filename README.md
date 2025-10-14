@@ -861,6 +861,30 @@ an example.
 To craft an update to an RBI file, use `.rbiupdate` instead of `.rbupdate`,
 unless you mean to simulate the effect of converting an RBI file to an RB file.
 
+#### Testing `sorbet/hierarchyReferences`
+
+There are two modes of testing `sorbet/hierarchyReferences`:
+
+- `^ hierarchy-ref-set: <symbol>`
+
+  Making a `sorbet/hierarchyReferences` request from each location in the set
+  specified by `<symbol>` should include a list of Locations for all other
+  entries in the set.
+
+- `^ find-hierarchy-refs: <symbol>` + `^ hierarchy-ref: <symbol>`
+
+  Making a `sorbet/hierarchyReferences` request at each of the location
+  specified by the `find-hierarchy-refs` locations only should return a list of
+  Locations that includes both the original `find-hierarchy-refs` position and
+  any others specified by `hierarchy-ref`.
+
+Prefer the "set" version, because it is more concise and tests more things.
+
+Use the `find-hierarchy-refs` version when there is intentional asymmetry. For
+example, given multiple inheritance, the hierarchy of two parent modules might
+be unrelated, but the hierarchy of their shared child will include both of them.
+In such cases, only `find-hierarchy-refs` can be used.
+
 ### LSP recorded tests
 
 It is possible to record an LSP session and use it as a test. We are attempting to move away from this form of

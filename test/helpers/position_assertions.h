@@ -577,5 +577,50 @@ public:
 
     std::string toString() const override;
 };
+
+// # ^^^ hierarchy-ref-set: symbol
+class HierarchyRefSetAssertion final : public RangeAssertion {
+public:
+    HierarchyRefSetAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                             std::string_view symbol);
+    static std::shared_ptr<HierarchyRefSetAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                          int assertionLine, std::string_view assertionContents,
+                                                          std::string_view assertionType);
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, const std::vector<std::shared_ptr<RangeAssertion>> &allReferences) const;
+
+    const std::string symbol;
+    std::string toString() const override;
+};
+
+// # ^^^ find-hierarchy-refs: symbol
+class FindHierarchyRefsAssertion final : public RangeAssertion {
+public:
+    FindHierarchyRefsAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                               std::string_view symbol);
+    static std::shared_ptr<FindHierarchyRefsAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                            int assertionLine, std::string_view assertionContents,
+                                                            std::string_view assertionType);
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, const std::vector<std::shared_ptr<RangeAssertion>> &allReferences) const;
+
+    const std::string symbol;
+    std::string toString() const override;
+};
+
+// # ^^^ hierarchy-ref: symbol
+class HierarchyRefAssertion final : public RangeAssertion {
+public:
+    HierarchyRefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                          std::string_view symbol);
+    static std::shared_ptr<HierarchyRefAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                       int assertionLine, std::string_view assertionContents,
+                                                       std::string_view assertionType);
+    const std::string symbol;
+    std::string toString() const override;
+};
+
 } // namespace sorbet::test
 #endif // TEST_HELPERS_POSITION_ASSERTIONS_H

@@ -670,6 +670,14 @@ TEST_CASE("LSPTest") {
         UnorderedMap<string,
                      pair<vector<shared_ptr<ImplementationAssertion>>, vector<shared_ptr<FindImplementationAssertion>>>>
             implementationMap;
+
+        // symbol => HierarchyRefSetAssertion[]
+        UnorderedMap<string, vector<shared_ptr<HierarchyRefSetAssertion>>> hierarchyReferenceSetMap;
+
+        // symbol => [ FindHierarchyRefsAssertion[], (FindHierarchyRefsAssertion | HierarchyRefAssertion)[] ]
+        UnorderedMap<string, pair<vector<shared_ptr<FindHierarchyRefsAssertion>>, vector<shared_ptr<RangeAssertion>>>>
+            findHierarchyReferenceMap;
+
         for (auto &assertion : assertions) {
             if (auto defAssertion = dynamic_pointer_cast<DefAssertion>(assertion)) {
                 auto &entry = defUsageMap[defAssertion->symbol];
@@ -696,6 +704,18 @@ TEST_CASE("LSPTest") {
             } else if (auto findImplAssertion = dynamic_pointer_cast<FindImplementationAssertion>(assertion)) {
                 auto &[_impls, implAssertions] = implementationMap[findImplAssertion->symbol];
                 implAssertions.emplace_back(findImplAssertion);
+            } else if (auto hierarchyRefSetAssertion = dynamic_pointer_cast<HierarchyRefSetAssertion>(assertion)) {
+                auto &hierarchyRefSetAssertions = hierarchyReferenceSetMap[hierarchyRefSetAssertion->symbol];
+                hierarchyRefSetAssertions.emplace_back(hierarchyRefSetAssertion);
+            } else if (auto findHierarchyRefsAssertion = dynamic_pointer_cast<FindHierarchyRefsAssertion>(assertion)) {
+                auto &[findHierarchyRefAssertions, allReferences] =
+                    findHierarchyReferenceMap[findHierarchyRefsAssertion->symbol];
+                findHierarchyRefAssertions.emplace_back(findHierarchyRefsAssertion);
+                allReferences.emplace_back(assertion);
+            } else if (auto hierarchyRefAssertion = dynamic_pointer_cast<HierarchyRefAssertion>(assertion)) {
+                auto &[_findHierarchyRefAssertions, allReferences] =
+                    findHierarchyReferenceMap[hierarchyRefAssertion->symbol];
+                allReferences.emplace_back(assertion);
             }
         }
 
@@ -809,6 +829,24 @@ TEST_CASE("LSPTest") {
                 auto queryLoc = implAssertion->getLocation(config);
                 FindImplementationAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                                    impls);
+            }
+        }
+
+        // Check each hierarchy-ref assertion.
+        for (const auto &[symbol, hierarchyRefSetAssertions] : hierarchyReferenceSetMap) {
+            // upcast explicitly by copying
+            vector<shared_ptr<RangeAssertion>> allReferences(hierarchyRefSetAssertions.begin(),
+                                                             hierarchyRefSetAssertions.end());
+            for (const auto &hierarchyRefAssertion : hierarchyRefSetAssertions) {
+                hierarchyRefAssertion->check(test.sourceFileContents, *lspWrapper, nextId, allReferences);
+            }
+        }
+
+        // Check each find-hierarchy-refs/hierarchy-ref pairing.
+        for (const auto &[symbol, entry] : findHierarchyReferenceMap) {
+            auto &[findHierarchyRefAssertions, allReferences] = entry;
+            for (const auto &findHierarchyRefsAssertion : findHierarchyRefAssertions) {
+                findHierarchyRefsAssertion->check(test.sourceFileContents, *lspWrapper, nextId, allReferences);
             }
         }
     }

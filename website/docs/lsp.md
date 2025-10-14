@@ -324,6 +324,22 @@ _Response_:
 
 - result: [`TextDocumentItem`]
 
+### `sorbet/hierarchyReferences` request
+
+<!-- TODO(jez) Document this -->
+<!-- TODO(jez) Advertise how to use this in VS Code from the references.md doc -->
+
+Finds all references to the symbol under the cursor, plus references to any others that it overrides or is overridden by. That is, it finds references to a given symbol throughout the entire inheritance hierarchy. If the thing at the cursor is a call to a method `Child#foo` that overrides an abstract `Parent#foo` method from a super class and is further overridden by a `GrandChild#foo` method in a subclass, Sorbet finds references to all three of these symbols throughout the workspace.
+
+_Request_:
+
+- method: `sorbet/hierarchyReferences`
+- params: [`ReferenceParams`]
+
+_Response_:
+
+- result: <code><a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#location">Location</a>[] | null </code>
+
 ### `sorbet.savePackageFiles` command
 
 The Sorbet language server will sometimes request that the `sorbet.savePackageFiles` command is run. This command is meant to be implemented by language clients.
@@ -369,3 +385,4 @@ Thus, to use Sorbet with watchman in a project that does not use Git, create an 
 [`TextDocumentIdentifier`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentIdentifier
 [`TextDocumentItem`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
 [`DiagnosticSeverity`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity
+[`ReferenceParams`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#referenceParams
