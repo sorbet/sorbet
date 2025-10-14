@@ -9,5 +9,11 @@ def example_untyped(arg0)
     puts(result)
   end
 
+  if arg0.is_a?(Integer)
+    T.reveal_type(arg0)
+  elsif arg0.nil?
+    T.reveal_type(arg0)
+  end
+
   result
 end
