@@ -209,11 +209,20 @@ void autocorrectReceiver(const core::GlobalState &gs, core::ErrorBuilder &e, con
     }
 }
 
-void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, SymbolRef definition, NameRef methodName,
-                                    string_view genericKind) {
+void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, const DispatchArgs &args,
+                                    SymbolRef definition, string_view genericKind) {
+    auto methodName = args.name;
     if (methodName == Names::isA_p()) {
-        e.addErrorNote("Use `{}` instead of `{}` to check the type of an unconstrained generic type {}", "case",
-                       methodName.show(gs), genericKind);
+        auto klass =
+            args.args.empty() ? Symbols::noClassOrModule() : core::Types::getRepresentedClass(gs, args.args[0]->type);
+
+        if (klass.exists() && args.receiverLoc().exists()) {
+            e.addErrorNote("Use `{}` instead of `{}` to check the type of an unconstrained generic type {}",
+                           fmt::format("case ... when {}", klass.show(gs)), methodName.show(gs), genericKind);
+        } else {
+            e.addErrorNote("Use a `{}` statement instead of `{}` to check the type of an unconstrained generic type {}",
+                           "case", methodName.show(gs), genericKind);
+        }
     } else if (methodName == Names::nil_p()) {
         e.addErrorNote("Use `{}` instead of `{}` to check whether an unconstrained generic type {} is nil",
                        "case ... when nil", methodName.show(gs), genericKind);
@@ -221,7 +230,6 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, Symb
         e.addErrorSection(ErrorSection(
             ErrorColors::format("Consider adding an `{}` bound to `{}` here", "upper", definition.show(gs)),
             {{definition.loc(gs), ""}}));
-
     } else {
         auto showOptions = ShowOptions().withUseValidSyntax();
         auto wrapped = fmt::format("T.all({}, Constraint)", definition.show(gs, showOptions));
@@ -251,7 +259,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 auto wrapInFn = gs.suggestUnsafe.value();
                 autocorrectReceiver(gs, e, args, wrapInFn);
             }
-            addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, "parameter");
+            addUnconstrainedIsaGenericNote(gs, e, args, this->definition, "parameter");
         }
         emptyResult.main.errors.emplace_back(e.build());
         return emptyResult;
@@ -282,7 +290,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                     auto wrapInFn = gs.suggestUnsafe.value();
                     autocorrectReceiver(gs, e, args, wrapInFn);
                 }
-                addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, member);
+                addUnconstrainedIsaGenericNote(gs, e, args, this->definition, member);
             }
             emptyResult.main.errors.emplace_back(e.build());
             return emptyResult;

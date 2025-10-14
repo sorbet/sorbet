@@ -24,7 +24,7 @@ type_argument_suggest_unsafe.rb:12: Call to method `is_a?` on unconstrained gene
     12 |  if x.is_a?(Integer)
              ^
   Note:
-    Use `case` instead of `is_a?` to check the type of an unconstrained generic type parameter
+    Use `case ... when Integer` instead of `is_a?` to check the type of an unconstrained generic type parameter
 
 type_argument_suggest_unsafe.rb:13: Revealed type: `T.all(Integer, T.type_parameter(:U) (of Object#example1))` https://srb.help/7014
     13 |    T.reveal_type(x)
