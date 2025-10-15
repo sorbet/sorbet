@@ -330,8 +330,6 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         expectedType = Types::untyped(method);
     }
 
-    expectedType = Types::replaceSelfType(gs, expectedType, selfType);
-
     core::ErrorSection::Collector errorDetailsCollector;
     if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible,
                                         errorDetailsCollector)) {
@@ -1685,7 +1683,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiateTypeVars(gs, resultType, *constr);
     }
-    resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
     if (args.block != nullptr) {
         component.returnTypeBeforeSolve = resultType;

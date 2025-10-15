@@ -364,47 +364,4 @@ TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, TypePtr::In
     return nullptr;
 }
 
-TypePtr Types::replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver) {
-    ENFORCE(what != nullptr);
-    auto t = what._replaceSelfType(gs, receiver);
-    if (t) {
-        return t;
-    }
-    return what;
-}
-
-TypePtr SelfType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-    return receiver;
-}
-
-TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-    auto left = this->left._replaceSelfType(gs, receiver);
-    auto right = this->right._replaceSelfType(gs, receiver);
-    if (left || right) {
-        if (!left) {
-            left = this->left;
-        }
-        if (!right) {
-            right = this->right;
-        }
-        return Types::any(gs, left, right);
-    }
-    return nullptr;
-}
-
-TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-    auto left = this->left._replaceSelfType(gs, receiver);
-    auto right = this->right._replaceSelfType(gs, receiver);
-    if (left || right) {
-        if (!left) {
-            left = this->left;
-        }
-        if (!right) {
-            right = this->right;
-        }
-        return Types::all(gs, left, right);
-    }
-    return nullptr;
-}
-
 } // namespace sorbet::core

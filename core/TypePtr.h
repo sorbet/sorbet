@@ -308,8 +308,6 @@ public:
 
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
 
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
     struct InstantiationContext {
