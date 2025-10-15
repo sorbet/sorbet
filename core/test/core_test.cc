@@ -298,8 +298,8 @@ TEST_SUITE("TypePtr") {
 
         for (auto values : valuesArray) {
             SUBCASE(fmt::format("{}, {}", values.first, values.second).c_str()) {
-                auto type = TypePtrTestHelper::createInlined(TypePtr::Tag::SelfType, values.first);
-                CHECK_EQ(TypePtr::Tag::SelfType, type.tag());
+                auto type = TypePtrTestHelper::createInlined(TypePtr::Tag::ClassType, values.first);
+                CHECK_EQ(TypePtr::Tag::ClassType, type.tag());
                 CHECK_EQ(values.first, TypePtrTestHelper::inlinedValue(type));
             }
         }
