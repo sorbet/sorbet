@@ -1485,8 +1485,6 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             e.setHeader("Unsupported type syntax");
         }
         result.type = core::Types::untypedUntracked();
-    } else if (ast::isa_tree<ast::Self>(expr)) {
-        result.type = ctxOwnerData->selfType(ctx);
     } else if (ast::isa_tree<ast::Literal>(expr)) {
         const auto &lit = ast::cast_tree_nonnull<ast::Literal>(expr);
         core::TypePtr underlying;
