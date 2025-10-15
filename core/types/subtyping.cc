@@ -517,6 +517,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     {
         if (isa_type<LambdaParam>(t1) || isa_type<LambdaParam>(t2)) {
+            ENFORCE(false);
             return OrType::make_shared(t1, t2);
         }
     }
