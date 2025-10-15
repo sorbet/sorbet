@@ -45,8 +45,86 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
-a.rb:12: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
-    12 |  result
+a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
+    12 |  if arg0.is_a?(Integer)
+                  ^^^^^
+  Got `T.untyped` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when Integer` instead of `is_a?` to check the type of an untyped value
+
+a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:12:
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:13: Revealed type: `Integer` https://srb.help/7014
+    13 |    T.reveal_type(arg0)
+            ^^^^^^^^^^^^^^^^^^^
+  Got `Integer` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:12:
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+
+a.rb:14: Call to method `nil?` on `T.untyped` https://srb.help/7018
+    14 |  elsif arg0.nil?
+                     ^^^^
+  Got `T.untyped` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when nil` instead of `nil?` to check whether an untyped value is nil
+
+a.rb:14: Conditional branch on `T.untyped` https://srb.help/7018
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:14:
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:15: Revealed type: `NilClass` https://srb.help/7014
+    15 |    T.reveal_type(arg0)
+            ^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:14:
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+
+a.rb:18: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
+    18 |  result
           ^^^^^^
   Got `T.untyped` originating from:
     a.rb:6:
@@ -73,15 +151,15 @@ b.rb:4: Call to method `foo` on `T.untyped` https://srb.help/7018
           ^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
-Errors: 5
+Errors: 11
 {
  "files": [
   {
    "path": "test/cli/track-untyped/a.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "Strong",
-   "untyped_usages": 4
+   "min_error_level": "True",
+   "untyped_usages": 8
   },
   {
    "path": "test/cli/track-untyped/b.rb",
@@ -145,8 +223,86 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
-a.rb:12: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
-    12 |  result
+a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
+    12 |  if arg0.is_a?(Integer)
+                  ^^^^^
+  Got `T.untyped` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when Integer` instead of `is_a?` to check the type of an untyped value
+
+a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:12:
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:13: Revealed type: `Integer` https://srb.help/7014
+    13 |    T.reveal_type(arg0)
+            ^^^^^^^^^^^^^^^^^^^
+  Got `Integer` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:12:
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+
+a.rb:14: Call to method `nil?` on `T.untyped` https://srb.help/7018
+    14 |  elsif arg0.nil?
+                     ^^^^
+  Got `T.untyped` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when nil` instead of `nil?` to check whether an untyped value is nil
+
+a.rb:14: Conditional branch on `T.untyped` https://srb.help/7018
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:14:
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:15: Revealed type: `NilClass` https://srb.help/7014
+    15 |    T.reveal_type(arg0)
+            ^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:14:
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+
+a.rb:18: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
+    18 |  result
           ^^^^^^
   Got `T.untyped` originating from:
     a.rb:6:
@@ -173,14 +329,14 @@ b.rb:4: Call to method `foo` on `T.untyped` https://srb.help/7018
           ^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
-Errors: 5
+Errors: 11
 {
  "files": [
   {
    "path": "test/cli/track-untyped/a.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "Strong"
+   "min_error_level": "True"
   },
   {
    "path": "test/cli/track-untyped/b.rb",
@@ -243,8 +399,86 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
-a.rb:12: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
-    12 |  result
+a.rb:12: Call to method `is_a?` on `T.untyped` https://srb.help/7018
+    12 |  if arg0.is_a?(Integer)
+                  ^^^^^
+  Got `T.untyped` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when Integer` instead of `is_a?` to check the type of an untyped value
+
+a.rb:12: Conditional branch on `T.untyped` https://srb.help/7018
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:12:
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:13: Revealed type: `Integer` https://srb.help/7014
+    13 |    T.reveal_type(arg0)
+            ^^^^^^^^^^^^^^^^^^^
+  Got `Integer` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:12:
+    12 |  if arg0.is_a?(Integer)
+             ^^^^^^^^^^^^^^^^^^^
+
+a.rb:14: Call to method `nil?` on `T.untyped` https://srb.help/7018
+    14 |  elsif arg0.nil?
+                     ^^^^
+  Got `T.untyped` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+  Note:
+    Use `case ... when nil` instead of `nil?` to check whether an untyped value is nil
+
+a.rb:14: Conditional branch on `T.untyped` https://srb.help/7018
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:14:
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:15: Revealed type: `NilClass` https://srb.help/7014
+    15 |    T.reveal_type(arg0)
+            ^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+    a.rb:14:
+    14 |  elsif arg0.nil?
+                ^^^^^^^^^
+
+a.rb:18: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
+    18 |  result
           ^^^^^^
   Got `T.untyped` originating from:
     a.rb:6:
@@ -271,15 +505,15 @@ b.rb:4: Call to method `foo` on `T.untyped` https://srb.help/7018
           ^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
-Errors: 5
+Errors: 11
 {
  "files": [
   {
    "path": "test/cli/track-untyped/a.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "Strong",
-   "untyped_usages": 4
+   "min_error_level": "True",
+   "untyped_usages": 8
   },
   {
    "path": "test/cli/track-untyped/b.rb",
