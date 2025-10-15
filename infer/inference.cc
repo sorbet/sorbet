@@ -99,7 +99,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             ctx,
             core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType, cfg->symbol.data(ctx)->owner,
                                               enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx),
-                                              core::Types::selfTypeAsSelfTypeParam()),
+                                              enclosingClass.data(ctx)->selfType(ctx)),
             *constr);
     }
 

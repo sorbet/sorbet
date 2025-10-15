@@ -17,8 +17,8 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, ClassType)             \
         CASE_STATEMENT(CASE_BODY, LambdaParam)           \
         CASE_STATEMENT(CASE_BODY, SelfTypeParam)         \
+        CASE_STATEMENT(CASE_BODY, NewSelfType)           \
         CASE_STATEMENT(CASE_BODY, AliasType)             \
-        CASE_STATEMENT(CASE_BODY, SelfType)              \
         CASE_STATEMENT(CASE_BODY, NamedLiteralType)      \
         CASE_STATEMENT(CASE_BODY, IntegerLiteralType)    \
         CASE_STATEMENT(CASE_BODY, FloatLiteralType)      \
@@ -110,6 +110,7 @@ int TypePtr::kind() const {
             return 7;
         case Tag::LambdaParam:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
             return 8;
         case Tag::MetaType:
             return 9;
@@ -121,8 +122,6 @@ int TypePtr::kind() const {
             return 12;
         case Tag::AndType:
             return 13;
-        case Tag::SelfType:
-            return 14;
     }
 }
 
@@ -148,13 +147,13 @@ bool TypePtr::isFullyDefined() const {
         case Tag::FloatLiteralType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::MetaType: // MetaType: this is kinda true but kinda false. it's false for subtyping but true for
                             // inferencer.
             return true;
 
         case Tag::TypeVar:
         case Tag::LambdaParam:
-        case Tag::SelfType:
             return false;
 
         // Composite types
@@ -187,9 +186,9 @@ bool TypePtr::hasUntyped() const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
             // These cannot have untyped.
@@ -231,9 +230,9 @@ bool TypePtr::hasTopLevelVoid() const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
         case Tag::BlamedUntyped:
@@ -311,8 +310,8 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
             auto &app = cast_type_nonnull<AppliedType>(*this);
             return app.getCallArguments(gs, name);
         }
-        case Tag::SelfType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::TypeVar:
         case Tag::AliasType: {
@@ -347,7 +346,7 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<cons
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
-        case Tag::SelfType:
+        case Tag::NewSelfType:
             // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
             // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
             // have to allocate another type.

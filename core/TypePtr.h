@@ -51,7 +51,6 @@ public:
         LambdaParam,
         SelfTypeParam,
         AliasType,
-        SelfType,
         NewSelfType,
         IntegerLiteralType,
         FloatLiteralType,

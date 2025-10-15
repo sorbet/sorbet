@@ -139,8 +139,6 @@ public:
     static TypePtr falsyTypes();
     static absl::Span<const ClassOrModuleRef> falsySymbols();
     static TypePtr todo();
-    // T.self_type as a SelfTypeParam
-    static TypePtr selfTypeAsSelfTypeParam();
 
     static TypePtr dropSubtypesOf(const GlobalState &gs, const TypePtr &from,
                                   absl::Span<const ClassOrModuleRef> klasses);
@@ -277,7 +275,7 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::LambdaParam:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::NewSelfType:
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
@@ -304,7 +302,7 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::AndType:
         case TypePtr::Tag::LambdaParam:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::NewSelfType:
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
@@ -590,34 +588,6 @@ template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-TYPE_INLINED(SelfType) final {
-public:
-    SelfType();
-    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs) const {
-        return show(gs, {});
-    };
-    std::string show(const GlobalState &gs, ShowOptions options) const;
-    std::string showValue(const GlobalState &gs) const;
-    uint32_t hash(const GlobalState &gs) const;
-
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-
-    void _sanityCheck(const GlobalState &gs) const;
-    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
-};
-CheckSize(SelfType, 8, 8);
-
-template <> inline TypePtr make_type<SelfType>() {
-    // static_cast required to disambiguate TypePtr constructor.
-    return TypePtr(TypePtr::Tag::SelfType, uint64_t(0));
-}
-
-template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
-    ENFORCE_NO_TIMER(isa_type<SelfType>(what));
-    return SelfType();
-}
-
 // TODO(jez) Document me
 TYPE(NewSelfType) final : public Refcounted {
 public:

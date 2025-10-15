@@ -539,13 +539,15 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
-            // NOTE: SelfType is an inlined type, so TypePtr equality is type equality.
-            if (t1 != t2) {
-                return OrType::make_shared(t1, t2);
-            } else {
-                return t1;
-            }
+        auto isSelfTypeT1 = isa_type<NewSelfType>(t1);
+        auto isSelfTypeT2 = isa_type<NewSelfType>(t2);
+
+        if (isSelfTypeT1 && isSelfTypeT2) {
+            // If they're both T.self_type, we can pick either.
+            // TODO(jez) Do you think you should ENFORCE that the upperBound's are equivalent?
+            return t1;
+        } else if (isSelfTypeT1 || isSelfTypeT2) {
+            return OrType::make_shared(t1, t2);
         }
     }
 
@@ -1039,17 +1041,19 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             }
         }
     }
-
     {
-        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
-            // NOTE: SelfType is an ilined type, so TypePtr equality is type equality.
-            if (t1 != t2) {
-                return AndType::make_shared(t1, t2);
-            } else {
-                return t1;
-            }
+        auto isSelfTypeT1 = isa_type<NewSelfType>(t1);
+        auto isSelfTypeT2 = isa_type<NewSelfType>(t2);
+
+        if (isSelfTypeT1 && isSelfTypeT2) {
+            // If they're both T.self_type, we can pick either.
+            // TODO(jez) Do you think you should ENFORCE that the upperBound's are equivalent?
+            return t1;
+        } else if (isSelfTypeT1 || isSelfTypeT2) {
+            return AndType::make_shared(t1, t2);
         }
     }
+
     return glbGround(gs, t1, t2);
 }
 
@@ -1207,8 +1211,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
                 if (auto lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
-                    // TODO(jez) This case is easier: passing `Parent` to `T.self_type` should error always,
-                    // and that's what a lower bound of T.noreturn does.
                     auto result = Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
                                                                   errorDetailsCollector);
                     if constexpr (shouldAddErrorDetails) {
@@ -1222,8 +1224,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return false;
                 }
             } else if (!isSelfTypeT2) {
-                // TODO(jez) How should T.self_type interact with other types?
-                // If you pass a `T.self_type` to a method that takes Parent it should work.
                 auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
                 if (auto lambdaParam = cast_type<LambdaParam>(self1.definition.resultType(gs))) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
@@ -1238,7 +1238,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return true;
                 }
 
-                // TODO(jez) Another example where, if t1 is a T.self_type, the upperBound is wrong.
                 auto lambda1 = cast_type<LambdaParam>(self1.definition.resultType(gs));
                 auto lambda2 = cast_type<LambdaParam>(self2.definition.resultType(gs));
                 return lambda1 && lambda2 &&
@@ -1249,12 +1248,32 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 
     {
-        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
-            // NOTE: SelfType is an inlined type, so TypePtr equality is type equality.
-            if (t1 != t2) {
+        auto self1 = cast_type<NewSelfType>(t1);
+        auto self2 = cast_type<NewSelfType>(t2);
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr) {
+                // Only T.self_type is a subtype of T.self_type
                 return false;
+            } else if (self2 == nullptr) {
+                // T.self_type can be a subtype of other types, if the upper bound is low enough
+                return Types::isSubTypeUnderConstraint(gs, constr, self1->upperBound, t2, mode, errorDetailsCollector);
+            } else {
+                // T.self_type is compatible with itself if we've already instantiated the LambdaParam to NewSelfType
+                //
+                // TODO(jez) I think this is right but I'm not sure.
+                // I can't think of a case where having two NewSelfType didn't also imply the
+                // original owner of the `T.self_type` is different. e.g., if we were making a
+                // TypeMemberRef per class (instead of just Symbols::T_SelfType()), where it would
+                // be possible that we have two NewSelfType, but self1.definition != self2.definition
+                //
+                // What about passing `self` to a method like `0.takes_self(self)`? Then you're
+                // going to have two NewSelfType but they're not going to be equivalent. You
+                // probably want to track an `owner` too (or maybe instead of upperBound, and then
+                // recreate the upper bound on demand if you need to call `selfType()`?).
+                // UPDATE: you're not going to have two `NewSelfType` because the parameterType will
+                // be seen externally, and thus have a concrete type of `Integer` instead of NewSelfType.
+                return true;
             }
-            return true;
         }
     }
 

@@ -348,6 +348,7 @@ void GlobalState::initEmpty() {
     // each with a bound of itself.
     //
     // TODO(jez) This means you have to audit ~all uses of upperBound.
+    // TODO(jez) You kind of did this audit by way of introducing NewSelfType
     typeMember.data(*this)->resultType = make_type<LambdaParam>(typeMember, Types::bottom(), Types::top());
 
     klass = synthesizeClass(core::Names::Constants::Top(), 0);

@@ -176,11 +176,6 @@ TypePtr Types::todo() {
     return make_type<ClassType>(Symbols::todo());
 }
 
-TypePtr Types::selfTypeAsSelfTypeParam() {
-    auto tSelfType = SymbolRef(core::Symbols::T_SelfType());
-    return make_type<SelfTypeParam>(tSelfType);
-}
-
 TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::Span<const ClassOrModuleRef> klasses) {
     TypePtr result;
 
@@ -680,7 +675,9 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
     // TODO: the ENFORCE below should be above this conditional, but there is
     // currently a problem with the handling of `module_function` that causes it
     // to fail reliably. https://github.com/sorbet/sorbet/issues/904
-    if (originalOwner.data(gs)->typeMembers().empty() || (what == nullptr)) {
+    // TODO(jez) Need to drop the typeMembers().empty() call to ensure that any T.self_type get replaced
+    // TODO(jez) Dropping the guard has performance implications, we should measure.
+    if (what == nullptr) {
         return what;
     }
 
@@ -838,20 +835,10 @@ TypePtr TupleType::elementType(const GlobalState &gs) const {
     return ap->targs.front();
 }
 
-SelfType::SelfType() {
-    recordAllocatedType("selftype");
-};
-
 AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     recordAllocatedType("appliedtype");
     histogramInc("appliedtype.targs", this->targs.size());
 }
-
-bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    Exception::raise("Should never call `derivesFrom` on a SelfType");
-}
-
-void SelfType::_sanityCheck(const GlobalState &gs) const {}
 
 TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
     ENFORCE(type != nullptr);
@@ -889,15 +876,19 @@ vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
 }
 } // namespace
 
+// This helper is only used in type_syntax.cc after wrapping up types.
+//
+// (Type syntax parsing wraps up what would normally be LambdaParam with SelfTypeParam so that it
+// can use `Types::any` and `Types::all` to minimize types during parsing, but that requires
+// fully-defined types.)
 TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     ENFORCE(type != nullptr);
 
     TypePtr ret;
     typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
-        [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
-        [&](const NamedLiteralType &lit) { ret = type; }, [&](const IntegerLiteralType &i) { ret = type; },
-        [&](const FloatLiteralType &i) { ret = type; },
+        [&](const LambdaParam &tv) { ret = type; }, [&](const NamedLiteralType &lit) { ret = type; },
+        [&](const IntegerLiteralType &i) { ret = type; }, [&](const FloatLiteralType &i) { ret = type; },
         [&](const AndType &andType) {
             ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
         },
@@ -912,13 +903,14 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         },
         [&](const SelfTypeParam &param) {
             auto sym = param.definition;
-            if (sym.owner(ctx) == ctx.owner || !sym.owner(ctx).exists()) {
+            if (sym.owner(ctx) == ctx.owner) {
                 ENFORCE(isa_type<LambdaParam>(sym.resultType(ctx)));
                 ret = sym.resultType(ctx);
             } else {
                 ret = type;
             }
         },
+        [&](const NewSelfType &self) { ret = core::Symbols::T_SelfType().data(ctx)->resultType; },
         [&](const TypePtr &tp) {
             if (type != nullptr) {
                 Exception::raise("unwrapSelfTypeParam: unhandled case type={}", type.toString(ctx));

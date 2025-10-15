@@ -286,8 +286,6 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
         ENFORCE(this->definition.isTypeMember());
         auto typeMember = this->definition.asTypeMemberRef();
         auto &lambdaParam = cast_type_nonnull<LambdaParam>(typeMember.data(gs)->resultType);
-        // TODO(jez) This doesn't handle the fake T.self_type type member
-        // (this matters for private methods, which can accept T.self_type despite it being covariant)
         auto upperBound = lambdaParam.upperBound;
         if (upperBound.isTop()) {
             if (args.suppressErrors) {
@@ -296,31 +294,22 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
 
             auto e = gs.beginError(args.errLoc(), errors::Infer::CallOnUnboundedTypeMember);
             if (e) {
-                if (typeMember == Symbols::T_SelfType()) {
-                    // TODO(jez) Fake T.self_type type member does not have an owner, but that should
-                    // not matter because we should always treat `upperBound` of a T.self_type as at
-                    // least something that's not `T.anything` and thus never get to this case.
-                    e.setHeader("Call to method `{}` on `{}`", args.name.show(gs), "T.self_type");
-                    // Writing this case just to silence the error for the time being.
+                auto member = typeMember.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()
+                                  ? "template"
+                                  : "member";
+                auto thisStr = args.thisType.show(gs);
+                if (args.fullType.type != args.thisType) {
+                    e.setHeader("Call to method `{}` on unbounded type {} `{}` component of `{}`", args.name.show(gs),
+                                member, thisStr, args.fullType.type.show(gs));
                 } else {
-                    auto member = typeMember.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()
-                                      ? "template"
-                                      : "member";
-                    auto thisStr = args.thisType.show(gs);
-                    if (args.fullType.type != args.thisType) {
-                        e.setHeader("Call to method `{}` on unbounded type {} `{}` component of `{}`",
-                                    args.name.show(gs), member, thisStr, args.fullType.type.show(gs));
-                    } else {
-                        e.setHeader("Call to method `{}` on unbounded type {} `{}`", args.name.show(gs), member,
-                                    thisStr);
-                    }
-                    e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-                    if (args.receiverLoc().exists() && gs.suggestUnsafe.has_value()) {
-                        auto wrapInFn = gs.suggestUnsafe.value();
-                        autocorrectReceiver(gs, e, args, wrapInFn);
-                    }
-                    addUnconstrainedIsaGenericNote(gs, e, args, this->definition, member);
+                    e.setHeader("Call to method `{}` on unbounded type {} `{}`", args.name.show(gs), member, thisStr);
                 }
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                if (args.receiverLoc().exists() && gs.suggestUnsafe.has_value()) {
+                    auto wrapInFn = gs.suggestUnsafe.value();
+                    autocorrectReceiver(gs, e, args, wrapInFn);
+                }
+                addUnconstrainedIsaGenericNote(gs, e, args, this->definition, member);
             }
             emptyResult.main.errors.emplace_back(e.build());
             return emptyResult;
@@ -328,6 +317,10 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
 
         return upperBound.dispatchCall(gs, args.withThisRef(upperBound));
     }
+}
+
+DispatchResult NewSelfType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    return this->upperBound.dispatchCall(gs, args.withThisRef(this->upperBound));
 }
 
 namespace {
@@ -1750,7 +1743,10 @@ TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
     if (symbol == core::Symbols::untyped()) {
         return Types::untyped(Symbols::noSymbol());
     }
-    // TODO(jez) What do we put here
+    // TODO(jez) I think that if you have
+    //   T.proc.params(x: T.self_type).void
+    // then we need the selfType to be `this`. Probably going to need to refactor
+    // getMethodParametersAsTuple to take a `selfType` arg that we pass `this` into
     return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{}, Types::untypedUntracked());
 }
 
@@ -1760,7 +1756,10 @@ TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) con
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    // TODO(jez) What do we put here
+    // TODO(jez) I think that if you have
+    //   T.proc.params(x: T.self_type).void
+    // then we need the selfType to be `this`. Probably going to need to refactor
+    // getMethodParametersAsTuple to take a `selfType` arg that we pass `this` into
     return getMethodParametersAsTuple(gs, klass, name, targs, Types::untypedUntracked());
 }
 
@@ -2035,6 +2034,7 @@ public:
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // TODO(jez) Make this work
         res.returnType = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_self_type;

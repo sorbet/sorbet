@@ -950,7 +950,11 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             if (args.allowSelfType) {
-                return TypeSyntax::ResultType{core::Types::selfTypeAsSelfTypeParam(), core::Symbols::noClassOrModule()};
+                // The upper bound doesn't actually matter here, because it will be unwrapped by
+                // unwrapSelfTypeParam to the LambdaParam after type syntax parsing (this mimics the
+                // type member case, because T.self_type acts mostly like a type member).
+                auto selfType = core::make_type<core::NewSelfType>(core::Types::top());
+                return TypeSyntax::ResultType{move(selfType), core::Symbols::noClassOrModule()};
             }
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level `{}` is supported", "T.self_type");

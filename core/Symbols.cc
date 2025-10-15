@@ -105,12 +105,10 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
 }
 TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
     // todo: in dotty it made sense to cache those.
-    // if (typeMembers().empty()) {
-    //    return externalType();
-    //} else {
-    //    return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
-    //}
-    return Types::selfTypeAsSelfTypeParam();
+    // TODO(jez) Should we cache these, like dmitry suggests? We could cache it on the CFG if not the symbol table
+    // TODO(jez) At the very least, we should probably avoid doign it selfTypeArgs AND selfType at each call site
+    auto upperBound = typeMembers().empty() ? externalType() : make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+    return core::make_type<core::NewSelfType>(move(upperBound));
 }
 
 // ClassOrModule::resultType is computed by unsafeComputeExternalType,
@@ -458,7 +456,7 @@ TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeCo
     auto klass = owner.enclosingClass(ctx);
     // TODO(jez) It might make sense to make a "resultTypeAsSeenFromSelf" helper that cuts some of this verbosity
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx),
-                                                    Types::selfTypeAsSelfTypeParam());
+                                                    klass.data(ctx)->selfType(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(owner);
     }

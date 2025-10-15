@@ -1975,8 +1975,8 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             } else {
                 // c.f. the similarity between this resultTypeAsSeenFrom and the processBinding case for Cast
-                castTypeSeenFromScope =
-                    core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scope.data(ctx)->selfTypeArgs(ctx));
+                castTypeSeenFromScope = core::Types::resultTypeAsSeenFrom(
+                    ctx, castType, scope, scope, scope.data(ctx)->selfTypeArgs(ctx), scope.data(ctx)->selfType(ctx));
                 if (!core::Types::isSubType(ctx, core::Types::nilClass(), castTypeSeenFromScope)) {
                     // Inside a method; declaring a normal instance variable
                     if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
@@ -2008,12 +2008,14 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         auto scopeSelfTypeArgs = scope.data(ctx)->selfTypeArgs(ctx);
-        auto priorFieldResultTypeSeenFromScope =
-            core::Types::resultTypeAsSeenFrom(ctx, priorFieldResultType, scope, scope, scopeSelfTypeArgs);
+        auto scopeSelfType = scope.data(ctx)->selfType(ctx);
+        auto priorFieldResultTypeSeenFromScope = core::Types::resultTypeAsSeenFrom(
+            ctx, priorFieldResultType, scope, scope, scopeSelfTypeArgs, scopeSelfType);
         if (castTypeSeenFromScope == nullptr) {
             // We might not have computed this yet, and to avoid eagerly computing it if we were
             // going to not need it due to an early exit, we make sure it's computed here.
-            castTypeSeenFromScope = core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scopeSelfTypeArgs);
+            castTypeSeenFromScope =
+                core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scopeSelfTypeArgs, scopeSelfType);
         }
         if (core::Types::equiv(ctx, priorFieldResultTypeSeenFromScope, castTypeSeenFromScope)) {
             // We already have a symbol for this field, and it matches what we already saw, so we can short circuit.
@@ -3725,10 +3727,12 @@ private:
             if (arg0.name != arg1.name) {
                 return false;
             }
+            auto ownerSelfTypeArgs = owner.data(gs)->selfTypeArgs(gs);
+            auto ownerSelfType = owner.data(gs)->selfType(gs);
             auto arg0type =
-                core::Types::resultTypeAsSeenFrom(gs, arg0.type, owner, owner, owner.data(gs)->selfTypeArgs(gs));
+                core::Types::resultTypeAsSeenFrom(gs, arg0.type, owner, owner, ownerSelfTypeArgs, ownerSelfType);
             auto arg1type =
-                core::Types::resultTypeAsSeenFrom(gs, arg1.type, owner, owner, owner.data(gs)->selfTypeArgs(gs));
+                core::Types::resultTypeAsSeenFrom(gs, arg1.type, owner, owner, ownerSelfTypeArgs, ownerSelfType);
             return core::Types::equiv(gs, arg0type, arg1type);
         };
 

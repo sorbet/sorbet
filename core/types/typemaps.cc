@@ -363,7 +363,7 @@ TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, absl::Span<
         }
     }
     // TODO(jez) I'm starting to think that the "_instantiateLambdaParams" approach with a threaded
-    // `selfType` parameter can be made to work, but it should be powered by a `SelfType { owner = ... }`
+    // `selfType` parameter can be made to work, but it should be powered by a `NewSelfType { upperBound = ... }`
     // type, because we're going to need an upperBound.
     //
     // ... but now that I type that out, it's still not quite right, because there was value we were
