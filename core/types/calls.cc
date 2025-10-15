@@ -1743,11 +1743,12 @@ TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
     if (symbol == core::Symbols::untyped()) {
         return Types::untyped(Symbols::noSymbol());
     }
-    // TODO(jez) I think that if you have
-    //   T.proc.params(x: T.self_type).void
-    // then we need the selfType to be `this`. Probably going to need to refactor
-    // getMethodParametersAsTuple to take a `selfType` arg that we pass `this` into
-    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{}, Types::untypedUntracked());
+    // TODO(jez) Avoid allocating a new type.
+    // We need a TypePtr, but we don't have one because we dispatched on the ClassType directly.
+    // TODO(jez) It's even worse: reallocating the type is wrong if we use getCallArguments on a union type, etc.
+    // We need to mimic the DispatchArgs withSelfAndThisRef to get a correct args.selfType here
+    auto symbol = this->symbol;
+    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{}, make_type<ClassType>(symbol));
 }
 
 TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
@@ -1756,11 +1757,11 @@ TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) con
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    // TODO(jez) I think that if you have
-    //   T.proc.params(x: T.self_type).void
-    // then we need the selfType to be `this`. Probably going to need to refactor
-    // getMethodParametersAsTuple to take a `selfType` arg that we pass `this` into
-    return getMethodParametersAsTuple(gs, klass, name, targs, Types::untypedUntracked());
+    // TODO(jez) Avoid allocating a new type.
+    // We need a TypePtr, but we don't have one because we dispatched on the ClassType directly.
+    // TODO(jez) It's even worse: reallocating the type is wrong if we use getCallArguments on a union type, etc.
+    // We need to mimic the DispatchArgs withSelfAndThisRef to get a correct args.selfType here
+    return getMethodParametersAsTuple(gs, klass, name, targs, make_type<AppliedType>(this->klass, targs));
 }
 
 namespace {
