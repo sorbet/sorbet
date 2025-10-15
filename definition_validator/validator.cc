@@ -87,10 +87,10 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
     // in the child class, so we always instantiate with the sub class types
     const auto &subSelfTypeArgs = subOwner.data(ctx)->selfTypeArgs(ctx);
 
-    auto subType = core::Types::approximateTypeVars(ctx, sub, constr);
-    subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs);
-    auto superType = core::Types::approximateTypeVars(ctx, super, constr);
-    superType = core::Types::resultTypeAsSeenFrom(ctx, superType, superOwner, subOwner, subSelfTypeArgs);
+    auto subType = core::Types::resultTypeAsSeenFrom(ctx, sub, subOwner, subOwner, subSelfTypeArgs);
+    subType = core::Types::approximateTypeVars(ctx, subType, constr);
+    auto superType = core::Types::resultTypeAsSeenFrom(ctx, super, superOwner, subOwner, subSelfTypeArgs);
+    superType = core::Types::approximateTypeVars(ctx, superType, constr);
 
     switch (polarity) {
         case core::Polarity::Negative:
