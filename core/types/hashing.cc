@@ -126,6 +126,11 @@ uint32_t SelfTypeParam::hash(const GlobalState &gs) const {
     return result;
 }
 
+uint32_t NewSelfType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::NewSelfType);
+    return mix(result, this->upperBound.hash(gs));
+}
+
 uint32_t SelfType::hash(const GlobalState &gs) const {
     return static_cast<uint32_t>(TypePtr::Tag::SelfType);
 }
