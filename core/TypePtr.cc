@@ -48,8 +48,6 @@ GENERATE_CALL_MEMBER(dispatchCall,
 GENERATE_CALL_MEMBER(_instantiateTypeVars, return nullptr, std::declval<const GlobalState &>(),
                      std::declval<const TypeConstraint &>())
 
-GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState &>(), declval<const TypePtr &>())
-
 GENERATE_CALL_MEMBER(_approximateTypeVars, return nullptr, declval<const GlobalState &>(),
                      declval<const TypeConstraint &>(), declval<core::Polarity>())
 
@@ -328,13 +326,6 @@ TypePtr TypePtr::_approximateTypeVars(const GlobalState &gs, const TypeConstrain
     return CALL_MEMBER__approximateTypeVars<const T>::call(cast_type_nonnull<T>(*this), gs, tc, polarity);
     GENERATE_TAG_SWITCH(tag(), _APPROXIMATE)
 #undef _APPROXIMATE
-}
-
-TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-#define _REPLACE_SELF_TYPE(T) \
-    return CALL_MEMBER__replaceSelfType<const T>::call(cast_type_nonnull<T>(*this), gs, receiver);
-    GENERATE_TAG_SWITCH(tag(), _REPLACE_SELF_TYPE)
-#undef _REPLACE_SELF_TYPE
 }
 
 TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
