@@ -219,8 +219,8 @@ module T
     return arg if arg == false
 
     begin
-      raise TypeError.new("Passed `nil` into T.must")
-    rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+      raise T::MustTypeError.new("Passed `nil` into T.must")
+    rescue T::MustTypeError => e # raise into rescue to ensure e.backtrace is populated
       T::Configuration.inline_type_error_handler(e, {kind: 'T.must', value: arg, type: nil})
     end
   end
@@ -247,8 +247,8 @@ module T
     return arg if arg == false
 
     begin
-      raise TypeError.new("Unexpected `nil` because #{yield}")
-    rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
+      raise T::MustTypeError.new("Unexpected `nil` because #{yield}")
+    rescue T::MustTypeError => e # raise into rescue to ensure e.backtrace is populated
       T::Configuration.inline_type_error_handler(e, {kind: 'T.must_because', value: arg, type: nil})
     end
   end
