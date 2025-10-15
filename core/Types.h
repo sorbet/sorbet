@@ -161,7 +161,6 @@ public:
      */
     static TypePtr instantiateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
 
-    static TypePtr replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver);
     /** Get rid of type variables in `what` and return a type that we deem close enough to continue
      * typechecking. We should be careful to only used this type when we are trying to guess a type.
      * We should do proper instantiation and subtype test after we have guessed type variables with
@@ -461,7 +460,6 @@ public:
 
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs, TypePtr selfType) const;
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 };
 CheckSize(LambdaParam, 24, 8);
 
@@ -804,7 +802,6 @@ public:
                                      const std::vector<TypePtr> &targs, TypePtr selfType) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
 private:
     /*
@@ -862,7 +859,6 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs, TypePtr selfType) const;
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
