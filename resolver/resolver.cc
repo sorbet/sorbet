@@ -1954,6 +1954,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
             scope = ctx.owner.enclosingClass(ctx);
         } else {
+            scope = ctx.selfClass();
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
             if (job.atTopLevel && ctx.owner.isClassOrModule()) {
@@ -1971,14 +1972,18 @@ class ResolveTypeMembersAndFieldsWalk {
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }
-            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
-                // Inside a method; declaring a normal instance variable
-                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
-                                uid->name.show(ctx), "initialize");
+            } else {
+                // c.f. the similarity between this resultTypeAsSeenFrom and the processBinding case for Cast
+                auto castTypeSeenFromScope =
+                    core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scope.data(ctx)->selfTypeArgs(ctx));
+                if (!core::Types::isSubType(ctx, core::Types::nilClass(), castTypeSeenFromScope)) {
+                    // Inside a method; declaring a normal instance variable
+                    if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                        e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
+                                    uid->name.show(ctx), "initialize");
+                    }
                 }
             }
-            scope = ctx.selfClass();
         }
 
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
