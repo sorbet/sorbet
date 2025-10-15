@@ -619,6 +619,29 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
     return SelfType();
 }
 
+// TODO(jez) Document me
+TYPE(NewSelfType) final : public Refcounted {
+public:
+    TypePtr upperBound;
+
+    NewSelfType(const TypePtr &upperBound);
+    NewSelfType(const NewSelfType &) = delete;
+    NewSelfType &operator=(const NewSelfType &) = delete;
+
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
+    uint32_t hash(const GlobalState &gs) const;
+
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
+
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
+    void _sanityCheck(const GlobalState &gs) const;
+};
+CheckSize(NewSelfType, 16, 8);
+
 TYPE_INLINED(NamedLiteralType) final {
 public:
     const NameRef name;

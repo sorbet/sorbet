@@ -805,6 +805,10 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
     recordAllocatedType("selftypeparam");
 }
 
+NewSelfType::NewSelfType(const TypePtr &upperBound) : upperBound(move(upperBound)) {
+    recordAllocatedType("selftype");
+}
+
 bool LambdaParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise(
         "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
@@ -818,9 +822,19 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) c
     }
 }
 
+bool NewSelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    return false;
+}
+
 void LambdaParam::_sanityCheck(const GlobalState &gs) const {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(definition.isTypeMember() || definition.isTypeParameter());
+}
+
+void NewSelfType::_sanityCheck(const GlobalState &gs) const {
+    ENFORCE(this->upperBound != nullptr);
+    ENFORCE(!this->upperBound.isUntyped());
+    ENFORCE(this->upperBound.isFullyDefined());
 }
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
@@ -860,6 +874,7 @@ TypePtr TupleType::elementType(const GlobalState &gs) const {
 SelfType::SelfType() {
     recordAllocatedType("selftype");
 };
+
 AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     recordAllocatedType("appliedtype");
     histogramInc("appliedtype.targs", this->targs.size());

@@ -52,6 +52,7 @@ public:
         SelfTypeParam,
         AliasType,
         SelfType,
+        NewSelfType,
         IntegerLiteralType,
         FloatLiteralType,
         NamedLiteralType,
