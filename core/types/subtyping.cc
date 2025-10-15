@@ -1216,12 +1216,12 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             return true;
         }
     }
-    //    ENFORCE(!isa_type<LambdaParam>(t1.get())); // sandly, this is false in Resolver, as we build
-    //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2) == nullptr);
 
     {
         auto lambda1 = cast_type<LambdaParam>(t1);
+        ENFORCE(lambda1 == nullptr);
         auto lambda2 = cast_type<LambdaParam>(t2);
+        ENFORCE(lambda2 == nullptr);
         if (lambda1 != nullptr || lambda2 != nullptr) {
             // This should only be reachable in resolver.
             if (lambda1 == nullptr || lambda2 == nullptr) {
