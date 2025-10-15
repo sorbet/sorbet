@@ -1,0 +1,489 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def test_each<<todo method>>(arr, &blk)
+    <emptyTree>
+  end
+
+  class <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+    def expect<<todo method>>(val, &<blk>)
+      <emptyTree>
+    end
+
+    def eq<<todo method>>(arg, &<blk>)
+      <emptyTree>
+    end
+
+    def subject<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def is_expected<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def to<<todo method>>(matcher, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of expect>
+
+    <runtime method definition of eq>
+
+    <runtime method definition of subject>
+
+    <runtime method definition of is_expected>
+
+    <runtime method definition of to>
+  end
+
+  <runtime method definition of test_each>
+
+  class <emptyTree>::<C <describe 'shared example with no context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    module <emptyTree>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
+      def foo<<todo method>>(&<blk>)
+        "bar"
+      end
+
+      def <it 'works'><<todo method>>(&<blk>)
+        <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+      end
+
+      <runtime method definition of foo>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+  end
+
+  class <emptyTree>::<C <describe 'single shared example with context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    module <emptyTree>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
+      def foo<<todo method>>(&<blk>)
+        "bar"
+      end
+
+      <runtime method definition of foo>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    class <emptyTree>::<C <context 'context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'works'><<todo method>>(&<blk>)
+        <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+      end
+
+      <self>.include(<emptyTree>::<C <shared_examples 'my shared example'>>)
+    end
+  end
+
+  class <emptyTree>::<C <describe 'multiple contexts'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    module <emptyTree>::<C <shared_examples 'complex processing'>><<C <todo sym>>> < ()
+      def x<<todo method>>(&<blk>)
+        10
+      end
+
+      <runtime method definition of x>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    class <emptyTree>::<C <context 'first context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'first test'><<todo method>>(&<blk>)
+        <self>.expect(<self>.x()).to(<self>.eq(10))
+      end
+
+      <self>.include(<emptyTree>::<C <shared_examples 'complex processing'>>)
+    end
+
+    class <emptyTree>::<C <context 'second context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'second test'><<todo method>>(&<blk>)
+        <self>.expect(<self>.x()).to(<self>.eq(10))
+      end
+
+      <self>.include(<emptyTree>::<C <shared_examples 'complex processing'>>)
+    end
+  end
+
+  class <emptyTree>::<C <describe 'nested contexts'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    module <emptyTree>::<C <shared_examples 'shared example with nested context'>><<C <todo sym>>> < ()
+      def value<<todo method>>(&<blk>)
+        42
+      end
+
+      <runtime method definition of value>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    class <emptyTree>::<C <context 'outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      class <emptyTree>::<C <context 'inner'>><<C <todo sym>>> < (<self>)
+        def <it 'nested test'><<todo method>>(&<blk>)
+          <self>.expect(<self>.value()).to(<self>.eq(42))
+        end
+      end
+
+      <self>.include(<emptyTree>::<C <shared_examples 'shared example with nested context'>>)
+    end
+  end
+
+  class <emptyTree>::<C <describe 'nested lets in nested context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    module <emptyTree>::<C <shared_examples 'mixed'>><<C <todo sym>>> < ()
+      def a<<todo method>>(&<blk>)
+        1
+      end
+
+      def b<<todo method>>(&<blk>)
+        2
+      end
+
+      <runtime method definition of a>
+
+      <runtime method definition of b>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    class <emptyTree>::<C <context 'calculation'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def c<<todo method>>(&<blk>)
+        3
+      end
+
+      def <it 'calculates'><<todo method>>(&<blk>)
+        <self>.expect(<self>.a().+(<self>.b()).+(<self>.c())).to(<self>.eq(6))
+      end
+
+      <runtime method definition of c>
+
+      <self>.include(<emptyTree>::<C <shared_examples 'mixed'>>)
+    end
+  end
+
+  class <emptyTree>::<C <describe 'nested shared examples with include examples'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def <it 'can access level 1 variable after include'><<todo method>>(&<blk>)
+      <self>.expect(<self>.level1_var()).to(<self>.eq(<self>.level1_var()))
+    end
+
+    begin
+      module <emptyTree>::<C <shared_examples 'level 1'>><<C <todo sym>>> < ()
+        def level1_var<<todo method>>(&<blk>)
+          "level1"
+        end
+
+        def <it 'can access its own level'><<todo method>>(&<blk>)
+          <self>.expect(<self>.level1_var()).to(<self>.eq(<self>.level1_var()))
+        end
+
+        def <it 'can access a level 2 variable after include'><<todo method>>(&<blk>)
+          <self>.expect(<self>.level2_var()).to(<self>.eq(<self>.level2_var()))
+        end
+
+        <runtime method definition of level1_var>
+
+        <self>.include(<emptyTree>::<C <shared_examples 'level 2'>>)
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+      module <emptyTree>::<C <shared_examples 'level 2'>><<C <todo sym>>> < ()
+        def level2_var<<todo method>>(&<blk>)
+          "level2"
+        end
+
+        def <it 'can access its own level'><<todo method>>(&<blk>)
+          <self>.expect(<self>.level2_var()).to(<self>.eq(<self>.level2_var()))
+        end
+
+        def <it 'cannot access level 1 variable'><<todo method>>(&<blk>)
+          begin
+            <self>.level_1_var()
+            <self>.level1_var()
+          end
+        end
+
+        <runtime method definition of level2_var>
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+    end
+
+    <self>.include(<emptyTree>::<C <shared_examples 'level 1'>>)
+  end
+
+  class <emptyTree>::<C <describe 'including examples within a test_each block'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def <it 'can access shared_var'><<todo method>>(&<blk>)
+      [1, 2, 3].each() do |num|
+        <self>.expect(<self>.shared_var()).to(<self>.eq("shared"))
+      end
+    end
+
+    module <emptyTree>::<C <shared_examples 'shared in test_each'>><<C <todo sym>>> < ()
+      def shared_var<<todo method>>(&<blk>)
+        "shared"
+      end
+
+      def <it 'can access shared_var'><<todo method>>(&<blk>)
+        <self>.expect(<self>.shared_var()).to(<self>.eq("shared"))
+      end
+
+      <runtime method definition of shared_var>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    <self>.test_each([1, 2, 3]) do |num|
+      begin
+        <self>.include(<emptyTree>::<C <shared_examples 'shared in test_each'>>)
+        <runtime method definition of <it 'can access shared_var'>>
+      end
+    end
+  end
+
+  class <emptyTree>::<C <describe 'its blocks inside shared examples'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def subject<<todo method>>(&<blk>)
+      {:name => "test", :value => 42}
+    end
+
+    <runtime method definition of subject>
+
+    module <emptyTree>::<C <shared_examples 'has attributes'>><<C <todo sym>>> < ()
+      class <emptyTree>::<C <describe 'name'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+        def <it><<todo method>>(&<blk>)
+          <self>.expect(<self>.subject().name()).to(<self>.eq("test"))
+        end
+      end
+
+      class <emptyTree>::<C <describe 'value'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+        def <it><<todo method>>(&<blk>)
+          <self>.expect(<self>.subject().value()).to(<self>.eq(42))
+        end
+      end
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    <self>.include(<emptyTree>::<C <shared_examples 'has attributes'>>)
+  end
+
+  module <emptyTree>::<C <shared_examples 'standalone shared context'>><<C <todo sym>>> < ()
+    def foo<<todo method>>(&<blk>)
+      "bar"
+    end
+
+    def <it 'works'><<todo method>>(&<blk>)
+      <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+    end
+
+    <runtime method definition of foo>
+
+    class <emptyTree>::<C <context 'my context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'works'><<todo method>>(&<blk>)
+        <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+      end
+    end
+
+    ::<Magic>.requires_ancestor() do ||
+      <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+    end
+  end
+
+  class <emptyTree>::<C <describe 'including standalone context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def <it 'can use the let'><<todo method>>(&<blk>)
+      <self>.foo()
+    end
+
+    <self>.include(<emptyTree>::<C <shared_examples 'standalone shared context'>>)
+  end
+
+  module <emptyTree>::<C <shared_examples 'standalone shared context with nested shared examples'>><<C <todo sym>>> < ()
+    def parent_var<<todo method>>(&<blk>)
+      "value"
+    end
+
+    <runtime method definition of parent_var>
+
+    module <emptyTree>::<C <shared_examples 'nested shared example'>><<C <todo sym>>> < ()
+      def foo<<todo method>>(&<blk>)
+        "bar"
+      end
+
+      def <it 'works'><<todo method>>(&<blk>)
+        <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+      end
+
+      def attempted_parent_access<<todo method>>(&<blk>)
+        <self>.parent_var()
+      end
+
+      def <it 'cannot access parent_var in it block either'><<todo method>>(&<blk>)
+        <self>.expect(<self>.parent_var()).to(<self>.eq("value"))
+      end
+
+      <runtime method definition of foo>
+
+      <runtime method definition of attempted_parent_access>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    ::<Magic>.requires_ancestor() do ||
+      <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+    end
+  end
+
+  class <emptyTree>::<C <describe 'describe using nested shared example from standalone shared context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def <it 'can use both'><<todo method>>(&<blk>)
+      begin
+        <self>.foo()
+        <self>.parent_var()
+      end
+    end
+
+    <self>.include(<emptyTree>::<C <shared_examples 'standalone shared context with nested shared examples'>>)
+
+    <self>.include(<emptyTree>::<C <shared_examples 'nested shared example'>>)
+  end
+
+  class <emptyTree>::<C <describe 'shared example block params'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    module <emptyTree>::<C <shared_examples 'with params'>><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.untyped())
+      end
+
+      def self.param1<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.untyped())
+      end
+
+      def param1<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.untyped())
+      end
+
+      def self.param2<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.untyped())
+      end
+
+      def param2<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      def <it 'can access params'><<todo method>>(&<blk>)
+        begin
+          <emptyTree>::<C T>.reveal_type(<self>.param1())
+          <emptyTree>::<C T>.reveal_type(<self>.param2())
+        end
+      end
+
+      <runtime method definition of self.param1>
+
+      <runtime method definition of param1>
+
+      <runtime method definition of self.param2>
+
+      <runtime method definition of param2>
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    <self>.include(<emptyTree>::<C <shared_examples 'with params'>>)
+  end
+
+  class <emptyTree>::<C <describe 'shared example block param used in context description'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    module <emptyTree>::<C <shared_examples 'example with block param'>><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.untyped())
+      end
+
+      def self.param<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.untyped())
+      end
+
+      def param<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      def <it '::<Magic>.<string-interpolate>("has flag ", <self>.param())'><<todo method>>(&<blk>)
+        <self>.expect(<self>.param()).to(<self>.eq(1))
+      end
+
+      <runtime method definition of self.param>
+
+      <runtime method definition of param>
+
+      <emptyTree>::<C T>.reveal_type(<self>.param())
+
+      begin
+        ::<Magic>.<string-interpolate>("has flag ", <self>.param())
+        <emptyTree>
+      end
+
+      ::<Magic>.requires_ancestor() do ||
+        <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      end
+    end
+
+    <self>.include(<emptyTree>::<C <shared_examples 'example with block param'>>)
+  end
+
+  module <emptyTree>::<C <shared_examples 'standalone shared example'>><<C <todo sym>>> < ()
+    def foo<<todo method>>(&<blk>)
+      "bar"
+    end
+
+    def <it 'works'><<todo method>>(&<blk>)
+      <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+    end
+
+    <runtime method definition of foo>
+
+    class <emptyTree>::<C <context 'my context'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'works'><<todo method>>(&<blk>)
+        <self>.expect(<self>.foo()).to(<self>.eq("bar"))
+      end
+    end
+
+    ::<Magic>.requires_ancestor() do ||
+      <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+    end
+  end
+
+  class <emptyTree>::<C <describe 'describe using standalone shared example'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def <it 'can use the let'><<todo method>>(&<blk>)
+      <self>.foo()
+    end
+
+    <self>.include(<emptyTree>::<C <shared_examples 'standalone shared example'>>)
+  end
+end
