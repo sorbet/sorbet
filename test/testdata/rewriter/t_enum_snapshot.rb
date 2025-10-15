@@ -10,7 +10,7 @@ end
 class NotAnEnum
   enums do # error: does not exist
   X = new
-  Y = T.let(new, self)
+  Y = T.let(new, self) # error: Unsupported type syntax
   end
 end
 
