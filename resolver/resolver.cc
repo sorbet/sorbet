@@ -1944,6 +1944,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto uid = job.ident;
 
         auto castType = checkFieldTypeTodo(ctx, uid->name, cast);
+        core::TypePtr castTypeSeenFromScope;
 
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.isClassOrModule()) {
@@ -1974,7 +1975,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             } else {
                 // c.f. the similarity between this resultTypeAsSeenFrom and the processBinding case for Cast
-                auto castTypeSeenFromScope =
+                castTypeSeenFromScope =
                     core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scope.data(ctx)->selfTypeArgs(ctx));
                 if (!core::Types::isSubType(ctx, core::Types::nilClass(), castTypeSeenFromScope)) {
                     // Inside a method; declaring a normal instance variable
@@ -2006,9 +2007,16 @@ class ResolveTypeMembersAndFieldsWalk {
             fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         }
 
-        if (core::Types::equiv(ctx, priorFieldResultType, castType)) {
-            // We already have a symbol for this field, and it matches what we already saw, so we can short
-            // circuit.
+        auto scopeSelfTypeArgs = scope.data(ctx)->selfTypeArgs(ctx);
+        auto priorFieldResultTypeSeenFromScope =
+            core::Types::resultTypeAsSeenFrom(ctx, priorFieldResultType, scope, scope, scopeSelfTypeArgs);
+        if (castTypeSeenFromScope == nullptr) {
+            // We might not have computed this yet, and to avoid eagerly computing it if we were
+            // going to not need it due to an early exit, we make sure it's computed here.
+            castTypeSeenFromScope = core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scopeSelfTypeArgs);
+        }
+        if (core::Types::equiv(ctx, priorFieldResultTypeSeenFromScope, castTypeSeenFromScope)) {
+            // We already have a symbol for this field, and it matches what we already saw, so we can short circuit.
             return;
         }
 
@@ -3609,8 +3617,8 @@ private:
             [&](const ast::ExpressionPtr &e) {});
     }
 
-    static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs,
-                                                      const OverloadedMethodSigInformation &info,
+    static bool hasCompatibleOverloadedSigsWithKwArgs(const core::GlobalState &gs, core::ClassOrModuleRef owner,
+                                                      int numSigs, const OverloadedMethodSigInformation &info,
                                                       const vector<OverloadedMethodArgInformation> &args) {
         if (numSigs != 2) {
             return false;
@@ -3626,11 +3634,15 @@ private:
         const auto &argv1 = args[1];
 
         // Unlike std::equal, absl::c_equal will test for equal sizes.
-        auto argsEqual = [&ctx](const auto &arg0, const auto &arg1) {
+        auto argsEqual = [&gs, owner](const auto &arg0, const auto &arg1) {
             if (arg0.name != arg1.name) {
                 return false;
             }
-            return core::Types::equiv(ctx, arg0.type, arg1.type);
+            auto arg0type =
+                core::Types::resultTypeAsSeenFrom(gs, arg0.type, owner, owner, owner.data(gs)->selfTypeArgs(gs));
+            auto arg1type =
+                core::Types::resultTypeAsSeenFrom(gs, arg1.type, owner, owner, owner.data(gs)->selfTypeArgs(gs));
+            return core::Types::equiv(gs, arg0type, arg1type);
         };
 
         // TODO(froydnj) better error messages for users trying to provide overloads with kwargs?
@@ -3702,7 +3714,8 @@ public:
         // This usually comes up in the standard library (e.g. `String#each_line`).
         ENFORCE(combinedInfo.has_value());
         if (isOverloaded && combinedInfo->hasKwArgs) {
-            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, args)) {
+            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, mdef.symbol.data(ctx)->owner, sigs.size(), *combinedInfo,
+                                                       args)) {
                 for (auto &argv : args) {
                     for (auto &arg : argv.kwArgs) {
                         if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
