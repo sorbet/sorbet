@@ -1772,46 +1772,44 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
-            ast::MethodDef::PARAMS_store params;
             bool canProvideNiceDesugar = true;
+            auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(variable.get());
 
             // Check if the variable is a simple local variable or a multi-target with only local variables
-            if (auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(variable.get())) {
+            if (mlhs) {
                 // Multi-target: check if all are local variables (no nested Mlhs or other complex targets)
-                for (auto &c : mlhs->exprs) {
-                    if (!parser::NodeWithExpr::isa_node<parser::LVarLhs>(c.get())) {
-                        canProvideNiceDesugar = false;
-                        break;
-                    }
-                }
-                if (canProvideNiceDesugar) {
-                    for (auto &c : mlhs->exprs) {
-                        params.emplace_back(c->peekDesugaredExpr().deepCopy());
-                    }
-                }
+                canProvideNiceDesugar = absl::c_all_of(mlhs->exprs, [](const auto &c) {
+                    return parser::NodeWithExpr::isa_node<parser::LVarLhs>(c.get());
+                });
             } else {
                 // Single variable: check if it's a local variable
                 canProvideNiceDesugar = parser::NodeWithExpr::isa_node<parser::LVarLhs>(variable.get());
-                if (canProvideNiceDesugar) {
-                    params.emplace_back(variable->peekDesugaredExpr().deepCopy());
-                }
             }
 
             // Only handle the simple "nice desugar" case in the Prism translator
             // Complex cases (nested Mlhs, instance vars, etc.) will be handled by PrismDesugar.cc
-            if (!canProvideNiceDesugar) {
-                return make_unique<parser::For>(location, move(variable), move(collection), move(body));
+            if (canProvideNiceDesugar) {
+                ast::MethodDef::PARAMS_store params;
+                if (mlhs) {
+                    for (auto &c : mlhs->exprs) {
+                        params.emplace_back(c->takeDesugaredExpr());
+                    }
+                } else {
+                    params.emplace_back(variable->takeDesugaredExpr());
+                }
+                auto bodyExpr = body ? body->takeDesugaredExpr() : MK::EmptyTree();
+                auto collectionExpr = collection->takeDesugaredExpr();
+                auto locZeroLen = location.copyWithZeroLength();
+
+                // Simple case: `for x in a; body; end` -> `a.each { |x| body }`
+                auto block = MK::Block(location, move(bodyExpr), move(params));
+                auto expr =
+                    MK::Send0Block(location, move(collectionExpr), core::Names::each(), locZeroLen, move(block));
+
+                return make_node_with_expr<parser::For>(move(expr), location, move(variable), move(collection),
+                                                        move(body));
             }
-
-            auto bodyExpr = body ? body->peekDesugaredExpr().deepCopy() : MK::EmptyTree();
-            auto collectionExpr = collection->peekDesugaredExpr().deepCopy();
-            auto locZeroLen = location.copyWithZeroLength();
-
-            // Simple case: `for x in a; body; end` -> `a.each { |x| body }`
-            auto block = MK::Block(location, move(bodyExpr), move(params));
-            auto expr = MK::Send0Block(location, move(collectionExpr), core::Names::each(), locZeroLen, move(block));
-
-            return make_node_with_expr<parser::For>(move(expr), location, move(variable), move(collection), move(body));
+            return make_unique<parser::For>(location, move(variable), move(collection), move(body));
         }
         case PM_FORWARDING_ARGUMENTS_NODE: { // The `...` argument in a method call, like `foo(...)`
             return make_unique<parser::ForwardedArgs>(location);
