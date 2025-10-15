@@ -61,3 +61,10 @@ requires: []
  resolved=[Foo Bar Y]
  loc=test/testdata/autogen/type_template.rb:7
  is_defining_ref=1
+[ref id=5]
+ scope=[Foo Bar]
+ name=[Integer]
+ nesting=[[Foo Bar] [Foo]]
+ resolved=[Integer]
+ loc=test/testdata/autogen/type_template.rb:8
+ is_defining_ref=0
