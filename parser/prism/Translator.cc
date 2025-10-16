@@ -1455,8 +1455,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // ... like `@@target1, @@target2 = 1, 2`, `rescue => @@target`, etc.
             auto classVariableTargetNode = down_cast<pm_class_variable_target_node>(node);
             auto name = translateConstantName(classVariableTargetNode->name);
-
-            return make_unique<parser::CVarLhs>(location, name);
+            auto expr = ast::make_expression<ast::UnresolvedIdent>(location, ast::UnresolvedIdent::Kind::Class, name);
+            return make_node_with_expr<parser::CVarLhs>(move(expr), location, name);
         }
         case PM_CLASS_VARIABLE_WRITE_NODE: { // Regular assignment to a class variable, e.g. `@@a = 1`
             return translateAssignment<pm_class_variable_write_node, parser::CVarLhs>(node);
