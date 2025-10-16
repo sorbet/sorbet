@@ -13,15 +13,15 @@ class ObjectBox
 
   sig { params(val: T.all(Object, Elem)).void }
   def example(val)
-    T.reveal_type(val) # error: `T.all(Object, ObjectBox::Elem)`
+    T.reveal_type(val) # error: `ObjectBox::Elem`
   end
 
   sig { returns(Elem) }
   def dup_val
     klass = @val.class
-    T.reveal_type(klass) # error: `T.class_of(Object)[T.all(Object, ObjectBox::Elem)]`
+    T.reveal_type(klass) # error: `T.class_of(Object)[ObjectBox::Elem]`
     new_val = klass.new
-    T.reveal_type(new_val) # error: `T.all(Object, ObjectBox::Elem)`
+    T.reveal_type(new_val) # error: `ObjectBox::Elem`
     new_val
   end
 end
@@ -38,7 +38,7 @@ class Maybe
 
   sig { params(val: T.nilable(Elem)).void }
   def example(val)
-    T.reveal_type(val) # error: `T.nilable(Maybe::Elem)`
+    T.reveal_type(val) # error: `Maybe::Elem`
   end
 
   sig { void }
@@ -85,12 +85,12 @@ class CompoundBounds
 
   sig { params(val: T.any(T.any(Integer, Float), Elem)).void }
   def example_lub_1(val)
-    T.reveal_type(val) # error: `T.any(Integer, Float, CompoundBounds::Elem)`
+    T.reveal_type(val) # error: `CompoundBounds::Elem`
   end
 
   sig { params(val: T.any(Elem, T.any(Integer, Float))).void }
   def example_lub_2(val)
-    T.reveal_type(val) # error: `T.any(Integer, Float, CompoundBounds::Elem)`
+    T.reveal_type(val) # error: `CompoundBounds::Elem`
   end
 
   sig { params(val: T.any(Elem, T.any(Comparable, Object))).void }
