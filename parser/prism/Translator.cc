@@ -1771,8 +1771,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // ... like `$target1, $target2 = 1, 2`, `rescue => $target`, etc.
             auto globalVariableTargetNode = down_cast<pm_global_variable_target_node>(node);
             auto name = translateConstantName(globalVariableTargetNode->name);
+            auto expr = ast::make_expression<ast::UnresolvedIdent>(location, ast::UnresolvedIdent::Kind::Global, name);
 
-            return make_unique<parser::GVarLhs>(location, name);
+            return make_node_with_expr<parser::GVarLhs>(move(expr), location, name);
         }
         case PM_GLOBAL_VARIABLE_WRITE_NODE: { // Regular assignment to a global variable, e.g. `$g = 1`
             return translateAssignment<pm_global_variable_write_node, parser::GVarLhs>(node);
