@@ -1941,8 +1941,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // ... like `@target1, @target2 = 1, 2`, `rescue => @target`, etc.
             auto instanceVariableTargetNode = down_cast<pm_instance_variable_target_node>(node);
             auto name = translateConstantName(instanceVariableTargetNode->name);
+            auto expr =
+                ast::make_expression<ast::UnresolvedIdent>(location, ast::UnresolvedIdent::Kind::Instance, name);
 
-            return make_unique<parser::IVarLhs>(location, name);
+            return make_node_with_expr<parser::IVarLhs>(move(expr), location, name);
         }
         case PM_INSTANCE_VARIABLE_WRITE_NODE: { // Regular assignment to an instance variable, e.g. `@iv = 1`
             return translateAssignment<pm_instance_variable_write_node, parser::IVarLhs>(node);
