@@ -528,16 +528,27 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        auto isSelfTypeT1 = isa_type<SelfTypeParam>(t1);
-        auto isSelfTypeT2 = isa_type<SelfTypeParam>(t2);
+        auto isSelfTypeParamT1 = isa_type<SelfTypeParam>(t1);
+        auto isSelfTypeParamT2 = isa_type<SelfTypeParam>(t2);
 
-        if (isSelfTypeT1 || isSelfTypeT2) {
-            // NOTE: SelfTypeParam is an inlined type, so TypePtr equality is type equality.
+        // NOTE: SelfTypeParam is an inlined type, so TypePtr equality is type equality.
+        if (isSelfTypeParamT1 && isSelfTypeParamT2) {
             if (t1 != t2) {
                 return OrType::make_shared(t1, t2);
             } else {
                 return t1;
             }
+        } else if (isSelfTypeParamT2) {
+            auto selfTypeT2 = cast_type_nonnull<SelfTypeParam>(t2);
+            // NOTE: SelfTypeParam is used both with TypeMember and TypeParameter--only TypeMembers have bounds today
+            if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeT2.definition.resultType(gs))) {
+                if (isSubType(gs, t1, lambdaParam->lowerBound)) {
+                    return t2;
+                }
+            }
+            return OrType::make_shared(t1, t2);
+        } else if (isSelfTypeParamT1) {
+            return OrType::make_shared(t1, t2);
         }
     }
 
@@ -1026,16 +1037,27 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
     {
-        auto isSelfTypeT1 = isa_type<SelfTypeParam>(t1);
-        auto isSelfTypeT2 = isa_type<SelfTypeParam>(t2);
+        auto isSelfTypeParamT1 = isa_type<SelfTypeParam>(t1);
+        auto isSelfTypeParamT2 = isa_type<SelfTypeParam>(t2);
 
-        if (isSelfTypeT1 || isSelfTypeT2) {
-            // NOTE: SelfTypeParam is an inlined type, so TypePtr equality is type equality.
+        // NOTE: SelfTypeParam is an inlined type, so TypePtr equality is type equality.
+        if (isSelfTypeParamT1 && isSelfTypeParamT2) {
             if (t1 != t2) {
                 return AndType::make_shared(t1, t2);
             } else {
                 return t1;
             }
+        } else if (isSelfTypeParamT2) {
+            auto selfTypeT2 = cast_type_nonnull<SelfTypeParam>(t2);
+            // NOTE: SelfTypeParam is used both with TypeMember and TypeParameter--only TypeMembers have bounds today
+            if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeT2.definition.resultType(gs))) {
+                if (isSubType(gs, lambdaParam->upperBound, t1)) {
+                    return t2;
+                }
+            }
+            return AndType::make_shared(t1, t2);
+        } else if (isSelfTypeParamT1) {
+            return AndType::make_shared(t1, t2);
         }
     }
 
