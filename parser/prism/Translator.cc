@@ -1789,11 +1789,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto bodyExpr = body ? body->takeDesugaredExpr() : MK::EmptyTree();
             auto collectionExpr = collection->takeDesugaredExpr();
             auto locZeroLen = location.copyWithZeroLength();
+            ast::MethodDef::PARAMS_store params;
 
-            ExpressionPtr block;
             if (canProvideNiceDesugar) {
                 // Simple case: `for x in a; body; end` -> `a.each { |x| body }`
-                ast::MethodDef::PARAMS_store params;
                 if (mlhs) {
                     for (auto &c : mlhs->exprs) {
                         params.emplace_back(c->takeDesugaredExpr());
@@ -1801,7 +1800,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 } else {
                     params.emplace_back(variable->takeDesugaredExpr());
                 }
-                block = MK::Block(location, move(bodyExpr), move(params));
             } else {
                 // Complex case: `for @x in a; body; end` -> `a.each { || @x = <temp>; body }`
                 auto temp = nextUniqueDesugarName(core::Names::forTemp());
@@ -1818,12 +1816,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 }
 
                 bodyExpr = MK::InsSeq1(location, move(masgnExpr), move(bodyExpr));
-
-                // Block has empty params - temp is a local variable, not a parameter
-                ast::MethodDef::PARAMS_store emptyParams;
-                block = MK::Block(location, move(bodyExpr), move(emptyParams));
             }
 
+            auto block = MK::Block(location, move(bodyExpr), move(params));
             auto expr = MK::Send0Block(location, move(collectionExpr), core::Names::each(), locZeroLen, move(block));
 
             return make_node_with_expr<parser::For>(move(expr), location, move(variable), move(collection), move(body));
