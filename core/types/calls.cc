@@ -3084,7 +3084,12 @@ public:
 
         auto selfTy = *args.args[0];
         auto mustExist = true;
-        auto self = unwrapSymbol(gs, selfTy.type, mustExist);
+        // TODO(jez) Pick a better name for these local vars once you figure out what you want to call NewSelfType
+        auto selfTyType = selfTy.type;
+        if (auto selfType = cast_type<NewSelfType>(selfTyType)) {
+            selfTyType = selfType->upperBound;
+        }
+        auto self = unwrapSymbol(gs, selfTyType, mustExist);
         auto selfData = self.data(gs);
 
         auto attachedClass = selfData->findMember(gs, core::Names::Constants::AttachedClass());
