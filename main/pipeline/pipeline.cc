@@ -317,7 +317,7 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
         // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
         auto source = file.data(ctx).source();
         parser::Prism::Parser parser{source};
-        parser::Prism::ParseResult parseResult = parser.parse(false);
+        parser::Prism::ParseResult parseResult = parser.parseOnly(false);
 
         auto node = parseResult.getRawNodePointer();
         if (gs.cacheSensitiveOptions.rbsEnabled) {

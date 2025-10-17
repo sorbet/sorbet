@@ -11,7 +11,7 @@ parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, 
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
-    Prism::ParseResult parseResult = parser.parse(false);
+    Prism::ParseResult parseResult = parser.parseOnly(false);
 
     auto translatedTree =
         Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
@@ -19,19 +19,11 @@ parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, 
     return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
 }
 
-ParseResult Parser::parseOnly(core::MutableContext &ctx) {
-    auto file = ctx.file;
-    auto source = file.data(ctx).source();
-    Prism::Parser parser{source};
-    bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
-    return parser.parse(collectComments);
-}
-
 pm_parser_t *Parser::getRawParserPointer() {
     return &parser;
 }
 
-ParseResult Parser::parse(bool collectComments) {
+ParseResult Parser::parseOnly(bool collectComments) { // remove
     pm_node_t *root = pm_parse(&parser);
     auto comments = collectComments ? collectCommentLocations() : vector<core::LocOffsets>{};
     return ParseResult{*this, root, collectErrors(), move(comments)};

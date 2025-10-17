@@ -65,9 +65,8 @@ public:
 
     static parser::ParseResult run(core::MutableContext ctx, bool directlyDesugar = true,
                                    bool preserveConcreteSyntax = false);
-    static ParseResult parseOnly(core::MutableContext &ctx);
 
-    ParseResult parse(bool collectComments = false);
+    ParseResult parseOnly(bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
     std::string_view extractString(pm_string_t *string) const;
