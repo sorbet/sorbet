@@ -1,7 +1,7 @@
 # typed: true
 
 [1,2,3].map { |x| _1 }
-                # ^^ error: can't use numbered params when ordinary
+                # ^^ error: numbered parameters are not allowed when an ordinary parameter is defined
 
 # recover
 successful_parse = 10

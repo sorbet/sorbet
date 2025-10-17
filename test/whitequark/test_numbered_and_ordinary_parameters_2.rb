@@ -1,3 +1,3 @@
 # typed: true
 
-m do || _1 end  # error: can't use numbered params when ordinary params were also defined
+m do || _1 end  # error: numbered parameters are not allowed when an ordinary parameter is defined

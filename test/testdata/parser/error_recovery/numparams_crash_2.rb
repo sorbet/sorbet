@@ -1,6 +1,6 @@
 # typed: false
 
 f (1) { |x| _1 }
-          # ^^ error: can't use numbered params
+          # ^^ error: numbered parameters are not allowed when an ordinary parameter is defined
 
 _1
