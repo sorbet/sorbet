@@ -194,6 +194,7 @@ public:
     unsigned int fieldsUsed() const;
     unsigned int typeParametersUsed() const;
     unsigned int typeMembersUsed() const;
+    unsigned int typeParametersUsed() const;
     unsigned int filesUsed() const;
     unsigned int symbolsUsedTotal() const;
 
