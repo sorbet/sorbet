@@ -11,8 +11,7 @@ parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, 
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
-    bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
-    Prism::ParseResult parseResult = parser.parse(collectComments);
+    Prism::ParseResult parseResult = parser.parse(false);
 
     auto translatedTree =
         Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
