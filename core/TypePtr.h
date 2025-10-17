@@ -51,7 +51,7 @@ public:
         LambdaParam,
         SelfTypeParam,
         AliasType,
-        SelfType,
+        NewSelfType,
         IntegerLiteralType,
         FloatLiteralType,
         NamedLiteralType,
@@ -307,12 +307,10 @@ public:
 
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
 
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                     const std::vector<TypePtr> &targs) const;
+                                     const std::vector<TypePtr> &targs, TypePtr selfType) const;
 
     // If this TypePtr `is_proxy_type`, returns its underlying type.
     TypePtr underlying(const GlobalState &gs) const;

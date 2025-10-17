@@ -319,18 +319,21 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
     }
 }
 
+DispatchResult NewSelfType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    return this->upperBound.dispatchCall(gs, args.withThisRef(this->upperBound));
+}
+
 namespace {
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
                                MethodRef method, const TypeAndOrigins &argTpe, const ParamInfo &argSym,
                                const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
-    TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
+    TypePtr expectedType =
+        Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs, selfType);
     if (!expectedType) {
         expectedType = Types::untyped(method);
     }
-
-    expectedType = Types::replaceSelfType(gs, expectedType, selfType);
 
     core::ErrorSection::Collector errorDetailsCollector;
     if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible,
@@ -382,7 +385,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 
 unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs &args, MethodRef method,
                                       const vector<const ParamInfo *> &missingKwargs, ClassOrModuleRef inClass,
-                                      const vector<TypePtr> &targs) {
+                                      const vector<TypePtr> &targs, TypePtr selfType) {
     auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
     if (missingKwargs.empty()) {
         return nullptr;
@@ -397,7 +400,8 @@ unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs 
 
         for (auto *arg : missingKwargs) {
             auto argName = arg->name.show(gs);
-            auto expectedType = Types::resultTypeAsSeenFrom(gs, arg->type, method.data(gs)->owner, inClass, targs);
+            auto expectedType =
+                Types::resultTypeAsSeenFrom(gs, arg->type, method.data(gs)->owner, inClass, targs, selfType);
             if (expectedType == nullptr) {
                 e.addErrorLine(arg->loc, "Keyword parameter `{}` declared here:", argName);
             } else {
@@ -452,7 +456,8 @@ struct GuessOverloadCandidate {
 };
 
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, TypePtr selfType,
+                        bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     vector<pair<MethodRef, size_t>> allCandidates;
 
@@ -533,7 +538,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                 }
 
                 auto paramType =
-                    Types::resultTypeAsSeenFrom(gs, paramTypeRaw, candidate.data(gs)->owner, inClass, targs);
+                    Types::resultTypeAsSeenFrom(gs, paramTypeRaw, candidate.data(gs)->owner, inClass, targs, selfType);
                 if (constr == nullptr) {
                     if (!Types::isSubType(gs, arg, paramType)) {
                         it = leftCandidates.erase(it);
@@ -1011,10 +1016,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    auto method =
-        mayBeOverloaded.data(gs)->flags.isOverloaded
-            ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
-            : mayBeOverloaded;
+    auto method = mayBeOverloaded.data(gs)->flags.isOverloaded
+                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.selfType,
+                                      args.block != nullptr)
+                      : mayBeOverloaded;
 
     auto methodData = method.data(gs);
     if (methodData->flags.isPrivate && !args.isPrivateOk) {
@@ -1308,8 +1313,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 } else {
                     for (const auto &kwParam : kwParams) {
-                        auto kwParamType =
-                            Types::resultTypeAsSeenFrom(gs, kwParam->type, methodData->owner, symbol, targs);
+                        auto kwParamType = Types::resultTypeAsSeenFrom(gs, kwParam->type, methodData->owner, symbol,
+                                                                       targs, args.selfType);
                         if (kwParamType == nullptr) {
                             kwParamType = Types::untyped(method);
                         }
@@ -1469,7 +1474,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
             }
-            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs)) {
+            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs, args.selfType)) {
                 result.main.errors.emplace_back(std::move(e));
             }
             for (auto &keyType : hash->keys) {
@@ -1508,7 +1513,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
                 missingKwargs.emplace_back(&param);
             }
-            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs)) {
+            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs, args.selfType)) {
                 result.main.errors.emplace_back(std::move(e));
             }
         }
@@ -1620,7 +1625,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs);
+        TypePtr blockType =
+            Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs, args.selfType);
         handleBlockType(gs, component, blockType);
         component.rebind = blockParam.rebind;
         component.rebindLoc = blockParam.loc;
@@ -1647,7 +1653,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         } else if (args.args.size() == 2 && methodData->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType = Types::resultTypeAsSeenFrom(gs, methodData->resultType, methodData->owner, symbol, targs);
+            resultType = Types::resultTypeAsSeenFrom(gs, methodData->resultType, methodData->owner, symbol, targs,
+                                                     args.selfType);
         }
     }
     if (args.block == nullptr) {
@@ -1681,7 +1688,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiateTypeVars(gs, resultType, *constr);
     }
-    resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
     if (args.block != nullptr) {
         component.returnTypeBeforeSolve = resultType;
@@ -1692,7 +1698,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 // Get a tuple type representing the type of the method's parameters
 // This is an approximation at best.
 TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass, NameRef name,
-                                   const vector<TypePtr> &targs) {
+                                   const vector<TypePtr> &targs, TypePtr selfType) {
     MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {
@@ -1706,7 +1712,7 @@ TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass
         if (param.flags.isRepeated) {
             ENFORCE(params.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     method.toString(gs));
-            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
+            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs, selfType));
         }
         ENFORCE(!param.flags.isKeyword, "getCallArguments does not support kwargs: {}", method.toString(gs));
         if (param.flags.isBlock) {
@@ -1716,7 +1722,7 @@ TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass
             params.emplace_back(core::Types::untyped(method));
             continue;
         }
-        params.emplace_back(Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
+        params.emplace_back(Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs, selfType));
     }
     return make_type<TupleType>(move(params));
 }
@@ -1737,7 +1743,12 @@ TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
     if (symbol == core::Symbols::untyped()) {
         return Types::untyped(Symbols::noSymbol());
     }
-    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{});
+    // TODO(jez) Avoid allocating a new type.
+    // We need a TypePtr, but we don't have one because we dispatched on the ClassType directly.
+    // TODO(jez) It's even worse: reallocating the type is wrong if we use getCallArguments on a union type, etc.
+    // We need to mimic the DispatchArgs withSelfAndThisRef to get a correct args.selfType here
+    auto symbol = this->symbol;
+    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{}, make_type<ClassType>(symbol));
 }
 
 TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
@@ -1746,7 +1757,11 @@ TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) con
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    return getMethodParametersAsTuple(gs, klass, name, targs);
+    // TODO(jez) Avoid allocating a new type.
+    // We need a TypePtr, but we don't have one because we dispatched on the ClassType directly.
+    // TODO(jez) It's even worse: reallocating the type is wrong if we use getCallArguments on a union type, etc.
+    // We need to mimic the DispatchArgs withSelfAndThisRef to get a correct args.selfType here
+    return getMethodParametersAsTuple(gs, klass, name, targs, make_type<AppliedType>(this->klass, targs));
 }
 
 namespace {
@@ -2020,6 +2035,7 @@ public:
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // TODO(jez) Make this work
         res.returnType = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_self_type;
@@ -2223,28 +2239,51 @@ public:
     }
 } DeclBuilderForProcs_bind;
 
-class Object_class : public IntrinsicMethod {
+class Kernel_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
-        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
+        auto self = unwrapSymbol(gs, args.thisType, mustExist);
+        auto selfData = self.data(gs);
         auto tClassSelfType = Types::tClass(Types::widen(gs, args.selfType));
-        if (self.data(gs)->isModule()) {
-            ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled,
-                    "Congrats, you've found a test case. Please add it, then delete this.");
-            // This normally can't happen, because `Object` is not an ancestor of any module
-            // instance by default. But Sorbet supports requires ancestor in a really weird way (by
-            // simply dispatching to a completely unrelated method) which means that sometimes we
-            // can actually get a call to this on a module.
-            //
+        if (selfData->isModule()) {
             // In the case where the receiver is a module, `singleton` will be `T.class_of(MyModule)`
             // which will not actually reflect how `.class` in a module instance method works at runtime.
             // (see https://sorbet.org/docs/class-of#tclass_of-and-modules)
+
             res.returnType = tClassSelfType;
+
+            auto selfClassMethods = selfData->findMethod(gs, core::Names::mixedInClassMethods());
+            if (!selfClassMethods.exists()) {
+                return;
+            }
+
+            auto &mixedInClassMethods = core::cast_type_nonnull<core::TupleType>(selfClassMethods.data(gs)->resultType);
+            for (auto &cmType : mixedInClassMethods.elems) {
+                auto classType = core::cast_type_nonnull<core::ClassType>(cmType);
+                auto cmMod = classType.symbol;
+                if (!cmMod.data(gs)->findMember(gs, core::Names::Constants::AttachedClass()).exists()) {
+                    // If the mixed in module is marked `has_attached_class!`, then we know it can't
+                    // have been mixed into another module--it can only have been mixed into a class.
+                    // This lets us know that having an instance of the module guarantees that its
+                    // `.class` is also an instance of the mixed in module.
+                    //
+                    // If it wasn't, then we have to skip adding this class methods to the return
+                    // type, because we don't know that. It would be nice to change mixed_in_class_methods
+                    // or build some other feature so that worked more recursively.
+                    //
+                    // TODO(jez) Write a test for this
+                    continue;
+                }
+
+                // TODO(jez) External type handles generics--write a test for this
+                res.returnType = Types::all(gs, res.returnType, cmMod.data(gs)->externalType());
+            }
+
             return;
         }
 
-        auto singleton = self.data(gs)->lookupSingletonClass(gs);
+        auto singleton = selfData->lookupSingletonClass(gs);
         if (!singleton.exists()) {
             res.returnType = tClassSelfType;
             return;
@@ -2262,7 +2301,7 @@ public:
         // (This matters, btw, in case the receiver is something like a generic.)
         res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
     }
-} Object_class;
+} Kernel_class;
 
 class Class_new : public IntrinsicMethod {
 public:
@@ -3068,7 +3107,12 @@ public:
 
         auto selfTy = *args.args[0];
         auto mustExist = true;
-        auto self = unwrapSymbol(gs, selfTy.type, mustExist);
+        // TODO(jez) Pick a better name for these local vars once you figure out what you want to call NewSelfType
+        auto selfTyType = selfTy.type;
+        if (auto selfType = cast_type<NewSelfType>(selfTyType)) {
+            selfTyType = selfType->upperBound;
+        }
+        auto self = unwrapSymbol(gs, selfTyType, mustExist);
         auto selfData = self.data(gs);
 
         auto attachedClass = selfData->findMember(gs, core::Names::Constants::AttachedClass());
@@ -4637,8 +4681,9 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
-    {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::class_(), &Kernel_class},
+    // TODO(jez) Should we also migrate Object#singleton_class ?
+    {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Kernel_class},
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},

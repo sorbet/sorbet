@@ -17,8 +17,8 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, ClassType)             \
         CASE_STATEMENT(CASE_BODY, LambdaParam)           \
         CASE_STATEMENT(CASE_BODY, SelfTypeParam)         \
+        CASE_STATEMENT(CASE_BODY, NewSelfType)           \
         CASE_STATEMENT(CASE_BODY, AliasType)             \
-        CASE_STATEMENT(CASE_BODY, SelfType)              \
         CASE_STATEMENT(CASE_BODY, NamedLiteralType)      \
         CASE_STATEMENT(CASE_BODY, IntegerLiteralType)    \
         CASE_STATEMENT(CASE_BODY, FloatLiteralType)      \
@@ -47,8 +47,6 @@ GENERATE_CALL_MEMBER(dispatchCall,
 
 GENERATE_CALL_MEMBER(_instantiateTypeVars, return nullptr, std::declval<const GlobalState &>(),
                      std::declval<const TypeConstraint &>())
-
-GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState &>(), declval<const TypePtr &>())
 
 GENERATE_CALL_MEMBER(_approximateTypeVars, return nullptr, declval<const GlobalState &>(),
                      declval<const TypeConstraint &>(), declval<core::Polarity>())
@@ -112,6 +110,7 @@ int TypePtr::kind() const {
             return 7;
         case Tag::LambdaParam:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
             return 8;
         case Tag::MetaType:
             return 9;
@@ -123,8 +122,6 @@ int TypePtr::kind() const {
             return 12;
         case Tag::AndType:
             return 13;
-        case Tag::SelfType:
-            return 14;
     }
 }
 
@@ -150,13 +147,13 @@ bool TypePtr::isFullyDefined() const {
         case Tag::FloatLiteralType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::MetaType: // MetaType: this is kinda true but kinda false. it's false for subtyping but true for
                             // inferencer.
             return true;
 
         case Tag::TypeVar:
         case Tag::LambdaParam:
-        case Tag::SelfType:
             return false;
 
         // Composite types
@@ -189,9 +186,9 @@ bool TypePtr::hasUntyped() const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
             // These cannot have untyped.
@@ -233,9 +230,9 @@ bool TypePtr::hasTopLevelVoid() const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
         case Tag::BlamedUntyped:
@@ -313,8 +310,8 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
             auto &app = cast_type_nonnull<AppliedType>(*this);
             return app.getCallArguments(gs, name);
         }
-        case Tag::SelfType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::TypeVar:
         case Tag::AliasType: {
@@ -330,13 +327,6 @@ TypePtr TypePtr::_approximateTypeVars(const GlobalState &gs, const TypeConstrain
 #undef _APPROXIMATE
 }
 
-TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-#define _REPLACE_SELF_TYPE(T) \
-    return CALL_MEMBER__replaceSelfType<const T>::call(cast_type_nonnull<T>(*this), gs, receiver);
-    GENERATE_TAG_SWITCH(tag(), _REPLACE_SELF_TYPE)
-#undef _REPLACE_SELF_TYPE
-}
-
 TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
 #define _INSTANTIATE(T) return CALL_MEMBER__instantiateTypeVars<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
     GENERATE_TAG_SWITCH(tag(), _INSTANTIATE)
@@ -345,7 +335,7 @@ TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
 
 // Returns nullptr to indicate no change.
 TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                          const vector<TypePtr> &targs) const {
+                                          const vector<TypePtr> &targs, TypePtr selfType) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
@@ -356,24 +346,24 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<cons
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
-        case Tag::SelfType:
+        case Tag::NewSelfType:
             // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
             // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
             // have to allocate another type.
             return nullptr;
 
         case Tag::TupleType:
-            return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::ShapeType:
-            return cast_type_nonnull<ShapeType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<ShapeType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::OrType:
-            return cast_type_nonnull<OrType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<OrType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::AndType:
-            return cast_type_nonnull<AndType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<AndType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::AppliedType:
-            return cast_type_nonnull<AppliedType>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<AppliedType>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
         case Tag::LambdaParam:
-            return cast_type_nonnull<LambdaParam>(*this)._instantiateLambdaParams(gs, params, targs);
+            return cast_type_nonnull<LambdaParam>(*this)._instantiateLambdaParams(gs, params, targs, selfType);
 
         case Tag::MetaType:
         case Tag::AliasType:
