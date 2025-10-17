@@ -57,31 +57,6 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
-pm_node_t *runRBSRewritePrism(sorbet::core::GlobalState &gs, sorbet::core::FileRef file, pm_node_t *node,
-                              const std::vector<sorbet::core::LocOffsets> &commentLocations,
-                              const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx,
-                              const parser::Prism::Parser &parser) {
-    Timer timeit(gs.tracer(), "runRBSRewritePrism", {{"file", string(file.data(gs).path())}});
-
-    // fmt::print("TRIGGERING COMMENTS ASSOCIATOR PRISM\n");
-    auto associator = rbs::CommentsAssociatorPrism(ctx, const_cast<std::vector<core::LocOffsets> &>(commentLocations));
-    auto commentMap = associator.run(node);
-
-    // fmt::print("TRIGGERING SIGS REWRITER PRISM\n");
-    auto sigsRewriter = rbs::SigsRewriterPrism(ctx, parser, commentMap.signaturesForNode);
-    node = sigsRewriter.run(node);
-
-    // auto assertionsRewriter = rbs::AssertionsRewriterPrism(ctx, commentMap.assertionsForNode);
-    // node = assertionsRewriter.run(node);
-
-    if (print.RBSRewriteTree.enabled) {
-        // TODO: Implement prism node to string conversion for debug output
-        // print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
-    }
-
-    return node;
-}
-
 void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) {
     gs.pathPrefix = opts.pathPrefix;
     gs.errorUrlBase = opts.errorUrlBase;
@@ -252,6 +227,57 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
     return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
 }
 
+unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::ParseResult &&parseResult,
+                                       const options::Printers &print) {
+    auto node = move(parseResult.tree);
+    auto commentLocations = move(parseResult.commentLocations);
+
+    fmt::print("NOOOOO RUNNING RBS REWRITE WITHOUT PRISM\n");
+    Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
+    core::MutableContext ctx(gs, core::Symbols::root(), file);
+    core::UnfreezeNameTable nameTableAccess(gs);
+
+    auto associator = rbs::CommentsAssociator(ctx, commentLocations);
+    auto commentMap = associator.run(node);
+
+    auto sigsRewriter = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
+    node = sigsRewriter.run(move(node));
+
+    auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
+    node = assertionsRewriter.run(move(node));
+
+    if (print.RBSRewriteTree.enabled) {
+        print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
+    }
+
+    return node;
+}
+
+pm_node_t *runPrismRBSRewrite(sorbet::core::GlobalState &gs, sorbet::core::FileRef file, pm_node_t *node,
+                              const std::vector<sorbet::core::LocOffsets> &commentLocations,
+                              const sorbet::realmain::options::Printers &print, sorbet::core::MutableContext &ctx,
+                              const parser::Prism::Parser &parser) {
+    Timer timeit(gs.tracer(), "runPrismRBSRewrite", {{"file", string(file.data(gs).path())}});
+
+    // fmt::print("TRIGGERING COMMENTS ASSOCIATOR PRISM\n");
+    auto associator = rbs::CommentsAssociatorPrism(ctx, const_cast<std::vector<core::LocOffsets> &>(commentLocations));
+    auto commentMap = associator.run(node);
+
+    // fmt::print("TRIGGERING SIGS REWRITER PRISM\n");
+    auto sigsRewriter = rbs::SigsRewriterPrism(ctx, parser, commentMap.signaturesForNode);
+    node = sigsRewriter.run(node);
+
+    // auto assertionsRewriter = rbs::AssertionsRewriterPrism(ctx, commentMap.assertionsForNode);
+    // node = assertionsRewriter.run(node);
+
+    if (print.RBSRewriteTree.enabled) {
+        // TODO: Implement prism node to string conversion for debug output
+        // print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
+    }
+
+    return node;
+}
+
 parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
                               bool traceLexer, bool traceParser) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
@@ -279,32 +305,6 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
     return result;
 }
 
-unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::ParseResult &&parseResult,
-                                       const options::Printers &print) {
-    auto node = move(parseResult.tree);
-    auto commentLocations = move(parseResult.commentLocations);
-
-    fmt::print("NOOOOO RUNNING RBS REWRITE WITHOUT PRISM\n");
-    Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
-    core::MutableContext ctx(gs, core::Symbols::root(), file);
-    core::UnfreezeNameTable nameTableAccess(gs);
-
-    auto associator = rbs::CommentsAssociator(ctx, commentLocations);
-    auto commentMap = associator.run(node);
-
-    auto sigsRewriter = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-    node = sigsRewriter.run(move(node));
-
-    auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-    node = assertionsRewriter.run(move(node));
-
-    if (print.RBSRewriteTree.enabled) {
-        print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
-    }
-
-    return node;
-}
-
 parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
                                    bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
@@ -321,7 +321,7 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
 
         auto node = parseResult.getRawNodePointer();
         if (gs.cacheSensitiveOptions.rbsEnabled) {
-            node = runRBSRewritePrism(gs, file, node, parseResult.getCommentLocations(), print, ctx, parser);
+            node = runPrismRBSRewrite(gs, file, node, parseResult.getCommentLocations(), print, ctx, parser);
         }
 
         auto translatedTree =
