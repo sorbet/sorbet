@@ -27,17 +27,6 @@ ParseResult Parser::parseOnly(core::MutableContext &ctx) {
     return parser.parse(collectComments);
 }
 
-parser::ParseResult Parser::translateOnly(core::MutableContext &ctx, const Parser &parser, pm_node_t *node,
-                                          const std::vector<ParseError> &parseErrors,
-                                          const std::vector<core::LocOffsets> &commentLocations,
-                                          bool preserveConcreteSyntax) {
-    absl::Span<const ParseError> errorSpan(parseErrors);
-    auto translatedTree = Prism::Translator(parser, ctx, errorSpan, false, false).translate(node); // TODO: false, false
-
-    vector<core::LocOffsets> commentLocationsCopy = commentLocations;
-    return parser::ParseResult{std::move(translatedTree), std::move(commentLocationsCopy)};
-}
-
 pm_parser_t *Parser::getRawParserPointer() {
     return &parser;
 }

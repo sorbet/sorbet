@@ -252,10 +252,11 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                         pm_node_t *rewrittenNode = realmain::pipeline::runRBSRewritePrism(
                             gs, file, prismParseResult.getRawNodePointer(), prismParseResult.getCommentLocations(),
                             print, ctx, prismParser);
-                        parseResult = parser::Prism::Parser::translateOnly(
-                            ctx, prismParser, rewrittenNode, prismParseResult.getParseErrors(),
-                            prismParseResult.getCommentLocations(),
-                            false); // TODO: preserveConcreteSyntax set to false
+
+                        auto translatedTree =
+                            parser::Prism::Translator(prismParser, ctx, prismParseResult.getParseErrors(), false, false)
+                                .translate(rewrittenNode);
+                        parseResult = parser::ParseResult{move(translatedTree), prismParseResult.getCommentLocations()};
                         directlyDesugaredTree = nullptr;
                     } else {
                         parseResult = parser::Prism::Parser::run(ctx, false);
@@ -754,9 +755,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     pm_node_t *rewrittenNode = realmain::pipeline::runRBSRewritePrism(
                         *gs, f.file, prismParseResult.getRawNodePointer(), prismParseResult.getCommentLocations(),
                         print, ctx, prismParser);
-                    parseResult = parser::Prism::Parser::translateOnly(
-                        ctx, prismParser, rewrittenNode, prismParseResult.getParseErrors(),
-                        prismParseResult.getCommentLocations(), false); // TODO: preserveConcreteSyntax set to false
+
+                    auto translatedTree =
+                        parser::Prism::Translator(prismParser, ctx, prismParseResult.getParseErrors(), false, false)
+                            .translate(rewrittenNode);
+                    parseResult = parser::ParseResult{move(translatedTree), prismParseResult.getCommentLocations()};
                 } else {
                     parseResult = parser::Prism::Parser::run(ctx, false);
                 }
