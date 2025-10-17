@@ -91,6 +91,32 @@ public:
     }
 };
 
+// Transforms is_expected calls to expect(subject.attribute) for RSpec's `its` DSL
+class IsExpectedTransformer {
+private:
+    core::NameRef attributeName;
+
+public:
+    IsExpectedTransformer(core::NameRef attributeName) : attributeName(attributeName) {}
+
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+
+        // Look for is_expected calls
+        if (send.fun == core::Names::isExpected() && send.recv.isSelfReference()) {
+            // Replace is_expected with expect(subject.attribute)
+            auto subjectCall = ast::MK::Send0(send.loc, ast::MK::Self(send.loc), core::Names::subject(),
+                                              send.loc.copyWithZeroLength());
+            auto attributeCall =
+                ast::MK::Send0(send.loc, std::move(subjectCall), attributeName, send.loc.copyWithZeroLength());
+            return ast::MK::Send1(send.loc, ast::MK::Self(send.loc), core::Names::expect(),
+                                  send.loc.copyWithZeroLength(), std::move(attributeCall));
+        }
+
+        return tree;
+    }
+};
+
 ast::ExpressionPtr addSigVoid(core::Context ctx, ast::ExpressionPtr expr) {
     if (ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict) {
         // Only add a dummy sig if it would be required (because the file is `# typed: strict`).
@@ -224,6 +250,7 @@ bool requiresSecondFactor(core::NameRef fun) {
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId():
+        case core::Names::its().rawId():
         // ExampleGroup names
         case core::Names::context().rawId():
         case core::Names::exampleGroup().rawId():
@@ -651,6 +678,61 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                 method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
             }
             return constantMover.addConstantsToExpression(send->loc, move(method));
+        }
+
+        case core::Names::its().rawId(): {
+            if (block == nullptr || !send->recv.isSelfReference() || !insideDescribe) {
+                return nullptr;
+            }
+
+            if (send->numPosArgs() != 1) {
+                return nullptr;
+            }
+
+            auto &arg = send->getPosArg(0);
+
+            // Handle both symbol and string arguments: its(:attribute) or its("attribute")
+            // Note: We don't currently support chained method calls like its("size.zero?")
+            auto argLit = ast::cast_tree<ast::Literal>(arg);
+            if (argLit == nullptr || !argLit->isName()) {
+                return nullptr;
+            }
+
+            auto attributeName = argLit->asName();
+            auto argString = attributeName.show(ctx);
+
+            // Create the describe block name
+            auto describeTestName = fmt::format("<describe '{}'>", argString);
+            auto describeName =
+                ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(describeTestName)});
+
+            // Transform the its block body to replace is_expected with expect(subject.attribute)
+            IsExpectedTransformer transformer(attributeName);
+            ast::ExpressionPtr itBody = ast::TreeMap::apply(ctx, transformer, move(block->body));
+
+            // Create it block
+            auto itName = core::Names::itAngles();
+            auto itDeclLoc = send->loc.copyWithZeroLength();
+
+            ConstantMover constantMover;
+            ast::TreeWalk::apply(ctx, constantMover, itBody);
+
+            auto itMethod = ast::MK::SyntheticMethod0(send->loc, itDeclLoc, itName,
+                                                      prepareBody(ctx, /* isClass */ true, std::move(itBody),
+                                                                  /* insideDescribe */ true));
+            ast::cast_tree_nonnull<ast::MethodDef>(itMethod).flags.discardDef = true;
+            itMethod = addSigVoid(ctx, move(itMethod));
+            itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
+
+            ast::ClassDef::RHS_store describeBody;
+            describeBody.emplace_back(std::move(itMethod));
+
+            ast::ClassDef::ANCESTORS_store ancestors;
+            ancestors.emplace_back(ast::MK::Self(arg.loc()));
+
+            auto describeDeclLoc = declLocForSendWithBlock(*send);
+            return ast::MK::Class(send->loc, describeDeclLoc, std::move(describeName), std::move(ancestors),
+                                  std::move(describeBody));
         }
 
         case core::Names::let().rawId():

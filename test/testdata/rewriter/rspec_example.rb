@@ -7,6 +7,15 @@ module RSpec
     class ExampleGroup
       def described_class
       end
+
+      def is_expected
+      end
+
+      def expect(arg)
+      end
+
+      def eq(arg)
+      end
     end
   end
 end
@@ -15,6 +24,12 @@ class A
   def self.test_each(arg, &blk) = arg.each(&blk)
 
   def outer_helper; end
+
+  def is_expected; end
+
+  def expect(arg); end
+
+  def eq(arg); end
 
   describe "inside describe" do
     def my_helper; end
@@ -92,6 +107,63 @@ class A
   xdescribe "xdescribe group" do
     it do
       outer_helper
+    end
+  end
+
+  describe "its support" do
+    let(:foo) { "bar" }
+
+    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
+
+    # String arguments should work the same as symbols for simple attributes
+    its('bar') { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
+
+    # Constants should be moved out of its blocks
+    its(:size) do
+      X = 1
+      is_expected.to eq(X) # error: Method `subject` does not exist
+    end
+
+    # The correct desugaring is:
+    #   its(:size) { is_expected.to eq(1) }
+    # should generate:
+    #   describe "size" do
+    #     it "is_expected.to eq(1)" do
+    #       expect(subject.size).to eq(1)
+    #     end
+    #   end
+    its(:size) do
+      T.reveal_type(self) # error: Revealed type: `A::<describe 'its support'>::<describe 'size'>`
+    end
+  end
+
+  describe "its with typed subject" do
+    class ThingWithSize
+      extend T::Sig
+
+      sig {returns(Integer)}
+      def size
+        42
+      end
+    end
+
+    # Define subject using let with a signature
+    extend T::Sig
+    sig {returns(ThingWithSize)}
+    let(:subject) { ThingWithSize.new }
+
+    # The rewriter transforms `its(:size) { is_expected.to eq(42) }`
+    # into `describe "size" do; it { expect(subject.size).to eq(42) }; end`
+    # This allows proper type inference since subject is called directly
+    its(:size) do
+      # subject should be ThingWithSize (from the parent describe)
+      T.reveal_type(subject) # error: Revealed type: `A::<describe 'its with typed subject'>::ThingWithSize`
+      is_expected.to eq(42)
+    end
+
+    # This should error because no_such_method doesn't exist on ThingWithSize
+    its(:no_such_method) do
+      is_expected.to eq(0) # error: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize`
     end
   end
 end
