@@ -104,6 +104,38 @@ optional<vector<TypePtr>> instantiateLambdaParamsInElems(const vector<TypePtr> &
     return newElems;
 }
 
+optional<vector<TypePtr>> instantiateLambdaParamsInElemsLazySelf(const vector<TypePtr> &elems, const GlobalState &gs,
+                                                                 optional<TypePtr::InstantiationContext> &ictx,
+                                                                 ClassOrModuleRef originalOwner,
+                                                                 ClassOrModuleRef self) {
+    optional<vector<TypePtr>> newElems;
+    int i = -1;
+    for (auto &e : elems) {
+        ++i;
+        auto t = e._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+        if (!newElems.has_value() && !t) {
+            continue;
+        }
+
+        if (!newElems.has_value()) {
+            // Oops, need to fixup all the elements that should be there.
+            newElems.emplace();
+            newElems->reserve(elems.size());
+            for (int j = 0; j < i; ++j) {
+                newElems->emplace_back(elems[j]);
+            }
+        }
+
+        if (!t) {
+            t = e;
+        }
+
+        ENFORCE(newElems->size() == i);
+        newElems->emplace_back(move(t));
+    }
+    return newElems;
+}
+
 optional<vector<TypePtr>> instantiateTypeVarsInElems(const vector<TypePtr> &elems, const GlobalState &gs,
                                                      const TypeConstraint &tc) {
     optional<vector<TypePtr>> newElems;
@@ -178,6 +210,17 @@ TypePtr TupleType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<co
     return make_type<TupleType>(move(*newElems));
 }
 
+TypePtr TupleType::_instantiateLambdaParamsLazySelf(const GlobalState &gs,
+                                                    optional<TypePtr::InstantiationContext> &ictx,
+                                                    ClassOrModuleRef originalOwner, ClassOrModuleRef self) const {
+    optional<vector<TypePtr>> newElems =
+        instantiateLambdaParamsInElemsLazySelf(this->elems, gs, ictx, originalOwner, self);
+    if (!newElems) {
+        return nullptr;
+    }
+    return make_type<TupleType>(move(*newElems));
+}
+
 TypePtr TupleType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
     optional<vector<TypePtr>> newElems = instantiateTypeVarsInElems(this->elems, gs, tc);
     if (!newElems) {
@@ -199,6 +242,17 @@ TypePtr TupleType::_approximateTypeVars(const GlobalState &gs, const TypeConstra
 TypePtr ShapeType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                             const vector<TypePtr> &targs) const {
     optional<vector<TypePtr>> newValues = instantiateLambdaParamsInElems(this->values, gs, params, targs);
+    if (!newValues) {
+        return nullptr;
+    }
+    return make_type<ShapeType>(this->keys, move(*newValues));
+}
+
+TypePtr ShapeType::_instantiateLambdaParamsLazySelf(const GlobalState &gs,
+                                                    optional<TypePtr::InstantiationContext> &ictx,
+                                                    ClassOrModuleRef originalOwner, ClassOrModuleRef self) const {
+    optional<vector<TypePtr>> newValues =
+        instantiateLambdaParamsInElemsLazySelf(this->values, gs, ictx, originalOwner, self);
     if (!newValues) {
         return nullptr;
     }
@@ -227,6 +281,22 @@ TypePtr OrType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const
                                          const vector<TypePtr> &targs) const {
     auto left = this->left._instantiateLambdaParams(gs, params, targs);
     auto right = this->right._instantiateLambdaParams(gs, params, targs);
+    if (left || right) {
+        if (!left) {
+            left = this->left;
+        }
+        if (!right) {
+            right = this->right;
+        }
+        return Types::any(gs, left, right);
+    }
+    return nullptr;
+}
+
+TypePtr OrType::_instantiateLambdaParamsLazySelf(const GlobalState &gs, optional<TypePtr::InstantiationContext> &ictx,
+                                                 ClassOrModuleRef originalOwner, ClassOrModuleRef self) const {
+    auto left = this->left._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+    auto right = this->right._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -285,6 +355,22 @@ TypePtr AndType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<cons
     return nullptr;
 }
 
+TypePtr AndType::_instantiateLambdaParamsLazySelf(const GlobalState &gs, optional<TypePtr::InstantiationContext> &ictx,
+                                                  ClassOrModuleRef originalOwner, ClassOrModuleRef self) const {
+    auto left = this->left._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+    auto right = this->right._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+    if (left || right) {
+        if (!left) {
+            left = this->left;
+        }
+        if (!right) {
+            right = this->right;
+        }
+        return Types::all(gs, left, right);
+    }
+    return nullptr;
+}
+
 TypePtr AndType::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
     auto left = this->left._instantiateTypeVars(gs, tc);
     auto right = this->right._instantiateTypeVars(gs, tc);
@@ -318,6 +404,17 @@ TypePtr AndType::_approximateTypeVars(const GlobalState &gs, const TypeConstrain
 TypePtr AppliedType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                               const vector<TypePtr> &targs) const {
     optional<vector<TypePtr>> newTargs = instantiateLambdaParamsInElems(this->targs, gs, params, targs);
+    if (!newTargs) {
+        return nullptr;
+    }
+    return make_type<AppliedType>(this->klass, move(*newTargs));
+}
+
+TypePtr AppliedType::_instantiateLambdaParamsLazySelf(const GlobalState &gs,
+                                                      optional<TypePtr::InstantiationContext> &ictx,
+                                                      ClassOrModuleRef originalOwner, ClassOrModuleRef self) const {
+    optional<vector<TypePtr>> newTargs =
+        instantiateLambdaParamsInElemsLazySelf(this->targs, gs, ictx, originalOwner, self);
     if (!newTargs) {
         return nullptr;
     }
@@ -360,6 +457,24 @@ TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, absl::Span<
     for (auto &el : params) {
         if (el == this->definition) {
             return targs[&el - &params.front()];
+        }
+    }
+    return nullptr;
+}
+
+TypePtr LambdaParam::_instantiateLambdaParamsLazySelf(const GlobalState &gs,
+                                                      optional<TypePtr::InstantiationContext> &ictx,
+                                                      ClassOrModuleRef originalOwner, ClassOrModuleRef self) const {
+    if (!ictx.has_value()) {
+        auto targs = self.data(gs)->selfTypeArgs(gs);
+        auto currentAlignment = Types::alignBaseTypeArgs(gs, originalOwner, targs, self);
+        ENFORCE(currentAlignment.size() == targs.size());
+        ictx.emplace(currentAlignment, targs);
+    }
+
+    for (auto &el : ictx->currentAlignment) {
+        if (el == this->definition) {
+            return ictx->targs[&el - &ictx->currentAlignment.front()];
         }
     }
     return nullptr;

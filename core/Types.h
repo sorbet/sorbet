@@ -3,7 +3,6 @@
 
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
-#include "common/counters/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/ParsedParam.h"
@@ -146,8 +145,13 @@ public:
     static bool canBeTruthy(const GlobalState &gs, const TypePtr &what);
     static bool canBeFalsy(const GlobalState &gs, const TypePtr &what);
 
+    // TODO(jez) It would be nice to find a way to do this that would allow having only one
+    // function... maybe we can accomplish that with shared_ptr somehow?
     static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
                                         ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs);
+
+    static TypePtr resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
+                                            ClassOrModuleRef self);
 
     static InlinedVector<TypeMemberRef, 4> alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
                                                              const std::vector<TypePtr> &targs, ClassOrModuleRef asIf);
@@ -459,6 +463,8 @@ public:
 
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParamsLazySelf(const GlobalState &gs, std::optional<TypePtr::InstantiationContext> &ictx,
+                                             ClassOrModuleRef originalOwner, ClassOrModuleRef self) const;
 };
 CheckSize(LambdaParam, 24, 8);
 
@@ -776,6 +782,8 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParamsLazySelf(const GlobalState &gs, std::optional<TypePtr::InstantiationContext> &ictx,
+                                             ClassOrModuleRef originalOwner, ClassOrModuleRef self) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
@@ -836,6 +844,8 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParamsLazySelf(const GlobalState &gs, std::optional<TypePtr::InstantiationContext> &ictx,
+                                             ClassOrModuleRef originalOwner, ClassOrModuleRef self) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -883,6 +893,8 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParamsLazySelf(const GlobalState &gs, std::optional<TypePtr::InstantiationContext> &ictx,
+                                             ClassOrModuleRef originalOwner, ClassOrModuleRef self) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
@@ -916,6 +928,8 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParamsLazySelf(const GlobalState &gs, std::optional<TypePtr::InstantiationContext> &ictx,
+                                             ClassOrModuleRef originalOwner, ClassOrModuleRef self) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -945,6 +959,8 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
+    TypePtr _instantiateLambdaParamsLazySelf(const GlobalState &gs, std::optional<TypePtr::InstantiationContext> &ictx,
+                                             ClassOrModuleRef originalOwner, ClassOrModuleRef self) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 

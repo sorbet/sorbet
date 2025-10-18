@@ -381,6 +381,46 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<cons
     }
 }
 
+// Returns nullptr to indicate no change.
+TypePtr TypePtr::_instantiateLambdaParamsLazySelf(const GlobalState &gs, optional<InstantiationContext> &ictx,
+                                                  ClassOrModuleRef originalOwner, ClassOrModuleRef self) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+        case Tag::TypeVar:
+        case Tag::NamedLiteralType:
+        case Tag::IntegerLiteralType:
+        case Tag::FloatLiteralType:
+        case Tag::SelfTypeParam:
+        case Tag::SelfType:
+            // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
+            // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
+            // have to allocate another type.
+            return nullptr;
+
+        case Tag::TupleType:
+            return cast_type_nonnull<TupleType>(*this)._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+        case Tag::ShapeType:
+            return cast_type_nonnull<ShapeType>(*this)._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+        case Tag::OrType:
+            return cast_type_nonnull<OrType>(*this)._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+        case Tag::AndType:
+            return cast_type_nonnull<AndType>(*this)._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+        case Tag::AppliedType:
+            return cast_type_nonnull<AppliedType>(*this)._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner,
+                                                                                          self);
+        case Tag::LambdaParam:
+            return cast_type_nonnull<LambdaParam>(*this)._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner,
+                                                                                          self);
+
+        case Tag::MetaType:
+        case Tag::AliasType:
+            Exception::raise("should never happen: _instantiateLambdaParamsLazySelf on `{}`", typeName());
+    }
+}
+
 void TypePtr::_sanityCheck(const GlobalState &gs) const {
     // Not really a dynamic check, but this is a convenient place to put this to
     // ensure that all relevant types get checked.

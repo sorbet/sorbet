@@ -689,6 +689,32 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
     return what;
 }
 
+/**
+ * fromWhat - where the generic type was written
+ * self   - where the generic type is observed
+ */
+TypePtr Types::resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
+                                        ClassOrModuleRef self) {
+    auto originalOwner = fromWhat;
+
+    // TODO: the ENFORCE below should be above this conditional, but there is
+    // currently a problem with the handling of `module_function` that causes it
+    // to fail reliably. https://github.com/sorbet/sorbet/issues/904
+    if (originalOwner.data(gs)->typeMembers().empty() || (what == nullptr)) {
+        return what;
+    }
+
+    ENFORCE(self == fromWhat || self.data(gs)->derivesFrom(gs, fromWhat) || fromWhat.data(gs)->derivesFrom(gs, self),
+            "\n{}\nis unrelated to\n\n{}", fromWhat.toString(gs), self.toString(gs));
+
+    optional<TypePtr::InstantiationContext> ictx;
+    auto result = what._instantiateLambdaParamsLazySelf(gs, ictx, originalOwner, self);
+    if (result != nullptr) {
+        return result;
+    }
+    return what;
+}
+
 TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType) {
     if (!procType.derivesFrom(gs, Symbols::Proc())) {
         return Types::untypedUntracked();

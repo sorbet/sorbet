@@ -314,6 +314,17 @@ public:
     TypePtr _instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                      const std::vector<TypePtr> &targs) const;
 
+    struct InstantiationContext {
+        const InlinedVector<TypeMemberRef, 4> currentAlignment;
+        const std::vector<TypePtr> targs;
+        InstantiationContext(InlinedVector<TypeMemberRef, 4> currentAlignment, std::vector<TypePtr> targs)
+            : currentAlignment(move(currentAlignment)), targs(move(targs)) {}
+    };
+    // Version of _instantiateLambdaParams that computes the targs lazily by calling `selfTypeArgs`
+    // on self only if the type contains a LambdaParam
+    TypePtr _instantiateLambdaParamsLazySelf(const GlobalState &gs, std::optional<InstantiationContext> &ictx,
+                                             ClassOrModuleRef originalOwner, ClassOrModuleRef self) const;
+
     // If this TypePtr `is_proxy_type`, returns its underlying type.
     TypePtr underlying(const GlobalState &gs) const;
 

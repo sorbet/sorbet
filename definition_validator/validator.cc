@@ -87,6 +87,7 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
     // in the child class, so we always instantiate with the sub class types
     const auto &subSelfTypeArgs = subOwner.data(ctx)->selfTypeArgs(ctx);
 
+    // TODO(jez) Version of resultTypeAsSeenFrom that takes the InstantiationContext
     auto subType = core::Types::approximateTypeVars(ctx, sub, constr);
     subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs);
     auto superType = core::Types::approximateTypeVars(ctx, super, constr);
