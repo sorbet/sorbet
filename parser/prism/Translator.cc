@@ -2880,7 +2880,15 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto left = patternTranslate(alternationPatternNode->left);
             auto right = patternTranslate(alternationPatternNode->right);
 
-            return make_unique<parser::MatchAlt>(location, move(left), move(right));
+            if (!directlyDesugar || !hasExpr(left, right)) {
+                return make_unique<parser::MatchAlt>(location, move(left), move(right));
+            }
+
+            ast::Array::ENTRY_store entries;
+            entries.emplace_back(left->takeDesugaredExpr());
+            entries.emplace_back(right->takeDesugaredExpr());
+            auto expr = MK::Array(location, move(entries));
+            return make_node_with_expr<parser::MatchAlt>(move(expr), location, move(left), move(right));
         }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash pattern, e.g. the `k: v` in `h in { k: v }
             auto assocNode = down_cast<pm_assoc_node>(node);
