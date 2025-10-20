@@ -80,9 +80,20 @@ void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic,
         return;
     }
 
-    auto diagnosticMessage = (diagnostic.severity == DiagnosticSeverity::Information)
-                                 ? fmt::format("untyped: {}", diagnostic.message)
-                                 : fmt::format("error: {}", diagnostic.message);
+    std::string messageType;
+    if (diagnostic.severity == DiagnosticSeverity::Error) {
+        messageType = "error";
+    } else if (diagnostic.severity == DiagnosticSeverity::Warning) {
+        messageType = "warning";
+    } else if (diagnostic.severity == DiagnosticSeverity::Information) {
+        messageType = "untyped";
+    } else if (diagnostic.severity == DiagnosticSeverity::Hint) {
+        messageType = "hint";
+    } else {
+        messageType = "unknown";
+    }
+
+    std::string diagnosticMessage = fmt::format("{}: {}", messageType, diagnostic.message);
 
     ADD_FAIL_CHECK_AT(
         filename.c_str(), diagnostic.range->start->line + 1,
@@ -255,6 +266,7 @@ const UnorderedMap<
         {"untyped", UntypedAssertion::make},
         {"error", ErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
+        {"hint", HintAssertion::make},
         {"usage", UsageAssertion::make},
         {"import", ImportAssertion::make},
         {"importusage", ImportUsageAssertion::make},
@@ -267,6 +279,7 @@ const UnorderedMap<
         {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-deprecated", BooleanPropertyAssertion::make},
         {"enable-experimental-rbs-comments", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
@@ -494,6 +507,12 @@ shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr
                                        assertionType == "error-with-dupes");
 }
 
+shared_ptr<HintAssertion> HintAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                              string_view assertionContents, string_view assertionType) {
+    return make_shared<HintAssertion>(filename, range, assertionLine, assertionContents,
+                                      assertionType == "hint-with-dupes");
+}
+
 string ErrorAssertion::toString() const {
     return fmt::format("{}: {}", (matchesDuplicateErrors ? "error-with-dupes" : "error"), message);
 }
@@ -513,6 +532,33 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
         return false;
     }
     return true;
+}
+
+HintAssertion::HintAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message,
+                             bool matchesDuplicateHints)
+    : RangeAssertion(filename, range, assertionLine), message(message), matchesDuplicateErrors(matchesDuplicateHints) {}
+
+string HintAssertion::toString() const {
+    return fmt::format("{}: {}", (matchesDuplicateErrors ? "hint-with-dupes" : "hint"), message);
+}
+
+bool HintAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    // The hint message must contain `message`.
+    if (diagnostic.message.find(message) == string::npos) {
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected hint of form:\n{}\nFound hint:\n{}", errorPrefix,
+                                      prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *diagnostic.range,
+                                                              fmt::format("hint: {}", diagnostic.message))));
+        return false;
+    }
+    return true;
+}
+
+bool HintAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
+                             vector<shared_ptr<HintAssertion>> hintAssertions,
+                             map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics, string hintPrefix) {
+    return checkAllInner<HintAssertion>(files, hintAssertions, filenamesAndDiagnostics, hintPrefix);
 }
 
 UntypedAssertion::UntypedAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
@@ -565,11 +611,47 @@ RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &ass
     return rv;
 }
 
+vector<shared_ptr<ErrorAssertion>>
+RangeAssertion::allTypedAsErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    vector<shared_ptr<ErrorAssertion>> rv;
+    for (auto assertion : assertions) {
+        if (auto errorAssertion = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
+            rv.push_back(errorAssertion);
+            continue;
+        }
+
+        string message;
+        bool matchesDuplicateErrors = false;
+        if (auto hintAssertion = dynamic_pointer_cast<HintAssertion>(assertion)) {
+            message = hintAssertion->message;
+            matchesDuplicateErrors = hintAssertion->matchesDuplicateErrors;
+        } else {
+            continue;
+        }
+
+        auto rangeCopy = assertion->range->copy();
+        rv.push_back(make_shared<ErrorAssertion>(assertion->filename, rangeCopy, assertion->assertionLine, message,
+                                                 matchesDuplicateErrors));
+    }
+    return rv;
+}
+
 vector<shared_ptr<UntypedAssertion>>
 RangeAssertion::getUntypedAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<shared_ptr<UntypedAssertion>> rv;
     for (auto assertion : assertions) {
         if (auto assertionOfType = dynamic_pointer_cast<UntypedAssertion>(assertion)) {
+            rv.push_back(assertionOfType);
+        }
+    }
+    return rv;
+}
+
+vector<shared_ptr<HintAssertion>>
+RangeAssertion::getHintAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    vector<shared_ptr<HintAssertion>> rv;
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<HintAssertion>(assertion)) {
             rv.push_back(assertionOfType);
         }
     }
@@ -709,6 +791,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
 
     opts.outOfOrderReferenceChecksEnabled =
         BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
+
+    opts.enableDeprecated = BooleanPropertyAssertion::getValue("enable-deprecated", assertions).value_or(false);
 
     if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
         opts.suggestUnsafe = "T.unsafe";

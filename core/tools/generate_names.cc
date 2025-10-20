@@ -114,6 +114,7 @@ NameDef names[] = {
     {"abstract"},
     {"implementation"},
     {"override_", "override"},
+    {"deprecated"},
     {"overridable"},
     {"allowIncompatible", "allow_incompatible"},
     {"visibility"},
