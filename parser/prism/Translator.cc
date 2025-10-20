@@ -1916,8 +1916,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto receiver = translate(indexedTargetNode->receiver);
             auto arguments = translateArguments(indexedTargetNode->arguments, up_cast(indexedTargetNode->block));
 
-            return make_unique<parser::Send>(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
-                                             move(arguments));
+            if (!directlyDesugar || !hasExpr(receiver, arguments)) {
+                return make_unique<parser::Send>(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
+                                                 move(arguments));
+            }
+
+            // Build the arguments for the Send expression
+            ast::Send::ARGS_store argExprs;
+            argExprs.reserve(arguments.size());
+            for (auto &arg : arguments) {
+                argExprs.emplace_back(arg->takeDesugaredExpr());
+            }
+
+            auto expr = MK::Send(location, receiver->takeDesugaredExpr(), core::Names::squareBracketsEq(), lBracketLoc,
+                                 argExprs.size(), move(argExprs));
+            return make_node_with_expr<parser::Send>(move(expr), location, move(receiver),
+                                                     core::Names::squareBracketsEq(), lBracketLoc, move(arguments));
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
             return translateOpAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
