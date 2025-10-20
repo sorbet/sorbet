@@ -1315,7 +1315,21 @@ private:
                 e.setHeader("Redefinition of package `{}`", pkgName);
                 e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
             }
-        } else {
+        } else if (!prevPkg.exists()) {
+            // TODO(jez) The above condition is a poor-man's way of making this safe for the fast path
+            // Previously, we would not run the "definePackage" logic at all for `__package.rb` files.
+            // By making a new package, we blow away all the imports/exports/etc. that were defined
+            // on the old package, which we don't want to do.
+            //
+            // Eventually we want to make edits to `__package.rb` files take the fast path, which
+            // would mean needing to do something more sophisticated right here.
+            //
+            // The reason why this condition is bad right now is because it compares locs for
+            // equality directly. This works because we currently send all edits to `__package.rb`
+            // files onto the slow path, but in the future, "whitespace-only change that just moves
+            // locs" should neither report an error nor blow away already-resolved state (or at
+            // least: if it's going to blow it away, it should also do enough other work to
+            // recompute it).
             auto pkg = make_unique<core::packages::PackageInfo>(mangledName, ctx.file, package.loc, package.declLoc);
             populatePackagePathPrefixes(ctx, *pkg);
             ctx.state.packageDB().enterPackage(move(pkg));
