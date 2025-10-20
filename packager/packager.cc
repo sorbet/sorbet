@@ -66,8 +66,8 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
     return pkg.file.data(gs).isPackagedTest();
 }
 
-vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, MangledName pkg) {
-    auto klass = pkg.owner;
+vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, core::ClassOrModuleRef owner) {
+    auto klass = owner;
     vector<core::NameRef> fqn;
     while (klass != core::Symbols::PackageSpecRegistry()) {
         auto data = klass.data(gs);
@@ -948,7 +948,7 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
     info.packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = package.file.data(gs).path();
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-    auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_);
+    auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_.owner);
     const auto shortName = absl::StrJoin(fullName, "_", NameFormatter(gs));
     const auto slashDirName = absl::StrJoin(fullName, "/", NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
