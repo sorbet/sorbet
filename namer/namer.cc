@@ -4,7 +4,6 @@
 #include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/ParamParsing.h"
-#include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/Parallel.h"
@@ -16,7 +15,6 @@
 #include "core/FoundDefinitions.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
-#include "core/core.h"
 #include "core/errors/namer.h"
 #include "core/lsp/TypecheckEpochManager.h"
 
