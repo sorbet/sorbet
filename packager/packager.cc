@@ -947,7 +947,6 @@ void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package
                              extraPackageFilesDirectorySlashPrefixes.size() + 1;
     info.packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = package.file.data(gs).path();
-    ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
     auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_);
     const auto shortName = absl::StrJoin(fullName, "_", NameFormatter(gs));
