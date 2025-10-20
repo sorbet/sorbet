@@ -2940,7 +2940,15 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto pattern = patternTranslate(capturePatternNode->value);
             auto target = patternTranslate(up_cast(capturePatternNode->target));
 
-            return make_unique<parser::MatchAs>(location, move(pattern), move(target));
+            if (!directlyDesugar || !hasExpr(pattern, target)) {
+                return make_unique<parser::MatchAs>(location, move(pattern), move(target));
+            }
+
+            ast::Array::ENTRY_store entries;
+            entries.emplace_back(pattern->takeDesugaredExpr());
+            entries.emplace_back(target->takeDesugaredExpr());
+            auto expr = MK::Array(location, move(entries));
+            return make_node_with_expr<parser::MatchAs>(move(expr), location, move(pattern), move(target));
         }
         case PM_FIND_PATTERN_NODE: { // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
             auto findPatternNode = down_cast<pm_find_pattern_node>(node);
