@@ -905,9 +905,6 @@ unique_ptr<PackageInfo> definePackage(core::GlobalState &gs, ast::ParsedFile &pa
             continue;
         }
 
-        // Eagerly resolve the superclass, so that we can rely on the
-        packageSpecClass->symbol.data(gs)->setSuperClass(core::Symbols::PackageSpec());
-
         auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
         ENFORCE(nameTree != nullptr, "Invariant from rewriter");
 
