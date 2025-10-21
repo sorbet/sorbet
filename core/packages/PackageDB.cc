@@ -45,19 +45,19 @@ MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
-const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
-    if (this->packageForFile_.size() <= file.id()) {
-        return MangledName();
-    }
+void PackageDB::reservePackageNameForFiles(size_t numFiles) {
+    // Add one, because `idx == 0` will be the package for the File that doesn't exist.
+    // (We could alternatively have chosen to use `file.id() - 1` in `{get,set}PackageNameForFile`.)
+    this->packageForFile_.resize(max(this->packageForFile_.size(), numFiles + 1), MangledName());
+}
 
+const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
+    ENFORCE(file.id() < this->packageForFile_.size(), "Missing a call to reservePackageNameForFiles!");
     return this->packageForFile_[file.id()];
 }
 
 void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
-    if (this->packageForFile_.size() <= file.id()) {
-        this->packageForFile_.resize(file.id() + 1, MangledName());
-    }
-
+    ENFORCE(file.id() < this->packageForFile_.size(), "Missing a call to reservePackageNameForFiles!");
     this->packageForFile_[file.id()] = mangledName;
 }
 
