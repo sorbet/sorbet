@@ -604,6 +604,32 @@ module T::Private::Methods
       mod.method(name)
     end
   end
+
+  def self.unload_const(mod)
+    unload_const_sigs(mod)
+    unload_const_sigs(mod.singleton_class)
+    mod.constants(false).each do |const_name|
+      # The inner module could be already unloaded. By other
+      # parent module
+      next if mod.autoload?(const_name)
+      inner_const = mod.const_get(const_name)
+      next unless inner_const.is_a?(Module)
+      unload_const(inner_const)
+    end
+  end
+
+  private_class_method def self.unload_const_sigs(mod)
+    obj_id = mod.object_id.to_s
+    @installed_hooks.delete(mod)
+    class_methods = mod.methods(false) + mod.private_methods(false)
+    instance_methods = mod.instance_methods(false) + mod.private_instance_methods(false)
+    methods = class_methods + instance_methods
+    methods.each do |method|
+      method_key = "#{obj_id}##{method}"
+      @sig_wrappers.delete(method_key)
+      @signatures_by_method.delete(method_key)
+    end
+  end
 end
 
 # This has to be here, and can't be nested inside `T::Private::Methods`,
