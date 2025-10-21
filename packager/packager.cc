@@ -1112,8 +1112,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
     gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
 
-    setPackageNameOnFiles(gs, files);
-
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
@@ -1168,10 +1166,6 @@ void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> fil
 }
 
 } // namespace
-
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
-    setPackageNameOnFilesImpl(gs, files, [](auto &p) { return p.file; });
-}
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
     setPackageNameOnFilesImpl(gs, files, [](auto f) { return f; });
