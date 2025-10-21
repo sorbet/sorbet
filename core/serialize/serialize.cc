@@ -987,7 +987,7 @@ void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
     }
 
     p.putU4(gs.namesByHash.size());
-    for (const auto &s : gs.namesByHash) {
+    for (const auto &s : gs.namesByHash.buckets_) {
         p.putU4(s.hash);
         p.putU4(s.rawId);
     }
@@ -1029,7 +1029,7 @@ void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
         for (int i = 0; i < namesByHashSize; i++) {
             auto hash = p.getU4();
             auto value = p.getU4();
-            result.namesByHash.emplace_back(GlobalState::Bucket{hash, value});
+            result.namesByHash.buckets_.emplace_back(hash, value);
         }
     }
 }
