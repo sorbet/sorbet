@@ -1473,8 +1473,7 @@ string_view GlobalState::enterString(string_view nm) {
 
 NameRef GlobalState::lookupNameUTF8(string_view nm) const {
     auto hash = NameHash::hashMixUTF8(nm);
-    auto &bucket = this->namesByHash.lookupBucket(
-        hash, [&gs = *this, nm](auto name) { return name.kind() == NameKind::UTF8 && name.dataUtf8(gs)->utf8 == nm; });
+    auto &bucket = this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUtf8(*this, nm));
 
     if (!bucket.present()) {
         return NameRef::noName();
@@ -1485,8 +1484,7 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
     auto hash = NameHash::hashMixUTF8(nm);
-    auto *bucket = &this->namesByHash.lookupBucket(
-        hash, [&gs = *this, nm](auto name) { return name.kind() == NameKind::UTF8 && name.dataUtf8(gs)->utf8 == nm; });
+    auto *bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUtf8(*this, nm));
     if (bucket->present()) {
         return NameRef::fromRaw(*this, bucket->rawId);
     }
@@ -1495,8 +1493,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 
     if (utf8Names.size() == utf8Names.capacity()) {
         expandNames(utf8Names.capacity() * 2, constantNames.capacity(), uniqueNames.capacity());
-        // Find the next empty entry by rejecting all populated buckets.
-        bucket = &this->namesByHash.lookupBucket(hash, [](auto name) { return false; });
+        bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
     }
 
     auto name = NameRef(*this, NameKind::UTF8, utf8Names.size());
@@ -1516,9 +1513,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE_NO_TIMER(original.isValidConstantName(*this), "making a constant name over wrong name kind");
 
     const auto hash = NameHash::hashMixConstant(original.rawId());
-    auto *bucket = &this->namesByHash.lookupBucket(hash, [&gs = *this, original](auto name) {
-        return name.kind() == NameKind::CONSTANT && name.dataCnst(gs)->original == original;
-    });
+    auto *bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isConstant(*this, original));
     if (bucket->present()) {
         return NameRef::fromRaw(*this, bucket->rawId);
     }
@@ -1527,7 +1522,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     if (constantNames.size() == constantNames.capacity()) {
         expandNames(utf8Names.capacity(), constantNames.capacity() * 2, uniqueNames.capacity());
-        bucket = &this->namesByHash.lookupBucket(hash, [](auto name) { return false; });
+        bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
     }
 
     auto name = NameRef(*this, NameKind::CONSTANT, constantNames.size());
@@ -1547,9 +1542,7 @@ NameRef GlobalState::enterNameConstant(string_view original) {
 
 NameRef GlobalState::lookupNameConstant(NameRef original) const {
     auto hash = NameHash::hashMixConstant(original.rawId());
-    auto &bucket = this->namesByHash.lookupBucket(hash, [&gs = *this, original](auto name) {
-        return name.kind() == NameKind::CONSTANT && name.dataCnst(gs)->original == original;
-    });
+    auto &bucket = this->namesByHash.lookupBucket(hash, NameHash::Bucket::isConstant(*this, original));
 
     if (!bucket.present()) {
         return NameRef::noName();
@@ -1606,10 +1599,8 @@ void GlobalState::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) const {
     ENFORCE_NO_TIMER(num > 0, "num == 0, name overflow");
     auto hash = NameHash::hashMixUnique(uniqueNameKind, num, original.rawId());
-    auto &bucket = this->namesByHash.lookupBucket(hash, [&gs = *this, uniqueNameKind, original, num](auto name) {
-        return name.kind() == NameKind::UNIQUE && name.dataUnique(gs)->uniqueNameKind == uniqueNameKind &&
-               name.dataUnique(gs)->num == num && name.dataUnique(gs)->original == original;
-    });
+    auto &bucket =
+        this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUnique(*this, uniqueNameKind, original, num));
     if (!bucket.present()) {
         return NameRef::noName();
     }
@@ -1620,10 +1611,8 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) {
     ENFORCE_NO_TIMER(num > 0, "num == 0, name overflow");
     auto hash = NameHash::hashMixUnique(uniqueNameKind, num, original.rawId());
-    auto *bucket = &this->namesByHash.lookupBucket(hash, [&gs = *this, uniqueNameKind, original, num](auto name) {
-        return name.kind() == NameKind::UNIQUE && name.dataUnique(gs)->uniqueNameKind == uniqueNameKind &&
-               name.dataUnique(gs)->num == num && name.dataUnique(gs)->original == original;
-    });
+    auto *bucket =
+        &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUnique(*this, uniqueNameKind, original, num));
     if (bucket->present()) {
         return NameRef::fromRaw(*this, bucket->rawId);
     }
@@ -1632,7 +1621,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
     if (uniqueNames.size() == uniqueNames.capacity()) {
         expandNames(utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity() * 2);
-        bucket = &this->namesByHash.lookupBucket(hash, [](auto name) { return false; });
+        bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
     }
 
     auto name = NameRef(*this, NameKind::UNIQUE, uniqueNames.size());

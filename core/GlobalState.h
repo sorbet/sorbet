@@ -19,6 +19,7 @@
 
 namespace sorbet::core {
 
+class GlobalState;
 class NameRef;
 class ClassOrModule;
 class SymbolRef;
@@ -56,6 +57,36 @@ public:
 
         bool present() const {
             return this->rawId != 0u;
+        }
+
+        // Constructs a predicate for identifying empty buckets.
+        static inline auto isEmpty() {
+            return [](auto name) { return false; };
+        }
+
+        // Constructs a predicate for identifying a bucket holding this UTF8 name.
+        static inline auto isUtf8(const GlobalState &gs, std::string_view utf8) {
+            return [&gs, utf8](auto name) { return name.kind() == NameKind::UTF8 && name.dataUtf8(gs)->utf8 == utf8; };
+        }
+
+        // Constructs a predicate for identifying a bucket holding this constant name.
+        static inline auto isConstant(const GlobalState &gs, NameRef original) {
+            return [&gs, original](auto name) {
+                return name.kind() == NameKind::CONSTANT && name.dataCnst(gs)->original == original;
+            };
+        }
+
+        // Constructs a predicate for identifying a bucket holding this unique name.
+        static inline auto isUnique(const GlobalState &gs, UniqueNameKind uniqueNameKind, NameRef original,
+                                    uint32_t num) {
+            return [&gs, uniqueNameKind, original, num](auto name) {
+                if (name.kind() != NameKind::UNIQUE) {
+                    return false;
+                }
+
+                auto data = name.dataUnique(gs);
+                return data->uniqueNameKind == uniqueNameKind && data->num == num && data->original == original;
+            };
         }
     };
 

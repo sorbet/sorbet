@@ -1014,7 +1014,7 @@ void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
         for (int i = 0; i < namesSize; i++) {
             auto hash = p.getU4();
             result.utf8Names.emplace_back(unpickleUTF8Name(p, result));
-            auto &bucket = result.namesByHash.lookupBucket(hash, [](auto name) { return false; });
+            auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
             bucket.hash = hash;
             bucket.rawId = core::NameRef(result, core::NameKind::UTF8, i).rawId();
         }
@@ -1024,7 +1024,7 @@ void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
         for (int i = 0; i < namesSize; i++) {
             auto hash = p.getU4();
             result.constantNames.emplace_back(unpickleConstantName(p, result));
-            auto &bucket = result.namesByHash.lookupBucket(hash, [](auto name) { return false; });
+            auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
             bucket.hash = hash;
             bucket.rawId = core::NameRef(result, core::NameKind::CONSTANT, i).rawId();
         }
@@ -1034,7 +1034,7 @@ void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
         for (int i = 0; i < namesSize; i++) {
             auto hash = p.getU4();
             result.uniqueNames.emplace_back(unpickleUniqueName(p, result));
-            auto &bucket = result.namesByHash.lookupBucket(hash, [](auto name) { return false; });
+            auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
             bucket.hash = hash;
             bucket.rawId = core::NameRef(result, core::NameKind::UNIQUE, i).rawId();
         }
