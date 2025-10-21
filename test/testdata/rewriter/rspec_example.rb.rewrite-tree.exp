@@ -1,8 +1,4 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def another_outer_helper<<todo method>>(&<blk>)
-    <emptyTree>
-  end
-
   module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
     def self.context<<todo method>>(arg0, &blk)
       <emptyTree>
@@ -250,18 +246,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  <emptyTree>::<C RSpec>.context("B") do ||
-    begin
-      <runtime method definition of another_outer_helper>
-      <self>.it("inside B") do ||
-        <self>.another_outer_helper()
-      end
-      <self>.context("Nested, no RSpec") do ||
-        <self>.it("inside Nested") do ||
-          begin
-            <self>.another_outer_helper()
-            <self>.described_class()
-          end
+  class <emptyTree>::<C <context 'B'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def another_outer_helper<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def <it 'inside B'><<todo method>>(&<blk>)
+      <self>.another_outer_helper()
+    end
+
+    <runtime method definition of another_outer_helper>
+
+    class <emptyTree>::<C <context 'Nested, no RSpec'>><<C <todo sym>>> < (<self>)
+      def <it 'inside Nested'><<todo method>>(&<blk>)
+        begin
+          <self>.another_outer_helper()
+          <self>.described_class()
         end
       end
     end

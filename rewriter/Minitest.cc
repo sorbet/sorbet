@@ -238,6 +238,15 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
     return pair{methodName, declLoc};
 }
 
+bool isRSpec(core::Context ctx, const ast::ExpressionPtr &recv) {
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(recv);
+    if (cnst == nullptr) {
+        return false;
+    }
+
+    return cnst->cnst == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope);
+}
+
 // Some RSpec methods are relatively common method names where we really want to make sure that
 // we're definitely in a test context before we do the translation here.
 //
@@ -627,15 +636,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::xcontext().rawId():
         case core::Names::fcontext().rawId():
         case core::Names::exampleGroup().rawId(): {
-            if (block == nullptr || send->numPosArgs() != 1 || !send->recv.isSelfReference()) {
+            if (block == nullptr || send->numPosArgs() != 1) {
                 return nullptr;
             }
 
-            if (!send->recv.isSelfReference()) {
+            auto recvIsRSpec = isRSpec(ctx, send->recv);
+            if (!send->recv.isSelfReference() && !recvIsRSpec) {
                 return nullptr;
             }
 
-            if (requiresSecondFactor(send->fun) && !insideDescribe) {
+            if (requiresSecondFactor(send->fun) && !recvIsRSpec && !insideDescribe) {
                 return nullptr;
             }
 
@@ -809,7 +819,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
             ENFORCE(isSharedExamplesName(send->fun));
-            if (block == nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
+            if (block == nullptr || send->numPosArgs() != 1) {
+                return nullptr;
+            }
+
+            auto recvIsRSpec = isRSpec(ctx, send->recv);
+            if (!send->recv.isSelfReference() && !recvIsRSpec) {
+                return nullptr;
+            }
+
+            if (!insideDescribe && !recvIsRSpec) {
                 return nullptr;
             }
 

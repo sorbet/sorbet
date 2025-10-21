@@ -172,17 +172,13 @@ RSpec.context("B") do
   def another_outer_helper; end
 
   it "inside B" do
-# ^^ error: does not exist
     another_outer_helper
   end
 
   context("Nested, no RSpec") do
-# ^^^^^^^ error: does not exist
     it "inside Nested" do
-  # ^^ error: does not exist
       another_outer_helper
       described_class
-    # ^^^^^^^^^^^^^^^ error: does not exist
     end
   end
 end
