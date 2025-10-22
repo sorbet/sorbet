@@ -128,9 +128,18 @@ ClassDef{
                     scope = EmptyTree
                   }
                   symbol = <C <U <todo sym>>>
-                  ancestors = [ConstantLit{
-                      symbol = (class ::<todo sym>)
-                      orig = nullptr
+                  ancestors = [UnresolvedConstantLit{
+                      cnst = <C <U ExampleGroup>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Core>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U RSpec>>
+                          scope = EmptyTree
+                        }
+                      }
+                    }, UnresolvedConstantLit{
+                      cnst = <C <U <shared_examples 'my shared example'>>>
+                      scope = EmptyTree
                     }]
                   rhs = [
                     MethodDef{

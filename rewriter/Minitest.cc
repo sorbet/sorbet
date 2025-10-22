@@ -517,13 +517,15 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
     return body;
 }
 
-ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe);
+ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
+                             ast::Send *send, bool insideDescribe);
 
-ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body,
+ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
+                                      const ast::ExpressionPtr &maybeSharedExamplesName, ast::ExpressionPtr body,
                                       bool insideDescribe) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
-        auto change = runSingle(ctx, isClass, bodySend, insideDescribe);
+        auto change = runSingle(ctx, isClass, move(maybeSharedExamplesName), bodySend, insideDescribe);
         if (change) {
             return change;
         }
@@ -531,20 +533,24 @@ ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass, as
     return body;
 }
 
-ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
-    body = tryRunSingleOnSend(ctx, isClass, std::move(body), insideDescribe);
+ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass,
+                               const ast::ExpressionPtr &maybeSharedExamplesName, ast::ExpressionPtr body,
+                               bool insideDescribe) {
+    body = tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(body), insideDescribe);
 
     if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
         for (auto &exp : bodySeq->stats) {
-            exp = tryRunSingleOnSend(ctx, isClass, std::move(exp), insideDescribe);
+            exp = tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(exp), insideDescribe);
         }
 
-        bodySeq->expr = tryRunSingleOnSend(ctx, isClass, std::move(bodySeq->expr), insideDescribe);
+        bodySeq->expr =
+            tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(bodySeq->expr), insideDescribe);
     }
     return body;
 }
 
-ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe) {
+ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
+                             ast::Send *send, bool insideDescribe) {
     auto *block = send->block();
 
     switch (send->fun.rawId()) {
@@ -615,22 +621,43 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             auto argString = to_s(ctx, arg);
             ast::ClassDef::ANCESTORS_store ancestors;
 
-            // First ancestor is the superclass
-            if (isClass) {
-                ancestors.emplace_back(ast::MK::Self(arg.loc()));
-            } else {
-                // Avoid subclassing self when it's a module, as that will produce an error.
-                ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
+            if (maybeSharedExamplesName == nullptr) {
+                // First ancestor is the superclass
+                if (isClass) {
+                    ancestors.emplace_back(ast::MK::Self(arg.loc()));
+                } else {
+                    // Avoid subclassing self when it's a module, as that will produce an error.
+                    ancestors.emplace_back(ast::MK::Constant(arg.loc(), core::Symbols::todo()));
 
-                // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
-                // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
-                // an ancestor, which we're choosing not to model so that this rewriter pass works for
-                // RSpec specs too. This means users might have to add extra `include` lines in their
-                // describe bodies to convince Sorbet what's available, but at least it won't say that
-                // Minitest::Spec is an ancestor for RSpec tests.
+                    // Note: For cases like `module M; describe '' {}; end`, minitest does not treat `M` as
+                    // an ancestor of the dynamically-created class. Instead, it treats `Minitest::Spec` as
+                    // an ancestor, which we're choosing not to model so that this rewriter pass works for
+                    // RSpec specs too. This means users might have to add extra `include` lines in their
+                    // describe bodies to convince Sorbet what's available, but at least it won't say that
+                    // Minitest::Spec is an ancestor for RSpec tests.
+                }
+            } else {
+                // If we're inside a shared_examples block, things are a little different.
+                // We can't use `<self>` as the superclass, because `self` is a module. But we can't
+                // leave it as nothing, because all the test helpers are defined on e.g. ExampleGroup
+                // There might also be helpers from the outer shared_examples block.
+                //
+                // In this case, we'll hard-code that the parent class is `RSpec::Core::ExampleGroup`
+                ENFORCE(!isClass, "Somehow we threaded down a maybeSharedExamplesName for a non-module parent class?")
+
+                static const core::NameRef parts[3] = {
+                    core::Names::Constants::RSpec(),
+                    core::Names::Constants::Core(),
+                    core::Names::Constants::ExampleGroup(),
+                };
+                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(maybeSharedExamplesName.loc(), parts));
+
+                ancestors.emplace_back(maybeSharedExamplesName.deepCopy());
             }
 
-            auto rhs = prepareBody(ctx, /* isClass */ true, std::move(block->body), /* insideDescribe */ true);
+            auto rhs =
+                prepareBody(ctx, /* isClass */ true, /* maybeSharedExamplesName */ nullptr, std::move(block->body),
+                            /* insideDescribe */ true);
 
             auto testName = fmt::format("<{} '{}'>", send->fun.show(ctx), argString);
             auto name = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
@@ -666,8 +693,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ConstantMover constantMover;
             ast::TreeWalk::apply(ctx, constantMover, block->body);
             auto declLoc = declLocForSendWithBlock(*send);
-            auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                                    prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
+            auto method = ast::MK::SyntheticMethod0(
+                send->loc, declLoc, std::move(name),
+                prepareBody(ctx, isClass, move(maybeSharedExamplesName), std::move(block->body), insideDescribe));
 
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
@@ -718,8 +746,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ast::TreeWalk::apply(ctx, constantMover, itBody);
 
             auto itMethod = ast::MK::SyntheticMethod0(send->loc, itDeclLoc, itName,
-                                                      prepareBody(ctx, /* isClass */ true, std::move(itBody),
-                                                                  /* insideDescribe */ true));
+                                                      prepareBody(ctx, /* isClass */ true, maybeSharedExamplesName,
+                                                                  std::move(itBody), /* insideDescribe */ true));
             ast::cast_tree_nonnull<ast::MethodDef>(itMethod).flags.discardDef = true;
             itMethod = addSigVoid(ctx, move(itMethod));
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
@@ -772,7 +800,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             // currently only use that to gate other Minitest/RSpec features behind a check where
             // we're _really_ sure that we're probably in a test context (vs some unrelated,
             // similarly-named DSL)
-            auto body = prepareBody(ctx, /* isClass */ false, move(block->body), /* insideDescribe */ true);
+            auto body =
+                prepareBody(ctx, /* isClass */ false, name.deepCopy(), move(block->body), /* insideDescribe */ true);
             auto rhs = flattenDescribeBody(move(body));
 
             if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
@@ -819,7 +848,7 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
     }
 
     auto insideDescribe = false;
-    auto exp = runSingle(ctx, isClass, send, insideDescribe);
+    auto exp = runSingle(ctx, isClass, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));
     }
