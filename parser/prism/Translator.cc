@@ -1065,7 +1065,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // true if the call contains a forwarded argument like `foo(...)`
             auto hasFwdArgs = callNode->arguments != nullptr &&
                               PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
-            auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*rest)`
+            auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*)`
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             unique_ptr<parser::Hash> kwargsHash;
             auto kwargsHashHasExpr = true; // true if we can directly desugar the kwargs Hash, if any.
@@ -1348,7 +1348,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
-            if (hasSplat || hasFwdArgs || hasFwdRestArg) { // f(*a) || f(*) || f(**)
+            if (hasSplat || hasFwdRestArg || hasFwdArgs) { // f(*a) || f(*) || f(...)
                 // If we have a splat anywhere in the argument list, desugar the argument list as a single Array node,
                 // and synthesize a call to `::Magic.<callWithSplat>(receiver, method, argArray[, &blk])`
                 // The `callWithSplat` implementation (in C++) will unpack a tuple type and call into the normal
