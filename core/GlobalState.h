@@ -297,6 +297,9 @@ public:
     NameRef lookupNameConstant(NameRef original) const;
     NameRef lookupNameConstant(std::string_view original) const;
 
+    FileRef enterSingleFileForIndex(std::shared_ptr<File> file);
+    std::shared_ptr<File> copyFileForIndexing(core::FileRef file);
+
     FileRef enterFile(std::string_view path, std::string_view source);
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef enterNewFileAt(std::shared_ptr<File> file, FileRef id);
