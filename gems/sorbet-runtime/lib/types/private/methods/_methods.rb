@@ -257,10 +257,8 @@ module T::Private::Methods
         # make sure to keep changes in sync.
         elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
           CallValidation.validate_call(self, original_method, method_sig, args, blk)
-        elsif T::Configuration::AT_LEAST_RUBY_2_7
-          original_method.bind_call(self, *args, &blk)
         else
-          original_method.bind(self).call(*args, &blk) # rubocop:disable Performance/BindCall
+          original_method.bind_call(self, *args, &blk)
         end
       end
     end
@@ -530,27 +528,15 @@ module T::Private::Methods
       @old_hooks = nil
     else
       old_included = T::Private::ClassUtils.replace_method(Module, :included, true) do |arg|
-        if T::Configuration::AT_LEAST_RUBY_2_7
-          old_included.bind_call(self, arg)
-        else
-          old_included.bind(self).call(arg) # rubocop:disable Performance/BindCall
-        end
+        old_included.bind_call(self, arg)
         ::T::Private::Methods._hook_impl(arg, false, self)
       end
       old_extended = T::Private::ClassUtils.replace_method(Module, :extended, true) do |arg|
-        if T::Configuration::AT_LEAST_RUBY_2_7
-          old_extended.bind_call(self, arg)
-        else
-          old_extended.bind(self).call(arg) # rubocop:disable Performance/BindCall
-        end
+        old_extended.bind_call(self, arg)
         ::T::Private::Methods._hook_impl(arg, true, self)
       end
       old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited, true) do |arg|
-        if T::Configuration::AT_LEAST_RUBY_2_7
-          old_inherited.bind_call(self, arg)
-        else
-          old_inherited.bind(self).call(arg) # rubocop:disable Performance/BindCall
-        end
+        old_inherited.bind_call(self, arg)
         ::T::Private::Methods._hook_impl(arg, false, self)
       end
       @old_hooks = [old_included, old_extended, old_inherited]

@@ -176,7 +176,7 @@ module T::Private::Methods::CallValidation
     # this code is sig validation code.
     # Please issue `finish` to step out of it
 
-    return_value = T::Configuration::AT_LEAST_RUBY_2_7 ? original_method.bind_call(instance, *args, &blk) : original_method.bind(instance).call(*args, &blk)
+    return_value = original_method.bind_call(instance, *args, &blk)
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
@@ -279,7 +279,7 @@ module T::Private::Methods::CallValidation
     # this code is sig validation code.
     # Please issue `finish` to step out of it
 
-    return_value = T::Configuration::AT_LEAST_RUBY_2_7 ? original_method.bind_call(instance, *args, &blk) : original_method.bind(instance).call(*args, &blk)
+    return_value = original_method.bind_call(instance, *args, &blk)
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
@@ -332,8 +332,4 @@ module T::Private::Methods::CallValidation
   end
 end
 
-if T::Configuration::AT_LEAST_RUBY_2_7
-  require_relative './call_validation_2_7'
-else
-  require_relative './call_validation_2_6'
-end
+require_relative './call_validation_2_7'

@@ -200,7 +200,7 @@ module Opus::Types::Test
         allocated = GC.stat(:total_allocated_objects) - before
         Critic::Extensions::TypeExt.patch_types
         if check_alloc_counts
-          expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
+          expected_allocations = 1
           assert_equal(expected_allocations, allocated)
         end
       end
@@ -224,7 +224,7 @@ module Opus::Types::Test
         allocated = GC.stat(:total_allocated_objects) - before
 
         if check_alloc_counts
-          expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
+          expected_allocations = 1
           assert_equal(expected_allocations, allocated) # dmitry: for some reason, when run locally this number is 0, in CI it's 2. IDK why.
         end
       end
