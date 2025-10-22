@@ -1926,18 +1926,6 @@ module Kernel
   end
   def puts(*arg0); end
 
-  ### TODO: this type is not correct. Observe this irb session:
-  ###
-  ### >> p
-  ### => nil
-  ### >> p 1
-  ### 1
-  ### => 1
-  ### >> p 1, 2
-  ### 1
-  ### 2
-  ### => [1, 2]
-
   # For each object, directly writes *obj*.`inspect` followed by a newline to
   # the program's standard output.
   #
@@ -1952,13 +1940,26 @@ module Kernel
   # ```ruby
   # #<S name="dave", state="TX">
   # ```
+  #
+  # Returns:
+  # - nil if no arguments
+  # - the single argument if one argument
+  # - an array of arguments if multiple arguments
+  sig { returns(NilClass) }
   sig do
-    params(
-        arg0: Object,
-    )
-    .returns(NilClass)
+    type_parameters(:T)
+      .params(arg0: T.all(T.type_parameter(:T), Object))
+      .returns(T.type_parameter(:T))
   end
-  def p(*arg0); end
+  sig do
+    type_parameters(:T)
+      .params(
+        arg0: T.all(T.type_parameter(:T), Object),
+        arg1: T.all(T.type_parameter(:T), Object)
+      )
+      .returns(T::Array[T.type_parameter(:T)])
+  end
+  def p(arg0=nil, *arg1); end
 
   # prints arguments in pretty form.
   #

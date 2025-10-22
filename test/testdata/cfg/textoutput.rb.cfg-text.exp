@@ -43,7 +43,7 @@ bb6[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <
     <cfgAlias>$15: T.class_of(T) = alias <C T>
     e: T.untyped = <cfgAlias>$15: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
     <statTemp>$26: String("done") = "done"
-    <throwAwayTemp>$24: NilClass = <self>: T.class_of(<root>).p(<statTemp>$26: String("done"))
+    <throwAwayTemp>$24: String = <self>: T.class_of(<root>).p(<statTemp>$26: String("done"))
     <gotoDeadTemp>$23 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
@@ -52,7 +52,7 @@ bb7[firstDead=-1](<self>: T.class_of(<root>), <exceptionValue>$3: StandardError)
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$17: T.untyped = <keep-alive> <exceptionValue>$3
     <statTemp>$22: String("whoops") = "whoops"
-    <returnMethodTemp>$2: NilClass = <self>: T.class_of(<root>).p(<statTemp>$22: String("whoops"))
+    <returnMethodTemp>$2: String = <self>: T.class_of(<root>).p(<statTemp>$22: String("whoops"))
     <unconditional> -> bb6
 
 # backedges

@@ -76,20 +76,25 @@ T.assert_type!(obj.object_id, Integer)
 obj = T.let("foo", String)
 T.assert_type!(obj.itself, String)
 
-
-# These types are deliberately wrong, because `Kernel#p` is difficult to type
-# in an RBI.  See the comments in kernel.rbi.
-p_result = Kernel.p 1
-# This should be `Integer`.
+p_result = p
+# Returns nil when called with no arguments
 T.reveal_type(p_result) # error: Revealed type: `NilClass`
+
+p_result = Kernel.p 1
+# Returns the argument when called with one argument
+T.reveal_type(p_result) # error: Revealed type: `Integer`
 
 p_result = p "string"
-# This should be `String`.
-T.reveal_type(p_result) # error: Revealed type: `NilClass`
+# Returns the argument when called with one argument
+T.reveal_type(p_result) # error: Revealed type: `String`
 
 p_result = p 1, 2
-# This should be `[1, 2]` or `T::Array[T.untyped]`
-T.reveal_type(p_result) # error: Revealed type: `NilClass`
+# Returns an array when called with multiple arguments
+T.reveal_type(p_result) # error: Revealed type: `T::Array[Integer]`
+
+p_result = Kernel.p 1, "string"
+# Returns a union type array when called with multiple arguments
+T.reveal_type(p_result) # error: Revealed type: `T::Array[T.any(Integer, String)]`
 
 class CustomError < StandardError
   def initialize(cause, team)
