@@ -567,15 +567,34 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     return ast;
 }
 
+struct FileToIndex {
+    core::FileRef originalRef;
+    shared_ptr<core::File> data;
+};
+
 struct IndexResult {
     unique_ptr<core::GlobalState> gs;
+
+    // These lengths of these two vectors will always be the same--the entry in the `files` vector corresponds to the
+    // updated file that was created during indexing the entry at the corresponding index in the `trees` vector.
     vector<ast::ParsedFile> trees;
+    vector<shared_ptr<core::File>> files;
 
     // The number of trees that were processed by the thread that produced this result. This can be greater than
     // `trees.size()` when cancelation happens, as we skip trees to save time at that point. This value must be used in
     // place of `trees.size()` anywhere that we're accounting for the number of trees processed by indexing, otherwise
     // we risk starving the main thread which expects to read one result for every tree processed.
     int numTreesProcessed = 0;
+
+    // Overwrite the files in `to` with the versions in `files`.
+    void mergeFileTable(core::GlobalState &to) {
+        ENFORCE(this->trees.size() == this->files.size());
+        for (auto i = 0; i < this->trees.size(); ++i) {
+            auto file = this->trees[i].file;
+            ENFORCE_NO_TIMER(file.id() < to.filesUsed());
+            to.replaceFile(file, move(this->files[i]));
+        }
+    }
 };
 
 struct IndexThreadResultPack {
@@ -598,8 +617,9 @@ struct IndexSubstitutionJob {
     IndexSubstitutionJob() {}
 
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
-        : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)}, numTreesProcessed{res.numTreesProcessed} {
-        to.mergeFileTable(*this->threadGs);
+        : threadGs{std::move(res.gs)}, subst{}, numTreesProcessed{res.numTreesProcessed} {
+        res.mergeFileTable(to);
+        this->trees = move(res.trees);
         if (absl::c_any_of(this->trees, [](auto &parsed) { return !parsed.cached(); })) {
             this->subst.emplace(*this->threadGs, to);
         }
@@ -695,9 +715,10 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
                                                const options::Options &opts, WorkerPool &workers,
                                                const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<FileToIndex>>(files.size());
+
     for (auto file : files) {
-        fileq->push(move(file), 1);
+        fileq->push(FileToIndex{file, baseGs.copyFileForIndexing(file)}, 1);
     }
 
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
@@ -717,7 +738,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         IndexThreadResultPack threadResult;
 
         {
-            core::FileRef job;
+            FileToIndex job;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     // Increment the count even if we're cancelled to ensure that we indicate downstream that all inputs
@@ -728,9 +749,19 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
                     if (cancelable && epochManager.wasTypecheckingCanceled()) {
                         continue;
                     }
-                    core::FileRef file = job;
+
+                    core::FileRef file;
+                    {
+                        core::UnfreezeFileTable unfreezeFiles(*localGs);
+                        file = localGs->enterSingleFileForIndex(job.data);
+                    }
                     auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
+
+                    // Replace the file ref used in the ParsedFile with the original from baseGs, and extract the
+                    // updated file data so that it can be updated in baseGs later.
+                    parsedFile.file = job.originalRef;
+                    threadResult.res.files.emplace_back(localGs->copyFileForIndexing(file));
                     threadResult.res.trees.emplace_back(move(parsedFile));
                 }
             }
@@ -1413,7 +1444,7 @@ class CFGCollectorAndTyper {
     const options::Options &opts;
 
 public:
-    CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
+    CFGCollectorAndTyper(const options::Options &opts) : opts(opts) {};
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
