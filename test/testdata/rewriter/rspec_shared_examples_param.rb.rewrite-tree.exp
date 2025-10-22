@@ -29,10 +29,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
 
         def <it '::<Magic>.<string-interpolate>("works for ", my_param)'><<todo method>>(&<blk>)
-          begin
-            <emptyTree>::<C T>.reveal_type(my_param)
-            <self>.expect(<self>.foo_exists()).to(<self>.eq("bar"))
-            <self>.this_does_not_exist()
+          [::T.unsafe(nil)].each() do |my_param|
+            begin
+              <emptyTree>::<C T>.reveal_type(my_param)
+              <self>.expect(<self>.foo_exists()).to(<self>.eq("bar"))
+              <self>.this_does_not_exist()
+            end
           end
         end
 
@@ -42,10 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         <runtime method definition of uses_my_param>
 
-        begin
-          ::<Magic>.<string-interpolate>("works for ", my_param)
-          <emptyTree>
-        end
+        <runtime method definition of <it '::<Magic>.<string-interpolate>("works for ", my_param)'>>
 
         ::<Magic>.requires_ancestor() do ||
           <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>

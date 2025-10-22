@@ -24,7 +24,7 @@ class MyClass < RSpec::Core::ExampleGroup
       }
 
       it "works for #{my_param}" do
-        T.reveal_type(my_param) # error: `NilClass`
+        T.reveal_type(my_param) # error: `T.untyped`
         expect(foo_exists).to eq('bar')
         this_does_not_exist
       # ^^^^^^^^^^^^^^^^^^^ error: `this_does_not_exist` does not exist

@@ -309,12 +309,31 @@ ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const as
     return ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(name)});
 }
 
+bool isSharedExamplesName(core::NameRef name) {
+    switch (name.rawId()) {
+        case core::Names::sharedExamples().rawId():
+        case core::Names::sharedContext().rawId():
+        case core::Names::sharedExamplesFor().rawId():
+            return true;
+        default:
+            return false;
+    }
+}
+
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                        const ast::MethodDef::PARAMS_store &args,
                                        absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                        ast::ExpressionPtr &iteratee, bool insideDescribe);
 
 ast::ExpressionPtr invalidUnderTestEach(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr stmt) {
+    if (isSharedExamplesName(eachName)) {
+        // To avoid causing undue errors in codebases that already use `shared_examples`, we don't
+        // report an error. Only report for test_each-style usages, because codebases will have
+        // explicitly opted into using that to get their types to check (no pre-existing usages that
+        // cause tricky migrations).
+        return stmt;
+    }
+
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.beginIndexerError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
@@ -786,6 +805,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::sharedExamples().rawId():
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
+            ENFORCE(isSharedExamplesName(send->fun));
             if (block == nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
                 return nullptr;
             }
@@ -794,14 +814,28 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
             auto declLoc = declLocForSendWithBlock(*send);
 
-            // We're not in a class (we're making a module).
-            //
-            // We're also not in a describe, but we're going to lie and say we are, because we
-            // currently only use that to gate other Minitest/RSpec features behind a check where
-            // we're _really_ sure that we're probably in a test context (vs some unrelated,
-            // similarly-named DSL)
-            auto body =
-                prepareBody(ctx, /* isClass */ false, name.deepCopy(), move(block->body), /* insideDescribe */ true);
+            ast::ExpressionPtr body;
+            if (block->params.empty()) {
+                // We're not in a class (we're making a module).
+                //
+                // We're also not in a describe, but we're going to lie and say we are, because
+                // we currently only use that to gate other Minitest/RSpec features behind a
+                // check where we're _really_ sure that we're probably in a test context (vs
+                // some unrelated, similarly-named DSL)
+                body = prepareBody(ctx, /* isClass */ false, name.deepCopy(), move(block->body),
+                                   /* insideDescribe */ true);
+            } else {
+                // We want to "fake" a test_each to approximate support for `shared_examples` that
+                // accept parameters. Inside the body, it's basically the same as a test_each over a
+                // single element.
+
+                auto iterateeLoc = block->params.front().loc().join(block->params.back().loc());
+                ast::Array::ENTRY_store entries;
+                entries.emplace_back(ast::MK::UntypedNil(iterateeLoc));
+                auto iteratee = ast::MK::Array(iterateeLoc, move(entries));
+                body = prepareTestEachBody(ctx, send->fun, move(block->body), block->params, {}, iteratee,
+                                           /* insideDescribe */ true);
+            }
             auto rhs = flattenDescribeBody(move(body));
 
             if (ctx.state.cacheSensitiveOptions.requiresAncestorEnabled) {
