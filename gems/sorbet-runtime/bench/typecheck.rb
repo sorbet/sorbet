@@ -204,13 +204,9 @@ module SorbetBenchmarks
         # rubocop:enable Performance/BindCall
       end
 
-      if T::Configuration::AT_LEAST_RUBY_2_7
-        time_block(".bind_call(example) Object#class") do
-          class_method.bind_call(example)
-          class_method.bind_call(example)
-        end
-      else
-        puts 'skipping UnboundMethod#bind_call tests (re-run on Ruby 2.7+)'
+      time_block(".bind_call(example) Object#class") do
+        class_method.bind_call(example)
+        class_method.bind_call(example)
       end
     end
 
