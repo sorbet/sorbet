@@ -1437,7 +1437,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         flags.hasBlock = true;
                     } else if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
                         // A forwarded block like the `&b` in `a.map(&b)`
-                        unreachable("This should be desugar to `Magic.callWithBlockPass()` above.");
+                        unreachable("This should have already been desugared to `Magic.callWithBlockPass()` above.");
                     } else {
                         unreachable("Found an unexpected block of type {}",
                                     pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
