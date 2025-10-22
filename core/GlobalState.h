@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TrackUntyped.h"
+#include "core/hashing/hashing.h"
 #include "core/lsp/DiagnosticSeverity.h"
 #include "core/lsp/Query.h"
 #include "core/packages/PackageDB.h"
@@ -18,6 +19,7 @@
 
 namespace sorbet::core {
 
+class GlobalState;
 class NameRef;
 class ClassOrModule;
 class SymbolRef;
@@ -39,6 +41,147 @@ namespace serialize {
 class Serializer;
 class SerializerImpl;
 } // namespace serialize
+
+class NameHash {
+    friend class serialize::SerializerImpl;
+
+public:
+    using Hash = uint32_t;
+
+    struct Bucket {
+        unsigned int hash;
+        uint32_t rawId;
+
+        Bucket() = default;
+        Bucket(unsigned int hash, uint32_t rawId) : hash{hash}, rawId{rawId} {}
+
+        bool present() const {
+            return this->rawId != 0u;
+        }
+
+        // Constructs a predicate for identifying empty buckets.
+        static inline auto isEmpty() {
+            return [](auto name) { return false; };
+        }
+
+        // Constructs a predicate for identifying a bucket holding this UTF8 name.
+        static inline auto isUtf8(const GlobalState &gs, std::string_view utf8) {
+            return [&gs, utf8](auto name) { return name.kind() == NameKind::UTF8 && name.dataUtf8(gs)->utf8 == utf8; };
+        }
+
+        // Constructs a predicate for identifying a bucket holding this constant name.
+        static inline auto isConstant(const GlobalState &gs, NameRef original) {
+            return [&gs, original](auto name) {
+                return name.kind() == NameKind::CONSTANT && name.dataCnst(gs)->original == original;
+            };
+        }
+
+        // Constructs a predicate for identifying a bucket holding this unique name.
+        static inline auto isUnique(const GlobalState &gs, UniqueNameKind uniqueNameKind, NameRef original,
+                                    uint32_t num) {
+            return [&gs, uniqueNameKind, original, num](auto name) {
+                if (name.kind() != NameKind::UNIQUE) {
+                    return false;
+                }
+
+                auto data = name.dataUnique(gs);
+                return data->uniqueNameKind == uniqueNameKind && data->num == num && data->original == original;
+            };
+        }
+    };
+
+private:
+    std::vector<Bucket> buckets_;
+
+    void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
+
+public:
+    static inline Hash hashMixUTF8(std::string_view name) {
+        return _hash(name);
+    }
+
+    static inline Hash hashMixUnique(UniqueNameKind unk, unsigned int num, unsigned int rawId) {
+        return mix(mix(num, static_cast<uint32_t>(unk)), rawId) * HASH_MULT2 + static_cast<uint32_t>(NameKind::UNIQUE);
+    }
+
+    static inline Hash hashMixConstant(unsigned int id) {
+        return id * HASH_MULT2 + static_cast<uint32_t>(NameKind::CONSTANT);
+    }
+
+    static inline Hash hashNameRef(const GlobalState &gs, NameRef nref) {
+        switch (nref.kind()) {
+            case NameKind::UTF8:
+                return _hash(nref.shortName(gs));
+            case NameKind::CONSTANT:
+                return hashMixConstant(nref.dataCnst(gs)->original.rawId());
+            case NameKind::UNIQUE: {
+                auto data = nref.dataUnique(gs);
+                return hashMixUnique(data->uniqueNameKind, data->num, data->original.rawId());
+            }
+        }
+    }
+
+    bool empty() const {
+        return this->buckets_.empty();
+    }
+
+    size_t size() const {
+        return this->buckets_.size();
+    }
+
+    size_t capacity() const {
+        return this->buckets_.capacity();
+    }
+
+    void clear() {
+        this->buckets_.clear();
+    }
+
+    void resize(size_t size) {
+        ENFORCE_NO_TIMER((size & (size - 1)) == 0, "namesByHashSize is not a power of 2");
+        this->buckets_.resize(size);
+    }
+
+    void reserve(size_t size) {
+        ENFORCE_NO_TIMER((size & (size - 1)) == 0, "namesByHashSize is not a power of 2");
+        this->buckets_.reserve(size);
+    }
+
+    absl::Span<const Bucket> buckets() const {
+        return absl::MakeSpan(this->buckets_);
+    }
+
+    void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
+
+    template <typename Pred> const Bucket &lookupBucket(Hash hash, Pred &&pred) const {
+        unsigned int hashTableSize = buckets_.size();
+        unsigned int mask = hashTableSize - 1;
+        auto bucketId = hash & mask;
+        unsigned int probeCount = 1;
+
+        while (buckets_[bucketId].present()) {
+            auto &bucket = buckets_[bucketId];
+            if (bucket.hash == hash) {
+                auto name = NameRef::fromRawUnchecked(bucket.rawId);
+                if (std::invoke(pred, name)) {
+                    break;
+                }
+            }
+            bucketId = (bucketId + probeCount) & mask;
+            probeCount++;
+        }
+
+        if (probeCount == hashTableSize) {
+            Exception::raise("Full table?");
+        }
+
+        return buckets_[bucketId];
+    }
+
+    template <typename Pred> Bucket &lookupBucket(Hash hash, Pred &&pred) {
+        return const_cast<Bucket &>(const_cast<const NameHash *>(this)->lookupBucket(hash, std::forward<Pred>(pred)));
+    }
+};
 
 class GlobalState final {
     friend NameRef;
@@ -401,11 +544,7 @@ private:
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
     std::vector<TypeParameter> typeParameters;
-    struct Bucket {
-        unsigned int hash;
-        uint32_t rawId;
-    };
-    std::vector<Bucket> namesByHash;
+    NameHash namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
@@ -429,7 +568,6 @@ private:
     void copyOptions(const GlobalState &other);
 
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
-    void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, uint32_t superclass = Symbols::todo().id(), bool isModule = false);
 
