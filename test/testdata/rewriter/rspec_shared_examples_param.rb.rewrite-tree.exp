@@ -1,0 +1,56 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def expect<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of expect>
+
+        <runtime method definition of eq>
+      end
+    end
+  end
+
+  class <emptyTree>::<C MyClass><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    class <emptyTree>::<C <describe 'single shared example with context'>><<C <todo sym>>> < (<self>)
+      module <emptyTree>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
+        def foo_exists<<todo method>>(&<blk>)
+          "bar"
+        end
+
+        def uses_my_param<<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(my_param)
+        end
+
+        def <it '::<Magic>.<string-interpolate>("works for ", my_param)'><<todo method>>(&<blk>)
+          begin
+            <emptyTree>::<C T>.reveal_type(my_param)
+            <self>.expect(<self>.foo_exists()).to(<self>.eq("bar"))
+            <self>.this_does_not_exist()
+          end
+        end
+
+        <emptyTree>::<C T>.reveal_type(my_param)
+
+        <runtime method definition of foo_exists>
+
+        <runtime method definition of uses_my_param>
+
+        begin
+          ::<Magic>.<string-interpolate>("works for ", my_param)
+          <emptyTree>
+        end
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+    end
+  end
+end
