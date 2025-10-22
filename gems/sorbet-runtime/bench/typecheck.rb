@@ -197,12 +197,6 @@ module SorbetBenchmarks
       end
 
       class_method = Object.instance_method(:class)
-      time_block(".bind(example).call Object#class") do
-        # rubocop:disable Performance/BindCall
-        class_method.bind(example).call
-        class_method.bind(example).call
-        # rubocop:enable Performance/BindCall
-      end
 
       time_block(".bind_call(example) Object#class") do
         class_method.bind_call(example)
