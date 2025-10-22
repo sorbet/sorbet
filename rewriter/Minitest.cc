@@ -245,6 +245,9 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
         case core::Names::after().rawId():
             return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
 
+        case core::Names::around().rawId():
+            return arity == 0 ? core::Names::aroundAngles() : core::NameRef::noName();
+
         case core::Names::it().rawId():
         case core::Names::xit().rawId():
         case core::Names::fit().rawId():
@@ -517,6 +520,20 @@ ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::Expr
     return body;
 }
 
+// Extract the parameter name from an around hook's block parameter.
+// Returns noName() if the parameter is missing (which triggers an error).
+core::NameRef extractAroundParameterName(core::MutableContext ctx, ast::Block *block) {
+    if (block->params.empty()) {
+        if (auto e = ctx.beginIndexerError(block->loc, core::errors::Rewriter::BadTestEach)) {
+            e.setHeader("`around` requires a block parameter (e.g., `|example|`)");
+        }
+        return core::NameRef::noName();
+    }
+
+    auto paramIdent = ast::cast_tree<ast::UnresolvedIdent>(block->params[0]);
+    return paramIdent ? paramIdent->name : core::Names::example();
+}
+
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe) {
     auto *block = send->block();
 
@@ -612,6 +629,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                   flattenDescribeBody(move(rhs)));
         }
 
+        case core::Names::around().rawId():
         case core::Names::after().rawId():
         case core::Names::before().rawId():
         case core::Names::it().rawId():
@@ -627,7 +645,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         case core::Names::pending().rawId():
         case core::Names::skip().rawId(): {
             if (block == nullptr || !send->recv.isSelfReference() ||
-                (!insideDescribe && requiresSecondFactor(send->fun))) {
+                (!insideDescribe && requiresSecondFactor(send->fun)) ||
+                (send->fun == core::Names::around() && !insideDescribe)) {
                 return nullptr;
             }
 
@@ -639,14 +658,40 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ConstantMover constantMover;
             ast::TreeWalk::apply(ctx, constantMover, block->body);
             auto declLoc = declLocForSendWithBlock(*send);
-            auto method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                                    prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
+
+            // around takes a parameter (the example), so we use SyntheticMethod1
+            bool isAround = (send->fun == core::Names::around());
+            ast::ExpressionPtr method;
+            core::NameRef paramName;
+
+            if (isAround) {
+                paramName = extractAroundParameterName(ctx, block);
+            }
+
+            // If around has a parameter, use SyntheticMethod1. Otherwise (including error cases),
+            // treat it like before/after and use SyntheticMethod0.
+            if (isAround && paramName.exists()) {
+                method = ast::MK::SyntheticMethod1(send->loc, declLoc, std::move(name), block->params[0].deepCopy(),
+                                                   prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
+            } else {
+                method = ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                                   prepareBody(ctx, isClass, std::move(block->body), insideDescribe));
+            }
 
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
             // omitting it saves memory.
             ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
-            method = addSigVoid(ctx, move(method));
+
+            // Add signature: around needs sig { params(paramName: T.untyped).void }, others need sig { void }
+            if (isAround && paramName.exists() && ctx.file.data(ctx).strictLevel >= core::StrictLevel::Strict) {
+                ast::Send::ARGS_store sigArgs;
+                sigArgs.emplace_back(ast::MK::Symbol(declLoc, paramName));
+                sigArgs.emplace_back(ast::MK::Untyped(declLoc));
+                method = ast::MK::InsSeq1(send->loc, ast::MK::SigVoid(declLoc, std::move(sigArgs)), std::move(method));
+            } else {
+                method = addSigVoid(ctx, move(method));
+            }
             if (send->numPosArgs() > 0 && !ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
                 method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
             }

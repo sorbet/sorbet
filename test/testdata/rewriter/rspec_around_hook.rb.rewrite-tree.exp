@@ -1,0 +1,77 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    def self.describe<<todo method>>(description, &block)
+      <emptyTree>
+    end
+
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+
+    <runtime method definition of self.describe>
+  end
+
+  class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def name<<todo method>>(&<blk>)
+      "Alice"
+    end
+
+    def age<<todo method>>(&<blk>)
+      25
+    end
+
+    def <before><<todo method>>(&<blk>)
+      <self>.name()
+    end
+
+    def <around><<todo method>>(example, &<blk>)
+      begin
+        <emptyTree>::<C T>.reveal_type(example)
+        <self>.name()
+        example.run()
+        <self>.age()
+      end
+    end
+
+    def <after><<todo method>>(&<blk>)
+      <self>.age()
+    end
+
+    def <it 'has a name and age'><<todo method>>(&<blk>)
+      begin
+        <self>.name()
+        <self>.age()
+      end
+    end
+
+    <runtime method definition of name>
+
+    <runtime method definition of age>
+
+    class <emptyTree>::<C <context 'when verified'>><<C <todo sym>>> < (<self>)
+      def verified<<todo method>>(&<blk>)
+        true
+      end
+
+      def <around><<todo method>>(spec, &<blk>)
+        begin
+          <emptyTree>::<C T>.reveal_type(spec)
+          <self>.verified()
+          spec.run()
+          <self>.verified()
+        end
+      end
+
+      def <it 'shows verified status'><<todo method>>(&<blk>)
+        begin
+          <self>.name()
+          <self>.age()
+          <self>.verified()
+        end
+      end
+
+      <runtime method definition of verified>
+    end
+  end
+end
