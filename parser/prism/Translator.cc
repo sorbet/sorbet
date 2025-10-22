@@ -1016,6 +1016,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto callNode = down_cast<pm_call_node>(node);
 
             auto loc = location;
+            auto locZeroLen = location.copyWithZeroLength();
 
             auto constantNameString = parser.resolveConstant(callNode->name);
             auto receiver = translate(callNode->receiver);
@@ -1160,8 +1161,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
+            auto supportedArgs = absl::c_all_of(args, [](const auto &arg) {
+                return hasExpr(arg) || parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
+            });
             auto supportedCallType = constantNameString != "block_given?" && kwargsHashHasExpr && !hasFwdArgs &&
-                                     !hasFwdRestArg && hasExpr(receiver, args);
+                                     hasExpr(receiver) && supportedArgs;
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
@@ -1357,11 +1361,32 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 ast::Array::ENTRY_store argExprs;
                 argExprs.reserve(prismArgs.size());
                 for (auto &arg : args) {
+                    if (parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get())) {
+                        continue; // Skip anonymous splats (like `f(*)`), which are handled separately in `PM_CALL_NODE`
+                    }
+
                     auto expr = arg->takeDesugaredExpr();
                     ENFORCE(expr != nullptr);
                     argExprs.emplace_back(move(expr));
                 }
                 auto argsArrayExpr = desugarArray(location.copyWithZeroLength(), prismArgs, move(argExprs));
+
+                if (hasFwdRestArg) { // f(*)
+                    // `<fwd-args>`
+                    auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
+
+                    // `<fwd-args>.to_a()`
+                    auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), locZeroLen);
+
+                    // `T.unsafe(<fwd-args>.to_a())`
+                    auto tUnsafe = MK::Unsafe(loc, move(argsSplat));
+
+                    // `argsArrayExpr.concat(T.unsafe(<fwd-args>.to_a()))`
+                    auto argsConcat =
+                        MK::Send1(loc, move(argsArrayExpr), core::Names::concat(), locZeroLen, move(tUnsafe));
+
+                    argsArrayExpr = move(argsConcat);
+                }
 
                 // Build up an array that represents the keyword args for the send.
                 // When there is a Kwsplat, treat all keyword arguments as a single argument.
@@ -3671,17 +3696,24 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blo
 ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
                                             ast::Array::ENTRY_store elements) {
     auto locZeroLen = location.copyWithZeroLength();
+    auto calledFromCallNode = location.empty();
 
     ast::Array::ENTRY_store elems;
     elems.reserve(elements.size());
 
     ExpressionPtr lastMerge;
-    ENFORCE(elements.size() == prismElements.size());
-    for (int i = 0; i < elements.size(); i++) {
-        auto *node = prismElements[i];
-        auto &stat = elements[i];
+    ENFORCE(elements.size() <= prismElements.size());
+    for (int prismIndex = 0, sorbetIndex = 0; prismIndex < prismElements.size() && sorbetIndex < elements.size();
+         prismIndex++, sorbetIndex++) {
+        auto *node = prismElements[prismIndex];
+        auto &stat = elements[sorbetIndex];
 
         if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
+            if (calledFromCallNode && down_cast<pm_splat_node>(node)->expression == nullptr) {
+                prismIndex++;
+                continue; // Skip anonymous splats (like `f(*)`), which are handled separately in `PM_CALL_NODE`
+            }
+
             // Desugar [a, *x, remaining] into a.concat(<splat>(x)).concat(remaining)
 
             // The Splat was already desugared to Send{Magic.splat(arg)} with the splat's own location.
