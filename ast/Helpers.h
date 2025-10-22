@@ -328,6 +328,12 @@ public:
         return make_expression<ast::Array>(loc, std::move(entries));
     }
 
+    static ExpressionPtr Array1(core::LocOffsets loc, ExpressionPtr arg) {
+        Array::ENTRY_store entries;
+        entries.emplace_back(std::move(arg));
+        return Array(loc, std::move(entries));
+    }
+
     static ExpressionPtr Hash(core::LocOffsets loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
         return make_expression<ast::Hash>(loc, std::move(keys), std::move(values));
     }

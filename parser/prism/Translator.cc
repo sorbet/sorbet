@@ -1162,10 +1162,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
             auto supportedArgs = absl::c_all_of(args, [](const auto &arg) {
-                return hasExpr(arg) || parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get());
+                return hasExpr(arg) || parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get()) ||
+                       parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get());
             });
-            auto supportedCallType = constantNameString != "block_given?" && kwargsHashHasExpr && !hasFwdArgs &&
-                                     hasExpr(receiver) && supportedArgs;
+            auto supportedCallType =
+                constantNameString != "block_given?" && kwargsHashHasExpr && hasExpr(receiver) && supportedArgs;
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
@@ -1293,12 +1294,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable reference, like
                         // `f(&&)`.
-                        blockPassArg = MK::Local(location.copyEndWithZeroLength(), core::Names::ampersand());
+                        blockPassArg = MK::Local(location.copyWithZeroLength(), core::Names::ampersand());
                         supportedBlock = true;
                     }
                 }
             } else {
                 // There is no block, so we support direct desugaring of this method call.
+                supportedBlock = true;
+            }
+
+            if (hasFwdArgs) { // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &b)`.
+                ENFORCE(blockPassArg == nullptr, "The parser should have rejected a call with both a block pass "
+                                                 "argument and forwarded args (e.g. `foo(&b, ...)`)");
+
+                blockPassArg = MK::Local(loc, core::Names::fwdBlock());
+                blockPassLoc = location.copyEndWithZeroLength();
                 supportedBlock = true;
             }
 
@@ -1363,12 +1373,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 for (auto &arg : args) {
                     if (parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get())) {
                         continue; // Skip anonymous splats (like `f(*)`), which are handled separately in `PM_CALL_NODE`
+                    } else if (parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get())) {
+                        continue; // Skip forwarded args (like `f(...)`), which are handled separately in `PM_CALL_NODE`
                     }
 
                     auto expr = arg->takeDesugaredExpr();
                     ENFORCE(expr != nullptr);
                     argExprs.emplace_back(move(expr));
                 }
+                auto argsEmpty = argExprs.empty();
                 auto argsArrayExpr = desugarArray(location.copyWithZeroLength(), prismArgs, move(argExprs));
 
                 if (hasFwdRestArg) { // f(*)
@@ -1384,6 +1397,39 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     // `argsArrayExpr.concat(T.unsafe(<fwd-args>.to_a()))`
                     auto argsConcat =
                         MK::Send1(loc, move(argsArrayExpr), core::Names::concat(), locZeroLen, move(tUnsafe));
+
+                    argsArrayExpr = move(argsConcat);
+                } else if (hasFwdArgs) { // f(...)
+                    // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
+                    //                                       ^^^^^^^^^^
+                    auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
+
+                    // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
+                    //                       ^^^^^^^^^^^^^^^^          ^
+                    auto argsSplat = MK::Splat(loc, move(fwdArgs));
+
+                    // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
+                    //  ^^^^^^^^^^^^^^^^^^^^^                           ^
+                    auto argsConcat = argsEmpty ? move(argsSplat)
+                                                : MK::Send1(loc, move(argsArrayExpr), core::Names::concat(), locZeroLen,
+                                                            move(argsSplat));
+
+                    // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
+                    //                                                                                    ^^^^^^^^^^^^
+                    auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
+
+                    // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
+                    //                                                            ^^^^^^^^^^^^^^^^^^^^^^^^            ^
+                    auto kwargsSplat =
+                        MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(fwdKwargs));
+
+                    // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
+                    //                                                           ^                                     ^
+                    auto kwargsArray = MK::Array1(loc, move(kwargsSplat));
+
+                    // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
+                    //                                                   ^^^^^^^^ ^
+                    argsConcat = MK::Send1(loc, move(argsConcat), core::Names::concat(), locZeroLen, move(kwargsArray));
 
                     argsArrayExpr = move(argsConcat);
                 }
@@ -1421,8 +1467,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 magicSendArgs.emplace_back(move(argsArrayExpr));
                 magicSendArgs.emplace_back(move(kwargsExpr));
 
-                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) &&
-                    !blockPassArgIsSymbol) {
+                if ((prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) &&
+                     !blockPassArgIsSymbol) ||
+                    hasFwdArgs) {
                     // Special handling for non-Symbol block pass args, like `a.map(&block)`
                     // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
                     // and handled separately below.
