@@ -17,4 +17,9 @@ module A3
  #^^^^^^^^^^^^^^^^^^^ error: does not exist
  #^^^^^^^^^^^^^^^^^^^ error: does not exist
 end
+
+class PrependedModule < Module
+  extend T::Generic
+  has_attached_class! # error: `has_attached_class!` can only be used inside a `module`, not a `class`
+end
 # ------------------------------
