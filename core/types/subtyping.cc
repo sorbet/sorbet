@@ -1583,7 +1583,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (!isSubTypeOfLeft) {
             if constexpr (shouldAddErrorDetails) {
                 // This if is to handle the T.nilable(X) < X case; it's not useful say that nil is not a subtype of X
-                if (!o1->left.isNilClass()) {
+                if (!o1->left.isNilClass() || true) {
                     auto message = ErrorColors::format("`{}` (the left side of the `{}`) is not a subtype of `{}`",
                                                        o1->left.show(gs), "T.any", t2.show(gs));
                     subCollectorLeft.message = message;
@@ -1597,7 +1597,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (!isSubTypeOfRight) {
             if constexpr (shouldAddErrorDetails) {
                 // This if is to handle the T.nilable(X) < X case; it's not useful say that nil is not a subtype of X
-                if (!o1->right.isNilClass()) {
+                if (!o1->right.isNilClass() || true) {
                     auto message = ErrorColors::format("`{}` (the right side of the `{}`) is not a subtype of `{}`",
                                                        o1->right.show(gs), "T.any", t2.show(gs));
                     subCollectorRight.message = message;
