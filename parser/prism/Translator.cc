@@ -1382,9 +1382,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                 auto itParamsNode = down_cast<pm_it_parameters_node>(blockNode->parameters);
                                 auto location = translateLoc(itParamsNode->base.location);
 
-                                auto name = ctx.state.enterNameUTF8("it");
-                                auto expr = MK::Local(location, name);
-                                auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
+                                auto name = core::Names::it();
+                                auto paramNode = make_unique<parser::LVar>(location, name);
 
                                 NodeVec params;
                                 params.emplace_back(move(paramNode));
@@ -2809,14 +2808,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_node_with_expr<parser::XString>(move(res), location, move(sorbetParts));
         }
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // Reading the `it` default param in a block, e.g. `a.map { it + 1 }`
-            auto name = ctx.state.enterNameUTF8("it");
-            auto expr = MK::Local(location, name);
-            return make_node_with_expr<parser::LVar>(move(expr), location, name);
+            auto name = core::Names::it();
+            return make_unique<parser::LVar>(location, name);
         }
         case PM_IT_PARAMETERS_NODE: { // Represents the `it` default param in a block, e.g. `lambda { it + 1 }`
-            auto name = ctx.state.enterNameUTF8("it");
-            auto expr = MK::Local(location, name);
-            auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
+            auto name = core::Names::it();
+            auto paramNode = make_unique<parser::LVar>(location, name);
 
             NodeVec params;
             params.emplace_back(move(paramNode));
