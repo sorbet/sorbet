@@ -60,7 +60,10 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
     auto name = parentTypeMember.data(gs)->name;
 
     if (name == core::Names::Constants::AttachedClass()) {
-        if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::HasAttachedClassIncluded)) {
+        auto code = sym.data(gs)->derivesFrom(gs, core::Symbols::Module())
+                        ? core::errors::Resolver::HasAttachedClassModuleNotDeclared
+                        : core::errors::Resolver::HasAttachedClassIncluded;
+        if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
             auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
             if (sym.data(gs)->isModule()) {
                 e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
@@ -82,12 +85,9 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
                 e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into `{}`", parent.show(gs),
                             hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
                 e.addErrorNote("Please report a bug--we thought this case was impossible");
-            } else if (sym.data(gs)->derivesFrom(gs, core::Symbols::Module())) {
-                // The VM doesn't reject `class A < ::Module`, but it's not clear how we should
-                // support it. It would mean that we would need to allow users to write
-                // `has_attached_class!` inside `class` bodies, whereas we currently only allow
-                // `class Class` and `class Module` to do this today.
-                e.setHeader("`{}` is a subclass of `{}` which is not allowed", sym.show(gs), "Module");
+            } else if (code == core::errors::Resolver::HasAttachedClassModuleNotDeclared) {
+                e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
+                            parent.show(gs), sym.show(gs));
             } else if (sym.data(gs)->derivesFrom(gs, core::Symbols::Class())) {
                 // The VM rejects attempts to subclass Class directly
                 e.setHeader("`{}` is a subclass of `{}` which is not allowed", sym.show(gs), "Class");
