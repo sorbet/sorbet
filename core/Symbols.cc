@@ -24,7 +24,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 51;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 106;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 107;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -636,9 +636,9 @@ bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
     return *this == Symbols::T_Hash() || *this == Symbols::T_Array() || *this == Symbols::T_Set() ||
-           *this == Symbols::T_Range() || *this == Symbols::T_Class() || *this == Symbols::T_Enumerable() ||
-           *this == Symbols::T_Enumerator() || *this == Symbols::T_Enumerator_Lazy() ||
-           *this == Symbols::T_Enumerator_Chain();
+           *this == Symbols::T_Range() || *this == Symbols::T_Class() || *this == Symbols::T_Module() ||
+           *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
+           *this == Symbols::T_Enumerator_Lazy() || *this == Symbols::T_Enumerator_Chain();
 }
 
 ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
@@ -660,6 +660,8 @@ ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
         return Symbols::Set();
     } else if (*this == Symbols::T_Class()) {
         return Symbols::Class();
+    } else if (*this == Symbols::T_Module()) {
+        return Symbols::Module();
     } else {
         return *this;
     }
@@ -684,6 +686,8 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
         return Symbols::T_Set();
     } else if (*this == Symbols::Class()) {
         return Symbols::T_Class();
+    } else if (*this == Symbols::Module()) {
+        return Symbols::T_Module();
     } else {
         return Symbols::noClassOrModule();
     }

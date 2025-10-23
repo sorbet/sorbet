@@ -69,13 +69,30 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
                 e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
                             parent.show(gs), sym.show(gs));
             } else if (sym.data(gs)->isSingletonClass(gs)) {
-                // We'd only get this type member redeclaration error in a singleton class if
-                // the attached class of this singleton class is a module (because all classes'
-                // singleton classes get the `<AttachedClass>` type member declared)
-                ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
-                e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
+                // All singleton classes (classes and modules) should have a synthetic `<AttachedClass>` type member.
+                ENFORCE(false, "All singleton classes (class+module) should have an `<AttachedClass>` type member");
+
+                // We used to report an error here saying that if you declare a module with
+                // `has_attached_class!` and then `extend` it into a module, you probably messed up.
+                //
+                // Now, it's not clear how this can happen, but on the off chance it can, let's report a message.
+                //
+                // This also means that we no longer have good messaging guiding people against
+                // misuse of stacks of modules using mixes_in_class_methods. But that's **already**
+                // a problem, regardless of whether `has_attached_class!` is in play, so regressing this is ~fine.
+                //
+                // We should solve the problem that mixes_in_class_methods is bad separately.
+                e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into `{}`", parent.show(gs),
                             hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
+                e.addErrorNote("Please report a bug--we thought this case was impossible");
+            } else if (sym.data(gs)->derivesFrom(gs, core::Symbols::Module())) {
+                // The VM doesn't reject `class A < ::Module`, but it's not clear how we should
+                // support it. It would mean that we would need to allow users to write
+                // `has_attached_class!` inside `class` bodies, whereas we currently only allow
+                // `class Class` and `class Module` to do this today.
+                e.setHeader("`{}` is a subclass of `{}` which is not allowed", sym.show(gs), "Module");
             } else if (sym.data(gs)->derivesFrom(gs, core::Symbols::Class())) {
+                // The VM rejects attempts to subclass Class directly
                 e.setHeader("`{}` is a subclass of `{}` which is not allowed", sym.show(gs), "Class");
             } else {
                 // sym is a normal, non singleton class
@@ -307,8 +324,6 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 // Note: this depends on attached classes having lower indexes in name table than their singletons
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
-                // TODO(jez) Should we be doing this logic for modules too?
-                // I'm down, but I would like to see what fails so I can write a test for it
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
                 auto singletonSuperClass = attached.data(gs)->superClass().data(gs)->lookupSingletonClass(gs);
                 if (!singletonSuperClass.exists()) {
