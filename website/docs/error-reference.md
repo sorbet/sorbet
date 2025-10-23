@@ -449,9 +449,9 @@ Accessor methods defined with `Struct.new` must not end with `=`, because the ge
 
 ## 3513
 
-This error code is from an old Sorbet version. It's equivalent to error 4023:
+This error code is from an old Sorbet version. It's equivalent to error 5080:
 
-[→ 4023](#4023)
+[→ 5080](#5080)
 
 ## 3514
 
@@ -1212,18 +1212,9 @@ To workaround issues like this, if you absolutely must have both a constant assi
 
 ## 4023
 
-The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
+This error code is from an old Sorbet version. It's equivalent to error 5080:
 
-## 4024
-
-Two keyword arguments to a method definition or block have been given the same name:
-
-```ruby
-def foo(x:, x:)
-end
-```
-
-You can resolve this error by giving a different name to one of the conflicting arguments.
+[→ 5080](#5080)
 
 ## 4025
 
@@ -2824,6 +2815,21 @@ For detailed information and examples, please refer to the documentation for err
 This error is functionally equivalent to error [7032](#7032). It is reported during the inference stage, while 5079 is reported during the resolver stage.
 
 For detailed information and examples, please refer to the documentation for error [7032](#7032).
+
+## 5080
+
+The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
+
+## 4024
+
+Two keyword arguments to a method definition or block have been given the same name:
+
+```ruby
+def foo(x:, x:)
+end
+```
+
+You can resolve this error by giving a different name to one of the conflicting arguments.
 
 ## 6001
 
