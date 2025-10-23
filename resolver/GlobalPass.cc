@@ -40,8 +40,6 @@ core::ErrorClass getRedeclarationErrorCode(const core::GlobalState &gs, core::Cl
                                            core::NameRef name) {
     if (parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())) {
         return core::errors::Resolver::EnumerableParentTypeNotDeclared;
-    } else if (name == core::Names::Constants::AttachedClass()) {
-        return core::errors::Resolver::HasAttachedClassIncluded;
     } else {
         return core::errors::Resolver::ParentTypeNotDeclared;
     }
@@ -60,10 +58,9 @@ core::ErrorClass getRedeclarationErrorCode(const core::GlobalState &gs, core::Cl
 void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef parent,
                               core::TypeMemberRef parentTypeMember, core::ClassOrModuleRef sym) {
     auto name = parentTypeMember.data(gs)->name;
-    auto code = getRedeclarationErrorCode(gs, parent, name);
 
-    if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
-        if (code == core::errors::Resolver::HasAttachedClassIncluded) {
+    if (name == core::Names::Constants::AttachedClass()) {
+        if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::HasAttachedClassIncluded)) {
             auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
             if (sym.data(gs)->isModule()) {
                 e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
@@ -100,7 +97,10 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
                             hasAttachedClass, "extend", sym.show(gs));
             }
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", hasAttachedClass);
-        } else {
+        }
+    } else {
+        auto code = getRedeclarationErrorCode(gs, parent, name);
+        if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
                         sym.show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
