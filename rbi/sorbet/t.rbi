@@ -485,3 +485,12 @@ module T::NonForcingConstants
   sig {params(val: BasicObject, klass: String).returns(T::Boolean)}
   def self.non_forcing_is_a?(val, klass); end
 end
+
+# T.must returns a custom subclass of `TypeError` to provide better error
+# messages in Ruby versions 3.1 or later. See the error_highlight gem and the
+# implementation of sorbet-runtime for more information on how this works.
+#
+# For all intents and purposes, this exception class should behave identically
+# to `TypeError`.
+class T::MustTypeError < TypeError
+end
