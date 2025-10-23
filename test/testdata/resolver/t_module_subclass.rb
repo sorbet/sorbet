@@ -1,6 +1,7 @@
 # typed: strict
+# disable-fast-path: true
 
-class ReplacedMethods < Module
+class ReplacedMethods < Module # error: `has_attached_class!` declared by parent `Module` must be re-declared in `ReplacedMethods`
   extend T::Sig
 
   sig { returns(Symbol) }

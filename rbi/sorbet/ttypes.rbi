@@ -414,3 +414,20 @@ class T::Types::TypedClass < T::Types::Base
   sig {returns(T.class_of(Class))}
   def underlying_class; end
 end
+
+class T::Types::TypedModule < T::Types::Base
+  sig {params(type: T.untyped).void}
+  def initialize(type); end
+
+  sig {returns(String)}
+  def name; end
+
+  sig {override.params(obj: Kernel).returns(T::Boolean)}
+  def valid?(obj); end
+
+  sig {returns(T::Types::Base)}
+  def type; end
+
+  sig {returns(T.class_of(Module))}
+  def underlying_class; end
+end
