@@ -1955,7 +1955,7 @@ public:
     }
 
     bool isItParameterName(std::string_view name) {
-        return name == "it";
+        return name == core::Names::it().shortName(gs_);
     }
 };
 
