@@ -1582,8 +1582,10 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, errorDetailsCollector);
         if (!isSubTypeOfLeft) {
             if constexpr (shouldAddErrorDetails) {
-                // This if is to handle the T.nilable(X) < X case; it's not useful say that nil is not a subtype of X
-                if (!o1->left.isNilClass()) {
+                // This if is to handle `T.nilable(X) < Y`; if we've already told the user that T.nilable(X) is not a
+                // subtype of Y, it's not useful to also tell the user that X is not a subtype of Y or that nil is not a
+                // subtype Y
+                if (!o1->left.isNilClass() && !o1->right.isNilClass()) {
                     auto message = ErrorColors::format("`{}` (the left side of the `{}`) is not a subtype of `{}`",
                                                        o1->left.show(gs), "T.any", t2.show(gs));
                     subCollectorLeft.message = message;
@@ -1596,8 +1598,10 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         auto isSubTypeOfRight = Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode, errorDetailsCollector);
         if (!isSubTypeOfRight) {
             if constexpr (shouldAddErrorDetails) {
-                // This if is to handle the T.nilable(X) < X case; it's not useful say that nil is not a subtype of X
-                if (!o1->right.isNilClass()) {
+                // This if is to handle `T.nilable(X) < Y`; if we've already told the user that T.nilable(X) is not a
+                // subtype of Y, it's not useful to also tell the user that X is not a subtype of Y or that nil is not a
+                // subtype Y
+                if (!o1->left.isNilClass() && !o1->right.isNilClass()) {
                     auto message = ErrorColors::format("`{}` (the right side of the `{}`) is not a subtype of `{}`",
                                                        o1->right.show(gs), "T.any", t2.show(gs));
                     subCollectorRight.message = message;
