@@ -669,12 +669,6 @@ public:
 using BehaviorLocs = InlinedVector<core::Loc, 1>;
 using ClassBehaviorLocsMap = UnorderedMap<core::ClassOrModuleRef, BehaviorLocs>;
 
-bool isBadHasAttachedClass(core::Context ctx, core::NameRef name) {
-    auto owner = ctx.owner.asClassOrModuleRef();
-    return name == core::Names::Constants::AttachedClass() && owner != core::Symbols::Class() &&
-           owner.data(ctx)->isClass() && !owner.data(ctx)->isSingletonClass(ctx);
-}
-
 /**
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
@@ -1946,30 +1940,6 @@ public:
                                             ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
 
             return handleAssignment(ctx, ast::MK::Assign(asgn.loc, move(asgn.lhs), move(send)));
-        }
-
-        if (isBadHasAttachedClass(ctx, typeName->cnst)) {
-            // We could go out of our way to try to not even define the <AttachedClass> type member,
-            // in an attempt to maintain an invariant that <AttachedClass> is only ever defined on
-            // - modules
-            // - class singleton classes
-            // - ::Class itself
-            // But then in GlobalPass, resolveTypeMember would simply mangle rename things so that
-            // the <AttachedClass> symbol pointed to a type member symbol anyways (instead of a
-            // static field or type alias symbol). So let's just report an error and then continue
-            // to let the type member be defined, shedding a single tear that we can't enforce the
-            // invariant we might have otherwise wanted.
-            if (auto e = ctx.beginError(asgn.loc, core::errors::Namer::HasAttachedClassInClass)) {
-                // This is the simple way to explain the error to users, even though the
-                // condition above is more complicated. The one exception to the way this error
-                // is phrased: `::Class` itself, which is a `class`, is allowed to use `has_attached_class!`.
-                //
-                // But since `::Class` is final (even according to the VM), and since we've
-                // already marked `::Class` with `has_attached_class!`, it's not worth leaking
-                // that special case to the user.
-                e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
-                            core::Names::declareHasAttachedClass().show(ctx), "module", "class");
-            }
         }
 
         // Prevent a crash by validating the arguments before we do any symbol lookups or manipulations
