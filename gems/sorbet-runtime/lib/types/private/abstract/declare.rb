@@ -38,6 +38,23 @@ module T::Private::Abstract::Declare
         if result.instance_of?(mod)
           raise "#{mod} is declared as abstract; it cannot be instantiated"
         end
+
+        # See if we were called on a module that resolved to the abstract override, and
+        # bypass the abstract override for the next call.
+        # The owner of the method is actually the singleton class, which is
+        # different from the module on which we are defining the singleton
+        # method.
+        me = self.method(:new)
+        if me.owner.attached_object != mod
+          return result
+        end
+
+        # This method must exist, or we would have errored in the earlier `super` call.
+        supered = T.must(me.super_method)
+        # TODO(froydnj) we should be able to ladder up the method inheritance
+        # chain to see if there are multiple abstract .new methods and resolve
+        # to the farthest-away non-abstract one.
+        self.send(:define_singleton_method, :new, supered.unbind)
         result
       end
 
