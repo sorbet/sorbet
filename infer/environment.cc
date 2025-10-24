@@ -710,18 +710,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         const auto &argSymData = argSym.data(ctx);
         if (argSymData->isModule()) {
-            if (!recvType.isUntyped() && recvType.derivesFrom(ctx, core::Symbols::Class())) {
-                argType = core::Types::tClass(argSymData->externalType());
+            argType = core::Types::tModule(argSymData->externalType());
 
-                // Can't add noTypeTest for module types, because approximateSubtract would drop the
-                // subtypes of `::Class` from the type, not just our `T::Class[argSymModule]` type.
-                // That is, approximateSubtract isn't very sophisticated in the AppliedType case:
-                // https://github.com/sorbet/sorbet/issues/9397
-                canAddNoTypeTest = false;
-            } else {
-                // Can't support this case until we have T::Module
-                return;
-            }
+            // Can't add noTypeTest for module types, because approximateSubtract would drop the
+            // subtypes of `::Class` from the type, not just our `T::Class[argSymModule]` type.
+            // That is, approximateSubtract isn't very sophisticated in the AppliedType case:
+            // https://github.com/sorbet/sorbet/issues/9397
+            canAddNoTypeTest = false;
         }
 
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
