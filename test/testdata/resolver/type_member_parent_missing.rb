@@ -10,7 +10,6 @@
   class Bar1 < Foo1
 # ^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Enumerable#each (overload.1)`
     Elem = type_member(:out)
-  # ^^^^^^^^^^^^^^^^^^^^^^^^ error: Type variance mismatch for `Elem` with parent `Foo1`. Child `Bar1` should be `invariant`, but it is `:out`
     #      ^^^^^^^^^^^ error: Method `type_member` does not exist on `T.class_of(Bar1)`
   end
 
