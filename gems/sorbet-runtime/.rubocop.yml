@@ -4,7 +4,7 @@ require: rubocop-performance
 AllCops:
   NewCops: disable
   SuggestExtensions: false
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.0
   Exclude:
     - 'vendor/**/*'
     - 'test/wholesome/vendor/**/*'
