@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require_relative '../test_helper'
+require_relative '../types/fixtures/reloading_constants'
 
 module Opus::Types::Test
   class UtilsTest < Critic::Unit::UnitTest
@@ -67,6 +68,52 @@ module Opus::Types::Test
         assert_equal(:sigfun, sfm.method.name)
         assert_equal(:sigfun, sfm.method_name)
         assert_equal('Integer', sfm.return_type.name)
+      end
+    end
+
+    describe 'T::Utils.unload_const' do
+      it 'releases const references from T::Private::Methods' do
+        # Read from fixture
+        # gems/sorbet-runtime/test/types/fixtures/reloading_constants.rb
+
+        mod = Foo
+        inner_class = Foo::Bar
+
+        mod_id = mod.object_id
+        mod_singleton_class_id = mod.singleton_class.object_id
+        inner_class_id = inner_class.object_id
+        inner_class_singleton_class_id = inner_class.singleton_class.object_id
+
+        method_ids = [
+          "#{mod_singleton_class_id}#method_1",
+          "#{mod_singleton_class_id}#method_2",
+          "#{mod_id}#method_3",
+          "#{mod_id}#method_4",
+          "#{mod_id}#method_5",
+          "#{inner_class_singleton_class_id}#method_6",
+          "#{inner_class_singleton_class_id}#method_7",
+          "#{inner_class_singleton_class_id}#method_8",
+          "#{inner_class_id}#method_9",
+          "#{inner_class_id}#method_10",
+          "#{inner_class_id}#method_11",
+        ]
+        inner_singleton_class = inner_class.singleton_class
+
+        assert(!T::Private::Methods.instance_variable_get(:@installed_hooks)[mod].nil?)
+        assert(!T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_class].nil?)
+        assert(!T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_singleton_class].nil?)
+        method_ids.each do |method_id|
+          assert(!T::Private::Methods.instance_variable_get(:@sig_wrappers)[method_id].nil?, "Expected to find sig wrapper for #{method_id}")
+        end
+
+        T::Utils.unload_const(Foo)
+
+        assert_nil(T::Private::Methods.instance_variable_get(:@installed_hooks)[mod])
+        assert_nil(T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_class])
+        assert_nil(T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_singleton_class])
+        method_ids.each do |method_id|
+          assert_nil(T::Private::Methods.instance_variable_get(:@sig_wrappers)[method_id])
+        end
       end
     end
   end
