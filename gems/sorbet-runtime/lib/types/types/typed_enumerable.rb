@@ -38,14 +38,12 @@ module T::Types
       return false unless obj.is_a?(Enumerable)
       case obj
       when Array
-        begin
-          it = 0
-          while it < obj.count
-            return false unless type.recursively_valid?(obj[it])
-            it += 1
-          end
-          true
+        it = 0
+        while it < obj.count
+          return false unless type.recursively_valid?(obj[it])
+          it += 1
         end
+        true
       when Hash
         type_ = self.type
         return false unless type_.is_a?(FixedArray)
