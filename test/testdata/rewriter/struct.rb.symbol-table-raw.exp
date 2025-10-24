@@ -267,7 +267,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U RealStructDesugar>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=18:1 end=18:24}
     class <C <U RealStructDesugar>>::<C <U A>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=19:5 end=19:21}
-      type-member(=) <C <U RealStructDesugar>>::<C <U A>>::<C <U Elem>> -> LambdaParam(<C <U RealStructDesugar>>::<C <U A>>::<C <U Elem>>, fixed=T.untyped) @ Loc {file=test/testdata/rewriter/struct.rb start=19:5 end=19:21}
+      type-member(+) <C <U RealStructDesugar>>::<C <U A>>::<C <U Elem>> -> LambdaParam(<C <U RealStructDesugar>>::<C <U A>>::<C <U Elem>>, fixed=T.untyped) @ Loc {file=test/testdata/rewriter/struct.rb start=19:5 end=19:21}
       method <C <U RealStructDesugar>>::<C <U A>>#<U bar> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=22:9 end=22:16}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
       method <C <U RealStructDesugar>>::<C <U A>>#<U bar=> (arg0, <blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=24:9 end=24:23}
