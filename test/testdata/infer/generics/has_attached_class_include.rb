@@ -11,7 +11,7 @@ module ChildModule1 # error: `has_attached_class!` declared by parent `Parent` m
   include Parent
 end
 
-module ChildModule2 # error: `Parent` was declared `has_attached_class!` and so cannot be `extend`ed into the module `ChildModule2
+module ChildModule2 # error: Type variance mismatch for `<AttachedClass>` with parent `Parent`. Child `T.class_of(ChildModule2)` should be `invariant`, but it is `:out`
   extend Parent
 end
 
