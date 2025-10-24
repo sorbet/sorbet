@@ -15,7 +15,7 @@ module M
   end
 end
 
-class Parent # error: Type variance mismatch for `<AttachedClass>` with parent `M`. Child `T.class_of(Parent)` should be `invariant`, but it is `:out`
+class Parent # error: Type variance mismatch for `T.attached_class` with parent `M`. Parent needs to be `:out` but it is `invariant`
   extend M
   # if this class were final, then Sorbet could allow the invariant <AttachedClass> above
   # final!
