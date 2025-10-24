@@ -27,7 +27,7 @@ class Child < Parent
   include Mixin
   include 3
   #       ^ error: `include` must only contain constant literals
-  #       ^ error: Expected `Module` but found `Integer(3)` for argument `arg0`
+  #       ^ error: Expected `T::Module[T.anything]` but found `Integer(3)` for argument `arg0`
   include Mixin do; end
   #             ^^^^^^^ error: Method `Module#include` does not take a block
 # ^^^^^^^^^^^^^^^^^^^^^ error: `include` can not be passed a block
