@@ -94,6 +94,11 @@ Performance/CollectionLiteralInLoop:
     # Ok to prioritize brevity over perf in tests
     - 'test/**/*'
 
+# Tests can do whatever they want.
+Style/MutableConstant:
+  Exclude:
+    - 'test/**/*'
+
 # We frequently care about the exact type of values, not just truthiness
 Style/DoubleNegation:
   Enabled: false
