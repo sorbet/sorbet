@@ -4,7 +4,7 @@ require: rubocop-performance
 AllCops:
   NewCops: disable
   SuggestExtensions: false
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.0
   Exclude:
     - 'vendor/**/*'
     - 'test/wholesome/vendor/**/*'
@@ -93,11 +93,11 @@ Performance/CollectionLiteralInLoop:
   Exclude:
     # Ok to prioritize brevity over perf in tests
     - 'test/**/*'
-Performance/BindCall:
+
+# Tests can do whatever they want.
+Style/MutableConstant:
   Exclude:
-    # Only runs when `bind_call` is not built into the stdlib
-    - 'lib/types/private/methods/call_validation_2_6.rb'
-    - 'lib/types/private/methods/call_validation.rb'
+    - 'test/**/*'
 
 # We frequently care about the exact type of values, not just truthiness
 Style/DoubleNegation:
@@ -118,14 +118,12 @@ Layout/EmptyLines:
   Exclude:
     # We deliberately add extra lines here to aid Pry debugging
     - 'lib/types/private/methods/call_validation.rb'
-    - 'lib/types/private/methods/call_validation_2_6.rb'
     - 'lib/types/private/methods/call_validation_2_7.rb'
 
 Layout/ArgumentAlignment:
   Exclude:
     # This is generated code where the readability of the generator
     # matters more than the readability of the result
-    - 'lib/types/private/methods/call_validation_2_6.rb'
     - 'lib/types/private/methods/call_validation_2_7.rb'
 
 Layout/EmptyLinesAroundAttributeAccessor:
