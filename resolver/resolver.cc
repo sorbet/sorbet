@@ -2337,12 +2337,20 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
         auto attachedClassTypeMember = attachedClass.asTypeMemberRef();
+        // TODO(jez) Are there other places where we need to apply this?
+        // e.g., is there somewhere that we eagerly resolve attached class type members?
+        bool isFixed = false;
+        if (singleton.data(ctx)->flags.isFinal) {
+            attachedClassTypeMember.data(ctx)->flags.isCovariant = false;
+            attachedClassTypeMember.data(ctx)->flags.isInvariant = true;
+            attachedClassTypeMember.data(ctx)->flags.isFixed = isFixed = true;
+        }
         auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember.data(ctx)->resultType);
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {
             lambdaParam->upperBound = sym.data(ctx)->unsafeComputeExternalType(ctx);
-            lambdaParam->lowerBound = core::Types::bottom();
+            lambdaParam->lowerBound = isFixed ? lambdaParam->upperBound : core::Types::bottom();
         }
 
         // If all of the singleton members have been resolved, attempt to
