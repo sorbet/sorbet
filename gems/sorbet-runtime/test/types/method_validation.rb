@@ -382,7 +382,7 @@ module Opus::Types::Test
               (1...10)
             end
 
-            assert_equal((1...10), @mod.foo)
+            assert_equal(1...10, @mod.foo)
           end
 
           it 'permits a range that has an integer start and no end' do
@@ -391,7 +391,7 @@ module Opus::Types::Test
               (1...nil)
             end
 
-            assert_equal((1...nil), @mod.foo)
+            assert_equal(1...nil, @mod.foo)
           end
 
           # Ruby 2.6 does not support ranges with boundless starts
@@ -402,7 +402,7 @@ module Opus::Types::Test
                 (nil...10)
               end
 
-              assert_equal((nil...10), @mod.foo)
+              assert_equal(nil...10, @mod.foo)
             end
           end
 
@@ -412,7 +412,7 @@ module Opus::Types::Test
               (nil...nil)
             end
 
-            assert_equal((nil...nil), @mod.foo)
+            assert_equal(nil...nil, @mod.foo)
           end
         end
       end

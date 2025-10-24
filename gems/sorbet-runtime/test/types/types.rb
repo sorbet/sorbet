@@ -849,7 +849,7 @@ module Opus::Types::Test
       end
 
       it 'can have its metatype instantiated' do
-        assert_equal((3..4), T::Range[Integer].new(3, 4))
+        assert_equal(3..4, T::Range[Integer].new(3, 4))
       end
     end
 
