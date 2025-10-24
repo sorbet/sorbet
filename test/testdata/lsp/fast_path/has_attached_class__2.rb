@@ -2,7 +2,7 @@
 # spacer for exclude-from-file-update
 
 class AbstractModel; end
-class Parent < AbstractModel
+class Parent < AbstractModel # error: Type variance mismatch
   include Inheritable
 end
 

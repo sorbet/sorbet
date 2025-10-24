@@ -18,7 +18,7 @@
 
 module Parent
   extend T::Generic
-  has_attached_class! { {upper: Integer} }
+  has_attached_class!(:out) { {upper: Integer} }
 end
 
 class Child
