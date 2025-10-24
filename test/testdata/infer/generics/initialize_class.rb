@@ -1,4 +1,5 @@
 # typed: strict
+# disable-fast-path: true
 class Module; include T::Sig; end
 
 module Thing

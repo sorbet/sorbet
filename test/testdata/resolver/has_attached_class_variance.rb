@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 
 module M
   extend T::Sig, T::Generic
