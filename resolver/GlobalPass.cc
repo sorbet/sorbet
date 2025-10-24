@@ -158,8 +158,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
     typeAliases[sym.id()].emplace_back(parentTypeMember, myTypeMember);
     auto myVariance = myTypeMember.data(gs)->variance();
     auto parentVariance = parentTypeMember.data(gs)->variance();
-    if (!sym.data(gs)->derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
-        myVariance != core::Variance::Invariant) {
+    if (myVariance != parentVariance && myVariance != core::Variance::Invariant) {
         if (auto e = gs.beginError(myTypeMember.data(gs)->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
             auto orInvariant = parentVariance == core::Variance::Invariant ? "" : " or invariant";
             e.setHeader("Type variance mismatch for `{}` with parent `{}`. Child `{}` should be `{}`{}, but "
