@@ -110,6 +110,10 @@ Style/SlicingWithRange:
 Style/CaseEquality:
   Enabled: false
 
+# False positives because it's not type-aware.
+Style/HashEachMethods:
+  Enabled: false
+
 Layout/EmptyLines:
   Exclude:
     # We deliberately add extra lines here to aid Pry debugging
