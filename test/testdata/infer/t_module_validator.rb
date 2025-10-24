@@ -32,7 +32,7 @@ class Validator
 
     case val
     when @mod
-      return val # error: Expected `T.nilable(T.all(Validator::Mod, T.type_parameter(:Val) (of Validator#try_validate)))` but found `T.type_parameter(:Val) (of Validator#try_validate)` for method result type
+      return val
     else
       return nil
     end

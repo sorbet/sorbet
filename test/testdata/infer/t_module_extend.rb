@@ -26,7 +26,7 @@ sig {
 }
 def example1(x, mod)
   if x.is_a?(mod)
-    T.reveal_type(x) # error: `Object`
+    T.reveal_type(x) # error: `T.all(Object, IParent)`
   end
 end
 
