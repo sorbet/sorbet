@@ -320,12 +320,13 @@ bool isSharedExamplesName(core::NameRef name) {
     }
 }
 
-ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                       const ast::MethodDef::PARAMS_store &args,
-                                       absl::Span<const ast::ExpressionPtr> destructuringStmts,
-                                       ast::ExpressionPtr &iteratee, bool insideDescribe);
+ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
+                                            const ast::MethodDef::PARAMS_store &args,
+                                            absl::Span<const ast::ExpressionPtr> destructuringStmts,
+                                            ast::ExpressionPtr &iteratee, bool insideDescribe);
 
-ast::ExpressionPtr invalidUnderTestEach(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr stmt) {
+ast::ExpressionPtr invalidUnderParameterizedBody(core::MutableContext ctx, core::NameRef eachName,
+                                                 ast::ExpressionPtr stmt) {
     if (isSharedExamplesName(eachName)) {
         // To avoid causing undue errors in codebases that already use `shared_examples`, we don't
         // report an error. Only report for test_each-style usages, because codebases will have
@@ -348,18 +349,18 @@ ast::ExpressionPtr invalidUnderTestEach(core::MutableContext ctx, core::NameRef 
 
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
-ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
-                                absl::Span<const ast::ExpressionPtr> destructuringStmts, ast::ExpressionPtr stmt,
-                                const ast::MethodDef::PARAMS_store &args, ast::ExpressionPtr &iteratee,
-                                bool insideDescribe) {
+ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef eachName,
+                                         absl::Span<const ast::ExpressionPtr> destructuringStmts,
+                                         ast::ExpressionPtr stmt, const ast::MethodDef::PARAMS_store &args,
+                                         ast::ExpressionPtr &iteratee, bool insideDescribe) {
     // this statement must be a send
     auto send = ast::cast_tree<ast::Send>(stmt);
     if (send == nullptr) {
-        return invalidUnderTestEach(ctx, eachName, move(stmt));
+        return invalidUnderParameterizedBody(ctx, eachName, move(stmt));
     }
 
     if (send->hasBlock() && send->block()->params.size() != 0) {
-        return invalidUnderTestEach(ctx, eachName, move(stmt));
+        return invalidUnderParameterizedBody(ctx, eachName, move(stmt));
     }
 
     auto maybeName = nameForTestHelperMethod(ctx, *send);
@@ -412,8 +413,8 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 break;
             }
 
-            return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
-                                       iteratee, /* insideDescribe */ true);
+            return prepareParameterizedBody(ctx, eachName, std::move(send->block()->body), args, destructuringStmts,
+                                            iteratee, /* insideDescribe */ true);
         }
 
         case core::Names::let().rawId():
@@ -459,7 +460,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         }
     }
 
-    return invalidUnderTestEach(ctx, eachName, move(stmt));
+    return invalidUnderParameterizedBody(ctx, eachName, move(stmt));
 }
 
 bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::PARAMS_store &args,
@@ -512,25 +513,27 @@ bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::PARAMS_s
 }
 
 // this just walks the body of a `test_each` and tries to transform every statement
-ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                       const ast::MethodDef::PARAMS_store &args,
-                                       absl::Span<const ast::ExpressionPtr> destructuringStmts,
-                                       ast::ExpressionPtr &iteratee, bool insideDescribe) {
+ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
+                                            const ast::MethodDef::PARAMS_store &args,
+                                            absl::Span<const ast::ExpressionPtr> destructuringStmts,
+                                            ast::ExpressionPtr &iteratee, bool insideDescribe) {
     if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
         if (isDestructuringInsSeq(ctx, args, bodySeq)) {
             ENFORCE(destructuringStmts.empty(), "Nested destructuring statements");
-            return prepareTestEachBody(ctx, eachName, std::move(bodySeq->expr), args, absl::MakeSpan(bodySeq->stats),
-                                       iteratee, insideDescribe);
+            return prepareParameterizedBody(ctx, eachName, std::move(bodySeq->expr), args,
+                                            absl::MakeSpan(bodySeq->stats), iteratee, insideDescribe);
         }
 
         for (auto &exp : bodySeq->stats) {
-            exp = runUnderEach(ctx, eachName, destructuringStmts, std::move(exp), args, iteratee, insideDescribe);
+            exp = runUnderParameterized(ctx, eachName, destructuringStmts, std::move(exp), args, iteratee,
+                                        insideDescribe);
         }
 
-        bodySeq->expr =
-            runUnderEach(ctx, eachName, destructuringStmts, std::move(bodySeq->expr), args, iteratee, insideDescribe);
+        bodySeq->expr = runUnderParameterized(ctx, eachName, destructuringStmts, std::move(bodySeq->expr), args,
+                                              iteratee, insideDescribe);
     } else {
-        body = runUnderEach(ctx, eachName, destructuringStmts, std::move(body), args, iteratee, insideDescribe);
+        body =
+            runUnderParameterized(ctx, eachName, destructuringStmts, std::move(body), args, iteratee, insideDescribe);
     }
 
     return body;
@@ -609,8 +612,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             // we can freely copy into methoddef scope
             auto iteratee = getIteratee(send->getPosArg(0));
             // and then reconstruct the send but with a modified body
-            auto body = prepareTestEachBody(ctx, send->fun, std::move(block->body), block->params, {}, iteratee,
-                                            insideDescribe);
+            auto body = prepareParameterizedBody(ctx, send->fun, std::move(block->body), block->params, {}, iteratee,
+                                                 insideDescribe);
             return ast::MK::Send(send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
                                  ast::MK::SendArgs(move(send->getPosArg(0)), ast::MK::Block(block->loc, std::move(body),
                                                                                             std::move(block->params))),
@@ -833,8 +836,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 ast::Array::ENTRY_store entries;
                 entries.emplace_back(ast::MK::UntypedNil(iterateeLoc));
                 auto iteratee = ast::MK::Array(iterateeLoc, move(entries));
-                body = prepareTestEachBody(ctx, send->fun, move(block->body), block->params, {}, iteratee,
-                                           /* insideDescribe */ true);
+                body = prepareParameterizedBody(ctx, send->fun, move(block->body), block->params, {}, iteratee,
+                                                /* insideDescribe */ true);
             }
             auto rhs = flattenDescribeBody(move(body));
 
