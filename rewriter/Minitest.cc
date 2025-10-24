@@ -238,6 +238,15 @@ optional<pair<core::NameRef, core::LocOffsets>> getLetNameAndDeclLoc(const ast::
     return pair{methodName, declLoc};
 }
 
+bool isRSpec(core::Context ctx, const ast::ExpressionPtr &recv) {
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(recv);
+    if (cnst == nullptr) {
+        return false;
+    }
+
+    return cnst->cnst == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope);
+}
+
 // Some RSpec methods are relatively common method names where we really want to make sure that
 // we're definitely in a test context before we do the translation here.
 //
@@ -627,15 +636,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::xcontext().rawId():
         case core::Names::fcontext().rawId():
         case core::Names::exampleGroup().rawId(): {
-            if (block == nullptr || send->numPosArgs() != 1 || !send->recv.isSelfReference()) {
+            if (block == nullptr || send->numPosArgs() != 1) {
                 return nullptr;
             }
 
-            if (!send->recv.isSelfReference()) {
+            auto recvIsRSpec = isRSpec(ctx, send->recv);
+            if (!send->recv.isSelfReference() && !recvIsRSpec) {
                 return nullptr;
             }
 
-            if (requiresSecondFactor(send->fun) && !insideDescribe) {
+            if (requiresSecondFactor(send->fun) && !recvIsRSpec && !insideDescribe) {
                 return nullptr;
             }
 
@@ -643,7 +653,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             auto argString = to_s(ctx, arg);
             ast::ClassDef::ANCESTORS_store ancestors;
 
-            if (maybeSharedExamplesName == nullptr) {
+            static const core::NameRef rspecParts[3] = {
+                core::Names::Constants::RSpec(),
+                core::Names::Constants::Core(),
+                core::Names::Constants::ExampleGroup(),
+            };
+            if (recvIsRSpec) {
+                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(send->recv.loc(), rspecParts));
+            } else if (maybeSharedExamplesName == nullptr) {
                 // First ancestor is the superclass
                 if (isClass) {
                     ancestors.emplace_back(ast::MK::Self(arg.loc()));
@@ -667,13 +684,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 // In this case, we'll hard-code that the parent class is `RSpec::Core::ExampleGroup`
                 ENFORCE(!isClass, "Somehow we threaded down a maybeSharedExamplesName for a non-module parent class?")
 
-                static const core::NameRef parts[3] = {
-                    core::Names::Constants::RSpec(),
-                    core::Names::Constants::Core(),
-                    core::Names::Constants::ExampleGroup(),
-                };
-                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(maybeSharedExamplesName.loc(), parts));
-
+                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(maybeSharedExamplesName.loc(), rspecParts));
                 ancestors.emplace_back(maybeSharedExamplesName.deepCopy());
             }
 
@@ -809,7 +820,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
             ENFORCE(isSharedExamplesName(send->fun));
-            if (block == nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
+            if (block == nullptr || send->numPosArgs() != 1) {
+                return nullptr;
+            }
+
+            auto recvIsRSpec = isRSpec(ctx, send->recv);
+            if (!send->recv.isSelfReference() && !recvIsRSpec) {
+                return nullptr;
+            }
+
+            if (!insideDescribe && !recvIsRSpec) {
                 return nullptr;
             }
 
