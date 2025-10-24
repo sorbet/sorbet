@@ -161,10 +161,17 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
     if (myVariance != parentVariance && myVariance != core::Variance::Invariant) {
         if (auto e = gs.beginError(myTypeMember.data(gs)->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
             auto orInvariant = parentVariance == core::Variance::Invariant ? "" : " or invariant";
-            e.setHeader("Type variance mismatch for `{}` with parent `{}`. Child `{}` should be `{}`{}, but "
-                        "it is `{}`",
-                        name.show(gs), parent.show(gs), sym.show(gs), core::Polarities::showVariance(parentVariance),
-                        orInvariant, core::Polarities::showVariance(myVariance));
+            if (name == core::Names::Constants::AttachedClass()) {
+                e.setHeader("Type variance mismatch for `{}` with parent `{}`. Parent needs to be `{}` but it is `{}`",
+                            "T.attached_class", parent.show(gs), core::Polarities::showVariance(myVariance),
+                            core::Polarities::showVariance(parentVariance));
+            } else {
+                e.setHeader("Type variance mismatch for `{}` with parent `{}`. Child `{}` should be `{}`{}, but "
+                            "it is `{}`",
+                            name.show(gs), parent.show(gs), sym.show(gs),
+                            core::Polarities::showVariance(parentVariance), orInvariant,
+                            core::Polarities::showVariance(myVariance));
+            }
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "Parent `{}` declared here", parent.show(gs));
         }
         return true;
