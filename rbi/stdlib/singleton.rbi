@@ -109,7 +109,7 @@ module Singleton
   include SingletonInstanceMethods
 
   module SingletonClassMethods
-    has_attached_class!
+    has_attached_class!(:out)
     sig {returns(T.attached_class)}
     def instance; end
 
@@ -129,7 +129,7 @@ module RactorLocalSingleton
 
   module RactorLocalSingletonClassMethods
     include Singleton::SingletonClassMethods
-    has_attached_class!
+    has_attached_class!(:out)
 
     sig {returns(T.attached_class)}
     def instance; end
