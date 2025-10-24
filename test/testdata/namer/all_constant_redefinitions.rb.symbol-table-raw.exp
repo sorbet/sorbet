@@ -45,7 +45,8 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U Wrapper>>::<S <C <U F>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Wrapper>>::<S <C <U F>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Wrapper::F) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=28:3 end=28:10}
       method <C <U Wrapper>>::<S <C <U F>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=28:3 end=28:15}
         argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
-  class <S <C <U Wrapper>> $1> < <C <U Module>> (<C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:1 end=3:15}
+  class <S <C <U Wrapper>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:1 end=3:15}
+    type-member(+) <S <C <U Wrapper>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Wrapper>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U Wrapper>>   targs = [     <M <C <U A>> $2> = T.untyped     <M <C <U B>> $2> = T.untyped     <M <C <U C>> $2> = T.untyped     <M <C <U D>> $1> = T.untyped     <M <C <U E>> $1> = T.untyped     <M <C <U F>> $1> = T.untyped   ] }) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:1 end=3:15}
     method <S <C <U Wrapper>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=3:1 end=29:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/all_constant_redefinitions.rb start=??? end=???}
 
