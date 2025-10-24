@@ -1,0 +1,237 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    ClassDef{
+      kind = module
+      name = UnresolvedConstantLit{
+        cnst = <C <U RSpec>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = []
+      rhs = [
+        ClassDef{
+          kind = module
+          name = UnresolvedConstantLit{
+            cnst = <C <U Core>>
+            scope = EmptyTree
+          }
+          symbol = <C <U <todo sym>>>
+          ancestors = []
+          rhs = [
+            ClassDef{
+              kind = class
+              name = UnresolvedConstantLit{
+                cnst = <C <U ExampleGroup>>
+                scope = EmptyTree
+              }
+              symbol = <C <U <todo sym>>>
+              ancestors = [ConstantLit{
+                  symbol = (class ::<todo sym>)
+                  orig = nullptr
+                }]
+              rhs = [
+                MethodDef{
+                  flags = {}
+                  name = <U expect><<U <todo method>>>
+                  params = [UnresolvedIdent{
+                      kind = Local
+                      name = <U arg>
+                    }, BlockParam{ expr = UnresolvedIdent{
+                      kind = Local
+                      name = <U <blk>>
+                    } }]
+                  rhs = EmptyTree
+                }
+
+                MethodDef{
+                  flags = {}
+                  name = <U eq><<U <todo method>>>
+                  params = [UnresolvedIdent{
+                      kind = Local
+                      name = <U arg>
+                    }, BlockParam{ expr = UnresolvedIdent{
+                      kind = Local
+                      name = <U <blk>>
+                    } }]
+                  rhs = EmptyTree
+                }
+
+                <runtime method definition of expect>
+
+                <runtime method definition of eq>
+              ]
+            }
+          ]
+        }
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U MyClass>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [UnresolvedConstantLit{
+          cnst = <C <U ExampleGroup>>
+          scope = UnresolvedConstantLit{
+            cnst = <C <U Core>>
+            scope = UnresolvedConstantLit{
+              cnst = <C <U RSpec>>
+              scope = EmptyTree
+            }
+          }
+        }]
+      rhs = [
+        ClassDef{
+          kind = class
+          name = UnresolvedConstantLit{
+            cnst = <C <U <describe 'single shared example with context'>>>
+            scope = EmptyTree
+          }
+          symbol = <C <U <todo sym>>>
+          ancestors = [Self]
+          rhs = [
+            ClassDef{
+              kind = module
+              name = UnresolvedConstantLit{
+                cnst = <C <U <shared_examples 'my shared example'>>>
+                scope = EmptyTree
+              }
+              symbol = <C <U <todo sym>>>
+              ancestors = []
+              rhs = [
+                MethodDef{
+                  flags = {rewriterSynthesized}
+                  name = <U foo_exists><<U <todo method>>>
+                  params = [BlockParam{ expr = UnresolvedIdent{
+                      kind = Local
+                      name = <U <blk>>
+                    } }]
+                  rhs = Literal{ value = "bar" }
+                }
+
+                <runtime method definition of foo_exists>
+
+                ClassDef{
+                  kind = class
+                  name = UnresolvedConstantLit{
+                    cnst = <C <U <context 'context'>>>
+                    scope = EmptyTree
+                  }
+                  symbol = <C <U <todo sym>>>
+                  ancestors = [UnresolvedConstantLit{
+                      cnst = <C <U ExampleGroup>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Core>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U RSpec>>
+                          scope = EmptyTree
+                        }
+                      }
+                    }, UnresolvedConstantLit{
+                      cnst = <C <U <shared_examples 'my shared example'>>>
+                      scope = EmptyTree
+                    }]
+                  rhs = [
+                    MethodDef{
+                      flags = {rewriterSynthesized}
+                      name = <U <it 'works'>><<U <todo method>>>
+                      params = [BlockParam{ expr = UnresolvedIdent{
+                          kind = Local
+                          name = <U <blk>>
+                        } }]
+                      rhs = InsSeq{
+                        stats = [
+                          Send{
+                            flags = {}
+                            recv = Send{
+                              flags = {privateOk}
+                              recv = Self
+                              fun = <U expect>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Send{
+                                  flags = {privateOk}
+                                  recv = Self
+                                  fun = <U foo_exists>
+                                  block = nullptr
+                                  pos_args = 0
+                                  args = [
+                                  ]
+                                }
+                              ]
+                            }
+                            fun = <U to>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              Send{
+                                flags = {privateOk}
+                                recv = Self
+                                fun = <U eq>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  Literal{ value = "bar" }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        expr = Send{
+                          flags = {privateOk}
+                          recv = Self
+                          fun = <U this_does_not_exist>
+                          block = nullptr
+                          pos_args = 0
+                          args = [
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U requires_ancestor>
+                  block = Block {
+                    params = [
+                    ]
+                    body = UnresolvedConstantLit{
+                      cnst = <C <U ExampleGroup>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Core>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U RSpec>>
+                          scope = EmptyTree
+                        }
+                      }
+                    }
+                  }
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
