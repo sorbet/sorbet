@@ -120,7 +120,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
     if (!my.exists()) {
         reportRedeclarationError(gs, parent, parentTypeMember, sym);
 
-        auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
+        auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, parentTypeMember.data(gs)->variance());
         typeMember.data(gs)->flags.isFixed = true;
         auto untyped = core::Types::untyped(sym);
         typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
