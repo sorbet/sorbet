@@ -1,7 +1,10 @@
 # typed: true
 
-# Test precedence: local variable 'it' takes precedence over method 'it'
-# Based on Ruby 3.4 spec: "If `it` is defined as a method, anonymous parameter takes precedence"
+# Test precedence rules for 'it': local variable > block parameter > method
+# Based on Ruby 3.4 spec:
+#  - "If `it` is defined as a method, anonymous parameter takes precedence"
+#  - "If `it` is available as a local variable, it takes precedence"
+# Note: Method call disambiguation (like it(it)) is tested in it_param_method_vs_param.rb
 
 class ItMethodTest
   extend T::Sig
