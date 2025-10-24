@@ -79,13 +79,13 @@ module T::Private::Methods::CallValidation
 
     # All the types for which valid? unconditionally returns `true`
     return_is_ignorable =
-      (method_sig.return_type.equal?(T::Types::Untyped::Private::INSTANCE) ||
-       method_sig.return_type.equal?(T::Types::Anything::Private::INSTANCE) ||
-       method_sig.return_type.equal?(T::Types::AttachedClassType::Private::INSTANCE) ||
-       method_sig.return_type.equal?(T::Types::SelfType::Private::INSTANCE) ||
-       method_sig.return_type.is_a?(T::Types::TypeParameter) ||
-       method_sig.return_type.is_a?(T::Types::TypeVariable) ||
-       (method_sig.return_type.is_a?(T::Types::Simple) && method_sig.return_type.raw_type.equal?(BasicObject)))
+      method_sig.return_type.equal?(T::Types::Untyped::Private::INSTANCE) ||
+      method_sig.return_type.equal?(T::Types::Anything::Private::INSTANCE) ||
+      method_sig.return_type.equal?(T::Types::AttachedClassType::Private::INSTANCE) ||
+      method_sig.return_type.equal?(T::Types::SelfType::Private::INSTANCE) ||
+      method_sig.return_type.is_a?(T::Types::TypeParameter) ||
+      method_sig.return_type.is_a?(T::Types::TypeVariable) ||
+      (method_sig.return_type.is_a?(T::Types::Simple) && method_sig.return_type.raw_type.equal?(BasicObject))
 
     returns_anything_method = all_args_are_simple && return_is_ignorable
 

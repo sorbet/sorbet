@@ -245,8 +245,8 @@ class T::Private::Methods::Signature
   end
 
   def force_type_init
-    @arg_types.each { |_, type| type.build_type }
-    @kwarg_types.each { |_, type| type.build_type }
+    @arg_types.each_value(&:build_type)
+    @kwarg_types.each_value(&:build_type)
     @block_type&.build_type
     @rest_type&.build_type
     @keyrest_type&.build_type

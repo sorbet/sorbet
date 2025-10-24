@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest', '~> 5.11'
   s.add_development_dependency 'mocha', '~> 2.1'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'rubocop', '1.57.1'
+  s.add_development_dependency 'rubocop', '1.81.6'
   s.add_development_dependency 'rubocop-performance', '1.13.2'
   # for reproducing race conditions in tests
   s.add_development_dependency 'concurrent-ruby', '~> 1.1.5'

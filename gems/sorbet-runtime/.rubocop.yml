@@ -78,7 +78,7 @@ Naming/FileName:
     # Filename deliberately matches gem name
     - 'lib/sorbet-runtime.rb'
 # You can convey semantic meaning by using is_foo?
-Naming/PredicateName:
+Naming/PredicatePrefix:
   Enabled: false
 Naming/MethodParameterName:
   Enabled: false
@@ -108,6 +108,10 @@ Style/SlicingWithRange:
   Enabled: false
 
 Style/CaseEquality:
+  Enabled: false
+
+# False positives because it's not type-aware.
+Style/HashEachMethods:
   Enabled: false
 
 Layout/EmptyLines:
