@@ -370,7 +370,7 @@ class Thread < Object
   def add_trace_func(proc); end
 
   # Returns the current backtrace of the target thread.
-  sig {params(args: T.untyped).returns(T::Array[T.untyped])}
+  sig {params(args: T.untyped).returns(T.nilable(T::Array[T.untyped]))}
   def backtrace(*args); end
 
   # Returns the execution stack for the target thread---an array containing
