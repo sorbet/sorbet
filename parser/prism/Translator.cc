@@ -2127,7 +2127,61 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto collection = translate(forNode->collection);
             auto body = translateStatements(forNode->statements);
 
-            return make_unique<parser::For>(location, move(variable), move(collection), move(body));
+            if (!directlyDesugar || !hasExpr(variable, collection, body)) {
+                return make_unique<parser::For>(location, move(variable), move(collection), move(body));
+            }
+
+            // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
+            bool canProvideNiceDesugar = true;
+            auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(variable.get());
+
+            // Check if the variable is a simple local variable or a multi-target with only local variables
+            if (mlhs) {
+                // Multi-target: check if all are local variables (no nested Mlhs or other complex targets)
+                canProvideNiceDesugar = absl::c_all_of(mlhs->exprs, [](const auto &c) {
+                    return parser::NodeWithExpr::isa_node<parser::LVarLhs>(c.get());
+                });
+            } else {
+                // Single variable: check if it's a local variable
+                canProvideNiceDesugar = parser::NodeWithExpr::isa_node<parser::LVarLhs>(variable.get());
+            }
+
+            auto bodyExpr = body ? body->takeDesugaredExpr() : MK::EmptyTree();
+            auto collectionExpr = collection->takeDesugaredExpr();
+            auto locZeroLen = location.copyWithZeroLength();
+            ast::MethodDef::PARAMS_store params;
+
+            if (canProvideNiceDesugar) {
+                // Simple case: `for x in a; body; end` -> `a.each { |x| body }`
+                if (mlhs) {
+                    for (auto &c : mlhs->exprs) {
+                        params.emplace_back(c->takeDesugaredExpr());
+                    }
+                } else {
+                    params.emplace_back(variable->takeDesugaredExpr());
+                }
+            } else {
+                // Complex case: `for @x in a; body; end` -> `a.each { || @x = <temp>; body }`
+                auto temp = nextUniqueDesugarName(core::Names::forTemp());
+                auto tempLocal = MK::Local(location, temp);
+
+                // Desugar the assignment
+                ExpressionPtr masgnExpr;
+                if (mlhs) {
+                    // Multi-target: use desugarMlhs for complex expansion
+                    masgnExpr = desugarMlhs(location, mlhs, move(tempLocal));
+                } else {
+                    // Single variable: simple assignment
+                    masgnExpr = MK::Assign(location, variable->takeDesugaredExpr(), move(tempLocal));
+                }
+
+                bodyExpr = MK::InsSeq1(location, move(masgnExpr), move(bodyExpr));
+            }
+
+            auto block = MK::Block(location, move(bodyExpr), move(params));
+            auto expr = MK::Send0Block(location, move(collectionExpr), core::Names::each(), locZeroLen, move(block));
+
+            return make_node_with_expr<parser::For>(move(expr), location, move(variable), move(collection), move(body));
         }
         case PM_FORWARDING_ARGUMENTS_NODE: { // The `...` argument in a method call, like `foo(...)`
             return make_unique<parser::ForwardedArgs>(location);
