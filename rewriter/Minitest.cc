@@ -653,7 +653,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             auto argString = to_s(ctx, arg);
             ast::ClassDef::ANCESTORS_store ancestors;
 
-            if (maybeSharedExamplesName == nullptr) {
+            static const core::NameRef rspecParts[3] = {
+                core::Names::Constants::RSpec(),
+                core::Names::Constants::Core(),
+                core::Names::Constants::ExampleGroup(),
+            };
+            if (recvIsRSpec) {
+                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(send->recv.loc(), rspecParts));
+            } else if (maybeSharedExamplesName == nullptr) {
                 // First ancestor is the superclass
                 if (isClass) {
                     ancestors.emplace_back(ast::MK::Self(arg.loc()));
@@ -677,13 +684,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 // In this case, we'll hard-code that the parent class is `RSpec::Core::ExampleGroup`
                 ENFORCE(!isClass, "Somehow we threaded down a maybeSharedExamplesName for a non-module parent class?")
 
-                static const core::NameRef parts[3] = {
-                    core::Names::Constants::RSpec(),
-                    core::Names::Constants::Core(),
-                    core::Names::Constants::ExampleGroup(),
-                };
-                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(maybeSharedExamplesName.loc(), parts));
-
+                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(maybeSharedExamplesName.loc(), rspecParts));
                 ancestors.emplace_back(maybeSharedExamplesName.deepCopy());
             }
 
