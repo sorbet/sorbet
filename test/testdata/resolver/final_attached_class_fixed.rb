@@ -8,11 +8,11 @@ class Parent
   def self.make
     if [true, false].sample
       # expected and desired
-      return Parent.new # error: Expected `T.attached_class (of Parent)` but found `Parent`
+      return Parent.new
     else
       # Also works because Child <: Parent and
       # `T.attached_class` == `Parent` in this case
-      return Child.new # error: Expected `T.attached_class (of Parent)` but found `Child`
+      return Child.new
     end
   end
 end
@@ -39,9 +39,9 @@ class Child < Parent
   sig(:final) { returns(T.attached_class) }
   def self.make2
     if [true, false].sample
-      return Parent.new # error: Expected `T.attached_class (of Child)` but found `Parent` for method result type
+      return Parent.new # error: Expected `Child` but found `Parent` for method result type
     else
-      return Child.new # error: Expected `T.attached_class (of Child)` but found `Child` for method result type
+      return Child.new
     end
   end
 end
@@ -72,18 +72,18 @@ module HasInvariantAttachedClass
   end
 end
 
-class ChildFinal1 # error: Type variance mismatch for `T.attached_class`
+class ChildFinal1
   extend HasInvariantAttachedClass
   extend T::Sig, T::Helpers
   final!
 
   sig(:final) { override.params(other: ChildFinal1).returns(ChildFinal1) }
-  def self.example(other) # error: does not match return type of overridable
+  def self.example(other)
     ChildFinal1.new
   end
 end
 
-class ChildFinal2 # error: Type variance mismatch for `T.attached_class`
+class ChildFinal2
   extend HasInvariantAttachedClass
   extend T::Helpers
   final!

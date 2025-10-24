@@ -2353,13 +2353,19 @@ class ResolveTypeMembersAndFieldsWalk {
         if (!attachedClass.exists()) {
             return;
         }
-        auto attachedClassTypeMember = attachedClass.asTypeMemberRef();
-        auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember.data(ctx)->resultType);
+        auto attachedClassTypeMember = attachedClass.asTypeMemberRef().data(ctx);
+        if (singleton.data(ctx)->flags.isFinal) {
+            attachedClassTypeMember->flags.isCovariant = false;
+            attachedClassTypeMember->flags.isInvariant = true;
+            attachedClassTypeMember->flags.isFixed = true;
+        }
+        auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember->resultType);
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {
             lambdaParam->upperBound = sym.data(ctx)->unsafeComputeExternalType(ctx);
-            lambdaParam->lowerBound = core::Types::bottom();
+            lambdaParam->lowerBound =
+                attachedClassTypeMember->flags.isFixed ? lambdaParam->upperBound : core::Types::bottom();
         }
 
         // If all of the singleton members have been resolved, attempt to
