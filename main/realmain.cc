@@ -654,11 +654,13 @@ int realmain(int argc, char *argv[]) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
 
-                pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
-                                    /* presorted */ false, intentionallyLeakASTs);
+                if (!opts.genPackages) {
+                    pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
+                                        /* presorted */ false, intentionallyLeakASTs);
 
-                if (gs->hadCriticalError()) {
-                    gs->errorQueue->flushAllErrors(*gs);
+                    if (gs->hadCriticalError()) {
+                        gs->errorQueue->flushAllErrors(*gs);
+                    }
                 }
             }
         }
