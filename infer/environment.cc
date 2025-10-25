@@ -539,9 +539,9 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
             }
         }
     } else if (auto klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
-        if (klassTypeApp->klass == core::Symbols::Class()) {
+        if (klassTypeApp->klass == core::Symbols::Class() || klassTypeApp->klass == core::Symbols::Module()) {
             auto currentAlignment =
-                core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs, core::Symbols::Class());
+                core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs, core::Symbols::Module());
             auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
                 return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
             });
@@ -549,7 +549,7 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
             auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
             if (!instanceTy.isUntyped()) {
                 whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
-                // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
+                // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class`/`T::Module` types
                 // https://github.com/sorbet/sorbet/issues/4358
             }
         }
@@ -710,18 +710,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         const auto &argSymData = argSym.data(ctx);
         if (argSymData->isModule()) {
-            if (!recvType.isUntyped() && recvType.derivesFrom(ctx, core::Symbols::Class())) {
-                argType = core::Types::tClass(argSymData->externalType());
+            argType = core::Types::tModule(argSymData->externalType());
 
-                // Can't add noTypeTest for module types, because approximateSubtract would drop the
-                // subtypes of `::Class` from the type, not just our `T::Class[argSymModule]` type.
-                // That is, approximateSubtract isn't very sophisticated in the AppliedType case:
-                // https://github.com/sorbet/sorbet/issues/9397
-                canAddNoTypeTest = false;
-            } else {
-                // Can't support this case until we have T::Module
-                return;
-            }
+            // Can't add noTypeTest for module types, because approximateSubtract would drop the
+            // subtypes of `::Class` from the type, not just our `T::Class[argSymModule]` type.
+            // That is, approximateSubtract isn't very sophisticated in the AppliedType case:
+            // https://github.com/sorbet/sorbet/issues/9397
+            canAddNoTypeTest = false;
         }
 
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
