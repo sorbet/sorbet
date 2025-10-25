@@ -719,7 +719,7 @@ CommentMap CommentsAssociator::run(unique_ptr<parser::Node> &node) {
 CommentsAssociator::CommentsAssociator(core::MutableContext ctx, vector<core::LocOffsets> commentLocations)
     : ctx(ctx), commentLocations(commentLocations), commentByLine() {
     for (auto &loc : commentLocations) {
-        auto comment_string = ctx.file.data(ctx).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos());
+        auto comment_string = ctx.file.data(ctx).source().substr(loc.beginPos(), loc.length());
         auto start32 = static_cast<uint32_t>(loc.beginPos());
         auto end32 = static_cast<uint32_t>(loc.endPos());
         auto comment = CommentNode{core::LocOffsets{start32, end32}, comment_string};
