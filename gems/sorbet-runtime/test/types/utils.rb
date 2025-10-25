@@ -69,5 +69,22 @@ module Opus::Types::Test
         assert_equal('Integer', sfm.return_type.name)
       end
     end
+
+    describe 'force_type_init' do
+      it 'works' do
+        Class.new do
+          extend T::Sig
+
+          sig { params(x: Integer).returns(String) }
+          def foo(x); x.to_s; end
+
+          T::Private::Methods.send(
+            :run_sig_block_for_key,
+            T::Private::Methods.send(:method_to_key, instance_method(:foo)),
+            force_type_init: true
+          )
+        end
+      end
+    end
   end
 end
