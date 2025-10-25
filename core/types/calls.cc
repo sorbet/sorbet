@@ -3691,24 +3691,35 @@ public:
         ENFORCE(args.args.size() == 1);
 
         auto &arg = args.args[0];
+
+        // Normally, the Ruby VM allows splatting anything that can be implicitly coerced to a Hash.
+        // `nil.to_hash` is not one of those things (this method does not exist), but it still
+        // allows calling `f(**x)` when `x` is `nil` anyways. So let's just treat the arg like it
+        // was non-nil.
+        auto argType = core::Types::dropNil(gs, arg->type);
+        if (argType.isBottom()) {
+            res.returnType = make_type<ShapeType>(vector<TypePtr>{}, vector<TypePtr>{});
+            return;
+        }
+
         InlinedVector<LocOffsets, 2> argLocs;
         CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
-        TypeAndOrigins wrappedFullType{arg->type, args.fullType.origins};
+        TypeAndOrigins wrappedFullType{argType, args.fullType.origins};
 
         DispatchArgs dispatch{core::Names::toHash(),
                               locs,
                               0,
                               innerArgs,
-                              arg->type,
+                              argType,
                               wrappedFullType,
-                              arg->type,
+                              argType,
                               nullptr,
                               args.originForUninitialized,
                               IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
                               args.suppressErrors,
                               args.enclosingMethodForSuper};
-        res = arg->type.dispatchCall(gs, dispatch);
+        res = argType.dispatchCall(gs, dispatch);
     }
 
 } Magic_toHash;
