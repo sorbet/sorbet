@@ -1216,6 +1216,17 @@ This error code is from an old Sorbet version. It's equivalent to error 5080:
 
 [→ 5080](#5080)
 
+## 4024
+
+Two keyword arguments to a method definition or block have been given the same name:
+
+```ruby
+def foo(x:, x:)
+end
+```
+
+You can resolve this error by giving a different name to one of the conflicting arguments.
+
 ## 4025
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -2819,17 +2830,6 @@ For detailed information and examples, please refer to the documentation for err
 ## 5080
 
 The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
-
-## 4024
-
-Two keyword arguments to a method definition or block have been given the same name:
-
-```ruby
-def foo(x:, x:)
-end
-```
-
-You can resolve this error by giving a different name to one of the conflicting arguments.
 
 ## 6001
 
