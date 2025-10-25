@@ -18,8 +18,9 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
     }
     if (auto applied = core::cast_type<core::AppliedType>(receiver)) {
         /* instantiate generic classes */
+        // TODO(jez) No clue if this is right
         resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
-                                                       applied->targs);
+                                                       applied->targs, receiver);
     }
     return resultType;
 }

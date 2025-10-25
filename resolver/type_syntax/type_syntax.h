@@ -74,7 +74,9 @@ struct TypeSyntaxArgs {
     }
 
     TypeSyntaxArgs withoutSelfType() const {
-        return TypeSyntaxArgs{false, allowRebind, typeMember, allowUnspecifiedTypeParameter, untypedBlame};
+        // TODO(jez) Delete this method, delete allowSelfType, and write tests for all the cases
+        // where we were calling withoutSelfType
+        return *this;
     }
 };
 

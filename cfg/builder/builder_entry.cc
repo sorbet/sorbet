@@ -31,9 +31,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         if (!selfClaz.exists()) {
             selfClaz = md.symbol.enclosingClass(ctx);
         }
+        auto selfType = selfClaz.data(ctx)->selfType(ctx);
         synthesizeExpr(entry, LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(),
-                       make_insn<Cast>(LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(),
-                                       selfClaz.data(ctx)->selfType(ctx), core::Names::cast()));
+                       make_insn<Cast>(LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(), move(selfType),
+                                       core::Names::cast()));
 
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;

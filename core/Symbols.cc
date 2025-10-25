@@ -26,7 +26,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 51;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 70;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 71;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -105,11 +105,10 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
 }
 TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
     // todo: in dotty it made sense to cache those.
-    if (typeMembers().empty()) {
-        return externalType();
-    } else {
-        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
-    }
+    // TODO(jez) Should we cache these, like dmitry suggests? We could cache it on the CFG if not the symbol table
+    // TODO(jez) At the very least, we should probably avoid doign it selfTypeArgs AND selfType at each call site
+    auto upperBound = typeMembers().empty() ? externalType() : make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+    return core::make_type<core::NewSelfType>(move(upperBound));
 }
 
 // ClassOrModule::resultType is computed by unsafeComputeExternalType,
@@ -455,7 +454,9 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
 TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner.asMethodRef();
     auto klass = owner.enclosingClass(ctx);
-    auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
+    // TODO(jez) It might make sense to make a "resultTypeAsSeenFromSelf" helper that cuts some of this verbosity
+    auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx),
+                                                    klass.data(ctx)->selfType(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(owner);
     }
@@ -465,15 +466,6 @@ TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeCo
         // You might expect us to instantiate with the constr to be null for a non-generic method,
         // but you might have the constraint that is used to guess return type of
         // this method. It's not solved and you shouldn't try to instantiate types against itt
-    }
-
-    if (owner.data(ctx)->flags.isPrivate) {
-        // optimization: only replace self type in parameter for private methods, because
-        // `T.self_type` is not allowed in parameters otherwise. When we allow non-top-level
-        // T.self_type, we will need to always replace, because there might be a valid use in a
-        // non-private method in e.g. a `T.proc.returns` (but maybe in the process of allowing
-        // non-top-level T.self_type we eliminate the need to replace at all?)
-        instantiated = core::Types::replaceSelfType(ctx, instantiated, klass.data(ctx)->selfType(ctx));
     }
 
     if (!flags.isRepeated) {

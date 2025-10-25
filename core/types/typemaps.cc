@@ -75,12 +75,12 @@ namespace {
 
 optional<vector<TypePtr>> instantiateLambdaParamsInElems(const vector<TypePtr> &elems, const GlobalState &gs,
                                                          absl::Span<const TypeMemberRef> params,
-                                                         const vector<TypePtr> &targs) {
+                                                         const vector<TypePtr> &targs, TypePtr selfType) {
     optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {
         ++i;
-        auto t = e._instantiateLambdaParams(gs, params, targs);
+        auto t = e._instantiateLambdaParams(gs, params, targs, selfType);
         if (!newElems.has_value() && !t) {
             continue;
         }
@@ -170,8 +170,8 @@ optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const G
 } // anonymous namespace
 
 TypePtr TupleType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                            const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newElems = instantiateLambdaParamsInElems(this->elems, gs, params, targs);
+                                            const vector<TypePtr> &targs, TypePtr selfType) const {
+    optional<vector<TypePtr>> newElems = instantiateLambdaParamsInElems(this->elems, gs, params, targs, selfType);
     if (!newElems) {
         return nullptr;
     }
@@ -197,8 +197,8 @@ TypePtr TupleType::_approximateTypeVars(const GlobalState &gs, const TypeConstra
 };
 
 TypePtr ShapeType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                            const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newValues = instantiateLambdaParamsInElems(this->values, gs, params, targs);
+                                            const vector<TypePtr> &targs, TypePtr selfType) const {
+    optional<vector<TypePtr>> newValues = instantiateLambdaParamsInElems(this->values, gs, params, targs, selfType);
     if (!newValues) {
         return nullptr;
     }
@@ -224,9 +224,9 @@ TypePtr ShapeType::_approximateTypeVars(const GlobalState &gs, const TypeConstra
 }
 
 TypePtr OrType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                         const vector<TypePtr> &targs) const {
-    auto left = this->left._instantiateLambdaParams(gs, params, targs);
-    auto right = this->right._instantiateLambdaParams(gs, params, targs);
+                                         const vector<TypePtr> &targs, TypePtr selfType) const {
+    auto left = this->left._instantiateLambdaParams(gs, params, targs, selfType);
+    auto right = this->right._instantiateLambdaParams(gs, params, targs, selfType);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -270,9 +270,9 @@ TypePtr OrType::_approximateTypeVars(const GlobalState &gs, const TypeConstraint
 }
 
 TypePtr AndType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                          const vector<TypePtr> &targs) const {
-    auto left = this->left._instantiateLambdaParams(gs, params, targs);
-    auto right = this->right._instantiateLambdaParams(gs, params, targs);
+                                          const vector<TypePtr> &targs, TypePtr selfType) const {
+    auto left = this->left._instantiateLambdaParams(gs, params, targs, selfType);
+    auto right = this->right._instantiateLambdaParams(gs, params, targs, selfType);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -316,8 +316,8 @@ TypePtr AndType::_approximateTypeVars(const GlobalState &gs, const TypeConstrain
 }
 
 TypePtr AppliedType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                              const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newTargs = instantiateLambdaParamsInElems(this->targs, gs, params, targs);
+                                              const vector<TypePtr> &targs, TypePtr selfType) const {
+    optional<vector<TypePtr>> newTargs = instantiateLambdaParamsInElems(this->targs, gs, params, targs, selfType);
     if (!newTargs) {
         return nullptr;
     }
@@ -355,55 +355,22 @@ TypePtr AppliedType::_approximateTypeVars(const GlobalState &gs, const TypeConst
 }
 
 TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                              const vector<TypePtr> &targs) const {
+                                              const vector<TypePtr> &targs, TypePtr selfType) const {
     ENFORCE(params.size() == targs.size());
     for (auto &el : params) {
         if (el == this->definition) {
             return targs[&el - &params.front()];
         }
     }
-    return nullptr;
-}
-
-TypePtr Types::replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver) {
-    ENFORCE(what != nullptr);
-    auto t = what._replaceSelfType(gs, receiver);
-    if (t) {
-        return t;
-    }
-    return what;
-}
-
-TypePtr SelfType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-    return receiver;
-}
-
-TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-    auto left = this->left._replaceSelfType(gs, receiver);
-    auto right = this->right._replaceSelfType(gs, receiver);
-    if (left || right) {
-        if (!left) {
-            left = this->left;
-        }
-        if (!right) {
-            right = this->right;
-        }
-        return Types::any(gs, left, right);
-    }
-    return nullptr;
-}
-
-TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-    auto left = this->left._replaceSelfType(gs, receiver);
-    auto right = this->right._replaceSelfType(gs, receiver);
-    if (left || right) {
-        if (!left) {
-            left = this->left;
-        }
-        if (!right) {
-            right = this->right;
-        }
-        return Types::all(gs, left, right);
+    // TODO(jez) I'm starting to think that the "_instantiateLambdaParams" approach with a threaded
+    // `selfType` parameter can be made to work, but it should be powered by a `NewSelfType { upperBound = ... }`
+    // type, because we're going to need an upperBound.
+    //
+    // ... but now that I type that out, it's still not quite right, because there was value we were
+    // getting out of the LambdaParam/SelfTypeParam distinction--we need to somehow make sure that
+    // two T.self_type's in unrelated hierarchies are never compared to each other...
+    if (this->definition == core::Symbols::T_SelfType()) {
+        return selfType;
     }
     return nullptr;
 }

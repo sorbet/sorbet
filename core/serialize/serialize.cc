@@ -518,11 +518,9 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             p.putU4(tp.sym.id());
             break;
         }
-        case TypePtr::Tag::SelfType: {
-            break;
-        }
         case TypePtr::Tag::MetaType:
-        case TypePtr::Tag::SelfTypeParam: {
+        case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::NewSelfType: {
             Exception::notImplemented();
         }
     }
@@ -605,11 +603,9 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             auto sym = TypeParameterRef::fromRaw(p.getU4());
             return make_type<TypeVar>(sym);
         }
-        case TypePtr::Tag::SelfType: {
-            return make_type<SelfType>();
-        }
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::NewSelfType:
             Exception::raise("Unknown type tag {}", tag);
     }
 }
