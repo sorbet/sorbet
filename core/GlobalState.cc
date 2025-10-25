@@ -1635,6 +1635,20 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return name;
 }
 
+FileRef GlobalState::enterSingleFileForIndex(shared_ptr<File> file) {
+    ENFORCE_NO_TIMER(!fileTableFrozen);
+    ENFORCE(this->files.size() <= 2);
+    this->files.clear();
+    this->fileRefByPath.clear();
+    this->files.emplace_back(nullptr);
+    return this->enterFile(move(file));
+}
+
+shared_ptr<File> GlobalState::copyFileForIndexing(core::FileRef file) {
+    ENFORCE_NO_TIMER(file.id() < this->files.size());
+    return this->files[file.id()];
+}
+
 FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 
@@ -2092,8 +2106,6 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
     result->copyOptions(*this);
 
     // Additional options that might be used during indexing are manually copied over here
-    result->files = this->files;
-    result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
@@ -2151,21 +2163,6 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     }
 
     return result;
-}
-
-void GlobalState::mergeFileTable(const core::GlobalState &from) {
-    UnfreezeFileTable unfreezeFiles(*this);
-    // id 0 is for non-existing FileRef
-    for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
-        if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
-            continue;
-        }
-        if (fileIdx < this->filesUsed() && from.files[fileIdx].get() == this->files[fileIdx].get()) {
-            continue;
-        }
-        ENFORCE_NO_TIMER(fileIdx >= this->filesUsed() || this->files[fileIdx]->sourceType == File::Type::NotYetRead);
-        this->enterNewFileAt(from.files[fileIdx], fileIdx);
-    }
 }
 
 string_view GlobalState::getPrintablePath(string_view path) const {

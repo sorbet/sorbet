@@ -567,9 +567,19 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     return ast;
 }
 
+struct FileToIndex {
+    core::FileRef originalRef;
+    shared_ptr<core::File> data;
+};
+
+struct IndexedFile {
+    shared_ptr<core::File> data;
+    ast::ParsedFile tree;
+};
+
 struct IndexResult {
     unique_ptr<core::GlobalState> gs;
-    vector<ast::ParsedFile> trees;
+    vector<IndexedFile> trees;
 
     // The number of trees that were processed by the thread that produced this result. This can be greater than
     // `trees.size()` when cancelation happens, as we skip trees to save time at that point. This value must be used in
@@ -598,9 +608,15 @@ struct IndexSubstitutionJob {
     IndexSubstitutionJob() {}
 
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
-        : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)}, numTreesProcessed{res.numTreesProcessed} {
-        to.mergeFileTable(*this->threadGs);
-        if (absl::c_any_of(this->trees, [](auto &parsed) { return !parsed.cached(); })) {
+        : threadGs{std::move(res.gs)}, subst{}, numTreesProcessed{res.numTreesProcessed} {
+        bool needsSubst = false;
+        this->trees.reserve(res.trees.size());
+        for (auto &indexed : res.trees) {
+            needsSubst = needsSubst || !indexed.tree.cached();
+            to.replaceFile(indexed.tree.file, move(indexed.data));
+            this->trees.emplace_back(move(indexed.tree));
+        }
+        if (needsSubst) {
             this->subst.emplace(*this->threadGs, to);
         }
     }
@@ -695,9 +711,10 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
                                                const options::Options &opts, WorkerPool &workers,
                                                const unique_ptr<const OwnedKeyValueStore> &kvstore, bool cancelable) {
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<FileToIndex>>(files.size());
+
     for (auto file : files) {
-        fileq->push(move(file), 1);
+        fileq->push(FileToIndex{file, baseGs.copyFileForIndexing(file)}, 1);
     }
 
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
@@ -717,7 +734,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         IndexThreadResultPack threadResult;
 
         {
-            core::FileRef job;
+            FileToIndex job;
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     // Increment the count even if we're cancelled to ensure that we indicate downstream that all inputs
@@ -728,10 +745,20 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
                     if (cancelable && epochManager.wasTypecheckingCanceled()) {
                         continue;
                     }
-                    core::FileRef file = job;
+
+                    core::FileRef file;
+                    {
+                        core::UnfreezeFileTable unfreezeFiles(*localGs);
+                        file = localGs->enterSingleFileForIndex(job.data);
+                    }
                     auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
-                    threadResult.res.trees.emplace_back(move(parsedFile));
+
+                    // Replace the file ref used in the ParsedFile with the original from baseGs, and extract the
+                    // updated file data so that it can be updated in baseGs later.
+                    parsedFile.file = job.originalRef;
+                    threadResult.res.trees.emplace_back(
+                        IndexedFile{localGs->copyFileForIndexing(file), move(parsedFile)});
                 }
             }
         }
