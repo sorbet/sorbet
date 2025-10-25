@@ -48,7 +48,7 @@ module Bad4
   extend T::Helpers
 
   mixes_in_class_methods(0) # error: must be statically resolvable to a module
-  #                      ^ error: Expected `Module` but found `Integer(0)`
+  #                      ^ error: Expected `T::Module[T.anything]` but found `Integer(0)`
 end
 
 module Bad5
@@ -57,7 +57,7 @@ module Bad5
 
   RUBY_CONSTANT = 0
   mixes_in_class_methods(RUBY_CONSTANT) # error: must be statically resolvable to a module
-  #                      ^^^^^^^^^^^^^ error: Expected `Module` but found `Integer`
+  #                      ^^^^^^^^^^^^^ error: Expected `T::Module[T.anything]` but found `Integer`
 end
 
 module Bad6

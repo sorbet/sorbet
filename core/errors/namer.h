@@ -25,7 +25,7 @@ constexpr ErrorClass MultipleBehaviorDefs{4019, StrictLevel::False};
 // constexpr ErrorClass YAMLSyntaxError{4020, StrictLevel::False};
 constexpr ErrorClass OldTypeMemberSyntax{4021, StrictLevel::False};
 constexpr ErrorClass ConstantKindRedefinition{4022, StrictLevel::False};
-constexpr ErrorClass HasAttachedClassInClass{4023, StrictLevel::False};
+// constexpr ErrorClass HasAttachedClassInClass{4023, StrictLevel::False};
 constexpr ErrorClass DuplicateKeywordArg{4024, StrictLevel::False};
 constexpr ErrorClass PackagePrivateOutsidePackage{4025, StrictLevel::False};
 constexpr ErrorClass PackageScopeMustBeClass{4026, StrictLevel::False};

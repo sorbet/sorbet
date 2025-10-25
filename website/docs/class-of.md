@@ -4,6 +4,8 @@ title: Types for Class Objects via T.class_of
 sidebar_label: T.class_of
 ---
 
+<!-- TODO(jez) Need to update this with T::Module documentation -->
+
 Classes are also values in Ruby. Sorbet has two ways to describe the type of these class objects: `T.class_of(...)` and `T::Class[...]`.
 
 ```ruby
