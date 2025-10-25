@@ -6,3 +6,8 @@ sig {returns(Class)}
 def example
   Integer
 end
+
+sig {returns(Module)}
+def example2
+  Integer
+end
