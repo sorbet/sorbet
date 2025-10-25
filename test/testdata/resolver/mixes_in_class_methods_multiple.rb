@@ -91,5 +91,5 @@ module Bad3
 
   module ClassMethods; end
   mixes_in_class_methods(ClassMethods, 0) # error: must be statically resolvable to a module
-  #                                    ^ error: Expected `Module` but found `Integer(0)`
+  #                                    ^ error: Expected `T::Module[T.anything]` but found `Integer(0)`
 end

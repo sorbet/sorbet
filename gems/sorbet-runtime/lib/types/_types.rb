@@ -367,4 +367,16 @@ module T
       end
     end
   end
+
+  module Module
+    def self.[](type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedModule::Untyped::Private::INSTANCE
+      elsif type.is_a?(T::Types::Anything)
+        T::Types::TypedModule::Anything::Private::INSTANCE
+      else
+        T::Types::TypedModule::Private::Pool.type_for_module(type)
+      end
+    end
+  end
 end
