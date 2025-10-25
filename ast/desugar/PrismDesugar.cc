@@ -89,9 +89,20 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
             }
         }
     } else if (auto *numParamsNode = parser::NodeWithExpr::cast_node<parser::NumParams>(anyParamsNode)) {
-        // Register any numbered parameters (`_1`, `_2`, ..., `_9`)
-        for (const auto &numberedParam : numParamsNode->decls) {
-            params.emplace_back(numberedParam->takeDesugaredExpr());
+        // The block uses numbered parameters like `_1` or `_9` OR the 'it' parameter, so we add them as parameters
+        auto *lvar = numParamsNode->decls.size() == 1
+                         ? parser::NodeWithExpr::cast_node<parser::LVar>(numParamsNode->decls[0].get())
+                         : nullptr;
+        if (lvar && lvar->name == core::Names::it()) {
+            // Single 'it' parameter - use the original name (not a unique one)
+            // Unlike numbered parameters, 'it' uses the actual name "it" so that
+            // local variables named 'it' in the same scope can shadow it
+            params.emplace_back(MK::Local(lvar->loc, lvar->name));
+        } else {
+            // Numbered parameters (_1, _2, etc.) - take their pre-desugared expressions
+            for (const auto &numberedParam : numParamsNode->decls) {
+                params.emplace_back(numberedParam->takeDesugaredExpr());
+            }
         }
     } else if (anyParamsNode == nullptr) {
         // do nothing

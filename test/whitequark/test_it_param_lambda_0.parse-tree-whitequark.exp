@@ -1,0 +1,7 @@
+s(:block,
+  s(:send, nil, :lambda),
+  s(:numparams,
+    s(:lvar, :it)),
+  s(:send,
+    s(:lvar, :it), :+,
+    s(:int, "1")))

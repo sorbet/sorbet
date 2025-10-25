@@ -121,10 +121,19 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
             }
         }
     } else if (auto *numParamsNode = parser::cast_node<parser::NumParams>(anyParamsNode)) {
-        // The block uses numbered parameters like `_1` or `_9` so we add them as parameters
-        // from _1 to the highest number used.
-        for (int i = 1; i <= numparamMax(dctx, &numParamsNode->decls); i++) {
-            params.emplace_back(numparamTree(dctx, i, &numParamsNode->decls));
+        // The block uses numbered parameters like `_1` or `_9` OR the 'it' parameter, so we add them as parameters
+        auto *lvar =
+            numParamsNode->decls.size() == 1 ? parser::cast_node<parser::LVar>(numParamsNode->decls[0].get()) : nullptr;
+        if (lvar && lvar->name == core::Names::it()) {
+            // Single 'it' parameter - use the original name (not a unique one)
+            // Unlike numbered parameters, 'it' uses the actual name "it" so that
+            // local variables named 'it' in the same scope can shadow it
+            params.emplace_back(MK::Local(lvar->loc, lvar->name));
+        } else {
+            // Numbered parameters (_1, _2, etc.)
+            for (int i = 1; i <= numparamMax(dctx, &numParamsNode->decls); i++) {
+                params.emplace_back(numparamTree(dctx, i, &numParamsNode->decls));
+            }
         }
     } else if (anyParamsNode == nullptr) {
         // do nothing
