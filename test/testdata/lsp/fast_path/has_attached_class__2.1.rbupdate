@@ -1,5 +1,8 @@
 # typed: true
 # exclude-from-file-update: true
+# Disables re-running a no-op file edit over just this file.
+# The rbupdate fast path test will still happen
+# disable-fast-path: true
 
 class AbstractModel; end
 class Parent < AbstractModel

@@ -1,4 +1,5 @@
 # typed: strict
+# disable-fast-path: true
 class Module; include T::Sig; end
 
 module Thing
@@ -33,7 +34,7 @@ def instantiate_class_good(klass)
   instance
 end
 
-class Child
+class Child # error: Type variance mismatch for `T.attached_class` with parent `Thing::Factory`. Parent needs to be `:out` but it is `invariant`
   extend T::Generic
   include Thing
 
