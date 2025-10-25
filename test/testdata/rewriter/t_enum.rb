@@ -17,12 +17,12 @@ T.reveal_type(MyEnum::Z) # error: Revealed type: `MyEnum::Z`
 class NotAnEnum
   enums do # error: does not exist
   X = new # error: Constants must have type annotations
-  Y = T.let(new, self)
+  Y = T.let(new, self) # error: Unsupported type syntax
   end
 end
 
 T.reveal_type(NotAnEnum::X) # error: Revealed type: `T.untyped`
-T.reveal_type(NotAnEnum::Y) # error: Revealed type: `NotAnEnum`
+T.reveal_type(NotAnEnum::Y) # error: Revealed type: `T.untyped`
 
 class EnumWithStrings < T::Enum
   enums do
