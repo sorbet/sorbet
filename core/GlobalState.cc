@@ -1651,6 +1651,9 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
     files.emplace_back(std::move(file));
     auto ret = FileRef(filesUsed() - 1);
     fileRefByPath[path] = ret;
+    if (this->packageDB_.enabled()) {
+        this->packageDB_.reservePackageNameForFiles(filesUsed() - 1);
+    }
     return ret;
 }
 

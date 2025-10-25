@@ -29,6 +29,21 @@ public:
 
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
 
+    // Reserve enough space in the `packageForFile_` vector for `numFiles` files.
+    //
+    // We also do this on GlobalState::enterFile, but this API is better because it avoids
+    // multiple reallocations if we can know ahead of time that we're going to use a certain number
+    // of files.
+    //
+    // You might wonder: why not have a field on a core::File that stores the package for that file?
+    //
+    // 1.  Files are agnostic of semantic information (e.g., they are valid to be moved from one
+    //     GlobalState to another). They do not store NameRef or SymbolRef, because those IDs change
+    //     from one GlobalState to the next.
+    //
+    // 2.  Users do not have to pay the additional memory for packages unless they have opted in.
+    void reservePackageNameForFiles(size_t numFiles);
+
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
     // associated package for the file.
     const MangledName getPackageNameForFile(FileRef file) const;
