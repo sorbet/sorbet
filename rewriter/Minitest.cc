@@ -460,7 +460,7 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (send->hasBlock() || !insideDescribe || send->numPosArgs() != 1) {
+            if (send->hasBlock() || !insideDescribe || send->numPosArgs() < 1) {
                 return nullptr;
             }
 
@@ -884,7 +884,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (block != nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() != 1) {
+            if (block != nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
                 return nullptr;
             }
 
