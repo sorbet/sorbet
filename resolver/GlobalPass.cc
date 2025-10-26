@@ -3,10 +3,6 @@
 #include "core/core.h"
 #include "core/errors/resolver.h"
 #include "resolver/resolver.h"
-
-#include "absl/algorithm/container.h"
-
-#include <map>
 #include <vector>
 
 using namespace std;
@@ -44,8 +40,6 @@ core::ErrorClass getRedeclarationErrorCode(const core::GlobalState &gs, core::Cl
                                            core::NameRef name) {
     if (parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())) {
         return core::errors::Resolver::EnumerableParentTypeNotDeclared;
-    } else if (name == core::Names::Constants::AttachedClass()) {
-        return core::errors::Resolver::HasAttachedClassIncluded;
     } else {
         return core::errors::Resolver::ParentTypeNotDeclared;
     }
@@ -64,22 +58,38 @@ core::ErrorClass getRedeclarationErrorCode(const core::GlobalState &gs, core::Cl
 void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef parent,
                               core::TypeMemberRef parentTypeMember, core::ClassOrModuleRef sym) {
     auto name = parentTypeMember.data(gs)->name;
-    auto code = getRedeclarationErrorCode(gs, parent, name);
 
-    if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
-        if (code == core::errors::Resolver::HasAttachedClassIncluded) {
+    if (name == core::Names::Constants::AttachedClass()) {
+        auto code = sym.data(gs)->derivesFrom(gs, core::Symbols::Module())
+                        ? core::errors::Resolver::HasAttachedClassModuleNotDeclared
+                        : core::errors::Resolver::HasAttachedClassIncluded;
+        if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
             auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
             if (sym.data(gs)->isModule()) {
                 e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
                             parent.show(gs), sym.show(gs));
             } else if (sym.data(gs)->isSingletonClass(gs)) {
-                // We'd only get this type member redeclaration error in a singleton class if
-                // the attached class of this singleton class is a module (because all classes'
-                // singleton classes get the `<AttachedClass>` type member declared)
-                ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
-                e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
+                // All singleton classes (classes and modules) should have a synthetic `<AttachedClass>` type member.
+                ENFORCE(false, "All singleton classes (class+module) should have an `<AttachedClass>` type member");
+
+                // We used to report an error here saying that if you declare a module with
+                // `has_attached_class!` and then `extend` it into a module, you probably messed up.
+                //
+                // Now, it's not clear how this can happen, but on the off chance it can, let's report a message.
+                //
+                // This also means that we no longer have good messaging guiding people against
+                // misuse of stacks of modules using mixes_in_class_methods. But that's **already**
+                // a problem, regardless of whether `has_attached_class!` is in play, so regressing this is ~fine.
+                //
+                // We should solve the problem that mixes_in_class_methods is bad separately.
+                e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into `{}`", parent.show(gs),
                             hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
+                e.addErrorNote("Please report a bug--we thought this case was impossible");
+            } else if (code == core::errors::Resolver::HasAttachedClassModuleNotDeclared) {
+                e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
+                            parent.show(gs), sym.show(gs));
             } else if (sym.data(gs)->derivesFrom(gs, core::Symbols::Class())) {
+                // The VM rejects attempts to subclass Class directly
                 e.setHeader("`{}` is a subclass of `{}` which is not allowed", sym.show(gs), "Class");
             } else {
                 // sym is a normal, non singleton class
@@ -87,7 +97,10 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
                             hasAttachedClass, "extend", sym.show(gs));
             }
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", hasAttachedClass);
-        } else {
+        }
+    } else {
+        auto code = getRedeclarationErrorCode(gs, parent, name);
+        if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
                         sym.show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));

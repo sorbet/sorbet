@@ -17,6 +17,10 @@ suggest-class-new-not-singleton.rb:4: Call to method `new` on `T.class_of(Intege
 suggest-class-new-not-singleton.rb:5: Call to method `new` on `T.class_of(T::Array)` mistakes a type for a value https://srb.help/7030
      5 |T.class_of(T::Array).new
                              ^^^
+  Autocorrect: Done
+    suggest-class-new-not-singleton.rb:5: Replaced with `T::Array`
+     5 |T.class_of(T::Array).new
+        ^^^^^^^^^^^^^^^^^^^^
 
 suggest-class-new-not-singleton.rb:6: Call to method `new` on `T.class_of(Array)[T::Array[T.untyped]]` mistakes a type for a value https://srb.help/7030
      6 |T.class_of(T::Array[String]).new
@@ -41,7 +45,7 @@ Errors: 5
 
 String.new
 Integer.new
-T.class_of(T::Array).new
+T::Array.new
 Array.new
 x = T.class_of(String)
 String.new

@@ -1064,6 +1064,10 @@ public:
         return ClassOrModuleRef::fromRaw(94);
     }
 
+    static ClassOrModuleRef T_Module() {
+        return ClassOrModuleRef::fromRaw(95);
+    }
+
     static MethodRef T_Generic_squareBrackets() {
         return MethodRef::fromRaw(12);
     }
@@ -1097,7 +1101,7 @@ public:
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
-        return ClassOrModuleRef::fromRaw(95);
+        return ClassOrModuleRef::fromRaw(96);
     }
 
     static FieldRef Magic_UntypedSource_super() {
