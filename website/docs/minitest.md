@@ -195,6 +195,7 @@ Sorbet supports RSpec's testing DSL using the same spec method translation as Mi
 ### Using RSpec.describe
 
 To enable proper type checking with RSpec's custom matchers (like `eq`, `include`, `match_array`, etc.), use `RSpec.describe` instead of bare `describe` at the top level:
+
 ```ruby
 RSpec.describe MyClass do
   it 'works' do
