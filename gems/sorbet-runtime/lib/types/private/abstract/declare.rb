@@ -5,6 +5,8 @@ module T::Private::Abstract::Declare
   Abstract = T::Private::Abstract
   AbstractUtils = T::AbstractUtils
 
+  HAS_ATTACHED_OBJECT = RUBY_VERSION >= "3.3.0"
+
   def self.declare_abstract(mod, type:)
     if AbstractUtils.abstract_module?(mod)
       raise "#{mod} is already declared as abstract"
@@ -39,13 +41,29 @@ module T::Private::Abstract::Declare
           raise "#{mod} is declared as abstract; it cannot be instantiated"
         end
 
+        # Don't even bother if we can't go from the singleton class to the attached class.
+        if !HAS_ATTACHED_OBJECT
+          return result
+        end
+
         # See if we were called on a module that resolved to the abstract override, and
         # bypass the abstract override for the next call.
         # The owner of the method is actually the singleton class, which is
         # different from the module on which we are defining the singleton
         # method.
         me = self.method(:new)
-        if me.owner.attached_object != mod
+        owner = me.owner
+        owner = case owner
+                when Class
+                  if owner.singleton_class?
+                    owner.attached_object
+                  else
+                    owner
+                  end
+                else
+                  owner
+        end
+        if owner != mod
           return result
         end
 
