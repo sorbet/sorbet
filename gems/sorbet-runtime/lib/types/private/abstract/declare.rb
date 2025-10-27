@@ -48,7 +48,10 @@ module T::Private::Abstract::Declare
 
         # This method must exist, or we would have errored in the earlier `super` call.
         supered = T.must(me.super_method)
-        self.send(:define_singleton_method, :new, &supered.unbind)
+        # TODO(froydnj) we should be able to ladder up the method inheritance
+        # chain to see if there are multiple abstract .new methods and resolve
+        # to the farthest-away non-abstract one.
+        self.send(:define_singleton_method, :new, supered.unbind)
         result
       end
 
