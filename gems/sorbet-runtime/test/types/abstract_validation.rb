@@ -378,6 +378,15 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
           "baz"
         end
       end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("lib/types/private/abstract/declare.rb"))
+      assert_equal("baz", klass.new.bar)
+      after_new = klass.method(:new)
+      after_location = after_new.source_location
+      assert_nil(after_location)
+      assert_equal(klass.singleton_class, after_new.owner)
       assert_equal("baz", klass.new.bar)
     end
 
