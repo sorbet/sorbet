@@ -390,6 +390,34 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       assert_equal("baz", klass.new.bar)
     end
 
+    it 'does not redefine .new on a concrete subclass' do
+      klass = Class.new(AbstractClass) do
+        extend T::Sig
+        extend T::Helpers
+        sig { override.returns(Object) }
+        def self.foo; end
+
+        sig { override.returns(Object) }
+        def bar
+          "baz"
+        end
+
+        def self.new
+          super
+        end
+      end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("abstract_validation.rb"))
+      assert_equal("baz", klass.new.bar)
+      after_new = klass.method(:new)
+      after_location = after_new.source_location[0]
+      assert(after_location.end_with?("abstract_validation.rb"))
+      assert_equal(klass.singleton_class, after_new.owner)
+      assert_equal("baz", klass.new.bar)
+    end
+
     it 'succeeds with abstract methods from parents' do
       parent = Class.new do
         def foo; end
