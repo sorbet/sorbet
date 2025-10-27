@@ -1286,7 +1286,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                     auto owner = ctx.owner.asMethodRef();
-                    auto klass = owner.enclosingClass(ctx);
+                    auto klass = owner.data(ctx)->owner;
                     ENFORCE(sym.data(ctx)->resultType != nullptr);
                     auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, sym.data(ctx)->resultType, klass, klass,
                                                                           klass.data(ctx)->selfTypeArgs(ctx));

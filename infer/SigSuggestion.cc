@@ -361,7 +361,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
 
-    auto enclosingClass = methodSymbol.enclosingClass(ctx);
+    auto enclosingClass = methodSymbol.data(ctx)->owner;
     auto closestMethod = closestOverriddenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
 
     fmt::memory_buffer ss;

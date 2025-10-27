@@ -229,7 +229,6 @@ public:
     ConstMethodData data(const GlobalState &gs) const;
     MethodData dataAllowingNone(GlobalState &gs) const;
 
-    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
     std::string toStringFullName(const GlobalState &gs) const;
