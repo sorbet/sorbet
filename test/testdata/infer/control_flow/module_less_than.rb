@@ -48,7 +48,7 @@ def valid?(obj)
     end
 
     if obj <= M
-      T.reveal_type(obj) # error: `T::Module[T.anything]`
+      T.reveal_type(obj) # error: `T::Module[M]`
     end
   end
 end
@@ -85,7 +85,7 @@ end
 sig { params(klass: T.all(Module, FromHash[T.anything])).void }
 def module_lt_module(klass)
   if klass < Exportable
-    T.reveal_type(klass) # error: `T.all(T::Module[T.anything], FromHash[T.anything])`
+    T.reveal_type(klass) # error: `T.all(FromHash[T.anything], T::Module[Exportable])`
     value = klass.from_hash
     T.reveal_type(value) # error: `T.anything`
     raise unless value
@@ -109,7 +109,7 @@ def nothing_special_for_class_methods(klass, mod)
   end
 
   if mod < HasClassMethods
-    T.reveal_type(mod) # error: `T::Module[T.anything]`
+    T.reveal_type(mod) # error: `T::Module[HasClassMethods]`
   end
 end
 
