@@ -51,5 +51,113 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
     end
+
+    class <emptyTree>::<C <describe 'shared context with 2 params'>><<C <todo sym>>> < (<self>)
+      module <emptyTree>::<C <shared_examples 'context with 2 params'>><<C <todo sym>>> < ()
+        def value1<<todo method>>(&<blk>)
+          param1
+        end
+
+        def value2<<todo method>>(&<blk>)
+          param2
+        end
+
+        def <it 'uses the params'><<todo method>>(&<blk>)
+          [::T.unsafe(nil)].each() do |param1, param2|
+            begin
+              <emptyTree>::<C T>.reveal_type(param1)
+              <emptyTree>::<C T>.reveal_type(param2)
+            end
+          end
+        end
+
+        <runtime method definition of value1>
+
+        <runtime method definition of value2>
+
+        <runtime method definition of <it 'uses the params'>>
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+
+      class <emptyTree>::<C <describe 'including context'>><<C <todo sym>>> < (<self>)
+        def <it 'has access to values'><<todo method>>(&<blk>)
+          begin
+            <self>.value1()
+            <self>.value2()
+          end
+        end
+
+        <self>.include(<emptyTree>::<C <shared_examples 'context with 2 params'>>)
+      end
+    end
+
+    class <emptyTree>::<C <describe 'shared context with 5 params'>><<C <todo sym>>> < (<self>)
+      module <emptyTree>::<C <shared_examples 'context with 5 params'>><<C <todo sym>>> < ()
+        def value1<<todo method>>(&<blk>)
+          param1
+        end
+
+        def value2<<todo method>>(&<blk>)
+          param2
+        end
+
+        def value3<<todo method>>(&<blk>)
+          param3
+        end
+
+        def value4<<todo method>>(&<blk>)
+          param4
+        end
+
+        def value5<<todo method>>(&<blk>)
+          param5
+        end
+
+        def <it 'uses the params'><<todo method>>(&<blk>)
+          [::T.unsafe(nil)].each() do |param1, param2, param3, param4, param5|
+            begin
+              <emptyTree>::<C T>.reveal_type(param1)
+              <emptyTree>::<C T>.reveal_type(param2)
+              <emptyTree>::<C T>.reveal_type(param3)
+              <emptyTree>::<C T>.reveal_type(param4)
+              <emptyTree>::<C T>.reveal_type(param5)
+            end
+          end
+        end
+
+        <runtime method definition of value1>
+
+        <runtime method definition of value2>
+
+        <runtime method definition of value3>
+
+        <runtime method definition of value4>
+
+        <runtime method definition of value5>
+
+        <runtime method definition of <it 'uses the params'>>
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+
+      class <emptyTree>::<C <describe 'including context'>><<C <todo sym>>> < (<self>)
+        def <it 'has access to values'><<todo method>>(&<blk>)
+          begin
+            <self>.value1()
+            <self>.value2()
+            <self>.value3()
+            <self>.value4()
+            <self>.value5()
+          end
+        end
+
+        <self>.include(<emptyTree>::<C <shared_examples 'context with 5 params'>>)
+      end
+    end
   end
 end
