@@ -192,9 +192,21 @@ end
 
 Sorbet supports RSpec's testing DSL using the same spec method translation as Minitest. RSpec and Minitest share common constructs like `describe`, `it`, `before`, `after`, and `let`, which are all translated to Ruby classes and methods before type checking.
 
-### Using RSpec.describe
+When Sorbet sees `RSpec.describe`, it translates this to a subclass of `RSpec::Core::ExampleGroup`:
 
-To enable proper type checking with RSpec's custom matchers (like `eq`, `include`, `match_array`, etc.), use `RSpec.describe` instead of bare `describe` at the top level:
+```ruby
+RSpec.describe MyClass do
+  # ... body ...
+end
+
+# ^ becomes:
+
+class made-up-class-name < RSpec::Core::ExampleGroup
+  # ... translated body ...
+end
+```
+
+This models what the `RSpec.describe` DSL will do at runtime. Ensure that there is a suitable RBI defining `RSpec::Core::ExampleGroup` (with any relevant monkey patches) contained in the project somewhere (either generated via `tapioca gem` or fetched from RBI Central).
 
 ```ruby
 RSpec.describe MyClass do
