@@ -40,7 +40,7 @@ class Module < Object
   # ```
   #
   # The second form calls the instance method `constants`.
-  sig {returns(T::Array[Integer])}
+  sig {returns(T::Array[Symbol])}
   def self.constants(); end
 
   # Returns the list of `Modules` nested at the point of call.
