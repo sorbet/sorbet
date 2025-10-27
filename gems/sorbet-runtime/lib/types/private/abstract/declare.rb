@@ -41,8 +41,11 @@ module T::Private::Abstract::Declare
 
         # See if we were called on a module that resolved to the abstract override, and
         # bypass the abstract override for the next call.
+        # The owner of the method is actually the singleton class, which is
+        # different from the module on which we are defining the singleton
+        # method.
         me = self.method(:new)
-        if me.owner != mod
+        if me.owner.attached_object != mod
           return result
         end
 
