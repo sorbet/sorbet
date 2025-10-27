@@ -849,13 +849,13 @@ Pickler SerializerImpl::pickleFileTable(const GlobalState &gs, bool payloadOnly)
 }
 
 void SerializerImpl::pickleFileTable(Pickler &p, const GlobalState &gs, bool payloadOnly) {
-    p.putU4(gs.files.size());
-    int i = -1;
-    for (const auto &f : gs.files) {
-        ++i;
-        if (i != 0) {
-            pickle(p, *f);
-        }
+    auto files = gs.getFiles();
+    // The file table always contains at least a single null entry for the invalid FileRef.
+    ENFORCE(files.size() > 0);
+    ENFORCE(files[0] == nullptr);
+    p.putU4(files.size() - 1);
+    for (const auto &f : files.subspan(1)) {
+        pickle(p, *f);
     }
 }
 
@@ -866,23 +866,16 @@ void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
     {
         Timer timeit(result.tracer(), "readFiles");
 
-        int filesSize = p.getU4();
+        // We don't count the empty file that we reserve for the invalid FileRef.
+        int filesSize = 1 + p.getU4();
         result.files.reserve(filesSize);
-        for (int i = 0; i < filesSize; i++) {
-            if (i == 0) {
-                result.files.emplace_back();
-            } else {
-                result.files.emplace_back(unpickleFile(p));
-            }
-        }
-    }
 
-    int i = 0;
-    for (auto &f : result.files) {
-        if (f && !f->path().empty()) {
+        result.files.emplace_back();
+
+        for (int i = 1; i < filesSize; i++) {
+            auto f = result.files.emplace_back(unpickleFile(p));
             result.fileRefByPath[string(f->path())] = FileRef(i);
         }
-        i++;
     }
 }
 
