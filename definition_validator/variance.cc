@@ -154,7 +154,7 @@ private:
                         if (replaceLoc.source(ctx) == selfTypeStr) {
                             if (eqeqNote.empty()) {
                                 e.replaceWith("Use enclosing class name directly", replaceLoc, "{}",
-                                              owningMethod.enclosingClass(ctx).show(ctx));
+                                              owningMethod.data(ctx)->owner.show(ctx));
                             } else {
                                 e.replaceWith("Use `T.anything` instead", replaceLoc, "T.anything");
                             }

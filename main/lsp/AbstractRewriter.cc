@@ -102,7 +102,7 @@ void AbstractRewriter::addSubclassRelatedMethods(const core::GlobalState &gs, co
     // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
     // then find the full tree; then look for methods with the same name as ours; then find all references to all
     // those methods and rename them.
-    auto symbolClass = symbol.enclosingClass(gs);
+    auto symbolClass = symbol.data(gs)->owner;
 
     // We have to be careful to follow superclass links only as long as we find a method that `symbol` overrides.
     // Otherwise we will find unrelated methods and rename them even though they don't need to be (see the

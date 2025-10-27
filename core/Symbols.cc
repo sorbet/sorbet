@@ -454,7 +454,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
 
 TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner.asMethodRef();
-    auto klass = owner.enclosingClass(ctx);
+    auto klass = owner.data(ctx)->owner;
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(owner);
@@ -2301,14 +2301,6 @@ void TypeParameter::sanityCheck(const GlobalState &gs) const {
     }
 }
 
-ClassOrModuleRef MethodRef::enclosingClass(const GlobalState &gs) const {
-    // Methods can only be owned by classes or modules.
-    auto result = data(gs)->owner;
-    ENFORCE(result != core::Symbols::todo(),
-            "Namer hasn't populated the information required to provide an enclosing class yet");
-    return result;
-}
-
 ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
     core::ClassOrModuleRef result;
     switch (kind()) {
@@ -2316,7 +2308,7 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
             result = asClassOrModuleRef();
             break;
         case SymbolRef::Kind::Method:
-            result = asMethodRef().enclosingClass(gs);
+            result = asMethodRef().data(gs)->owner;
             break;
         case SymbolRef::Kind::FieldOrStaticField:
             // Fields can only be owned by classes or modules.
@@ -2324,7 +2316,7 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
             break;
         case SymbolRef::Kind::TypeParameter:
             // Typeargs are owned by methods.
-            result = asTypeParameterRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+            result = asTypeParameterRef().data(gs)->owner.asMethodRef().data(gs)->owner;
             break;
         case SymbolRef::Kind::TypeMember:
             // TypeMembers are only owned by classes or modules.
