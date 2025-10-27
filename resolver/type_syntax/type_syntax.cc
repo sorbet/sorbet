@@ -1485,6 +1485,12 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             e.setHeader("Unsupported type syntax");
         }
         result.type = core::Types::untypedUntracked();
+    } else if (ast::isa_tree<ast::Self>(expr)) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+            e.setHeader("Unsupported type syntax, did you mean `{}`?", "T.self_type");
+            e.replaceWith("Replace with T.self_type", ctx.locAt(expr.loc()), "T.self_type");
+        }
+        result.type = core::Types::untypedUntracked();
     } else if (ast::isa_tree<ast::Literal>(expr)) {
         const auto &lit = ast::cast_tree_nonnull<ast::Literal>(expr);
         core::TypePtr underlying;
