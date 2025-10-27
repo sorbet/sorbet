@@ -23,6 +23,7 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
+#include "core/errors/infer.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
 #include "core/serialize/serialize.h"
@@ -692,7 +693,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto path = error->loc.file().data(*gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+        // Pipeline treats all errors as the same severity
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::allTypedAsErrorAssertions(assertions),
+                                 diagnostics);
     }
 
     // Allow later phases to have errors that we didn't test for

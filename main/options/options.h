@@ -295,6 +295,7 @@ struct Options {
     bool forciblySilenceLspMultipleDirError = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
+    bool enableDeprecated = false;
     core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
 
     std::string inlineInput; // passed via -e

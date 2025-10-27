@@ -735,6 +735,20 @@ void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree,
             // Further context: https://blog.jez.io/constructor-override-checking/
             validateCompatibleOverride(ctx, tree, overriddenMethod, methodDef);
         }
+
+        // Check if overriding a deprecated method without marking override as deprecated
+        if (ctx.state.enableDeprecated && overriddenMethod.data(ctx)->flags.isDeprecated &&
+            !method.data(ctx)->flags.isDeprecated && method.data(ctx)->flags.isOverride && !isRBI &&
+            !method.data(ctx)->flags.isRewriterSynthesized) {
+            if (auto e =
+                    ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverrideMustBeDeprecated)) {
+                e.setHeader("Method `{}` overrides deprecated method but is not marked deprecated", method.show(ctx));
+                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "Deprecated method `{}` defined here",
+                               overriddenMethod.show(ctx));
+                e.addErrorNote(
+                    "Add `deprecated` to the signature or remove `override` if providing a non-deprecated replacement");
+            }
+        }
     }
 }
 

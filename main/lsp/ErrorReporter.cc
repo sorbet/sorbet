@@ -151,13 +151,19 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
 
         auto diagnostic = make_unique<Diagnostic>(std::move(range), error->header);
         diagnostic->code = error->what.code;
+
         if (error->what.code == sorbet::core::errors::Infer::DeadBranchInferencer.code) {
             vector<DiagnosticTag> tags;
             tags.push_back(DiagnosticTag::Unnecessary);
             diagnostic->tags = move(tags);
         }
-
         diagnostic->severity = DiagnosticSeverity::Error;
+        if (error->what.code == sorbet::core::errors::Infer::DeprecatedMethodUsage.code) {
+            vector<DiagnosticTag> tags;
+            tags.push_back(DiagnosticTag::Deprecated);
+            diagnostic->tags = move(tags);
+            diagnostic->severity = DiagnosticSeverity::Hint;
+        }
         if (error->what == sorbet::core::errors::Infer::UntypedValueInformation) {
             diagnostic->severity = convertDiagnosticSeverity(gs.highlightUntypedDiagnosticSeverity);
         }

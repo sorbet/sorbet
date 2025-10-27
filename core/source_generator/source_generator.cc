@@ -48,6 +48,9 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (sym->flags.isFinal) {
         sigCall = "sig(:final)";
     }
+    if (sym->flags.isDeprecated) {
+        flags.emplace_back("deprecated");
+    }
     if (sym->flags.isAbstract && options.concretizeIfAbstract) {
         flags.emplace_back("override");
     } else if (sym->flags.isAbstract) {

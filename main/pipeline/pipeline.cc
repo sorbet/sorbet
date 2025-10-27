@@ -67,6 +67,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     }
     gs.autocorrect = opts.autocorrect;
     gs.didYouMean = opts.didYouMean;
+    gs.enableDeprecated = opts.enableDeprecated;
     if (opts.censorForSnapshotTests) {
         gs.censorForSnapshotTests = true;
     }

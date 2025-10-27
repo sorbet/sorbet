@@ -384,6 +384,7 @@ public:
     bool silenceErrors = false;
     bool autocorrect = false;
     bool didYouMean = true;
+    bool enableDeprecated = false;
     TrackUntyped trackUntyped = TrackUntyped::Nowhere;
 
     /**

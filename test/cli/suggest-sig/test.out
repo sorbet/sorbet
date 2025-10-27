@@ -263,12 +263,12 @@ suggest-sig.rb:124: Method `generated` does not exist on `T::Private::Methods::D
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:124: Replaced with `inherited`
+    suggest-sig.rb:124: Replaced with `deprecated`
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                                                                          ^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
-      NN |  def inherited(arg0); end
-            ^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/builder.rbi#LCENSORED: Defined here
+    NN |  def deprecated; end
+          ^^^^^^^^^^^^^^
 
 suggest-sig.rb:137: Method `generated` does not exist on `T::Private::Methods::DeclBuilder` https://srb.help/7003
      137 |  generated
@@ -278,12 +278,12 @@ suggest-sig.rb:137: Method `generated` does not exist on `T::Private::Methods::D
      135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
      136 |  returns(T.untyped).
   Autocorrect: Done
-    suggest-sig.rb:137: Replaced with `inherited`
+    suggest-sig.rb:137: Replaced with `deprecated`
      137 |  generated
             ^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
-      NN |  def inherited(arg0); end
-            ^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/builder.rbi#LCENSORED: Defined here
+    NN |  def deprecated; end
+          ^^^^^^^^^^^^^^
 
 suggest-sig.rb:41: The method `a_private` does not have a `sig` https://srb.help/7017
     41 |  private def a_private; end
@@ -542,7 +542,7 @@ def cantRun(a)
   1
 end
 
-sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).inherited} # error: `generated` is deprecated
+sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).deprecated} # error: `generated` is deprecated
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -555,7 +555,7 @@ end
 sig do
   params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
   returns(T.untyped).
-  inherited
+  deprecated
 end
 def fooCondGeneratedDo(a, cond)
   if cond

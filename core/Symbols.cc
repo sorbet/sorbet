@@ -1364,6 +1364,9 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     } else if (sym->flags.allowIncompatibleOverrideAll) {
         methodFlags.emplace_back("allow_incompatible");
     }
+    if (sym->flags.isDeprecated) {
+        methodFlags.emplace_back("deprecated");
+    }
     if (sym->flags.isFinal) {
         methodFlags.emplace_back("final");
     }

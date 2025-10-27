@@ -36,6 +36,7 @@ struct ParsedSig {
         core::LocOffsets abstract = core::LocOffsets::none();
         core::LocOffsets override_ = core::LocOffsets::none();
         core::LocOffsets overridable = core::LocOffsets::none();
+        core::LocOffsets deprecated_ = core::LocOffsets::none();
         core::LocOffsets returns = core::LocOffsets::none();
         core::LocOffsets void_ = core::LocOffsets::none();
         core::LocOffsets checked = core::LocOffsets::none();
