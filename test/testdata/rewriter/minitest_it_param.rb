@@ -130,4 +130,17 @@ class MinitestItParamTest < Minitest::Spec
       end
     end
   end
+
+  # Edge case: 'it' method call wins over potential 'it' block parameter
+  test_each([1, 2, 3]) do |element|
+    # 'it' with arguments is always a method call, not the block parameter
+    it "tests using element from test_each" do
+      # Inside here, 'it' as block param works normally
+      result = [4, 5, 6].map { it * 2 }
+      T.reveal_type(result) # error: Revealed type: `T::Array[Integer]`
+
+      # Can also access the outer test_each parameter
+      T.reveal_type(element) # error: Revealed type: `Integer`
+    end
+  end
 end
