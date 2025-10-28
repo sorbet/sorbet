@@ -2200,7 +2200,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         if (data->name == core::Names::Constants::AttachedClass() && owner.data(ctx)->isClass() &&
-            owner != core::Symbols::Module() && !owner.data(ctx)->derivesFrom(ctx, core::Symbols::Module())) {
+            !owner.data(ctx)->derivesFrom(ctx, core::Symbols::Module())) {
             // There isn't really a technical reason why we *can't* support this, but it's kind of
             // wierd, because it makes the `T.attached_class` type in a generic class stand for
             // something that has no connection whatsoever to the intrinsic notion of an attached class.
