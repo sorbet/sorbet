@@ -5,5 +5,6 @@ module Foo
     extend T::Generic
     X = type_template
     Y = type_template
+    Z = type_template { {fixed: Integer} }
   end
 end
