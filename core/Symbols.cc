@@ -455,7 +455,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
 TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner.asMethodRef();
     auto klass = owner.data(ctx)->owner;
-    auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
+    auto instantiated = Types::resultTypeAsSeenFromSelf(ctx, type, klass);
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(owner);
     }
