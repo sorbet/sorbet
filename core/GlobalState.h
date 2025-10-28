@@ -258,7 +258,7 @@ class GlobalState final {
     // Private constructor that allows a specific globalStateId. Used in `makeEmptyGlobalStateForHashing` to avoid
     // contention on the global state ID atomic.
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                int globalStateId);
+                std::shared_ptr<FileTable> files, int globalStateId);
 
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
@@ -353,7 +353,7 @@ public:
     std::shared_ptr<File> replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path) const {
-        return this->files.findFileByPath(path);
+        return this->files->findFileByPath(path);
     }
 
     const packages::PackageDB &packageDB() const;
@@ -521,7 +521,7 @@ public:
 
     std::unique_ptr<LocalSymbolTableHashes> hash() const;
     absl::Span<const std::shared_ptr<File>> getFiles() const {
-        return this->files.span();
+        return this->files->span();
     }
 
     // Contains a string to be used as the base of the error URL.
@@ -600,7 +600,7 @@ private:
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
-    FileTable files;
+    std::shared_ptr<FileTable> files;
     bool wasNameTableModified_ = false;
 
     core::packages::PackageDB packageDB_;
