@@ -343,6 +343,19 @@ TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
 #undef _INSTANTIATE
 }
 
+void TypePtr::InstantiationContext::computeSelfTypeArgs(const GlobalState &gs) {
+    ENFORCE_NO_TIMER(this->originalOwner.exists() && this->inWhat == this->originalOwner && !this->targs.has_value() &&
+                     this->currentAlignment.empty());
+
+    this->targsOwned = this->originalOwner.data(gs)->selfTypeArgs(gs);
+    this->targs = absl::MakeSpan(this->targsOwned);
+}
+
+void TypePtr::InstantiationContext::computeAlignment(const GlobalState &gs) {
+    ENFORCE_NO_TIMER(this->targs.has_value());
+    this->currentAlignment = Types::alignBaseTypeArgs(gs, originalOwner, this->targs.value(), inWhat);
+}
+
 // Returns nullptr to indicate no change.
 TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                                           const vector<TypePtr> &targs) const {

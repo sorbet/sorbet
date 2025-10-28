@@ -149,6 +149,8 @@ public:
     static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
                                         ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs);
 
+    static TypePtr resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef self);
+
     static InlinedVector<TypeMemberRef, 4> alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
                                                              absl::Span<const TypePtr> targs, ClassOrModuleRef asIf);
     // Extract the return value type from a proc.

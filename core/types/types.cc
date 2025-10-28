@@ -672,6 +672,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
     // TODO: the ENFORCE below should be above this conditional, but there is
     // currently a problem with the handling of `module_function` that causes it
     // to fail reliably. https://github.com/sorbet/sorbet/issues/904
+    // TODO(jez) Is this comment still true?
     if (originalOwner.data(gs)->typeMembers().empty() || (what == nullptr)) {
         return what;
     }
@@ -680,9 +681,25 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
                 fromWhat.data(gs)->derivesFrom(gs, inWhat),
             "\n{}\nis unrelated to\n\n{}", fromWhat.toString(gs), inWhat.toString(gs));
 
-    auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);
+    TypePtr::InstantiationContext ictx(originalOwner, inWhat, targs);
+    auto result = what._instantiateLambdaParams(gs, ictx);
+    if (result != nullptr) {
+        return result;
+    }
+    return what;
+}
 
-    auto result = what._instantiateLambdaParams(gs, currentAlignment, targs);
+/**
+ * fromWhat - where the generic type was written
+ * self   - where the generic type is observed
+ */
+TypePtr Types::resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef self) {
+    if (self.data(gs)->typeMembers().empty() || (what == nullptr)) {
+        return what;
+    }
+
+    TypePtr::InstantiationContext ictx(self, self);
+    auto result = what._instantiateLambdaParams(gs, ictx);
     if (result != nullptr) {
         return result;
     }
