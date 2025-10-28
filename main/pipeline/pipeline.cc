@@ -141,6 +141,9 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
 
 vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &files) {
     Timer timeit(gs.tracer(), "reserveFiles");
+    if (gs.packageDB().enabled()) {
+        gs.packageDB().reservePackageNameForFiles(files.size());
+    }
     vector<core::FileRef> ret;
     ret.reserve(files.size());
     core::UnfreezeFileTable unfreezeFiles(gs);
