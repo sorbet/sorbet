@@ -3485,14 +3485,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto unescaped = &strNode->unescaped;
             auto source = parser.extractString(unescaped);
             auto content = ctx.state.enterNameUTF8(source);
+            auto contentLoc = translateLoc(strNode->content_loc);
 
             // Create the backtick send call for the desugared expression
             auto sendBacktick = MK::Send1(location, MK::Self(location), core::Names::backtick(),
-                                          location.copyWithZeroLength(), MK::String(location, content));
+                                          location.copyWithZeroLength(), MK::String(contentLoc, content));
 
             // Create the XString NodeVec with a single string node
             NodeVec nodes{};
-            nodes.emplace_back(make_node_with_expr<parser::String>(MK::String(location, content), location, content));
+            nodes.emplace_back(
+                make_node_with_expr<parser::String>(MK::String(contentLoc, content), contentLoc, content));
 
             return make_node_with_expr<parser::XString>(move(sendBacktick), location, move(nodes));
         }
