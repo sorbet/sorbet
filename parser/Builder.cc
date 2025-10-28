@@ -313,7 +313,7 @@ public:
             loc = tokLoc(begin).join(loc);
         }
         if (end != nullptr) {
-            loc = loc.join(tokLoc(begin));
+            loc = loc.join(tokLoc(end));
         }
         if (trailingComma) {
             return make_unique<ArrayPatternWithTail>(loc, std::move(res));
@@ -1008,7 +1008,7 @@ public:
             loc = tokLoc(begin).join(loc);
         }
         if (end != nullptr) {
-            loc = loc.join(tokLoc(begin));
+            loc = loc.join(tokLoc(end));
         }
         return make_unique<HashPattern>(loc, std::move(kwargs));
     }
