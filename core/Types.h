@@ -150,7 +150,7 @@ public:
                                         ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs);
 
     static InlinedVector<TypeMemberRef, 4> alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
-                                                             const std::vector<TypePtr> &targs, ClassOrModuleRef asIf);
+                                                             absl::Span<const TypePtr> targs, ClassOrModuleRef asIf);
     // Extract the return value type from a proc.
     static TypePtr getProcReturnType(const GlobalState &gs, const TypePtr &procType);
 

@@ -629,7 +629,7 @@ void MetaType::_sanityCheck(const GlobalState &gs) const {
  * If some typeArgs are not present, return NoSymbol
  * */
 InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
-                                                         const vector<TypePtr> &targs, ClassOrModuleRef asIf) {
+                                                         absl::Span<const TypePtr> targs, ClassOrModuleRef asIf) {
     ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
             "what={} asIf={}", what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
     InlinedVector<TypeMemberRef, 4> currentAlignment;
