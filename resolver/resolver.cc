@@ -1975,8 +1975,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             } else {
                 // c.f. the similarity between this resultTypeAsSeenFrom and the processBinding case for Cast
-                castTypeSeenFromScope =
-                    core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scope.data(ctx)->selfTypeArgs(ctx));
+                castTypeSeenFromScope = core::Types::resultTypeAsSeenFromSelf(ctx, castType, scope);
                 if (!core::Types::isSubType(ctx, core::Types::nilClass(), castTypeSeenFromScope)) {
                     // Inside a method; declaring a normal instance variable
                     if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
@@ -2007,13 +2006,12 @@ class ResolveTypeMembersAndFieldsWalk {
             fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         }
 
-        auto scopeSelfTypeArgs = scope.data(ctx)->selfTypeArgs(ctx);
         auto priorFieldResultTypeSeenFromScope =
-            core::Types::resultTypeAsSeenFrom(ctx, priorFieldResultType, scope, scope, scopeSelfTypeArgs);
+            core::Types::resultTypeAsSeenFromSelf(ctx, priorFieldResultType, scope);
         if (castTypeSeenFromScope == nullptr) {
             // We might not have computed this yet, and to avoid eagerly computing it if we were
             // going to not need it due to an early exit, we make sure it's computed here.
-            castTypeSeenFromScope = core::Types::resultTypeAsSeenFrom(ctx, castType, scope, scope, scopeSelfTypeArgs);
+            castTypeSeenFromScope = core::Types::resultTypeAsSeenFromSelf(ctx, castType, scope);
         }
         if (core::Types::equiv(ctx, priorFieldResultTypeSeenFromScope, castTypeSeenFromScope)) {
             // We already have a symbol for this field, and it matches what we already saw, so we can short circuit.
@@ -3638,10 +3636,8 @@ private:
             if (arg0.name != arg1.name) {
                 return false;
             }
-            auto arg0type =
-                core::Types::resultTypeAsSeenFrom(gs, arg0.type, owner, owner, owner.data(gs)->selfTypeArgs(gs));
-            auto arg1type =
-                core::Types::resultTypeAsSeenFrom(gs, arg1.type, owner, owner, owner.data(gs)->selfTypeArgs(gs));
+            auto arg0type = core::Types::resultTypeAsSeenFromSelf(gs, arg0.type, owner);
+            auto arg1type = core::Types::resultTypeAsSeenFromSelf(gs, arg1.type, owner);
             return core::Types::equiv(gs, arg0type, arg1type);
         };
 
