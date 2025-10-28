@@ -74,13 +74,12 @@ TypePtr TypeVar::_approximateTypeVars(const GlobalState &gs, const TypeConstrain
 namespace {
 
 optional<vector<TypePtr>> instantiateLambdaParamsInElems(const vector<TypePtr> &elems, const GlobalState &gs,
-                                                         absl::Span<const TypeMemberRef> params,
-                                                         const vector<TypePtr> &targs) {
+                                                         TypePtr::InstantiationContext &ictx) {
     optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {
         ++i;
-        auto t = e._instantiateLambdaParams(gs, params, targs);
+        auto t = e._instantiateLambdaParams(gs, ictx);
         if (!newElems.has_value() && !t) {
             continue;
         }
@@ -169,9 +168,8 @@ optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const G
 
 } // anonymous namespace
 
-TypePtr TupleType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                            const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newElems = instantiateLambdaParamsInElems(this->elems, gs, params, targs);
+TypePtr TupleType::_instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const {
+    optional<vector<TypePtr>> newElems = instantiateLambdaParamsInElems(this->elems, gs, ictx);
     if (!newElems) {
         return nullptr;
     }
@@ -196,9 +194,8 @@ TypePtr TupleType::_approximateTypeVars(const GlobalState &gs, const TypeConstra
     return make_type<TupleType>(move(*newElems));
 };
 
-TypePtr ShapeType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                            const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newValues = instantiateLambdaParamsInElems(this->values, gs, params, targs);
+TypePtr ShapeType::_instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const {
+    optional<vector<TypePtr>> newValues = instantiateLambdaParamsInElems(this->values, gs, ictx);
     if (!newValues) {
         return nullptr;
     }
@@ -223,10 +220,9 @@ TypePtr ShapeType::_approximateTypeVars(const GlobalState &gs, const TypeConstra
     return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
-TypePtr OrType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                         const vector<TypePtr> &targs) const {
-    auto left = this->left._instantiateLambdaParams(gs, params, targs);
-    auto right = this->right._instantiateLambdaParams(gs, params, targs);
+TypePtr OrType::_instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const {
+    auto left = this->left._instantiateLambdaParams(gs, ictx);
+    auto right = this->right._instantiateLambdaParams(gs, ictx);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -269,10 +265,9 @@ TypePtr OrType::_approximateTypeVars(const GlobalState &gs, const TypeConstraint
     return nullptr;
 }
 
-TypePtr AndType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                          const vector<TypePtr> &targs) const {
-    auto left = this->left._instantiateLambdaParams(gs, params, targs);
-    auto right = this->right._instantiateLambdaParams(gs, params, targs);
+TypePtr AndType::_instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const {
+    auto left = this->left._instantiateLambdaParams(gs, ictx);
+    auto right = this->right._instantiateLambdaParams(gs, ictx);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -315,9 +310,8 @@ TypePtr AndType::_approximateTypeVars(const GlobalState &gs, const TypeConstrain
     return nullptr;
 }
 
-TypePtr AppliedType::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                              const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newTargs = instantiateLambdaParamsInElems(this->targs, gs, params, targs);
+TypePtr AppliedType::_instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const {
+    optional<vector<TypePtr>> newTargs = instantiateLambdaParamsInElems(this->targs, gs, ictx);
     if (!newTargs) {
         return nullptr;
     }
