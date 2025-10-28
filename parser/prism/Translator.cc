@@ -4691,7 +4691,12 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     auto length = closingLoc.end - closingLoc.start;
-    auto location = translateLoc(closingLoc);
+
+    // Chop off `/` from Regopt location, so the location only spans the options themselves:
+    // `/foo/im`
+    //       ^^
+    constexpr uint32_t offset = "/"sv.size();
+    auto location = translateLoc(closingLoc.start + offset, closingLoc.end);
 
     string_view options;
 
