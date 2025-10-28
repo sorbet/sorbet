@@ -2151,7 +2151,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             auto inlineIfSingle = false;
-            return translateStatements(stmtsNode, inlineIfSingle);
+            return translateStatements(stmtsNode, inlineIfSingle, location);
         }
         case PM_EMBEDDED_VARIABLE_NODE: {
             auto embeddedVariableNode = down_cast<pm_embedded_variable_node>(node);
