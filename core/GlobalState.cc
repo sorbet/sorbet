@@ -2087,7 +2087,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
     result->copyOptions(*this);
 
     // Additional options that might be used during indexing are manually copied over here
-    result->files = make_shared<FileTable>(*this->files);
+    result->files = this->files;
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
