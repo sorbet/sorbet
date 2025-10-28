@@ -3,7 +3,6 @@
 
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
-#include "common/counters/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/ParsedParam.h"
