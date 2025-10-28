@@ -2891,8 +2891,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto inlineIfSingle = false;
             // Override the begin node location to be the parentheses location instead of the statements location
-            return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle,
-                                       parensNode->base.location);
+            return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle, location);
         }
         case PM_PRE_EXECUTION_NODE: {
             auto preExecutionNode = down_cast<pm_pre_execution_node>(node);
@@ -4235,7 +4234,7 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
 // @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
 unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
-                                                         std::optional<pm_location_t> overrideLocation) {
+                                                         core::LocOffsets overrideLocation) {
     if (stmtsNode == nullptr)
         return nullptr;
 
@@ -4247,7 +4246,7 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     // For multiple statements, convert each statement and add them to the body of a Begin node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
-    auto beginLoc = translateLoc(overrideLocation.value_or(stmtsNode->base.location));
+    auto beginLoc = overrideLocation.exists() ? overrideLocation : translateLoc(stmtsNode->base.location);
 
     if (sorbetStmts.empty()) {
         return make_node_with_expr<parser::Begin>(MK::Nil(beginLoc), beginLoc, NodeVec{});
