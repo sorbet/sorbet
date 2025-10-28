@@ -1288,8 +1288,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     auto owner = ctx.owner.asMethodRef();
                     auto klass = owner.data(ctx)->owner;
                     ENFORCE(sym.data(ctx)->resultType != nullptr);
-                    auto instantiated = core::Types::resultTypeAsSeenFrom(ctx, sym.data(ctx)->resultType, klass, klass,
-                                                                          klass.data(ctx)->selfTypeArgs(ctx));
+                    auto instantiated = core::Types::resultTypeAsSeenFromSelf(ctx, sym.data(ctx)->resultType, klass);
                     if (owner.data(ctx)->flags.isGenericMethod) {
                         // instantiate requires a frozen constraint, but the constraint might not be
                         // frozen when we're running in guessTypes mode (and we never guess types if
@@ -1640,8 +1639,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::Cast &c) {
                 auto klass = ctx.owner.enclosingClass(ctx);
 
-                auto castType =
-                    core::Types::resultTypeAsSeenFrom(ctx, c.type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
+                auto castType = core::Types::resultTypeAsSeenFromSelf(ctx, c.type, klass);
 
                 if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
                     // ^ This mimics the check in LoadArg's call to parameterTypeAsSeenByImplementation

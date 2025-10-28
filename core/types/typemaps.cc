@@ -354,12 +354,17 @@ TypePtr AppliedType::_approximateTypeVars(const GlobalState &gs, const TypeConst
     return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
-TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
-                                              const vector<TypePtr> &targs) const {
-    ENFORCE(params.size() == targs.size());
-    for (auto &el : params) {
-        if (el == this->definition) {
-            return targs[&el - &params.front()];
+TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const {
+    if (!ictx.targs.has_value()) {
+        ictx.computeSelfTypeArgs(gs);
+    }
+    if (!ictx.targs->empty() && ictx.currentAlignment.empty()) {
+        ictx.computeAlignment(gs);
+    }
+    ENFORCE(ictx.currentAlignment.size() == ictx.targs->size());
+    for (auto el = ictx.currentAlignment.begin(); el != ictx.currentAlignment.end(); ++el) {
+        if (*el == this->definition) {
+            return ictx.targs.value()[distance(ictx.currentAlignment.begin(), el)];
         }
     }
     return nullptr;
