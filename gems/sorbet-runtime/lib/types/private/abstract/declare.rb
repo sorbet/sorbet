@@ -45,9 +45,14 @@ module T::Private::Abstract::Declare
         # different from the module on which we are defining the singleton
         # method.
         me = self.method(:new)
-        # #owner is generally a `Module`, but we know here it is a class.
-        # TODO(froydnj): write a test to verify that this is true?
-        if T.unsafe(me.owner).attached_object != mod
+        owner = me.owner
+        owner = case owner
+        when Class
+          owner.attached_object
+        else
+          owner
+        end
+        if owner != mod
           return result
         end
 
