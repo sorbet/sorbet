@@ -52,9 +52,10 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 //
 // It makes certain assumptions that it is running for the sake of computing overrides that are not
 // going to be true in other situations.
-bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const core::TypePtr &sub,
-                  core::MethodRef subMethod, const core::TypePtr &super, core::MethodRef superMethod,
-                  core::Polarity polarity, core::ErrorSection::Collector &errorDetailsCollector) {
+bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const vector<core::TypePtr> &subSelfTypeArgs,
+                  const core::TypePtr &sub, core::MethodRef subMethod, const core::TypePtr &super,
+                  core::MethodRef superMethod, core::Polarity polarity,
+                  core::ErrorSection::Collector &errorDetailsCollector) {
     if (sub == nullptr || super == nullptr) {
         // nullptr is just "unannotated" which is T.untyped
         return true;
@@ -82,10 +83,6 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
     //
     // Another approach might be to create the constr right here, instead of threading it around
     // everywhere. We've taken the aprpopach of only constructing the constraint once as an optimization.
-
-    // For the sake of comparison, we always compare the two types as if they were being "observed"
-    // in the child class, so we always instantiate with the sub class types
-    const auto &subSelfTypeArgs = subOwner.data(ctx)->selfTypeArgs(ctx);
 
     auto subType = core::Types::approximateTypeVars(ctx, sub, constr);
     subType = core::Types::resultTypeAsSeenFrom(ctx, subType, subOwner, subOwner, subSelfTypeArgs);
@@ -216,7 +213,8 @@ optional<core::AutocorrectSuggestion> constructAllowIncompatibleAutocorrect(cons
 
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
-void matchPositional(const core::Context ctx, core::TypeConstraint &constr, const ast::ExpressionPtr &tree,
+void matchPositional(const core::Context ctx, core::TypeConstraint &constr, const vector<core::TypePtr> &selfTypeArgs,
+                     const ast::ExpressionPtr &tree,
                      absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &superArgs,
                      core::MethodRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &methodArgs,
@@ -230,8 +228,8 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr, cons
         auto &methodArg = methodArgs[idx].get();
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, constr, methodArg.type, method, superArg.type, superMethod, core::Polarity::Negative,
-                          errorDetailsCollector)) {
+        if (!checkSubtype(ctx, constr, selfTypeArgs, methodArg.type, method, superArg.type, superMethod,
+                          core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(methodArg.loc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                             methodArgs[idx].get().show(ctx), methodArg.type.show(ctx),
@@ -367,11 +365,16 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         }
     }
 
+    // For the sake of comparison, we always compare the two types as if they were being "observed"
+    // in the child class, so we always instantiate with the sub class types.
+    // Compute out here so we only have to allocate it once.
+    auto selfTypeArgs = method.data(ctx)->owner.data(ctx)->selfTypeArgs(ctx);
+
     // match types of required positional arguments
-    matchPositional(ctx, *constr, tree, superSig.pos.required, superMethod, sig.pos.required, methodDef,
+    matchPositional(ctx, *constr, selfTypeArgs, tree, superSig.pos.required, superMethod, sig.pos.required, methodDef,
                     reportedAutocorrect);
     // match types of optional positional arguments
-    matchPositional(ctx, *constr, tree, superSig.pos.optional, superMethod, sig.pos.optional, methodDef,
+    matchPositional(ctx, *constr, selfTypeArgs, tree, superSig.pos.optional, superMethod, sig.pos.optional, methodDef,
                     reportedAutocorrect);
 
     if (!sig.kw.rest) {
@@ -390,8 +393,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
             // if there is a corresponding parameter, make sure it has the right type
             if (hasCorrespondingRequired || hasCorrespondingOptional) {
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!checkSubtype(ctx, *constr, corresponding->get().type, method, req.get().type, superMethod,
-                                  core::Polarity::Negative, errorDetailsCollector)) {
+                if (!checkSubtype(ctx, *constr, selfTypeArgs, corresponding->get().type, method, req.get().type,
+                                  superMethod, core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
                             ctx.state.beginError(corresponding->get().loc, core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -427,8 +430,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
             // if there is a corresponding parameter, make sure it has the sig type
             if (corresponding != sig.kw.optional.end()) {
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!checkSubtype(ctx, *constr, corresponding->get().type, method, opt.get().type, superMethod,
-                                  core::Polarity::Negative, errorDetailsCollector)) {
+                if (!checkSubtype(ctx, *constr, selfTypeArgs, corresponding->get().type, method, opt.get().type,
+                                  superMethod, core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
                             ctx.state.beginError(corresponding->get().loc, core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
@@ -482,8 +485,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
                 e.maybeAddAutocorrect(
                     constructAllowIncompatibleAutocorrect(ctx, tree, methodDef, "true", reportedAutocorrect));
             }
-        } else if (!checkSubtype(ctx, *constr, sig.kw.rest->get().type, method, superSigRest->get().type, superMethod,
-                                 core::Polarity::Negative, errorDetailsCollector)) {
+        } else if (!checkSubtype(ctx, *constr, selfTypeArgs, sig.kw.rest->get().type, method, superSigRest->get().type,
+                                 superMethod, core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
                             sig.kw.rest->get().show(ctx), sig.kw.rest->get().type.show(ctx),
@@ -530,8 +533,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         const auto &superMethodBlkParam = superMethod.data(ctx)->parameters.back();
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodBlkParam.type, method, superMethodBlkParam.type, superMethod,
-                          core::Polarity::Negative, errorDetailsCollector)) {
+        if (!checkSubtype(ctx, *constr, selfTypeArgs, methodBlkParam.type, method, superMethodBlkParam.type,
+                          superMethod, core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                             methodBlkParam.parameterName(ctx), methodBlkParam.type.show(ctx),
@@ -555,8 +558,8 @@ void validateCompatibleOverride(const core::Context ctx, const ast::ExpressionPt
         auto &methodReturn = method.data(ctx)->resultType;
 
         core::ErrorSection::Collector errorDetailsCollector;
-        if (!checkSubtype(ctx, *constr, methodReturn, method, superReturn, superMethod, core::Polarity::Positive,
-                          errorDetailsCollector)) {
+        if (!checkSubtype(ctx, *constr, selfTypeArgs, methodReturn, method, superReturn, superMethod,
+                          core::Polarity::Positive, errorDetailsCollector)) {
             if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Resolver::BadMethodOverride)) {
                 auto methodReturnShow = methodReturn == core::Types::void_() ? "void" : methodReturn.show(ctx);
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturnShow,
