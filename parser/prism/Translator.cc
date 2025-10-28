@@ -394,6 +394,7 @@ unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode)
 
 // widen the type from `parser::OpAsgn` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+// The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
 unique_ptr<parser::Node> Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
                                                               unique_ptr<parser::Node> lhs) {
@@ -420,6 +421,7 @@ unique_ptr<parser::Node> Translator::translateAnyOpAssignment(PrismAssignmentNod
         "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
 }
 
+// The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untypedNode, core::LocOffsets location) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
@@ -431,24 +433,29 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
     auto receiver = translate(node->receiver);
     auto args = translateArguments(node->arguments, up_cast(node->block));
 
+    // The LHS location includes the receiver and the `[]`, but not the `=` or rhs.
+    // self.example[k] = v
+    // ^^^^^^^^^^^^^^^
+    auto lhsLoc = translateLoc(node->receiver->location.start, node->closing_loc.end);
+
     unique_ptr<parser::Node> lhs;
     if (!directlyDesugar || !hasExpr(receiver) || !hasExpr(args)) {
-        lhs =
-            make_unique<parser::Send>(location, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
+        lhs = make_unique<parser::Send>(lhsLoc, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
     } else {
         auto receiverExpr = receiver->takeDesugaredExpr();
         auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
 
         // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
-        auto send = MK::Send(location, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(),
-                             move(args2));
-        lhs = make_node_with_expr<parser::Send>(move(send), location, move(receiver), core::Names::squareBrackets(),
+        auto send =
+            MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
+        lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), core::Names::squareBrackets(),
                                                 lBracketLoc, move(args));
     }
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
 }
 
+// The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets location, unique_ptr<parser::Node> lhs,
                                                               unique_ptr<parser::Node> rhs) {
@@ -618,6 +625,7 @@ Translator::OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
     return {tempRecv, move(stats), numPosArgs, move(readArgs), move(assgnArgs)};
 }
 
+// The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
 unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
                                                            unique_ptr<parser::Node> lhs, unique_ptr<parser::Node> rhs) {
