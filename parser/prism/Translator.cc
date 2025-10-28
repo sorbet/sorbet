@@ -2851,7 +2851,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat/`
             auto matchLastLineNode = down_cast<pm_match_last_line_node>(node);
 
-            auto regex = translateRegexp(matchLastLineNode->unescaped, location, matchLastLineNode->closing_loc);
+            auto regex =
+                translateRegexp(location, location, matchLastLineNode->unescaped, matchLastLineNode->closing_loc);
 
             return make_unsupported_node<parser::MatchCurLine>(location, move(regex));
         }
@@ -3147,7 +3148,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_REGULAR_EXPRESSION_NODE: { // A regular expression literal, e.g. `/foo/`
             auto regexNode = down_cast<pm_regular_expression_node>(node);
 
-            return translateRegexp(regexNode->unescaped, location, regexNode->closing_loc);
+            auto contentLoc = translateLoc(regexNode->content_loc);
+
+            return translateRegexp(location, contentLoc, regexNode->unescaped, regexNode->closing_loc);
         }
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE: { // A required keyword parameter, like `def foo(a:)`
             auto requiredKeywordParamNode = down_cast<pm_required_keyword_parameter_node>(node);
@@ -4723,18 +4726,18 @@ unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closin
 }
 
 // Translate an unescaped string from a Regexp literal
-unique_ptr<parser::Node> Translator::translateRegexp(pm_string_t unescaped, core::LocOffsets location,
-                                                     pm_location_t closingLoc) {
+unique_ptr<parser::Node> Translator::translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
+                                                     pm_string_t content, pm_location_t closingLoc) {
     // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
     // but we'll only have up to one String node here for this non-interpolated Regexp.
     parser::NodeVec parts;
-    auto source = parser.extractString(&unescaped);
+    auto source = parser.extractString(&content);
     if (!source.empty()) {
         if (directlyDesugar) {
             // Create a String node with its desugared expression
             auto name = ctx.state.enterNameUTF8(source);
             auto expr = MK::String(location, name);
-            auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), location, name);
+            auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), contentLoc, name);
             parts.emplace_back(move(sourceStringNode));
         } else {
             auto sourceStringNode = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
