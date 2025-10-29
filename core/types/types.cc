@@ -680,7 +680,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
         return what;
     }
 
-    TypePtr::InstantiationContext ictx(originalOwner, inWhat, targs);
+    InstantiationContext ictx(originalOwner, inWhat, targs);
     auto result = what._instantiateLambdaParams(gs, ictx);
     if (result != nullptr) {
         return result;
@@ -697,7 +697,7 @@ TypePtr Types::resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &wh
         return what;
     }
 
-    TypePtr::InstantiationContext ictx(self, self);
+    InstantiationContext ictx(self, self);
     auto result = what._instantiateLambdaParams(gs, ictx);
     if (result != nullptr) {
         return result;

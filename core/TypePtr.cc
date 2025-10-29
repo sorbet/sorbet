@@ -334,7 +334,7 @@ TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
 #undef _INSTANTIATE
 }
 
-void TypePtr::InstantiationContext::computeSelfTypeArgs(const GlobalState &gs) {
+void InstantiationContext::computeSelfTypeArgs(const GlobalState &gs) {
     ENFORCE_NO_TIMER(this->originalOwner.exists() && this->inWhat == this->originalOwner && !this->targs.has_value() &&
                      this->currentAlignment.empty());
 
@@ -342,7 +342,7 @@ void TypePtr::InstantiationContext::computeSelfTypeArgs(const GlobalState &gs) {
     this->targs = absl::MakeSpan(this->targsOwned);
 }
 
-void TypePtr::InstantiationContext::computeAlignment(const GlobalState &gs) {
+void InstantiationContext::computeAlignment(const GlobalState &gs) {
     ENFORCE_NO_TIMER(this->targs.has_value());
     this->currentAlignment = Types::alignBaseTypeArgs(gs, originalOwner, this->targs.value(), inWhat);
 }
