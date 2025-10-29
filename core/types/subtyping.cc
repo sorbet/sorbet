@@ -1590,6 +1590,10 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
                                                        o1->left.show(gs), "T.any", t2.show(gs));
                     subCollectorLeft.message = message;
                     errorDetailsCollector.addErrorDetails(move(subCollectorLeft));
+                } else {
+                    for (auto &c : subCollectorLeft.children) {
+                        errorDetailsCollector.addErrorDetails(move(c));
+                    }
                 }
             }
             return isSubTypeOfLeft;
@@ -1606,6 +1610,10 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
                                                        o1->right.show(gs), "T.any", t2.show(gs));
                     subCollectorRight.message = message;
                     errorDetailsCollector.addErrorDetails(move(subCollectorRight));
+                } else {
+                    for (auto &c : subCollectorRight.children) {
+                        errorDetailsCollector.addErrorDetails(move(c));
+                    }
                 }
             }
         }

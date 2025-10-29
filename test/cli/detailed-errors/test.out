@@ -313,6 +313,9 @@ hash.rb:10: Expected `T.nilable(T::Hash[String, Integer])` but found `T.nilable(
     hash.rb:9:
      9 |def takes_symbol_hash(symbol_hash)
                               ^^^^^^^^^^^
+  Detailed explanation:
+    `Symbol` is not a subtype of `String` for covariant type member `Hash::K`
+    `Hash` does not derive from `NilClass`
 
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
     10 |takes_tuple([])
