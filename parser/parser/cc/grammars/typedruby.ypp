@@ -3166,49 +3166,49 @@ lcurly_block_start:
                 | p_const p_lparen p_args rparen
                     {
                       driver.pattern_hash_keys.pop();
-                      auto pattern = driver.build.array_pattern(self, nullptr, $3, nullptr);
+                      auto pattern = driver.build.array_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const p_lparen p_find rparen
                     {
                       driver.pattern_hash_keys.pop();
-                      auto pattern = driver.build.find_pattern(self, nullptr, $3, nullptr);
+                      auto pattern = driver.build.find_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const p_lparen p_kwargs rparen
                     {
                       driver.pattern_hash_keys.pop();
-                      auto pattern = driver.build.hash_pattern(self, nullptr, $3, nullptr);
+                      auto pattern = driver.build.hash_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const tLPAREN2 rparen
                     {
                       auto list = driver.alloc.node_list();
-                      auto pattern = driver.build.array_pattern(self, $2, list, nullptr);
+                      auto pattern = driver.build.array_pattern(self, $2, list, $3);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $3);
                     }
                 | p_const p_lbracket p_args rbracket
                     {
                       driver.pattern_hash_keys.pop();
-                      auto pattern = driver.build.array_pattern(self, nullptr, $3, nullptr);
+                      auto pattern = driver.build.array_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const p_lbracket p_find rbracket
                     {
                       driver.pattern_hash_keys.pop();
-                      auto pattern = driver.build.find_pattern(self, nullptr, $3, nullptr);
+                      auto pattern = driver.build.find_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const p_lbracket p_kwargs rbracket
                     {
                       driver.pattern_hash_keys.pop();
-                      auto pattern = driver.build.hash_pattern(self, nullptr, $3, nullptr);
+                      auto pattern = driver.build.hash_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const tLBRACK2 rbracket
                     {
                       auto list = driver.alloc.node_list();
-                      auto pattern = driver.build.array_pattern(self, $2, list, nullptr);
+                      auto pattern = driver.build.array_pattern(self, $2, list, $3);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $3);
                     }
                 | tLBRACK p_args rbracket
