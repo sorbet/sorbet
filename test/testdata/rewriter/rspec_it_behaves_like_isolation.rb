@@ -17,22 +17,26 @@ class MyClass < RSpec::Core::ExampleGroup
   describe("it_behaves_like provides isolation") do
     # Define a shared example with a let variable
     shared_examples "shared behavior" do
-      let(:shared_value) { 'from_shared' }
+      let(:shared_value) { T.let('from_shared', String) }
 
       it 'uses shared value' do
-        expect(shared_value).to eq('from_shared')
+        result = shared_value
+        T.reveal_type(result) # error: Revealed type: `T.untyped`
+        expect(result).to eq('from_shared')
       end
     end
 
-    # Define a let variable in the outer context
-    let(:shared_value) { 'from_outer' }
+    # Define a let variable in the outer context with a different value
+    let(:shared_value) { T.let(100, Integer) }
 
     # Test that it_behaves_like creates an isolated nested context
     it_behaves_like "shared behavior"
 
-    # Test that the outer context still has its own value
+    # Test that the outer context still has its own value (not clobbered by shared behavior)
     it 'outer context has its own value' do
-      expect(shared_value).to eq('from_outer')
+      result = shared_value
+      T.reveal_type(result) # error: Revealed type: `T.untyped`
+      expect(result).to eq(100)
     end
 
     # Test nested it_behaves_like with method overriding
