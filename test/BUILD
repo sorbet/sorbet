@@ -133,7 +133,6 @@ prism_location_test_suite(
         exclude = [
             "prism_regression/case_match_variable_pinning.rb",
             "prism_regression/error_recovery/assign.rb",
-            "prism_regression/if_elsif.rb",
             "prism_regression/lambda.rb",
             "prism_regression/multi_target.rb",
             "prism_regression/multi_write.rb",
