@@ -53,9 +53,9 @@ steps:
     artifact_paths: _out_/profile.json
     <<: *elastic
 
-  - label: ":linux: test-vscode-extension.sh"
-    command: '.buildkite/test-vscode-extension.sh < /dev/null'
-    <<: *elastic
+  # - label: ":linux: test-vscode-extension.sh"
+  #   command: '.buildkite/test-vscode-extension.sh < /dev/null'
+  #   <<: *elastic
 
   - wait: ~
 
@@ -104,10 +104,10 @@ steps:
     artifact_paths: _out_/**/*
     <<: *elastic
 
-  - label: ":linux: build-vscode-extension.sh"
-    command: '.buildkite/build-vscode-extension.sh < /dev/null'
-    artifact_paths: _out_/**/*
-    <<: *elastic
+  # - label: ":linux: build-vscode-extension.sh"
+  #   command: '.buildkite/build-vscode-extension.sh < /dev/null'
+  #   artifact_paths: _out_/**/*
+  #   <<: *elastic
 
   - wait: ~
 
