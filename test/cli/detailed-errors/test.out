@@ -74,8 +74,8 @@ union.rb:44: Argument does not have asserted type `T.all(Union::M1, Union::M2)` 
     43 |  C12_or_C13 = T.let(C12.new, T.any(C12, C13))
           ^^^^^^^^^^
   Detailed explanation:
-    `Union::C13` is not a subtype of `Union::M2` (the right side of the `T.all`)
     `Union::C13` (the right side of the `T.any`) is not a subtype of `T.all(Union::M1, Union::M2)`
+      `Union::C13` is not a subtype of `Union::M2` (the right side of the `T.all`)
 
 union.rb:45: Argument does not have asserted type `T.all(Union::M1, Union::M3)` https://srb.help/7007
     45 |  T.let(C12_or_C13, T.all(M1, M3));
@@ -85,8 +85,8 @@ union.rb:45: Argument does not have asserted type `T.all(Union::M1, Union::M3)` 
     43 |  C12_or_C13 = T.let(C12.new, T.any(C12, C13))
           ^^^^^^^^^^
   Detailed explanation:
-    `Union::C12` is not a subtype of `Union::M3` (the right side of the `T.all`)
     `Union::C12` (the left side of the `T.any`) is not a subtype of `T.all(Union::M1, Union::M3)`
+      `Union::C12` is not a subtype of `Union::M3` (the right side of the `T.all`)
 
 union.rb:48: Argument does not have asserted type `T.any(Union::C1, Union::C3)` https://srb.help/7007
     48 |  T.let(C1_or_C2, T.any(C1, C3))
@@ -313,9 +313,6 @@ hash.rb:10: Expected `T.nilable(T::Hash[String, Integer])` but found `T.nilable(
     hash.rb:9:
      9 |def takes_symbol_hash(symbol_hash)
                               ^^^^^^^^^^^
-  Detailed explanation:
-    `Symbol` is not a subtype of `String` for covariant type member `Hash::K`
-    `Hash` does not derive from `NilClass`
 
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
     10 |takes_tuple([])

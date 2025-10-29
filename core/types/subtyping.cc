@@ -1579,7 +1579,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     // lose "or" information in t2 early.
     if (auto o1 = cast_type<OrType>(t1)) { // 7, 8, 9
         auto subCollectorLeft = errorDetailsCollector.newCollector();
-        auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, errorDetailsCollector);
+        auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, subCollectorLeft);
         if (!isSubTypeOfLeft) {
             if constexpr (shouldAddErrorDetails) {
                 // This if is to handle `T.nilable(X) < Y`; if we've already told the user that T.nilable(X) is not a
@@ -1595,7 +1595,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
             return isSubTypeOfLeft;
         }
         auto subCollectorRight = errorDetailsCollector.newCollector();
-        auto isSubTypeOfRight = Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode, errorDetailsCollector);
+        auto isSubTypeOfRight = Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode, subCollectorRight);
         if (!isSubTypeOfRight) {
             if constexpr (shouldAddErrorDetails) {
                 // This if is to handle `T.nilable(X) < Y`; if we've already told the user that T.nilable(X) is not a
