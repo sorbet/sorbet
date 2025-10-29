@@ -599,7 +599,6 @@ struct IndexSubstitutionJob {
 
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
         : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)}, numTreesProcessed{res.numTreesProcessed} {
-        to.mergeFileTable(*this->threadGs);
         if (absl::c_any_of(this->trees, [](auto &parsed) { return !parsed.cached(); })) {
             this->subst.emplace(*this->threadGs, to);
         }

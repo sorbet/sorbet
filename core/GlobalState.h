@@ -507,10 +507,6 @@ public:
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &packagerLayers, std::string errorHint) const;
 
-    // Merge the contents of one file table into this GlobalState. This is used during the index pass to make sure that
-    // changes made to the file table in worker threads are propagated back to the main GlobalState.
-    void mergeFileTable(const core::GlobalState &gs);
-
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
     // Returns a string_view of the given path with the path prefix removed.
