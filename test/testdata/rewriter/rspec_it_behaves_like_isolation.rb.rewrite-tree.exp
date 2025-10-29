@@ -20,20 +20,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C MyClass><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
     class <emptyTree>::<C <describe 'it_behaves_like provides isolation'>><<C <todo sym>>> < (<self>)
       def shared_value<<todo method>>(&<blk>)
-        "from_outer"
+        <cast:let>(100, <todo sym>, <emptyTree>::<C Integer>)
       end
 
       def <it 'outer context has its own value'><<todo method>>(&<blk>)
-        <self>.expect(<self>.shared_value()).to(<self>.eq("from_outer"))
+        begin
+          result = <self>.shared_value()
+          <emptyTree>::<C T>.reveal_type(result)
+          <self>.expect(result).to(<self>.eq(100))
+        end
       end
 
       module <emptyTree>::<C <shared_examples 'shared behavior'>><<C <todo sym>>> < ()
         def shared_value<<todo method>>(&<blk>)
-          "from_shared"
+          <cast:let>("from_shared", <todo sym>, <emptyTree>::<C String>)
         end
 
         def <it 'uses shared value'><<todo method>>(&<blk>)
-          <self>.expect(<self>.shared_value()).to(<self>.eq("from_shared"))
+          begin
+            result = <self>.shared_value()
+            <emptyTree>::<C T>.reveal_type(result)
+            <self>.expect(result).to(<self>.eq("from_shared"))
+          end
         end
 
         <runtime method definition of shared_value>
