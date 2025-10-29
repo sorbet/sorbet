@@ -2174,8 +2174,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto owner = data->owner.asClassOrModuleRef();
 
         const core::LambdaParam *parentType = nullptr;
-        core::SymbolRef parentMemberSymbol = core::Symbols::noSymbol();
-        parentMemberSymbol = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
+        auto parentMemberSymbol = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
 
         // check mixins if the type member doesn't exist in the parent
         if (!parentMemberSymbol.exists()) {
@@ -2197,6 +2196,24 @@ class ResolveTypeMembersAndFieldsWalk {
                 const auto parentShow = parentMemberSymbol.show(ctx);
                 e.setHeader("`{}` is a type member but `{}` is not a type member", lhs.show(ctx), parentShow);
                 e.addErrorLine(parentMemberSymbol.loc(ctx), "`{}` definition", parentShow);
+            }
+        }
+
+        if (data->name == core::Names::Constants::AttachedClass() && owner.data(ctx)->isClass() &&
+            owner != core::Symbols::Module() && !owner.data(ctx)->derivesFrom(ctx, core::Symbols::Module())) {
+            // There isn't really a technical reason why we *can't* support this, but it's kind of
+            // wierd, because it makes the `T.attached_class` type in a generic class stand for
+            // something that has no connection whatsoever to the intrinsic notion of an attached class.
+            if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::HasAttachedClassInClass)) {
+                // This is the simple way to explain the error to users, even though the
+                // condition above is more complicated. has_attached_class *is* allowed in a class
+                // inherits from `::Module`, which includes `class ::Class` and `class ::Module`.
+                // `::Class` cannot be subclassed directly, but `::Module` can (and it appears that
+                // some gems do).
+                //
+                // But this phrasing is the easiest way to convey what's intended to a user.
+                e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
+                            core::Names::declareHasAttachedClass().show(ctx), "module", "class");
             }
         }
 
