@@ -1482,8 +1482,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                             result = false;
                             if constexpr (shouldAddErrorDetails) {
                                 auto message = ErrorColors::format("`{}` is not a subtype of `{}` for key `{}`",
-                                                                   h1.values[i].show(gs),
-                                                                   h2->values[optind.value()].show(gs), el2.show(gs));
+                                                                   h1.values[optind.value()].show(gs),
+                                                                   h2->values[i].show(gs), el2.show(gs));
                                 subCollector.message = message;
                                 errorDetailsCollector.addErrorDetails(std::move(subCollector));
                             } else {
