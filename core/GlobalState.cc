@@ -956,7 +956,7 @@ void GlobalState::initEmpty() {
     Symbols::Object().data(*this)->resultType = Types::Object();
 
     // First file is used to indicate absence of a file
-    files.emplace_back();
+    files.initEmpty();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
@@ -1639,7 +1639,7 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 
     SLOW_DEBUG_ONLY(for (auto &f
-                         : this->files) {
+                         : this->getFiles()) {
         if (f) {
             if (f->path() == file->path()) {
                 Exception::raise("Request to `enterFile` for already-entered file path?");
@@ -1647,11 +1647,7 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
         }
     })
 
-    auto path = file->path();
-    files.emplace_back(std::move(file));
-    auto ret = FileRef(filesUsed() - 1);
-    fileRefByPath[path] = ret;
-    return ret;
+    return files.emplace(std::move(file));
 }
 
 FileRef GlobalState::enterFile(string_view path, string_view source) {
@@ -1662,11 +1658,11 @@ FileRef GlobalState::enterFile(string_view path, string_view source) {
 FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
     ENFORCE_NO_TIMER(id.id() < this->files.size());
-    ENFORCE_NO_TIMER(this->files[id.id()]->sourceType == File::Type::NotYetRead);
-    ENFORCE_NO_TIMER(this->files[id.id()]->path() == file->path());
+    ENFORCE_NO_TIMER(this->files.get(id.id())->sourceType == File::Type::NotYetRead);
+    ENFORCE_NO_TIMER(this->files.get(id.id())->path() == file->path());
 
     // was a tombstone before.
-    this->files[id.id()] = std::move(file);
+    this->files.get(id.id()) = std::move(file);
     return id;
 }
 
@@ -2018,7 +2014,6 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
 
     result->strings = this->strings;
     result->files = this->files;
-    result->fileRefByPath = this->fileRefByPath;
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
@@ -2093,7 +2088,6 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
 
     // Additional options that might be used during indexing are manually copied over here
     result->files = this->files;
-    result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
@@ -2125,7 +2119,6 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     // We share the file table entries with the original GlobalState, and then copy the content of the name table,
     // string storage, and uuid to ensure that we remain compatible with the session cache.
     result->files = this->files;
-    result->fileRefByPath = this->fileRefByPath;
     result->kvstoreUuid = this->kvstoreUuid;
     result->strings = this->strings;
     result->utf8Names = this->utf8Names;
@@ -2157,14 +2150,15 @@ void GlobalState::mergeFileTable(const core::GlobalState &from) {
     UnfreezeFileTable unfreezeFiles(*this);
     // id 0 is for non-existing FileRef
     for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
-        if (from.files[fileIdx]->sourceType == File::Type::NotYetRead) {
+        if (from.files.get(fileIdx)->sourceType == File::Type::NotYetRead) {
             continue;
         }
-        if (fileIdx < this->filesUsed() && from.files[fileIdx].get() == this->files[fileIdx].get()) {
+        if (fileIdx < this->filesUsed() && from.files.get(fileIdx).get() == this->files.get(fileIdx).get()) {
             continue;
         }
-        ENFORCE_NO_TIMER(fileIdx >= this->filesUsed() || this->files[fileIdx]->sourceType == File::Type::NotYetRead);
-        this->enterNewFileAt(from.files[fileIdx], fileIdx);
+        ENFORCE_NO_TIMER(fileIdx >= this->filesUsed() ||
+                         this->files.get(fileIdx)->sourceType == File::Type::NotYetRead);
+        this->enterNewFileAt(from.files.get(fileIdx), fileIdx);
     }
 }
 
@@ -2276,7 +2270,7 @@ void GlobalState::trace(string_view msg) const {
 
 void GlobalState::markAsPayload() {
     bool seenEmpty = false;
-    for (auto &f : files) {
+    for (auto &f : getFiles()) {
         if (!seenEmpty) {
             ENFORCE_NO_TIMER(!f);
             seenEmpty = true;
@@ -2289,10 +2283,10 @@ void GlobalState::markAsPayload() {
 std::shared_ptr<File> GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
     ENFORCE_NO_TIMER(whatFile.id() < filesUsed());
     ENFORCE_NO_TIMER(whatFile.dataAllowingUnsafe(*this).path() == withWhat->path());
-    return std::exchange(files[whatFile.id()], std::move(withWhat));
+    return std::exchange(files.get(whatFile.id()), std::move(withWhat));
 }
 
-FileRef GlobalState::findFileByPath(string_view path) const {
+FileRef FileTable::findFileByPath(string_view path) const {
     auto fnd = fileRefByPath.find(path);
     if (fnd != fileRefByPath.end()) {
         return fnd->second;
@@ -2333,7 +2327,7 @@ packages::UnfreezePackages GlobalState::unfreezePackages() {
 
 unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {
     ENFORCE_NO_TIMER(fref.id() < what->filesUsed());
-    what->files[fref.id()]->sourceType = File::Type::TombStone;
+    what->files.get(fref.id())->sourceType = File::Type::TombStone;
     return what;
 }
 
@@ -2454,10 +2448,6 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
     result->classAliasHash = LocalSymbolTableHashes::patchHash(classAliasHash);
     result->methodHash = LocalSymbolTableHashes::patchHash(methodHash);
     return result;
-}
-
-absl::Span<const shared_ptr<File>> GlobalState::getFiles() const {
-    return absl::MakeSpan(files);
 }
 
 MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {

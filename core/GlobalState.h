@@ -183,6 +183,55 @@ public:
     }
 };
 
+class FileTable {
+    std::vector<std::shared_ptr<File>> files;
+    UnorderedMap<std::string, FileRef> fileRefByPath;
+
+public:
+    std::shared_ptr<File> &get(size_t ix) {
+        return this->files[ix];
+    }
+
+    const std::shared_ptr<File> &get(size_t ix) const {
+        return this->files[ix];
+    }
+
+    void reserve(size_t size) {
+        this->files.reserve(size);
+    }
+
+    size_t size() const {
+        return this->files.size();
+    }
+
+    bool empty() const {
+        return this->files.empty();
+    }
+
+    FileRef findFileByPath(std::string_view path) const;
+
+    FileRef emplace(std::shared_ptr<File> &&file) {
+        FileRef ref(this->files.size());
+        this->fileRefByPath[file->path()] = ref;
+        this->files.emplace_back(std::move(file));
+        return ref;
+    }
+
+    void clear() {
+        this->files.clear();
+        this->fileRefByPath.clear();
+    }
+
+    void initEmpty() {
+        // First file is used to indicate absence of a file
+        this->files.emplace_back();
+    }
+
+    absl::Span<const std::shared_ptr<File>> span() const {
+        return absl::MakeSpan(this->files);
+    }
+};
+
 class GlobalState final {
     friend NameRef;
     friend ClassOrModule;
@@ -303,7 +352,9 @@ public:
     FileRef reserveFileRef(std::string path);
     std::shared_ptr<File> replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
-    FileRef findFileByPath(std::string_view path) const;
+    FileRef findFileByPath(std::string_view path) const {
+        return this->files.findFileByPath(path);
+    }
 
     const packages::PackageDB &packageDB() const;
     packages::PackageDB &packageDB();
@@ -469,7 +520,9 @@ public:
     void trace(std::string_view msg) const;
 
     std::unique_ptr<LocalSymbolTableHashes> hash() const;
-    absl::Span<const std::shared_ptr<File>> getFiles() const;
+    absl::Span<const std::shared_ptr<File>> getFiles() const {
+        return this->files.span();
+    }
 
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
@@ -538,17 +591,16 @@ private:
     std::vector<UTF8Name> utf8Names;
     std::vector<ConstantName> constantNames;
     std::vector<UniqueName> uniqueNames;
-    UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<ClassOrModule> classAndModules;
     std::vector<Method> methods;
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
     std::vector<TypeParameter> typeParameters;
     NameHash namesByHash;
-    std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
+    FileTable files;
     bool wasNameTableModified_ = false;
 
     core::packages::PackageDB packageDB_;

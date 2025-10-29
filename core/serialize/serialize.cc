@@ -860,22 +860,17 @@ void SerializerImpl::pickleFileTable(Pickler &p, const GlobalState &gs, bool pay
 }
 
 void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
+    Timer timeit(result.tracer(), "readFiles");
     result.files.clear();
-    result.fileRefByPath.clear();
 
-    {
-        Timer timeit(result.tracer(), "readFiles");
+    int filesSize = p.getU4();
 
-        // We don't count the empty file that we reserve for the invalid FileRef.
-        int filesSize = 1 + p.getU4();
-        result.files.reserve(filesSize);
+    // We don't count the empty file that we reserve for the invalid FileRef.
+    result.files.reserve(1 + filesSize);
+    result.files.initEmpty();
 
-        result.files.emplace_back();
-
-        for (int i = 1; i < filesSize; i++) {
-            auto f = result.files.emplace_back(unpickleFile(p));
-            result.fileRefByPath[string(f->path())] = FileRef(i);
-        }
+    for (int i = 0; i < filesSize; i++) {
+        result.files.emplace(unpickleFile(p));
     }
 }
 
