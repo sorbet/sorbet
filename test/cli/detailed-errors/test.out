@@ -60,6 +60,17 @@ union.rb:49: Argument does not have asserted type `T.any(Union::C2, Union::C3)` 
   Detailed explanation:
     `Union::C1` (the left side of the `T.any`) is not a subtype of `T.any(Union::C2, Union::C3)`
 
+union.rb:52: Argument does not have asserted type `T.any(Union::M1, Union::M3)` https://srb.help/7007
+    52 |  T.let(C1_or_C2_or_C3, T.any(M1, M3))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.nilable(T.any(Union::C1, Union::C2, Union::C3))` originating from:
+    union.rb:51:
+    51 |  C1_or_C2_or_C3 = T.let(C1.new, T.any(T.nilable(T.any(C1, C2)), C3))
+          ^^^^^^^^^^^^^^
+  Detailed explanation:
+    `T.nilable(T.any(Union::C1, Union::C2))` (the left side of the `T.any`) is not a subtype of `T.any(Union::M1, Union::M3)`
+      `Union::C2` (the right side of the `T.any`) is not a subtype of `T.any(Union::M1, Union::M3)`
+
 type_members.rb:35: Argument does not have asserted type `Box2[Integer]` https://srb.help/7007
     35 |  T.let(box1, Box2[Integer])
           ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -410,4 +421,4 @@ attached_class.rb:17: Expected `T::Array[T.attached_class (of AttachedClassB)]` 
   Detailed explanation:
     `AttachedClassB` is not a subtype of `T.attached_class (of AttachedClassB)` for covariant type member `Array::Elem`
       `AttachedClassB` is incompatible with `T.attached_class (of AttachedClassB)` because when this method is called on a subclass `T.attached_class (of AttachedClassB)` will represent a more specific subclass, meaning `AttachedClassB` will not be specific enough. See https://sorbet.org/docs/attached-class for more.
-Errors: 34
+Errors: 35
