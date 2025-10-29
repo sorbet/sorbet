@@ -459,7 +459,7 @@ public:
 
     void _sanityCheck(const GlobalState &gs) const;
 
-    TypePtr _instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
 };
 CheckSize(LambdaParam, 24, 8);
 
@@ -798,7 +798,7 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
@@ -856,7 +856,7 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
@@ -903,7 +903,7 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
@@ -942,7 +942,7 @@ public:
     std::string showWithMoreInfo(const GlobalState &gs) const;
     uint32_t hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -970,7 +970,7 @@ public:
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
-    TypePtr _instantiateLambdaParams(const GlobalState &gs, TypePtr::InstantiationContext &ictx) const;
+    TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
