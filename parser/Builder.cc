@@ -739,7 +739,7 @@ public:
 
     unique_ptr<Node> const_pattern(unique_ptr<Node> const_, const token *begin, unique_ptr<Node> pattern,
                                    const token *end) {
-        return make_unique<ConstPattern>(tokLoc(begin).join(tokLoc(end)), std::move(const_), std::move(pattern));
+        return make_unique<ConstPattern>(const_->loc.join(tokLoc(end)), std::move(const_), std::move(pattern));
     }
 
     unique_ptr<Node> constFetch(unique_ptr<Node> scope, const token *colon, const token *name) {
