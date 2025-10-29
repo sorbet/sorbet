@@ -50,22 +50,42 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       class <emptyTree>::<C <describe 'method isolation'>><<C <todo sym>>> < (<self>)
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C Integer>)
+        end
+
         def helper_method<<todo method>>(&<blk>)
-          "from_outer"
+          42
         end
 
         def <it 'outer helper_method is not clobbered'><<todo method>>(&<blk>)
-          <self>.expect(<self>.helper_method()).to(<self>.eq("from_outer"))
+          begin
+            result = <self>.helper_method()
+            <emptyTree>::<C T>.reveal_type(result)
+            <self>.expect(result).to(<self>.eq(42))
+          end
         end
 
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
         module <emptyTree>::<C <shared_examples 'defines helper method'>><<C <todo sym>>> < ()
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
           def helper_method<<todo method>>(&<blk>)
             "from_shared"
           end
 
           def <it 'uses helper from shared'><<todo method>>(&<blk>)
-            <self>.expect(<self>.helper_method()).to(<self>.eq("from_shared"))
+            begin
+              result = <self>.helper_method()
+              <emptyTree>::<C T>.reveal_type(result)
+              <self>.expect(result).to(<self>.eq("from_shared"))
+            end
           end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
           <runtime method definition of helper_method>
 
