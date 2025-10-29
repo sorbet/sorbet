@@ -470,17 +470,31 @@ public:
     std::unique_ptr<GlobalState> deepCopyGlobalState(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
-    // Copy the file table and other parts of GlobalState that are required for the indexing pass.
+    // Minimally copy the global state and share the file table with the original. This is meant only for use on threads
+    // in the indexing pass, as the global states produced will be short-lived and the files used between threads will
+    // have no overlap.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
     std::unique_ptr<GlobalState>
-    copyForIndex(const bool packagerEnabled,
-                 const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                 const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                 const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                 const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                 const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                 const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+    copyForIndexThread(const bool packagerEnabled,
+                       const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                       const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                       const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
+                       const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+                       const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+                       const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+
+    // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
+    // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
+    // during indexing, and the name tables will only be written to.
+    std::unique_ptr<GlobalState>
+    copyForLSPTypechecker(const bool packagerEnabled,
+                          const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                          const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                          const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
+                          const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+                          const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+                          const std::vector<std::string> &packagerLayers, std::string errorHint) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
     // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will

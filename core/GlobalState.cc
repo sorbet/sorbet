@@ -2075,7 +2075,7 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     return result;
 }
 
-unique_ptr<GlobalState> GlobalState::copyForIndex(
+unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
@@ -2086,8 +2086,11 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
     result->initEmpty();
     result->copyOptions(*this);
 
-    // Additional options that might be used during indexing are manually copied over here
+    // We share the file table here insead of copying it, to avoid the allocation and overhead of merging back together
+    // on an indexing thread.
     result->files = this->files;
+
+    // Additional options that might be used during indexing are manually copied over here
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
@@ -2102,6 +2105,32 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
     return result;
 }
 
+unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
+    const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &packagerLayers, string errorHint) const {
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
+
+    result->initEmpty();
+    result->copyOptions(*this);
+
+    // Additional options that might be used during indexing are manually copied over here
+    result->files = make_shared<FileTable>(*this->files);
+    result->kvstoreUuid = this->kvstoreUuid;
+
+    if (packagerEnabled) {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+    }
+
+    return result;
+}
 unique_ptr<GlobalState>
 GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
                              const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,

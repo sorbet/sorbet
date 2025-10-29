@@ -1796,7 +1796,7 @@ NameRef SerializerImpl::unpickleNameRef(UnPickler &p) {
     // to ENFORCE that re-entering the thing with the given name produces the same result.
     //
     // For unpickled NameRefs, that might not be the case: the GlobalState we're unpickling a tree
-    // that contains NameRef with might be a tree created by `GlobalState::copyForIndex`, which
+    // that contains NameRef with might be a tree created by `GlobalState::copyForIndex*`, which
     // doesn't have a complete name table (it will only have the names created by generate_names.cc)
     // which normally isn't important because mergeIndexResults skips ast::Substitute::run for trees
     // which came out of the cache (e.g., it assumes those trees are getting merged into a
