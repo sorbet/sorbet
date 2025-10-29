@@ -861,17 +861,19 @@ void SerializerImpl::pickleFileTable(Pickler &p, const GlobalState &gs, bool pay
 
 void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
     Timer timeit(result.tracer(), "readFiles");
-    result.files.clear();
+    FileTable files;
 
     int filesSize = p.getU4();
 
     // We don't count the empty file that we reserve for the invalid FileRef.
-    result.files.reserve(1 + filesSize);
-    result.files.initEmpty();
+    files.reserve(1 + filesSize);
+    files.initEmpty();
 
     for (int i = 0; i < filesSize; i++) {
-        result.files.emplace(unpickleFile(p));
+        files.emplace(unpickleFile(p));
     }
+
+    result.files = make_shared<FileTable>(move(files));
 }
 
 Pickler SerializerImpl::pickleSymbolTable(const GlobalState &gs) {
@@ -1116,7 +1118,7 @@ void Serializer::loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const
 
 void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const symbolTableData,
                                  const uint8_t *const nameTableData, const uint8_t *const fileTableData) {
-    ENFORCE_NO_TIMER(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
+    ENFORCE_NO_TIMER(gs.files->empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
                      "Can't load into a non-empty state");
     {
         UnPickler p(symbolTableData, gs.tracer());
@@ -1794,7 +1796,7 @@ NameRef SerializerImpl::unpickleNameRef(UnPickler &p) {
     // to ENFORCE that re-entering the thing with the given name produces the same result.
     //
     // For unpickled NameRefs, that might not be the case: the GlobalState we're unpickling a tree
-    // that contains NameRef with might be a tree created by `GlobalState::copyForIndex`, which
+    // that contains NameRef with might be a tree created by `GlobalState::copyForIndex*`, which
     // doesn't have a complete name table (it will only have the names created by generate_names.cc)
     // which normally isn't important because mergeIndexResults skips ast::Substitute::run for trees
     // which came out of the cache (e.g., it assumes those trees are getting merged into a

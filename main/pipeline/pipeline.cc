@@ -519,13 +519,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
                 counterInc("types.input.rbi.files");
             }
 
-            {
-                core::UnfreezeFileTable unfreezeFiles(gs);
-                auto fileObj = make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
-
-                auto entered = gs.enterNewFileAt(move(fileObj), file);
-                ENFORCE(entered == file);
-            }
+            gs.replaceFile(file, make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal));
 
             if constexpr (enable_counters) {
                 counterAdd("types.input.lines", file.data(gs).lineCount());
@@ -599,7 +593,6 @@ struct IndexSubstitutionJob {
 
     IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
         : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)}, numTreesProcessed{res.numTreesProcessed} {
-        to.mergeFileTable(*this->threadGs);
         if (absl::c_any_of(this->trees, [](auto &parsed) { return !parsed.cached(); })) {
             this->subst.emplace(*this->threadGs, to);
         }
@@ -700,7 +693,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         fileq->push(move(file), 1);
     }
 
-    shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex(
+    shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndexThread(
         opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
@@ -711,7 +704,11 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
 
         // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
         // file sources are available.
-        unique_ptr<core::GlobalState> localGs = emptyGs->deepCopyGlobalState();
+        auto localGs = emptyGs->copyForIndexThread(
+            opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+            opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
+            opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
+            opts.sorbetPackagesHint);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;

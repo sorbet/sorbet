@@ -269,12 +269,12 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
     : GlobalState(move(errorQueue), make_shared<lsp::TypecheckEpochManager>()) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
-    : GlobalState(move(errorQueue), move(epochManager), globalStateIdCounter.fetch_add(1)) {}
+    : GlobalState(move(errorQueue), move(epochManager), make_shared<FileTable>(), globalStateIdCounter.fetch_add(1)) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                         int globalStateId)
+                         shared_ptr<FileTable> files, int globalStateId)
     : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
-      epochManager(move(epochManager)) {
+      epochManager(move(epochManager)), files(move(files)) {
     // Reserve memory in internal vectors for the contents of payload.
     utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
     constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
@@ -294,7 +294,7 @@ unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logg
     // Note: Private constructor.
     unique_ptr<GlobalState> rv(
         new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
-                        make_shared<lsp::TypecheckEpochManager>(), -1));
+                        make_shared<lsp::TypecheckEpochManager>(), make_shared<FileTable>(), -1));
     rv->initEmpty();
     return rv;
 }
@@ -956,7 +956,7 @@ void GlobalState::initEmpty() {
     Symbols::Object().data(*this)->resultType = Types::Object();
 
     // First file is used to indicate absence of a file
-    files.initEmpty();
+    files->initEmpty();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
@@ -1647,23 +1647,12 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
         }
     })
 
-    return files.emplace(std::move(file));
+    return files->emplace(std::move(file));
 }
 
 FileRef GlobalState::enterFile(string_view path, string_view source) {
     return GlobalState::enterFile(
         make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal));
-}
-
-FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
-    ENFORCE_NO_TIMER(!fileTableFrozen);
-    ENFORCE_NO_TIMER(id.id() < this->files.size());
-    ENFORCE_NO_TIMER(this->files.get(id.id())->sourceType == File::Type::NotYetRead);
-    ENFORCE_NO_TIMER(this->files.get(id.id())->path() == file->path());
-
-    // was a tombstone before.
-    this->files.get(id.id()) = std::move(file);
-    return id;
 }
 
 FileRef GlobalState::reserveFileRef(string path) {
@@ -1800,7 +1789,7 @@ unsigned int GlobalState::typeMembersUsed() const {
 }
 
 unsigned int GlobalState::filesUsed() const {
-    return files.size();
+    return files->size();
 }
 
 unsigned int GlobalState::namesUsedTotal() const {
@@ -1964,6 +1953,7 @@ bool GlobalState::unfreezeNameTable() {
 }
 
 bool GlobalState::unfreezeFileTable() {
+    ENFORCE(this->files.use_count() == 1, "Shared file tables may not be unfrozen");
     bool old = this->fileTableFrozen;
     this->fileTableFrozen = false;
     return old;
@@ -2013,7 +2003,7 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
         DeepCloneHistoryEntry{this->globalStateId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
 
     result->strings = this->strings;
-    result->files = this->files;
+    result->files = make_shared<FileTable>(*this->files);
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
@@ -2075,19 +2065,24 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     return result;
 }
 
-unique_ptr<GlobalState> GlobalState::copyForIndex(
+unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &packagerLayers, string errorHint) const {
+    ENFORCE(fileTableFrozen);
+
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
     result->copyOptions(*this);
 
-    // Additional options that might be used during indexing are manually copied over here
+    // We share the file table here insead of copying it, to avoid the allocation and overhead of merging back together
+    // on an indexing thread.
     result->files = this->files;
+
+    // Additional options that might be used during indexing are manually copied over here
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
@@ -2102,6 +2097,32 @@ unique_ptr<GlobalState> GlobalState::copyForIndex(
     return result;
 }
 
+unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
+    const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &packagerLayers, string errorHint) const {
+    auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
+
+    result->initEmpty();
+    result->copyOptions(*this);
+
+    // Additional options that might be used during indexing are manually copied over here
+    result->files = make_shared<FileTable>(*this->files);
+    result->kvstoreUuid = this->kvstoreUuid;
+
+    if (packagerEnabled) {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint);
+    }
+
+    return result;
+}
 unique_ptr<GlobalState>
 GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
                              const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
@@ -2118,7 +2139,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
 
     // We share the file table entries with the original GlobalState, and then copy the content of the name table,
     // string storage, and uuid to ensure that we remain compatible with the session cache.
-    result->files = this->files;
+    result->files = make_shared<FileTable>(*this->files);
     result->kvstoreUuid = this->kvstoreUuid;
     result->strings = this->strings;
     result->utf8Names = this->utf8Names;
@@ -2144,22 +2165,6 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     }
 
     return result;
-}
-
-void GlobalState::mergeFileTable(const core::GlobalState &from) {
-    UnfreezeFileTable unfreezeFiles(*this);
-    // id 0 is for non-existing FileRef
-    for (int fileIdx = 1; fileIdx < from.filesUsed(); fileIdx++) {
-        if (from.files.get(fileIdx)->sourceType == File::Type::NotYetRead) {
-            continue;
-        }
-        if (fileIdx < this->filesUsed() && from.files.get(fileIdx).get() == this->files.get(fileIdx).get()) {
-            continue;
-        }
-        ENFORCE_NO_TIMER(fileIdx >= this->filesUsed() ||
-                         this->files.get(fileIdx)->sourceType == File::Type::NotYetRead);
-        this->enterNewFileAt(from.files.get(fileIdx), fileIdx);
-    }
 }
 
 string_view GlobalState::getPrintablePath(string_view path) const {
@@ -2283,7 +2288,7 @@ void GlobalState::markAsPayload() {
 std::shared_ptr<File> GlobalState::replaceFile(FileRef whatFile, shared_ptr<File> withWhat) {
     ENFORCE_NO_TIMER(whatFile.id() < filesUsed());
     ENFORCE_NO_TIMER(whatFile.dataAllowingUnsafe(*this).path() == withWhat->path());
-    return std::exchange(files.get(whatFile.id()), std::move(withWhat));
+    return std::exchange(files->get(whatFile.id()), std::move(withWhat));
 }
 
 FileRef FileTable::findFileByPath(string_view path) const {
@@ -2327,7 +2332,7 @@ packages::UnfreezePackages GlobalState::unfreezePackages() {
 
 unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {
     ENFORCE_NO_TIMER(fref.id() < what->filesUsed());
-    what->files.get(fref.id())->sourceType = File::Type::TombStone;
+    what->files->get(fref.id())->sourceType = File::Type::TombStone;
     return what;
 }
 
