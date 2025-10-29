@@ -13,6 +13,7 @@ namespace sorbet::core {
 class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
+struct InstantiationContext;
 
 class NonRefcounted {};
 
@@ -310,38 +311,6 @@ public:
 
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
 
-    struct InstantiationContext {
-    private:
-        ClassOrModuleRef originalOwner;
-        ClassOrModuleRef inWhat;
-
-    public:
-        InlinedVector<TypeMemberRef, 4> currentAlignment;
-
-    private:
-        std::vector<TypePtr> targsOwned;
-
-    public:
-        // Points to either:
-        // - a vector owned by the caller (the "seen from external type application" case)
-        // - `targsOwned`, which might have been lazily populated (the "seen from self" case)
-        std::optional<absl::Span<const TypePtr>> targs;
-
-        // Seen from self version
-        InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat)
-            : originalOwner(originalOwner), inWhat(inWhat) {}
-
-        // Seen from external type application version
-        InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs)
-            : originalOwner(originalOwner), inWhat(inWhat), targs(absl::MakeSpan(targs)) {}
-
-        // Lazily populate `targsOwned` with the "seen from self" type args
-        void computeSelfTypeArgs(const GlobalState &gs);
-
-        // Lazily populate `currentAlignment`
-        void computeAlignment(const GlobalState &gs);
-    };
-
     TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
 
     // If this TypePtr `is_proxy_type`, returns its underlying type.
@@ -374,6 +343,39 @@ public:
     friend class TypePtrTestHelper;
 };
 CheckSize(TypePtr, 8, 8);
+
+    struct InstantiationContext {
+    private:
+        ClassOrModuleRef originalOwner;
+        ClassOrModuleRef inWhat;
+
+    public:
+        InlinedVector<TypeMemberRef, 4> currentAlignment;
+
+    private:
+        std::vector<TypePtr> targsOwned;
+
+    public:
+        // Points to either:
+        // - a vector owned by the caller (the "seen from external type application" case)
+        // - `targsOwned`, which might have been lazily populated (the "seen from self" case)
+        std::optional<absl::Span<const TypePtr>> targs;
+
+        // Seen from self version
+        InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat)
+            : originalOwner(originalOwner), inWhat(inWhat) {}
+
+        // Seen from external type application version
+        InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs)
+            : originalOwner(originalOwner), inWhat(inWhat), targs(absl::MakeSpan(targs)) {}
+
+        // Lazily populate `targsOwned` with the "seen from self" type args
+        void computeSelfTypeArgs(const GlobalState &gs);
+
+        // Lazily populate `currentAlignment`
+        void computeAlignment(const GlobalState &gs);
+    };
+
 } // namespace sorbet::core
 
 #endif
