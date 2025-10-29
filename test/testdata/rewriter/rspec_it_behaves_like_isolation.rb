@@ -15,27 +15,33 @@ end
 
 class MyClass < RSpec::Core::ExampleGroup
   describe("it_behaves_like provides isolation") do
+    extend T::Sig
+
     # Define a shared example with a let variable
     shared_examples "shared behavior" do
-      let(:shared_value) { T.let('from_shared', String) }
+      extend T::Sig
+
+      sig { returns(String) }
+      let(:shared_value) { 'from_shared' }
 
       it 'uses shared value' do
         result = shared_value
-        T.reveal_type(result) # error: Revealed type: `T.untyped`
+        T.reveal_type(result) # error: Revealed type: `String`
         expect(result).to eq('from_shared')
       end
     end
 
-    # Define a let variable in the outer context with a different value
-    let(:shared_value) { T.let(100, Integer) }
+    # Define a let variable in the outer context with a different type
+    sig { returns(Integer) }
+    let(:shared_value) { 100 }
 
     # Test that it_behaves_like creates an isolated nested context
     it_behaves_like "shared behavior"
 
-    # Test that the outer context still has its own value (not clobbered by shared behavior)
+    # Test that the outer context still has its own value and type (not clobbered by shared behavior)
     it 'outer context has its own value' do
       result = shared_value
-      T.reveal_type(result) # error: Revealed type: `T.untyped`
+      T.reveal_type(result) # error: Revealed type: `Integer`
       expect(result).to eq(100)
     end
 
