@@ -36,6 +36,8 @@ test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(In
     test/cli/expected-got/expected-got.rb:24:
     24 |    x = 1
                 ^
+  Detailed explanation:
+    `String` (the right side of the `T.any`) is not a subtype of `Integer`
 
 test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but found `T.proc.returns(String)` for block argument https://srb.help/7002
     42 |  takes_int_block(&blk)
