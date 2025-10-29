@@ -47,4 +47,7 @@ module Union
   # T.any < T.any
   T.let(C1_or_C2, T.any(C1, C3))
   T.let(C1_or_C2, T.any(C2, C3))
+
+  # C1_or_C2_or_C3 = T.let(C1.new, T.any(T.nilable(T.any(C1, C2)), C3))
+  # T.let(C1_or_C2_or_C3, T.any(M1, M3))
 end
