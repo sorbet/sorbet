@@ -1240,7 +1240,9 @@ public:
 
     unique_ptr<Node> match_pair(unique_ptr<Node> label, unique_ptr<Node> value) {
         if (auto *pair = parser::cast_node<Pair>(label.get())) {
+            pair->loc = pair->loc.join(value->loc);
             pair->value = std::move(value);
+
             if (auto *key = parser::cast_node<Symbol>(pair->key.get())) {
                 checkDuplicatePatternKey(key->val.show(gs_), label->loc);
                 return label;
