@@ -1467,23 +1467,23 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         }
                     }
                     // have enough keys (or we want to keep going for rich error reporting).
-                    int i = -1;
+                    int h2index = -1;
                     for (auto &el2 : h2->keys) {
-                        ++i;
-                        auto optind = h1.indexForKey(el2);
+                        ++h2index;
+                        auto opth1index = h1.indexForKey(el2);
                         auto subCollector = errorDetailsCollector.newCollector();
-                        if (!optind.has_value()) {
+                        if (!opth1index.has_value()) {
                             result = false;
                             if constexpr (!shouldAddErrorDetails) {
                                 return;
                             }
-                        } else if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()],
-                                                                    h2->values[i], mode, subCollector)) {
+                        } else if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[opth1index.value()],
+                                                                    h2->values[h2index], mode, subCollector)) {
                             result = false;
                             if constexpr (shouldAddErrorDetails) {
                                 auto message = ErrorColors::format("`{}` is not a subtype of `{}` for key `{}`",
-                                                                   h1.values[optind.value()].show(gs),
-                                                                   h2->values[i].show(gs), el2.show(gs));
+                                                                   h1.values[opth1index.value()].show(gs),
+                                                                   h2->values[h2index].show(gs), el2.show(gs));
                                 subCollector.message = message;
                                 errorDetailsCollector.addErrorDetails(std::move(subCollector));
                             } else {
