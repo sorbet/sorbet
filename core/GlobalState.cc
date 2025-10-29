@@ -1655,17 +1655,6 @@ FileRef GlobalState::enterFile(string_view path, string_view source) {
         make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal));
 }
 
-FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
-    ENFORCE_NO_TIMER(!fileTableFrozen);
-    ENFORCE_NO_TIMER(id.id() < this->files->size());
-    ENFORCE_NO_TIMER(this->files->get(id.id())->sourceType == File::Type::NotYetRead);
-    ENFORCE_NO_TIMER(this->files->get(id.id())->path() == file->path());
-
-    // was a tombstone before.
-    this->files->get(id.id()) = std::move(file);
-    return id;
-}
-
 FileRef GlobalState::reserveFileRef(string path) {
     return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::NotYetRead));
 }

@@ -519,13 +519,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
                 counterInc("types.input.rbi.files");
             }
 
-            {
-                core::UnfreezeFileTable unfreezeFiles(gs);
-                auto fileObj = make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal);
-
-                auto entered = gs.enterNewFileAt(move(fileObj), file);
-                ENFORCE(entered == file);
-            }
+            gs.replaceFile(file, make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal));
 
             if constexpr (enable_counters) {
                 counterAdd("types.input.lines", file.data(gs).lineCount());
