@@ -37,25 +37,35 @@ class MyClass < RSpec::Core::ExampleGroup
 
     # Test nested it_behaves_like with method overriding
     describe "method isolation" do
+      extend T::Sig
+
       shared_examples "defines helper method" do
+        extend T::Sig
+
+        sig { returns(String) }
         def helper_method
           'from_shared'
         end
 
         it 'uses helper from shared' do
-          expect(helper_method).to eq('from_shared')
+          result = helper_method
+          T.reveal_type(result) # error: Revealed type: `String`
+          expect(result).to eq('from_shared')
         end
       end
 
+      sig { returns(Integer) }
       def helper_method
-        'from_outer'
+        42
       end
 
       # it_behaves_like should not let the shared helper_method clobber the outer one
       it_behaves_like "defines helper method"
 
       it 'outer helper_method is not clobbered' do
-        expect(helper_method).to eq('from_outer')
+        result = helper_method
+        T.reveal_type(result) # error: Revealed type: `Integer`
+        expect(result).to eq(42)
       end
     end
 
