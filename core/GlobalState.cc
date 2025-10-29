@@ -1964,6 +1964,7 @@ bool GlobalState::unfreezeNameTable() {
 }
 
 bool GlobalState::unfreezeFileTable() {
+    ENFORCE(this->files.use_count() == 1, "Shared file tables may not be unfrozen");
     bool old = this->fileTableFrozen;
     this->fileTableFrozen = false;
     return old;
@@ -2081,6 +2082,8 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &packagerLayers, string errorHint) const {
+    ENFORCE(fileTableFrozen);
+
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
