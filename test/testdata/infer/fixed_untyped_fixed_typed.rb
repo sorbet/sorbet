@@ -13,6 +13,11 @@ class View
   private def instance
     inputs&.fetch(:model, nil)
   end
+
+  sig { params(model: T.nilable(DataViewModelMember)).void }
+  private def takes_member(model)
+    T.reveal_type(model) # error: `T.untyped`
+  end
 end
 
 class PaymentAttempt; end
