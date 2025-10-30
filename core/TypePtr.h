@@ -52,7 +52,7 @@ public:
         LambdaParam,
         SelfTypeParam,
         AliasType,
-        NewSelfType,
+        FreshSelfType,
         IntegerLiteralType,
         FloatLiteralType,
         NamedLiteralType,

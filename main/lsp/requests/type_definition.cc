@@ -48,7 +48,7 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
                 result.emplace_back(loc);
             }
         },
-        [&](const core::NewSelfType &s) {
+        [&](const core::FreshSelfType &s) {
             // TODO(jez) Probably want a test for this
             for (auto loc : locsForType(gs, s.upperBound)) {
                 result.emplace_back(loc);
