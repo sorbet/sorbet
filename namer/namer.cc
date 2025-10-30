@@ -1169,19 +1169,28 @@ private:
                 symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
             }
 
-            if (!isUnknown) {
-                if (klass.definesBehavior) {
-                    auto &behaviorLocs = classBehaviorLocs[symbol];
-                    behaviorLocs.emplace_back(ctx.locAt(klass.declLoc));
-                    symbol.data(ctx)->flags.isBehaviorDefining = true;
-                }
+            // we want to force create singleton class only if it's a known definition
+            core::ClassOrModuleRef singletonClass;
+            if (isUnknown) {
+                singletonClass = symbol.data(ctx)->lookupSingletonClass(ctx);
+            } else {
+                singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+            }
 
-                auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+            if (singletonClass.exists()) {
                 singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
                 auto attachedClassTM =
                     singletonClass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
                 if (attachedClassTM.exists() && attachedClassTM.isTypeMember()) {
                     attachedClassTM.asTypeMemberRef().data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                }
+            }
+
+            if (!isUnknown) {
+                if (klass.definesBehavior) {
+                    auto &behaviorLocs = classBehaviorLocs[symbol];
+                    behaviorLocs.emplace_back(ctx.locAt(klass.declLoc));
+                    symbol.data(ctx)->flags.isBehaviorDefining = true;
                 }
 
                 // This willDeleteOldDefs condition is a hack to improve performance when editing within a method body.

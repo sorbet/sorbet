@@ -13,7 +13,7 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U ANamespace>>::<S <C <U ObviousChild>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U ANamespace>>::<S <C <U ObviousChild>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ANamespace::ObviousChild) @ Loc {file=test/testdata/namer/simple.rb start=14:3 end=14:21}
       method <C <U ANamespace>>::<S <C <U ObviousChild>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=14:3 end=15:6}
         argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
-  class <S <C <U ANamespace>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=13:1 end=13:18}
+  class <S <C <U ANamespace>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=17:7 end=17:17}
     method <S <C <U ANamespace>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=13:1 end=16:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
   class <C <U Child>> < <C <U Parent>> (<C <U Mixin>>) @ Loc {file=test/testdata/namer/simple.rb start=26:1 end=26:21}

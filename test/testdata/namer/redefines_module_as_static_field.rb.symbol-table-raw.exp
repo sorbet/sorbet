@@ -26,7 +26,7 @@ class <C <U <root>>> < <C <U Object>> ()
         class <C <U T>>::<C <U Private>>::<C <U Methods>>::<S <C <U SignatureValidation>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=13:1 end=13:48}
           method <C <U T>>::<C <U Private>>::<C <U Methods>>::<S <C <U SignatureValidation>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=13:1 end=14:4}
             argument <blk><block> @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=??? end=???}
-    class <C <U T>>::<S <C <U Private>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=7:1 end=7:18}
+    class <C <U T>>::<S <C <U Private>> $1> < <C <U Module>> () @ (Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=19:8 end=19:18}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/tprivate.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/builder.rbi start=removed end=removed})
       method <C <U T>>::<S <C <U Private>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=7:1 end=8:4}
         argument <blk><block> @ Loc {file=test/testdata/namer/redefines_module_as_static_field.rb start=??? end=???}
 
