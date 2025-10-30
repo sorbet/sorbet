@@ -692,8 +692,11 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
  */
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
                                     ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
+    // requires_ancestor leads to dispatches that target some other symbol entirely.
+    // There is no guarantee that we have redeclared the other method's type members.
+    // This is yet another case where requires ancestor is just broken.
     ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat) ||
-                fromWhat.data(gs)->derivesFrom(gs, inWhat),
+                fromWhat.data(gs)->derivesFrom(gs, inWhat) || gs.cacheSensitiveOptions.requiresAncestorEnabled,
             "\n{}\nis unrelated to\n\n{}", fromWhat.toString(gs), inWhat.toString(gs));
 
     auto originalOwner = fromWhat;
