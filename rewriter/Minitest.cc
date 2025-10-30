@@ -903,19 +903,20 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
-            // it_behaves_like creates a nested context (describe block) for isolation
             auto &arg = send->getPosArg(0);
             auto argString = to_s(ctx, arg);
 
-            // Create a nested describe block with the shared examples name
+            // it_behaves_like creates a nested class for isolation.
+            // This wraps the shared examples in a new context so their definitions
+            // (like let-defined methods) don't clobber the outer context's definitions.
             auto testName = fmt::format("<it_behaves_like '{}'>", argString);
-            auto name = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
+            auto isolatedClassName = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
 
-            // Create ancestors - inherit from self to maintain context
+            // Inherit from self to maintain access to outer context
             ast::ClassDef::ANCESTORS_store ancestors;
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
 
-            // Create the body: include the shared examples module
+            // Include the shared examples module in this isolated context
             auto sharedExamplesName = makeSharedExamplesConstant(ctx, arg);
             auto includeStmt = ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()),
                                              core::Names::include(), send->funLoc, move(sharedExamplesName));
@@ -924,7 +925,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             rhs.emplace_back(move(includeStmt));
 
             auto declLoc = send->loc.copyWithZeroLength();
-            return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs));
+            return ast::MK::Class(send->loc, declLoc, std::move(isolatedClassName), std::move(ancestors), std::move(rhs));
         }
     }
 
