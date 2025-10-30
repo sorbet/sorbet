@@ -277,7 +277,7 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::LambdaParam:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::NewSelfType:
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
@@ -304,7 +304,7 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::AndType:
         case TypePtr::Tag::LambdaParam:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::NewSelfType:
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
@@ -392,7 +392,7 @@ public:
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
-    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
@@ -585,16 +585,6 @@ template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
     return AliasType(core::SymbolRef::fromRaw(what.inlinedValue()));
 }
 
-template <> inline TypePtr make_type<SelfType>() {
-    // static_cast required to disambiguate TypePtr constructor.
-    return TypePtr(TypePtr::Tag::SelfType, uint64_t(0));
-}
-
-template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
-    ENFORCE_NO_TIMER(isa_type<SelfType>(what));
-    return SelfType();
-}
-
 /**
  * This is basically like SelfTypeParam, but for `T.self_type`.
  *
@@ -777,7 +767,7 @@ public:
     std::string show(const GlobalState &gs, ShowOptions options) const;
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
-    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
@@ -835,7 +825,7 @@ public:
     uint32_t hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
-    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
@@ -947,7 +937,7 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
 
-    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
@@ -1163,7 +1153,7 @@ public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
 
-    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const;
 };
 
 template <> inline TypePtr make_type<BlamedUntyped, core::SymbolRef &>(core::SymbolRef &whoToBlame) {
