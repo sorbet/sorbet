@@ -2641,14 +2641,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto keywordRestParamNode = down_cast<pm_keyword_rest_parameter_node>(node);
 
             core::NameRef sorbetName;
+            core::LocOffsets kwrestLoc;
             if (auto prismName = keywordRestParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
                 // A named keyword rest parameter, like `def foo(**kwargs)`
                 sorbetName = translateConstantName(prismName);
+
+                // The location doesn't include the `**`, only the splatted expression like `kwargs` in `**kwargs`
+                constexpr uint8_t length = std::size("**"sv);
+                kwrestLoc = core::LocOffsets{location.beginPos() + length, location.endPos()};
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
                 sorbetName = nextUniqueParserName(core::Names::starStar());
+
+                // This location *does* include the whole `**`.
+                kwrestLoc = location;
             }
 
-            auto kwrestLoc = core::LocOffsets{location.beginPos() + 2, location.endPos()};
             return make_node_with_expr<parser::Kwrestarg>(
                 MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)), kwrestLoc, sorbetName);
         }
