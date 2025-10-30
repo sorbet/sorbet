@@ -12,7 +12,7 @@ T.noreturn.to_s # error: Call to method `to_s` on `T.noreturn` mistakes a type f
 T.untyped.to_s # error: Call to method `to_s` on `T.untyped` mistakes a type for a value
 
 # And another one
-T.self_type.to_s # error: Call to method `to_s` on `T.untyped` mistakes a type for a value
+T.self_type.to_s # error: Call to method `to_s` on `T.self_type (of T.class_of(<root>))` mistakes a type for a value
 
 # And yet another one
 T.class_of(Integer).to_s # error: Call to method `to_s` on `T.class_of(Integer)` mistakes a type for a value

@@ -62,7 +62,7 @@ module B
 
   sig { params(x: T.self_type).void }
   private def takes_self_private(x)
-    T.reveal_type(x) # error: `B`
+    T.reveal_type(x) # error: `T.self_type (of B)`
     x
   end
 
@@ -74,7 +74,7 @@ module B
 
   sig { params(x: T.any(T.self_type, Integer)).void }
   private def takes_self_or_integer(x)
-    T.reveal_type(x) # error: `T.any(Integer, B)`
+    T.reveal_type(x) # error: `T.any(Integer, T.self_type (of B))`
     x
   end
 
