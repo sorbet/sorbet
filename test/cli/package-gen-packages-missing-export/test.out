@@ -1,0 +1,21 @@
+A/__package.rb:3: A is missing exports https://srb.help/3734
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    A/__package.rb:7: Inserted `export A::ANOTHER_CONSTANT
+      export A::CONSTANT_FROM_A
+      export A::UnexportedClass`
+     7 |  # Note: NOT exporting A::CONSTANT_FROM_A or A::UnexportedClass
+                                                                        ^
+Errors: 1
+# typed: strict
+
+class A < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  # Note: NOT exporting A::CONSTANT_FROM_A or A::UnexportedClass
+  export A::ANOTHER_CONSTANT
+  export A::CONSTANT_FROM_A
+  export A::UnexportedClass
+end
