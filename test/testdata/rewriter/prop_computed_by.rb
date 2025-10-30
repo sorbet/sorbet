@@ -11,7 +11,7 @@ class ComputingProps
   end
 
   const :missing, Integer, computed_by: :compute_missing
-                                      # ^^^^^^^^^^^^^^^^ error: Method `compute_missing` does not exist on `T.class_of(ComputingProps)`
+                                      # ^^^^^^^^^^^^^^^^ error: Method `compute_missing` does not exist on `T.class_of(ComputingProps)[T.all(ComputingProps, T.self_type (of ComputingProps))]`
                                       # ^^^^^^^^^^^^^^^^ error: Expected a type but found `T.untyped` for `T.assert_type!`
 
   const :num_wrong_value, Integer, computed_by: :compute_num_wrong_value

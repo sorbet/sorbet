@@ -47,11 +47,11 @@ class Foo
 end
 
 C1 = Class.new do
-  T.reveal_type self # error: Revealed type: `T.class_of(C1)`
+  T.reveal_type self # error: Revealed type: `T.self_type (of T.class_of(C1))`
 end
 
 C2 = Class.new(Foo) do
-  T.reveal_type self # error: Revealed type: `T.class_of(C2)`
+  T.reveal_type self # error: Revealed type: `T.self_type (of T.class_of(C2))`
   foo
 end
 
