@@ -438,6 +438,7 @@ void untrackImports(core::GlobalState &nonConstGs, absl::Span<ast::ParsedFile> f
 
 void untrackExports(core::GlobalState &nonConstGs, absl::Span<ast::ParsedFile> filesSpan) {
     const core::GlobalState &gs = nonConstGs;
+    ENFORCE(gs.symbolsReferencedByFile.size() == gs.getFiles().size());
     for (auto &parsedFile : filesSpan) {
         // TODO(neil): we can skip this loop on the slow path since the package references sets will be
         // empty
