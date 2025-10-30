@@ -266,6 +266,18 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = AndType::make_shared(from, droppedFromUpper);
             }
         },
+        [&](const FreshSelfType &s) {
+            auto droppedFromUpper = dropSubtypesOf(gs, s.upperBound, klasses);
+            if (droppedFromUpper.isBottom()) {
+                result = Types::bottom();
+            } else if (droppedFromUpper == s.upperBound) {
+                result = from;
+            } else if (droppedFromUpper.kind() <= from.kind()) {
+                result = AndType::make_shared(droppedFromUpper, from);
+            } else {
+                result = AndType::make_shared(from, droppedFromUpper);
+            }
+        },
         [&](const TypePtr &) {
             if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(gs), klasses).isBottom()) {
                 result = Types::bottom();
