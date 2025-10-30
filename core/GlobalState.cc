@@ -629,6 +629,9 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Class());
     ENFORCE_NO_TIMER(klass == Symbols::T_Class());
 
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Module());
+    ENFORCE_NO_TIMER(klass == Symbols::T_Module());
+
     method = enterMethod(*this, Symbols::T_Generic(), Names::squareBrackets()).repeatedTopArg(Names::args()).build();
     ENFORCE_NO_TIMER(method == Symbols::T_Generic_squareBrackets());
 

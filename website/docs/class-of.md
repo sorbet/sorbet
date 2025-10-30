@@ -4,18 +4,21 @@ title: Types for Class Objects via T.class_of
 sidebar_label: T.class_of
 ---
 
-Classes are also values in Ruby. Sorbet has two ways to describe the type of these class objects: `T.class_of(...)` and `T::Class[...]`.
+<!-- TODO(jez) Need to update this with T::Module documentation -->
+
+Classes and modules are also values in Ruby. Sorbet has two ways to describe the type of these class objects: `T.class_of(...)` and `T::Class[...]`.
 
 ```ruby
 # The type to use in most circumstances:
 T.class_of(MyClass)
 
-# Another type that has certain specific use cases
+# Other types that have certain specific use cases
 # (discussed below)
-T::Class[MyClass]
+T::Class[AnArbitraryType]
+T::Module[AnArbitraryType]
 ```
 
-Prefer `T.class_of(...)` in most cases: it's simpler and leads to fewer surprises. `T::Class[...]` is better for some very specific use cases, discussed below. (These specific cases are less common, which is why we recommend using `T.class_of` to those who don't yet know which to pick.)
+Prefer `T.class_of(...)` in most cases: it's simpler, usually more precise, and leads to fewer surprises. `T::Class[...]` and `T::Module[...]` are better for some very specific use cases, discussed below. (These specific cases are less common, which is why we recommend using `T.class_of` to those who don't yet know which to pick.)
 
 ## What is a `T.class_of` type?
 
@@ -45,7 +48,7 @@ T.let(42.class, T.class_of(Integer))
 
 ## `T.class_of` and inheritance
 
-As with plain [Class Types](class-types.md#inheritance), `T.class_of` types respect inheritance:
+As with plain [Class Types](class-types.md#inheritance), `T.class_of` types respect inheritance, as long as the argument is a **class** name, not a module name:
 
 ```ruby
 # typed: true
@@ -209,7 +212,7 @@ What are these mismatches? `T.class_of(...)` is, simply, a type representing the
 - Arbitrary types don't necessarily have singleton classes: for example, `T.class_of(T.noreturn)` is not a valid type, and neither is `T.class_of(T.any(A, B))`.
 - As we saw in the previous section, `T.class_of(MyInterface)` **does not mean** "any class object which, when instantiated, creates instances that at least have type `MyInterface`."
 
-Sorbet provides `T::Class` to relax these restrictions. Like other `T::`-prefixed types, this is a [typed wrapper](stdlib-generics.md) for the `::Class` class defined in the Ruby standard library. It's also a [generic class](generics.md), which means it can be given an arbitrary type, instead of only classes. And finally, the generic type parameter on `T::Class` uses the same internal mechanism as Sorbet's [`T.attached_class` type](attached-class.md), which represents "an instance of the current class."
+Sorbet provides `T::Class` to relax these restrictions. Like other `T::`-prefixed types, this is a [typed wrapper](stdlib-generics.md) for the `::Class` class defined in the Ruby standard library. It's also a [generic class](generics.md), which means it can be given an arbitrary type, unlike `T.class_of(...)` which can only be given a class name, not an arbitrary type). And finally, the generic type parameter on `T::Class` uses the same internal mechanism as Sorbet's [`T.attached_class` type](attached-class.md), which represents "an instance of the current class."
 
 Combined, these features allow `T::Class[...]` to model some common Ruby patterns. For example:
 
@@ -284,7 +287,7 @@ There are some things that are only possible to represent with `T.class_of`, and
   end
   ```
 
-  The type `T::Class[MyClass]` doesn't represent what singleton class methods exist on that class object, only that the associated instance type is. But `T.class_of(MyClass)` represents both what singleton class methods exist, and also that creating an instance of this class will have type `MyClass`.
+  The type `T::Class[MyClass]` isn't aware of what singleton class methods exist on that class object, only that the associated instance type is. But `T.class_of(MyClass)` represents both what singleton class methods exist, and also that creating an instance of this class will have type `MyClass`.
 
 So these two types are similar, but each has functionality unique to itself.
 
@@ -368,3 +371,87 @@ T.class_of(AnotherClass)[AnotherClass, Integer]
 ```
 
 Sorbet still requires that the first argument must be the type for the attached class, and then the remaining arguments apply to each `type_template` the class defines, in turn.
+
+## `T::Module` vs `T::Class`
+
+`T::Module` is just like `T::Class`, but for arbitrary module objects. That is: `T::Module` is a generic wrapper for the `::Module` class defined in the Ruby standard library. Things defined with the `module` keyword are instances of `Module`, just like things defined with the `class` keyword are instances of `Class`. Said another way, in code:
+
+```ruby
+class C; end
+puts(C.class)           # => Class
+T.let(C, T::Class[C])   # => ✅
+T.let(C, T::Module[C])  # => ✅
+
+module M; end
+puts(M.class)           # => Module
+T.let(M, T::Class[M])   # => ⛔️
+T.let(M, T::Module[M])  # => ✅
+```
+
+Ruby chooses to model these two classes (i.e., the `Class` class and the `Module` class) using inheritance. In Ruby, every `Class` is a `Module`, but not every `Module` is a `Class`. This makes sense, because class objects have all the methods available on module objects (like `mod.name`, `mod.const_get`, etc.), but also have a few methods that are unique to classes (like `klass.new`, i.e., only classes not modules can be instantiated). Said another way, in code:
+
+```ruby
+# these are defined in the Ruby standard library:
+class ::Module
+  def name; end
+  def const_get(cnst); end
+  # ...
+end
+
+class ::Class < ::Module
+  def new(...); end
+end
+```
+
+Just like `T::Class[...]`, `T::Module[...]` can take an arbitrary type, like [`T.type_parameter(:U)`](generics.md#generic-methods) or [`T.any(A, B)`](union-types.md) or [`T.anything`](anything.md) (not just a simple class or module name, like `T.class_of(...)`).
+
+Somewhat counterintuitively, this means that `T::Class[SomeModule]` and `T::Module[SomeClass]` are both valid types:
+
+- `T::Class[SomeModule]` means "any `class` object that has included `SomeModule`"
+- `T::Module[SomeClass]` means "any `module` object that inherits from `SomeClass`." It's kind of a weird type, because anything that inherits from `SomeClass` must necessarily also be a `Class`, so this could most likely be replaced with `T::Class[SomeClass]` for free. But explicitly annotating something as `T::Module[...]` prohibits calling any `Class`-specific methods, like `.new`, and maybe this is a guarantee you want to enforce in the type system.
+
+Use `T::Module[...]` over `T::Class[...]` for methods that can accept any module object, and want to be able to operate on the attached class. For example:
+
+```ruby
+sig {
+  type_parameters(:Attached)
+    .params(
+      x: T.anything,
+      mod: T::Module[T.type_parameter(:Attached)]
+    )
+    .returns(T.nilable(T.type_parameter(:Attached)))
+}
+def validate_against_module(x, mod)
+  case x
+  when mod then x
+  else nil
+  end
+end
+
+data = JSON.parse(File.read('foo.json'))
+T.reveal_type(data) # => T.untyped
+
+validated = validate_against_module(data, Enumerable)
+T.reveal_type(validated) # => T::Enumerable[T.untyped]
+
+validated = validated.map {|item| validate_against_module(item, Integer) }
+T.reveal_type(validated) # => T::Array[T.nilable(Integer)]
+```
+
+This `validate_against_module` method only uses `mod` in a `case` statement, i.e., it only uses the `mod.===(x)`, the [case equality operator]. Accepting `T::Module[...]` instead of `T::Class[...]` allows this method to be maximally permissive, and we see it called with both a module (`Enumerable`) and a class (`Integer`).
+
+[case equality operator]: https://docs.ruby-lang.org/en/master/Module.html#method-i-3D-3D-3D
+
+For further reading:
+
+- Be sure to read all about `T::Class[...]`, because basically everything that is true about how `T::Class[...]` works also holds for `T::Module[...]` from a type system perspective. For example:
+  - `T::Module` is to `Module` like `T::Array` is to `Array`: it's a generic wrapper that allows passing type arguments without needing to define a `[]` method
+  - `Module` another way of writing `T::Module[T.anything]`. At `# typed: strict` and above, it's an error to have a bare `Module` without specifying an explicit type argument
+  - This feature is powered by [generic classes](generics.md) and is related to [T.attached_class](attached-class.md)
+- See the [class Class documentation](https://docs.ruby-lang.org/en/master/Class.html) in the official Ruby docs
+  - There's a neat ASCII art diagram of the top of the Ruby class hierarchy
+- Browse Sorbet's definitions for these two classes: [class.rbi], [module.rbi]
+  - defined in Sorbet's [RBI files](rbi.md) for the Ruby standard library
+
+[class.rbi]: https://github.com/sorbet/sorbet/blob/master/rbi/core/class.rbi#L71
+[module.rbi]: https://github.com/sorbet/sorbet/blob/master/rbi/core/module.rbi#L26
