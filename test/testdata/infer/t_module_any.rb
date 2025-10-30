@@ -12,7 +12,7 @@ end
 def assert_kind_of(x, mod)
   case x
   when mod
-    return x # error: Expected `T.type_parameter(:Instance) (of Object#assert_kind_of)` but found `T.anything` for method result type
+    return x
   else raise ArgumentError.new("Not an instance of #{mod}!")
   end
 end
@@ -27,7 +27,7 @@ sig do
 end
 def assert_kind_of2(x, mod)
   if x.is_a?(mod)
-    return x # error: Expected `T.type_parameter(:Instance) (of Object#assert_kind_of2)` but found `Object` for method result type
+    return x
   else
     raise ArgumentError.new("Not an instance of #{mod}!")
   end
@@ -49,13 +49,13 @@ def example(mod)
   T.reveal_type(res) # error: `T.any(IFoo, IBar)`
 
   if mod <= IFoo
-    T.reveal_type(mod) # error: `T::Module[T.any(IFoo, IBar)]`
+    T.reveal_type(mod) # error: `T::Module[IFoo]`
   elsif mod <= Foo
     T.reveal_type(mod) # error: `T.class_of(Foo)`
   elsif mod == IFoo
     T.reveal_type(mod) # error: `T.class_of(IFoo)`
   elsif mod <= Another
-    T.reveal_type(mod) # error: `T::Module[T.any(IFoo, IBar)]`
+    T.reveal_type(mod) # error: `T::Module[T.all(Another, T.any(IFoo, IBar))]`
   else
     T.reveal_type(mod) # error: `T::Module[T.any(IFoo, IBar)]`
   end
