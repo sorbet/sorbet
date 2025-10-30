@@ -110,6 +110,7 @@ int TypePtr::kind() const {
             return 7;
         case Tag::LambdaParam:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
             return 8;
         case Tag::MetaType:
             return 9;
@@ -121,8 +122,6 @@ int TypePtr::kind() const {
             return 12;
         case Tag::AndType:
             return 13;
-        case Tag::SelfType:
-            return 14;
     }
 }
 
@@ -148,13 +147,13 @@ bool TypePtr::isFullyDefined() const {
         case Tag::FloatLiteralType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::MetaType: // MetaType: this is kinda true but kinda false. it's false for subtyping but true for
                             // inferencer.
             return true;
 
         case Tag::TypeVar:
         case Tag::LambdaParam:
-        case Tag::SelfType:
             return false;
 
         // Composite types
@@ -334,12 +333,14 @@ TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstrain
 #undef _INSTANTIATE
 }
 
-void InstantiationContext::computeSelfTypeArgs(const GlobalState &gs) {
+void InstantiationContext::computeSelfType(const GlobalState &gs) {
     ENFORCE_NO_TIMER(this->originalOwner.exists() && this->inWhat == this->originalOwner && !this->targs.has_value() &&
                      this->currentAlignment.empty());
 
-    this->targsOwned = this->originalOwner.data(gs)->selfTypeArgs(gs);
+    auto ownerData = this->originalOwner.data(gs);
+    this->targsOwned = ownerData->selfTypeArgs(gs);
     this->targs = absl::MakeSpan(this->targsOwned);
+    this->selfType = ownerData->selfType(gs, this->targsOwned);
 }
 
 void InstantiationContext::computeAlignment(const GlobalState &gs) {

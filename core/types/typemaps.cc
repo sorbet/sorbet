@@ -350,7 +350,7 @@ TypePtr AppliedType::_approximateTypeVars(const GlobalState &gs, const TypeConst
 
 TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const {
     if (!ictx.targs.has_value()) {
-        ictx.computeSelfTypeArgs(gs);
+        ictx.computeSelfType(gs);
     }
     if (!ictx.targs->empty() && ictx.currentAlignment.empty()) {
         ictx.computeAlignment(gs);
@@ -360,6 +360,9 @@ TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, Instantiati
         if (*el == this->definition) {
             return ictx.targs.value()[distance(ictx.currentAlignment.begin(), el)];
         }
+    }
+    if (this->definition == core::Symbols::T_SelfType()) {
+        return ictx.selfType;
     }
     return nullptr;
 }

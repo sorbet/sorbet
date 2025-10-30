@@ -147,7 +147,7 @@ public:
     static bool canBeFalsy(const GlobalState &gs, const TypePtr &what);
 
     static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
-                                        ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs);
+                                        ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs, TypePtr selfType);
 
     static TypePtr resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef self);
 
@@ -586,28 +586,6 @@ template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
     return AliasType(core::SymbolRef::fromRaw(what.inlinedValue()));
 }
 
-/** This is a specific kind of self-type that should only be used in method return position.
- * It indicates that the method may(or will) return `self` or type that behaves equivalently
- * to self(e.g. in case of `.clone`).
- */
-TYPE_INLINED(SelfType) final {
-public:
-    SelfType();
-    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
-    std::string show(const GlobalState &gs) const {
-        return show(gs, {});
-    };
-    std::string show(const GlobalState &gs, ShowOptions options) const;
-    std::string showValue(const GlobalState &gs) const;
-    uint32_t hash(const GlobalState &gs) const;
-
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-
-    void _sanityCheck(const GlobalState &gs) const;
-    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
-};
-CheckSize(SelfType, 8, 8);
-
 template <> inline TypePtr make_type<SelfType>() {
     // static_cast required to disambiguate TypePtr constructor.
     return TypePtr(TypePtr::Tag::SelfType, uint64_t(0));
@@ -618,7 +596,12 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
     return SelfType();
 }
 
-// TODO(jez) Document me
+/**
+ * This is basically like SelfTypeParam, but for `T.self_type`.
+ *
+ * T.self_type can't use SelfTypeParam directly, because we don't (shouldn't) define a type member for
+ * every class that is equivalent to that object's type.
+ */
 TYPE(NewSelfType) final : public Refcounted {
 public:
     TypePtr upperBound;

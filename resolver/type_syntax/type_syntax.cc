@@ -983,7 +983,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             }
             return TypeSyntax::ResultType{core::Types::untyped(args.untypedBlame), core::Symbols::noClassOrModule()};
         }
-        case core::Names::selfType().rawId():
+        case core::Names::selfType().rawId(): {
             if (send.numPosArgs() != 0 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 0, 0);
                 checkUnexpectedKwargs(ctx, send);
@@ -1020,7 +1020,12 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
-            return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
+            // The upper bound doesn't actually matter here, because it will be unwrapped by
+            // unwrapSelfTypeParam to the LambdaParam after type syntax parsing (this mimics the
+            // type member case, because T.self_type acts mostly like a type member).
+            auto selfType = core::make_type<core::NewSelfType>(core::Types::top());
+            return TypeSyntax::ResultType{move(selfType), core::Symbols::noClassOrModule()};
+        }
         case core::Names::experimentalAttachedClass().rawId():
         case core::Names::attachedClass().rawId(): {
             if (send.fun == core::Names::experimentalAttachedClass()) {

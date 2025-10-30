@@ -689,9 +689,12 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
 /**
  * fromWhat - where the generic type was written
  * inWhat   - where the generic type is observed
+ *
+ * selfType - Every class has an "implicit" type member corresponding to itself.
+ *            This parameter is the recursion: we pass ourself down once we know what ourself is.
  */
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
-                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
+                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs, TypePtr selfType) {
     // requires_ancestor leads to dispatches that target some other symbol entirely.
     // There is no guarantee that we have redeclared the other method's type members.
     // This is yet another case where requires ancestor is just broken.
@@ -701,11 +704,11 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     auto originalOwner = fromWhat;
 
-    if (originalOwner.data(gs)->typeMembers().empty() || (what == nullptr)) {
+    if (what == nullptr) {
         return what;
     }
 
-    InstantiationContext ictx(originalOwner, inWhat, targs);
+    InstantiationContext ictx(originalOwner, inWhat, targs, selfType);
     auto result = what._instantiateLambdaParams(gs, ictx);
     if (result != nullptr) {
         return result;
@@ -714,7 +717,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 }
 
 TypePtr Types::resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef self) {
-    if (self.data(gs)->typeMembers().empty() || (what == nullptr)) {
+    if (what == nullptr) {
         return what;
     }
 
@@ -922,15 +925,19 @@ vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
 }
 } // namespace
 
+// This helper is only used in type_syntax.cc after wrapping up types.
+//
+// (Type syntax parsing wraps up what would normally be LambdaParam with SelfTypeParam so that it
+// can use `Types::any` and `Types::all` to minimize types during parsing, but that requires
+// fully-defined types.)
 TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     ENFORCE(type != nullptr);
 
     TypePtr ret;
     typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
-        [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
-        [&](const NamedLiteralType &lit) { ret = type; }, [&](const IntegerLiteralType &i) { ret = type; },
-        [&](const FloatLiteralType &i) { ret = type; },
+        [&](const LambdaParam &tv) { ret = type; }, [&](const NamedLiteralType &lit) { ret = type; },
+        [&](const IntegerLiteralType &i) { ret = type; }, [&](const FloatLiteralType &i) { ret = type; },
         [&](const AndType &andType) {
             ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
         },
@@ -952,6 +959,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
                 ret = type;
             }
         },
+        [&](const NewSelfType &self) { ret = core::Symbols::T_SelfType().data(ctx)->resultType; },
         [&](const TypePtr &tp) {
             if (type != nullptr) {
                 Exception::raise("unwrapSelfTypeParam: unhandled case type={}", type.toString(ctx));

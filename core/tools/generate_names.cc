@@ -531,6 +531,7 @@ NameDef names[] = {
     {"noMethod", "<no-method>", false},
     {"NoTypeParameter", "<no-type-argument>", true},
     {"NoTypeMember", "<no-type-member>", true},
+    {"T_SelfType", "T.self_type", true},
     {"Opus", "Opus", true},
     {"T", "T", true},
     {"BasicObject", "BasicObject", true},

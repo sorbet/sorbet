@@ -17,9 +17,11 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
         receiver = receiver.underlying(gs);
     }
     if (auto applied = core::cast_type<core::AppliedType>(receiver)) {
-        /* instantiate generic classes */
+        // Instantiate generic classes, but leave any LambdaParam { definition = T.self_type } unchanged,
+        // so that they prettify as "T.self_type"
+        auto selfType = core::Symbols::T_SelfType().data(gs)->resultType;
         resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
-                                                       applied->targs);
+                                                       applied->targs, selfType);
     }
     return resultType;
 }
