@@ -65,7 +65,7 @@ module List
     # when List::Cons
     #   self.tail
     else
-      T.absurd(self) # error: the type `List::Cons[List::Elem]` wasn't handled
+      T.absurd(self) # error: the type `T.all(List::Cons[List::Elem], T.self_type (of List[List::Elem]))` wasn't handled
     end
   end
 end
