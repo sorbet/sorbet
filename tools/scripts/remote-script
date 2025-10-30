@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-
 # cd so we pick up pay-server's .ruby-version, not Sorbet's .ruby-version.
 cd $HOME/stripe/pay-server
 
+SORBET_DIR=$(pay exec /pay/deploy/mint-path-resolver-hosts/current/mint-path-resolver --repo sorbet)
 # We have to manually specify --dir because remote-script hard-codes pay-server for backwards compatibility.
 #    https://git.corp.stripe.com/stripe-internal/pay-server/pull/196272/files#diff-3476184fa78de8564df28ff68cf18631R89
 # I think we should fix remote-script to stop doing that.
-exec $HOME/stripe/pay-server/scripts/bin/remote-script --dir /pay/src/sorbet "$@"
+exec $HOME/stripe/pay-server/scripts/bin/remote-script --dir "$SORBET_DIR" "$@"
