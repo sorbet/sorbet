@@ -81,9 +81,9 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
     return DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
 }
 
-TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    auto largs = left.getCallArguments(gs, name);
-    auto rargs = right.getCallArguments(gs, name);
+TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const {
+    auto largs = left.getCallArguments(gs, name, selfType);
+    auto rargs = right.getCallArguments(gs, name, selfType);
     if (!largs) {
         largs = Types::untypedUntracked();
     }
@@ -124,9 +124,9 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &
     return DispatchResult::merge(gs, DispatchResult::Combinator::AND, std::move(leftRet), std::move(rightRet));
 }
 
-TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    auto l = left.getCallArguments(gs, name);
-    auto r = right.getCallArguments(gs, name);
+TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const {
+    auto l = left.getCallArguments(gs, name, selfType);
+    auto r = right.getCallArguments(gs, name, selfType);
     if (l == nullptr) {
         return r;
     }
@@ -319,18 +319,21 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
     }
 }
 
+DispatchResult FreshSelfType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    return this->upperBound.dispatchCall(gs, args.withThisRef(this->upperBound));
+}
+
 namespace {
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
                                MethodRef method, const TypeAndOrigins &argTpe, const ParamInfo &argSym,
                                const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
-    TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
+    TypePtr expectedType =
+        Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs, selfType);
     if (!expectedType) {
         expectedType = Types::untyped(method);
     }
-
-    expectedType = Types::replaceSelfType(gs, expectedType, selfType);
 
     core::ErrorSection::Collector errorDetailsCollector;
     if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible,
@@ -382,7 +385,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 
 unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs &args, MethodRef method,
                                       const vector<const ParamInfo *> &missingKwargs, ClassOrModuleRef inClass,
-                                      const vector<TypePtr> &targs) {
+                                      const vector<TypePtr> &targs, TypePtr selfType) {
     auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
     if (missingKwargs.empty()) {
         return nullptr;
@@ -397,7 +400,8 @@ unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs 
 
         for (auto *arg : missingKwargs) {
             auto argName = arg->name.show(gs);
-            auto expectedType = Types::resultTypeAsSeenFrom(gs, arg->type, method.data(gs)->owner, inClass, targs);
+            auto expectedType =
+                Types::resultTypeAsSeenFrom(gs, arg->type, method.data(gs)->owner, inClass, targs, selfType);
             if (expectedType == nullptr) {
                 e.addErrorLine(arg->loc, "Keyword parameter `{}` declared here:", argName);
             } else {
@@ -452,7 +456,8 @@ struct GuessOverloadCandidate {
 };
 
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, TypePtr selfType,
+                        bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     vector<pair<MethodRef, size_t>> allCandidates;
 
@@ -533,7 +538,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                 }
 
                 auto paramType =
-                    Types::resultTypeAsSeenFrom(gs, paramTypeRaw, candidate.data(gs)->owner, inClass, targs);
+                    Types::resultTypeAsSeenFrom(gs, paramTypeRaw, candidate.data(gs)->owner, inClass, targs, selfType);
                 if (constr == nullptr) {
                     if (!Types::isSubType(gs, arg, paramType)) {
                         it = leftCandidates.erase(it);
@@ -1011,12 +1016,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    auto method =
-        mayBeOverloaded.data(gs)->flags.isOverloaded
-            ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
-            : mayBeOverloaded;
+    auto method = mayBeOverloaded.data(gs)->flags.isOverloaded
+                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.selfType,
+                                      args.block != nullptr)
+                      : mayBeOverloaded;
 
     auto methodData = method.data(gs);
+    if (methodData->name == core::Names::badAliasMethodStub()) {
+        // We already reported an error in namer
+        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+    }
+
     if (methodData->flags.isPrivate && !args.isPrivateOk) {
         if (auto e = gs.beginError(args.errLoc(), core::errors::Infer::PrivateMethod)) {
             if (args.fullType.type != args.thisType) {
@@ -1308,8 +1318,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 } else {
                     for (const auto &kwParam : kwParams) {
-                        auto kwParamType =
-                            Types::resultTypeAsSeenFrom(gs, kwParam->type, methodData->owner, symbol, targs);
+                        auto kwParamType = Types::resultTypeAsSeenFrom(gs, kwParam->type, methodData->owner, symbol,
+                                                                       targs, args.selfType);
                         if (kwParamType == nullptr) {
                             kwParamType = Types::untyped(method);
                         }
@@ -1469,7 +1479,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
             }
-            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs)) {
+            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs, args.selfType)) {
                 result.main.errors.emplace_back(std::move(e));
             }
             for (auto &keyType : hash->keys) {
@@ -1508,7 +1518,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
                 missingKwargs.emplace_back(&param);
             }
-            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs)) {
+            if (auto e = reportMissingKwargs(gs, args, method, missingKwargs, symbol, targs, args.selfType)) {
                 result.main.errors.emplace_back(std::move(e));
             }
         }
@@ -1620,7 +1630,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs);
+        TypePtr blockType =
+            Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs, args.selfType);
         handleBlockType(gs, component, blockType);
         component.rebind = blockParam.rebind;
         component.rebindLoc = blockParam.loc;
@@ -1647,7 +1658,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         } else if (args.args.size() == 2 && methodData->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType = Types::resultTypeAsSeenFrom(gs, methodData->resultType, methodData->owner, symbol, targs);
+            resultType = Types::resultTypeAsSeenFrom(gs, methodData->resultType, methodData->owner, symbol, targs,
+                                                     args.selfType);
         }
     }
     if (args.block == nullptr) {
@@ -1681,7 +1693,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiateTypeVars(gs, resultType, *constr);
     }
-    resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
     if (args.block != nullptr) {
         component.returnTypeBeforeSolve = resultType;
@@ -1692,7 +1703,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 // Get a tuple type representing the type of the method's parameters
 // This is an approximation at best.
 TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass, NameRef name,
-                                   const vector<TypePtr> &targs) {
+                                   const vector<TypePtr> &targs, TypePtr selfType) {
     MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {
@@ -1706,7 +1717,7 @@ TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass
         if (param.flags.isRepeated) {
             ENFORCE(params.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     method.toString(gs));
-            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
+            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs, selfType));
         }
         ENFORCE(!param.flags.isKeyword, "getCallArguments does not support kwargs: {}", method.toString(gs));
         if (param.flags.isBlock) {
@@ -1716,7 +1727,7 @@ TypePtr getMethodParametersAsTuple(const GlobalState &gs, ClassOrModuleRef klass
             params.emplace_back(core::Types::untyped(method));
             continue;
         }
-        params.emplace_back(Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs));
+        params.emplace_back(Types::resultTypeAsSeenFrom(gs, param.type, data->owner, klass, targs, selfType));
     }
     return make_type<TupleType>(move(params));
 }
@@ -1733,20 +1744,21 @@ DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchAr
     return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
 
-TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
+TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const {
     if (symbol == core::Symbols::untyped()) {
         return Types::untyped(Symbols::noSymbol());
     }
-    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{});
+    auto symbol = this->symbol;
+    return getMethodParametersAsTuple(gs, symbol, name, vector<TypePtr>{}, selfType);
 }
 
-TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
+TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const {
     // BlamedUntyped are always untyped.
     return Types::untyped(blame);
 }
 
-TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    return getMethodParametersAsTuple(gs, klass, name, targs);
+TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const {
+    return getMethodParametersAsTuple(gs, klass, name, targs, selfType);
 }
 
 namespace {
@@ -2020,6 +2032,11 @@ public:
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // Most syntactically visible calls to `T.self_type` should be handled by the
+        // `<Magic>.self_type` intrinsic.
+        //
+        // This intrinsic remains just on the off chance that people misuse `T.self_type` as a
+        // value some other way (e.g., t = T; t.self_type).
         res.returnType = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_self_type;
@@ -3068,7 +3085,11 @@ public:
 
         auto selfTy = *args.args[0];
         auto mustExist = true;
-        auto self = unwrapSymbol(gs, selfTy.type, mustExist);
+        auto selfTyType = selfTy.type;
+        if (auto freshSelfType = cast_type<FreshSelfType>(selfTyType)) {
+            selfTyType = freshSelfType->upperBound;
+        }
+        auto self = unwrapSymbol(gs, selfTyType, mustExist);
         auto selfData = self.data(gs);
 
         auto attachedClass = selfData->findMember(gs, core::Names::Constants::AttachedClass());
@@ -3103,6 +3124,27 @@ public:
         }
     }
 } Magic_attachedClass;
+
+class Magic_selfType : public IntrinsicMethod {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        // args[0] is `<self>`
+
+        auto selfTy = *args.args[0];
+        auto selfTyType = selfTy.type;
+        if (auto freshSelfType = cast_type<FreshSelfType>(selfTyType)) {
+            selfTyType = freshSelfType->upperBound;
+        }
+
+        auto mustExist = true;
+        auto self = unwrapSymbol(gs, selfTyType, mustExist);
+        auto selfData = self.data(gs);
+        res.returnType = make_type<MetaType>(selfData->selfType(gs, selfData->selfTypeArgs(gs)));
+    }
+} Magic_selfType;
 
 class Magic_checkAndAnd : public IntrinsicMethod {
 public:
@@ -4654,6 +4696,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestConstantType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestFieldType(), &Magic_suggestUntypedFieldType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfType(), &Magic_selfType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkAndAnd(), &Magic_checkAndAnd},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splat(), &Magic_splat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashDup(), &Magic_toHash},

@@ -1263,10 +1263,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             }
                         } else if (symbol.isField(ctx)) {
                             auto field = symbol.asFieldRef();
+                            auto selfTypeArgs = ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx);
                             tp.type = core::Types::resultTypeAsSeenFrom(
                                 ctx, field.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
-                                ctx.owner.enclosingClass(ctx),
-                                ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
+                                ctx.owner.enclosingClass(ctx), selfTypeArgs,
+                                ctx.owner.enclosingClass(ctx).data(ctx)->selfType(ctx, selfTypeArgs));
                         } else {
                             tp.type = resultType;
                         }
@@ -1382,12 +1383,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(insn.link->result->main.blockPreType);
 
                 auto &procType = insn.link->result->main.blockPreType;
-                auto params = procType.getCallArguments(ctx, core::Names::call());
+                auto params = procType.getCallArguments(ctx, core::Names::call(), procType);
                 auto it = insn.link->result->secondary.get();
                 while (it != nullptr) {
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
-                        auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                        auto secondaryParams =
+                            secondaryProcType.getCallArguments(ctx, core::Names::call(), secondaryProcType);
                         switch (insn.link->result->secondaryKind) {
                             case core::DispatchResult::Combinator::OR:
                                 params = core::Types::any(ctx, params, secondaryParams);
@@ -1903,7 +1905,9 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 
             result.type = lambdaParam->upperBound;
         } else {
-            result.type = rebind.data(ctx)->selfType(ctx);
+            // TODO(jez) Be sure to test this
+            auto rebindData = rebind.data(ctx);
+            result.type = rebindData->selfType(ctx, rebindData->selfTypeArgs(ctx));
         }
 
         result.origins.emplace_back(main.rebindLoc);
