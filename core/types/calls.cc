@@ -1799,6 +1799,10 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
         }
     }
 
+    if (isa_type<FreshSelfType>(wrapped)) {
+        return false;
+    }
+
     return true;
 }
 
