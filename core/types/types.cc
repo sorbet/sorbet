@@ -679,6 +679,8 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     auto originalOwner = fromWhat;
 
+    // TODO(jez) Need to drop the typeMembers().empty() call to ensure that any T.self_type get replaced
+    // TODO(jez) Dropping the guard has performance implications, we should measure.
     if (what == nullptr) {
         return what;
     }
@@ -696,6 +698,8 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
  * self   - where the generic type is observed
  */
 TypePtr Types::resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef self) {
+    // TODO(jez) Need to drop the typeMembers().empty() call to ensure that any T.self_type get replaced
+    // TODO(jez) Dropping the guard has performance implications, we should measure.
     if (what == nullptr) {
         return what;
     }

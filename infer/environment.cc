@@ -1905,6 +1905,7 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 
             result.type = lambdaParam->upperBound;
         } else {
+            // TODO(jez) Be sure to test this
             auto rebindData = rebind.data(ctx);
             result.type = rebindData->selfType(ctx, rebindData->selfTypeArgs(ctx));
         }
