@@ -49,7 +49,6 @@ struct ParsedSig {
 };
 
 struct TypeSyntaxArgs {
-    const bool allowSelfType;
     const bool allowRebind;
     enum class TypeMember : uint8_t {
         Allowed,
@@ -60,21 +59,17 @@ struct TypeSyntaxArgs {
     const bool allowUnspecifiedTypeParameter;
     const core::SymbolRef untypedBlame;
 
-    TypeSyntaxArgs(bool allowSelfType, bool allowRebind, TypeMember typeMember, bool allowUnspecifiedTypeParameter,
+    TypeSyntaxArgs(bool allowRebind, TypeMember typeMember, bool allowUnspecifiedTypeParameter,
                    core::SymbolRef untypedBlame)
-        : allowSelfType(allowSelfType), allowRebind(allowRebind), typeMember(typeMember),
+        : allowRebind(allowRebind), typeMember(typeMember),
           allowUnspecifiedTypeParameter(allowUnspecifiedTypeParameter), untypedBlame(untypedBlame) {}
 
     TypeSyntaxArgs withoutRebind() const {
-        return TypeSyntaxArgs{allowSelfType, false, typeMember, allowUnspecifiedTypeParameter, untypedBlame};
+        return TypeSyntaxArgs{false, typeMember, allowUnspecifiedTypeParameter, untypedBlame};
     }
 
     TypeSyntaxArgs withRebind() const {
-        return TypeSyntaxArgs{allowSelfType, true, typeMember, allowUnspecifiedTypeParameter, untypedBlame};
-    }
-
-    TypeSyntaxArgs withoutSelfType() const {
-        return TypeSyntaxArgs{false, allowRebind, typeMember, allowUnspecifiedTypeParameter, untypedBlame};
+        return TypeSyntaxArgs{true, typeMember, allowUnspecifiedTypeParameter, untypedBlame};
     }
 };
 
