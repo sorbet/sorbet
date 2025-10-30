@@ -874,20 +874,10 @@ TypePtr TupleType::elementType(const GlobalState &gs) const {
     return ap->targs.front();
 }
 
-SelfType::SelfType() {
-    recordAllocatedType("selftype");
-};
-
 AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     recordAllocatedType("appliedtype");
     histogramInc("appliedtype.targs", this->targs.size());
 }
-
-bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    Exception::raise("Should never call `derivesFrom` on a SelfType");
-}
-
-void SelfType::_sanityCheck(const GlobalState &gs) const {}
 
 TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
     ENFORCE(type != nullptr);

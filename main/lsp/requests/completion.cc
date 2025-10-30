@@ -215,6 +215,7 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
         [&](const core::SelfTypeParam &type) {
             result = similarMethodsForReceiver(gs, type.definition.resultType(gs), prefix);
         },
+        [&](const core::NewSelfType &type) { result = similarMethodsForReceiver(gs, type.upperBound, prefix); },
         [&](const core::TypePtr &type) {
             if (is_proxy_type(receiver)) {
                 result = similarMethodsForReceiver(gs, receiver.underlying(gs), prefix);

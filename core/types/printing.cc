@@ -527,18 +527,6 @@ string SelfTypeParam::show(const GlobalState &gs, ShowOptions options) const {
     return this->definition.show(gs, options);
 }
 
-string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return show(gs);
-}
-
-string SelfType::show(const GlobalState &gs, ShowOptions options) const {
-    return "T.self_type";
-}
-
-string SelfType::showValue(const GlobalState &gs) const {
-    return show(gs);
-}
-
 string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
