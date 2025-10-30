@@ -85,6 +85,7 @@ private:
     std::unique_ptr<parser::Node> make_unsupported_node(TArgs &&...args) const;
 
     core::LocOffsets translateLoc(pm_location_t loc) const;
+    core::LocOffsets translateLoc(const uint8_t *start, const uint8_t *end) const;
 
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);

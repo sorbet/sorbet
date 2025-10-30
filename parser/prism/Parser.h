@@ -60,6 +60,7 @@ public:
 
     ParseResult parse(bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
+    core::LocOffsets translateLocation(const uint8_t *start, const uint8_t *end) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
     std::string_view extractString(pm_string_t *string) const;
 
