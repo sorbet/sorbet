@@ -104,7 +104,7 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
 TypePtr ClassOrModule::selfType(const GlobalState &gs, vector<TypePtr> selfTypeArgs) const {
     // todo: in dotty it made sense to cache those.
     auto upperBound = typeMembers().empty() ? externalType() : make_type<AppliedType>(ref(gs), move(selfTypeArgs));
-    return core::make_type<core::NewSelfType>(move(upperBound));
+    return core::make_type<core::FreshSelfType>(move(upperBound));
 }
 
 // ClassOrModule::resultType is computed by unsafeComputeExternalType,

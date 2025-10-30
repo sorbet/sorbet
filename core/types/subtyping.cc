@@ -550,8 +550,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        auto isSelfTypeT1 = isa_type<NewSelfType>(t1);
-        auto isSelfTypeT2 = isa_type<NewSelfType>(t2);
+        auto isSelfTypeT1 = isa_type<FreshSelfType>(t1);
+        auto isSelfTypeT2 = isa_type<FreshSelfType>(t2);
 
         if (isSelfTypeT1 && isSelfTypeT2) {
             // If they're both T.self_type, we can pick either.
@@ -1065,8 +1065,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
     {
-        auto isSelfTypeT1 = isa_type<NewSelfType>(t1);
-        auto isSelfTypeT2 = isa_type<NewSelfType>(t2);
+        auto isSelfTypeT1 = isa_type<FreshSelfType>(t1);
+        auto isSelfTypeT2 = isa_type<FreshSelfType>(t2);
 
         if (isSelfTypeT1 && isSelfTypeT2) {
             // If they're both T.self_type, we can pick either.
@@ -1270,8 +1270,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 
     {
-        auto self1 = cast_type<NewSelfType>(t1);
-        auto self2 = cast_type<NewSelfType>(t2);
+        auto self1 = cast_type<FreshSelfType>(t1);
+        auto self2 = cast_type<FreshSelfType>(t2);
         if (self1 != nullptr || self2 != nullptr) {
             if (self1 == nullptr) {
                 // Only T.self_type is a subtype of T.self_type

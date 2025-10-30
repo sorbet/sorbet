@@ -520,7 +520,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::NewSelfType: {
+        case TypePtr::Tag::FreshSelfType: {
             Exception::notImplemented();
         }
     }
@@ -605,7 +605,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         }
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::NewSelfType:
+        case TypePtr::Tag::FreshSelfType:
             Exception::raise("Unknown type tag {}", tag);
     }
 }

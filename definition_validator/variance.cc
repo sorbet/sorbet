@@ -31,7 +31,7 @@ private:
                 break;
 
             case core::TypePtr::Tag::SelfTypeParam: // Does not appear in the symbol table
-            case core::TypePtr::Tag::NewSelfType:   // Does not appear in the symbol table
+            case core::TypePtr::Tag::FreshSelfType:   // Does not appear in the symbol table
             case core::TypePtr::Tag::TypeVar:       // Can appear in any position for variance checking
                 break;
 

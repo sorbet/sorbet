@@ -278,7 +278,7 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::LambdaParam:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::NewSelfType:
+        case TypePtr::Tag::FreshSelfType:
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
@@ -305,7 +305,7 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::AndType:
         case TypePtr::Tag::LambdaParam:
         case TypePtr::Tag::SelfTypeParam:
-        case TypePtr::Tag::NewSelfType:
+        case TypePtr::Tag::FreshSelfType:
         case TypePtr::Tag::AliasType:
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
@@ -589,16 +589,23 @@ template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
 /**
  * This is basically like SelfTypeParam, but for `T.self_type`.
  *
+ * (In the future, I want to rename `SelfTypeParam` to `FreshType` or `FreshTypeParam`, because
+ * having two types with "self" in the name is confusing, and `SelfTypeParam` doesn't really
+ * describe what it does in my opinion. Or at least I don't know enough theory to understand why
+ * it's self-describing.)
+ *
+ * It's "fresh" in the sense that this type is only equivalent to other instances of this exact type.
+ *
  * T.self_type can't use SelfTypeParam directly, because we don't (shouldn't) define a type member for
  * every class that is equivalent to that object's type.
  */
-TYPE(NewSelfType) final : public Refcounted {
+TYPE(FreshSelfType) final : public Refcounted {
 public:
     TypePtr upperBound;
 
-    NewSelfType(const TypePtr &upperBound);
-    NewSelfType(const NewSelfType &) = delete;
-    NewSelfType &operator=(const NewSelfType &) = delete;
+    FreshSelfType(const TypePtr &upperBound);
+    FreshSelfType(const FreshSelfType &) = delete;
+    FreshSelfType &operator=(const FreshSelfType &) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const {
@@ -612,7 +619,7 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(NewSelfType, 16, 8);
+CheckSize(FreshSelfType, 16, 8);
 
 TYPE_INLINED(NamedLiteralType) final {
 public:

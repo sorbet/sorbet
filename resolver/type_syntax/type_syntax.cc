@@ -1023,7 +1023,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             // The upper bound doesn't actually matter here, because it will be unwrapped by
             // unwrapSelfTypeParam to the LambdaParam after type syntax parsing (this mimics the
             // type member case, because T.self_type acts mostly like a type member).
-            auto selfType = core::make_type<core::NewSelfType>(core::Types::top());
+            auto selfType = core::make_type<core::FreshSelfType>(core::Types::top());
             return TypeSyntax::ResultType{move(selfType), core::Symbols::noClassOrModule()};
         }
         case core::Names::experimentalAttachedClass().rawId():

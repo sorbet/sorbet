@@ -319,7 +319,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
     }
 }
 
-DispatchResult NewSelfType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+DispatchResult FreshSelfType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     return this->upperBound.dispatchCall(gs, args.withThisRef(this->upperBound));
 }
 
@@ -3082,10 +3082,9 @@ public:
 
         auto selfTy = *args.args[0];
         auto mustExist = true;
-        // TODO(jez) Pick a better name for these local vars once you figure out what you want to call NewSelfType
         auto selfTyType = selfTy.type;
-        if (auto selfType = cast_type<NewSelfType>(selfTyType)) {
-            selfTyType = selfType->upperBound;
+        if (auto freshSelfType = cast_type<FreshSelfType>(selfTyType)) {
+            selfTyType = freshSelfType->upperBound;
         }
         auto self = unwrapSymbol(gs, selfTyType, mustExist);
         auto selfData = self.data(gs);
