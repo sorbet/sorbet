@@ -204,7 +204,7 @@ void base_driver::local_push() {
     lex.cond.push(false);
     auto decls = alloc.node_list();
     bool staticContext = true;
-    numparam_stack.push(decls, staticContext);
+    numparam_stack.push(decls, staticContext, nullptr);
 }
 
 void base_driver::local_pop() {

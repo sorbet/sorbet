@@ -1346,7 +1346,7 @@ public:
     }
 
     // `tok` is the opening token:
-    //     - for blocks, it's opening `do` or `{` (TODO!)
+    //     - for blocks, it's opening `do` or `{`
     //     - for lambdas, it's the `->`
     // We use it to set the location of the numparams to a zero-length loc just after, as if you had written:
     //     - `do|_1, _2| ... end`
@@ -1357,8 +1357,7 @@ public:
         // During desugar we will create implicit arguments for the block based on on the highest
         // numparam used in it's body.
 
-        // TODO: `tok` is `nullptr` for brace or do/end blocks
-        auto loc = tok ? tokLoc(tok).copyEndWithZeroLength() : core::LocOffsets(1, 1);
+        auto loc = tokLoc(tok).copyEndWithZeroLength();
 
         return make_unique<NumParams>(loc, std::move(declaringNodes));
     }

@@ -1022,11 +1022,16 @@ lbrace_cmd_block_start:
                       driver.lex.context.allowNumparams = true;
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                     }
- cmd_brace_block: lbrace_cmd_block_start brace_body tRCURLY
+ cmd_brace_block: lbrace_cmd_block_start
                     {
-                      auto &block = $2;
+                      bool staticContext = false;
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext, $1->token);
+                    }
+                    brace_body tRCURLY
+                    {
+                      auto &block = $3;
                       block->begin = $1->token;
-                      block->end = $3;
+                      block->end = $4;
                       $$ = block;
                       driver.lex.context.inBlock = $1->context.inBlock;
                       driver.lex.context.allowNumparams = $1->context.allowNumparams;
@@ -2779,7 +2784,7 @@ opt_block_args_tail:
                       auto &lambda_arrow = $1; // The `->` token with context
                       auto &delimited_block = $4;
                       if (driver.numparam_stack.seen_numparams()) {
-                        delimited_block->args = driver.build.numparams(self, lambda_arrow->token, driver.numparam_stack.top()->decls);
+                        delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
                       } else {
                         delimited_block->args = $2;
                       }
@@ -2813,7 +2818,7 @@ opt_block_args_tail:
                     {
                       driver.lex.extend_dynamic();
                       bool staticContext = false;
-                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext);
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext, $1);
                       $$ = driver.alloc.token_with_context($1, driver.lex.context.dup());
                       driver.lex.context.inLambda = true;
                       driver.lex.context.allowNumparams = true;
@@ -2861,15 +2866,20 @@ opt_block_args_tail:
                       driver.lex.context.allowNumparams = true;
                     }
 
-        do_block: k_do_block do_body kend_or_eof
+        do_block: k_do_block
+                    {
+                      bool staticContext = false;
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext, $1->token);
+                    }
+                    do_body kend_or_eof
                     {
                       driver.lex.context.inBlock = $1->context.inBlock;
                       driver.lex.context.allowNumparams = $1->context.allowNumparams;
-                      auto &delimited_block = $2;
+                      auto &delimited_block = $3;
                       delimited_block->begin = $1->token;
-                      delimited_block->end = $3;
+                      delimited_block->end = $4;
                       $$ = delimited_block;
-                      driver.rewind_if_dedented($1->token, $3);
+                      driver.rewind_if_dedented($1->token, $4);
                     }
 
       block_call: command do_block
@@ -2986,11 +2996,16 @@ lcurly_block_start:
                       driver.lex.context.inBlock = true;
                       driver.lex.context.allowNumparams = true;
                     }
-     brace_block: lcurly_block_start brace_body tRCURLY
+     brace_block: lcurly_block_start
                     {
-                      auto &block = $2;
+                      bool staticContext = false;
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext, $1->token);
+                    }
+                    brace_body tRCURLY
+                    {
+                      auto &block = $3;
                       block->begin = $1->token;
-                      block->end = $3;
+                      block->end = $4;
                       $$ = block;
                       driver.lex.context.inBlock = $1->context.inBlock;
                       driver.lex.context.allowNumparams = $1->context.allowNumparams;
@@ -3007,26 +3022,29 @@ lcurly_block_start:
                           diagnostic::range(@1.beginPos(), @4.endPos()));
                       driver.lex.context.allowNumparams = $1->context.allowNumparams;
                     }
-                | k_do do_body kend_or_eof
+                | k_do
                     {
-                      auto &block = $2;
+                      bool staticContext = false;
+                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext, $1->token);
+                    }
+                    do_body kend_or_eof
+                    {
+                      auto &block = $3;
                       block->begin = $1->token;
-                      block->end = $3;
+                      block->end = $4;
                       $$ = block;
-                      driver.rewind_if_dedented($1->token, $3);
+                      driver.rewind_if_dedented($1->token, $4);
                       driver.lex.context.inBlock = $1->context.inBlock;
                       driver.lex.context.allowNumparams = $1->context.allowNumparams;
                     }
 
-      brace_body:   {
+      brace_body: {
                       driver.lex.extend_dynamic();
-                      bool staticContext = false;
-                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext);
                     }
                     opt_block_param bodystmt
                     {
                       if (driver.numparam_stack.seen_numparams()) {
-                        auto numparams = driver.build.numparams(self,  nullptr, driver.numparam_stack.top()->decls);
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
                         $$ = driver.alloc.delimited_block(nullptr, numparams, $3->body, nullptr);
                       } else {
                         $$ = driver.alloc.delimited_block(nullptr, $2, $3->body, nullptr);
@@ -3035,21 +3053,17 @@ lcurly_block_start:
                       driver.lex.unextend();
                     }
 
-         do_body:   {
+         do_body: {
                       driver.lex.extend_dynamic();
-                      bool staticContext = false;
-                      driver.numparam_stack.push(driver.alloc.node_list(), staticContext);
-                    }
-                    {
                       driver.lex.cmdarg.push(false);
                     }
                     opt_block_param bodystmt
                     {
                       if (driver.numparam_stack.seen_numparams()) {
-                        auto numparams = driver.build.numparams(self, nullptr, driver.numparam_stack.top()->decls);
-                        $$ = driver.alloc.delimited_block(nullptr, numparams, $4->body, nullptr);
+                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
+                        $$ = driver.alloc.delimited_block(nullptr, numparams, $3->body, nullptr);
                       } else {
-                        $$ = driver.alloc.delimited_block(nullptr, $3, $4->body, nullptr);
+                        $$ = driver.alloc.delimited_block(nullptr, $2, $3->body, nullptr);
                       }
                       driver.lex.unextend();
 
