@@ -247,6 +247,25 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = from;
             }
         },
+        [&](const SelfTypeParam &p) {
+            if (!p.definition.isTypeMember()) {
+                // Only type members have upper bounds--type parameters do not
+                result = from;
+                return;
+            }
+
+            auto &lambdaParam = cast_type_nonnull<LambdaParam>(p.definition.asTypeMemberRef().data(gs)->resultType);
+            auto droppedFromUpper = dropSubtypesOf(gs, lambdaParam.upperBound, klasses);
+            if (droppedFromUpper.isBottom()) {
+                result = Types::bottom();
+            } else if (droppedFromUpper == lambdaParam.upperBound) {
+                result = from;
+            } else if (droppedFromUpper.kind() <= from.kind()) {
+                result = AndType::make_shared(droppedFromUpper, from);
+            } else {
+                result = AndType::make_shared(from, droppedFromUpper);
+            }
+        },
         [&](const TypePtr &) {
             if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(gs), klasses).isBottom()) {
                 result = Types::bottom();

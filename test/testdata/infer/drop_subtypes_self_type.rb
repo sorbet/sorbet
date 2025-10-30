@@ -18,7 +18,7 @@ class Parent
     when Child2
       T.reveal_type(inst) # error: `T.all(Parent::Child2, T.attached_class (of Parent))`
     else
-      T.absurd(inst) # error: Control flow could reach `T.absurd` because the type `T.attached_class (of Parent)` wasn't handled
+      T.absurd(inst)
     end
   end
 
@@ -30,7 +30,7 @@ class Parent
     when Child1
       T.reveal_type(inst) # error: `T.all(Parent::Child1, T.attached_class (of Parent))`
     else
-      T.absurd(inst) # error: Control flow could reach `T.absurd` because the type `T.attached_class (of Parent)` wasn't handled
+      T.absurd(inst) # error: Control flow could reach `T.absurd` because the type `T.all(Parent::Child2, T.attached_class (of Parent))` wasn't handled
     end
   end
 end
