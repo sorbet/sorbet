@@ -787,7 +787,7 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
     recordAllocatedType("selftypeparam");
 }
 
-NewSelfType::NewSelfType(const TypePtr &upperBound) : upperBound(move(upperBound)) {
+FreshSelfType::FreshSelfType(const TypePtr &upperBound) : upperBound(move(upperBound)) {
     recordAllocatedType("selftype");
 }
 
@@ -800,7 +800,7 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) c
     return false;
 }
 
-bool NewSelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+bool FreshSelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return false;
 }
 
@@ -809,7 +809,7 @@ void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(definition.isTypeMember() || definition.isTypeParameter());
 }
 
-void NewSelfType::_sanityCheck(const GlobalState &gs) const {
+void FreshSelfType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->upperBound != nullptr);
     ENFORCE(!this->upperBound.isUntyped());
     ENFORCE(this->upperBound.isFullyDefined());
@@ -924,7 +924,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
                 ret = type;
             }
         },
-        [&](const NewSelfType &self) { ret = core::Symbols::T_SelfType().data(ctx)->resultType; },
+        [&](const FreshSelfType &self) { ret = core::Symbols::T_SelfType().data(ctx)->resultType; },
         [&](const TypePtr &tp) {
             if (type != nullptr) {
                 Exception::raise("unwrapSelfTypeParam: unhandled case type={}", type.toString(ctx));
