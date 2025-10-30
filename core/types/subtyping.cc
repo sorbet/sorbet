@@ -542,7 +542,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             auto selfTypeT2 = cast_type_nonnull<SelfTypeParam>(t2);
             // NOTE: SelfTypeParam is used both with TypeMember and TypeParameter--only TypeMembers have bounds today
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeT2.definition.resultType(gs))) {
-                if (isSubType(gs, t1, lambdaParam->lowerBound)) {
+                if (!lambdaParam->lowerBound.isUntyped() && isSubType(gs, t1, lambdaParam->lowerBound)) {
                     return t2;
                 }
             }
@@ -1051,7 +1051,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             auto selfTypeT2 = cast_type_nonnull<SelfTypeParam>(t2);
             // NOTE: SelfTypeParam is used both with TypeMember and TypeParameter--only TypeMembers have bounds today
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeT2.definition.resultType(gs))) {
-                if (isSubType(gs, lambdaParam->upperBound, t1)) {
+                if (!lambdaParam->upperBound.isUntyped() && isSubType(gs, lambdaParam->upperBound, t1)) {
                     return t2;
                 }
             }
