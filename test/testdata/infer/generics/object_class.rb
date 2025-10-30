@@ -17,9 +17,9 @@ class Get
   sig {params(instance: ModelType).returns(ModelType)}
   def get(instance)
     T.reveal_type(instance) # error: `Get::ModelType`
-    T.reveal_type(instance.class) # error: `T.class_of(Model)[T.all(Model, Get::ModelType)]`
+    T.reveal_type(instance.class) # error: `T.class_of(Model)[Get::ModelType]`
     x = instance.class.load_one
-    T.reveal_type(x) # error: `T.all(Model, Get::ModelType)`
+    T.reveal_type(x) # error: `Get::ModelType`
     x
   end
 end
