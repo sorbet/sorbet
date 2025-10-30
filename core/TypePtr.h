@@ -360,16 +360,22 @@ public:
     // - `targsOwned`, which might have been lazily populated (the "seen from self" case)
     std::optional<absl::Span<const TypePtr>> targs;
 
+    // Points to either:
+    // - a type created by the caller (the "seen from external" case)
+    // - a type created lazily representing the "seen from self" case
+    TypePtr selfType;
+
     // Seen from self version
     InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat)
         : originalOwner(originalOwner), inWhat(inWhat) {}
 
     // Seen from external type application version
-    InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs)
-        : originalOwner(originalOwner), inWhat(inWhat), targs(absl::MakeSpan(targs)) {}
+    InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs,
+                         TypePtr selfType)
+        : originalOwner(originalOwner), inWhat(inWhat), targs(absl::MakeSpan(targs)), selfType(selfType) {}
 
-    // Lazily populate `targsOwned` with the "seen from self" type args
-    void computeSelfTypeArgs(const GlobalState &gs);
+    // Lazily populate `targsOwned` and `selfType` with the "seen from self" type args
+    void computeSelfType(const GlobalState &gs);
 
     // Lazily populate `currentAlignment`
     void computeAlignment(const GlobalState &gs);
