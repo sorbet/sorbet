@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::Examples#i_like_ifs {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
@@ -45,7 +45,7 @@ bb3[firstDead=0]():
 method ::Examples#i_like_exps {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
@@ -78,7 +78,7 @@ bb4[firstDead=1](<returnMethodTemp>$2: Integer(1)):
 method ::Examples#return_in_one_branch1 {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
@@ -107,7 +107,7 @@ bb3[firstDead=0]():
 method ::Examples#return_in_one_branch2 {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     <ifTemp>$3: TrueClass = true
     <ifTemp>$3 -> (TrueClass ? bb2 : bb3)
 
@@ -136,7 +136,7 @@ bb3[firstDead=0]():
 method ::Examples#variables {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     <ifTemp>$4: TrueClass = true
     <ifTemp>$4 -> (TrueClass ? bb2 : bb3)
 
@@ -189,7 +189,7 @@ bb7[firstDead=2](a: Integer(1), b: Integer(2)):
 method ::Examples#variables_and_loop {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     cond: T.untyped = load_arg(cond)
     <ifTemp>$4: TrueClass = true
     <ifTemp>$4 -> (TrueClass ? bb2 : bb3)
@@ -253,7 +253,7 @@ bb10[firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
 method ::Examples#variables_loop_if {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     cond: T.untyped = load_arg(cond)
     <unconditional> -> bb2
 
@@ -303,7 +303,7 @@ bb7[firstDead=-1](cond: T.nilable(FalseClass), b: NilClass):
 method ::Examples#take_arguments {
 
 bb0[firstDead=-1]():
-    <self>: Examples = cast(<self>: NilClass, Examples);
+    <self>: T.self_type (of Examples) = cast(<self>: NilClass, T.self_type (of Examples));
     i: T.untyped = load_arg(i)
     <ifTemp>$3: FalseClass = false
     <ifTemp>$3 -> (FalseClass ? bb2 : bb3)
@@ -337,7 +337,7 @@ bb4[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::<Class:Examples>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(Examples) = cast(<self>: NilClass, T.class_of(Examples));
+    <self>: T.self_type (of T.class_of(Examples)) = cast(<self>: NilClass, T.self_type (of T.class_of(Examples)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
