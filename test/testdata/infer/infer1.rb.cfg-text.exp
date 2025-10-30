@@ -1,7 +1,7 @@
 method ::Object#baz1 {
 
 bb0[firstDead=5]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     a: String("foo") = "foo"
     b: T.nilable(Integer) = a: String("foo").getbyte(a: String("foo"))
     <returnMethodTemp>$2: T.nilable(Integer) = b
@@ -18,7 +18,7 @@ bb1[firstDead=-1]():
 method ::Object#baz2 {
 
 bb0[firstDead=6]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     a: String("foo") = "foo"
     <statTemp>$5: String("foo") = "foo"
     b: T.nilable(Integer) = a: String("foo").getbyte(<statTemp>$5: String("foo"))
@@ -36,7 +36,7 @@ bb1[firstDead=-1]():
 method ::Object#baz3 {
 
 bb0[firstDead=6]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <statTemp>$3: String("foo") = "foo"
     <statTemp>$4: String("foo") = "foo"
     b: T.nilable(Integer) = <statTemp>$3: String("foo").getbyte(<statTemp>$4: String("foo"))
@@ -54,8 +54,8 @@ bb1[firstDead=-1]():
 method ::Object#baz4 {
 
 bb0[firstDead=6]():
-    <self>: Object = cast(<self>: NilClass, Object);
-    <statTemp>$3: T.untyped = <self>: Object.a()
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
+    <statTemp>$3: T.untyped = <self>: T.self_type (of Object).a()
     <statTemp>$5: String("foo") = "foo"
     b: T.untyped = <statTemp>$3: T.untyped.getbyte(<statTemp>$5: String("foo"))
     <returnMethodTemp>$2: T.untyped = b
@@ -72,7 +72,7 @@ bb1[firstDead=-1]():
 method ::Object#baz5 {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     cond: T.untyped = load_arg(cond)
     cond -> (T.untyped ? bb2 : bb3)
 
@@ -109,7 +109,7 @@ bb4[firstDead=5](b: T.any(Integer, String)):
 method ::Object#baz6 {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     cond: T.untyped = load_arg(cond)
     cond -> (T.untyped ? bb2 : bb3)
 
@@ -146,7 +146,7 @@ bb4[firstDead=5](b: T.any(Integer, String)):
 method ::Object#baz7 {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     cond: T.untyped = load_arg(cond)
     cond -> (T.untyped ? bb2 : bb4)
 
@@ -177,7 +177,7 @@ bb4[firstDead=5](b: T.nilable(Integer)):
 method ::Object#baz8 {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <unconditional> -> bb2
 
 # backedges
@@ -212,7 +212,7 @@ bb5[firstDead=-1]():
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

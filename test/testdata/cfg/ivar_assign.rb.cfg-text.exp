@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -16,7 +16,7 @@ method ::TestIVar#initialize {
 
 bb0[firstDead=9]():
     @foo$3: Integer = alias @foo
-    <self>: TestIVar = cast(<self>: NilClass, TestIVar);
+    <self>: T.self_type (of TestIVar) = cast(<self>: NilClass, T.self_type (of TestIVar));
     <cfgAlias>$5: T.class_of(Integer) = alias <C Integer>
     keep_for_ide$4: T.class_of(Integer) = <cfgAlias>$5
     keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
@@ -37,7 +37,7 @@ method ::TestIVar#test {
 
 bb0[firstDead=5]():
     @foo$3: Integer = alias @foo
-    <self>: TestIVar = cast(<self>: NilClass, TestIVar);
+    <self>: T.self_type (of TestIVar) = cast(<self>: NilClass, T.self_type (of TestIVar));
     @foo$3: Integer = nil
     <returnMethodTemp>$2: Integer = @foo$3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
@@ -53,7 +53,7 @@ bb1[firstDead=-1]():
 method ::<Class:TestIVar>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(TestIVar) = cast(<self>: NilClass, T.class_of(TestIVar));
+    <self>: T.self_type (of T.class_of(TestIVar)) = cast(<self>: NilClass, T.self_type (of T.class_of(TestIVar)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

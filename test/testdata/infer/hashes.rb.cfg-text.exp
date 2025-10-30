@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::Foo#bar {
 
 bb0[firstDead=-1]():
-    <self>: Foo = cast(<self>: NilClass, Foo);
+    <self>: T.self_type (of Foo) = cast(<self>: NilClass, T.self_type (of Foo));
     cond: T.untyped = load_arg(cond)
     cond -> (T.untyped ? bb2 : bb3)
 
@@ -52,7 +52,7 @@ bb4[firstDead=2](s: {}):
 method ::<Class:Foo>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(Foo) = cast(<self>: NilClass, T.class_of(Foo));
+    <self>: T.self_type (of T.class_of(Foo)) = cast(<self>: NilClass, T.self_type (of T.class_of(Foo)));
     <returnMethodTemp>$2: Symbol(:bar) = :bar
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:bar)
     <unconditional> -> bb1
