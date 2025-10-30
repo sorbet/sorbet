@@ -692,19 +692,15 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
  */
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
                                     ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
-    auto originalOwner = fromWhat;
-
-    // TODO: the ENFORCE below should be above this conditional, but there is
-    // currently a problem with the handling of `module_function` that causes it
-    // to fail reliably. https://github.com/sorbet/sorbet/issues/904
-    // TODO(jez) Is this comment still true?
-    if (originalOwner.data(gs)->typeMembers().empty() || (what == nullptr)) {
-        return what;
-    }
-
     ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat) ||
                 fromWhat.data(gs)->derivesFrom(gs, inWhat),
             "\n{}\nis unrelated to\n\n{}", fromWhat.toString(gs), inWhat.toString(gs));
+
+    auto originalOwner = fromWhat;
+
+    if (originalOwner.data(gs)->typeMembers().empty() || (what == nullptr)) {
+        return what;
+    }
 
     TypePtr::InstantiationContext ictx(originalOwner, inWhat, targs);
     auto result = what._instantiateLambdaParams(gs, ictx);
