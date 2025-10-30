@@ -1,13 +1,13 @@
 method ::Object#foo {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <arrayTemp>$6: Integer(1) = 1
     <arrayTemp>$7: Integer(2) = 2
     <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$4: [Integer(1), Integer(2)] = <magic>$5: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))
     <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <statTemp>$4: [Integer(1), Integer(2)].map()
-    <selfRestore>$9: Object = <self>
+    <selfRestore>$9: T.self_type (of Object) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -17,20 +17,20 @@ bb1[firstDead=-1]():
 
 # backedges
 # - bb0
-bb2[firstDead=-1](<self>: Object, <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: Object):
+bb2[firstDead=-1](<self>: T.self_type (of Object), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.self_type (of Object)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: Object):
+bb3[firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.self_type (of Object)):
     target: T::Array[T.noreturn] = Solve<<block-pre-call-temp>$8, map>
     <unconditional> -> bb4
 
 # backedges
 # - bb3
 # - bb5
-bb4[firstDead=3](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$9: Object):
+bb4[firstDead=3](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$9: T.self_type (of Object)):
     <cfgAlias>$19: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer) = <cfgAlias>$19: T.class_of(T).reveal_type(target: T.any(T::Array[T.noreturn], Integer))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(T::Array[T.noreturn], Integer)
@@ -38,9 +38,9 @@ bb4[firstDead=3](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$9: 
 
 # backedges
 # - bb2
-bb5[firstDead=-1](<self>: Object, <selfRestore>$9: Object):
+bb5[firstDead=-1](<self>: T.self_type (of Object), <selfRestore>$9: T.self_type (of Object)):
     # outerLoops: 1
-    <self>: Object = loadSelf(map)
+    <self>: T.self_type (of Object) = loadSelf(map)
     <blk>$10: [Integer] = load_yield_params(map)
     x$1: Integer = yield_load_arg(0, <blk>$10: [Integer])
     <returnTemp>$14: Integer = x$1
@@ -55,7 +55,7 @@ bb5[firstDead=-1](<self>: Object, <selfRestore>$9: Object):
 method ::Object#bar {
 
 bb0[firstDead=3]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <returnMethodTemp>$2: String("foo bar") = "foo bar"
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String("foo bar")
     <unconditional> -> bb1
@@ -70,9 +70,9 @@ bb1[firstDead=-1]():
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=-1]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()
-    <selfRestore>$6: T.class_of(<root>) = <self>
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(<root>)).sig()
+    <selfRestore>$6: T.self_type (of T.class_of(<root>)) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -83,27 +83,27 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>)):
+bb2[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>)):
+bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(<root>))):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
-    <self>: T.class_of(<root>) = <selfRestore>$6
+    <self>: T.self_type (of T.class_of(<root>)) = <selfRestore>$6
     <cfgAlias>$27: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$29: T.class_of(T) = alias <C T>
-    <statTemp>$24: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$27: T.class_of(T::Sig))
-    <statTemp>$33: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$31: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$33: T.untyped)
-    <block-pre-call-temp>$38: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()
-    <selfRestore>$39: T.class_of(<root>) = <self>
+    <statTemp>$24: T.self_type (of T.class_of(<root>)) = <self>: T.self_type (of T.class_of(<root>)).extend(<cfgAlias>$27: T.class_of(T::Sig))
+    <statTemp>$33: T.untyped = <self>: T.self_type (of T.class_of(<root>)).foo()
+    <statTemp>$31: NilClass = <self>: T.self_type (of T.class_of(<root>)).puts(<statTemp>$33: T.untyped)
+    <block-pre-call-temp>$38: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(<root>)).bar()
+    <selfRestore>$39: T.self_type (of T.class_of(<root>)) = <self>
     <unconditional> -> bb6
 
 # backedges
 # - bb2
-bb5[firstDead=13](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>)):
+bb5[firstDead=13](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$10: Symbol(:blk) = :blk
@@ -123,32 +123,32 @@ bb5[firstDead=13](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::P
 # backedges
 # - bb3
 # - bb11
-bb6[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.class_of(<root>)):
+bb6[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6
-bb7[firstDead=-1](<block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.class_of(<root>)):
+bb7[firstDead=-1](<block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.self_type (of T.class_of(<root>))):
     a: String = Solve<<block-pre-call-temp>$38, bar>
     <unconditional> -> bb8
 
 # backedges
 # - bb7
 # - bb10
-bb8[firstDead=-1](a: T.any(String, Integer), <selfRestore>$39: T.class_of(<root>)):
-    <self>: T.class_of(<root>) = <selfRestore>$39
+bb8[firstDead=-1](a: T.any(String, Integer), <selfRestore>$39: T.self_type (of T.class_of(<root>))):
+    <self>: T.self_type (of T.class_of(<root>)) = <selfRestore>$39
     <cfgAlias>$53: T.class_of(T) = alias <C T>
     <statTemp>$51: T.any(String, Integer) = <cfgAlias>$53: T.class_of(T).reveal_type(a: T.any(String, Integer))
-    <block-pre-call-temp>$57: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).bar()
-    <selfRestore>$58: T.class_of(<root>) = <self>
+    <block-pre-call-temp>$57: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(<root>)).bar()
+    <selfRestore>$58: T.self_type (of T.class_of(<root>)) = <self>
     <unconditional> -> bb12
 
 # backedges
 # - bb6
-bb9[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.class_of(<root>)):
+bb9[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
-    <self>: T.class_of(<root>) = loadSelf(bar)
+    <self>: T.self_type (of T.class_of(<root>)) = loadSelf(bar)
     <blk>$40: [Integer] = load_yield_params(bar)
     x$2: Integer = yield_load_arg(0, <blk>$40: [Integer])
     <statTemp>$45: Integer(5) = 5
@@ -157,7 +157,7 @@ bb9[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::
 
 # backedges
 # - bb9
-bb10[firstDead=-1](<selfRestore>$39: T.class_of(<root>)):
+bb10[firstDead=-1](<selfRestore>$39: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <returnTemp>$46: Integer(10) = 10
     <block-break-assign>$47: Integer(10) = <returnTemp>$46
@@ -168,7 +168,7 @@ bb10[firstDead=-1](<selfRestore>$39: T.class_of(<root>)):
 
 # backedges
 # - bb9
-bb11[firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.class_of(<root>)):
+bb11[firstDead=2](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <blockReturnTemp>$41: String("test") = "test"
     <blockReturnTemp>$50: T.noreturn = blockreturn<bar> <blockReturnTemp>$41: String("test")
@@ -177,29 +177,29 @@ bb11[firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::
 # backedges
 # - bb8
 # - bb17
-bb12[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(<root>)):
+bb12[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb15 : bb13)
 
 # backedges
 # - bb12
-bb13[firstDead=-1](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(<root>)):
+bb13[firstDead=-1](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.self_type (of T.class_of(<root>))):
     b: String = Solve<<block-pre-call-temp>$57, bar>
     <unconditional> -> bb14
 
 # backedges
 # - bb13
 # - bb16
-bb14[firstDead=-1](b: T.nilable(String), <selfRestore>$58: T.class_of(<root>)):
+bb14[firstDead=-1](b: T.nilable(String), <selfRestore>$58: T.self_type (of T.class_of(<root>))):
     <cfgAlias>$72: T.class_of(T) = alias <C T>
     <statTemp>$70: T.nilable(String) = <cfgAlias>$72: T.class_of(T).reveal_type(b: T.nilable(String))
     <unconditional> -> bb18
 
 # backedges
 # - bb12
-bb15[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(<root>)):
+bb15[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
-    <self>: T.class_of(<root>) = loadSelf(bar)
+    <self>: T.self_type (of T.class_of(<root>)) = loadSelf(bar)
     <blk>$59: [Integer] = load_yield_params(bar)
     x$3: Integer = yield_load_arg(0, <blk>$59: [Integer])
     <statTemp>$64: Integer(5) = 5
@@ -208,7 +208,7 @@ bb15[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet:
 
 # backedges
 # - bb15
-bb16[firstDead=-1](<selfRestore>$58: T.class_of(<root>)):
+bb16[firstDead=-1](<selfRestore>$58: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <block-break-assign>$66: NilClass = <returnTemp>$65
     <magic>$67: T.class_of(<Magic>) = alias <C <Magic>>
@@ -218,7 +218,7 @@ bb16[firstDead=-1](<selfRestore>$58: T.class_of(<root>)):
 
 # backedges
 # - bb15
-bb17[firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(<root>)):
+bb17[firstDead=2](<self>: T.self_type (of T.class_of(<root>)), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <blockReturnTemp>$60: String("test") = "test"
     <blockReturnTemp>$69: T.noreturn = blockreturn<bar> <blockReturnTemp>$60: String("test")

@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::HasLoops#variable_only_inside_loop {
 
 bb0[firstDead=-1]():
-    <self>: HasLoops = cast(<self>: NilClass, HasLoops);
+    <self>: T.self_type (of HasLoops) = cast(<self>: NilClass, T.self_type (of HasLoops));
     <unconditional> -> bb2
 
 # backedges
@@ -50,7 +50,7 @@ bb5[firstDead=-1]():
 method ::HasLoops#incorrect_assignment {
 
 bb0[firstDead=-1]():
-    <self>: HasLoops = cast(<self>: NilClass, HasLoops);
+    <self>: T.self_type (of HasLoops) = cast(<self>: NilClass, T.self_type (of HasLoops));
     a: String("s") = "s"
     <unconditional> -> bb2
 
@@ -86,7 +86,7 @@ bb5[firstDead=-1](a: String("s")):
 method ::HasLoops#correct_assignment {
 
 bb0[firstDead=-1]():
-    <self>: HasLoops = cast(<self>: NilClass, HasLoops);
+    <self>: T.self_type (of HasLoops) = cast(<self>: NilClass, T.self_type (of HasLoops));
     a: String("s") = "s"
     <unconditional> -> bb2
 
@@ -122,7 +122,7 @@ bb5[firstDead=-1](a: String("s")):
 method ::<Class:HasLoops>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(HasLoops) = cast(<self>: NilClass, T.class_of(HasLoops));
+    <self>: T.self_type (of T.class_of(HasLoops)) = cast(<self>: NilClass, T.self_type (of T.class_of(HasLoops)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

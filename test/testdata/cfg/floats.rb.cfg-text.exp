@@ -1,7 +1,7 @@
 method ::Object#test_large_float {
 
 bb0[firstDead=15]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     a: Float(3.141593) = 3.141593
     a: Float(0.000001) = 0.000001
     a: Float(-0.000001) = -0.000001
@@ -28,7 +28,7 @@ bb1[firstDead=-1]():
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <returnMethodTemp>$2: Symbol(:test_large_float) = :test_large_float
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:test_large_float)
     <unconditional> -> bb1

@@ -1,7 +1,7 @@
 method ::Object#main {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <cfgAlias>$6: T.class_of(T) = alias <C T>
     <cfgAlias>$8: T.class_of(String) = alias <C String>
     keep_for_ide$4: Runtime object representing type: T.nilable(String) = <cfgAlias>$6: T.class_of(T).nilable(<cfgAlias>$8: T.class_of(String))
@@ -37,7 +37,7 @@ bb3[firstDead=3](name: String):
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <returnMethodTemp>$2: Symbol(:main) = :main
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:main)
     <unconditional> -> bb1

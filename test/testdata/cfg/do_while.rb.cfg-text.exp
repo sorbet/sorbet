@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=-1]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <unconditional> -> bb2
 
 # backedges
@@ -12,24 +12,24 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(<root>)):
+bb2[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <whileTemp>$4: TrueClass = true
     <whileTemp>$4 -> (TrueClass ? bb5 : bb8)
 
 # backedges
 # - bb2
-bb5[firstDead=-1](<self>: T.class_of(<root>)):
+bb5[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <statTemp>$8: Integer(2) = 2
-    <statTemp>$6: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$8: Integer(2))
+    <statTemp>$6: NilClass = <self>: T.self_type (of T.class_of(<root>)).puts(<statTemp>$8: Integer(2))
     <statTemp>$10: FalseClass = false
     <ifTemp>$9: TrueClass = <statTemp>$10: FalseClass.!()
     <ifTemp>$9 -> (TrueClass ? bb6 : bb2)
 
 # backedges
 # - bb5
-bb6[firstDead=-1](<self>: T.class_of(<root>)):
+bb6[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <block-break-assign>$12: NilClass = <returnTemp>$11
     <unconditional> -> bb8
@@ -38,7 +38,7 @@ bb6[firstDead=-1](<self>: T.class_of(<root>)):
 # - bb2
 # - bb6
 # - bb11
-bb8[firstDead=-1](<self>: T.class_of(<root>)):
+bb8[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <whileTemp>$14: TrueClass = true
     <whileTemp>$14 -> (TrueClass ? bb11 : bb10)
@@ -46,22 +46,22 @@ bb8[firstDead=-1](<self>: T.class_of(<root>)):
 # backedges
 # - bb8
 # - bb12
-bb10[firstDead=-1](<self>: T.class_of(<root>)):
+bb10[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     x: Integer(0) = 0
     <unconditional> -> bb14
 
 # backedges
 # - bb8
-bb11[firstDead=-1](<self>: T.class_of(<root>)):
+bb11[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <statTemp>$18: Integer(2) = 2
-    <statTemp>$16: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: Integer(2))
+    <statTemp>$16: NilClass = <self>: T.self_type (of T.class_of(<root>)).puts(<statTemp>$18: Integer(2))
     <ifTemp>$19: TrueClass = true
     <ifTemp>$19 -> (TrueClass ? bb12 : bb8)
 
 # backedges
 # - bb11
-bb12[firstDead=-1](<self>: T.class_of(<root>)):
+bb12[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     # outerLoops: 1
     <block-break-assign>$21: NilClass = <returnTemp>$20
     <unconditional> -> bb10
@@ -69,20 +69,20 @@ bb12[firstDead=-1](<self>: T.class_of(<root>)):
 # backedges
 # - bb10
 # - bb17
-bb14[firstDead=-1](<self>: T.class_of(<root>), x: Integer(0)):
+bb14[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), x: Integer(0)):
     # outerLoops: 1
     <whileTemp>$24: FalseClass = false
     <whileTemp>$24 -> (FalseClass ? bb17 : bb16)
 
 # backedges
 # - bb14
-bb16[firstDead=-1](<self>: T.class_of(<root>), x: Integer(0)):
+bb16[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), x: Integer(0)):
     y: Integer(0) = 0
     <unconditional> -> bb18
 
 # backedges
 # - bb14
-bb17[firstDead=0](<self>: T.class_of(<root>), x: Integer(0)):
+bb17[firstDead=0](<self>: T.self_type (of T.class_of(<root>)), x: Integer(0)):
     # outerLoops: 1
     <statTemp>$28 = 2
     <statTemp>$26 = <self>.puts(<statTemp>$28)
@@ -92,7 +92,7 @@ bb17[firstDead=0](<self>: T.class_of(<root>), x: Integer(0)):
 # backedges
 # - bb16
 # - bb21
-bb18[firstDead=-1](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
+bb18[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), x: Integer(0), y: Integer(0)):
     # outerLoops: 1
     <statTemp>$32: TrueClass = true
     <whileTemp>$31: FalseClass = <statTemp>$32: TrueClass.!()
@@ -100,14 +100,14 @@ bb18[firstDead=-1](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
 
 # backedges
 # - bb18
-bb20[firstDead=2](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
-    <statTemp>$37: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))
+bb20[firstDead=2](<self>: T.self_type (of T.class_of(<root>)), x: Integer(0), y: Integer(0)):
+    <statTemp>$37: NilClass = <self>: T.self_type (of T.class_of(<root>)).puts(x: Integer(0), y: Integer(0))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb18
-bb21[firstDead=0](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
+bb21[firstDead=0](<self>: T.self_type (of T.class_of(<root>)), x: Integer(0), y: Integer(0)):
     # outerLoops: 1
     <statTemp>$36 = 2
     <statTemp>$34 = <self>.puts(<statTemp>$36)

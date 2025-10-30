@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,12 +15,12 @@ bb1[firstDead=-1]():
 method ::BlockTest#blockPass {
 
 bb0[firstDead=-1]():
-    <self>: BlockTest = cast(<self>: NilClass, BlockTest);
+    <self>: T.self_type (of BlockTest) = cast(<self>: NilClass, T.self_type (of BlockTest));
     <statTemp>$4: Integer(1) = 1
     <statTemp>$5: Integer(2) = 2
     <statTemp>$6: Integer(3) = 3
-    <block-pre-call-temp>$7: Sorbet::Private::Static::Void = <self>: BlockTest.foo(<statTemp>$4: Integer(1), <statTemp>$5: Integer(2), <statTemp>$6: Integer(3))
-    <selfRestore>$8: BlockTest = <self>
+    <block-pre-call-temp>$7: Sorbet::Private::Static::Void = <self>: T.self_type (of BlockTest).foo(<statTemp>$4: Integer(1), <statTemp>$5: Integer(2), <statTemp>$6: Integer(3))
+    <selfRestore>$8: T.self_type (of BlockTest) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -31,22 +31,22 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: BlockTest, <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: BlockTest):
+bb2[firstDead=-1](<self>: T.self_type (of BlockTest), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.self_type (of BlockTest)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: BlockTest):
+bb3[firstDead=2](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.self_type (of BlockTest)):
     <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$7, foo>
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=6](<self>: BlockTest, <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: BlockTest):
+bb5[firstDead=6](<self>: T.self_type (of BlockTest), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.self_type (of BlockTest)):
     # outerLoops: 1
-    <self>: BlockTest = loadSelf(foo)
+    <self>: T.self_type (of BlockTest) = loadSelf(foo)
     <blk>$9: T.untyped = load_yield_params(foo)
     x$1: T.untyped = yield_load_arg(0, <blk>$9: T.untyped)
     y$1: T.untyped = yield_load_arg(1, <blk>$9: T.untyped)
@@ -59,7 +59,7 @@ bb5[firstDead=6](<self>: BlockTest, <block-pre-call-temp>$7: Sorbet::Private::St
 method ::<Class:BlockTest>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(BlockTest) = cast(<self>: NilClass, T.class_of(BlockTest));
+    <self>: T.self_type (of T.class_of(BlockTest)) = cast(<self>: NilClass, T.self_type (of T.class_of(BlockTest)));
     <returnMethodTemp>$2: Symbol(:blockPass) = :blockPass
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:blockPass)
     <unconditional> -> bb1

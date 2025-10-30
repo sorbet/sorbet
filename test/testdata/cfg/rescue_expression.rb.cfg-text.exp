@@ -1,7 +1,7 @@
 method ::Object#foo {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -25,10 +25,10 @@ bb3[firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: Exception)
 
 # backedges
 # - bb0
-bb4[firstDead=3](<self>: Object):
+bb4[firstDead=3](<self>: T.self_type (of Object)):
     <cfgAlias>$7: T.class_of(MyException) = alias <C MyException>
     <statTemp>$5: MyException = <cfgAlias>$7: T.class_of(MyException).new()
-    <returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)
+    <returnMethodTemp>$2: T.noreturn = <self>: T.self_type (of Object).raise(<statTemp>$5: MyException)
     <exceptionValue>$3 = <get-current-exception>
     <exceptionValue>$3 -> (<nullptr> ? bb3 : bb6)
 
@@ -64,9 +64,9 @@ bb9[firstDead=1](<returnMethodTemp>$2: Integer(3)):
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=4]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$6: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$4: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$6: T.untyped)
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
+    <statTemp>$6: T.untyped = <self>: T.self_type (of T.class_of(<root>)).foo()
+    <statTemp>$4: NilClass = <self>: T.self_type (of T.class_of(<root>)).puts(<statTemp>$6: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -80,7 +80,7 @@ bb1[firstDead=-1]():
 method ::<Class:MyException>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(MyException) = cast(<self>: NilClass, T.class_of(MyException));
+    <self>: T.self_type (of T.class_of(MyException)) = cast(<self>: NilClass, T.self_type (of T.class_of(MyException)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

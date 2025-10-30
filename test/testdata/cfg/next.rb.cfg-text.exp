@@ -1,12 +1,12 @@
 method ::Object#foo {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <arrayTemp>$5: Integer(1) = 1
     <magic>$4: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$3: [Integer(1)] = <magic>$4: T.class_of(<Magic>).<build-array>(<arrayTemp>$5: Integer(1))
     <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <statTemp>$3: [Integer(1)].map()
-    <selfRestore>$7: Object = <self>
+    <selfRestore>$7: T.self_type (of Object) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -19,26 +19,26 @@ bb1[firstDead=-1](<self>):
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: Object, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: Object):
+bb2[firstDead=-1](<self>: T.self_type (of Object), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.self_type (of Object)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=3](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: Object):
+bb3[firstDead=3](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.self_type (of Object)):
     <returnMethodTemp>$2: T::Array[Integer] = Solve<<block-pre-call-temp>$6, map>
-    <self>: Object = <selfRestore>$7
+    <self>: T.self_type (of Object) = <selfRestore>$7
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Integer]
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=6](<self>: Object, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: Object):
+bb5[firstDead=6](<self>: T.self_type (of Object), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.self_type (of Object)):
     # outerLoops: 1
-    <self>: Object = loadSelf(map)
+    <self>: T.self_type (of Object) = loadSelf(map)
     <blk>$8: [Integer] = load_yield_params(map)
     x$1: Integer = yield_load_arg(0, <blk>$8: [Integer])
-    <statTemp>$10: T.untyped = <self>: Object.good()
+    <statTemp>$10: T.untyped = <self>: T.self_type (of Object).good()
     <nextTemp>$13: Integer = x$1
     <nextTemp>$14: T.noreturn = blockreturn<map> <nextTemp>$13: Integer
     <unconditional> -> bb2
@@ -48,7 +48,7 @@ bb5[firstDead=6](<self>: Object, <block-pre-call-temp>$6: Sorbet::Private::Stati
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <returnMethodTemp>$2: Symbol(:foo) = :foo
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1
