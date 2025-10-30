@@ -4671,6 +4671,13 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     auto name = translateConstantName(node->name);
 
     if (this->isInMethodDef() && replaceWithDynamicConstAssign) {
+        if constexpr (is_same_v<PrismLhsNode, pm_constant_write_node> ||
+                      is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
+                      is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
+                      is_same_v<PrismLhsNode, pm_constant_or_write_node>) {
+            location = translateLoc(node->name_loc);
+        }
+
         // Check if this is a dynamic constant assignment (SyntaxError at runtime)
         // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
         // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
