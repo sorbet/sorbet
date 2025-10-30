@@ -1264,10 +1264,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             }
                         } else if (symbol.isField(ctx)) {
                             auto field = symbol.asFieldRef();
+                            auto selfTypeArgs = ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx);
                             tp.type = core::Types::resultTypeAsSeenFrom(
                                 ctx, field.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
-                                ctx.owner.enclosingClass(ctx),
-                                ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
+                                ctx.owner.enclosingClass(ctx), selfTypeArgs,
+                                ctx.owner.enclosingClass(ctx).data(ctx)->selfType(ctx, selfTypeArgs));
                         } else {
                             tp.type = resultType;
                         }
