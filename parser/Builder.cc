@@ -1345,15 +1345,22 @@ public:
         return make_unique<NthRef>(tokLoc(tok), atoi(tok->asString().c_str()));
     }
 
-    unique_ptr<Node> numparams(sorbet::parser::NodeVec declaringNodes) {
+    // `tok` is the opening token:
+    //     - for blocks, it's opening `do` or `{` (TODO!)
+    //     - for lambdas, it's the `->`
+    // We use it to set the location of the numparams to a zero-length loc just after, as if you had written:
+    //     - `do|_1, _2| ... end`
+    //     - `{|_1, _2| ... }`
+    //     - `->(_1, _2) { ... }`
+    unique_ptr<Node> numparams(const token *tok, sorbet::parser::NodeVec declaringNodes) {
         ENFORCE(!declaringNodes.empty(), "NumParams node created without declaring node.");
         // During desugar we will create implicit arguments for the block based on on the highest
         // numparam used in it's body.
-        // We will use the first node declaring a numbered parameter for the location of the implicit arg.
-        // In the meantime, we need a loc for the NumParams node to pass the sanity check at the end of the
-        // parsing phase so we arbitrary pick the first one from the node list (we know there is at least one).
-        auto dummyLoc = declaringNodes.at(0)->loc;
-        return make_unique<NumParams>(dummyLoc, std::move(declaringNodes));
+
+        // TODO: `tok` is `nullptr` for brace or do/end blocks
+        auto loc = tok ? tokLoc(tok).copyEndWithZeroLength() : core::LocOffsets(1, 1);
+
+        return make_unique<NumParams>(loc, std::move(declaringNodes));
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -2498,9 +2505,9 @@ ForeignPtr nth_ref(SelfPtr builder, const token *tok) {
     return build->toForeign(build->nth_ref(tok));
 }
 
-ForeignPtr numparams(SelfPtr builder, const node_list *declaringNodes) {
+ForeignPtr numparams(SelfPtr builder, const token *tok, const node_list *declaringNodes) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->numparams(build->convertNodeList(declaringNodes)));
+    return build->toForeign(build->numparams(tok, build->convertNodeList(declaringNodes)));
 }
 
 ForeignPtr numblock(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,

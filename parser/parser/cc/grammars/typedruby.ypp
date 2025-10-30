@@ -2776,9 +2776,10 @@ opt_block_args_tail:
                     }
                   lambda_body
                     {
+                      auto &lambda_arrow = $1; // The `->` token with context
                       auto &delimited_block = $4;
                       if (driver.numparam_stack.seen_numparams()) {
-                        delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                        delimited_block->args = driver.build.numparams(self, lambda_arrow->token, driver.numparam_stack.top()->decls);
                       } else {
                         delimited_block->args = $2;
                       }
@@ -2786,10 +2787,10 @@ opt_block_args_tail:
                       driver.numparam_stack.pop();
                       driver.lex.unextend();
                       driver.lex.cmdarg.pop();
-                      driver.lex.context.inLambda = $1->context.inLambda;
-                      driver.lex.context.allowNumparams = $1->context.allowNumparams;
+                      driver.lex.context.inLambda = lambda_arrow->context.inLambda;
+                      driver.lex.context.allowNumparams = lambda_arrow->context.allowNumparams;
 
-                      auto lambda_call = driver.build.callLambda(self, $1->token);
+                      auto lambda_call = driver.build.callLambda(self, lambda_arrow->token);
                       auto &lambda = delimited_block;
                       $$ = driver.build.block(self, lambda_call,
                         lambda->begin,
@@ -3025,7 +3026,7 @@ lcurly_block_start:
                     opt_block_param bodystmt
                     {
                       if (driver.numparam_stack.seen_numparams()) {
-                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                        auto numparams = driver.build.numparams(self,  nullptr, driver.numparam_stack.top()->decls);
                         $$ = driver.alloc.delimited_block(nullptr, numparams, $3->body, nullptr);
                       } else {
                         $$ = driver.alloc.delimited_block(nullptr, $2, $3->body, nullptr);
@@ -3045,7 +3046,7 @@ lcurly_block_start:
                     opt_block_param bodystmt
                     {
                       if (driver.numparam_stack.seen_numparams()) {
-                        auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->decls);
+                        auto numparams = driver.build.numparams(self, nullptr, driver.numparam_stack.top()->decls);
                         $$ = driver.alloc.delimited_block(nullptr, numparams, $4->body, nullptr);
                       } else {
                         $$ = driver.alloc.delimited_block(nullptr, $3, $4->body, nullptr);
