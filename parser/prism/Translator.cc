@@ -2348,25 +2348,28 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto sign = value[0];
             bool hasSign = (sign == '+' || sign == '-');
 
+            auto numberLoc = location;
             if (hasSign) {
                 value.remove_prefix(1); // Remove the sign
+
+                numberLoc = core::LocOffsets{location.beginPos() + 1, location.endPos()};
             }
 
             // Create the desugared Complex call: `Kernel.Complex(0, unsigned_value)`
-            auto kernel = MK::Constant(location, core::Symbols::Kernel());
+            auto kernel = MK::Constant(numberLoc, core::Symbols::Kernel());
             core::NameRef complexName = core::Names::Constants::Complex().dataCnst(ctx)->original;
             core::NameRef valueName = ctx.state.enterNameUTF8(value);
-            auto complexCall = MK::Send2(location, move(kernel), complexName, location.copyWithZeroLength(),
-                                         MK::Int(location, 0), MK::String(location, valueName));
+            auto complexCall = MK::Send2(numberLoc, move(kernel), complexName, numberLoc.copyWithZeroLength(),
+                                         MK::Int(numberLoc, 0), MK::String(numberLoc, valueName));
 
             // If there was a sign, wrap in unary operation
             // E.g. desugar `+42` to `42.+()`
             if (hasSign) {
-                auto complexNode = make_unique<parser::Complex>(location, string(value));
+                auto complexNode = make_unique<parser::Complex>(numberLoc, string(value));
                 core::NameRef unaryOp = (sign == '-') ? core::Names::unaryMinus() : core::Names::unaryPlus();
 
                 auto unarySend = MK::Send0(location, move(complexCall), unaryOp,
-                                           core::LocOffsets{location.beginLoc, location.beginLoc + 1});
+                                           core::LocOffsets{location.beginLoc, numberLoc.beginLoc});
 
                 return make_node_with_expr<parser::Send>(move(unarySend), location, move(complexNode), unaryOp,
                                                          core::LocOffsets{location.beginLoc, location.beginLoc + 1},
