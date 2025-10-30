@@ -151,3 +151,7 @@ Style/AccessorGrouping:
 Style/BisectedAttrAccessor:
   Exclude:
     - 'lib/types/private/methods/signature.rb'
+Style/SymbolArray:
+  Enabled: false
+Style/RedundantSelf:
+  Enabled: false

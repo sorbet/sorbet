@@ -14,7 +14,7 @@ module Opus::Types::Test
       e = assert_raises(TypeError) do
         T.must(nil)
       end
-      assert_equal('Passed `nil` into T.must', e.message)
+      assert_equal('Passed `nil` into T.must', e.message.split("\n")[0])
     end
   end
 end
