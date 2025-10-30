@@ -1017,6 +1017,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             : mayBeOverloaded;
 
     auto methodData = method.data(gs);
+    if (methodData->name == core::Names::badAliasMethodStub()) {
+        // We already reported an error in namer
+        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+    }
+
     if (methodData->flags.isPrivate && !args.isPrivateOk) {
         if (auto e = gs.beginError(args.errLoc(), core::errors::Infer::PrivateMethod)) {
             if (args.fullType.type != args.thisType) {
