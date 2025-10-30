@@ -3371,6 +3371,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
     }
 }
 
+core::LocOffsets Translator::translateLoc(const uint8_t *start, const uint8_t *end) const {
+    return parser.translateLocation(start, end);
+}
+
 core::LocOffsets Translator::translateLoc(pm_location_t loc) const {
     return parser.translateLocation(loc);
 }
