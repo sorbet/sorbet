@@ -143,8 +143,6 @@ prism_location_test_suite(
             "prism_regression/call_block_param.rb",
             "prism_regression/case_match.rb",
             "prism_regression/case_match_variable_pinning.rb",
-            "prism_regression/def_all_params.rb",
-            "prism_regression/def_block_param.rb",
             "prism_regression/ensure.rb",
             "prism_regression/error_recovery/assign.rb",
             "prism_regression/for_loop.rb",

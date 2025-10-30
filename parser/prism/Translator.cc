@@ -3724,16 +3724,18 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
 
     core::NameRef enclosingBlockParamName;
     if (auto *prismBlockParam = paramsNode->block) {
+        auto blockParamLoc = translateLoc(prismBlockParam->base.location);
+
         if (auto prismName = prismBlockParam->name; prismName != PM_CONSTANT_ID_UNSET) {
             // A named block parameter, like `def foo(&block)`
             enclosingBlockParamName = translateConstantName(prismName);
+
+            // The location doesn't include the `&`, only the name of the block parameter
+            constexpr uint32_t length = "&"sv.size();
+            blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + length, blockParamLoc.endPos()};
         } else { // An anonymous block parameter, like `def foo(&)`
             enclosingBlockParamName = nextUniqueParserName(core::Names::ampersand());
         }
-
-        auto blockParamLoc = translateLoc(prismBlockParam->base.location);
-        // Drop the `&` before the name of the block parameter.
-        blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + 1, blockParamLoc.endPos()};
 
         auto blockParamExpr = MK::BlockParam(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
         auto blockParamNode =
