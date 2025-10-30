@@ -101,12 +101,12 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
     }
     return targs;
 }
-TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
+TypePtr ClassOrModule::selfType(const GlobalState &gs, vector<TypePtr> selfTypeArgs) const {
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
         return externalType();
     } else {
-        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+        return make_type<AppliedType>(ref(gs), move(selfTypeArgs));
     }
 }
 
