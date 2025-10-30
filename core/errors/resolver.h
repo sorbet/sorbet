@@ -64,7 +64,7 @@ constexpr ErrorClass ExperimentalAttachedClass{5056, StrictLevel::False};
 // constexpr ErrorClass GeneratedDeprecated{5056, StrictLevel::False};
 constexpr ErrorClass StaticAbstractModuleMethod{5057, StrictLevel::False};
 constexpr ErrorClass AttachedClassAsParam{5058, StrictLevel::False};
-constexpr ErrorClass LazyResolve{5059, StrictLevel::False};
+// constexpr ErrorClass LazyResolve{5059, StrictLevel::False};
 constexpr ErrorClass GenericTypeParamBoundMismatch{5060, StrictLevel::False};
 constexpr ErrorClass PrivateConstantReferenced{5061, StrictLevel::True};
 constexpr ErrorClass InvalidRequiredAncestor{5062, StrictLevel::True};
