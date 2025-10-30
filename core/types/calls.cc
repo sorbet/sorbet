@@ -255,6 +255,13 @@ void addIsaUntypedNote(const GlobalState &gs, const DispatchArgs &args, ErrorBui
     }
 }
 
+bool showComponentOfInMessage(const DispatchArgs &args) {
+    // The various "component of" messages are typically for when the fullType is `T.any(...)`
+    // If the fullType is `T.self_type`, it doesn't really help to show the fullType component in
+    // the message, because it's just going to be the same as its upper bound.
+    return args.fullType.type != args.thisType && !isa_type<FreshSelfType>(args.fullType.type);
+}
+
 } // namespace
 
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -267,7 +274,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
         auto e = gs.beginError(args.errLoc(), errors::Infer::CallOnTypeArgument);
         if (e) {
             auto thisStr = args.thisType.show(gs);
-            if (args.fullType.type != args.thisType) {
+            if (showComponentOfInMessage(args)) {
                 e.setHeader("Call to method `{}` on generic type `{}` component of `{}`", args.name.show(gs), thisStr,
                             args.fullType.type.show(gs));
             } else {
@@ -298,7 +305,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                                   ? "template"
                                   : "member";
                 auto thisStr = args.thisType.show(gs);
-                if (args.fullType.type != args.thisType) {
+                if (showComponentOfInMessage(args)) {
                     e.setHeader("Call to method `{}` on unbounded type {} `{}` component of `{}`", args.name.show(gs),
                                 member, thisStr, args.fullType.type.show(gs));
                 } else {
@@ -822,7 +829,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto ancestorsOf = args.name == Names::super() ? "ancestors of " : "";
             auto isSetter = targetName.isSetter(gs);
             auto methodPrefix = isSetter ? "Setter method" : "Method";
-            if (args.fullType.type != args.thisType) {
+            if (showComponentOfInMessage(args)) {
                 e.setHeader("{} `{}` does not exist on {}`{}` component of `{}`", methodPrefix, targetName.show(gs),
                             ancestorsOf, thisStr, args.fullType.type.show(gs));
             } else {
@@ -1029,7 +1036,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (methodData->flags.isPrivate && !args.isPrivateOk) {
         if (auto e = gs.beginError(args.errLoc(), core::errors::Infer::PrivateMethod)) {
-            if (args.fullType.type != args.thisType) {
+            if (showComponentOfInMessage(args)) {
                 e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
                             methodData->name.show(gs), args.thisType.show(gs), args.fullType.type.show(gs));
             } else {
@@ -1360,7 +1367,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
             auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
             if (auto e = gs.beginError(errLoc, errors::Infer::MethodArgumentCountMismatch)) {
-                if (args.fullType.type != args.thisType) {
+                if (showComponentOfInMessage(args)) {
                     e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
                                 "Expected: `{}`, got: `{}`",
                                 method.show(gs), args.thisType.show(gs), args.fullType.type.show(gs),
