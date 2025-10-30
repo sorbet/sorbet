@@ -304,7 +304,11 @@ public:
     // into this:
     //   [Integer, Integer]
     // for use with LoadYieldParams
-    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+    //
+    // The `selfType` is weird, it shouldn't matter, because we only call this on `T.proc` types,
+    // and none of the `Proc` classes have `T.self_type` in their arguments. But we thread a
+    // `selfType` anyways just in case.
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const;
 
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
 

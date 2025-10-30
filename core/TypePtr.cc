@@ -17,8 +17,8 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, ClassType)             \
         CASE_STATEMENT(CASE_BODY, LambdaParam)           \
         CASE_STATEMENT(CASE_BODY, SelfTypeParam)         \
+        CASE_STATEMENT(CASE_BODY, NewSelfType)           \
         CASE_STATEMENT(CASE_BODY, AliasType)             \
-        CASE_STATEMENT(CASE_BODY, SelfType)              \
         CASE_STATEMENT(CASE_BODY, NamedLiteralType)      \
         CASE_STATEMENT(CASE_BODY, IntegerLiteralType)    \
         CASE_STATEMENT(CASE_BODY, FloatLiteralType)      \
@@ -186,9 +186,9 @@ bool TypePtr::hasUntyped() const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
             // These cannot have untyped.
@@ -230,9 +230,9 @@ bool TypePtr::hasTopLevelVoid() const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
         case Tag::BlamedUntyped:
@@ -278,7 +278,7 @@ core::SymbolRef TypePtr::untypedBlame() const {
 //
 // Currently, this method is never called with `name` set to anything other than `Names::call()`,
 // which is where the `getCallArguments` comes from.
-TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
+TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const {
     switch (tag()) {
         case Tag::MetaType:
         case Tag::TupleType:
@@ -286,32 +286,32 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType: {
-            return this->underlying(gs).getCallArguments(gs, name);
+            return this->underlying(gs).getCallArguments(gs, name, selfType);
         }
         case Tag::OrType: {
             auto &orType = cast_type_nonnull<OrType>(*this);
-            return orType.getCallArguments(gs, name);
+            return orType.getCallArguments(gs, name, selfType);
         }
         case Tag::AndType: {
             auto &andType = cast_type_nonnull<AndType>(*this);
-            return andType.getCallArguments(gs, name);
+            return andType.getCallArguments(gs, name, selfType);
         }
         case Tag::BlamedUntyped: {
             auto c = cast_type_nonnull<BlamedUntyped>(*this);
-            return c.getCallArguments(gs, name);
+            return c.getCallArguments(gs, name, selfType);
         }
         case Tag::UnresolvedClassType:
         case Tag::UnresolvedAppliedType:
         case Tag::ClassType: {
             auto c = cast_type_nonnull<ClassType>(*this);
-            return c.getCallArguments(gs, name);
+            return c.getCallArguments(gs, name, selfType);
         }
         case Tag::AppliedType: {
             auto &app = cast_type_nonnull<AppliedType>(*this);
-            return app.getCallArguments(gs, name);
+            return app.getCallArguments(gs, name, selfType);
         }
-        case Tag::SelfType:
         case Tag::SelfTypeParam:
+        case Tag::NewSelfType:
         case Tag::LambdaParam:
         case Tag::TypeVar:
         case Tag::AliasType: {
@@ -360,7 +360,7 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, InstantiationCo
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
-        case Tag::SelfType:
+        case Tag::NewSelfType:
             // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
             // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
             // have to allocate another type.
