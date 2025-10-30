@@ -2038,6 +2038,11 @@ public:
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // Most syntactically visible calls to `T.self_type` should be handled by the
+        // `<Magic>.self_type` intrinsic.
+        //
+        // This intrinsic remains just on the off chance that people misuse `T.self_type` as a
+        // value some other way (e.g., t = T; t.self_type).
         res.returnType = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_self_type;
@@ -3119,6 +3124,27 @@ public:
         }
     }
 } Magic_attachedClass;
+
+class Magic_selfType : public IntrinsicMethod {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        // args[0] is `<self>`
+
+        auto selfTy = *args.args[0];
+        auto selfTyType = selfTy.type;
+        if (auto freshSelfType = cast_type<FreshSelfType>(selfTyType)) {
+            selfTyType = freshSelfType->upperBound;
+        }
+
+        auto mustExist = true;
+        auto self = unwrapSymbol(gs, selfTyType, mustExist);
+        auto selfData = self.data(gs);
+        res.returnType = make_type<MetaType>(selfData->selfType(gs, selfData->selfTypeArgs(gs)));
+    }
+} Magic_selfType;
 
 class Magic_checkAndAnd : public IntrinsicMethod {
 public:
@@ -4682,6 +4708,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestConstantType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestFieldType(), &Magic_suggestUntypedFieldType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfType(), &Magic_selfType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkAndAnd(), &Magic_checkAndAnd},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splat(), &Magic_splat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashDup(), &Magic_toHash},

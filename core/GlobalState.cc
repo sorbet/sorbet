@@ -750,6 +750,11 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::attachedClass())
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
+    // Synthesize <Magic>.attachedClass(arg: *T.untyped) => T.untyped
+    // (accept any args to avoid repeating errors that would otherwise be reported by type syntax parsing)
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfType())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<check-and-and>(arg0: T.untyped, arg1: Symbol, arg2: T.untyped, arg: *T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::checkAndAnd())
                  .untypedArg(Names::arg0())
