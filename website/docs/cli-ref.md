@@ -97,6 +97,7 @@ Usage:
                                 Remove the provided <prefix> from all printed paths.
                                 Defaults to the input directory passed to Sorbet, if any.
                                 (default: "")
+      --gen-packages            Generate package information
 
 ```
 

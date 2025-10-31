@@ -362,7 +362,7 @@ public:
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                             const std::vector<std::string> &skipImportVisibilityCheckFor,
-                            const std::vector<std::string> &packagerLayers, std::string errorHint);
+                            const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
@@ -481,19 +481,18 @@ public:
                        const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                        const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                        const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                       const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+                       const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
-    std::unique_ptr<GlobalState>
-    copyForLSPTypechecker(const bool packagerEnabled,
-                          const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                          const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                          const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                          const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                          const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                          const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+    std::unique_ptr<GlobalState> copyForLSPTypechecker(
+        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+        const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
+        const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+        const std::vector<std::string> &allowRelaxedPackagerChecksFor, const std::vector<std::string> &packagerLayers,
+        std::string errorHint, bool genPackages) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
     // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will
@@ -504,7 +503,7 @@ public:
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                     const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                    const std::vector<std::string> &packagerLayers, std::string errorHint) const;
+                    const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
