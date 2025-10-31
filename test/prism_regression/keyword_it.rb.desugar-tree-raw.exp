@@ -16,15 +16,14 @@ ClassDef{
       fun = <U new>
       block = Block {
         params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U it>
+          }
         ]
-        body = Send{
-          flags = {privateOk}
-          recv = Self
-          fun = <U it>
-          block = nullptr
-          pos_args = 0
-          args = [
-          ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U it>
         }
       }
       pos_args = 0
