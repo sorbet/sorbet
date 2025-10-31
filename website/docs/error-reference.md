@@ -2301,6 +2301,12 @@ Some alternatives:
 
 It's an error to use `T.attached_class` to describe the type of method parameters. See the [T.attached_class](attached-class.md#tattached_class-as-an-argument) documentation for a more thorough description of why this is.
 
+## 5059
+
+The syntax for the second argument to `T::NonForcingConstants.non_forcing_is_a?` is much more constrained than what Sorbet allows for when resolving arbitrary constant literals.
+
+For more information, see [T::NonForcingConstants](non-forcing-constants.md).
+
 ## 5060
 
 When applying a type argument to a generic class, the type argument must be between any `lower` and `upper` bound declared by the `type_member` (or `type_template`) declaration for that type parameter.
