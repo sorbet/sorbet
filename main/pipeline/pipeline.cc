@@ -47,6 +47,9 @@
 #include "rbs/AssertionsRewriter.h"
 #include "rbs/CommentsAssociator.h"
 #include "rbs/SigsRewriter.h"
+#include "rbs/prism/AssertionsRewriterPrism.h"
+#include "rbs/prism/CommentsAssociatorPrism.h"
+#include "rbs/prism/SigsRewriterPrism.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 
@@ -352,6 +355,27 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 }
 
 } // namespace
+
+pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
+                              const vector<core::LocOffsets> &commentLocations, const options::Printers &print,
+                              core::MutableContext &ctx, const parser::Prism::Parser &parser) {
+    Timer timeit(gs.tracer(), "runPrismRBSRewrite", {{"file", string(file.data(gs).path())}});
+
+    auto associator = rbs::CommentsAssociatorPrism(ctx, parser, commentLocations);
+    auto commentMap = associator.run(node);
+
+    auto sigsRewriter = rbs::SigsRewriterPrism(ctx, parser, commentMap.signaturesForNode);
+    node = sigsRewriter.run(node);
+
+    auto assertionsRewriter = rbs::AssertionsRewriterPrism(ctx, commentMap.assertionsForNode);
+    node = assertionsRewriter.run(node);
+
+    if (print.RBSRewriteTree.enabled) {
+        // print RBS rewrite tree
+    }
+
+    return node;
+}
 
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
                               bool preserveConcreteSyntax) {
