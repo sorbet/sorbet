@@ -148,7 +148,6 @@ prism_location_test_suite(
             "prism_regression/def_all_params.rb",
             "prism_regression/def_block_param.rb",
             "prism_regression/def_kw_rest_params.rb",
-            "prism_regression/def.rb",
             "prism_regression/ensure.rb",
             "prism_regression/error_recovery/assign.rb",
             "prism_regression/for_loop.rb",
