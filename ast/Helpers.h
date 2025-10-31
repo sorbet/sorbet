@@ -7,6 +7,8 @@
 
 namespace sorbet::ast {
 
+using namespace std::literals::string_view_literals;
+
 class MK {
 public:
     static ExpressionPtr EmptyTree() {
@@ -545,10 +547,14 @@ public:
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
+        // A ZSuper call can have a block argument. Don't include it in the location.
+        const uint32_t len = std::size("super"sv);
+        auto superKeywordLoc = core::LocOffsets{loc.beginPos(), loc.beginPos() + len};
+
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(loc), method, loc, 1,
-                    SendArgs(make_expression<ast::ZSuperArgs>(loc.copyEndWithZeroLength())), flags);
+        return Send(loc, Self(superKeywordLoc.copyWithZeroLength()), method, loc, 1,
+                    SendArgs(make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength())), flags);
     }
 
     static ExpressionPtr Magic(core::LocOffsets loc) {
