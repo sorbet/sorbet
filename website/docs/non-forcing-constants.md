@@ -3,7 +3,7 @@ id: non-forcing-constants
 title: Non-Forcing Constants
 ---
 
-> **Note**: This feature has been removed from Sorbet, but if you need that behavior, you can use the following snippet:
+> **Note**: This feature has been removed from Sorbet. For a mostly drop in replacement, use the following snippet, which has the same runtime behavior but will not be checked statically (like the removed version would have been):
 
 ```ruby
 T::Sig::WithoutRuntime.sig { params(val: BasicObject, klass: String).returns(T::Boolean) }
