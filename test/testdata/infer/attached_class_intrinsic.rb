@@ -39,10 +39,11 @@ end
 B.bind_example do
   T.reveal_type(self) # error: `T.class_of(Example)`
   example = new
-  T.reveal_type(example) # error: `T.attached_class (of Example)`
+  T.reveal_type(example) # error: `Example`
   examples = T::Array[T.attached_class].new
   T.reveal_type(examples) # error: `T::Array[T.attached_class (of Example)]`
   examples << example
+  #           ^^^^^^^ error: Expected `T.attached_class (of Example)` but found `Example`
   examples << 'nope'
   #           ^^^^^^ error: Expected `T.attached_class (of Example)` but found `String("nope")`
 end
