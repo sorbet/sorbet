@@ -1962,7 +1962,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 if (rparenLoc.start != nullptr) {
                     // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
                     // In this case, Sorbet's legacy parser will still hold an empty Args node
-                    params = make_unique<parser::Params>(location, NodeVec{});
+                    auto loc = translateLoc(defNode->lparen_loc.start, defNode->rparen_loc.end);
+                    params = make_unique<parser::Params>(loc, NodeVec{});
                 } else {
                     params = nullptr;
                 }
@@ -3369,6 +3370,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
             return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
     }
+}
+
+core::LocOffsets Translator::translateLoc(const uint8_t *start, const uint8_t *end) const {
+    return parser.translateLocation(start, end);
 }
 
 core::LocOffsets Translator::translateLoc(pm_location_t loc) const {
