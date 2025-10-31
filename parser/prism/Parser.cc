@@ -31,10 +31,14 @@ ParseResult Parser::parse(bool collectComments) {
 };
 
 core::LocOffsets Parser::translateLocation(pm_location_t location) const {
-    uint32_t start = static_cast<uint32_t>(location.start - parser.start);
-    uint32_t end = static_cast<uint32_t>(location.end - parser.start);
+    return translateLocation(location.start, location.end);
+}
 
-    return core::LocOffsets{start, end};
+core::LocOffsets Parser::translateLocation(const uint8_t *start, const uint8_t *end) const {
+    uint32_t startPos = static_cast<uint32_t>(start - parser.start);
+    uint32_t endPos = static_cast<uint32_t>(end - parser.start);
+
+    return core::LocOffsets{startPos, endPos};
 }
 
 string_view Parser::resolveConstant(pm_constant_id_t constantId) const {
