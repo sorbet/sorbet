@@ -14,6 +14,7 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
+using namespace std::literals::string_view_literals;
 using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
@@ -2265,8 +2266,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
             auto forwardingSuperNode = down_cast<pm_forwarding_super_node>(node);
 
+            // There's no `keyword_loc` field, so we make it ourselves from the start location.
+            constexpr auto len = std::size("super"sv);
+            auto keywordLoc = translateLoc(node->location.start, node->location.start + len);
+
             auto expr = MK::ZSuper(location, maybeTypedSuper());
-            auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), location);
+            auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), keywordLoc);
 
             auto blockArgumentNode = forwardingSuperNode->block;
 
