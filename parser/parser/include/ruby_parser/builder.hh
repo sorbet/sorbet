@@ -146,7 +146,7 @@ struct builder {
     ForeignPtr (*nil)(SelfPtr builder, const token *tok);
     ForeignPtr (*not_op)(SelfPtr builder, const token *not_, const token *begin, ForeignPtr receiver, const token *end);
     ForeignPtr (*nth_ref)(SelfPtr builder, const token *tok);
-    ForeignPtr (*numparams)(SelfPtr builder, const node_list *declaringNodes);
+    ForeignPtr (*numparams)(SelfPtr builder, const token *tok, const node_list *declaringNodes);
     ForeignPtr (*numblock)(SelfPtr builder, ForeignPtr methodCall, const token *begin, ForeignPtr args, ForeignPtr body,
                            const token *end);
     ForeignPtr (*op_assign)(SelfPtr builder, ForeignPtr lhs, const token *op, ForeignPtr rhs);

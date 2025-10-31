@@ -206,6 +206,7 @@ class max_numparam_stack {
         int max;
         ruby_parser::node_list *decls;
         bool staticContext = false;
+        token_t opening_token = nullptr;
     };
 
     std::vector<NumparamScope> stack;
@@ -235,7 +236,7 @@ public:
     // Register a numparam in the current scope
     void regis(int numparam, ruby_parser::node_list *decls) {
         if (stack.empty()) {
-            push(decls, false);
+            push(decls, false, nullptr);
         } else {
             top()->decls->concat(decls);
         }
@@ -250,8 +251,8 @@ public:
     }
 
     // Push a new scope on the stack (top = 0)
-    void push(ruby_parser::node_list *decls, bool staticContext) {
-        stack.push_back(NumparamScope{0, decls, staticContext});
+    void push(ruby_parser::node_list *decls, bool staticContext, token_t opening_token) {
+        stack.push_back(NumparamScope{0, decls, staticContext, opening_token});
     }
 
     // Pop the current scope
