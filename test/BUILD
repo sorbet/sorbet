@@ -151,7 +151,6 @@ prism_location_test_suite(
             "prism_regression/def_block_param.rb",
             "prism_regression/def_forwarding_param.rb",
             "prism_regression/def_kw_rest_params.rb",
-            "prism_regression/def.rb",
             "prism_regression/def_optional_kw_params.rb",
             "prism_regression/def_optional_params.rb",
             "prism_regression/def_required_kw_params.rb",
