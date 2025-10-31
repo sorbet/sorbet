@@ -4398,9 +4398,6 @@ f_opt_paren_args: f_paren_args
                     }
                 | tLABEL
                     {
-                      auto *key = $1;
-                      key->setEnd(key->end() - 1); // Drop trailing ':'
-
                       $$ = driver.build.pair_label(self, $1);
                     }
                 | tSTRING_BEG string_contents tLABEL_END arg_value

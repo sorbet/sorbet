@@ -1414,9 +1414,10 @@ public:
             value = const_(key);
         }
 
-        auto keyLoc = tokLoc(key);
+        auto pairLoc = tokLoc(key);
+        auto keyLoc = core::LocOffsets{pairLoc.beginPos(), pairLoc.endPos() - 1}; // drop the trailing ':'
         auto accessible_value = accessible(move(value));
-        return make_unique<Pair>(keyLoc, make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())),
+        return make_unique<Pair>(pairLoc, make_unique<Symbol>(keyLoc, gs_.enterNameUTF8(key->view())),
                                  move(accessible_value));
     }
 
