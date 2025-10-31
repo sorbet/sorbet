@@ -973,7 +973,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
 
             unique_ptr<parser::Params> params;
-            std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters);
+            std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters, location);
 
             // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's Params node,
             // after all other parameters.
@@ -1207,7 +1207,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                     didDesugarBlockParams = true;
                                 } else {
                                     unique_ptr<parser::Params> params;
-                                    std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters);
+                                    std::tie(params, std::ignore) =
+                                        translateParametersNode(paramsNode->parameters, location);
 
                                     // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's
                                     // Params node, after all other parameters.
@@ -1945,6 +1946,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto rparenLoc = defNode->rparen_loc;
 
+            // If there is a `)` in the method definition, include it in the location span.
             if (rparenLoc.start != nullptr && rparenLoc.end != nullptr) {
                 declLoc = declLoc.join(translateLoc(defNode->rparen_loc));
             }
@@ -1957,7 +1959,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unique_ptr<parser::Params> params;
             core::NameRef enclosingBlockParamName;
             if (defNode->parameters != nullptr) {
-                std::tie(params, enclosingBlockParamName) = translateParametersNode(defNode->parameters);
+                // The Params' location shouldn't include the `( )`, if any.
+                //    def foo(a, b)
+                //            ^^^^
+                auto startLoc = defNode->lparen_loc.start == nullptr ? defNode->parameters->base.location.start
+                                                                     : defNode->lparen_loc.start;
+                auto endLoc = defNode->rparen_loc.end == nullptr ? defNode->parameters->base.location.end
+                                                                 : defNode->rparen_loc.end;
+                auto loc = translateLoc(pm_location_t{startLoc, endLoc});
+                declLoc = declLoc.join(loc);
+
+                std::tie(params, enclosingBlockParamName) = translateParametersNode(defNode->parameters, loc);
             } else {
                 if (rparenLoc.start != nullptr) {
                     // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
@@ -3646,9 +3658,7 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
 }
 
 pair<unique_ptr<parser::Params>, core::NameRef /* enclosingBlockParamName */>
-Translator::translateParametersNode(pm_parameters_node *paramsNode) {
-    auto location = translateLoc(paramsNode->base.location);
-
+Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location) {
     auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
     auto optionals = absl::MakeSpan(paramsNode->optionals.nodes, paramsNode->optionals.size);
     auto keywords = absl::MakeSpan(paramsNode->keywords.nodes, paramsNode->keywords.size);
