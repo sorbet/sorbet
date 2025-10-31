@@ -1,6 +1,6 @@
 # typed: false
 
-{ k1: "v1" }
+{ k1: "v1" } # Symbol location excludes the `:`
 
 { :k2 => "v2" }
 
@@ -15,4 +15,11 @@ def has_anonymous_kwargs(**)
 end
 
 v4 = "v4"
-k4 = { v4: }
+
+# Hash with implicit lvar value
+k4 = { v4: } # Symbol location excludes the `:`
+
+def v5; end
+
+# Hash with implicit method value
+v5 = { v5: } # Symbol location excludes the `:`

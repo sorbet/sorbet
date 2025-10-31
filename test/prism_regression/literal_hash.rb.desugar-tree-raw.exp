@@ -263,5 +263,33 @@ ClassDef{
         ]
       }
     }
+
+    MethodDef{
+      flags = {}
+      name = <U v5><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U v5>
+      }
+      rhs = Hash{
+        pairs = [
+          [
+            key = Literal{ value = :v5 }
+            value = UnresolvedIdent{
+              kind = Local
+              name = <U v5>
+            }
+          ]
+        ]
+      }
+    }
   ]
 }

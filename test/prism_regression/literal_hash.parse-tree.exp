@@ -134,5 +134,28 @@ Begin {
         ]
       }
     }
+    DefMethod {
+      name = <U v5>
+      params = NULL
+      body = NULL
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U v5>
+      }
+      rhs = Hash {
+        kwargs = false
+        pairs = [
+          Pair {
+            key = Symbol {
+              val = <U v5>
+            }
+            value = LVar {
+              name = <U v5>
+            }
+          }
+        ]
+      }
+    }
   ]
 }
