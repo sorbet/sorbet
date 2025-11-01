@@ -24,6 +24,11 @@
 # Mod.instance_methods   #=> [:meth]
 # ```
 class Module < Object
+  # Intentionally does not write extend T::Generic so we don't pollute the
+  # stdlib with an ancestor that doesn't exist at runtime. It doesn't matter,
+  # because RBI files are not typechecked anyways.
+  has_attached_class!(:out)
+
   # In the first form, returns an array of the names of all constants accessible
   # from the point of call. This list includes the names of all modules and
   # classes defined in the global scope.

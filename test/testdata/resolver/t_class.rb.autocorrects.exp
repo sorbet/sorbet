@@ -7,4 +7,9 @@ sig {returns(T::Class[T.anything])}
 def example
   Integer
 end
+
+sig {returns(Module)}
+def example2
+  Integer
+end
 # ------------------------------

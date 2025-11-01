@@ -1092,6 +1092,51 @@ module Opus::Types::Test
       end
     end
 
+    describe "TypedModule" do
+      it 'works if the type is right' do
+        type = T::Module[Mixin1]
+        value = Mixin1
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'works if the type is wrong, but a module' do
+        type = T::Module[WithMixin]
+        value = Mixin1
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'cannot have its metatype instantiated' do
+        # People might assume that this creates a class with a supertype of
+        # `Base`. It doesn't, because generics are erased, and also `[...]` can
+        # hold an arbitrary type, not necessarily a class type.
+        #
+        # Also, `Module.new` doesn't accept a superclass argument like Class.new
+        assert_raises(NoMethodError) do
+          T::Module[Base].new
+        end
+      end
+
+      it 'is not coerced from plain class literal' do
+        # This is for backwards compatibility. If this poses problems for the
+        # sake of runtime checking and reflection, we may want to make this
+        # behavior more like the static system, where `::Module` has type
+        # `T.class_of(Module)`. It looks like we already don't treat `::A` as
+        # coercing to `T.class_of(A)`, which is why I don't know whether it
+        # particularly matters.
+        #
+        # (It's also worth noting: Sorbet doesn't have a separate notion of
+        # `T::Types::Simple` and `T::Types::ClassOf`. A ClassType is used to
+        # model `T::Types::Simple` and _was_ used to model `T.class_of(...)`
+        # until we made all singleton classes generic with `<AttachedClass>`,
+        # when they became AppliedType.)
+        type = T::Utils.coerce(::Module)
+        assert_instance_of(T::Types::Simple, type)
+        assert_equal(::Module, type.raw_type)
+      end
+    end
+
     describe "T.class_of(...)[...]" do
       it 'works if the type is right' do
         type = T.class_of(Base)[Base]
@@ -1597,6 +1642,33 @@ module Opus::Types::Test
         end
       end
 
+      describe "T::Class and T::Module" do
+        it "Class and T::Class" do
+          assert_subtype(T::Class[T.anything], T::Class[T.anything])
+          assert_subtype(Class, T::Class[T.anything])
+          assert_subtype(T::Class[T.anything], Class)
+          # erased generics
+          assert_subtype(T::Class[Integer], T::Class[String])
+        end
+
+        it "Module and T::Module" do
+          assert_subtype(T::Module[T.anything], T::Module[T.anything])
+          assert_subtype(Module, T::Module[T.anything])
+          assert_subtype(T::Module[T.anything], Module)
+          # erased generics
+          assert_subtype(T::Module[Integer], T::Module[String])
+        end
+
+        it "mixed" do
+          assert_subtype(T::Class[T.anything], T::Module[T.anything])
+          refute_subtype(T::Module[T.anything], T::Class[T.anything])
+          assert_subtype(Class, T::Module[T.anything])
+          refute_subtype(Module, T::Class[T.anything])
+          assert_subtype(T::Class[T.anything], Module)
+          refute_subtype(T::Module[T.anything], Class)
+        end
+      end
+
       describe "class_of" do
         it "returns true for itself" do
           assert_equal(true, subtype?(T.class_of(Base), T.class_of(Base)))
@@ -1648,6 +1720,14 @@ module Opus::Types::Test
 
         it "handles when RHS is a T.class_of type (parent)" do
           refute(subtype?(T.class_of(Mixin1Child), T.class_of(Mixin1)))
+        end
+
+        it "returns true for a singleton of a class against T::Module[...]" do
+          assert_equal(true, subtype?(T.class_of(Base), T::Module[T.anything]))
+        end
+
+        it "returns true for a singleton of a module against T::Module[...]" do
+          assert_equal(true, subtype?(T.class_of(Mixin1), T::Module[T.anything]))
         end
       end
 
