@@ -187,3 +187,82 @@ def self.test_each_hash(hash, &blk)
   hash.each(&blk)
 end
 ```
+
+## RSpec
+
+Sorbet supports RSpec's testing DSL using the same spec method translation as Minitest. RSpec and Minitest share common constructs like `describe`, `it`, `before`, `after`, and `let`, which are all translated to Ruby classes and methods before type checking.
+
+When Sorbet sees `RSpec.describe`, it translates this to a subclass of `RSpec::Core::ExampleGroup`:
+
+```ruby
+RSpec.describe MyClass do
+  # ... body ...
+end
+
+# ^ becomes:
+
+class made-up-class-name < RSpec::Core::ExampleGroup
+  # ... translated body ...
+end
+```
+
+This models what the `RSpec.describe` DSL will do at runtime. Ensure that there is a suitable RBI defining `RSpec::Core::ExampleGroup` (with any relevant monkey patches) contained in the project somewhere (either generated via `tapioca gem` or fetched from RBI Central).
+
+```ruby
+RSpec.describe MyClass do
+  it 'works' do
+    expect(MyClass.foo).to eq 'foo'
+  end
+
+  context 'nested contexts' do
+    it 'works' do
+      expect(MyClass.foo).to eq 'foo'
+    end
+  end
+
+  describe 'nested describes' do
+    it 'works' do
+      expect(MyClass.foo).to eq 'foo'
+    end
+  end
+end
+```
+
+The prefix is necessary for Sorbet to be able to support your customer RSpec matchers (see the RBI section below).
+
+### Type signatures for RSpec methods
+
+To provide better type checking for RSpec, define [RBI type signatures](rbi.md) for the RSpec methods used in the project. These signatures tell Sorbet about the available methods and their parameters.
+
+The example below shows an abbreviated example. See [this gist](https://gist.github.com/alexevanczuk/dafa927f0fd18cf82608bd58bab66ec0)
+ for a complete example that can be used to type a standard RSpec test suite. You may want to curate this list based on your usage of RSpec.
+
+```ruby
+# sorbet/rbi/manual/rspec.rbi
+
+# typed: strict
+
+module RSpec
+  sig {params(args: T.untyped, example_group_block: T.proc.bind(Core::ExampleGroup).void).void}
+  def self.describe(*args, &example_group_block); end
+
+  sig {params(args: T.untyped, example_group_block: T.proc.bind(Core::ExampleGroup).void).void}
+  def self.context(*args, &example_group_block); end
+
+  module Core
+    class ExampleGroup
+      def array_including(*args); end
+
+      sig { params(block: T.proc.params(arg0: RSpec::Core::ExampleGroup).bind(RSpec::Core::ExampleGroup).void).returns(T.untyped) }
+      def around(&block); end
+
+      def expect(*args); end
+
+      def allow(*args); end
+
+      def instance_double(*args); end
+    end
+  end
+end
+
+```
