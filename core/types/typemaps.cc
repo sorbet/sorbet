@@ -358,7 +358,13 @@ TypePtr LambdaParam::_instantiateLambdaParams(const GlobalState &gs, Instantiati
     ENFORCE(ictx.currentAlignment.size() == ictx.targs->size());
     for (auto el = ictx.currentAlignment.begin(); el != ictx.currentAlignment.end(); ++el) {
         if (*el == this->definition) {
-            return ictx.targs.value()[distance(ictx.currentAlignment.begin(), el)];
+            auto res = ictx.targs.value()[distance(ictx.currentAlignment.begin(), el)];
+            if (isa_type<LambdaParam>(res)) {
+                // TODO(jez) This is a hack until you have a way to prove that this recursion terminates!
+                return res._instantiateLambdaParams(gs, ictx);
+            } else {
+                return res;
+            }
         }
     }
     if (this->definition == core::Symbols::T_SelfType()) {
