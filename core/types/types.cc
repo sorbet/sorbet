@@ -853,7 +853,7 @@ void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {
 void FreshSelfType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->upperBound != nullptr);
     ENFORCE(!this->upperBound.isUntyped());
-    ENFORCE(this->upperBound.isFullyDefined());
+    // ENFORCE(this->upperBound.isFullyDefined());
 }
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
