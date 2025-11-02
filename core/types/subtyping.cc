@@ -550,13 +550,19 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        auto isSelfTypeT1 = isa_type<FreshSelfType>(t1);
-        auto isSelfTypeT2 = isa_type<FreshSelfType>(t2);
+        auto freshSelfTypeT1 = cast_type<FreshSelfType>(t1);
+        auto freshSelfTypeT2 = cast_type<FreshSelfType>(t2);
 
-        if (isSelfTypeT1 && isSelfTypeT2) {
+        if (freshSelfTypeT1 != nullptr && freshSelfTypeT2 != nullptr) {
             // If they're both T.self_type, we can pick either.
             return t1;
-        } else if (isSelfTypeT1 || isSelfTypeT2) {
+        } else if (freshSelfTypeT2 != nullptr) {
+            // FreshSelfType is like a SelfTypeParam with a lower bound of T.noreturn
+            if (isSubType(gs, t1, Types::bottom())) {
+                return t2;
+            }
+            return OrType::make_shared(t1, t2);
+        } else if (freshSelfTypeT1 != nullptr) {
             return OrType::make_shared(t1, t2);
         }
     }
@@ -1065,13 +1071,18 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
     {
-        auto isSelfTypeT1 = isa_type<FreshSelfType>(t1);
-        auto isSelfTypeT2 = isa_type<FreshSelfType>(t2);
+        auto freshSelfTypeT1 = cast_type<FreshSelfType>(t1);
+        auto freshSelfTypeT2 = cast_type<FreshSelfType>(t2);
 
-        if (isSelfTypeT1 && isSelfTypeT2) {
+        if (freshSelfTypeT1 != nullptr && freshSelfTypeT2 != nullptr) {
             // If they're both T.self_type, we can pick either.
             return t1;
-        } else if (isSelfTypeT1 || isSelfTypeT2) {
+        } else if (freshSelfTypeT2 != nullptr) {
+            if (!freshSelfTypeT2->upperBound.isUntyped() && isSubType(gs, freshSelfTypeT2->upperBound, t1)) {
+                return t2;
+            }
+            return AndType::make_shared(t1, t2);
+        } else if (freshSelfTypeT1 != nullptr) {
             return AndType::make_shared(t1, t2);
         }
     }
