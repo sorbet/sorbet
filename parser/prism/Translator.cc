@@ -14,6 +14,7 @@ using namespace std;
 
 namespace sorbet::parser::Prism {
 
+using namespace std::literals::string_view_literals;
 using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
@@ -2274,11 +2275,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // Desugared in desugarParametersNode().
             return make_unique<parser::ForwardArg>(location);
         }
-        case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
+        case PM_FORWARDING_SUPER_NODE: { // A `super` with no explicit arguments
+            // It might have a literal block argument, though.
+
             auto forwardingSuperNode = down_cast<pm_forwarding_super_node>(node);
 
+            // There's no `keyword_loc` field, so we make it ourselves from the start location.
+            constexpr auto len = std::size("super"sv);
+            auto keywordLoc = translateLoc(node->location.start, node->location.start + len);
+
             auto expr = MK::ZSuper(location, maybeTypedSuper());
-            auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), location);
+            auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), keywordLoc);
 
             auto blockArgumentNode = forwardingSuperNode->block;
 
@@ -3178,7 +3185,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             return make_node_with_expr<parser::String>(MK::String(location, content), location, content);
         }
-        case PM_SUPER_NODE: { // The `super` keyword, like `super`, `super(a, b)`
+        case PM_SUPER_NODE: { // A `super` call with explicit args, like `super()`, `super(a, b)`
+            // If there's no arguments (except a literal block argument), then it's a `PM_FORWARDING_SUPER_NODE`.
+
             auto superNode = down_cast<pm_super_node>(node);
 
             auto blockArgumentNode = superNode->block;
@@ -3381,6 +3390,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             }
             return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
     }
+}
+
+core::LocOffsets Translator::translateLoc(const uint8_t *start, const uint8_t *end) const {
+    return parser.translateLocation(start, end);
 }
 
 core::LocOffsets Translator::translateLoc(pm_location_t loc) const {

@@ -166,7 +166,6 @@ prism_location_test_suite(
             "prism_regression/numbered_params.rb",
             "prism_regression/numbered_reference_read.rb",
             "prism_regression/rescue.rb",
-            "prism_regression/super.rb",
             "prism_regression/xstring.rb",
         ],
     ),
