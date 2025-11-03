@@ -2851,8 +2851,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat/`
             auto matchLastLineNode = down_cast<pm_match_last_line_node>(node);
 
+            auto contentLoc = translateLoc(matchLastLineNode->content_loc);
+
             auto regex =
-                translateRegexp(location, location, matchLastLineNode->unescaped, matchLastLineNode->closing_loc);
+                translateRegexp(location, contentLoc, matchLastLineNode->unescaped, matchLastLineNode->closing_loc);
 
             return make_unsupported_node<parser::MatchCurLine>(location, move(regex));
         }
