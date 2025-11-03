@@ -12,7 +12,7 @@ parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, 
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
-    Prism::ParseResult parseResult = parser.parse(collectComments);
+    Prism::ParseResult parseResult = parser.parseWithoutTranslation(collectComments);
 
     auto translatedTree =
         Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
@@ -24,7 +24,9 @@ pm_parser_t *Parser::getRawParserPointer() {
     return &parser;
 }
 
-ParseResult Parser::parse(bool collectComments) {
+// Parses without translating and returns raw Prism nodes for intermediate processing (e.g., RBS rewriting)
+// Caller must keep Parser alive for later translation, unlike run() which parses + translates in one step
+ParseResult Parser::parseWithoutTranslation(bool collectComments) {
     pm_node_t *root = pm_parse(&parser);
     auto comments = collectComments ? collectCommentLocations() : vector<core::LocOffsets>{};
     return ParseResult{*this, root, collectErrors(), move(comments)};
