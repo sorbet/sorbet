@@ -4493,7 +4493,6 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
     auto *prismRescueNode = parentBeginNode->rescue_clause;
     ENFORCE(prismRescueNode, "translateRescue() should only be called if there's a `rescue` clause.")
 
-    auto rescueLoc = translateLoc(prismRescueNode->base.location);
     NodeVec rescueBodies;
 
     // Each `rescue` clause generates a `Resbody` node, which is a child of the `Rescue` node.
@@ -4507,10 +4506,13 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
 
         // Translate the exceptions being rescued (e.g., `RuntimeError` in `rescue RuntimeError`)
         auto exceptions = translateMulti(currentRescueNode->exceptions);
-        auto exceptionsArray =
-            exceptions.empty()
-                ? nullptr
-                : make_unique<parser::Array>(translateLoc(currentRescueNode->base.location), move(exceptions));
+
+        auto exceptionsNodes = absl::MakeSpan(currentRescueNode->exceptions.nodes, currentRescueNode->exceptions.size);
+        auto exceptionsArray = exceptionsNodes.empty()
+                                   ? nullptr
+                                   : make_unique<parser::Array>(translateLoc(exceptionsNodes.front()->location.start,
+                                                                             exceptionsNodes.back()->location.end),
+                                                                move(exceptions));
 
         auto resbodyLoc = translateLoc(currentRescueNode->base.location);
 
@@ -4550,13 +4552,58 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
     auto bodyNode = translateStatements(parentBeginNode->statements);
     auto elseNode = translate(up_cast(parentBeginNode->else_clause));
 
+    // Find the last rescue clause by traversing the linked list
+    pm_rescue_node *lastRescueNode = prismRescueNode;
+    while (lastRescueNode->subsequent != nullptr) {
+        lastRescueNode = lastRescueNode->subsequent;
+    }
+
+    const uint8_t *rescueStart;
+    // Determine the start location, prioritize: begin statements > else statements > rescue keyword
+    if (auto *beginStmts = parentBeginNode->statements) {
+        // If there are begin statements, start there
+        rescueStart = beginStmts->base.location.start;
+    } else if (auto *prismElseNode = parentBeginNode->else_clause) {
+        if (auto *elseStmts = prismElseNode->statements) {
+            // No begin statements, but there are else statements - start at else statements
+            rescueStart = elseStmts->base.location.start;
+        } else {
+            // No begin statements and no else statements - start at rescue keyword
+            rescueStart = prismRescueNode->keyword_loc.start;
+        }
+    } else {
+        // No begin statements and no else clause - start at rescue keyword
+        rescueStart = prismRescueNode->keyword_loc.start;
+    }
+
+    const uint8_t *rescueEnd;
+    // Determine the end location, prioritize: rescue keyword < rescue statements < else statements
+    if (auto *prismElseNode = parentBeginNode->else_clause) {
+        if (auto *elseStmts = prismElseNode->statements) {
+            // If there are else statements, end at their end
+            rescueEnd = elseStmts->base.location.end;
+        } else if (auto *rescueStmts = lastRescueNode->statements) {
+            // No else statements but there are rescue statements
+            rescueEnd = rescueStmts->base.location.end;
+        } else {
+            // No else statements and no rescue statements - use rescue keyword end
+            rescueEnd = lastRescueNode->base.location.end;
+        }
+    } else if (auto *rescueStmts = lastRescueNode->statements) {
+        // No else clause but there are rescue statements
+        rescueEnd = rescueStmts->base.location.end;
+    } else {
+        // No else clause and no rescue statements - use rescue keyword end
+        rescueEnd = lastRescueNode->base.location.end;
+    }
+
+    core::LocOffsets rescueLoc = translateLoc(rescueStart, rescueEnd);
+
     // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
     return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
 }
 
 NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
-    auto location = translateLoc(beginNode->base.location);
-
     NodeVec statements;
 
     unique_ptr<parser::Node> translatedRescue;
@@ -4571,11 +4618,70 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
         auto bodyNode = translateStatements(beginNode->statements);
         auto ensureBody = translateStatements(ensureNode->statements);
 
+        absl::Span<pm_node_t *> prismStatements;
+        if (beginNode->statements) {
+            prismStatements = absl::MakeSpan(beginNode->statements->body.nodes, beginNode->statements->body.size);
+        }
+
         unique_ptr<parser::Ensure> translatedEnsure;
         if (translatedRescue != nullptr) {
-            translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
+            // When we have a rescue clause, the Ensure node should span from either:
+            // - the begin statements start (if present), or
+            // - the rescue keyword (if no begin statements)
+            // to the end of the body (rescue/else clause or ensure statements, whichever comes last)
+            const uint8_t *start = prismStatements.empty() ? beginNode->rescue_clause->keyword_loc.start
+                                                           : beginNode->statements->base.location.start;
+
+            const uint8_t *end;
+
+            // If there are ensure statements, always extend to include them
+            if (ensureNode->statements) {
+                end = ensureNode->statements->base.location.end;
+            } else {
+                // No ensure statements, so find the end of the rescue clause (including else if present)
+                pm_rescue_node *lastRescueNode = beginNode->rescue_clause;
+                while (lastRescueNode->subsequent != nullptr) {
+                    lastRescueNode = lastRescueNode->subsequent;
+                }
+
+                if (auto *prismElseNode = beginNode->else_clause) {
+                    if (auto *elseStmts = prismElseNode->statements) {
+                        end = elseStmts->base.location.end;
+                    } else {
+                        end = prismElseNode->base.location.end;
+                    }
+                } else if (auto *rescueStmts = lastRescueNode->statements) {
+                    end = rescueStmts->base.location.end;
+                } else {
+                    // When the last rescue clause has no statements, use the end of the rescue clause itself
+                    end = lastRescueNode->base.location.end;
+                }
+            }
+
+            auto loc = translateLoc(start, end);
+
+            translatedEnsure = make_unique<parser::Ensure>(loc, move(translatedRescue), move(ensureBody));
         } else {
-            translatedEnsure = make_unique<parser::Ensure>(location, move(bodyNode), move(ensureBody));
+            // When there's no rescue clause, the Ensure node location depends on whether there are begin statements:
+            // - If there are begin statements: span from start of begin statements to end of ensure statements
+            // - If there are no begin statements: span from ensure keyword to end of ensure statements
+            const uint8_t *start = prismStatements.empty() ? ensureNode->ensure_keyword_loc.start
+                                                           : beginNode->statements->base.location.start;
+
+            const uint8_t *end;
+            if (ensureNode->statements) {
+                // If there are ensure statements, always extend to include them
+                end = ensureNode->statements->base.location.end;
+            } else if (!prismStatements.empty()) {
+                // No ensure statements but there are begin statements
+                end = beginNode->statements->base.location.end;
+            } else {
+                // No ensure statements and no begin statements
+                end = ensureNode->ensure_keyword_loc.end;
+            }
+
+            auto loc = translateLoc(start, end);
+            translatedEnsure = make_unique<parser::Ensure>(loc, move(bodyNode), move(ensureBody));
         }
 
         statements.emplace_back(move(translatedEnsure));
