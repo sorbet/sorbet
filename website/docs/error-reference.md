@@ -1268,6 +1268,12 @@ end
 
 (**Note**: this requires updating references to point at the new `Value` constant.)
 
+## 4027
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Each package must have only one definition. A package definition is the place where there is a line like `class Opus::Foo < PackageSpec` in a `__package.rb` file.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:

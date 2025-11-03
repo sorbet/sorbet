@@ -128,6 +128,10 @@ string FoundClass::toString(const core::GlobalState &gs, const FoundDefinitions 
                        classKindStr);
 }
 
+string FoundPackage::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
+    return fmt::format("{{ id = {}, owner = {} }}", id, owner.idx());
+}
+
 string FoundStaticField::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
     return fmt::format("{{ id = {}, owner = {}, name = {} }}", id, owner.idx(), name.toString(gs));
 }

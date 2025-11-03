@@ -1127,6 +1127,7 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+    auto packagesAccess = gs.unfreezePackages();
     bool canceled = false;
     try {
         canceled = namer::Namer::run(gs, what, workers, foundHashes);
@@ -1338,6 +1339,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
+            auto packages = gs.unfreezePackages();
 
             auto canceled =
                 runIncrementalNamer

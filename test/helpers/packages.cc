@@ -99,6 +99,7 @@ vector<ast::ParsedFile> PackageHelpers::enterPackages(core::GlobalState &gs,
     {
         core::UnfreezeNameTable nameTableAccess(gs);
         core::UnfreezeSymbolTable symbolTableAccess(gs);
+        auto accessPackages = gs.unfreezePackages();
         auto foundHashes = nullptr;
         auto canceled = namer::Namer::run(gs, absl::MakeSpan(parsedFiles), *workers, foundHashes);
         ENFORCE(!canceled);

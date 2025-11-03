@@ -1,10 +1,11 @@
 #include "namer/namer.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/ParamParsing.h"
-#include "ast/ast.h"
+#include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/Parallel.h"
@@ -16,7 +17,6 @@
 #include "core/FoundDefinitions.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
-#include "core/core.h"
 #include "core/errors/namer.h"
 #include "core/lsp/TypecheckEpochManager.h"
 
@@ -196,6 +196,18 @@ public:
 
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
         methodVisiStack.emplace_back(nullopt);
+
+        if (ctx.file.data(ctx).isPackage(ctx)) {
+            auto packageSpecClass = ast::packager::asPackageSpecClass(tree);
+            if (packageSpecClass != nullptr) {
+                ENFORCE(!foundDefs->package.has_value(), "PackageSpec Rewriter should rewrite at most one spec");
+                foundDefs->package = core::FoundPackage{
+                    .owner = ownerStack.back(),
+                    .loc = klass.loc,
+                    .declLoc = klass.declLoc,
+                };
+            }
+        }
     }
 
     // `tree` is not `const` because this populates the `ancestors` field of the ClassDef
@@ -668,6 +680,72 @@ public:
 
 using BehaviorLocs = InlinedVector<core::Loc, 1>;
 using ClassBehaviorLocsMap = UnorderedMap<core::ClassOrModuleRef, BehaviorLocs>;
+
+vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, core::ClassOrModuleRef owner) {
+    auto klass = owner;
+    vector<core::NameRef> fqn;
+    while (klass != core::Symbols::PackageSpecRegistry()) {
+        auto data = klass.data(gs);
+        fqn.emplace_back(data->name);
+        klass = data->owner;
+    }
+    absl::c_reverse(fqn);
+    return fqn;
+}
+
+void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::PackageInfo &info) {
+    auto &gs = ctx.state;
+    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
+        gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
+    auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
+
+    const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
+                             extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
+                             extraPackageFilesDirectorySlashPrefixes.size() + 1;
+    info.packagePathPrefixes.reserve(numPrefixes);
+    auto packageFilePath = ctx.file.data(gs).path();
+    info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+    auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_.owner);
+    const auto shortName = absl::StrJoin(fullName, "_", core::packages::NameFormatter(gs));
+    const auto slashDirName = absl::StrJoin(fullName, "/", core::packages::NameFormatter(gs)) + "/";
+    const string_view dirNameFromShortName = shortName;
+
+    for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
+        // Project_FooBar -- munge with underscore
+        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
+    }
+
+    for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
+        // project/Foo_bar -- convert camel-case to snake-case and munge with slash
+        string additionalDirPath;
+        additionalDirPath.reserve(prefix.size() + 2 * dirNameFromShortName.length() + 1);
+        additionalDirPath += prefix;
+        for (int i = 0; i < dirNameFromShortName.length(); i++) {
+            if (dirNameFromShortName[i] == '_') {
+                additionalDirPath.push_back('/');
+            } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
+                // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
+                // which tend to be all lower case
+                additionalDirPath.push_back(std::toupper(dirNameFromShortName[i]));
+            } else {
+                if (isupper(dirNameFromShortName[i])) {
+                    additionalDirPath.push_back('_'); // snake-case munging
+                }
+
+                additionalDirPath.push_back(std::tolower(dirNameFromShortName[i]));
+            }
+        }
+        additionalDirPath.push_back('/');
+
+        info.packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+    }
+
+    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+        // Project/FooBar -- each constant name is a file or directory name
+        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
+    }
+}
 
 /**
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
@@ -1220,6 +1298,44 @@ private:
         return symbol;
     }
 
+    void insertPackage(core::MutableContext ctx, const State &state, const core::FoundPackage &package) {
+        ENFORCE(ctx.file.data(ctx).isPackage(ctx));
+        auto owner = getOwnerSymbol(state, package.owner);
+
+        // Eagerly resolve the superclass, so that we can rely on
+        // TODO(trevor) Finish this comment
+        owner.data(ctx)->setSuperClass(core::Symbols::PackageSpec());
+
+        auto mangledName = core::packages::MangledName(owner);
+
+        auto &prevPkg = ctx.state.packageDB().getPackageInfo(mangledName);
+        if (prevPkg.exists() && prevPkg.declLoc() != ctx.locAt(package.declLoc)) {
+            if (auto e = ctx.beginError(package.declLoc, core::errors::Namer::RedefinitionOfPackage)) {
+                auto pkgName = owner.show(ctx);
+                e.setHeader("Redefinition of package `{}`", pkgName);
+                e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
+            }
+        } else if (!prevPkg.exists()) {
+            // TODO(jez) The above condition is a poor-man's way of making this safe for the fast path
+            // Previously, we would not run the "definePackage" logic at all for `__package.rb` files.
+            // By making a new package, we blow away all the imports/exports/etc. that were defined
+            // on the old package, which we don't want to do.
+            //
+            // Eventually we want to make edits to `__package.rb` files take the fast path, which
+            // would mean needing to do something more sophisticated right here.
+            //
+            // The reason why this condition is bad right now is because it compares locs for
+            // equality directly. This works because we currently send all edits to `__package.rb`
+            // files onto the slow path, but in the future, "whitespace-only change that just moves
+            // locs" should neither report an error nor blow away already-resolved state (or at
+            // least: if it's going to blow it away, it should also do enough other work to
+            // recompute it).
+            auto pkg = make_unique<core::packages::PackageInfo>(mangledName, ctx.file, package.loc, package.declLoc);
+            populatePackagePathPrefixes(ctx, *pkg);
+            ctx.state.packageDB().enterPackage(move(pkg));
+        }
+    }
+
     void modifyClass(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Class);
         const auto fun = mod.name;
@@ -1622,6 +1738,11 @@ public:
         for (const auto &klass : foundDefs.klasses()) {
             state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), state,
                                                           klass, willDeleteOldDefs, classBehaviorLocs));
+        }
+
+        if (foundDefs.package.has_value()) {
+            // TODO(jez) Do we need to store this in state like we do for state.definedClasses?
+            insertPackage(ctx, state, foundDefs.package.value());
         }
 
         return state;
