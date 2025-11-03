@@ -203,6 +203,8 @@ public:
 
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
 
+                auto opening_token = raw_numparam_stack.back().opening_token;
+
                 // ignore current block scope
                 raw_numparam_stack.pop_back();
 
@@ -226,7 +228,11 @@ public:
                 }
 
                 driver_->lex.declare(name_str);
-                auto intro = make_unique<LVar>(node->loc, id->name);
+
+                // The LVar's location matches the non-zero length NumParams node. See `numparams()` for details.
+                core::LocOffsets loc = tokLoc(opening_token).copyEndWithZeroLength();
+                auto intro = make_unique<LVar>(loc, id->name);
+
                 auto decls = driver_->alloc.node_list();
                 decls->emplace_back(toForeign(std::move(intro)));
                 driver_->numparam_stack.regis(name_str[1] - 48, std::move(decls));
