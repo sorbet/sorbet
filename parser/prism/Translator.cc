@@ -4550,8 +4550,6 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
 }
 
 NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
-    auto location = translateLoc(beginNode->base.location);
-
     NodeVec statements;
 
     unique_ptr<parser::Node> translatedRescue;
@@ -4571,11 +4569,35 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
         auto bodyNode = translateStatements(beginNode->statements);
         auto ensureBody = translateStatements(ensureNode->statements);
 
+        absl::Span<pm_node_t *> prismStatements;
+        if (beginNode->statements) {
+            prismStatements = absl::MakeSpan(beginNode->statements->body.nodes, beginNode->statements->body.size);
+        }
+
         unique_ptr<parser::Ensure> translatedEnsure;
         if (translatedRescue != nullptr) {
-            translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
+            // When we have a rescue clause, the Ensure node should span from either:
+            // - the begin statements start (if present), or
+            // - the rescue keyword (if no begin statements)
+            // to the end of the ensure statements
+            const uint8_t *start = prismStatements.empty() ? beginNode->rescue_clause->keyword_loc.start
+                                                           : beginNode->statements->base.location.start;
+            const uint8_t *end = ensureNode->statements->base.location.end;
+            auto loc = translateLoc(start, end);
+
+            translatedEnsure = make_unique<parser::Ensure>(loc, move(translatedRescue), move(ensureBody));
         } else {
-            translatedEnsure = make_unique<parser::Ensure>(location, move(bodyNode), move(ensureBody));
+            ENFORCE(ensureNode->statements != nullptr);
+
+            const uint8_t *start = prismStatements.empty() ? ensureNode->ensure_keyword_loc.start
+                                                           : beginNode->statements->base.location.start;
+
+            const uint8_t *end = (prismStatements.data() != nullptr && prismStatements.empty())
+                                     ? ensureNode->ensure_keyword_loc.end
+                                     : ensureNode->statements->base.location.end;
+
+            auto loc = translateLoc(start, end);
+            translatedEnsure = make_unique<parser::Ensure>(loc, move(bodyNode), move(ensureBody));
         }
 
         statements.emplace_back(move(translatedEnsure));
