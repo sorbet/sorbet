@@ -122,39 +122,39 @@ if [ "$dryrun" = "" ]; then
 fi
 popd
 
-# echo "--- releasing VS Code extension"
-# pushd vscode_extension
-#
-# extension_release_version="$(jq --raw-output '.version' package.json)"
-# echo "releasing $extension_release_version"
-#
-# # (progress bar messes with Buildkite timestamps)
-# yarn install --no-progress
-#
-# if node_modules/.bin/vsce show --json sorbet.sorbet-vscode-extension | \
-#     jq --raw-output '.versions[] | .version' | \
-#     grep -qFx "$extension_release_version"; then
-#   echo "... $extension_release_version is already published"
-#   node_modules/.bin/vsce show sorbet.sorbet-vscode-extension
-# elif [ "$dryrun" = "" ]; then
-#   echo "... starting publish"
-#   vsce_publish_output="$(mktemp)"
-#   trap 'rm -rf "$vsce_publish_output"' EXIT
-#
-#   # Reads from the VSCE_PAT variable
-#   if ! node_modules/.bin/vsce publish --packagePath "../_out_/vscode_extension/sorbet.vsix" < /dev/null > "$vsce_publish_output" 2>&1; then
-#     # It can take 4+ minutes for the marketplace to "verify" our extension
-#     # before it shows up as published according to `vsce show`.
-#     cat "$vsce_publish_output"
-#     if grep -qF 'Version number cannot be the same' "$vsce_publish_output"; then
-#       echo "... $extension_release_version is already published"
-#     else
-#       exit 1
-#     fi
-#   else
-#     echo "... published version $extension_release_version"
-#   fi
-# else
-#   echo "... skipping extension publish for dryrun."
-# fi
-# popd
+echo "--- releasing VS Code extension"
+pushd vscode_extension
+
+extension_release_version="$(jq --raw-output '.version' package.json)"
+echo "releasing $extension_release_version"
+
+# (progress bar messes with Buildkite timestamps)
+yarn install --no-progress
+
+if node_modules/.bin/vsce show --json sorbet.sorbet-vscode-extension | \
+    jq --raw-output '.versions[] | .version' | \
+    grep -qFx "$extension_release_version"; then
+  echo "... $extension_release_version is already published"
+  node_modules/.bin/vsce show sorbet.sorbet-vscode-extension
+elif [ "$dryrun" = "" ]; then
+  echo "... starting publish"
+  vsce_publish_output="$(mktemp)"
+  trap 'rm -rf "$vsce_publish_output"' EXIT
+
+  # Reads from the VSCE_PAT variable
+  if ! node_modules/.bin/vsce publish --packagePath "../_out_/vscode_extension/sorbet.vsix" < /dev/null > "$vsce_publish_output" 2>&1; then
+    # It can take 4+ minutes for the marketplace to "verify" our extension
+    # before it shows up as published according to `vsce show`.
+    cat "$vsce_publish_output"
+    if grep -qF 'Version number cannot be the same' "$vsce_publish_output"; then
+      echo "... $extension_release_version is already published"
+    else
+      exit 1
+    fi
+  else
+    echo "... published version $extension_release_version"
+  fi
+else
+  echo "... skipping extension publish for dryrun."
+fi
+popd
