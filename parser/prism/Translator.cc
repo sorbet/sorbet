@@ -4489,8 +4489,10 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
 //
 // This function and the PM_BEGIN_NODE case translate between the two representations by processing the `pm_rescue_node`
 // (and its linked `subsequent` nodes) and assembling the corresponding `Rescue` and `Resbody` nodes in Sorbet's AST.
-unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescueNode, unique_ptr<parser::Node> bodyNode,
-                                                     unique_ptr<parser::Node> elseNode) {
+unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginNode) {
+    auto *prismRescueNode = parentBeginNode->rescue_clause;
+    ENFORCE(prismRescueNode, "translateRescue() should only be called if there's a `rescue` clause.")
+
     auto rescueLoc = translateLoc(prismRescueNode->base.location);
     NodeVec rescueBodies;
 
@@ -4545,6 +4547,9 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
             make_unique<parser::Resbody>(resbodyLoc, move(exceptionsArray), move(var), move(rescueBody)));
     }
 
+    auto bodyNode = translateStatements(parentBeginNode->statements);
+    auto elseNode = translate(up_cast(parentBeginNode->else_clause));
+
     // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
     return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
 }
@@ -4556,12 +4561,7 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
 
     unique_ptr<parser::Node> translatedRescue;
     if (beginNode->rescue_clause != nullptr) {
-        // Extract rescue and else nodes from the begin node
-        auto bodyNode = translateStatements(beginNode->statements);
-        auto elseNode = translate(up_cast(beginNode->else_clause));
-        // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
-        // statements
-        translatedRescue = translateRescue(beginNode->rescue_clause, move(bodyNode), move(elseNode));
+        translatedRescue = translateRescue(beginNode);
     }
 
     if (auto *ensureNode = beginNode->ensure_clause) {
