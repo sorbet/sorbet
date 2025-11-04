@@ -705,6 +705,10 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
     auto zeroLengthLoc = location.copyWithZeroLength();
     auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
 
+    // The `&` in `a&.b = 1`
+    constexpr auto len = "&"sv.size();
+    auto ampersandLoc = translateLoc(callNode->call_operator_loc.start, callNode->call_operator_loc.start + len);
+
     auto tempAssign = MK::Assign(zeroLengthRecvLoc, tempRecv, move(receiverExpr));
     auto cond = MK::Send1(zeroLengthLoc, MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
                           core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
@@ -718,7 +722,7 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
 
     auto assignmentExpr = assignmentResult->takeDesugaredExpr();
     auto nilValue = MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
-                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(zeroLengthLoc, tempRecv));
+                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(ampersandLoc, tempRecv));
     auto ifExpr = MK::If(zeroLengthLoc, move(cond), move(nilValue), move(assignmentExpr));
     auto result = MK::InsSeq1(location, move(tempAssign), move(ifExpr));
 
