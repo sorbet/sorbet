@@ -225,12 +225,12 @@ public:
 
     // Have we encountered an ordinary param before? (top < 0)
     bool seen_ordinary_params() {
-        return stack.empty() ? false : top()->max < 0;
+        return !stack.empty() && top()->max < 0;
     }
 
     // Have we encountered a num param before? (top > 0)
     bool seen_numparams() {
-        return stack.empty() ? false : top()->max > 0;
+        return !stack.empty() && top()->max > 0;
     }
 
     // Register a numparam in the current scope

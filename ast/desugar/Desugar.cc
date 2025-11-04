@@ -54,7 +54,7 @@ core::NameRef blockParam2Name(DesugarContext dctx, const BlockParam &blockParam)
 int numparamNum(DesugarContext dctx, parser::Node *decl) {
     if (auto *lvar = parser::cast_node<parser::LVar>(decl)) {
         auto name_str = lvar->name.show(dctx.ctx);
-        return name_str[1] - 48;
+        return name_str[1] - '0';
     }
     return -1;
 }

@@ -1234,6 +1234,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                                 auto paramCount = numberedParamsNode->maximum;
 
+                                ENFORCE(1 <= paramCount,
+                                        "A `pm_numbered_parameters_node_t` node should have at least one parameter");
+
                                 NodeVec params;
                                 params.reserve(paramCount);
 
