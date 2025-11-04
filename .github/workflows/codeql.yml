@@ -1,0 +1,111 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "master", "gh-pages" ]
+  pull_request:
+    branches: [ "master", "gh-pages" ]
+  schedule:
+    - cron: '40 16 * * 5'
+
+jobs:
+  analyze-cpp:
+    name: "Analyze C++"
+    runs-on: "ubuntu-latest"
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: "c-cpp"
+        build-mode: "none"
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:c-cpp"
+
+  analyze-ruby:
+    name: "Analyze Ruby"
+    runs-on: "ubuntu-latest"
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: "ruby"
+        build-mode: "none"
+        config-file: "./.github/codeql/ruby-config.yaml"
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:ruby"
+
+  analyze-javascript:
+    name: "Analyze Javascript/Typescript"
+    runs-on: "ubuntu-latest"
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: "javascript-typescript"
+        build-mode: "none"
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:javascript-typescript"
+
+  analyze-actions:
+    name: "Analyze Github Actions"
+    runs-on: "ubuntu-latest"
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: "actions"
+        build-mode: "none"
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:actions"

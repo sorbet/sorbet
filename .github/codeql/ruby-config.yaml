@@ -1,0 +1,7 @@
+name: "Ruby Config"
+
+# The only ruby that's interesting to scan is in the gems directory, everything
+# else is test cases that often has bad patterns on purpose, as we're testing
+# the limits of the static type checker.
+paths:
+  - gems
