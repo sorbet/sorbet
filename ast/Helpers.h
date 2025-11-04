@@ -548,8 +548,8 @@ public:
 
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
         // A ZSuper call can have a block argument. Don't include it in the location.
-        const uint32_t len = std::size("super"sv);
-        auto superKeywordLoc = core::LocOffsets{loc.beginPos(), loc.beginPos() + len};
+        const uint32_t length = "super"sv.size();
+        auto superKeywordLoc = core::LocOffsets{loc.beginPos(), loc.beginPos() + length};
 
         Send::Flags flags;
         flags.isPrivateOk = true;
