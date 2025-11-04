@@ -460,7 +460,8 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (send->hasBlock() || !insideDescribe || send->numPosArgs() < 1) {
+            if (send->hasBlock() || !insideDescribe || send->numPosArgs() < 1 ||
+                ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
                 return nullptr;
             }
 
@@ -645,6 +646,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
+            if (recvIsRSpec && ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
+                return nullptr;
+            }
+
             if (requiresSecondFactor(send->fun) && !recvIsRSpec && !insideDescribe) {
                 return nullptr;
             }
@@ -820,7 +825,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
             ENFORCE(isSharedExamplesName(send->fun));
-            if (block == nullptr || send->numPosArgs() != 1) {
+            if (block == nullptr || send->numPosArgs() != 1 ||
+                ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
                 return nullptr;
             }
 
@@ -884,7 +890,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (block != nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
+            if (block != nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1 ||
+                ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
                 return nullptr;
             }
 
