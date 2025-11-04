@@ -434,8 +434,8 @@ T.reveal_type(data) # => T.untyped
 validated = validate_against_module(data, Enumerable)
 T.reveal_type(validated) # => T.nilable(T::Enumerable[T.untyped])
 
-validated = validated.map {|item| validate_against_module(item, Integer) }
-T.reveal_type(validated) # => T::Array[T.nilable(Integer)]
+validated = validated&.map {|item| validate_against_module(item, Integer) }
+T.reveal_type(validated) # => T.nilable(T::Array[T.nilable(Integer)])
 ```
 
 This `validate_against_module` method only uses `mod` in a `case` statement, i.e., it only uses the `mod.===(x)`, the [case equality operator]. Accepting `T::Module[...]` instead of `T::Class[...]` allows this method to be maximally permissive, and we see it called with both a module (`Enumerable`) and a class (`Integer`).
