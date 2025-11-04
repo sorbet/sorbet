@@ -117,7 +117,49 @@ ClassDef{
           kind = Local
           name = <U <blk>>
         } }]
-      rhs = EmptyTree
+      rhs = Send{
+        flags = {}
+        recv = Send{
+          flags = {}
+          recv = Array{
+            elems = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+            ]
+          }
+          fun = <U concat>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <splat>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U *>
+                }
+              ]
+            }
+          ]
+        }
+        fun = <U concat>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Array{
+            elems = [
+              Literal{ value = 3 }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

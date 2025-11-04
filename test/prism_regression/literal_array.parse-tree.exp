@@ -106,7 +106,21 @@ Begin {
           }
         ]
       }
-      body = NULL
+      body = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          ForwardedRestArg {
+          }
+          Integer {
+            val = "3"
+          }
+        ]
+      }
     }
   ]
 }

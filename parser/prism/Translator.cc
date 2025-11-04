@@ -3880,7 +3880,8 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
         auto &stat = elements[sorbetIndex];
 
         if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
-            if (calledFromCallNode && down_cast<pm_splat_node>(node)->expression == nullptr) {
+            auto isAnonymousSplat = down_cast<pm_splat_node>(node)->expression == nullptr;
+            if (calledFromCallNode && isAnonymousSplat) {
                 prismIndex++;
                 continue; // Skip anonymous splats (like `f(*)`), which are handled separately in `PM_CALL_NODE`
             }
@@ -3897,7 +3898,13 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
             // the Splat in that case, and non-zero if there was a real Array literal.
             if (auto splattedExpr = ast::MK::extractSplattedExpression(var)) {
                 // Extract the argument from the old Send and create a new one with array's location
-                var = MK::Splat(location, move(splattedExpr));
+                if (isAnonymousSplat) {
+                    // Recreate the splat and local expr with the correct locations
+                    var = MK::Splat(location, MK::Local(location, core::Names::star()));
+                } else {
+                    // Recreate the splat with the correct location, keep the splatted expression as-is.
+                    var = MK::Splat(location, move(splattedExpr));
+                }
             }
 
             if (elems.empty()) {

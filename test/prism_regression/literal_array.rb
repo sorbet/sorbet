@@ -17,7 +17,5 @@ def has_named_rest_args(*args)
 end
 
 def has_anonymous_rest_args(*)
-  # Crashes Sorbet, even with the legacy parser.
-  # https://github.com/sorbet/sorbet/issues/8166
-  # [1, 2, *, 3]
+  [1, 2, *, 3]
 end
