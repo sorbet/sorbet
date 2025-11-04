@@ -426,6 +426,11 @@ Usage:
       --enable-experimental-rbs-comments
                                 Enable experimental support for RBS signatures and
                                 assertions as inline comments
+      --enable-experimental-rspec
+                                Enables experimental support for RSpec. There are many
+                                RSpec constructs that are impossible for Sorbet to
+                                handle. As a result, there is no path to this flag ever
+                                being stable: RSpec support is best effort.
 
 ```
 

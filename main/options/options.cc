@@ -732,12 +732,19 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
+
     options.add_options(section)("enable-experimental-rbs-signatures",
                                  "Enable experimental support for RBS signatures as inline comments");
     options.add_options(section)("enable-experimental-rbs-assertions",
                                  "Enable experimental support for RBS assertions as inline comments");
     options.add_options(section)("enable-experimental-rbs-comments",
                                  "Enable experimental support for RBS signatures and assertions as inline comments");
+
+    options.add_options(section)(
+        "enable-experimental-rspec",
+        "Enables experimental support for RSpec. "
+        "There are many RSpec constructs that are impossible for Sorbet to handle. "
+        "As a result, there is no path to this flag ever being stable: RSpec support is best effort.");
     // }}}
 
     // ----- OTHER -------------------------------------------------------- {{{
@@ -991,6 +998,7 @@ void readOptions(Options &opts,
         }
 
         opts.cacheSensitiveOptions.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
+        opts.cacheSensitiveOptions.rspecRewriterEnabled = raw["enable-experimental-rspec"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
