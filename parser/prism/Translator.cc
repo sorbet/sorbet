@@ -1505,9 +1505,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             auto symbol = down_cast<pm_symbol_node>(bp->expression);
                             blockExpr = desugarSymbolProc(symbol);
                         } else {
+                            auto blockLoc = translateLoc(prismBlock->location);
                             auto blockBodyExpr =
                                 blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
-                            blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
+                            blockExpr = MK::Block(blockLoc, move(blockBodyExpr), move(blockParamsStore));
                         }
 
                         magicSendArgs.emplace_back(move(blockExpr));
@@ -1621,8 +1622,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         auto symbol = down_cast<pm_symbol_node>(bp->expression);
                         blockExpr = desugarSymbolProc(symbol);
                     } else {
+                        auto blockLoc = translateLoc(prismBlock->location);
                         auto blockBodyExpr = blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
-                        blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
+                        blockExpr = MK::Block(blockLoc, move(blockBodyExpr), move(blockParamsStore));
                     }
 
                     sendArgs.emplace_back(move(blockExpr));
