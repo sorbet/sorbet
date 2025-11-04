@@ -146,17 +146,6 @@ Usage:
       --experimental-ruby3-keyword-args
                                 Enforce use of new (Ruby 3.0-style) keyword arguments.
                                 (incomplete and experimental)
-      --enable-experimental-rbs-signatures
-                                Enable experimental support for RBS signatures as inline
-                                comments
-      --enable-experimental-rbs-assertions
-                                Enable experimental support for RBS assertions as inline
-                                comments
-      --enable-experimental-rbs-comments
-                                Enable experimental support for RBS signatures and
-                                assertions as inline comments
-      --enable-experimental-requires-ancestor
-                                Enable experimental `requires_ancestor` annotation
       --uniquely-defined-behavior
                                 Ensure that every class and module only defines
                                 'behavior' in one file. Ensures that every class or
@@ -420,6 +409,23 @@ Usage:
       --censor-for-snapshot-tests
                                 When printing raw location information, don't show line
                                 numbers
+
+```
+
+## EXPERIMENTAL options
+
+```plaintext
+      --enable-experimental-requires-ancestor
+                                Enable experimental `requires_ancestor` annotation
+      --enable-experimental-rbs-signatures
+                                Enable experimental support for RBS signatures as inline
+                                comments
+      --enable-experimental-rbs-assertions
+                                Enable experimental support for RBS assertions as inline
+                                comments
+      --enable-experimental-rbs-comments
+                                Enable experimental support for RBS signatures and
+                                assertions as inline comments
 
 ```
 
