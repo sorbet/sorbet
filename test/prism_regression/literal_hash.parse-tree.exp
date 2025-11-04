@@ -134,5 +134,32 @@ Begin {
         ]
       }
     }
+    DefMethod {
+      name = <U v5>
+      params = NULL
+      body = NULL
+    }
+    Send {
+      receiver = NULL
+      method = <U v5>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U k5>
+              }
+              value = Send {
+                receiver = NULL
+                method = <U k5>
+                args = [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

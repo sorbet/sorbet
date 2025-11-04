@@ -16,3 +16,7 @@ end
 
 v4 = "v4"
 k4 = { v4: }
+
+def v5; end
+
+v5(k5:)

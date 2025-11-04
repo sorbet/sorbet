@@ -1,0 +1,100 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U foo1>
+      block = nullptr
+      pos_args = 0
+      args = [
+        Literal{ value = :key }
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U key>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U foo2>
+      block = nullptr
+      pos_args = 0
+      args = [
+        Literal{ value = :key }
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U foo3>
+          block = nullptr
+          pos_args = 0
+          args = [
+            Literal{ value = :key1 }
+            Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U key1>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+            Literal{ value = :key2 }
+            Send{
+              flags = {privateOk}
+              recv = Self
+              fun = <U key2>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U foo4>
+      block = nullptr
+      pos_args = 0
+      args = [
+        Literal{ value = :key1 }
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U key1>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+        Literal{ value = :key2 }
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U key2>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      ]
+    }
+  ]
+}
