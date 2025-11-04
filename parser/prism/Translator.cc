@@ -3035,8 +3035,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             ast::RescueCase::EXCEPTION_store exceptions;
             auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
 
+            auto rescueCaseLoc =
+                translateLoc(rescueModifierNode->keyword_loc.start, rescueModifierNode->base.location.end);
             auto rescueCase = ast::make_expression<ast::RescueCase>(
-                location, move(exceptions), ast::MK::Local(keywordLoc, rescueTemp), move(rescueExpr));
+                rescueCaseLoc, move(exceptions), ast::MK::Local(keywordLoc, rescueTemp), move(rescueExpr));
 
             ast::Rescue::RESCUE_CASE_store rescueCases;
             rescueCases.emplace_back(move(rescueCase));
