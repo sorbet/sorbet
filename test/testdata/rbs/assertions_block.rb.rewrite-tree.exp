@@ -98,4 +98,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end, <todo sym>, <emptyTree>::<C String>))
 
   <emptyTree>::<C T>.reveal_type(b7)
+
+  <cast:let>(<emptyTree>::<C Object>.new(), <todo sym>, <emptyTree>::<C Object>).tap() do ||
+    <emptyTree>
+  end.tap() do ||
+    <emptyTree>
+  end
 end

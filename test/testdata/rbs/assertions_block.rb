@@ -74,3 +74,7 @@ b7 += take_block do |x|
   x #: as !nil
 end #: String # error: Expected `Integer` but found `String` for argument `arg0`
 T.reveal_type(b7) # error: Revealed type: `Integer`
+
+Object.new #: Object
+  .tap {}
+  .tap {}
