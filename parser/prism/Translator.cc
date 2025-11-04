@@ -2285,8 +2285,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto forwardingSuperNode = down_cast<pm_forwarding_super_node>(node);
 
             // There's no `keyword_loc` field, so we make it ourselves from the start location.
-            constexpr auto len = std::size("super"sv);
-            auto keywordLoc = translateLoc(node->location.start, node->location.start + len);
+            constexpr uint32_t length = "super"sv.size();
+            auto keywordLoc = translateLoc(node->location.start, node->location.start + length);
 
             auto expr = MK::ZSuper(location, maybeTypedSuper());
             auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), keywordLoc);
@@ -2650,7 +2650,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 sorbetName = translateConstantName(prismName);
 
                 // The location doesn't include the `**`, only the splatted expression like `kwargs` in `**kwargs`
-                constexpr uint8_t length = std::size("**"sv);
+                constexpr uint32_t length = "**"sv.size();
                 kwrestLoc = core::LocOffsets{location.beginPos() + length, location.endPos()};
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
                 sorbetName = nextUniqueParserName(core::Names::starStar());
