@@ -1296,7 +1296,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable reference, like
                         // `f(&&)`.
-                        blockPassArg = MK::Local(location.copyWithZeroLength(), core::Names::ampersand());
+                        blockPassArg = MK::Local(location.copyEndWithZeroLength(), core::Names::ampersand());
                         supportedBlock = true;
                     }
                 }
