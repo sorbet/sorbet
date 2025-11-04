@@ -432,7 +432,7 @@ data = JSON.parse(File.read('foo.json'))
 T.reveal_type(data) # => T.untyped
 
 validated = validate_against_module(data, Enumerable)
-T.reveal_type(validated) # => T::Enumerable[T.untyped]
+T.reveal_type(validated) # => T.nilable(T::Enumerable[T.untyped])
 
 validated = validated.map {|item| validate_against_module(item, Integer) }
 T.reveal_type(validated) # => T::Array[T.nilable(Integer)]
