@@ -219,13 +219,13 @@ T.reveal_type(Child.make) <span class="hljs-comment"># Revealed type: `Child`</s
 <h2><a class="anchor" aria-hidden="true" id="has_attached_class-tattached_class-in-module-instance-methods"></a><a href="#has_attached_class-tattached_class-in-module-instance-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>has_attached_class!</code>: <code>T.attached_class</code> in module instance methods</h2>
 <p>Some modules are only ever eventually mixed into a <strong>class</strong> with <code>extend</code> (not <code>include</code>), meaning that any methods that module defines will eventually be called like singleton class methods.</p>
 <p>These modules usually want to be able to call <code>new</code> to instantiate an instance of the class that the module is <code>extend</code>'d into. That’s a problem because normally constructor methods like that would have a return type of <code>T.attached_class</code>, but instance methods cannot mention <code>T.attached_class</code>.</p>
-<p>To allow instance methods in such modules to use <code>T.attached_class</code>, Sorbet provides the <code>has_attached_class!</code> annotation:</p>
+<p>To allow instance methods in such modules to use <code>T.attached_class</code>, Sorbet provides the <code>has_attached_class!(:out)</code> annotation:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">FinderMethods</span></span>
   extend T::Sig
   extend T::Generic
   abstract!
 
-  has_attached_class!
+  has_attached_class!(<span class="hljs-symbol">:out</span>)
 
   sig { abstract.returns(T.attached_class) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">new</span>;</span> <span class="hljs-keyword">end</span>
@@ -251,14 +251,14 @@ T.reveal_type(child)  <span class="hljs-comment"># =&gt; `ChildModel`</span>
 </code></pre>
 <p>Some things to note:</p>
 <ul>
-<li><p>The <code>has_attached_class!</code> method is exposed as a method in <code>T::Generic</code>, because using <code>has_attached_class!</code> implicitly makes the module into a <a href="/docs/generics">generic module</a>. This is why modules are not allowed to use <code>T.attached_class</code> by default. More on this in a moment.</p></li>
+<li><p>The <code>has_attached_class!</code> method is exposed as a method in <code>T::Generic</code>, because using <code>has_attached_class!</code> implicitly makes the module into a <a href="/docs/generics">generic module</a>. This is why modules are not allowed to use <code>T.attached_class</code> by default. It’s also why the <code>:out</code> is there: as a reminder that <code>T.attached_class</code> must obey the same rules as <code>type_member(:out)</code>. More on this in a moment.</p></li>
 <li><p>We’ve declared <code>new</code> as an abstract method. This method is automatically detected to be implemented when <code>extend</code>'d into a class (because all classes inherit a concrete <code>self.new</code> method).</p>
 <p>This abstract <code>new</code> method allows calling <code>new</code> in the <code>find</code> method. If this <code>find</code> method had been in an <a href="/docs/rbi">RBI file</a> (not in a source file), then the abstract <code>new</code> declaration would not have been required, because there would be no method bodies to type check.</p></li>
 <li><p>The <code>FinderMethods</code> module is <code>extended</code> into <code>ParentModel</code>. Had this been <code>include FinderMethods</code>, Sorbet would have reported an error saying that <code>FinderMethods</code> can only be extended into classes.</p></li>
 <li><p>The two calls to <code>find</code> at the bottom of the snippet reveal that <code>find</code>'s type changes based on the type of the method call’s receiver. Basically: <code>find</code> on a <code>ChildModel</code> will be a <code>ChildModel</code>.</p></li>
 </ul>
 <h3><a class="anchor" aria-hidden="true" id="generics-and-has_attached_class"></a><a href="#generics-and-has_attached_class" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Generics and <code>has_attached_class!</code></h3>
-<p>We mentioned above that using <code>has_attached_class!</code> in a module makes the module into a generic module. The mental model is to think of <code>has_attached_class!</code> as syntactic sugar for putting a <code>type_member</code> with an unknown name into the module. This <code>type_member</code>, having no explicit name, can then be referenced using <code>T.attached_class</code>.</p>
+<p>We mentioned above that using <code>has_attached_class!</code> in a module makes the module into a generic module. The mental model is to think of <code>has_attached_class!</code> as syntactic sugar for putting a <code>type_member</code> with an unmentionable name into the module. This <code>type_member</code>, having no explicit name, can then be referenced using <code>T.attached_class</code>.</p>
 <p>What this means is that it’s possible to abstract over the attached class of an <code>has_attached_class!</code> module, the same as any other generic interface:</p>
 <pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
   type_parameters(<span class="hljs-symbol">:U</span>)
