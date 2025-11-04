@@ -72,7 +72,9 @@ module T::Private::Abstract::Declare
         # TODO(froydnj) we should be able to ladder up the method inheritance
         # chain to see if there are multiple abstract .new methods and resolve
         # to the farthest-away non-abstract one.
-        self.send(:define_singleton_method, :new, supered.unbind)
+        T::Private::DeclState.current.without_on_method_added do
+          self.send(:define_singleton_method, :new, supered.unbind)
+        end
         result
       end
 
