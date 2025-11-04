@@ -28,7 +28,7 @@ def example(classes)
     else
       classes
     end
-  T.reveal_type(thing) # error: Revealed type: `T::Array[Module]`
+  T.reveal_type(thing) # error: Revealed type: `T::Array[T::Module[T.anything]]`
   thing
-  # ^ hover: T::Array[Module]
+  # ^ hover: T::Array[T::Module[T.anything]]
 end

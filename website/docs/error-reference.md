@@ -2837,6 +2837,21 @@ For detailed information and examples, please refer to the documentation for err
 
 The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
 
+## 5081
+
+This is conceptually the same error as [5014](#5014), so reading that gives a good overview of the problem.
+
+Specifically, this error arises from failing to redeclare `has_attached_class!`, and typically it will only be reported in classes that inherit from `::Class` or `::Module` directly:
+
+```ruby
+class MyCustomModule < Module # ⛔️ error: `has_attached_class!` must be redeclared
+end
+```
+
+Sorbet treats the `::Class` and `::Module` classes in the Ruby standard library as generic classes—generic in their [attached class](attached-class.md). For more about this, read [T::Class and T::Module](class-of.md). As a result, code that creates custom subclasses of `::Module` must redeclare this generic type member by writing `has_attached_class!`.
+
+Note that this error is only reported in `# typed: strict` files and above. Downgrading the file that declares an explicit subclass of `Module` to `typed: true` will silence this error. (This also applies to direct subclasses of `Class`, but note that directly subclassing `Class` is rejected by the Ruby VM at runtime.)
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside a Ruby block.

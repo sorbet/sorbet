@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Types
-  class TypedClass < T::Types::Base
+  class TypedModule < T::Types::Base
     def initialize(type)
       @inner_type = type
     end
@@ -18,26 +18,26 @@ module T::Types
 
     # overrides Base
     def name
-      "T::Class[#{type.name}]"
+      "T::Module[#{type.name}]"
     end
 
     def underlying_class
-      Class
+      Module
     end
 
     # overrides Base
     def valid?(obj)
-      Class.===(obj)
+      Module.===(obj)
     end
 
     # overrides Base
     private def subtype_of_single?(type)
       case type
-      when TypedClass, TypedModule
+      when TypedModule
         # treat like generics are erased
         true
       when Simple
-        Class <= type.raw_type
+        Module <= type.raw_type
       else
         false
       end
@@ -59,7 +59,7 @@ module T::Types
           cached = @cache[mod]
           return cached if cached
 
-          type = TypedClass.new(mod)
+          type = TypedModule.new(mod)
 
           if CACHE_FROZEN_OBJECTS || (!mod.frozen? && !type.frozen?)
             @cache[mod] = type
@@ -69,7 +69,7 @@ module T::Types
       end
     end
 
-    class Untyped < TypedClass
+    class Untyped < TypedModule
       def initialize
         super(T::Types::Untyped::Private::INSTANCE)
       end
@@ -84,7 +84,7 @@ module T::Types
       end
     end
 
-    class Anything < TypedClass
+    class Anything < TypedModule
       def initialize
         super(T.anything)
       end

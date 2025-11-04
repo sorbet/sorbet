@@ -54,7 +54,8 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U Foo>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Foo>>::<S <C <U Struct>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo::Struct) @ Loc {file=test/testdata/rewriter/struct.rb start=5:5 end=5:17}
       method <C <U Foo>>::<S <C <U Struct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=5:5 end=6:8}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-  class <S <C <U Foo>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=4:11}
+  class <S <C <U Foo>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=4:11}
+    type-member(+) <S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=4:11}
     method <S <C <U Foo>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=4:1 end=7:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U FullyQualifiedStructUsages>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=113:1 end=113:33}
@@ -175,7 +176,8 @@ class <C <U <root>>> < <C <U Object>> ()
     module <C <U MixinStruct>>::<C <U MyMixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=50:17}
       method <C <U MixinStruct>>::<C <U MyMixin>>#<U foo> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=51:5 end=51:12}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-    class <C <U MixinStruct>>::<S <C <U MyMixin>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=50:17}
+    class <C <U MixinStruct>>::<S <C <U MyMixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=50:17}
+      type-member(+) <C <U MixinStruct>>::<S <C <U MyMixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U MixinStruct>>::<S <C <U MyMixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=MixinStruct::MyMixin) @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=50:17}
       method <C <U MixinStruct>>::<S <C <U MyMixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=50:3 end=52:6}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
     class <C <U MixinStruct>>::<C <U <C <U MyStruct>> $1>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=54:3 end=58:6}
