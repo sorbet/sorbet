@@ -34,6 +34,14 @@ end
  #  ^ error: Failed to parse RBS signature (expected a token `pARROW`)
   def parse_error4(p1, p2); end # error: The method `parse_error4` does not have a `sig`
 
+#: -> Integer.foo
+#            ^ error: Failed to parse RBS signature (expected a token `pEOF`)
+def parse_error5; T.unsafe(nil); end # error: The method `parse_error5` does not have a `sig`
+
+#: -> Integer | String
+#             ^ error: Failed to parse RBS signature (expected a token `pEOF`)
+def parse_error6; T.unsafe(nil); end # error: The method `parse_error6` does not have a `sig`
+
 # Sig mismatch
 
 #: (P1) -> void
