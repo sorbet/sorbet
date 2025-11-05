@@ -223,7 +223,7 @@ string Loc::toStringWithTabs(const GlobalState &gs, int tabs) const {
             buf << ' ';
         }
         buf << rang::fg::cyan;
-        if (details.second.column - details.first.column > 0) {
+        if (details.second.column > details.first.column) {
             for (; p < details.second.column; p++) {
                 buf << '^';
             }
