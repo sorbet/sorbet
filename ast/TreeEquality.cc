@@ -18,7 +18,7 @@ template <typename Comparator>
 bool compareTreeSpans(const core::GlobalState &gs, const void *avoid, absl::Span<const ExpressionPtr> a,
                       absl::Span<const ExpressionPtr> b, const core::FileRef file) {
     return absl::c_equal(a, b,
-                         [&](const auto &a, const auto &b) { return compareTrees<Comparator>(gs, avoid, a, b, file); });
+                         [&](const auto &a, const auto &b) { return Comparator::compareNodes(gs, avoid, a, b, file); });
 }
 
 class StructurallyEqualError {};

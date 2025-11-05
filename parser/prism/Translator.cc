@@ -705,6 +705,10 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
     auto zeroLengthLoc = location.copyWithZeroLength();
     auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
 
+    // The `&` in `a&.b = 1`
+    constexpr auto len = "&"sv.size();
+    auto ampersandLoc = translateLoc(callNode->call_operator_loc.start, callNode->call_operator_loc.start + len);
+
     auto tempAssign = MK::Assign(zeroLengthRecvLoc, tempRecv, move(receiverExpr));
     auto cond = MK::Send1(zeroLengthLoc, MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
                           core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
@@ -718,7 +722,7 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
 
     auto assignmentExpr = assignmentResult->takeDesugaredExpr();
     auto nilValue = MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
-                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(zeroLengthLoc, tempRecv));
+                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(ampersandLoc, tempRecv));
     auto ifExpr = MK::If(zeroLengthLoc, move(cond), move(nilValue), move(assignmentExpr));
     auto result = MK::InsSeq1(location, move(tempAssign), move(ifExpr));
 
@@ -1505,9 +1509,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             auto symbol = down_cast<pm_symbol_node>(bp->expression);
                             blockExpr = desugarSymbolProc(symbol);
                         } else {
+                            auto blockLoc = translateLoc(prismBlock->location);
                             auto blockBodyExpr =
                                 blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
-                            blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
+                            blockExpr = MK::Block(blockLoc, move(blockBodyExpr), move(blockParamsStore));
                         }
 
                         magicSendArgs.emplace_back(move(blockExpr));
@@ -1621,8 +1626,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         auto symbol = down_cast<pm_symbol_node>(bp->expression);
                         blockExpr = desugarSymbolProc(symbol);
                     } else {
+                        auto blockLoc = translateLoc(prismBlock->location);
                         auto blockBodyExpr = blockBody == nullptr ? MK::EmptyTree() : blockBody->takeDesugaredExpr();
-                        blockExpr = MK::Block(location, move(blockBodyExpr), move(blockParamsStore));
+                        blockExpr = MK::Block(blockLoc, move(blockBodyExpr), move(blockParamsStore));
                     }
 
                     sendArgs.emplace_back(move(blockExpr));
@@ -3033,8 +3039,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             ast::RescueCase::EXCEPTION_store exceptions;
             auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
 
+            auto rescueCaseLoc =
+                translateLoc(rescueModifierNode->keyword_loc.start, rescueModifierNode->base.location.end);
             auto rescueCase = ast::make_expression<ast::RescueCase>(
-                location, move(exceptions), ast::MK::Local(keywordLoc, rescueTemp), move(rescueExpr));
+                rescueCaseLoc, move(exceptions), ast::MK::Local(keywordLoc, rescueTemp), move(rescueExpr));
 
             ast::Rescue::RESCUE_CASE_store rescueCases;
             rescueCases.emplace_back(move(rescueCase));
@@ -3872,7 +3880,8 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
         auto &stat = elements[sorbetIndex];
 
         if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
-            if (calledFromCallNode && down_cast<pm_splat_node>(node)->expression == nullptr) {
+            auto isAnonymousSplat = down_cast<pm_splat_node>(node)->expression == nullptr;
+            if (calledFromCallNode && isAnonymousSplat) {
                 prismIndex++;
                 continue; // Skip anonymous splats (like `f(*)`), which are handled separately in `PM_CALL_NODE`
             }
@@ -3889,7 +3898,13 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
             // the Splat in that case, and non-zero if there was a real Array literal.
             if (auto splattedExpr = ast::MK::extractSplattedExpression(var)) {
                 // Extract the argument from the old Send and create a new one with array's location
-                var = MK::Splat(location, move(splattedExpr));
+                if (isAnonymousSplat) {
+                    // Recreate the splat and local expr with the correct locations
+                    var = MK::Splat(location, MK::Local(location, core::Names::star()));
+                } else {
+                    // Recreate the splat with the correct location, keep the splatted expression as-is.
+                    var = MK::Splat(location, move(splattedExpr));
+                }
             }
 
             if (elems.empty()) {
