@@ -461,7 +461,7 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
             if (send->hasBlock() || !insideDescribe || send->numPosArgs() < 1) {
-                return nullptr;
+                break;
             }
 
             auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
