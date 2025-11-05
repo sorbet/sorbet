@@ -1029,6 +1029,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 messageLoc = translateLoc(callNode->message_loc);
             }
 
+            absl::Span<pm_node_t *> prismArgs;
+            if (auto *prismArgsNode = callNode->arguments) {
+                prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
+            }
+
             // Handle `~[Integer]`, like `~42`
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
@@ -1069,12 +1074,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             unique_ptr<parser::Hash> kwargsHash;
             auto kwargsHashHasExpr = true; // true if we can directly desugar the kwargs Hash, if any.
-            absl::Span<pm_node_t *> prismArgs;
-            if (auto *prismArgsNode = callNode->arguments) {
-                prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
-
+            if (!prismArgs.empty()) {
                 // Pop the Kwargs Hash off the end of the arguments, if there is one.
-                if (!prismArgs.empty() && PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
+                if (PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
                     auto h = translate(prismArgs.back());
                     auto hash = unique_ptr<parser::Hash>(reinterpret_cast<parser::Hash *>(h.release()));
                     ENFORCE(hash != nullptr);
