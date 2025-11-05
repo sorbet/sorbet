@@ -9,3 +9,10 @@ if main/sorbet --max-threads=0 --censor-for-snapshot-tests --silence-dev-message
   echo "expected to fail!!"
   exit 1
 fi
+
+echo --------------------------------------------------------------------------
+
+if main/sorbet --max-threads=0 --censor-for-snapshot-tests --silence-dev-message --enable-experimental-rspec --enable-experimental-requires-ancestor "${inputs[@]}" 2>&1 ; then
+  echo "expected to fail!!"
+  exit 1
+fi
