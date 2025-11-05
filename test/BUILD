@@ -149,7 +149,6 @@ prism_location_test_suite(
             "prism_regression/if_elsif.rb",
             "prism_regression/keyword_it.rb",
             "prism_regression/lambda.rb",
-            "prism_regression/literal_hash.rb",
             "prism_regression/literal_regexp.rb",
             "prism_regression/match_last_line.rb",
             "prism_regression/match_write.rb",

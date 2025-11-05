@@ -4006,6 +4006,7 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
                 //            { k4:   }   # 10-13 Key with implicit method call
                 //              ^^^         key symbol loc
                 //              ^^^         Sorbet send node loc
+                //              ^^^         Sorbet send node methodLoc (Prism excludes the ':' here)
                 //     def demo(k5:); end # 10-13 Keyword parameter
                 //              ^^^
                 //         call(k6:)      # 10-13 Keyword argument
@@ -4013,6 +4014,18 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
                 if (symbolNode->opening_loc.start == nullptr) {
                     core::LocOffsets symbolLoc;
                     if (PM_NODE_TYPE_P(pair->value, PM_IMPLICIT_NODE)) {
+                        auto implicitNode = down_cast<pm_implicit_node>(pair->value);
+
+                        if (PM_NODE_TYPE_P(implicitNode->value, PM_CALL_NODE)) {
+                            auto callNode = down_cast<pm_call_node>(implicitNode->value);
+
+                            // Prism's method_loc excludes the ':' here, but Sorbet's legacy parser includes it.
+                            // Not a fan of modifying the Prism tree in-place, but the alternative is much trickier.
+                            // TODO: revisit this when we extract a helper function for translating call nodes.
+                            ENFORCE(symbolNode->base.location.end[-1] == ':');
+                            callNode->message_loc.end = symbolNode->base.location.end;
+                        }
+
                         symbolLoc = translateLoc(symbolNode->base.location);
                     } else {
                         // Drop the trailing colon in the key's location
