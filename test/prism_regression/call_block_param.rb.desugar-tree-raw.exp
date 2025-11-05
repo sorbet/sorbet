@@ -399,14 +399,28 @@ ClassDef{
       args = [
         Self
         Literal{ value = :foo }
-        Send{
-          flags = {privateOk}
-          recv = Self
-          fun = <U forwarded_block>
-          block = nullptr
-          pos_args = 0
-          args = [
-          ]
+        UnresolvedConstantLit{
+          cnst = <C <U FORWARDED_BLOCK>>
+          scope = EmptyTree
+        }
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = ConstantLit{
+        symbol = (class ::<Magic>)
+        orig = nullptr
+      }
+      fun = <U <call-with-block-pass>>
+      block = nullptr
+      pos_args = 3
+      args = [
+        Self
+        Literal{ value = :foo }
+        UnresolvedConstantLit{
+          cnst = <C <U FORWARDED_BLOCK>>
+          scope = EmptyTree
         }
       ]
     }
@@ -430,74 +444,91 @@ ClassDef{
       ]
     }
 
-    InsSeq{
-      stats = [
-        Assign{
-          lhs = UnresolvedIdent{
-            kind = Local
-            name = <D <U <assignTemp>> $8>
-          }
-          rhs = Send{
-            flags = {privateOk}
-            recv = Self
-            fun = <U foo>
-            block = nullptr
-            pos_args = 0
-            args = [
-            ]
-          }
-        }
-      ],
-      expr = If{
-        cond = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (class ::NilClass)
-            orig = nullptr
-          }
-          fun = <U ===>
-          block = nullptr
-          pos_args = 1
-          args = [
-            UnresolvedIdent{
-              kind = Local
-              name = <D <U <assignTemp>> $8>
-            }
-          ]
-        }
-        thenp = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (class ::<Magic>)
-            orig = nullptr
-          }
-          fun = <U <nil-for-safe-navigation>>
-          block = nullptr
-          pos_args = 1
-          args = [
-            UnresolvedIdent{
-              kind = Local
-              name = <D <U <assignTemp>> $8>
-            }
-          ]
-        }
-        elsep = Send{
-          flags = {}
-          recv = UnresolvedIdent{
-            kind = Local
-            name = <D <U <assignTemp>> $8>
-          }
-          fun = <U bar>
-          block = Block {
-            params = [
-            ]
-            body = EmptyTree
-          }
-          pos_args = 0
-          args = [
-          ]
-        }
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U foo>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
       }
+      fun = <U &>
+      block = nullptr
+      pos_args = 1
+      args = [
+        InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $8>
+              }
+              rhs = Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U foo>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            }
+          ],
+          expr = If{
+            cond = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::NilClass)
+                orig = nullptr
+              }
+              fun = <U ===>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $8>
+                }
+              ]
+            }
+            thenp = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <nil-for-safe-navigation>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $8>
+                }
+              ]
+            }
+            elsep = Send{
+              flags = {}
+              recv = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $8>
+              }
+              fun = <U bar>
+              block = Block {
+                params = [
+                ]
+                body = EmptyTree
+              }
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+        }
+      ]
     }
 
     Send{
