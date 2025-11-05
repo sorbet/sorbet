@@ -1,9 +1,40 @@
-test/cli/rspec/rspec2.rb:58: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`) https://srb.help/5064
-    58 |    describe "will include shared examples" do # error: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/rspec/rspec2.rb:50: required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>` here
-    50 |    shared_examples "some examples" do
-                                            ^
+test/cli/rspec/rspec2.rb:68: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each` https://srb.help/3507
+    68 |        include_examples("some examples")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    For other things, like constant and variable assignments,    hoist them to constants or methods defined outside the `test_each` block.
+
+test/cli/rspec/rspec2.rb:174: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     174 |  it "inside B" do
+            ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec2.rb:4:
+     4 |module RSpec
+        ^
+
+test/cli/rspec/rspec2.rb:178: Method `context` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     178 |  context("Nested, no RSpec") do
+            ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec2.rb:4:
+     4 |module RSpec
+        ^
+
+test/cli/rspec/rspec2.rb:179: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     179 |    it "inside Nested" do
+              ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec2.rb:4:
+     4 |module RSpec
+        ^
+
+test/cli/rspec/rspec2.rb:181: Method `described_class` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     181 |      described_class
+                ^^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec2.rb:4:
+     4 |module RSpec
+        ^
 
 test/cli/rspec/rspec2.rb:77: Method `example` does not exist on `T.class_of(A)` https://srb.help/7003
     77 |  example do # error: Method `example` does not exist
@@ -106,6 +137,76 @@ test/cli/rspec/rspec2.rb:71: Method `defined_in_shared_examples` does not exist 
     70 |        it "has access to defined_in_shared_examples" do
                 ^
 
+test/cli/rspec/rspec2.rb:50: Method `shared_examples` does not exist on `T.class_of(A::<describe 'inside describe'>)` https://srb.help/7003
+    50 |    shared_examples "some examples" do
+            ^^^^^^^^^^^^^^^
+  Got `T.class_of(A::<describe 'inside describe'>)` originating from:
+    test/cli/rspec/rspec2.rb:34:
+    34 |  describe "inside describe" do
+          ^
+
+test/cli/rspec/rspec2.rb:51: Method `let` does not exist on `T.class_of(A::<describe 'inside describe'>)` https://srb.help/7003
+    51 |      let(:defined_in_shared_examples) { "foo" }
+              ^^^
+  Got `T.class_of(A::<describe 'inside describe'>)` originating from:
+    test/cli/rspec/rspec2.rb:34:
+    34 |  describe "inside describe" do
+          ^
+
+test/cli/rspec/rspec2.rb:53: Method `it` does not exist on `T.class_of(A::<describe 'inside describe'>)` https://srb.help/7003
+    53 |      it("a shared example") do
+              ^^
+  Got `T.class_of(A::<describe 'inside describe'>)` originating from:
+    test/cli/rspec/rspec2.rb:34:
+    34 |  describe "inside describe" do
+          ^
+
+test/cli/rspec/rspec2.rb:54: Method `described_class` does not exist on `T.class_of(A::<describe 'inside describe'>)` https://srb.help/7003
+    54 |        described_class
+                ^^^^^^^^^^^^^^^
+  Got `T.class_of(A::<describe 'inside describe'>)` originating from:
+    test/cli/rspec/rspec2.rb:34:
+    34 |  describe "inside describe" do
+          ^
+
+test/cli/rspec/rspec2.rb:68: Method `include_examples` does not exist on `T.class_of(A::<describe 'inside describe'>)` https://srb.help/7003
+    68 |        include_examples("some examples")
+                ^^^^^^^^^^^^^^^^
+  Got `T.class_of(A::<describe 'inside describe'>)` originating from:
+    test/cli/rspec/rspec2.rb:34:
+    34 |  describe "inside describe" do
+          ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec2.rb:68: Replace with `included_modules`
+    68 |        include_examples("some examples")
+                ^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec2.rb:62: Method `defined_in_shared_examples` does not exist on `A::<describe 'inside describe'>::<describe 'will include shared examples'>` https://srb.help/7003
+    62 |        defined_in_shared_examples
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A::<describe 'inside describe'>::<describe 'will include shared examples'>` originating from:
+    test/cli/rspec/rspec2.rb:61:
+    61 |      it "has access to defined_in_shared_examples" do
+              ^
+
+test/cli/rspec/rspec2.rb:59: Method `include_examples` does not exist on `T.class_of(A::<describe 'inside describe'>::<describe 'will include shared examples'>)` https://srb.help/7003
+    59 |      include_examples("some examples")
+              ^^^^^^^^^^^^^^^^
+  Got `T.class_of(A::<describe 'inside describe'>::<describe 'will include shared examples'>)` originating from:
+    test/cli/rspec/rspec2.rb:58:
+    58 |    describe "will include shared examples" do # error: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`)
+            ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec2.rb:59: Replace with `included_modules`
+    59 |      include_examples("some examples")
+              ^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
 test/cli/rspec/rspec2.rb:116: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>` https://srb.help/7003
      116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
                           ^^^^^^^^^^^
@@ -154,13 +255,53 @@ test/cli/rspec/rspec2.rb:166: Method `no_such_method` does not exist on `A::<des
      166 |      is_expected.to eq(0) # error: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize`
                 ^^^^^^^^^^^
 
-test/cli/rspec/rspec4.rb:23: Revealed type: `NilClass` https://srb.help/7014
+test/cli/rspec/rspec4.rb:18: Method `shared_examples` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    18 |    shared_examples "my shared example" do |my_param|
+            ^^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec4.rb:19: Revealed type: `T.untyped` https://srb.help/7014
+    19 |      T.reveal_type(my_param) # error: `NilClass`
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:18:
+    18 |    shared_examples "my shared example" do |my_param|
+                                                    ^^^^^^^^
+
+test/cli/rspec/rspec4.rb:20: Method `let` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    20 |      let(:foo_exists) { 'bar' }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec4.rb:22: Method `let` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    22 |      let(:uses_my_param) {
+              ^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec4.rb:23: Revealed type: `T.untyped` https://srb.help/7014
     23 |        T.reveal_type(my_param) # error: `NilClass`
                 ^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    test/cli/rspec/rspec4.rb:22: Possibly uninitialized (`NilClass`) in:
-    22 |      let(:uses_my_param) {
-              ^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:18:
+    18 |    shared_examples "my shared example" do |my_param|
+                                                    ^^^^^^^^
+
+test/cli/rspec/rspec4.rb:26: Method `it` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    26 |      it "works for #{my_param}" do
+              ^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
 
 test/cli/rspec/rspec4.rb:27: Revealed type: `T.untyped` https://srb.help/7014
     27 |        T.reveal_type(my_param) # error: `T.untyped`
@@ -170,30 +311,83 @@ test/cli/rspec/rspec4.rb:27: Revealed type: `T.untyped` https://srb.help/7014
     18 |    shared_examples "my shared example" do |my_param|
                                                     ^^^^^^^^
 
-test/cli/rspec/rspec4.rb:29: Method `this_does_not_exist` does not exist on `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>` https://srb.help/7003
+test/cli/rspec/rspec4.rb:28: Method `foo_exists` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    28 |        expect(foo_exists).to eq('bar')
+                       ^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+  Did you mean `at_exit`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:28: Replace with `at_exit`
+    28 |        expect(foo_exists).to eq('bar')
+                       ^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def at_exit(&blk); end
+            ^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:28: Method `expect` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    28 |        expect(foo_exists).to eq('bar')
+                ^^^^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+  Did you mean `exec`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:28: Replace with `exec`
+    28 |        expect(foo_exists).to eq('bar')
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def exec(env, argv0 = T.unsafe(nil), *args, **options); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:28: Method `eq` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    28 |        expect(foo_exists).to eq('bar')
+                                      ^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec4.rb:29: Method `this_does_not_exist` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
     29 |        this_does_not_exist
                 ^^^^^^^^^^^^^^^^^^^
-  Got `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>` originating from:
-    test/cli/rspec/rspec4.rb:26:
-    26 |      it "works for #{my_param}" do
-              ^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec4.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
 
-test/cli/rspec/rspec4.rb:19: Revealed type: `NilClass` https://srb.help/7014
-    19 |      T.reveal_type(my_param) # error: `NilClass`
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    test/cli/rspec/rspec4.rb:18: Possibly uninitialized (`NilClass`) in:
-    18 |    shared_examples "my shared example" do |my_param|
-    19 |      T.reveal_type(my_param) # error: `NilClass`
-    20 |      let(:foo_exists) { 'bar' }
-    21 |
-    22 |      let(:uses_my_param) {
-       |...
-    28 |        expect(foo_exists).to eq('bar')
-    29 |        this_does_not_exist
-    30 |      # ^^^^^^^^^^^^^^^^^^^ error: `this_does_not_exist` does not exist
-    31 |      end
-    32 |    end
+test/cli/rspec/rspec4.rb:36: Method `shared_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 2 params'>)` https://srb.help/7003
+    36 |    shared_context "context with 2 params" do |param1, param2|
+            ^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 2 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:35:
+    35 |  describe("shared context with 2 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:37: Method `let` does not exist on `T.class_of(MyClass::<describe 'shared context with 2 params'>)` https://srb.help/7003
+    37 |      let(:value1) { param1 }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 2 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:35:
+    35 |  describe("shared context with 2 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:38: Method `let` does not exist on `T.class_of(MyClass::<describe 'shared context with 2 params'>)` https://srb.help/7003
+    38 |      let(:value2) { param2 }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 2 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:35:
+    35 |  describe("shared context with 2 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:40: Method `it` does not exist on `T.class_of(MyClass::<describe 'shared context with 2 params'>)` https://srb.help/7003
+    40 |      it "uses the params" do
+              ^^
+  Got `T.class_of(MyClass::<describe 'shared context with 2 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:35:
+    35 |  describe("shared context with 2 params") do
+          ^
 
 test/cli/rspec/rspec4.rb:41: Revealed type: `T.untyped` https://srb.help/7014
     41 |        T.reveal_type(param1) # error: `T.untyped`
@@ -210,6 +404,107 @@ test/cli/rspec/rspec4.rb:42: Revealed type: `T.untyped` https://srb.help/7014
     test/cli/rspec/rspec4.rb:36:
     36 |    shared_context "context with 2 params" do |param1, param2|
                                                                ^^^^^^
+
+test/cli/rspec/rspec4.rb:50: Method `value1` does not exist on `MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>` https://srb.help/7003
+    50 |        value1
+                ^^^^^^
+  Got `MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>` originating from:
+    test/cli/rspec/rspec4.rb:49:
+    49 |      it "has access to values" do
+              ^
+  Did you mean `caller`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:50: Replace with `caller`
+    50 |        value1
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:51: Method `value2` does not exist on `MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>` https://srb.help/7003
+    51 |        value2
+                ^^^^^^
+  Got `MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>` originating from:
+    test/cli/rspec/rspec4.rb:49:
+    49 |      it "has access to values" do
+              ^
+  Did you mean `caller`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:51: Replace with `caller`
+    51 |        value2
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:47: Method `include_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>)` https://srb.help/7003
+    47 |      include_context("context with 2 params", "value1", "value2")
+              ^^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>)` originating from:
+    test/cli/rspec/rspec4.rb:46:
+    46 |    describe "including context" do
+            ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:47: Replace with `included_modules`
+    47 |      include_context("context with 2 params", "value1", "value2")
+              ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:57: Method `shared_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
+    57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
+            ^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:56:
+    56 |  describe("shared context with 5 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:58: Method `let` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
+    58 |      let(:value1) { param1 }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:56:
+    56 |  describe("shared context with 5 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:59: Method `let` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
+    59 |      let(:value2) { param2 }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:56:
+    56 |  describe("shared context with 5 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:60: Method `let` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
+    60 |      let(:value3) { param3 }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:56:
+    56 |  describe("shared context with 5 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:61: Method `let` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
+    61 |      let(:value4) { param4 }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:56:
+    56 |  describe("shared context with 5 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:62: Method `let` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
+    62 |      let(:value5) { param5 }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:56:
+    56 |  describe("shared context with 5 params") do
+          ^
+
+test/cli/rspec/rspec4.rb:64: Method `it` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
+    64 |      it "uses the params" do
+              ^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>)` originating from:
+    test/cli/rspec/rspec4.rb:56:
+    56 |  describe("shared context with 5 params") do
+          ^
 
 test/cli/rspec/rspec4.rb:65: Revealed type: `T.untyped` https://srb.help/7014
     65 |        T.reveal_type(param1) # error: `T.untyped`
@@ -251,11 +546,219 @@ test/cli/rspec/rspec4.rb:69: Revealed type: `T.untyped` https://srb.help/7014
     57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
                                                                                        ^^^^^^
 
-test/cli/rspec/rspec3.rb:24: Method `this_does_not_exist` does not exist on `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>::<context 'context'>` https://srb.help/7003
+test/cli/rspec/rspec4.rb:77: Method `value1` does not exist on `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` https://srb.help/7003
+    77 |        value1
+                ^^^^^^
+  Got `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` originating from:
+    test/cli/rspec/rspec4.rb:76:
+    76 |      it "has access to values" do
+              ^
+  Did you mean `caller`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:77: Replace with `caller`
+    77 |        value1
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:78: Method `value2` does not exist on `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` https://srb.help/7003
+    78 |        value2
+                ^^^^^^
+  Got `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` originating from:
+    test/cli/rspec/rspec4.rb:76:
+    76 |      it "has access to values" do
+              ^
+  Did you mean `caller`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:78: Replace with `caller`
+    78 |        value2
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:79: Method `value3` does not exist on `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` https://srb.help/7003
+    79 |        value3
+                ^^^^^^
+  Got `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` originating from:
+    test/cli/rspec/rspec4.rb:76:
+    76 |      it "has access to values" do
+              ^
+  Did you mean `caller`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:79: Replace with `caller`
+    79 |        value3
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:80: Method `value4` does not exist on `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` https://srb.help/7003
+    80 |        value4
+                ^^^^^^
+  Got `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` originating from:
+    test/cli/rspec/rspec4.rb:76:
+    76 |      it "has access to values" do
+              ^
+  Did you mean `caller`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:80: Replace with `caller`
+    80 |        value4
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:81: Method `value5` does not exist on `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` https://srb.help/7003
+    81 |        value5
+                ^^^^^^
+  Got `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` originating from:
+    test/cli/rspec/rspec4.rb:76:
+    76 |      it "has access to values" do
+              ^
+  Did you mean `caller`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:81: Replace with `caller`
+    81 |        value5
+                ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:74: Method `include_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>)` https://srb.help/7003
+    74 |      include_context("context with 5 params", "value1", "value2", "value3", "value4", "value5")
+              ^^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>)` originating from:
+    test/cli/rspec/rspec4.rb:73:
+    73 |    describe "including context" do
+            ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:74: Replace with `included_modules`
+    74 |      include_context("context with 5 params", "value1", "value2", "value3", "value4", "value5")
+              ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec3.rb:18: Method `shared_examples` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    18 |    shared_examples "my shared example" do
+            ^^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec3.rb:19: Method `let` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    19 |      let(:foo_exists) { 'bar' }
+              ^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec3.rb:21: Method `context` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    21 |      context 'context' do
+              ^^^^^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec3.rb:22: Method `it` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    22 |        it 'works' do
+                ^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec3.rb:23: Method `foo_exists` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    23 |          expect(foo_exists).to eq('bar')
+                         ^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+  Did you mean `at_exit`? Use `-a` to autocorrect
+    test/cli/rspec/rspec3.rb:23: Replace with `at_exit`
+    23 |          expect(foo_exists).to eq('bar')
+                         ^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def at_exit(&blk); end
+            ^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec3.rb:23: Method `expect` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    23 |          expect(foo_exists).to eq('bar')
+                  ^^^^^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+  Did you mean `exec`? Use `-a` to autocorrect
+    test/cli/rspec/rspec3.rb:23: Replace with `exec`
+    23 |          expect(foo_exists).to eq('bar')
+                  ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def exec(env, argv0 = T.unsafe(nil), *args, **options); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec3.rb:23: Method `eq` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
+    23 |          expect(foo_exists).to eq('bar')
+                                        ^^
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec3.rb:24: Method `this_does_not_exist` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
     24 |          this_does_not_exist
                   ^^^^^^^^^^^^^^^^^^^
-  Got `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>::<context 'context'>` originating from:
-    test/cli/rspec/rspec3.rb:22:
-    22 |        it 'works' do
-                ^
-Errors: 29
+  Got `T.class_of(MyClass::<describe 'single shared example with context'>)` originating from:
+    test/cli/rspec/rspec3.rb:17:
+    17 |  describe("single shared example with context") do
+          ^
+
+test/cli/rspec/rspec1.rb:18: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    18 |  let(:name) { "Alice" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec1.rb:7:
+     7 |module RSpec
+        ^
+
+test/cli/rspec/rspec1.rb:20: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    20 |  it "has a name" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec1.rb:7:
+     7 |module RSpec
+        ^
+
+test/cli/rspec/rspec1.rb:24: Method `context` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    24 |  context "when verified" do
+          ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec1.rb:7:
+     7 |module RSpec
+        ^
+
+test/cli/rspec/rspec1.rb:25: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    25 |    let(:verified) { true }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec1.rb:7:
+     7 |module RSpec
+        ^
+
+test/cli/rspec/rspec1.rb:27: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    27 |    it "shows verified status" do
+            ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec1.rb:7:
+     7 |module RSpec
+        ^
+
+test/cli/rspec/rspec1.rb:29: Method `verified` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    29 |      verified
+              ^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec1.rb:7:
+     7 |module RSpec
+        ^
+Errors: 80

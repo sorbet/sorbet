@@ -1,4 +1,8 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  def another_outer_helper<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
   module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
     def self.context<<todo method>>(arg0, &blk)
       <emptyTree>
@@ -94,19 +98,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of my_helper>
 
-      module <emptyTree>::<C <shared_examples 'some examples'>><<C <todo sym>>> < ()
-        def defined_in_shared_examples<<todo method>>(&<blk>)
-          "foo"
-        end
-
-        def <it 'a shared example'><<todo method>>(&<blk>)
-          <self>.described_class()
-        end
-
-        <runtime method definition of defined_in_shared_examples>
-
-        ::<Magic>.requires_ancestor() do ||
-          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+      <self>.shared_examples("some examples") do ||
+        begin
+          <self>.let(:defined_in_shared_examples) do ||
+            "foo"
+          end
+          <self>.it("a shared example") do ||
+            <self>.described_class()
+          end
         end
       end
 
@@ -115,12 +114,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <self>.defined_in_shared_examples()
         end
 
-        <self>.include(<emptyTree>::<C <shared_examples 'some examples'>>)
+        <self>.include_examples("some examples")
       end
 
       <self>.test_each([]) do |x|
         begin
-          <self>.include(<emptyTree>::<C <shared_examples 'some examples'>>)
+          <self>.include_examples("some examples")
           <runtime method definition of <it 'has access to defined_in_shared_examples'>>
         end
       end
@@ -246,22 +245,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <context 'B'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def another_outer_helper<<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    def <it 'inside B'><<todo method>>(&<blk>)
-      <self>.another_outer_helper()
-    end
-
-    <runtime method definition of another_outer_helper>
-
-    class <emptyTree>::<C <context 'Nested, no RSpec'>><<C <todo sym>>> < (<self>)
-      def <it 'inside Nested'><<todo method>>(&<blk>)
-        begin
-          <self>.another_outer_helper()
-          <self>.described_class()
+  <emptyTree>::<C RSpec>.context("B") do ||
+    begin
+      <runtime method definition of another_outer_helper>
+      <self>.it("inside B") do ||
+        <self>.another_outer_helper()
+      end
+      <self>.context("Nested, no RSpec") do ||
+        <self>.it("inside Nested") do ||
+          begin
+            <self>.another_outer_helper()
+            <self>.described_class()
+          end
         end
       end
     end

@@ -460,7 +460,8 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (send->hasBlock() || !insideDescribe || send->numPosArgs() < 1) {
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || send->hasBlock() || !insideDescribe ||
+                send->numPosArgs() < 1) {
                 break;
             }
 
@@ -645,6 +646,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
+            if (recvIsRSpec && !ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
+                return nullptr;
+            }
+
             if (requiresSecondFactor(send->fun) && !recvIsRSpec && !insideDescribe) {
                 return nullptr;
             }
@@ -820,7 +825,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
             ENFORCE(isSharedExamplesName(send->fun));
-            if (block == nullptr || send->numPosArgs() != 1) {
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || block == nullptr || send->numPosArgs() != 1) {
                 return nullptr;
             }
 
@@ -884,7 +889,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (block != nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || block != nullptr ||
+                !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
                 return nullptr;
             }
 

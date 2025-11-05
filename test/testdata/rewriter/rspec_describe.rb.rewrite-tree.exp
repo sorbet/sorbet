@@ -12,30 +12,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.describe>
   end
 
-  class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def name<<todo method>>(&<blk>)
-      "Alice"
-    end
-
-    def <it 'has a name'><<todo method>>(&<blk>)
-      <self>.name()
-    end
-
-    <runtime method definition of name>
-
-    class <emptyTree>::<C <context 'when verified'>><<C <todo sym>>> < (<self>)
-      def verified<<todo method>>(&<blk>)
-        true
+  <emptyTree>::<C RSpec>.describe("User") do ||
+    begin
+      <self>.let(:name) do ||
+        "Alice"
       end
-
-      def <it 'shows verified status'><<todo method>>(&<blk>)
+      <self>.it("has a name") do ||
+        <self>.name()
+      end
+      <self>.context("when verified") do ||
         begin
-          <self>.name()
-          <self>.verified()
+          <self>.let(:verified) do ||
+            true
+          end
+          <self>.it("shows verified status") do ||
+            begin
+              <self>.name()
+              <self>.verified()
+            end
+          end
         end
       end
-
-      <runtime method definition of verified>
     end
   end
 end
