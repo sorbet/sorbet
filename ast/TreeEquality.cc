@@ -40,6 +40,13 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (!Comparator::compareNames(gs, a->fun, b->fun)) {
                 return false;
             }
+            if (!Comparator::compareLocations(a->loc, b->loc)) {
+                return false;
+            }
+
+            if (!Comparator::compareLocations(a->argsLoc(), b->argsLoc())) {
+                return false;
+            }
 
             if (a->flags != b->flags) {
                 return false;
@@ -65,6 +72,9 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (a->kind != b->kind) {
                 return false;
             }
+            if (!Comparator::compareLocations(a->loc, b->loc)) {
+                return false;
+            }
             if (!Comparator::compareNodes(gs, avoid, a->name, b->name, file)) {
                 return false;
             }
@@ -87,6 +97,9 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
                 return false;
             }
             if (!Comparator::compareNames(gs, a->name, b->name)) {
+                return false;
+            }
+            if (!Comparator::compareLocations(a->loc, b->loc)) {
                 return false;
             }
             if (a->flags != b->flags) {
@@ -257,6 +270,11 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             } else if (aType.tag() == core::TypePtr::Tag::NamedLiteralType) {
                 auto named_literal_a = core::cast_type_nonnull<core::NamedLiteralType>(aType);
                 auto named_literal_b = core::cast_type_nonnull<core::NamedLiteralType>(bType);
+
+                if (named_literal_a.kind != named_literal_b.kind) {
+                    Exception::raise("Why aren't these the same kind?");
+                }
+
                 return named_literal_a.kind == named_literal_b.kind &&
                        Comparator::compareNames(gs, named_literal_a.name, named_literal_b.name);
             } else if (aType.tag() == core::TypePtr::Tag::ClassType) {
@@ -367,13 +385,17 @@ struct StructurallyEqualComparator {
     static bool compareNames(const core::GlobalState &gs, const core::NameRef &a, const core::NameRef &b) {
         return a == b;
     }
+
+    static bool compareLocations(const core::LocOffsets a, const core::LocOffsets b) {
+        return true; // Igonre location differences.
+    }
 };
 
 // TODO: Clean up after Prism work is done. https://github.com/sorbet/sorbet/issues/9065
 struct PrismDesugarComparator {
     static bool compareNodes(const core::GlobalState &gs, const void *avoid, const ExpressionPtr &tree,
                              const ExpressionPtr &other, const core::FileRef file) {
-        if (tree.loc() != other.loc()) {
+        if (!compareLocations(tree.loc(), other.loc())) {
             return false;
         }
 
@@ -403,6 +425,10 @@ struct PrismDesugarComparator {
         // So for now, we'll ignore the difference between uniquely generated names.
         return a.hasUniqueNameKind(gs, core::UniqueNameKind::Desugar) &&
                b.hasUniqueNameKind(gs, core::UniqueNameKind::Desugar);
+    }
+
+    static bool compareLocations(const core::LocOffsets a, const core::LocOffsets b) {
+        return a == b;
     }
 };
 
