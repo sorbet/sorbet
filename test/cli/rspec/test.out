@@ -1,0 +1,261 @@
+test/cli/rspec/rspec2.rb:58: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`) https://srb.help/5064
+    58 |    describe "will include shared examples" do # error: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/rspec/rspec2.rb:50: required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>` here
+    50 |    shared_examples "some examples" do
+                                            ^
+
+test/cli/rspec/rspec2.rb:77: Method `example` does not exist on `T.class_of(A)` https://srb.help/7003
+    77 |  example do # error: Method `example` does not exist
+          ^^^^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+
+test/cli/rspec/rspec2.rb:78: Method `outer_helper` does not exist on `T.class_of(A)` https://srb.help/7003
+    78 |    outer_helper # error: Method `outer_helper` does not exist
+            ^^^^^^^^^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+  Did you mean `attr_reader`? Use `-a` to autocorrect
+    test/cli/rspec/rspec2.rb:78: Replace with `attr_reader`
+    78 |    outer_helper # error: Method `outer_helper` does not exist
+            ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr_reader(*arg0); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec2.rb:81: Method `example_group` does not exist on `T.class_of(A)` https://srb.help/7003
+    81 |  example_group "example_group group" do # error: Method `example_group` does not exist
+          ^^^^^^^^^^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+
+test/cli/rspec/rspec2.rb:82: Method `it` does not exist on `T.class_of(A)` https://srb.help/7003
+    82 |    it do # error: does not exist
+            ^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+
+test/cli/rspec/rspec2.rb:83: Method `outer_helper` does not exist on `T.class_of(A)` https://srb.help/7003
+    83 |      outer_helper # error: Method `outer_helper` does not exist
+              ^^^^^^^^^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+  Did you mean `attr_reader`? Use `-a` to autocorrect
+    test/cli/rspec/rspec2.rb:83: Replace with `attr_reader`
+    83 |      outer_helper # error: Method `outer_helper` does not exist
+              ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr_reader(*arg0); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec2.rb:87: Method `context` does not exist on `T.class_of(A)` https://srb.help/7003
+    87 |  context "context group" do # error: Method `context` does not exist
+          ^^^^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+
+test/cli/rspec/rspec2.rb:88: Method `it` does not exist on `T.class_of(A)` https://srb.help/7003
+    88 |    it do # error: does not exist
+            ^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+
+test/cli/rspec/rspec2.rb:89: Method `outer_helper` does not exist on `T.class_of(A)` https://srb.help/7003
+    89 |      outer_helper # error: Method `outer_helper` does not exist
+              ^^^^^^^^^^^^
+  Got `T.class_of(A)` originating from:
+    test/cli/rspec/rspec2.rb:23:
+    23 |class A
+        ^
+  Did you mean `attr_reader`? Use `-a` to autocorrect
+    test/cli/rspec/rspec2.rb:89: Replace with `attr_reader`
+    89 |      outer_helper # error: Method `outer_helper` does not exist
+              ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr_reader(*arg0); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec2.rb:39: Method `described_class` does not exist on `A::<describe 'inside describe'>` https://srb.help/7003
+    39 |      described_class # error: does not exist
+              ^^^^^^^^^^^^^^^
+  Got `A::<describe 'inside describe'>` originating from:
+    test/cli/rspec/rspec2.rb:37:
+    37 |    xit do
+            ^
+
+test/cli/rspec/rspec2.rb:71: Method `defined_in_shared_examples` does not exist on `A::<describe 'inside describe'>` https://srb.help/7003
+    71 |          defined_in_shared_examples # error: does not exist
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A::<describe 'inside describe'>` originating from:
+    test/cli/rspec/rspec2.rb:70:
+    70 |        it "has access to defined_in_shared_examples" do
+                ^
+
+test/cli/rspec/rspec2.rb:116: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>` https://srb.help/7003
+     116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
+                          ^^^^^^^^^^^
+  Got `A::<describe 'its support'>::<describe 'bar'>` originating from:
+    test/cli/rspec/rspec2.rb:116:
+     116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
+              ^
+
+test/cli/rspec/rspec2.rb:119: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>` https://srb.help/7003
+     119 |    its('bar') { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
+                           ^^^^^^^^^^^
+  Got `A::<describe 'its support'>::<describe 'bar'>` originating from:
+    test/cli/rspec/rspec2.rb:119: Possibly uninitialized (`NilClass`) in:
+     119 |    its('bar') { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
+              ^
+
+test/cli/rspec/rspec2.rb:124: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'size'>` https://srb.help/7003
+     124 |      is_expected.to eq(X) # error: Method `subject` does not exist
+                ^^^^^^^^^^^
+  Got `A::<describe 'its support'>::<describe 'size'>` originating from:
+    test/cli/rspec/rspec2.rb:122:
+     122 |    its(:size) do
+              ^
+
+test/cli/rspec/rspec2.rb:136: Revealed type: `A::<describe 'its support'>::<describe 'size'>` https://srb.help/7014
+     136 |      T.reveal_type(self) # error: Revealed type: `A::<describe 'its support'>::<describe 'size'>`
+                ^^^^^^^^^^^^^^^^^^^
+  Got `A::<describe 'its support'>::<describe 'size'>` originating from:
+    test/cli/rspec/rspec2.rb:135: Possibly uninitialized (`NilClass`) in:
+     135 |    its(:size) do
+              ^
+
+test/cli/rspec/rspec2.rb:160: Revealed type: `A::<describe 'its with typed subject'>::ThingWithSize` https://srb.help/7014
+     160 |      T.reveal_type(subject) # error: Revealed type: `A::<describe 'its with typed subject'>::ThingWithSize`
+                ^^^^^^^^^^^^^^^^^^^^^^
+  Got `A::<describe 'its with typed subject'>::ThingWithSize` originating from:
+    test/cli/rspec/rspec2.rb:160:
+     160 |      T.reveal_type(subject) # error: Revealed type: `A::<describe 'its with typed subject'>::ThingWithSize`
+                              ^^^^^^^
+
+test/cli/rspec/rspec2.rb:166: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize` https://srb.help/7003
+     166 |      is_expected.to eq(0) # error: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize`
+                ^^^^^^^^^^^
+  Got `A::<describe 'its with typed subject'>::ThingWithSize` originating from:
+    test/cli/rspec/rspec2.rb:166:
+     166 |      is_expected.to eq(0) # error: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize`
+                ^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:23: Revealed type: `NilClass` https://srb.help/7014
+    23 |        T.reveal_type(my_param) # error: `NilClass`
+                ^^^^^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    test/cli/rspec/rspec4.rb:22: Possibly uninitialized (`NilClass`) in:
+    22 |      let(:uses_my_param) {
+              ^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec4.rb:27: Revealed type: `T.untyped` https://srb.help/7014
+    27 |        T.reveal_type(my_param) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:18:
+    18 |    shared_examples "my shared example" do |my_param|
+                                                    ^^^^^^^^
+
+test/cli/rspec/rspec4.rb:29: Method `this_does_not_exist` does not exist on `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>` https://srb.help/7003
+    29 |        this_does_not_exist
+                ^^^^^^^^^^^^^^^^^^^
+  Got `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>` originating from:
+    test/cli/rspec/rspec4.rb:26:
+    26 |      it "works for #{my_param}" do
+              ^
+
+test/cli/rspec/rspec4.rb:19: Revealed type: `NilClass` https://srb.help/7014
+    19 |      T.reveal_type(my_param) # error: `NilClass`
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    test/cli/rspec/rspec4.rb:18: Possibly uninitialized (`NilClass`) in:
+    18 |    shared_examples "my shared example" do |my_param|
+    19 |      T.reveal_type(my_param) # error: `NilClass`
+    20 |      let(:foo_exists) { 'bar' }
+    21 |
+    22 |      let(:uses_my_param) {
+       |...
+    28 |        expect(foo_exists).to eq('bar')
+    29 |        this_does_not_exist
+    30 |      # ^^^^^^^^^^^^^^^^^^^ error: `this_does_not_exist` does not exist
+    31 |      end
+    32 |    end
+
+test/cli/rspec/rspec4.rb:41: Revealed type: `T.untyped` https://srb.help/7014
+    41 |        T.reveal_type(param1) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:36:
+    36 |    shared_context "context with 2 params" do |param1, param2|
+                                                       ^^^^^^
+
+test/cli/rspec/rspec4.rb:42: Revealed type: `T.untyped` https://srb.help/7014
+    42 |        T.reveal_type(param2) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:36:
+    36 |    shared_context "context with 2 params" do |param1, param2|
+                                                               ^^^^^^
+
+test/cli/rspec/rspec4.rb:65: Revealed type: `T.untyped` https://srb.help/7014
+    65 |        T.reveal_type(param1) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:57:
+    57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
+                                                       ^^^^^^
+
+test/cli/rspec/rspec4.rb:66: Revealed type: `T.untyped` https://srb.help/7014
+    66 |        T.reveal_type(param2) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:57:
+    57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
+                                                               ^^^^^^
+
+test/cli/rspec/rspec4.rb:67: Revealed type: `T.untyped` https://srb.help/7014
+    67 |        T.reveal_type(param3) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:57:
+    57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
+                                                                       ^^^^^^
+
+test/cli/rspec/rspec4.rb:68: Revealed type: `T.untyped` https://srb.help/7014
+    68 |        T.reveal_type(param4) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:57:
+    57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
+                                                                               ^^^^^^
+
+test/cli/rspec/rspec4.rb:69: Revealed type: `T.untyped` https://srb.help/7014
+    69 |        T.reveal_type(param5) # error: `T.untyped`
+                ^^^^^^^^^^^^^^^^^^^^^
+  Got `T.untyped` originating from:
+    test/cli/rspec/rspec4.rb:57:
+    57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
+                                                                                       ^^^^^^
+
+test/cli/rspec/rspec3.rb:24: Method `this_does_not_exist` does not exist on `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>::<context 'context'>` https://srb.help/7003
+    24 |          this_does_not_exist
+                  ^^^^^^^^^^^^^^^^^^^
+  Got `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>::<context 'context'>` originating from:
+    test/cli/rspec/rspec3.rb:22:
+    22 |        it 'works' do
+                ^
+Errors: 29
