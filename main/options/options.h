@@ -200,17 +200,19 @@ struct Options {
         // Experimental feature `requires_ancestor`
         bool requiresAncestorEnabled : 1;
 
+        bool rspecRewriterEnabled : 1;
+
         bool runningUnderAutogen : 1;
 
         bool sorbetPackages : 1;
 
         // HELLO! adding/removing MUST also change this number!!
-        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 7;
 
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
             : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
-              runningUnderAutogen(false), sorbetPackages(false) {}
+              rspecRewriterEnabled(false), runningUnderAutogen(false), sorbetPackages(false) {}
 
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 

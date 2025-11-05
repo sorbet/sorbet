@@ -41,6 +41,7 @@ enum class Group {
     STRIPE_AUTOGEN,
     DEBUGGING,
     INTERNAL,
+    EXPERIMENTAL,
     OTHER,
 };
 
@@ -70,6 +71,8 @@ string groupToString(Group group) {
             return "DEBUGGING";
         case Group::INTERNAL:
             return "INTERNAL";
+        case Group::EXPERIMENTAL:
+            return "EXPERIMENTAL";
         case Group::OTHER:
             return "OTHER";
     }
@@ -82,7 +85,7 @@ const vector<string> groupSections{
     groupToString(Group::ERROR),          groupToString(Group::METRIC),      groupToString(Group::LSP),
     groupToString(Group::LSP_FEATURE),    groupToString(Group::PERFORMANCE), groupToString(Group::SORBET_PACKAGES_MODE),
     groupToString(Group::STRIPE_AUTOGEN), groupToString(Group::DEBUGGING),   groupToString(Group::INTERNAL),
-    groupToString(Group::OTHER),
+    groupToString(Group::EXPERIMENTAL),   groupToString(Group::OTHER),
 };
 
 struct PrintOptions {
@@ -466,14 +469,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-ruby3-keyword-args",
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
-    options.add_options(section)("enable-experimental-rbs-signatures",
-                                 "Enable experimental support for RBS signatures as inline comments");
-    options.add_options(section)("enable-experimental-rbs-assertions",
-                                 "Enable experimental support for RBS assertions as inline comments");
-    options.add_options(section)("enable-experimental-rbs-comments",
-                                 "Enable experimental support for RBS signatures and assertions as inline comments");
-    options.add_options(section)("enable-experimental-requires-ancestor",
-                                 "Enable experimental `requires_ancestor` annotation");
     options.add_options(section)("uniquely-defined-behavior",
                                  "Ensure that every class and module only defines 'behavior' in one file. Ensures "
                                  "that every class or module can be autoloaded by loading exactly one file.",
@@ -732,6 +727,26 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "When printing raw location information, don't show line numbers");
     // }}}
 
+    // ----- EXPERIMENTAL ------------------------------------------------- {{{
+    section = groupToString(Group::EXPERIMENTAL);
+
+    options.add_options(section)("enable-experimental-requires-ancestor",
+                                 "Enable experimental `requires_ancestor` annotation");
+
+    options.add_options(section)("enable-experimental-rbs-signatures",
+                                 "Enable experimental support for RBS signatures as inline comments");
+    options.add_options(section)("enable-experimental-rbs-assertions",
+                                 "Enable experimental support for RBS assertions as inline comments");
+    options.add_options(section)("enable-experimental-rbs-comments",
+                                 "Enable experimental support for RBS signatures and assertions as inline comments");
+
+    options.add_options(section)(
+        "enable-experimental-rspec",
+        "Enables experimental support for RSpec. "
+        "There are many RSpec constructs that are impossible for Sorbet to handle. "
+        "As a result, there is no path to this flag ever being stable: RSpec support is best effort.");
+    // }}}
+
     // ----- OTHER -------------------------------------------------------- {{{
     section = groupToString(Group::OTHER);
     options.add_options(section)("version", "Show Sorbet's version");
@@ -983,6 +998,7 @@ void readOptions(Options &opts,
         }
 
         opts.cacheSensitiveOptions.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
+        opts.cacheSensitiveOptions.rspecRewriterEnabled = raw["enable-experimental-rspec"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();

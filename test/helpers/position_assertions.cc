@@ -269,6 +269,7 @@ const UnorderedMap<
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-rbs-comments", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
+        {"enable-experimental-rspec", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
@@ -698,6 +699,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
         BooleanPropertyAssertion::getValue("enable-experimental-rbs-comments", assertions).value_or(false);
     opts.cacheSensitiveOptions.requiresAncestorEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
+    opts.cacheSensitiveOptions.rspecRewriterEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-rspec", assertions).value_or(false);
     opts.ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
     opts.cacheSensitiveOptions.typedSuper =

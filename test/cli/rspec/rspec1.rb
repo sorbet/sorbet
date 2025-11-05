@@ -1,5 +1,4 @@
 # typed: true
-# enable-experimental-rspec: true
 
 # This test shows that RSpec DSL methods like `let`, `it`, and `context`
 # are recognized by Sorbet with no errors.

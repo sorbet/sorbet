@@ -140,6 +140,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
       needs_requires_ancestor=true
     fi
 
+    needs_rspec=false
+    if grep -q '^# enable-experimental-rspec: true' "${srcs[@]}"; then
+      needs_rspec=true
+    fi
+
     needs_experimental_rbs=false
     if grep -q '^# enable-experimental-rbs-comments: true' "${srcs[@]}"; then
       needs_experimental_rbs=true
@@ -203,6 +208,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
       fi
       if $needs_requires_ancestor; then
         args=("--enable-experimental-requires-ancestor")
+      else
+        args=()
+      fi
+      if $needs_rspec; then
+        args+=("--enable-experimental-rspec")
       else
         args=()
       fi
