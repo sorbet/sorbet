@@ -1,0 +1,108 @@
+Begin {
+  stmts = [
+    Send {
+      receiver = NULL
+      method = <U foo1>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U key>
+              }
+              value = Send {
+                receiver = NULL
+                method = <U key>
+                args = [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U foo2>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U key>
+              }
+              value = Send {
+                receiver = NULL
+                method = <U foo3>
+                args = [
+                  Hash {
+                    kwargs = true
+                    pairs = [
+                      Pair {
+                        key = Symbol {
+                          val = <U key1>
+                        }
+                        value = Send {
+                          receiver = NULL
+                          method = <U key1>
+                          args = [
+                          ]
+                        }
+                      }
+                      Pair {
+                        key = Symbol {
+                          val = <U key2>
+                        }
+                        value = Send {
+                          receiver = NULL
+                          method = <U key2>
+                          args = [
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U foo4>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U key1>
+              }
+              value = Send {
+                receiver = NULL
+                method = <U key1>
+                args = [
+                ]
+              }
+            }
+            Pair {
+              key = Symbol {
+                val = <U key2>
+              }
+              value = Send {
+                receiver = NULL
+                method = <U key2>
+                args = [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -142,12 +142,6 @@ pair<core::NameRef, core::LocOffsets> Translator::translateSymbol(pm_symbol_node
     // TODO: can these have different encodings?
     auto content = ctx.state.enterNameUTF8(parser.extractString(unescaped));
 
-    // If the opening location is null, the symbol is used as a key with a colon postfix, like `{a: 1}`
-    // In those cases, the location should not include the colon.
-    if (symbol->opening_loc.start == nullptr) {
-        location = translateLoc(symbol->value_loc);
-    }
-
     return make_pair(content, location);
 }
 
@@ -2336,7 +2330,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return translateAssignment<pm_global_variable_write_node, parser::GVarLhs>(node);
         }
         case PM_HASH_NODE: { // A hash literal, like `{ a: 1, b: 2 }`
-            auto kvPairs = translateKeyValuePairs(down_cast<pm_hash_node>(node)->elements);
+            auto hashNode = down_cast<pm_hash_node>(node);
+
+            auto kvPairs = translateKeyValuePairs(hashNode->elements);
 
             auto elementsHaveExprs = absl::c_all_of(kvPairs, [](const auto &node) {
                 // `parser::Pair` nodes never have a desugared expr, because they have no ExpressionPtr equivalent.
@@ -3658,6 +3654,16 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto expr = patternTranslate(prismSplatNode->expression);
             return make_unique<MatchRest>(location, move(expr));
         }
+        case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
+            auto symNode = down_cast<pm_symbol_node>(node);
+
+            auto [content, _] = translateSymbol(symNode);
+
+            // For patterns, Sorbet's legacy parser uses the location of the symbol content, not including the colon.
+            location = translateLoc(symNode->value_loc);
+
+            return make_node_with_expr<parser::Symbol>(MK::Symbol(location, content), location, content);
+        }
         default: {
             return translate(node);
         }
@@ -3961,9 +3967,9 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     parser::NodeVec sorbetElements{};
     sorbetElements.reserve(prismElements.size());
 
-    for (auto &pair : prismElements) {
-        if (PM_NODE_TYPE_P(pair, PM_ASSOC_SPLAT_NODE)) {
-            auto prismSplatNode = down_cast<pm_assoc_splat_node>(pair);
+    for (auto &element : prismElements) {
+        if (PM_NODE_TYPE_P(element, PM_ASSOC_SPLAT_NODE)) {
+            auto prismSplatNode = down_cast<pm_assoc_splat_node>(element);
             auto splatLoc = translateLoc(prismSplatNode->base.location);
             auto value = translate(prismSplatNode->value);
 
@@ -3976,8 +3982,69 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
 
             sorbetElements.emplace_back(move(sorbetSplatNode));
         } else {
-            ENFORCE(PM_NODE_TYPE_P(pair, PM_ASSOC_NODE))
-            unique_ptr<parser::Node> sorbetKVPair = translate(pair);
+            ENFORCE(PM_NODE_TYPE_P(element, PM_ASSOC_NODE))
+            auto pair = down_cast<pm_assoc_node>(element);
+
+            unique_ptr<parser::Node> sorbetKVPair;
+            if (PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE)) { // Special case to modify Symbol locations
+                auto symbolNode = down_cast<pm_symbol_node>(pair->key);
+
+                auto [symbolContent, _] = translateSymbol(symbolNode);
+
+                // If the opening location is null, the symbol is used as a key with a colon postfix, like `{ a: 1 }`
+                // The legacy parser sometimes includes symbol's colons, othertimes not:
+                //
+                //     k3 = nil    # The implicit lvar accessed by k3 below
+                //     def k4; end # The implicit method called by k4 below
+                //
+                //             :k1        #  9-12 Regular symbol
+                //             ^^^
+                //            { k2: 1 }   # 10-12 Key with explicit value
+                //              ^^
+                //            { k3:   }   # 10-13 Key with implicit lvar value access
+                //              ^^^         key symbol loc
+                //            { k4:   }   # 10-13 Key with implicit method call
+                //              ^^^         key symbol loc
+                //              ^^^         Sorbet send node loc
+                //              ^^^         Sorbet send node methodLoc (Prism excludes the ':' here)
+                //     def demo(k5:); end # 10-13 Keyword parameter
+                //              ^^^
+                //         call(k6:)      # 10-13 Keyword argument
+                //              ^^
+                if (symbolNode->opening_loc.start == nullptr) {
+                    core::LocOffsets symbolLoc;
+                    if (PM_NODE_TYPE_P(pair->value, PM_IMPLICIT_NODE)) {
+                        auto implicitNode = down_cast<pm_implicit_node>(pair->value);
+
+                        if (PM_NODE_TYPE_P(implicitNode->value, PM_CALL_NODE)) {
+                            auto callNode = down_cast<pm_call_node>(implicitNode->value);
+
+                            // Prism's method_loc excludes the ':' here, but Sorbet's legacy parser includes it.
+                            // Not a fan of modifying the Prism tree in-place, but the alternative is much trickier.
+                            // TODO: revisit this when we extract a helper function for translating call nodes.
+                            ENFORCE(symbolNode->base.location.end[-1] == ':');
+                            callNode->message_loc.end = symbolNode->base.location.end;
+                        }
+
+                        symbolLoc = translateLoc(symbolNode->base.location);
+                    } else {
+                        // Drop the trailing colon in the key's location
+                        symbolLoc = translateLoc(symbolNode->base.location.start, symbolNode->base.location.end - 1);
+                    }
+
+                    auto key = make_node_with_expr<parser::Symbol>(MK::Symbol(symbolLoc, symbolContent), symbolLoc,
+                                                                   symbolContent);
+                    auto value = translate(pair->value);
+                    sorbetKVPair =
+                        make_unique<parser::Pair>(translateLoc(pair->base.location), move(key), translate(pair->value));
+
+                } else {
+                    sorbetKVPair = translate(element);
+                }
+            } else {
+                sorbetKVPair = translate(element);
+            }
+
             sorbetElements.emplace_back(move(sorbetKVPair));
         }
     }
@@ -4031,6 +4098,8 @@ ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPair
     //   acc = <Magic>.<merge-hash>(acc, remaining)
     //   acc
     for (auto &pairAsExpression : kvPairs) {
+        ENFORCE(pairAsExpression != nullptr);
+
         auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(pairAsExpression.get());
         if (pair != nullptr) {
             auto key = pair->key->takeDesugaredExpr();

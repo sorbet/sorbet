@@ -263,5 +263,35 @@ ClassDef{
         ]
       }
     }
+
+    MethodDef{
+      flags = {}
+      name = <U v5><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U v5>
+      block = nullptr
+      pos_args = 0
+      args = [
+        Literal{ value = :k5 }
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U k5>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      ]
+    }
   ]
 }
