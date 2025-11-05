@@ -689,10 +689,6 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
     return what;
 }
 
-/**
- * fromWhat - where the generic type was written
- * self   - where the generic type is observed
- */
 TypePtr Types::resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef self) {
     if (self.data(gs)->typeMembers().empty() || (what == nullptr)) {
         return what;
