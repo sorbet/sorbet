@@ -369,6 +369,12 @@ TypePtr Types::tClass(const TypePtr &attachedClass) {
     return make_type<AppliedType>(Symbols::Class(), move(targs));
 }
 
+TypePtr Types::tModule(const TypePtr &attachedClass) {
+    vector<TypePtr> targs;
+    targs.emplace_back(attachedClass);
+    return make_type<AppliedType>(Symbols::Module(), move(targs));
+}
+
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
     static auto nilClass = core::Symbols::NilClass();
     static auto toDrop = absl::MakeSpan(&nilClass, 1);

@@ -181,6 +181,7 @@ public:
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &key, const TypePtr &val);
     static TypePtr setOf(const TypePtr &elem);
     static TypePtr tClass(const TypePtr &attachedClass);
+    static TypePtr tModule(const TypePtr &attachedClass);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */
