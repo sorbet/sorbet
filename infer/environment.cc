@@ -624,7 +624,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
-    // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p() ||
         send->fun == core::Names::instanceOf_p()) {
         const auto &klassType = send->args[0].type;
