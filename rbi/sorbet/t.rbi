@@ -309,7 +309,7 @@ module T::Helpers
   # `include` target.
   #
   # For more information, see https://sorbet.org/docs/abstract#interfaces-and-the-included-hook
-  sig {params(mod: Module, mods: Module).void}
+  sig {params(mod: T::Module[T.anything], mods: T::Module[T.anything]).void}
   def mixes_in_class_methods(mod, *mods); end
 
   # Experimental feature to require that a module be eventually mixed into a
@@ -473,14 +473,14 @@ module T::Utils::Nilable
   #
   # If this method is about to return a `T::Types::Simple` type (e.g., a normal
   # class type), returns that type's `raw_type`, e.g. a Module
-  sig { params(prop_type: T.any(Module, T::Types::Base)).returns(T.any(Module, T::Types::Base)) }
+  sig { params(prop_type: T.any(T::Module[T.anything], T::Types::Base)).returns(T.any(T::Module[T.anything], T::Types::Base)) }
   def self.get_underlying_type(prop_type); end
 
   # If prop_type can accept `nil`, returns a type representing the non-nil version.
   # Otherwise, returns the input.
   sig {
     type_parameters(:Type)
-      .params(prop_type: T.all(T.type_parameter(:Type), T.any(T::Types::Base, Module)))
+      .params(prop_type: T.all(T.type_parameter(:Type), T.any(T::Types::Base, T::Module[T.anything])))
       .returns(T.any(T::Types::Base, T.type_parameter(:Type)))
   }
   def self.get_underlying_type_object(prop_type); end

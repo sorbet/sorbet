@@ -59,7 +59,7 @@ class Module < Object
   # $a           #=> [M1::M2, M1]
   # $a[0].name   #=> "M1::M2"
   # ```
-  sig {returns(T::Array[Module])}
+  sig {returns(T::Array[T::Module[T.anything]])}
   def self.nesting(); end
 
   # Returns true if *mod* is a subclass of *other*. Returns `nil` if there's no
@@ -67,7 +67,7 @@ class Module < Object
   # class definition: "class A < B" implies "A < B".)
   sig do
     params(
-        other: Module,
+      other: T::Module[T.anything],
     )
     .returns(T.nilable(T::Boolean))
   end
@@ -79,7 +79,7 @@ class Module < Object
   # B".)
   sig do
     params(
-        other: Module,
+      other: T::Module[T.anything],
     )
     .returns(T.nilable(T::Boolean))
   end
@@ -181,7 +181,7 @@ class Module < Object
   # class definition: "class A < B" implies "B > A".)
   sig do
     params(
-        other: Module,
+      other: T::Module[T.anything],
     )
     .returns(T.nilable(T::Boolean))
   end
@@ -193,7 +193,7 @@ class Module < Object
   # > A".)
   sig do
     params(
-        other: Module,
+      other: T::Module[T.anything],
     )
     .returns(T.nilable(T::Boolean))
   end
@@ -242,7 +242,7 @@ class Module < Object
   # Math.ancestors       #=> [Math]
   # Enumerable.ancestors #=> [Enumerable]
   # ```
-  sig {returns(T::Array[Module])}
+  sig {returns(T::Array[T::Module[T.anything]])}
   def ancestors(); end
 
   # When this module is included in another, Ruby calls
@@ -254,7 +254,7 @@ class Module < Object
   # [`Module#include`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-include).
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T.self_type)
   end
@@ -917,7 +917,7 @@ class Module < Object
   # ```
   sig do
     params(
-        othermod: Module,
+      othermod: T::Module[T.anything],
     )
     .returns(T.untyped)
   end
@@ -934,7 +934,7 @@ class Module < Object
   # on each parameter in reverse order.
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T.self_type)
   end
@@ -957,7 +957,7 @@ class Module < Object
   # ```
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T::Boolean)
   end
@@ -980,7 +980,7 @@ class Module < Object
   # ```
   sig do
     params(
-        othermod: Module,
+      othermod: T::Module[T.anything],
     )
     .returns(T.untyped)
   end
@@ -1004,13 +1004,13 @@ class Module < Object
   # Mixin.included_modules   #=> [Sub]
   # Outer.included_modules   #=> [Sub, Mixin]
   # ```
-  sig {returns(T::Array[Module])}
+  sig {returns(T::Array[T::Module[T.anything]])}
   def included_modules(); end
 
   sig {returns(Object)}
   sig do
     params(
-        blk: T.proc.params(arg0: Module).returns(BasicObject),
+      blk: T.proc.params(arg0: T::Module[T.anything]).returns(BasicObject),
     )
     .void
   end
@@ -1309,7 +1309,7 @@ class Module < Object
   # on each parameter in reverse order.
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T.self_type)
   end
@@ -1324,7 +1324,7 @@ class Module < Object
   # [`Module#prepend`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-prepend).
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T.self_type)
   end
@@ -1345,7 +1345,7 @@ class Module < Object
   # ```
   sig do
     params(
-        othermod: Module,
+      othermod: T::Module[T.anything],
     )
     .returns(T.untyped)
   end
@@ -1664,7 +1664,7 @@ class Module < Object
   # ```ruby
   # [#<refinement:Integer@A>, #<refinement:String@B>]
   # ```
-  sig {returns(T::Array[Module])}
+  sig {returns(T::Array[T::Module[T.anything]])}
   def refinements; end
 
   # Removes the named class variable from the receiver, returning that
@@ -1824,7 +1824,7 @@ class Module < Object
   # definition.
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T.self_type)
   end
@@ -1901,6 +1901,6 @@ class Module < Object
   # ```ruby
   # [#<refinement:Object@B>, #<refinement:Object@A>]
   # ```
-  sig {returns(T::Array[Module])}
+  sig {returns(T::Array[T::Module[T.anything]])}
   def self.used_refinements; end
 end

@@ -157,7 +157,7 @@ class TracePoint < Object
   #   C.foo
   # end
   # ```
-  sig {returns(Module)}
+  sig {returns(T::Module[T.anything])}
   def defined_class; end
 
   # Deactivates the trace
