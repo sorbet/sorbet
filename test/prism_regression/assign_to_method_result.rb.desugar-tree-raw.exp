@@ -624,7 +624,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <assignTemp>> $17>
+            name = <D <U <assignTemp>> $2>
           }
           rhs = Array{
             elems = [
@@ -636,7 +636,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <assignTemp>> $18>
+            name = <D <U <assignTemp>> $3>
           }
           rhs = Send{
             flags = {}
@@ -650,7 +650,7 @@ ClassDef{
             args = [
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $17>
+                name = <D <U <assignTemp>> $2>
               }
               Literal{ value = 2 }
               Literal{ value = 0 }
@@ -668,7 +668,7 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $18>
+                name = <D <U <assignTemp>> $3>
               }
               fun = <U []>
               block = nullptr
@@ -690,7 +690,7 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $18>
+                name = <D <U <assignTemp>> $3>
               }
               fun = <U []>
               block = nullptr
@@ -704,7 +704,7 @@ ClassDef{
       ],
       expr = UnresolvedIdent{
         kind = Local
-        name = <D <U <assignTemp>> $17>
+        name = <D <U <assignTemp>> $2>
       }
     }
 
@@ -713,7 +713,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <assignTemp>> $19>
+            name = <D <U <assignTemp>> $4>
           }
           rhs = Array{
             elems = [
@@ -725,7 +725,7 @@ ClassDef{
         Assign{
           lhs = UnresolvedIdent{
             kind = Local
-            name = <D <U <assignTemp>> $20>
+            name = <D <U <assignTemp>> $5>
           }
           rhs = Send{
             flags = {}
@@ -739,7 +739,7 @@ ClassDef{
             args = [
               UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $19>
+                name = <D <U <assignTemp>> $4>
               }
               Literal{ value = 2 }
               Literal{ value = 0 }
@@ -751,7 +751,7 @@ ClassDef{
             Assign{
               lhs = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $21>
+                name = <D <U <assignTemp>> $6>
               }
               rhs = Self
             }
@@ -769,7 +769,7 @@ ClassDef{
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $21>
+                  name = <D <U <assignTemp>> $6>
                 }
               ]
             }
@@ -785,7 +785,7 @@ ClassDef{
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $21>
+                  name = <D <U <assignTemp>> $6>
                 }
               ]
             }
@@ -793,7 +793,7 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $21>
+                name = <D <U <assignTemp>> $6>
               }
               fun = <U target1=>
               block = nullptr
@@ -803,7 +803,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $20>
+                    name = <D <U <assignTemp>> $5>
                   }
                   fun = <U []>
                   block = nullptr
@@ -821,7 +821,7 @@ ClassDef{
             Assign{
               lhs = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $22>
+                name = <D <U <assignTemp>> $7>
               }
               rhs = Self
             }
@@ -839,7 +839,7 @@ ClassDef{
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $22>
+                  name = <D <U <assignTemp>> $7>
                 }
               ]
             }
@@ -855,7 +855,7 @@ ClassDef{
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $22>
+                  name = <D <U <assignTemp>> $7>
                 }
               ]
             }
@@ -863,7 +863,7 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $22>
+                name = <D <U <assignTemp>> $7>
               }
               fun = <U target2=>
               block = nullptr
@@ -873,7 +873,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $20>
+                    name = <D <U <assignTemp>> $5>
                   }
                   fun = <U []>
                   block = nullptr
@@ -889,7 +889,7 @@ ClassDef{
       ],
       expr = UnresolvedIdent{
         kind = Local
-        name = <D <U <assignTemp>> $19>
+        name = <D <U <assignTemp>> $4>
       }
     }
   ]
