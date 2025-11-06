@@ -50,7 +50,6 @@
       "attached-class",
       "intersection-types",
       "generics",
-      "non-forcing-constants",
       "strong"
     ],
     "Ruby & DSL Features": [

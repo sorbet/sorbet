@@ -2536,107 +2536,6 @@ class ResolveTypeMembersAndFieldsWalk {
         }
     }
 
-    void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
-        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
-
-        if (send.numPosArgs() != 2) {
-            return;
-        }
-
-        auto numKwArgs = send.numKwArgs();
-        if (numKwArgs > 1) {
-            return;
-        }
-
-        auto stringLoc = send.getPosArg(1).loc();
-
-        auto literalNode = ast::cast_tree<ast::Literal>(send.getPosArg(1));
-        if (literalNode == nullptr) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("`{}` only accepts string literals", method);
-            }
-            return;
-        }
-
-        if (!core::isa_type<core::NamedLiteralType>(literalNode->value)) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("`{}` only accepts string literals", method);
-            }
-            return;
-        }
-
-        auto literal = core::cast_type_nonnull<core::NamedLiteralType>(literalNode->value);
-        if (literal.kind != core::NamedLiteralType::Kind::String) {
-            // Infer will report a type error
-            return;
-        }
-
-        auto shortName = literal.name.shortName(ctx);
-        if (shortName.empty()) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("The string given to `{}` must not be empty", method);
-            }
-            return;
-        }
-
-        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places
-        // below, we'll check to find out whether the first part is `""` or not, which means we're testing whether
-        // the string did or did not begin with `::`.
-        vector<string_view> parts = absl::StrSplit(shortName, "::");
-
-        core::SymbolRef current;
-        for (auto part : parts) {
-            if (!current.exists()) {
-                current = core::Symbols::root();
-
-                // First iteration
-                if (part != "") {
-                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                        e.setHeader("The string given to `{}` must be an absolute constant reference that "
-                                    "starts with `{}`",
-                                    method, "::");
-                    }
-                    return;
-                }
-                continue;
-            }
-
-            auto member = ctx.state.lookupNameConstant(part);
-            if (!member.exists()) {
-                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
-                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                    e.setHeader("Unable to resolve constant `{}`", pretty);
-                }
-                return;
-            }
-
-            core::SymbolRef newCurrent;
-            if (current.isClassOrModule()) {
-                newCurrent = current.asClassOrModuleRef().data(ctx)->findMember(ctx, member);
-            }
-            if (!newCurrent.exists()) {
-                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
-                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                    e.setHeader("Unable to resolve constant `{}`", pretty);
-                }
-                return;
-            }
-            current = newCurrent;
-        }
-
-        ENFORCE(current.exists(), "Loop invariant violated");
-
-        if (!current.isClassOrModule()) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("The string given to `{}` must resolve to a class or module", method);
-                e.addErrorLine(current.loc(ctx), "Resolved to this constant");
-            }
-            return;
-        }
-    }
-
     core::ClassOrModuleRef methodOwner(core::Context ctx) {
         core::ClassOrModuleRef owner = ctx.owner.enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
@@ -2868,9 +2767,6 @@ public:
                     }
                     return;
                 }
-                case core::Names::nonForcingIsA_p().rawId():
-                    validateNonForcingIsA(ctx, send);
-                    return;
                 default:
                     return;
             }
