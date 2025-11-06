@@ -654,7 +654,17 @@ int realmain(int argc, char *argv[]) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
 
-                if (!opts.genPackages) {
+                if (opts.genPackages) {
+                    // In --gen-packages mode, we skip typecheck because we only want to show packaging related errors,
+                    // and skipping typecheck saves a significant amount of time.
+                    // However, one thing typecheck does is call flushErrorsForFile, which provides a consistent
+                    // ordering for errors when running in single threaded mode. To replicate that behaviour, we loop
+                    // over all files and call it manually here, instead of waiting for the flushAllErrors call later.
+
+                    for (auto &parsedFile : stratumFiles) {
+                        gs->errorQueue->flushErrorsForFile(*gs, parsedFile.file);
+                    }
+                } else {
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
                                         /* presorted */ false, intentionallyLeakASTs);
 

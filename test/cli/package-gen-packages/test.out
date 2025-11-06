@@ -1,14 +1,5 @@
 --gen-packages can only be used when --stripe-packages is also enabled
 --gen-packages can not be used when --lsp is also enabled
-C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
-     8 |      puts F::CONSTANT_FROM_F
-                   ^^^^^^^^^^^^^^^^^^
-    F/__package.rb:4: `F` must be at least `strict_dependencies 'dag'` but is currently `strict_dependencies 'layered'`
-     4 |  strict_dependencies 'layered'
-                              ^^^^^^^^^
-  Note:
-    `F::CONSTANT_FROM_F`'s package is not imported
-
 C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
      7 |  import A
           ^^^^^^^^
@@ -29,6 +20,15 @@ C/__package.rb:3: C is missing imports https://srb.help/3734
     C/__package.rb:8: Inserted `import E`
      8 |  import D
                   ^
+
+C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+     8 |      puts F::CONSTANT_FROM_F
+                   ^^^^^^^^^^^^^^^^^^
+    F/__package.rb:4: `F` must be at least `strict_dependencies 'dag'` but is currently `strict_dependencies 'layered'`
+     4 |  strict_dependencies 'layered'
+                              ^^^^^^^^^
+  Note:
+    `F::CONSTANT_FROM_F`'s package is not imported
 Errors: 3
 # typed: strict
 
