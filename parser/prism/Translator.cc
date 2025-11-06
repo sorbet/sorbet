@@ -3095,12 +3095,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto rescue = translate(rescueModifierNode->rescue_expression);
             auto keywordLoc = translateLoc(rescueModifierNode->keyword_loc);
 
-            // In rescue modifiers, users can't specify exceptions and the variable name so they're null
             auto resbodyLoc = core::LocOffsets{keywordLoc.beginPos(), location.endPos()};
 
             if (!directlyDesugar || !hasExpr(body, rescue)) {
+                // In rescue modifiers, users can't specify exception classes or names, so they're always null.
+                std::unique_ptr<Node> rescuedExceptions = nullptr;
+                auto resBody = make_unique<parser::Resbody>(resbodyLoc, move(rescuedExceptions), nullptr, move(rescue));
+
                 NodeVec cases;
-                cases.emplace_back(make_unique<parser::Resbody>(resbodyLoc, nullptr, nullptr, move(rescue)));
+                cases.emplace_back(move(resBody));
                 return make_unique<parser::Rescue>(location, move(body), move(cases), nullptr);
             }
 
