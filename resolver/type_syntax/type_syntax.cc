@@ -1149,8 +1149,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             // TODO(jez) After T::Module change: fix the payload, fix all the codebases, and remove this check.
             // (Leaving at least one version in between, so that there is a published version that
             // supports both `Module` and `T::Module` as valid syntax.)
-            if (klass != core::Symbols::Module() &&
-                (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0)) {
+            if (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0) {
                 // Class/Module are not isLegacyStdlibGeneric (because their type members don't default to T.untyped),
                 // but we want to report this syntax error at `# typed: strict` like other stdlib classes.
                 auto level =
