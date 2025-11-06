@@ -725,12 +725,23 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
     return move(lhs);
 }
 
+// Used the 3 kinds of assignment that lower to `Send` nodes:
+// 1. `recv.a &&= b`
+// 2. `recv.a ||= b`
+// 3. `recv.a  += b`
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, core::LocOffsets location) {
     auto callNode = down_cast<PrismAssignmentNode>(node);
     auto name = translateConstantName(callNode->read_name);
     auto receiver = translate(callNode->receiver);
     auto messageLoc = translateLoc(callNode->message_loc);
+
+    // The assign's location spans from the start of the receiver to the end of
+    // the message, not including the operator or RHS:
+    //     recv.a += b
+    //     ^^^^^^^^^^^ assign loc
+    //     ^^^^^^      lhs send loc
+    auto lhsLoc = core::LocOffsets{location.beginPos(), messageLoc.endPos()};
 
     if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
         // Handle operator assignment to the result of a safe method call, like `a&.b += 1`
@@ -741,7 +752,7 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
 
     // Handle operator assignment to the result of a method call, like `a.b += 1`
     if (!directlyDesugar || !hasExpr(receiver)) {
-        auto lhs = make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{});
+        auto lhs = make_unique<parser::Send>(lhsLoc, move(receiver), name, messageLoc, NodeVec{});
         auto result = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
             callNode, location, move(lhs));
         return result;
@@ -751,8 +762,8 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
     ast::Send::Flags flags;
     flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
-    auto send = MK::Send(location, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
-    auto lhs = make_node_with_expr<parser::Send>(move(send), location, move(receiver), name, messageLoc, NodeVec{});
+    auto send = MK::Send(lhsLoc, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
+    auto lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), name, messageLoc, NodeVec{});
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(callNode, location,
                                                                                              move(lhs));
@@ -1014,20 +1025,73 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_CALL_NODE: { // A method call like `a.b()` or `a&.b()`
             auto callNode = down_cast<pm_call_node>(node);
 
-            auto loc = location;
-            auto locZeroLen = location.copyWithZeroLength();
-
             auto constantNameString = parser.resolveConstant(callNode->name);
             auto receiver = translate(callNode->receiver);
 
             core::LocOffsets messageLoc;
 
-            // When the message is empty, like `foo.()`, the message location is the same as the call operator location
+            // When the message is empty, like `foo.()`, the message location is the
+            // same as the call operator location
             if (callNode->message_loc.start == nullptr && callNode->message_loc.end == nullptr) {
                 messageLoc = translateLoc(callNode->call_operator_loc);
             } else {
                 messageLoc = translateLoc(callNode->message_loc);
             }
+
+            absl::Span<pm_node_t *> prismArgs;
+            if (auto *prismArgsNode = callNode->arguments) {
+                prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
+            }
+
+            // The legacy parser nodes don't include the literal block argument (if any), but the desugar nodes do
+            // include it.
+            core::LocOffsets sendLoc;  // The location of the "send" node, exluding any literal block, if any.
+            core::LocOffsets blockLoc; // The location of just the block node, on its own.
+            core::LocOffsets sendWithBlockLoc = location;
+            location = core::LocOffsets::none(); // Invalidate this to ensure we don't use it again in this path.
+            if (callNode->block == nullptr) { // There's no block, so the `sendLoc` and `sendWithBlockLoc` are the same.
+                sendLoc = sendWithBlockLoc;
+            } else { // There's a block, so we need to calculate the location of the "send" node, excluding it.
+                sendLoc = messageLoc;
+                blockLoc = translateLoc(callNode->block->location);
+
+                if (callNode->receiver) {
+                    sendLoc = translateLoc(callNode->receiver->location).join(sendLoc);
+                }
+
+                if (callNode->closing_loc.start &&
+                    callNode->closing_loc.end) { // explicit `( )` or `[ ]` around the params
+                    sendLoc = sendLoc.join(translateLoc(callNode->closing_loc));
+                }
+
+                if (!prismArgs.empty()) { // Extend to last argument's location, if any.
+                    // For index expressions, the closing_loc can come before the last
+                    // argument's location:
+                    //     a[1, 2] = 3
+                    //           ^     closing loc
+                    //               ^ last arg loc
+                    sendLoc = sendLoc.join(translateLoc(prismArgs.back()->location));
+                }
+
+                // The block pass arugment is not stored with the other arguments, so we handle it separately here.
+                if (PM_NODE_TYPE_P(callNode->block, PM_BLOCK_ARGUMENT_NODE)) {
+                    auto blockPassArgLoc = translateLoc(callNode->block->location);
+                    sendLoc = sendLoc.join(blockPassArgLoc);
+
+                    // Prism bug: TODO: link github issue here
+                    // If there's a block pass argument, Prism fails to include the closing paren in the call location.
+                    //     foo(&block)
+                    //     ^^^^^^^^^^  Prism call location
+                    //     ^^^^^^^^^^^ Fixed location
+                    if (callNode->closing_loc.end) {
+                        ENFORCE(callNode->closing_loc.start)
+                        auto closingLoc = translateLoc(callNode->closing_loc);
+                        sendWithBlockLoc = sendWithBlockLoc.join(closingLoc);
+                        blockLoc = blockLoc.join(closingLoc);
+                    }
+                }
+            }
+            auto sendLoc0 = sendLoc.copyWithZeroLength();
 
             // Handle `~[Integer]`, like `~42`
             // Unlike `-[Integer]`, Prism treats `~[Integer]` as a method call
@@ -1036,7 +1100,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 string valueString(sliceLocation(callNode->base.location));
 
                 if (!directlyDesugar) {
-                    return make_unique<parser::Integer>(location, move(valueString));
+                    return make_unique<parser::Integer>(sendLoc, move(valueString));
                 }
 
                 // The purely integer part of it, not including the `~`
@@ -1044,8 +1108,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 ENFORCE(integerExpr != nullptr, "All Integer nodes should have been desugared already");
 
                 // Model this as an Integer in the parse tree, but desugar to a method call like `42.~()`
-                auto sendNode = MK::Send0(loc, move(integerExpr), core::Names::tilde(), loc.copyEndWithZeroLength());
-                return make_node_with_expr<parser::Integer>(move(sendNode), location, move(valueString));
+                auto sendNode =
+                    MK::Send0(sendLoc, move(integerExpr), core::Names::tilde(), sendLoc.copyEndWithZeroLength());
+                return make_node_with_expr<parser::Integer>(move(sendNode), sendLoc, move(valueString));
             }
 
             if (constantNameString == "[]" || constantNameString == "[]=") {
@@ -1069,12 +1134,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             unique_ptr<parser::Hash> kwargsHash;
             auto kwargsHashHasExpr = true; // true if we can directly desugar the kwargs Hash, if any.
-            absl::Span<pm_node_t *> prismArgs;
-            if (auto *prismArgsNode = callNode->arguments) {
-                prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
-
+            if (!prismArgs.empty()) {
                 // Pop the Kwargs Hash off the end of the arguments, if there is one.
-                if (!prismArgs.empty() && PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
+                if (PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
                     auto h = translate(prismArgs.back());
                     auto hash = unique_ptr<parser::Hash>(reinterpret_cast<parser::Hash *>(h.release()));
                     ENFORCE(hash != nullptr);
@@ -1127,7 +1189,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unique_ptr<parser::Node> sendNode;
 
             auto name = ctx.state.enterNameUTF8(constantNameString);
-            auto methodName = MK::Symbol(location.copyWithZeroLength(), name);
+            auto methodName = MK::Symbol(sendLoc0, name);
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `a&.b`
@@ -1140,7 +1202,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(blockPassNode));
                 }
 
-                sendNode = make_unique<parser::CSend>(loc, move(receiver), name, messageLoc, move(args));
+                sendNode = make_unique<parser::CSend>(sendLoc, move(receiver), name, messageLoc, move(args));
 
                 // TODO: Direct desugaring support for conditional sends is not implemented yet.
 
@@ -1207,7 +1269,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                 } else {
                                     unique_ptr<parser::Params> params;
                                     std::tie(params, std::ignore) =
-                                        translateParametersNode(paramsNode->parameters, location);
+                                        translateParametersNode(paramsNode->parameters, sendLoc);
 
                                     // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's
                                     // Params node, after all other parameters.
@@ -1295,9 +1357,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             }
                         }
                     } else {
-                        // Replace an anonymous block pass like `f(&)` with a local variable reference, like
-                        // `f(&&)`.
-                        blockPassArg = MK::Local(location.copyEndWithZeroLength(), core::Names::ampersand());
+                        // Replace an anonymous block pass like `f(&)` with a local variable
+                        // reference, like `f(&<&>)`.
+                        blockPassArg = MK::Local(blockPassLoc.copyEndWithZeroLength(), core::Names::ampersand());
                         supportedBlock = true;
                     }
                 }
@@ -1310,8 +1372,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 ENFORCE(blockPassArg == nullptr, "The parser should have rejected a call with both a block pass "
                                                  "argument and forwarded args (e.g. `foo(&b, ...)`)");
 
-                blockPassArg = MK::Local(loc, core::Names::fwdBlock());
-                blockPassLoc = location.copyEndWithZeroLength();
+                blockPassArg = MK::Local(sendWithBlockLoc, core::Names::fwdBlock());
+                blockPassLoc = sendLoc.copyEndWithZeroLength();
                 supportedBlock = true;
             }
 
@@ -1331,7 +1393,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(blockPassNode));
                 }
 
-                sendNode = make_unique<parser::Send>(loc, move(receiver), name, messageLoc, move(args));
+                sendNode = make_unique<parser::Send>(sendLoc, move(receiver), name, messageLoc, move(args));
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                     // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
@@ -1350,16 +1412,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             ast::ExpressionPtr receiverExpr;
             if (receiver == nullptr) { // Convert `foo()` to `self.foo()`
                 // 0-sized Loc, since `self.` doesn't appear in the original file.
-                receiverExpr = MK::Self(loc.copyWithZeroLength());
+                receiverExpr = MK::Self(sendLoc0);
             } else {
                 receiverExpr = receiver->takeDesugaredExpr();
             }
 
             // Unsupported nodes are desugared to an empty tree.
             // Treat them as if they were `self` to match `Desugar.cc`.
-            // TODO: Clean up after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+            // TODO: Clean up after direct desugaring is complete.
+            // https://github.com/Shopify/sorbet/issues/671
             if (ast::isa_tree<ast::EmptyTree>(receiverExpr)) {
-                receiverExpr = MK::Self(loc.copyWithZeroLength());
+                receiverExpr = MK::Self(sendLoc0);
                 flags.isPrivateOk = true;
             } else {
                 flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
@@ -1385,24 +1448,28 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     argExprs.emplace_back(move(expr));
                 }
                 auto argsEmpty = argExprs.empty();
-                auto argsArrayExpr = desugarArray(location.copyWithZeroLength(), prismArgs, move(argExprs));
+                auto argsArrayExpr = desugarArray(sendLoc0, prismArgs, move(argExprs));
 
                 if (hasFwdRestArg) { // f(*)
+                    auto loc = sendWithBlockLoc;
+
                     // `<fwd-args>`
                     auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
 
                     // `<fwd-args>.to_a()`
-                    auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), locZeroLen);
+                    auto argsSplat = MK::Send0(loc, move(fwdArgs), core::Names::toA(), sendLoc0);
 
                     // `T.unsafe(<fwd-args>.to_a())`
                     auto tUnsafe = MK::Unsafe(loc, move(argsSplat));
 
                     // `argsArrayExpr.concat(T.unsafe(<fwd-args>.to_a()))`
                     auto argsConcat =
-                        MK::Send1(loc, move(argsArrayExpr), core::Names::concat(), locZeroLen, move(tUnsafe));
+                        MK::Send1(loc, move(argsArrayExpr), core::Names::concat(), sendLoc0, move(tUnsafe));
 
                     argsArrayExpr = move(argsConcat);
                 } else if (hasFwdArgs) { // f(...)
+                    auto loc = sendWithBlockLoc;
+
                     // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
                     //                                       ^^^^^^^^^^
                     auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
@@ -1414,7 +1481,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
                     //  ^^^^^^^^^^^^^^^^^^^^^                           ^
                     auto argsConcat = argsEmpty ? move(argsSplat)
-                                                : MK::Send1(loc, move(argsArrayExpr), core::Names::concat(), locZeroLen,
+                                                : MK::Send1(loc, move(argsArrayExpr), core::Names::concat(), sendLoc0,
                                                             move(argsSplat));
 
                     // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
@@ -1424,7 +1491,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
                     //                                                            ^^^^^^^^^^^^^^^^^^^^^^^^            ^
                     auto kwargsSplat =
-                        MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(fwdKwargs));
+                        MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), sendLoc0, move(fwdKwargs));
 
                     // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
                     //                                                           ^                                     ^
@@ -1432,7 +1499,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                     // `argsArrayExpr.concat(::Magic.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)])`
                     //                                                   ^^^^^^^^ ^
-                    argsConcat = MK::Send1(loc, move(argsConcat), core::Names::concat(), locZeroLen, move(kwargsArray));
+                    argsConcat = MK::Send1(loc, move(argsConcat), core::Names::concat(), sendLoc0, move(kwargsArray));
 
                     argsArrayExpr = move(argsConcat);
                 }
@@ -1452,9 +1519,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     // This doesn't effect the desugared expression.
                     args.emplace_back(move(kwargsHash));
 
-                    kwargsExpr = MK::Array(loc, move(kwargElements));
+                    kwargsExpr = MK::Array(sendWithBlockLoc, move(kwargElements));
                 } else {
-                    kwargsExpr = MK::Nil(loc);
+                    kwargsExpr = MK::Nil(sendWithBlockLoc);
                 }
 
                 if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
@@ -1483,10 +1550,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     magicSendArgs.emplace_back(move(blockPassArg));
                     numPosArgs++;
 
-                    auto sendExpr = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
-                                             messageLoc, numPosArgs, move(magicSendArgs), flags);
-                    return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
-                                                             move(args));
+                    auto sendExpr =
+                        MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
+                                 messageLoc, numPosArgs, move(magicSendArgs), flags);
+                    return make_node_with_expr<parser::Send>(move(sendExpr), sendWithBlockLoc, move(receiver), name,
+                                                             messageLoc, move(args));
                 }
 
                 if (prismBlock != nullptr) {
@@ -1523,10 +1591,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 // Desugar any call with a splat and without a block pass argument.
                 // If there's a literal block argument, that's handled here, too.
                 // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
-                auto sendExpr = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), messageLoc, numPosArgs,
-                                         move(magicSendArgs), flags);
-                auto sendNode = make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
-                                                                  move(args));
+                auto sendExpr = MK::Send(sendWithBlockLoc, MK::Magic(sendWithBlockLoc), core::Names::callWithSplat(),
+                                         messageLoc, numPosArgs, move(magicSendArgs), flags);
+                auto sendNode = make_node_with_expr<parser::Send>(move(sendExpr), sendWithBlockLoc, move(receiver),
+                                                                  name, messageLoc, move(args));
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                     // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
@@ -1536,8 +1604,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     //       It just puts them at the end of the arguments list,
                     //       which is why we checked for `PM_BLOCK_NODE` specifically here.
 
-                    return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc,
-                                                              move(sendNode), move(blockParameters), move(blockBody));
+                    return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), blockLoc, move(sendNode),
+                                                              move(blockParameters), move(blockBody));
                 }
 
                 return sendNode;
@@ -1579,14 +1647,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
                     // Add the parser node back into the wq tree, to pass the parser tests.
+                    // Extend the location to include the closing paren
+                    blockPassNode->loc = blockPassNode->loc.join(sendWithBlockLoc);
                     args.emplace_back(move(blockPassNode));
                 }
 
-                auto sendExpr = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(), messageLoc,
-                                         numPosArgs, move(magicSendArgs), flags);
+                auto sendExpr = MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(),
+                                         messageLoc, numPosArgs, move(magicSendArgs), flags);
 
-                return make_node_with_expr<parser::Send>(move(sendExpr), loc, move(receiver), name, messageLoc,
-                                                         move(args));
+                return make_node_with_expr<parser::Send>(move(sendExpr), sendWithBlockLoc, move(receiver), name,
+                                                         messageLoc, move(args));
             }
 
             ast::Send::ARGS_store sendArgs{};
@@ -1635,9 +1705,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 }
             }
 
-            auto expr = MK::Send(location, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
+            auto expr =
+                MK::Send(sendWithBlockLoc, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
 
-            sendNode = make_node_with_expr<parser::Send>(move(expr), loc, move(receiver), name, messageLoc, move(args));
+            sendNode =
+                make_node_with_expr<parser::Send>(move(expr), sendLoc, move(receiver), name, messageLoc, move(args));
 
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                 // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
@@ -1647,7 +1719,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 //       It just puts them at the end of the arguments list,
                 //       which is why we checked for `PM_BLOCK_NODE` specifically here.
 
-                return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), sendNode->loc, move(sendNode),
+                return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), blockLoc, move(sendNode),
                                                           move(blockParameters), move(blockBody));
             }
 
@@ -2619,6 +2691,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
 
             auto kvPairs = translateKeyValuePairs(keywordHashNode->elements);
+
+            auto elements = absl::MakeSpan(keywordHashNode->elements.nodes, keywordHashNode->elements.size);
+            ENFORCE(!elements.empty());
 
             auto isKwargs =
                 PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||

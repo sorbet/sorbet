@@ -30,9 +30,11 @@ end
 
 foo { |bar; baz, qux| }
 
-foo(&forwarded_block)
+foo(&FORWARDED_BLOCK)
+foo &FORWARDED_BLOCK
 
 foo(&) # Anonymous block pass argument
+foo &
 
 foo&.bar {}
 

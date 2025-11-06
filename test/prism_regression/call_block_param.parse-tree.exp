@@ -203,11 +203,21 @@ Begin {
       method = <U foo>
       args = [
         BlockPass {
-          block = Send {
-            receiver = NULL
-            method = <U forwarded_block>
-            args = [
-            ]
+          block = Const {
+            scope = NULL
+            name = <C <U FORWARDED_BLOCK>>
+          }
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        BlockPass {
+          block = Const {
+            scope = NULL
+            name = <C <U FORWARDED_BLOCK>>
           }
         }
       ]
@@ -221,20 +231,31 @@ Begin {
         }
       ]
     }
-    Block {
-      send = CSend {
-        receiver = Send {
-          receiver = NULL
-          method = <U foo>
-          args = [
-          ]
-        }
-        method = <U bar>
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U foo>
         args = [
         ]
       }
-      params = NULL
-      body = NULL
+      method = <U &>
+      args = [
+        Block {
+          send = CSend {
+            receiver = Send {
+              receiver = NULL
+              method = <U foo>
+              args = [
+              ]
+            }
+            method = <U bar>
+            args = [
+            ]
+          }
+          params = NULL
+          body = NULL
+        }
+      ]
     }
     Block {
       send = Send {
