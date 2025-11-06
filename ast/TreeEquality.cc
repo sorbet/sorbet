@@ -270,11 +270,6 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             } else if (aType.tag() == core::TypePtr::Tag::NamedLiteralType) {
                 auto named_literal_a = core::cast_type_nonnull<core::NamedLiteralType>(aType);
                 auto named_literal_b = core::cast_type_nonnull<core::NamedLiteralType>(bType);
-
-                if (named_literal_a.kind != named_literal_b.kind) {
-                    Exception::raise("Why aren't these the same kind?");
-                }
-
                 return named_literal_a.kind == named_literal_b.kind &&
                        Comparator::compareNames(gs, named_literal_a.name, named_literal_b.name);
             } else if (aType.tag() == core::TypePtr::Tag::ClassType) {
