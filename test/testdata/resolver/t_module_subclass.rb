@@ -10,7 +10,7 @@ class ReplacedMethods < Module # error: `has_attached_class!` declared by parent
   sig do
     params(
       prop: Symbol,
-      blk: T.proc.bind(T.self_type).params(arg0: Module).returns(BasicObject)
+      blk: T.proc.bind(T.self_type).params(arg0: T::Module[T.anything]).returns(BasicObject)
     )
       .void
   end
@@ -25,12 +25,12 @@ module Tokenizable::Mixin::ClassMethods
   extend T::Sig, T::Helpers
   abstract!
 
-  sig { abstract.params(arg0: Module).returns(T.self_type) }
+  sig { abstract.params(arg0: T::Module[T.anything]).returns(T.self_type) }
   def include(arg0); end
 
   sig { params(method_name: Symbol).returns(Proc) }
   private def __tokenizable__hide_method!(method_name)
-    T.bind(self, Module)
+    T.bind(self, T::Module[T.anything])
 
     unless method_defined?(method_name, true)
       return -> (_, *args) { args.first }

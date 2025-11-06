@@ -7,7 +7,7 @@ def example(x)
   T.reveal_type(klass) # error: `T.untyped`
 end
 
-sig { params(mod: Module).void }
+sig { params(mod: T::Module[T.anything]).void }
 def example2(mod)
   if mod < T::Props
     T.reveal_type(mod) # error: `T::Module[T::Props]`
