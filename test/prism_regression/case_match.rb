@@ -24,6 +24,8 @@ in [*, 6]
   puts "ends with six!"
 in [*, 7, *] # A "find pattern"
   puts "contains a seven!"
+in Array[] # Empty ArrayPattern inside a ConstPattern
+  puts "empty!"
 in Array[first, second] # Requires the `array_like_thing` to be an `Array` specifically
   puts "An Array with first: #{first} and second: #{second}"
 in Point[x, y]          # Requires the `array_like_thing` to be a `Point` specifically
@@ -45,6 +47,8 @@ in {"kj": j} | {"kh": l} => m
   puts "#{m} has j or l!"
 in {"n1":, n2:, "n3":} => n4
   puts "#{n4} has n1, n2, and n3!"
+in Hash[] # This is still an empty ArrayPattern inside a ConstPattern, regardless of the constant being `Hash`.
+  puts "empty!"
 in Hash[e: 5 => e]             # Requires the `hash_like_thing` to be a `Hash` specifically
   puts "A Hash with e: #{e}"
 in Point[x: 6 => x, y: 7 => y] # Requires the `hash_like_thing` to be a `Point` specifically
@@ -81,3 +85,5 @@ in a, b unless b == 2
 in c, d; c unless c == 3
   "in with 2 args, semicolon, and unless"
 end
+
+# TODO: test ConstPattern with `()`, e.g. `Constant(1, 2)` and `Constant(k: v)`

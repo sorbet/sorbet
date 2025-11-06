@@ -219,6 +219,28 @@ Begin {
             }
             pattern = ArrayPattern {
               elts = [
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U empty!>
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Array>>
+            }
+            pattern = ArrayPattern {
+              elts = [
                 MatchVar {
                   name = <U first>
                 }
@@ -579,6 +601,28 @@ Begin {
                     val = <U  has n1, n2, and n3!>
                   }
                 ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Hash>>
+            }
+            pattern = ArrayPattern {
+              elts = [
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U empty!>
               }
             ]
           }

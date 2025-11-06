@@ -450,28 +450,7 @@ ClassDef{
                       block = nullptr
                       pos_args = 1
                       args = [
-                        Send{
-                          flags = {}
-                          recv = ConstantLit{
-                            symbol = (class ::<Magic>)
-                            orig = nullptr
-                          }
-                          fun = <U <string-interpolate>>
-                          block = nullptr
-                          pos_args = 4
-                          args = [
-                            Literal{ value = "An Array with first: " }
-                            UnresolvedIdent{
-                              kind = Local
-                              name = <U first>
-                            }
-                            Literal{ value = " and second: " }
-                            UnresolvedIdent{
-                              kind = Local
-                              name = <U second>
-                            }
-                          ]
-                        }
+                        Literal{ value = "empty!" }
                       ]
                     }
                     elsep = If{
@@ -517,15 +496,15 @@ ClassDef{
                             block = nullptr
                             pos_args = 4
                             args = [
-                              Literal{ value = "A Point with x: " }
+                              Literal{ value = "An Array with first: " }
                               UnresolvedIdent{
                                 kind = Local
-                                name = <U x>
+                                name = <U first>
                               }
-                              Literal{ value = " and y: " }
+                              Literal{ value = " and second: " }
                               UnresolvedIdent{
                                 kind = Local
-                                name = <U y>
+                                name = <U second>
                               }
                             ]
                           }
@@ -557,52 +536,110 @@ ClassDef{
                             Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                           ]
                         }
-                        thenp = InsSeq{
-                          stats = [
-                            Assign{
-                              lhs = UnresolvedIdent{
-                                kind = Local
-                                name = <U i>
+                        thenp = Send{
+                          flags = {privateOk}
+                          recv = Self
+                          fun = <U puts>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Send{
+                              flags = {}
+                              recv = ConstantLit{
+                                symbol = (class ::<Magic>)
+                                orig = nullptr
                               }
-                              rhs = Send{
-                                flags = {rewriterSynthesized}
-                                recv = Send{
-                                  flags = {}
-                                  recv = ConstantLit{
-                                    symbol = (module ::T)
-                                    orig = nullptr
-                                  }
-                                  fun = <U unsafe>
-                                  block = nullptr
-                                  pos_args = 1
-                                  args = [
-                                    ConstantLit{
-                                      symbol = (module ::Kernel)
-                                      orig = nullptr
-                                    }
-                                  ]
+                              fun = <U <string-interpolate>>
+                              block = nullptr
+                              pos_args = 4
+                              args = [
+                                Literal{ value = "A Point with x: " }
+                                UnresolvedIdent{
+                                  kind = Local
+                                  name = <U x>
                                 }
-                                fun = <U raise>
-                                block = nullptr
-                                pos_args = 1
-                                args = [
-                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                                ]
-                              }
+                                Literal{ value = " and y: " }
+                                UnresolvedIdent{
+                                  kind = Local
+                                  name = <U y>
+                                }
+                              ]
                             }
-                          ],
-                          expr = Send{
-                            flags = {privateOk}
-                            recv = Self
-                            fun = <U puts>
+                          ]
+                        }
+                        elsep = If{
+                          cond = Send{
+                            flags = {rewriterSynthesized}
+                            recv = Send{
+                              flags = {}
+                              recv = ConstantLit{
+                                symbol = (module ::T)
+                                orig = nullptr
+                              }
+                              fun = <U unsafe>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                ConstantLit{
+                                  symbol = (module ::Kernel)
+                                  orig = nullptr
+                                }
+                              ]
+                            }
+                            fun = <U raise>
                             block = nullptr
                             pos_args = 1
                             args = [
-                              Literal{ value = "An array with an element and maybe other stuff" }
+                              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                             ]
                           }
+                          thenp = InsSeq{
+                            stats = [
+                              Assign{
+                                lhs = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U i>
+                                }
+                                rhs = Send{
+                                  flags = {rewriterSynthesized}
+                                  recv = Send{
+                                    flags = {}
+                                    recv = ConstantLit{
+                                      symbol = (module ::T)
+                                      orig = nullptr
+                                    }
+                                    fun = <U unsafe>
+                                    block = nullptr
+                                    pos_args = 1
+                                    args = [
+                                      ConstantLit{
+                                        symbol = (module ::Kernel)
+                                        orig = nullptr
+                                      }
+                                    ]
+                                  }
+                                  fun = <U raise>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                  ]
+                                }
+                              }
+                            ],
+                            expr = Send{
+                              flags = {privateOk}
+                              recv = Self
+                              fun = <U puts>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Literal{ value = "An array with an element and maybe other stuff" }
+                              ]
+                            }
+                          }
+                          elsep = EmptyTree
                         }
-                        elsep = EmptyTree
                       }
                     }
                   }
@@ -1291,23 +1328,7 @@ ClassDef{
                       block = nullptr
                       pos_args = 1
                       args = [
-                        Send{
-                          flags = {}
-                          recv = ConstantLit{
-                            symbol = (class ::<Magic>)
-                            orig = nullptr
-                          }
-                          fun = <U <string-interpolate>>
-                          block = nullptr
-                          pos_args = 2
-                          args = [
-                            Literal{ value = "A Hash with e: " }
-                            UnresolvedIdent{
-                              kind = Local
-                              name = <U e>
-                            }
-                          ]
-                        }
+                        Literal{ value = "empty!" }
                       ]
                     }
                     elsep = If{
@@ -1351,17 +1372,12 @@ ClassDef{
                             }
                             fun = <U <string-interpolate>>
                             block = nullptr
-                            pos_args = 4
+                            pos_args = 2
                             args = [
-                              Literal{ value = "A Point with x: " }
+                              Literal{ value = "A Hash with e: " }
                               UnresolvedIdent{
                                 kind = Local
-                                name = <U x>
-                              }
-                              Literal{ value = " and y: " }
-                              UnresolvedIdent{
-                                kind = Local
-                                name = <U y>
+                                name = <U e>
                               }
                             ]
                           }
@@ -1393,50 +1409,36 @@ ClassDef{
                             Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                           ]
                         }
-                        thenp = InsSeq{
-                          stats = [
-                            Assign{
-                              lhs = UnresolvedIdent{
-                                kind = Local
-                                name = <U o>
+                        thenp = Send{
+                          flags = {privateOk}
+                          recv = Self
+                          fun = <U puts>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Send{
+                              flags = {}
+                              recv = ConstantLit{
+                                symbol = (class ::<Magic>)
+                                orig = nullptr
                               }
-                              rhs = Send{
-                                flags = {rewriterSynthesized}
-                                recv = Send{
-                                  flags = {}
-                                  recv = ConstantLit{
-                                    symbol = (module ::T)
-                                    orig = nullptr
-                                  }
-                                  fun = <U unsafe>
-                                  block = nullptr
-                                  pos_args = 1
-                                  args = [
-                                    ConstantLit{
-                                      symbol = (module ::Kernel)
-                                      orig = nullptr
-                                    }
-                                  ]
+                              fun = <U <string-interpolate>>
+                              block = nullptr
+                              pos_args = 4
+                              args = [
+                                Literal{ value = "A Point with x: " }
+                                UnresolvedIdent{
+                                  kind = Local
+                                  name = <U x>
                                 }
-                                fun = <U raise>
-                                block = nullptr
-                                pos_args = 1
-                                args = [
-                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                                ]
-                              }
+                                Literal{ value = " and y: " }
+                                UnresolvedIdent{
+                                  kind = Local
+                                  name = <U y>
+                                }
+                              ]
                             }
-                          ],
-                          expr = Send{
-                            flags = {privateOk}
-                            recv = Self
-                            fun = <U puts>
-                            block = nullptr
-                            pos_args = 1
-                            args = [
-                              Literal{ value = "splat!" }
-                            ]
-                          }
+                          ]
                         }
                         elsep = If{
                           cond = Send{
@@ -1464,17 +1466,89 @@ ClassDef{
                               Literal{ value = "Sorbet rewriter pass partially unimplemented" }
                             ]
                           }
-                          thenp = Send{
-                            flags = {privateOk}
-                            recv = Self
-                            fun = <U puts>
-                            block = nullptr
-                            pos_args = 1
-                            args = [
-                              Literal{ value = "splat nil!" }
-                            ]
+                          thenp = InsSeq{
+                            stats = [
+                              Assign{
+                                lhs = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U o>
+                                }
+                                rhs = Send{
+                                  flags = {rewriterSynthesized}
+                                  recv = Send{
+                                    flags = {}
+                                    recv = ConstantLit{
+                                      symbol = (module ::T)
+                                      orig = nullptr
+                                    }
+                                    fun = <U unsafe>
+                                    block = nullptr
+                                    pos_args = 1
+                                    args = [
+                                      ConstantLit{
+                                        symbol = (module ::Kernel)
+                                        orig = nullptr
+                                      }
+                                    ]
+                                  }
+                                  fun = <U raise>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                  ]
+                                }
+                              }
+                            ],
+                            expr = Send{
+                              flags = {privateOk}
+                              recv = Self
+                              fun = <U puts>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Literal{ value = "splat!" }
+                              ]
+                            }
                           }
-                          elsep = EmptyTree
+                          elsep = If{
+                            cond = Send{
+                              flags = {rewriterSynthesized}
+                              recv = Send{
+                                flags = {}
+                                recv = ConstantLit{
+                                  symbol = (module ::T)
+                                  orig = nullptr
+                                }
+                                fun = <U unsafe>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  ConstantLit{
+                                    symbol = (module ::Kernel)
+                                    orig = nullptr
+                                  }
+                                ]
+                              }
+                              fun = <U raise>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                              ]
+                            }
+                            thenp = Send{
+                              flags = {privateOk}
+                              recv = Self
+                              fun = <U puts>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Literal{ value = "splat nil!" }
+                              ]
+                            }
+                            elsep = EmptyTree
+                          }
                         }
                       }
                     }
