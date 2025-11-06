@@ -89,7 +89,7 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
             }
         }
     } else if (auto *numParamsNode = parser::NodeWithExpr::cast_node<parser::NumParams>(anyParamsNode)) {
-        // Register any numbered parameters (`_1`, `_2`, ..., `_9`)
+        // Register any numbered parameters (`_1`, `_2`, ..., `_9`) or 'it' parameter
         for (const auto &numberedParam : numParamsNode->decls) {
             params.emplace_back(numberedParam->takeDesugaredExpr());
         }

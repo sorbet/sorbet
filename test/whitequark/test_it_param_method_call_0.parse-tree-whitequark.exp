@@ -1,0 +1,9 @@
+s(:block,
+  s(:send,
+    s(:array,
+      s(:str, "hello"),
+      s(:str, "world")), :map),
+  s(:numparams,
+    s(:lvar, :it)),
+  s(:send,
+    s(:lvar, :it), :upcase))
