@@ -13,8 +13,10 @@ class T::Props::Decorator
   Rules = T.type_alias { T::Hash[Symbol, T.untyped] }
   DecoratedInstance = T.type_alias { Object } # Would be T::Props, but that produces circular reference errors in some circumstances
   PropType = T.type_alias { T::Types::Base }
-  PropTypeOrClass = T.type_alias { T.any(PropType, Module) }
+  PropTypeOrClass = T.type_alias { T.any(PropType, T::Module[T.anything]) }
   OverrideRules = T.type_alias { T::Hash[Symbol, {allow_incompatible: T::Boolean}] }
+  DecoratedClassType = T.type_alias { T.all(T::Module[T.anything], T::Props::ClassMethods) }
+  private_constant :DecoratedClassType
 
   class NoRulesError < StandardError; end
 
@@ -38,7 +40,7 @@ class T::Props::Decorator
 
   sig { params(klass: T.untyped).void.checked(:never) }
   def initialize(klass)
-    @class = T.let(klass, T.all(Module, T::Props::ClassMethods))
+    @class = T.let(klass, DecoratedClassType)
     @class.plugins.each do |mod|
       T::Props::Plugin::Private.apply_decorator_methods(mod, self)
     end
@@ -102,7 +104,7 @@ class T::Props::Decorator
   end
 
   # checked(:never) - O(prop accesses)
-  sig { returns(T.all(Module, T::Props::ClassMethods)).checked(:never) }
+  sig { returns(DecoratedClassType).checked(:never) }
   def decorated_class
     @class
   end
@@ -207,7 +209,7 @@ class T::Props::Decorator
     params(
       instance: DecoratedInstance,
       prop: Symbol,
-      foreign_class: Module,
+      foreign_class: T::Module[T.anything],
       rules: Rules,
       opts: T::Hash[Symbol, T.untyped],
     )
@@ -226,7 +228,7 @@ class T::Props::Decorator
   sig do
     params(
       name: Symbol,
-      cls: Module,
+      cls: T::Module[T.anything],
       rules: Rules,
       type: PropTypeOrClass
     )
@@ -277,7 +279,7 @@ class T::Props::Decorator
   end
 
   # This converts the type from a T::Type to a regular old ruby class.
-  sig { params(type: T::Types::Base).returns(Module).checked(:never) }
+  sig { params(type: T::Types::Base).returns(T::Module[T.anything]).checked(:never) }
   private def convert_type_to_class(type)
     case type
     when T::Types::TypedArray, T::Types::FixedArray
@@ -586,7 +588,7 @@ class T::Props::Decorator
   sig do
     params(
       prop_name: Symbol,
-      prop_cls: Module,
+      prop_cls: T::Module[T.anything],
       rules: Rules,
       foreign: T.untyped,
     )
@@ -629,10 +631,10 @@ class T::Props::Decorator
   #
   # This gets called when a module or class that extends T::Props gets included, extended,
   # prepended, or inherited.
-  sig { params(child: Module).void.checked(:never) }
+  sig { params(child: T::Module[T.anything]).void.checked(:never) }
   def model_inherited(child)
     child.extend(T::Props::ClassMethods)
-    child = T.cast(child, T.all(Module, T::Props::ClassMethods))
+    child = T.cast(child, DecoratedClassType)
 
     child.plugins.concat(decorated_class.plugins)
     decorated_class.plugins.each do |mod|
@@ -719,19 +721,19 @@ class T::Props::Decorator
     result
   end
 
-  sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
+  sig { params(child: DecoratedClassType, prop: Symbol).returns(T::Boolean).checked(:never) }
   private def clobber_getter?(child, prop)
     !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
        child.instance_method(prop).source_location&.first == __FILE__)
   end
 
-  sig { params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never) }
+  sig { params(child: DecoratedClassType, prop: Symbol).returns(T::Boolean).checked(:never) }
   private def clobber_setter?(child, prop)
     !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
        child.instance_method("#{prop}=").source_location&.first == __FILE__)
   end
 
-  sig { params(mod: Module).void.checked(:never) }
+  sig { params(mod: T::Module[T.anything]).void.checked(:never) }
   def plugin(mod)
     decorated_class.plugins << mod
     T::Props::Plugin::Private.apply_class_methods(mod, decorated_class)

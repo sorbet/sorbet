@@ -14,7 +14,6 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      # Re-implements non_forcing_is_a?
       return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
       return false unless Object.const_defined?(:Set) # Set is not loaded yet
       obj.is_a?(Set) && super
@@ -22,7 +21,6 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      # Re-implements non_forcing_is_a?
       return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
       return false unless Object.const_defined?(:Set) # Set is not loaded yet
       obj.is_a?(Set)
@@ -41,7 +39,6 @@ module T::Types
       end
 
       def valid?(obj)
-        # Re-implements non_forcing_is_a?
         return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
         return false unless Object.const_defined?(:Set) # Set is not loaded yet
         obj.is_a?(Set)
