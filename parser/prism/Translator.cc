@@ -3665,18 +3665,28 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 }
             }
 
-            auto hashPattern = make_unique<parser::HashPattern>(location, move(sorbetElements));
-
             if (auto *prismConstant = hashPatternNode->constant) {
                 // A hash pattern can start with a constant that matches against a specific type,
-                // rather than any value whose `#deconstruct_keys` results are matched by the pattern
+                // (rather than any value whose `#deconstruct_keys` results are matched by the pattern).
                 // E.g. the `Point` in `in Point[x: Integer => 1, y: Integer => 2]`
                 auto sorbetConstant = translate(prismConstant);
+
+                ENFORCE(hashPatternNode->opening_loc.start && hashPatternNode->closing_loc.end,
+                        "Hash pattern without parentheses or square brackets?");
+
+                // The `HashPattern` loc doesn't include the constant, if there is one.
+                //     `Point[x: Integer => 1, y: Integer => 2]`
+                //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ HashPattern loc
+                //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ConstPattern loc
+                auto hashPatternLoc =
+                    translateLoc(hashPatternNode->opening_loc.start, hashPatternNode->closing_loc.end);
+
+                auto hashPattern = make_unique<parser::HashPattern>(hashPatternLoc, move(sorbetElements));
 
                 return make_unique<parser::ConstPattern>(location, move(sorbetConstant), move(hashPattern));
             }
 
-            return hashPattern;
+            return make_unique<parser::HashPattern>(location, move(sorbetElements));
         }
         case PM_IMPLICIT_NODE: {
             auto implicitNode = down_cast<pm_implicit_node>(node);
