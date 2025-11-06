@@ -858,6 +858,8 @@ private:
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
+    friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from,
+                                         absl::Span<const ClassOrModuleRef> klasses);
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
