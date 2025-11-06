@@ -20,7 +20,7 @@ module T::Props
 
       NO_TRANSFORM_TYPES = T.let(
         [TrueClass, FalseClass, NilClass, Symbol, String].freeze,
-        T::Array[Module],
+        T::Array[T::Module[T.anything]],
       )
       private_constant :NO_TRANSFORM_TYPES
 
@@ -151,7 +151,7 @@ module T::Props
         end
       end
 
-      sig { params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never) }
+      sig { params(varname: String, type: T::Module[T.anything], mode: ModeType).returns(String).checked(:never) }
       private_class_method def self.handle_serializable_subtype(varname, type, mode)
         case mode
         when Serialize
@@ -164,7 +164,7 @@ module T::Props
         end
       end
 
-      sig { params(varname: String, type: Module, mode: ModeType).returns(String).checked(:never) }
+      sig { params(varname: String, type: T::Module[T.anything], mode: ModeType).returns(String).checked(:never) }
       private_class_method def self.handle_custom_type(varname, type, mode)
         case mode
         when Serialize
@@ -177,7 +177,7 @@ module T::Props
         end
       end
 
-      sig { params(type: Module).returns(T.nilable(String)).checked(:never) }
+      sig { params(type: T::Module[T.anything]).returns(T.nilable(String)).checked(:never) }
       private_class_method def self.module_name(type)
         T::Configuration.module_name_mangler.call(type)
       end

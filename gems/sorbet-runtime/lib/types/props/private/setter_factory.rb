@@ -12,7 +12,7 @@ module T::Props
 
       sig do
         params(
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
           prop: Symbol,
           rules: T::Hash[Symbol, T.untyped]
         )
@@ -53,8 +53,8 @@ module T::Props
         params(
           prop: Symbol,
           accessor_key: Symbol,
-          non_nil_type: Module,
-          klass: T.all(Module, T::Props::ClassMethods),
+          non_nil_type: T::Module[T.anything],
+          klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
         )
         .returns([SetterProc, ValueValidationProc])
       end
@@ -89,7 +89,7 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: T::Types::Base,
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
           validate: T.nilable(ValidateProc)
         )
         .returns([SetterProc, ValueValidationProc])
@@ -138,8 +138,8 @@ module T::Props
         params(
           prop: Symbol,
           accessor_key: Symbol,
-          non_nil_type: Module,
-          klass: T.all(Module, T::Props::ClassMethods),
+          non_nil_type: T::Module[T.anything],
+          klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
         )
         .returns([SetterProc, ValueValidationProc])
       end
@@ -174,7 +174,7 @@ module T::Props
           prop: Symbol,
           accessor_key: Symbol,
           non_nil_type: T::Types::Base,
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
           validate: T.nilable(ValidateProc),
         )
         .returns([SetterProc, ValueValidationProc])
@@ -225,9 +225,9 @@ module T::Props
 
       sig do
         params(
-          klass: T.all(Module, T::Props::ClassMethods),
+          klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
           prop: Symbol,
-          type: T.any(T::Types::Base, Module),
+          type: T.any(T::Types::Base, T::Module[T.anything]),
           val: T.untyped,
         )
         .void
