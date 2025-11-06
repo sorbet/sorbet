@@ -469,7 +469,7 @@ ClassDef{
           ]
           var = UnresolvedIdent{
             kind = Local
-            name = <D <U <rescueTemp>> $7>
+            name = <D <U <rescueTemp>> $2>
           }
           body = Send{
             flags = {privateOk}
@@ -503,7 +503,7 @@ ClassDef{
           ]
           var = UnresolvedIdent{
             kind = Local
-            name = <D <U <rescueTemp>> $8>
+            name = <D <U <rescueTemp>> $3>
           }
           body = Literal{ value = nil }
         }
@@ -529,7 +529,7 @@ ClassDef{
             ]
             var = UnresolvedIdent{
               kind = Local
-              name = <D <U <rescueTemp>> $10>
+              name = <D <U <rescueTemp>> $4>
             }
             body = Send{
               flags = {privateOk}
@@ -551,7 +551,7 @@ ClassDef{
           ]
           var = UnresolvedIdent{
             kind = Local
-            name = <D <U <rescueTemp>> $9>
+            name = <D <U <rescueTemp>> $5>
           }
           body = Send{
             flags = {privateOk}
