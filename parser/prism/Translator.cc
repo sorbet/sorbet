@@ -3095,10 +3095,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto rescue = translate(rescueModifierNode->rescue_expression);
             auto keywordLoc = translateLoc(rescueModifierNode->keyword_loc);
 
+            // In rescue modifiers, users can't specify exceptions and the variable name so they're null
+            auto resbodyLoc = core::LocOffsets{keywordLoc.beginPos(), location.endPos()};
+
             if (!directlyDesugar || !hasExpr(body, rescue)) {
                 NodeVec cases;
-                // In rescue modifiers, users can't specify exceptions and the variable name so they're null
-                auto resbodyLoc = core::LocOffsets{keywordLoc.beginPos(), location.endPos()};
                 cases.emplace_back(make_unique<parser::Resbody>(resbodyLoc, nullptr, nullptr, move(rescue)));
                 return make_unique<parser::Rescue>(location, move(body), move(cases), nullptr);
             }
@@ -3121,7 +3122,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                                           ast::MK::EmptyTree(), ast::MK::EmptyTree());
 
             NodeVec cases;
-            cases.emplace_back(make_unique<parser::Resbody>(location, nullptr, nullptr, move(rescue)));
+            cases.emplace_back(make_unique<parser::Resbody>(resbodyLoc, nullptr, nullptr, move(rescue)));
 
             return make_node_with_expr<parser::Rescue>(move(expr), location, move(body), move(cases), nullptr);
         }
