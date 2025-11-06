@@ -3659,8 +3659,18 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             auto [content, _] = translateSymbol(symNode);
 
-            // For patterns, Sorbet's legacy parser uses the location of the symbol content, not including the colon.
-            location = translateLoc(symNode->value_loc);
+            // The legacy parser has two different locations for symbols.
+            if (symNode->opening_loc.start == nullptr) {
+                // If it uses quoted syntax, the full symbol is included, with the colon and quotes:
+                //     x in { "key": value }
+                //            ^^^^^^
+                location = translateLoc(symNode->value_loc);
+            } else {
+                // If it uses short-hand syntax, the content is included, without the colon:
+                //     x in {  key: value }
+                //             ^^^
+                // no-op: leave the whole location as-is.
+            }
 
             return make_node_with_expr<parser::Symbol>(MK::Symbol(location, content), location, content);
         }
