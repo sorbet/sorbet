@@ -1378,8 +1378,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                 break;
                             }
 
-                            case PM_IT_PARAMETERS_NODE: {
-                                unreachable("PM_IT_PARAMETERS_NODE is not implemented yet");
+                            case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
+                                auto itParamsNode = down_cast<pm_it_parameters_node>(blockNode->parameters);
+                                auto location = translateLoc(itParamsNode->base.location);
+
+                                auto name = ctx.state.enterNameUTF8("it");
+                                auto expr = MK::Local(location, name);
+                                auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
+
+                                NodeVec params;
+                                params.emplace_back(move(paramNode));
+
+                                blockParameters = make_unique<parser::NumParams>(location, move(params));
+                                break;
                             }
 
                             default: {
@@ -2797,12 +2808,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                  move(desugared));
             return make_node_with_expr<parser::XString>(move(res), location, move(sorbetParts));
         }
-        case PM_IT_LOCAL_VARIABLE_READ_NODE: { // The `it` implicit parameter added in Ruby 3.4, e.g. `a.map { it + 1 }`
-            [[fallthrough]];
+        case PM_IT_LOCAL_VARIABLE_READ_NODE: { // Reading the `it` default param in a block, e.g. `a.map { it + 1 }`
+            auto name = ctx.state.enterNameUTF8("it");
+            auto expr = MK::Local(location, name);
+            return make_node_with_expr<parser::LVar>(move(expr), location, name);
         }
-        case PM_IT_PARAMETERS_NODE: { // Used in a parameter list for lambdas that the `it` implicit parameter.
-            // See Prism::ParserStorage::ParsedRubyVersion
-            unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
+        case PM_IT_PARAMETERS_NODE: { // Represents the `it` default param in a block, e.g. `lambda { it + 1 }`
+            auto name = ctx.state.enterNameUTF8("it");
+            auto expr = MK::Local(location, name);
+            auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
+
+            NodeVec params;
+            params.emplace_back(move(paramNode));
+
+            return make_unique<parser::NumParams>(location, move(params));
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);

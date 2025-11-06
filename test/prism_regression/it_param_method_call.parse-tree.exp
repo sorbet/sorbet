@@ -1,0 +1,32 @@
+Block {
+  send = Send {
+    receiver = Array {
+      elts = [
+        String {
+          val = <U hello>
+        }
+        String {
+          val = <U world>
+        }
+      ]
+    }
+    method = <U map>
+    args = [
+    ]
+  }
+  params = NumParams {
+    decls = [
+      LVar {
+        name = <U it>
+      }
+    ]
+  }
+  body = Send {
+    receiver = LVar {
+      name = <U it>
+    }
+    method = <U upcase>
+    args = [
+    ]
+  }
+}

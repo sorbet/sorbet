@@ -207,6 +207,7 @@ class max_numparam_stack {
         ruby_parser::node_list *decls;
         bool staticContext = false;
         token_t opening_token = nullptr;
+        bool hasItParam = false; // Track if 'it' parameter is used in this scope
     };
 
     std::vector<NumparamScope> stack;
@@ -231,6 +232,32 @@ public:
     // Have we encountered a num param before? (top > 0)
     bool seen_numparams() {
         return !stack.empty() && top()->max > 0;
+    }
+
+    // Mark that 'it' parameter is used in the current scope
+    void set_it_param() {
+        if (!stack.empty()) {
+            top()->hasItParam = true;
+        }
+    }
+
+    // Have we encountered 'it' parameter before?
+    bool seen_it_param() {
+        return stack.empty() ? false : top()->hasItParam;
+    }
+
+    // Check if 'it' parameter is used in any outer scope (not current scope)
+    bool seen_it_param_in_outer_scope() {
+        if (stack.size() <= 1) {
+            return false;
+        }
+        // Check all scopes except the current (top) one
+        for (size_t i = 0; i < stack.size() - 1; i++) {
+            if (stack[i].hasItParam) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Register a numparam in the current scope
