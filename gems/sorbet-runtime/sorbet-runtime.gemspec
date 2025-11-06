@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'sorbet-runtime'
-  s.version     = '0.0.0'
+  s.version     = '0.6.12705'
   s.summary     = 'Sorbet runtime'
   s.description = "Sorbet's runtime type checking component"
   s.authors     = ['Stripe']
