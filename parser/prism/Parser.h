@@ -30,7 +30,7 @@ public:
 
 class Parser final {
     // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
-    static constexpr std::string_view ParsedRubyVersion = "3.3.0";
+    static constexpr std::string_view ParsedRubyVersion = "3.4.0";
 
     pm_parser_t parser;
     pm_options_t options;

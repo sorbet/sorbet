@@ -131,10 +131,10 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
     } else if (auto *numParamsNode = parser::NodeWithExpr::cast_node<parser::NumParams>(anyParamsNode)) {
         // The parse tree only contains declarations for numbered parameters that were actually used in the block or
         // lambda body, listed in the order they were encountered in the body. The desugar tree always contains all
-        // params (`_1, _2, ..., _9`) in numbered order.
+        // params (`_1, _2, ..., _9`) in numbered order. Also handles 'it' parameter.
         auto max = numparamMax(dctx, &numParamsNode->decls);
 
-        // The block uses numbered parameters like `_1` or `_9` so we add them as parameters
+        // The block uses numbered parameters like `_1` or `_9` OR 'it' parameter, so we add them as parameters
         // from _1 to the highest number used.
         for (int i = 1; i <= max; i++) {
             params.emplace_back(numparamTree(dctx, i, &numParamsNode->decls));
