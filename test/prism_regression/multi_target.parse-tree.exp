@@ -3,16 +3,39 @@ Begin {
     Masgn {
       lhs = Mlhs {
         exprs = [
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x>
+              }
+              LVarLhs {
+                name = <U y>
+              }
+            ]
+          }
           LVarLhs {
-            name = <U p1>
+            name = <U a>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U a>
           }
           Mlhs {
             exprs = [
               LVarLhs {
-                name = <U x2>
+                name = <U x>
               }
               LVarLhs {
-                name = <U y2>
+                name = <U y>
               }
             ]
           }
@@ -20,26 +43,62 @@ Begin {
       }
       rhs = Array {
         elts = [
-          Array {
-            elts = [
-              Integer {
-                val = "1"
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          SplatLhs {
+            var = LVarLhs {
+              name = <U head>
+            }
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x>
               }
-              Integer {
-                val = "2"
+              LVarLhs {
+                name = <U y>
               }
             ]
           }
-          Array {
-            elts = [
-              Integer {
-                val = "3"
+          LVarLhs {
+            name = <U a>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          SplatLhs {
+            var = LVarLhs {
+              name = <U head>
+            }
+          }
+          LVarLhs {
+            name = <U a>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x>
               }
-              Integer {
-                val = "4"
+              LVarLhs {
+                name = <U y>
               }
             ]
           }
+        ]
+      }
+      rhs = Array {
+        elts = [
         ]
       }
     }
@@ -90,11 +149,8 @@ Begin {
           }
         ]
       }
-      expr = Send {
-        receiver = NULL
-        method = <U a>
-        args = [
-        ]
+      expr = LVar {
+        name = <U a>
       }
       body = NULL
     }
@@ -329,11 +385,8 @@ Begin {
           }
         ]
       }
-      expr = Send {
-        receiver = NULL
-        method = <U a>
-        args = [
-        ]
+      expr = LVar {
+        name = <U a>
       }
       body = NULL
     }

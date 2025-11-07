@@ -1,6 +1,17 @@
 # typed: false
 
-p1, (x2, y2) = [[1, 2], [3, 4]]
+# `MultiTargetNode` in the `lefts` of a `MultiWriteNode`
+(x, y), a = []
+a, (x, y) = []
+
+# `MultiTargetNode` in the `rest` of a `MultiWriteNode` is a syntax error
+# *(x, y) = []
+# ^~~~~~ unexpected write target
+# ^~~~~~ unexpected write target
+
+# `MultiTargetNode` in the `rights` of a `MultiWriteNode`
+*head, (x, y), a = []
+*head, a, (x, y) = []
 
 Proc.new do |p1, (x2, y2)|
 end
