@@ -1,18 +1,1 @@
-a/test/a.test.rb:4: Unable to resolve constant `B` https://srb.help/5002
-     4 |  class Example < Test::B::Helper
-                          ^^^^^^^
-  Did you mean `T`? Use `-a` to autocorrect
-    a/test/a.test.rb:4: Replace with `T`
-     4 |  class Example < Test::B::Helper
-                          ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
-    16 |module T
-        ^^^^^^^^
-  Did you mean `Test::A`? Use `-a` to autocorrect
-    a/test/a.test.rb:4: Replace with `Test::A`
-     4 |  class Example < Test::B::Helper
-                          ^^^^^^^
-    a/test/a.test.rb:3: `Test::A` defined here
-     3 |module Test::A
-        ^^^^^^^^^^^^^^
-Errors: 1
+No errors! Great job.
