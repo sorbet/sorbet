@@ -3608,7 +3608,21 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_ASSOC_NODE: { // A key-value pair in a Hash pattern, e.g. the `k: v` in `h in { k: v }
             auto assocNode = down_cast<pm_assoc_node>(node);
 
+            // If the value is an implicit node, skip creating the pair, and return that value directly.
             if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
+                auto implicitNode = down_cast<pm_implicit_node>(assocNode->value);
+
+                // Special case: the legacy parser includes the colon's loc in a MatchVar if it's in a Hash pattern key
+                //     nil in { "n1": }
+                //              ^^^^^
+                if (PM_NODE_TYPE_P(implicitNode->value, PM_LOCAL_VARIABLE_TARGET_NODE)) {
+                    auto localVarTargetNode = down_cast<pm_local_variable_target_node>(implicitNode->value);
+                    auto name = translateConstantName(localVarTargetNode->name);
+
+                    // Use the location of the assoc node:
+                    return make_unique<MatchVar>(location, name);
+                }
+
                 return patternTranslate(assocNode->value);
             }
 
