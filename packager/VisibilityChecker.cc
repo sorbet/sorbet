@@ -755,9 +755,8 @@ public:
         }
     }
 
-    static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
-                                       vector<ast::ParsedFile> files) {
-        const core::GlobalState &gs = nonConstGs;
+    static vector<ast::ParsedFile> run(const core::GlobalState &gs, core::packages::PackageDB &nonConstPackageDB,
+                                       WorkerPool &workers, vector<ast::ParsedFile> files) {
         auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<std::pair<
             core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
             files.size());
@@ -803,7 +802,7 @@ public:
                 if (!pkgName.exists()) {
                     continue;
                 }
-                auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
+                auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
                 nonConstPackageInfo->untrackPackageReferencesFor(file);
             }
 
@@ -819,7 +818,7 @@ public:
                     if (!pkgName.exists()) {
                         continue;
                     }
-                    auto nonConstPackageInfo = nonConstGs.packageDB().getPackageInfoNonConst(pkgName);
+                    auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
                     for (auto [p, packageReferenceInfo] : threadResult.value().second) {
                         nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
                     }
@@ -843,7 +842,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             PropagateVisibility::run(gs, f);
         }
     }
-    auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
+    auto result = VisibilityCheckerPass::run(gs, gs.packageDB(), workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
         for (auto package : gs.packageDB().packages()) {
