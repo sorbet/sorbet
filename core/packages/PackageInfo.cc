@@ -1,5 +1,6 @@
 #include "core/packages/PackageInfo.h"
 #include "absl/strings/str_join.h"
+#include "common/sort/sort.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
@@ -464,6 +465,97 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
 
     // No path found
     return nullopt;
+}
+
+void PackageInfo::trackPackageReference(const core::FileRef file, const core::packages::MangledName package,
+                                        const PackageReferenceInfo packageReferenceInfo) {
+    auto r = referencedPackages.find(package);
+    if (r != referencedPackages.end()) {
+        r->second.first.insert(file);
+    } else {
+        referencedPackages[package] = {{file}, packageReferenceInfo};
+    }
+}
+
+void PackageInfo::untrackPackageReferencesFor(const core::FileRef file) {
+    for (auto &[_, v] : referencedPackages) {
+        auto files = v.first;
+        auto it = files.find(file);
+        if (it == files.end()) {
+            continue;
+        }
+        files.erase(it);
+    }
+    erase_if(referencedPackages, [](const auto &x) { return x.second.first.empty(); });
+}
+
+namespace {
+core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file) {
+    if (file.data(gs).isPackagedTestHelper()) {
+        return core::packages::ImportType::TestHelper;
+    } else if (file.data(gs).isPackagedTest()) {
+        return core::packages::ImportType::TestUnit;
+    } else {
+        return core::packages::ImportType::Normal;
+    }
+}
+
+core::packages::ImportType broadestImportType(const core::GlobalState &gs, const UnorderedSet<core::FileRef> &files) {
+    auto broadestImport = core::packages::ImportType::TestUnit;
+    for (auto f : files) {
+        auto importType = fileToImportType(gs, f);
+        if (importType < broadestImport) {
+            broadestImport = importType;
+        }
+    }
+    return broadestImport;
+}
+
+void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) {
+    fast_sort(edits, [](const auto &lhs, const auto &rhs) {
+        if (lhs.loc == rhs.loc) {
+            return lhs.replacement < rhs.replacement;
+        }
+        return lhs.loc.beginPos() < rhs.loc.beginPos();
+    });
+    auto i = 0;
+    while (edits.size() > 0 && i < edits.size() - 1) {
+        if (edits[i].loc.beginPos() == edits[i + 1].loc.beginPos() && edits[i].loc.empty() &&
+            edits[i + 1].loc.empty()) {
+            // If we're inserting 2 imports at the same location, combine them into a single edit.
+            // TODO(neil): maybe this logic should be moved/added to AutocorrectSuggestion::apply, to handle other
+            // cases where 2 autocorrects add at the same loc?
+            edits[i].replacement += edits[i + 1].replacement;
+            edits.erase(edits.begin() + i + 1);
+        } else {
+            i++;
+        }
+    }
+}
+
+}; // namespace
+
+std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto &[p, value] : referencedPackages) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(p);
+        auto files = value.first;
+        auto packageReferenceInfo = value.second;
+        if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
+            continue;
+        }
+        auto importType = broadestImportType(gs, files);
+        auto autocorrect = this->addImport(gs, pkgInfo, importType);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+    if (allEdits.size() == 0) {
+        return nullopt;
+    }
+    mergeAdjacentEdits(allEdits);
+    return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
 }
 
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
