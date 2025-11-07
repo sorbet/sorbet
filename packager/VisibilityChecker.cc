@@ -757,7 +757,7 @@ public:
 
     static vector<ast::ParsedFile> run(const core::GlobalState &gs, core::packages::PackageDB &nonConstPackageDB,
                                        WorkerPool &workers, vector<ast::ParsedFile> files) {
-        auto resultq = std::make_shared<BlockingBoundedQueue<std::unique_ptr<std::pair<
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<std::pair<
             core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
             files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
@@ -778,19 +778,18 @@ public:
                 }
                 auto &f = filesSpan[idx];
                 if (f.file.data(gs).isPackage(gs)) {
-                    resultq->push(nullptr, 1);
+                    resultq->push(std::nullopt, 1);
                     continue;
                 }
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                 if (!pkgName.exists()) {
-                    resultq->push(nullptr, 1);
+                    resultq->push(std::nullopt, 1);
                     continue;
                 }
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
-                auto pair = make_pair(f.file, std::move(pass.packageReferences));
-                resultq->push(std::make_unique<decltype(pair)>(pair), 1);
+                resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
             }
             barrier.DecrementCount();
         });
@@ -807,20 +806,20 @@ public:
                 nonConstPackageInfo->untrackPackageReferencesFor(file);
             }
 
-            std::unique_ptr<std::pair<core::FileRef,
-                                      UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
+            std::optional<std::pair<core::FileRef,
+                                    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
                 threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem() && threadResult) {
-                    auto file = threadResult->first;
+                if (result.gotItem() && threadResult.has_value()) {
+                    auto file = threadResult.value().first;
                     auto pkgName = gs.packageDB().getPackageNameForFile(file);
                     if (!pkgName.exists()) {
                         continue;
                     }
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
-                    for (auto [p, packageReferenceInfo] : threadResult->second) {
+                    for (auto [p, packageReferenceInfo] : threadResult.value().second) {
                         nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
                     }
                 }
