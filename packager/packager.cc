@@ -1210,6 +1210,12 @@ public:
         return packageDB.getPackageInfo(packageName).sccID().value();
     }
 
+    int getTestSCCId(MangledName packageName) const {
+        ENFORCE(packageDB.getPackageInfo(packageName).exists());
+        ENFORCE(packageDB.getPackageInfo(packageName).testSccID().has_value());
+        return packageDB.getPackageInfo(packageName).testSccID().value();
+    }
+
     void setTestSCCId(MangledName packageName, int sccID) {
         auto *pkgInfoPtr = packageDB.getPackageInfoNonConst(packageName);
         if (!pkgInfoPtr) {

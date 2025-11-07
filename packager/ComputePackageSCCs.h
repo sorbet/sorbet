@@ -138,22 +138,26 @@ class ComputePackageSCCs {
             // we've visited all members of the SCC once, to ensure that their ids have all been populated.
             for (auto name : condensationNode.members) {
                 for (auto &i : packageGraph.getImports(name)) {
-                    // We want to consider all imports from test code, but only normal imports for application code.
-                    if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                        if (i.type != core::packages::ImportType::Normal) {
-                            continue;
-                        }
-                    }
-
                     // The mangled name won't exist if the import was to a package that doesn't exist.
                     if (!i.mangledName.exists()) {
                         continue;
                     }
 
-                    // All of the imports of every member of the SCC will have been processed in the recursive step, so
-                    // we can assume the scc id of the target exists. Additionally, all imports are to the original
-                    // application code, which is why we don't consider using the `testSccID` here.
-                    auto impId = packageGraph.getSCCId(i.mangledName);
+                    int impId = 0;
+
+                    if constexpr (EdgeType == core::packages::ImportType::Normal) {
+                        if (i.type != core::packages::ImportType::Normal) {
+                            continue;
+                        }
+                        impId = packageGraph.getSCCId(i.mangledName);
+                    } else {
+                        // If we're processing imports from a test package, we can't tell if those imports are used only
+                        // at application time, or application and test time. Conservatively, we consider the import to
+                        // be to the test package, which transitively depends on the application code, ensuring the
+                        // correct ordering for test packages.
+                        impId = packageGraph.getTestSCCId(i.mangledName);
+                    }
+
                     if (impId == sccId) {
                         continue;
                     }
