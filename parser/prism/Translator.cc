@@ -3608,12 +3608,12 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_ASSOC_NODE: { // A key-value pair in a Hash pattern, e.g. the `k: v` in `h in { k: v }
             auto assocNode = down_cast<pm_assoc_node>(node);
 
+            if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
+                return patternTranslate(assocNode->value);
+            }
+
             auto key = patternTranslate(assocNode->key);
             auto value = patternTranslate(assocNode->value);
-
-            if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
-                return value;
-            }
 
             return make_unique<parser::Pair>(location, move(key), move(value));
         }
