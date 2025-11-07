@@ -271,9 +271,11 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
         parser::Prism::ParseResult prismResult = parser.parseWithoutTranslation(collectComments);
 
         auto node = prismResult.getRawNodePointer();
-        if (gs.cacheSensitiveOptions.rbsEnabled) {
-            node = runPrismRBSRewrite(gs, file, node, prismResult.getCommentLocations(), print, ctx, parser);
-        }
+        // TODO: Enable once RBS Prism pipeline is fully implemented. For now, we use the legacy RBS rewrite
+        // path (see indexOne): https://github.com/sorbet/sorbet/issues/9065
+        // if (gs.cacheSensitiveOptions.rbsEnabled) {
+        //     node = runPrismRBSRewrite(gs, file, node, prismResult.getCommentLocations(), print, ctx, parser);
+        // }
 
         bool directlyDesugar = !gs.cacheSensitiveOptions.rbsEnabled;
         auto translatedTree = parser::Prism::Translator(parser, ctx, prismResult.getParseErrors(), directlyDesugar,
@@ -283,23 +285,17 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
         parseResult = parser::ParseResult{move(translatedTree), prismResult.getCommentLocations()};
     }
 
-    if (print.ParseTree.enabled) {
-        if (parseResult.tree) {
+    if (parseResult.tree) {
+        if (print.ParseTree.enabled) {
             print.ParseTree.fmt("{}\n", parseResult.tree->toStringWithTabs(gs, 0));
         }
-    }
-    if (print.ParseTreeJson.enabled) {
-        if (parseResult.tree) {
+        if (print.ParseTreeJson.enabled) {
             print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSON(gs, 0));
         }
-    }
-    if (print.ParseTreeJsonWithLocs.enabled) {
-        if (parseResult.tree) {
+        if (print.ParseTreeJsonWithLocs.enabled) {
             print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSONWithLocs(gs, file, 0));
         }
-    }
-    if (print.ParseTreeWhitequark.enabled) {
-        if (parseResult.tree) {
+        if (print.ParseTreeWhitequark.enabled) {
             print.ParseTreeWhitequark.fmt("{}\n", parseResult.tree->toWhitequark(gs, 0));
         }
     }
@@ -392,7 +388,7 @@ pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node
     node = assertionsRewriter.run(node);
 
     if (print.RBSRewriteTree.enabled) {
-        // print RBS rewrite tree
+        // TODO: print RBS rewrite tree (https://github.com/sorbet/sorbet/issues/9065)
     }
 
     return node;
@@ -464,9 +460,22 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 }
                 case options::Parser::PRISM: {
                     auto parseResult = runPrismParser(lgs, file, print);
-                    parseTree = move(parseResult.tree);
 
+                    // TODO: Move this check into runPrismParser when it performs rewriting
+                    // https://github.com/sorbet/sorbet/issues/9065
                     if (opts.stopAfterPhase == options::Phase::PARSER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    // TODO: Remove once RBS Prism pipeline is fully implemented. For now, use the legacy
+                    // RBS rewrite path to ensure RBS support continues to work with Prism.
+                    if (lgs.cacheSensitiveOptions.rbsEnabled) {
+                        parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
+                    } else {
+                        parseTree = move(parseResult.tree);
+                    }
+
+                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                         return emptyParsedFile(file);
                     }
 
