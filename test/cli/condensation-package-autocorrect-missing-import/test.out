@@ -335,16 +335,16 @@ use_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/
     NN |module Net
         ^^^^^^^^^^
 
-use_cycle_package/foo.test.rb:4: `Test::Foo::Bar::CyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  Test::Foo::Bar::CyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    cycle_package/__package.rb:5: Exported from package here
-     5 |class Foo::Bar::CyclePackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::CyclePackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered_dag'
-                                           ^
+    use_cycle_package/foo.test.rb:4: Replaced with `Dir`
+     4 |  Test::Foo::Bar::CyclePackage::TestUtil
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -353,7 +353,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::CyclePackage, only: "test_rb"
   test_import Foo::Bar::CyclePackageTest
 end
 
@@ -399,16 +398,16 @@ use_app_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.h
     NN |module Net
         ^^^^^^^^^^
 
-use_app_cycle_package/foo.test.rb:4: `Test::Foo::Bar::AppCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_app_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    app_cycle_package/__package.rb:5: Exported from package here
-     5 |class Foo::Bar::AppCyclePackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_app_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::AppCyclePackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered_dag'
-                                           ^
+    use_app_cycle_package/foo.test.rb:4: Replaced with `Dir`
+     4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -417,7 +416,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::AppCyclePackage, only: "test_rb"
   test_import Foo::Bar::AppCyclePackageTest
 end
 
@@ -463,16 +461,16 @@ use_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb
     NN |module Net
         ^^^^^^^^^^
 
-use_false_cycle_package/foo.test.rb:4: `Test::Foo::Bar::FalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_false_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_cycle_package/__package.rb:5: Exported from package here
-     5 |class Foo::Bar::FalseCyclePackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_false_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::FalseCyclePackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered_dag'
-                                           ^
+    use_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
+     4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -481,7 +479,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::FalseCyclePackage, only: "test_rb"
   test_import Foo::Bar::FalseCyclePackageTest
 end
 
@@ -527,16 +524,16 @@ use_app_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https:/
     NN |module Net
         ^^^^^^^^^^
 
-use_app_false_cycle_package/foo.test.rb:4: `Test::Foo::Bar::AppFalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_app_false_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
      4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    app_false_cycle_package/__package.rb:5: Exported from package here
-     5 |class Foo::Bar::AppFalseCyclePackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_app_false_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::AppFalseCyclePackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered_dag'
-                                           ^
+    use_app_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
+     4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
+    NN |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -545,6 +542,5 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::AppFalseCyclePackage, only: "test_rb"
   test_import Foo::Bar::AppFalseCyclePackageTest
 end
