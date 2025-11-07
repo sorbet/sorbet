@@ -4709,7 +4709,7 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 // Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
-    auto length = closingLoc.end - closingLoc.start;
+    ENFORCE(closingLoc.start && closingLoc.end);
 
     // Chop off `/` from Regopt location, so the location only spans the options themselves:
     // `/foo/im`
@@ -4717,13 +4717,8 @@ unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closin
     constexpr uint32_t offset = "/"sv.size();
     auto location = translateLoc(closingLoc.start + offset, closingLoc.end);
 
-    string_view options;
 
-    if (length > 0) {
-        options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
-    } else {
-        options = string_view();
-    }
+    string_view options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
 
     if (!directlyDesugar) {
         return make_unique<parser::Regopt>(location, options);
