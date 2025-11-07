@@ -1379,16 +1379,40 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             }
 
                             case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
-                                auto itParamsNode = down_cast<pm_it_parameters_node>(blockNode->parameters);
-                                auto location = translateLoc(itParamsNode->base.location);
+                                // After upstream commit 58185d6573, the original parser uses
+                                // tokLoc(tok).copyEndWithZeroLength() for NumParams location.
+                                // We need to compute precise locations to match this behavior.
+
+                                auto blockBaseLocation = translateLoc(blockNode->base.location);
+                                const auto &source = ctx.file.data(ctx).source();
+
+                                // NumParams: zero-length location after opening token
+                                // Block location starts after the opening token (after `{` or `do`)
+                                auto numParamsPos = blockBaseLocation.beginPos() + 1; // Skip space after opening
+                                auto numParamsLoc = core::LocOffsets{numParamsPos, numParamsPos};
+
+                                // LVar: find the actual 'it' identifier location in the source
+                                auto itPos = source.find("it", blockBaseLocation.beginPos());
+                                auto itLoc = numParamsLoc; // Default if not found
+                                if (itPos != std::string_view::npos && itPos < blockBaseLocation.endPos()) {
+                                    // Verify it's a whole word
+                                    bool startOk =
+                                        (itPos == 0 || (!isalnum(source[itPos - 1]) && source[itPos - 1] != '_'));
+                                    bool endOk = (itPos + 2 >= source.size() ||
+                                                  (!isalnum(source[itPos + 2]) && source[itPos + 2] != '_'));
+                                    if (startOk && endOk) {
+                                        itLoc = core::LocOffsets{static_cast<uint32_t>(itPos),
+                                                                 static_cast<uint32_t>(itPos) + 2};
+                                    }
+                                }
 
                                 auto name = core::Names::it();
-                                auto paramNode = make_unique<parser::LVar>(location, name);
+                                auto paramNode = make_unique<parser::LVar>(itLoc, name);
 
                                 NodeVec params;
                                 params.emplace_back(move(paramNode));
 
-                                blockParameters = make_unique<parser::NumParams>(location, move(params));
+                                blockParameters = make_unique<parser::NumParams>(numParamsLoc, move(params));
                                 break;
                             }
 
@@ -2808,17 +2832,35 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             return make_node_with_expr<parser::XString>(move(res), location, move(sorbetParts));
         }
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // Reading the `it` default param in a block, e.g. `a.map { it + 1 }`
-            auto name = core::Names::it();
-            return make_unique<parser::LVar>(location, name);
+            return make_unique<parser::LVar>(location, core::Names::it());
         }
-        case PM_IT_PARAMETERS_NODE: { // Represents the `it` default param in a block, e.g. `lambda { it + 1 }`
+        case PM_IT_PARAMETERS_NODE: { // Represents the `it` default param in a lambda, e.g. `-> { it + 1 }`
+            // Similar to blocks, compute precise locations to match upstream changes
+            const auto &source = ctx.file.data(ctx).source();
+
+            // NumParams: zero-length location after opening (location starts after opening token)
+            auto numParamsPos = location.beginPos() + 1;
+            auto numParamsLoc = core::LocOffsets{numParamsPos, numParamsPos};
+
+            // LVar: find the actual 'it' identifier location
+            auto itPos = source.find("it", location.beginPos());
+            auto itLoc = numParamsLoc; // Default if not found
+            if (itPos != std::string_view::npos && itPos < location.endPos()) {
+                // Verify it's a whole word
+                bool startOk = (itPos == 0 || (!isalnum(source[itPos - 1]) && source[itPos - 1] != '_'));
+                bool endOk = (itPos + 2 >= source.size() || (!isalnum(source[itPos + 2]) && source[itPos + 2] != '_'));
+                if (startOk && endOk) {
+                    itLoc = core::LocOffsets{static_cast<uint32_t>(itPos), static_cast<uint32_t>(itPos) + 2};
+                }
+            }
+
             auto name = core::Names::it();
-            auto paramNode = make_unique<parser::LVar>(location, name);
+            auto paramNode = make_unique<parser::LVar>(itLoc, name);
 
             NodeVec params;
             params.emplace_back(move(paramNode));
 
-            return make_unique<parser::NumParams>(location, move(params));
+            return make_unique<parser::NumParams>(numParamsLoc, move(params));
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
