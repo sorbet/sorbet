@@ -4711,14 +4711,20 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     ENFORCE(closingLoc.start && closingLoc.end);
 
-    // Chop off `/` from Regopt location, so the location only spans the options themselves:
-    // `/foo/im`
-    //       ^^
-    constexpr uint32_t offset = "/"sv.size();
-    auto location = translateLoc(closingLoc.start + offset, closingLoc.end);
+    // Chop off Regexp's closing delimiter from the start of the Regopt location,
+    // so the location only spans the options themselves:
+    //     /foo/im
+    //          ^^
+    //     $r(foo)im
+    //            ^^
+    //     $r[foo]im
+    //            ^^
+    //     $r{foo}im
+    //            ^^
+    auto prismLoc = pm_location_t{.start = closingLoc.start + 1, .end = closingLoc.end};
+    auto location = translateLoc(prismLoc);
 
-
-    string_view options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
+    string_view options = sliceLocation(prismLoc);
 
     if (!directlyDesugar) {
         return make_unique<parser::Regopt>(location, options);
