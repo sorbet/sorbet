@@ -132,6 +132,75 @@ ast::ExpressionPtr mergeStrings(core::MutableContext ctx, core::LocOffsets loc,
     }
 }
 
+// Given a `pm_multi_target_node` or `pm_multi_write_node`, return the location of the left-hand side.
+// Conceptually, the location spans from the start of the first element, to the end of the last element.
+// Determining the first/last elements is tricky, because they're split across the `lefts`, `rest`, and `rights` fields.
+// We could smush them all into a temporary array, but this implementation opts to go for an allocation-free approach.
+template <typename PrismNode> pm_location_t mlhsLocation(PrismNode *node) {
+    static_assert(
+        is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>,
+        "Translator::translateMultiTarget can only be used for PM_MULTI_TARGET_NODE and PM_MULTI_WRITE_NODE.");
+
+    auto lefts = absl::MakeSpan(node->lefts.nodes, node->lefts.size);
+    auto *middle = node->rest;
+    auto rights = absl::MakeSpan(node->rights.nodes, node->rights.size);
+
+    pm_node_t *left = nullptr;
+    pm_node_t *right = nullptr;
+
+    if (!lefts.empty()) {
+        left = lefts.front();
+
+        // Look for the last element, from right-to-left.
+        if (!rights.empty()) {
+            right = rights.back();
+        } else if (middle && !PM_NODE_TYPE_P(middle, PM_IMPLICIT_REST_NODE)) {
+            // Special case: implicit rest nodes (`,`) should not be included in the location:
+            //     a, = 1, 2
+            //     ^
+
+            right = middle;
+        } else {
+            right = lefts.back();
+        }
+    } else if (middle) {
+        left = middle;
+
+        // Look for the last element, from right-to-left.
+        if (!rights.empty()) {
+            right = rights.back();
+        } else {
+            right = middle;
+        }
+    } else if (!rights.empty()) {
+        left = rights.front();
+        right = rights.back();
+    } else {
+        unreachable("This multi-write node has no lefts, middle, or rights?!");
+    }
+
+    ENFORCE(left != nullptr && right != nullptr);
+
+    const uint8_t *leftStartLoc = nullptr;
+    if (PM_NODE_TYPE_P(left, PM_MULTI_TARGET_NODE)) {
+        auto multiTargetNode = down_cast<pm_multi_target_node>(left);
+        leftStartLoc = mlhsLocation(multiTargetNode).start;
+    } else {
+        leftStartLoc = left->location.start;
+    }
+
+    const uint8_t *rightEndLoc = nullptr;
+    if (PM_NODE_TYPE_P(right, PM_MULTI_TARGET_NODE)) {
+        auto multiTargetNode = down_cast<pm_multi_target_node>(right);
+        rightEndLoc = mlhsLocation(multiTargetNode).end;
+    } else {
+        rightEndLoc = right->location.end;
+    }
+
+    ENFORCE(leftStartLoc != nullptr && rightEndLoc != nullptr);
+    return (pm_location_t){.start = leftStartLoc, .end = rightEndLoc};
+}
+
 // Extract the content and location of a Symbol node.
 // This is handy for `desugarSymbolProc`, where it saves us from needing to dig and
 // cast to extract this info out of an `ast::Literal`.
@@ -2838,12 +2907,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
             auto multiTargetNode = down_cast<pm_multi_target_node>(node);
 
-            return translateMultiTargetLhs(multiTargetNode);
+            auto lhsLoc = translateLoc(mlhsLocation(multiTargetNode));
+
+            return translateMultiTargetLhs(multiTargetNode, lhsLoc);
         }
         case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
             auto multiWriteNode = down_cast<pm_multi_write_node>(node);
 
-            auto multiLhsNode = translateMultiTargetLhs(multiWriteNode);
+            auto lhsLoc = translateLoc(mlhsLocation(multiWriteNode));
+
+            auto multiLhsNode = translateMultiTargetLhs(multiWriteNode, lhsLoc);
             auto rhsValue = translate(multiWriteNode->value);
 
             if (!directlyDesugar || !hasExpr(rhsValue, multiLhsNode->exprs)) {
@@ -3786,7 +3859,27 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
     params.reserve(requireds.size() + optionals.size() + restSize + posts.size() + keywords.size() + kwrestSize +
                    blockSize);
 
-    translateMultiInto(params, requireds);
+    for (auto &n : requireds) {
+        if (PM_NODE_TYPE_P(n, PM_MULTI_TARGET_NODE)) {
+            auto multiTargetNode = down_cast<pm_multi_target_node>(n);
+
+            ENFORCE(multiTargetNode->lparen_loc.start);
+            ENFORCE(multiTargetNode->lparen_loc.end);
+            ENFORCE(multiTargetNode->rparen_loc.start);
+            ENFORCE(multiTargetNode->rparen_loc.end);
+
+            // The legacy parser doesn't usually include the parens in the location of a multi-target node,
+            // *except* in a block's parameter list.
+            auto mlhsLoc = translateLoc(multiTargetNode->lparen_loc.start, multiTargetNode->rparen_loc.end);
+
+            auto multiLhsNode = translateMultiTargetLhs(multiTargetNode, mlhsLoc);
+
+            params.emplace_back(move(multiLhsNode));
+        } else {
+            params.emplace_back(translate(n));
+        }
+    }
+
     translateMultiInto(params, optionals);
 
     if (paramsNode->rest != nullptr) {
@@ -4667,12 +4760,11 @@ string_view Translator::sliceLocation(pm_location_t loc) const {
 }
 
 // Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.
-template <typename PrismNode> unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node) {
+template <typename PrismNode>
+unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, core::LocOffsets location) {
     static_assert(
         is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>,
         "Translator::translateMultiTarget can only be used for PM_MULTI_TARGET_NODE and PM_MULTI_WRITE_NODE.");
-
-    auto location = translateLoc(node->base.location);
 
     // Left-hand side of the assignment
     auto prismLefts = absl::MakeSpan(node->lefts.nodes, node->lefts.size);
