@@ -2851,8 +2851,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat/`
             auto matchLastLineNode = down_cast<pm_match_last_line_node>(node);
 
+            auto contentLoc = translateLoc(matchLastLineNode->content_loc);
+
             auto regex =
-                translateRegexp(location, location, matchLastLineNode->unescaped, matchLastLineNode->closing_loc);
+                translateRegexp(location, contentLoc, matchLastLineNode->unescaped, matchLastLineNode->closing_loc);
 
             return make_unsupported_node<parser::MatchCurLine>(location, move(regex));
         }
@@ -4707,21 +4709,22 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 // Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
-    auto length = closingLoc.end - closingLoc.start;
+    ENFORCE(closingLoc.start && closingLoc.end);
 
-    // Chop off `/` from Regopt location, so the location only spans the options themselves:
-    // `/foo/im`
-    //       ^^
-    constexpr uint32_t offset = "/"sv.size();
-    auto location = translateLoc(closingLoc.start + offset, closingLoc.end);
+    // Chop off Regexp's closing delimiter from the start of the Regopt location,
+    // so the location only spans the options themselves:
+    //     /foo/im
+    //          ^^
+    //     $r(foo)im
+    //            ^^
+    //     $r[foo]im
+    //            ^^
+    //     $r{foo}im
+    //            ^^
+    auto prismLoc = pm_location_t{.start = closingLoc.start + 1, .end = closingLoc.end};
+    auto location = translateLoc(prismLoc);
 
-    string_view options;
-
-    if (length > 0) {
-        options = sliceLocation(closingLoc).substr(1); // one character after the closing `/`
-    } else {
-        options = string_view();
-    }
+    string_view options = sliceLocation(prismLoc);
 
     if (!directlyDesugar) {
         return make_unique<parser::Regopt>(location, options);

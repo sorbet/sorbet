@@ -140,7 +140,6 @@ prism_location_test_suite(
             "prism_regression/error_recovery/assign.rb",
             "prism_regression/if_elsif.rb",
             "prism_regression/lambda.rb",
-            "prism_regression/match_last_line.rb",
             "prism_regression/multi_target.rb",
             "prism_regression/multi_write.rb",
             "prism_regression/numbered_params.rb",
