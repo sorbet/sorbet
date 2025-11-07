@@ -3779,10 +3779,13 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 if (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE)) {
                     auto ifNode = down_cast<pm_if_node>(prismPattern);
                     conditionalStatements = ifNode->statements;
+                    auto location = translateLoc(ifNode->if_keyword_loc.start, ifNode->base.location.end);
                     sorbetGuard = make_unique<parser::IfGuard>(location, translate(ifNode->predicate));
                 } else { // PM_UNLESS_NODE
+                    ENFORCE(PM_NODE_TYPE_P(prismPattern, PM_UNLESS_NODE));
                     auto unlessNode = down_cast<pm_unless_node>(prismPattern);
                     conditionalStatements = unlessNode->statements;
+                    auto location = translateLoc(unlessNode->keyword_loc.start, unlessNode->base.location.end);
                     sorbetGuard = make_unique<parser::UnlessGuard>(location, translate(unlessNode->predicate));
                 }
 
