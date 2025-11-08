@@ -454,10 +454,6 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     if (forwarderClass.exists()) {
         fmt::format_to(std::back_inserter(buf), "{}", forwarderClass.show(gs, options));
     } else {
-        // T.class_of(klass)[arg1, arg2] is never valid syntax in an RBI
-        if (options.useValidSyntax && this->klass.data(gs)->isSingletonClass(gs)) {
-            return this->klass.show(gs, options);
-        }
         fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
     }
     auto targs = this->targs;

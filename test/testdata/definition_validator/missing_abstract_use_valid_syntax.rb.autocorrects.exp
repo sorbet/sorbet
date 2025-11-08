@@ -10,7 +10,7 @@ class Parent
 end
 
 class Child < Parent
-  sig { override.params(x: T.class_of(Numeric)).void }
+  sig { override.params(x: T.class_of(Numeric)[Integer]).void }
   def foo(x); end
 end # error: Missing definition for abstract method `Parent#foo`
 # ------------------------------
