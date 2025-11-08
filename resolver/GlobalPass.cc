@@ -258,17 +258,16 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
             auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             if (attachedClass.exists()) {
                 auto attachedClassTypeMember = attachedClass.asTypeMemberRef().data(gs);
-                if (singleton.data(gs)->flags.isFinal) {
+                bool isFinal = singleton.data(gs)->flags.isFinal;
+                if (isFinal) {
                     attachedClassTypeMember->flags.isCovariant = false;
                     attachedClassTypeMember->flags.isInvariant = true;
-                    attachedClassTypeMember->flags.isFixed = true;
                 }
                 auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember->resultType);
                 ENFORCE(lambdaParam != nullptr);
 
                 lambdaParam->upperBound = sym.data(gs)->externalType();
-                lambdaParam->lowerBound =
-                    attachedClassTypeMember->flags.isFixed ? lambdaParam->upperBound : core::Types::bottom();
+                lambdaParam->lowerBound = isFinal ? lambdaParam->upperBound : core::Types::bottom();
             }
         }
     }
