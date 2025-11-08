@@ -1,0 +1,16 @@
+# -- test/testdata/definition_validator/missing_abstract_use_valid_syntax.rb --
+# typed: true
+
+class Parent
+  extend T::Sig, T::Helpers
+  abstract!
+  sig { abstract.params(x: T.class_of(Numeric)[Integer]).void }
+  def foo(x)
+  end
+end
+
+class Child < Parent
+  sig { override.params(x: T.class_of(Numeric)).void }
+  def foo(x); end
+end # error: Missing definition for abstract method `Parent#foo`
+# ------------------------------
