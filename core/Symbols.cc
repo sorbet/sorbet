@@ -89,15 +89,8 @@ bool TypeParameterRef::operator!=(const TypeParameterRef &rhs) const {
 vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
     vector<TypePtr> targs;
     for (auto tm : typeMembers()) {
-        auto tmData = tm.data(gs);
-        if (tmData->flags.isFixed) {
-            auto lambdaParam = cast_type<LambdaParam>(tmData->resultType);
-            ENFORCE(lambdaParam != nullptr);
-            targs.emplace_back(lambdaParam->upperBound);
-        } else {
-            auto selfType = core::SymbolRef(tm);
-            targs.emplace_back(make_type<SelfTypeParam>(selfType));
-        }
+        auto selfType = core::SymbolRef(tm);
+        targs.emplace_back(make_type<SelfTypeParam>(selfType));
     }
     return targs;
 }

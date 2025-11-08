@@ -1245,16 +1245,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     const auto &resultType = symbol.resultType(ctx);
                     if (resultType != nullptr) {
                         if (symbol.isTypeMember()) {
-                            auto tm = symbol.asTypeMemberRef();
-                            if (tm.data(ctx)->flags.isFixed) {
-                                // pick the upper bound here, as
-                                // isFixed() => lowerBound == upperBound.
-                                auto lambdaParam = core::cast_type<core::LambdaParam>(resultType);
-                                ENFORCE(lambdaParam != nullptr);
-                                tp.type = core::make_type<core::MetaType>(lambdaParam->upperBound);
-                            } else {
-                                tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
-                            }
+                            tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
                         } else if (symbol.isField(ctx)) {
                             auto field = symbol.asFieldRef();
                             tp.type = core::Types::resultTypeAsSeenFrom(
