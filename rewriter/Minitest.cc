@@ -899,7 +899,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         }
 
         case core::Names::itBehavesLike().rawId(): {
-            if (block != nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || block != nullptr || !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
                 return nullptr;
             }
 
