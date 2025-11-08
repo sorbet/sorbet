@@ -1388,7 +1388,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                                 // NumParams: zero-length location after opening token
                                 // Block location starts after the opening token (after `{` or `do`)
-                                auto numParamsPos = blockBaseLocation.beginPos() + 1; // Skip space after opening
+                                // Check if the block starts with '{' (1 char) or 'do' (2 chars)
+                                uint32_t tokenLength = (source[blockBaseLocation.beginPos()] == '{') ? 1 : 2;
+                                auto numParamsPos = blockBaseLocation.beginPos() + tokenLength;
                                 auto numParamsLoc = core::LocOffsets{numParamsPos, numParamsPos};
 
                                 // LVar: find the actual 'it' identifier location in the source
@@ -2839,7 +2841,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             const auto &source = ctx.file.data(ctx).source();
 
             // NumParams: zero-length location after opening (location starts after opening token)
-            auto numParamsPos = location.beginPos() + 1;
+            // Check if the block starts with '{' (1 char) or 'do' (2 chars)
+            uint32_t tokenLength = (source[location.beginPos()] == '{') ? 1 : 2;
+            auto numParamsPos = location.beginPos() + tokenLength;
             auto numParamsLoc = core::LocOffsets{numParamsPos, numParamsPos};
 
             // LVar: find the actual 'it' identifier location
