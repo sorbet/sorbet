@@ -3671,23 +3671,39 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             unique_ptr<parser::Node> arrayPattern = nullptr;
 
-            // When the pattern ends with an implicit rest node, we need to return an `ArrayPatternWithTail` instead
-            if (prismRestNode != nullptr && PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
-                arrayPattern = make_unique<parser::ArrayPatternWithTail>(location, move(sorbetElements));
-            } else {
-                arrayPattern = make_unique<parser::ArrayPattern>(location, move(sorbetElements));
-            }
-
             if (auto *prismConstant = arrayPatternNode->constant) {
                 // An array pattern can start with a constant that matches against a specific type,
-                // rather than any value whose `#deconstruct` results are matched by the pattern
+                // (rather than any value whose `#deconstruct` results are matched by the pattern).
                 // E.g. the `Point` in `in Point[1, 2]`
                 auto sorbetConstant = translate(prismConstant);
+
+                ENFORCE(arrayPatternNode->opening_loc.start && arrayPatternNode->closing_loc.end,
+                        "Array pattern without parentheses or square brackets?");
+
+                // The `ArrayPattern` loc doesn't include the constant, if there is one.
+                //     `Point[x: Integer => 1, y: Integer => 2]`
+                //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ArrayPattern loc
+                //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ConstPattern loc
+                auto arrayPatternLoc =
+                    translateLoc(arrayPatternNode->opening_loc.start, arrayPatternNode->closing_loc.end);
+
+                // When the pattern ends with an implicit rest node, we need to return an `ArrayPatternWithTail`
+                // instead
+                if (prismRestNode != nullptr && PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
+                    arrayPattern = make_unique<parser::ArrayPatternWithTail>(arrayPatternLoc, move(sorbetElements));
+                } else {
+                    arrayPattern = make_unique<parser::ArrayPattern>(arrayPatternLoc, move(sorbetElements));
+                }
 
                 return make_unique<parser::ConstPattern>(location, move(sorbetConstant), move(arrayPattern));
             }
 
-            return arrayPattern;
+            // When the pattern ends with an implicit rest node, we need to return an `ArrayPatternWithTail` instead
+            if (prismRestNode != nullptr && PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
+                return make_unique<parser::ArrayPatternWithTail>(location, move(sorbetElements));
+            } else {
+                return make_unique<parser::ArrayPattern>(location, move(sorbetElements));
+            }
         }
         case PM_CAPTURE_PATTERN_NODE: { // A variable capture such as the `Integer => i` in `in Integer => i`
             auto capturePatternNode = down_cast<pm_capture_pattern_node>(node);
@@ -3755,18 +3771,28 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 }
             }
 
-            auto hashPattern = make_unique<parser::HashPattern>(location, move(sorbetElements));
-
             if (auto *prismConstant = hashPatternNode->constant) {
                 // A hash pattern can start with a constant that matches against a specific type,
-                // rather than any value whose `#deconstruct_keys` results are matched by the pattern
+                // (rather than any value whose `#deconstruct_keys` results are matched by the pattern).
                 // E.g. the `Point` in `in Point[x: Integer => 1, y: Integer => 2]`
                 auto sorbetConstant = translate(prismConstant);
+
+                ENFORCE(hashPatternNode->opening_loc.start && hashPatternNode->closing_loc.end,
+                        "Hash pattern without parentheses or square brackets?");
+
+                // The `HashPattern` loc doesn't include the constant, if there is one.
+                //     `Point[x: Integer => 1, y: Integer => 2]`
+                //           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ HashPattern loc
+                //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ConstPattern loc
+                auto hashPatternLoc =
+                    translateLoc(hashPatternNode->opening_loc.start, hashPatternNode->closing_loc.end);
+
+                auto hashPattern = make_unique<parser::HashPattern>(hashPatternLoc, move(sorbetElements));
 
                 return make_unique<parser::ConstPattern>(location, move(sorbetConstant), move(hashPattern));
             }
 
-            return hashPattern;
+            return make_unique<parser::HashPattern>(location, move(sorbetElements));
         }
         case PM_IMPLICIT_NODE: {
             auto implicitNode = down_cast<pm_implicit_node>(node);
