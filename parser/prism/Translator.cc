@@ -1348,8 +1348,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                     }
                                 }
 
-                                auto name = core::Names::it();
-                                auto paramNode = make_unique<parser::LVar>(itLoc, name);
+                                auto paramNode = make_unique<parser::LVar>(itLoc, core::Names::it());
 
                                 NodeVec params;
                                 params.emplace_back(move(paramNode));
