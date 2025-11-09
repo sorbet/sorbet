@@ -41,3 +41,33 @@ end
 res = ChildA.new.my_dup
 #     ^^^^^^ error: Expression does not have a fully-defined type
 T.reveal_type(res) # error: `T.untyped`
+
+class B
+  extend T::Sig, T::Generic
+  X = type_member { {lower: T.self_type, upper: T.self_type} }
+
+  sig { returns(X) }
+  def my_dup = self # error: Expected `B::X` but found `B[B::X]` for method result type
+end
+
+p(B)
+b = B.new
+T.reveal_type(b) # error: `B[T.untyped]`
+
+class ChildB < B
+  X = type_member { {lower: T.self_type, upper: T.self_type} }
+end
+
+class C
+  extend T::Sig, T::Generic
+  X = type_member(:out) { {lower: T.self_type, upper: T.self_type} }
+
+  sig { returns(X) }
+  def my_dup = self # error: Expected `C::X` but found `C[C::X]`
+end
+
+p(C)
+# ^ error: does not have a fully-defined type
+b = C.new
+#   ^ error: does not have a fully-defined type
+T.reveal_type(b) # error: `T.untyped`
