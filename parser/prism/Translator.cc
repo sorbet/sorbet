@@ -2960,8 +2960,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             for (auto i = 1; i <= paramCount; i++) {
                 auto name = ctx.state.enterNameUTF8("_" + to_string(i));
 
-                // The location is arbitrary and not really used, since these aren't explicitly written in the
-                // source.
+                // The location is arbitrary and not really used, since these aren't explicitly written in the source.
                 auto expr = MK::Local(location, name);
                 auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
                 params.emplace_back(move(paramNode));
