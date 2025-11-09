@@ -37,12 +37,12 @@ class MyGeneric
 
   sig { params(x: T.all(IBox[Integer], HasUpper)).void }
   def collapses_intersection_upper(x)
-    T.reveal_type(x) # error: `T.all(IBox[Integer], MyGeneric::HasUpper)`
+    T.reveal_type(x) # error: `MyGeneric::HasUpper`
   end
 
   sig { params(x: T.all(IBox[Integer], HasLower)).void }
   def collapses_intersection_lower(x)
-    T.reveal_type(x) # error: `T.all(IBox[Integer], MyGeneric::HasLower)`
+    T.reveal_type(x) # error: `IBox[Integer]`
   end
 
   sig { params(x: T.any(IBox[Integer], HasUpper)).void }
