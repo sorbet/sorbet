@@ -878,8 +878,13 @@ pair<core::LocOffsets, core::LocOffsets> Translator::computeSendLoc(PrismNode *c
         sendLoc = translateLoc(receiver->location).join(sendLoc);
     }
 
-    if (callNode->closing_loc.start && callNode->closing_loc.end) { // explicit `( )` or `[ ]` around the params
-        sendLoc = sendLoc.join(translateLoc(callNode->closing_loc));
+    if constexpr (is_same_v<PrismNode, pm_call_node>) {
+        // Extend the location to include the closing `)`/`]` of the arguments, if any, but only for `pm_call_node`s.
+        // Not for `pm_lambda_node` though, because its `closing_loc` is the closing `}` or `end` of the block.
+
+        if (callNode->closing_loc.start && callNode->closing_loc.end) { // explicit `( )` or `[ ]` around the params
+            sendLoc = sendLoc.join(translateLoc(callNode->closing_loc));
+        }
     }
 
     if (!prismArgs.empty()) { // Extend to last argument's location, if any.
