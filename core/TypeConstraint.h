@@ -5,6 +5,8 @@
 #include "core/Context.h"
 #include "core/SymbolRef.h"
 #include "core/TypePtr.h"
+#include "core/UntypedMode.h"
+
 namespace sorbet::core {
 
 class TypeConstraint {
@@ -40,7 +42,7 @@ public:
     bool rememberIsSubtype(const GlobalState &gs, const TypePtr &, const TypePtr &);
 
     // At least one of arguments has to be a typevar
-    bool isAlreadyASubType(const GlobalState &gs, const TypePtr &, const TypePtr &) const;
+    bool isAlreadyASubType(const GlobalState &gs, const TypePtr &, const TypePtr &, UntypedMode mode) const;
     // returns true if was successfully solved
     bool solve(const GlobalState &gs);
     TypePtr getInstantiation(TypeParameterRef) const;
