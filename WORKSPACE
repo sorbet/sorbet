@@ -33,11 +33,26 @@ load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
 
+# bazel_features is used by rules_cc and toolchains_llvm to detect Bazel version
+# capabilities. bazel_features_deps() sets up the @bazel_features_version repository
+# which is needed by bazel_features internally.
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
+
+# rules_cc 0.2.14+ requires the @cc_compatibility_proxy repository to be set up
+# for WORKSPACE builds. This provides compatibility shims for native cc_* rules.
+load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
+
+compatibility_proxy_repo()
+
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
     name = "llvm_toolchain_15_0_7",
-    absolute_paths = True,
+    # absolute_paths = False (the default) creates symlinks for tools like
+    # llvm-libtool-darwin -> libtool in the toolchain bin directory, which is
+    # required for proper tool resolution on macOS.
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],

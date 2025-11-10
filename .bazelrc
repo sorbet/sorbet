@@ -18,8 +18,12 @@ build --incompatible_enable_cc_toolchain_resolution
 # Without this, one can use `--linkopt='-undefined dynamic_lookup'`.
 # This feature is intentionally not supported on macOS.
 build --features=-supports_dynamic_linker
-# Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
-build --features=-libtool
+
+# Port over all dependencies to use Bzlmod. Until then, disable it,
+# as enabling it pulls in the module version of dependencies such
+# as @@zlib~. By default, @@zlib~ doesn't build; we need to pass in
+# in flags to disable warnings to make the code build.
+common --enable_bzlmod=false
 
 ##
 ##  Common build options across all build configurations
