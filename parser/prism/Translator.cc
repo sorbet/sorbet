@@ -875,7 +875,23 @@ pair<core::LocOffsets, core::LocOffsets> Translator::computeSendLoc(PrismNode *c
     auto sendLoc = initialLoc;
 
     if (receiver) {
-        sendLoc = translateLoc(receiver->location).join(sendLoc);
+        auto receiverStart = startLoc(receiver);
+
+        // Special case: the legacy parser ignores the `->` and parameters of a lambda node,
+        // but only if it's used as a receiver to a method call.
+        // Instead, it used the opening_loc (the `{`/`do`)
+        //     -> (a, b) { 123 }.chained_method_call()
+        //               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Outter Send loc (chained method call)
+        //               ^^^^^^^                       Inner Block loc (receiver)
+        //     ^^                                      Inner Send loc  (receiver)
+        // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9631 is fixed
+        if (PM_NODE_TYPE_P(receiver, PM_LAMBDA_NODE)) {
+            auto lambdaNode = down_cast<pm_lambda_node>(receiver);
+            receiverStart = lambdaNode->opening_loc.start;
+        }
+
+        auto receiverEnd = endLoc(receiver);
+        sendLoc = translateLoc(receiverStart, receiverEnd).join(sendLoc);
     }
 
     if constexpr (is_same_v<PrismNode, pm_call_node>) {
@@ -4691,16 +4707,18 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     pm_node_t *prismParametersNode;
     pm_node_t *prismBodyNode;
-    auto blockLoc = translateLoc(prismBlockOrLambdaNode->location);
+    core::LocOffsets blockLoc;
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         prismParametersNode = prismBlockNode->parameters;
         prismBodyNode = prismBlockNode->body;
+        blockLoc = translateLoc(prismBlockOrLambdaNode->location);
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
         prismParametersNode = prismLambdaNode->parameters;
         prismBodyNode = prismLambdaNode->body;
+        blockLoc = translateLoc(prismLambdaNode->opening_loc.start, prismLambdaNode->closing_loc.end);
     }
 
     unique_ptr<parser::Node> parametersNode;
