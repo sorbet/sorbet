@@ -77,6 +77,74 @@ ClassDef{
 
     Send{
       flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        params = [
+        ]
+        body = Literal{ value = 456 }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U param>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U param>
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = UnresolvedConstantLit{
+        cnst = <C <U Kernel>>
+        scope = EmptyTree
+      }
+      fun = <U lambda>
+      block = Block {
+        params = [
+          OptionalParam{
+            expr = UnresolvedIdent{
+              kind = Local
+              name = <U optional_param>
+            }
+            default_ = Literal{ value = 123 }
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U optional_param>
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {}
       recv = Send{
         flags = {}
         recv = UnresolvedConstantLit{
@@ -87,13 +155,13 @@ ClassDef{
         block = Block {
           params = [
           ]
-          body = Literal{ value = 456 }
+          body = Literal{ value = 890 }
         }
         pos_args = 0
         args = [
         ]
       }
-      fun = <U call>
+      fun = <U chained_method_call>
       block = nullptr
       pos_args = 0
       args = [
@@ -107,28 +175,7 @@ ClassDef{
       block = Block {
         params = [
         ]
-        body = Literal{ value = 789 }
-      }
-      pos_args = 0
-      args = [
-      ]
-    }
-
-    Send{
-      flags = {privateOk}
-      recv = Self
-      fun = <U lambda>
-      block = Block {
-        params = [
-          UnresolvedIdent{
-            kind = Local
-            name = <U param>
-          }
-        ]
-        body = UnresolvedIdent{
-          kind = Local
-          name = <U param>
-        }
+        body = Literal{ value = 123 }
       }
       pos_args = 0
       args = [
