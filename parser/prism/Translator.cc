@@ -904,7 +904,9 @@ Translator::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receive
         result = translateLoc(receiver->location).join(result);
     }
 
-    if (closingLoc.start && closingLoc.end) { // explicit `( )` or `[ ]` around the params
+    // Extend the location to include the closing `)`/`]` of the arguments, if any, but only for `pm_call_node`s.
+    // Not for `pm_lambda_node` though, because its `closing_loc` is the closing `}` or `end` of the block.
+    if (closingLoc.start && closingLoc.end) {
         result = result.join(translateLoc(closingLoc));
     }
 
