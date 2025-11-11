@@ -9,7 +9,7 @@ class A
     when Object
       T.reveal_type(x) # error: `Object`
     else
-      T.reveal_type(x) # error: This code is unreachable
+      T.reveal_type(x) # error: `T.anything`
     end
   end
 end
@@ -25,7 +25,7 @@ class Box
     when Object
       T.reveal_type(x) # error: `T.all(Object, Box::X)`
     else
-      T.reveal_type(x) # error: This code is unreachable
+      T.reveal_type(x) # error: `Box::X`
     end
   end
 end
