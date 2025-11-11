@@ -1724,8 +1724,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
                     // Add the parser node back into the wq tree, to pass the parser tests.
-                    // Extend the location to include the closing paren
-                    blockPassNode->loc = blockPassNode->loc.join(sendWithBlockLoc);
+
                     args.emplace_back(move(blockPassNode));
                 }
 
