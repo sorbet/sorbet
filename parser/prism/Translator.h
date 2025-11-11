@@ -96,6 +96,10 @@ private:
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool>
     desugarParametersNode(NodeVec &params, bool attemptToDesugarParams);
 
+    NodeVec translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
+                                            pm_statements_node_t *statements,
+                                            ast::MethodDef::PARAMS_store *paramsStore);
+
     ast::ExpressionPtr desugarSymbolProc(pm_symbol_node *symbol);
 
     NodeVec translateArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
