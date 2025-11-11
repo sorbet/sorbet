@@ -7,6 +7,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
+  def parse_error5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  def parse_error6<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
   ::T::Sig::WithoutRuntime.sig() do ||
     <self>.params(:p1, <emptyTree>::<C P1>).void()
   end
@@ -374,6 +382,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <runtime method definition of parse_error4>
+
+  <runtime method definition of parse_error5>
+
+  <runtime method definition of parse_error6>
 
   <runtime method definition of sig_mismatch1>
 

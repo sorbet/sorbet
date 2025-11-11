@@ -49,13 +49,13 @@ rbs_node_list_t *Parser::parseTypeParams() {
 
 rbs_method_type_t *Parser::parseMethodType() {
     rbs_method_type_t *methodType = nullptr;
-    rbs_parse_method_type(parser.get(), &methodType);
+    rbs_parse_method_type(parser.get(), &methodType, true);
     return methodType;
 }
 
 rbs_node_t *Parser::parseType() {
     rbs_node_t *type = nullptr;
-    rbs_parse_type(parser.get(), &type);
+    rbs_parse_type(parser.get(), &type, true, true);
     return type;
 }
 
