@@ -209,7 +209,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
         },
         [&](const ClassType &c) {
             auto cdata = c.symbol.data(gs);
-            if (c.symbol == core::Symbols::untyped()) {
+            if (c.symbol == core::Symbols::untyped() || c.symbol == core::Symbols::top()) {
                 result = from;
             } else if (absl::c_any_of(klasses,
                                       [&](auto klass) { return c.symbol == klass || c.derivesFrom(gs, klass); })) {
