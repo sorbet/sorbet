@@ -157,8 +157,8 @@ private:
                                                            std::unique_ptr<parser::Node> receiver, core::NameRef name,
                                                            core::LocOffsets messageLoc);
 
-    template <typename PrismLhsNode, typename SorbetLHSNode>
-    std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign = false);
+    template <typename PrismLhsNode, typename SorbetLHSNode, bool checkForDynamicConstAssign = false>
+    std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
 
     // Generates a unique name for a `parser::Node`.

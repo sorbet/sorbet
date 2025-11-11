@@ -402,12 +402,13 @@ unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode)
     unique_ptr<parser::Node> lhs;
     if constexpr (is_same_v<PrismAssignmentNode, pm_constant_write_node>) {
         // Handle regular assignment to a "plain" constant, like `A = 1`
-        auto replaceWithDynamicConstAssign = true;
-        lhs = translateConst<pm_constant_write_node, parser::ConstLhs>(node, replaceWithDynamicConstAssign);
+        constexpr bool checkForDynamicConstAssign = true;
+        lhs = translateConst<pm_constant_write_node, parser::ConstLhs, checkForDynamicConstAssign>(node);
     } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_path_write_node>) {
         // Handle regular assignment to a constant path, like `A::B::C = 1` or `::C = 1`
-        auto replaceWithDynamicConstAssign = true;
-        lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target, replaceWithDynamicConstAssign);
+        constexpr bool checkForDynamicConstAssign = true;
+        auto target = node->target;
+        lhs = translateConst<pm_constant_path_node, parser::ConstLhs, checkForDynamicConstAssign>(target);
     } else {
         // Handle regular assignment to any other kind of LHS.
         auto name = translateConstantName(node->name);
@@ -763,8 +764,8 @@ unique_ptr<parser::Node> Translator::translateConstantAssignment(pm_node_t *node
     }
 
     auto constantNode = down_cast<PrismConstantNode>(node);
-    auto replaceWithDynamicConstAssign = true;
-    auto lhs = translateConst<PrismConstantNode, parser::ConstLhs>(constantNode, replaceWithDynamicConstAssign);
+    constexpr bool replaceWithDynamicConstAssign = true;
+    auto lhs = translateConst<PrismConstantNode, parser::ConstLhs, replaceWithDynamicConstAssign>(constantNode);
     return translateAnyOpAssignment<PrismConstantNode, SorbetAssignmentNode, parser::ConstLhs>(constantNode, location,
                                                                                                move(lhs));
 }
@@ -4964,8 +4965,8 @@ unique_ptr<parser::Node> Translator::translateIfNode(core::LocOffsets location, 
 //
 // Usually returns the `SorbetLHSNode`, but for constant writes and targets,
 // it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
-template <typename PrismLhsNode, typename SorbetLHSNode>
-unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool replaceWithDynamicConstAssign) {
+template <typename PrismLhsNode, typename SorbetLHSNode, bool checkForDynamicConstAssign>
+unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     static_assert(is_same_v<SorbetLHSNode, parser::Const> || is_same_v<SorbetLHSNode, parser::ConstLhs>,
                   "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
 
@@ -4974,19 +4975,21 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node, bool rep
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
 
-    if (this->isInMethodDef() && replaceWithDynamicConstAssign) {
-        if constexpr (is_same_v<PrismLhsNode, pm_constant_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_or_write_node>) {
-            location = translateLoc(node->name_loc);
-        }
+    if constexpr (checkForDynamicConstAssign) {
+        if (this->isInMethodDef()) {
+            if constexpr (is_same_v<PrismLhsNode, pm_constant_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
+                          is_same_v<PrismLhsNode, pm_constant_or_write_node>) {
+                location = translateLoc(node->name_loc);
+            }
 
-        // Check if this is a dynamic constant assignment (SyntaxError at runtime)
-        // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
-        // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
-        auto expr = MK::Local(location, core::Names::dynamicConstAssign());
-        return make_node_with_expr<LVarLhs>(move(expr), location, core::Names::dynamicConstAssign());
+            // Check if this is a dynamic constant assignment (SyntaxError at runtime)
+            // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
+            // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
+            auto expr = MK::Local(location, core::Names::dynamicConstAssign());
+            return make_node_with_expr<LVarLhs>(move(expr), location, core::Names::dynamicConstAssign());
+        }
     }
 
     auto constantName = ctx.state.enterNameConstant(name);
