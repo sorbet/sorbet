@@ -4970,18 +4970,22 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     static_assert(is_same_v<SorbetLHSNode, parser::Const> || is_same_v<SorbetLHSNode, parser::ConstLhs>,
                   "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
 
-    auto location = translateLoc(node->base.location);
     // It's important that in all branches `enterNameUTF8` is called, which `translateConstantName` does,
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
 
     if constexpr (checkForDynamicConstAssign) {
         if (this->isInMethodDef()) {
+            core::LocOffsets location;
             if constexpr (is_same_v<PrismLhsNode, pm_constant_write_node> ||
                           is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
                           is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
                           is_same_v<PrismLhsNode, pm_constant_or_write_node>) {
                 location = translateLoc(node->name_loc);
+            } else if constexpr (is_same_v<PrismLhsNode, pm_constant_path_node>) {
+                location = translateLoc(node->base.location);
+            } else {
+                static_assert(always_false_v<PrismLhsNode>, "Unexpected case");
             }
 
             // Check if this is a dynamic constant assignment (SyntaxError at runtime)
@@ -4992,6 +4996,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
         }
     }
 
+    auto location = translateLoc(node->base.location);
     auto constantName = ctx.state.enterNameConstant(name);
 
     auto constexpr isConstantPath = is_same_v<PrismLhsNode, pm_constant_path_target_node> ||
