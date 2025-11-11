@@ -10,7 +10,7 @@ if ! diff "$expect" -u <("$script"); then
 ================================================================================
 There were differences in the captured output when running this CLI test.
 To make this output the expected output, run this and commit the changes:
-./bazel test //test/cli:$3
+./bazel test --config=dbg //test/cli:$3
 
 To update all cli tests in bulk, run this and commit the changes:
 ./bazel test //test/cli:update
