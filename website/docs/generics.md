@@ -702,7 +702,9 @@ The `fixed` annotation in the [example above](#type_templates-and-bounds) places
 
 - `lower`: The opposite—places a lower bound, thus requiring only supertypes of that bound.
 
-- `fixed`: Syntactic sugar for specifying both `lower` and `upper` at the same time. Effectively requires that an equivalent type be applied to the type member. Sorbet then uses this fact to never require that an explicit type argument be provided to the class.
+- `fixed`: Specifies both `lower` and `upper` at the same time. Since this effectively requires that any applied type must be equivalent to the `fixed` type, Sorbet does not allow applying an explicit type argument to a `fixed` type parameter.
+
+  To reiterate: `fixed` does two things: specifies bounds **and** changes the "type arity" for a generic class (number of generic type arguments allowed). Use `lower: SomeType, upper: SomeType` instead of `fixed: SomeType` to allow an argument to be passed (e.g. when moving from `upper` to `fixed` would introduce new type errors in any client that is already explicitly applying type arguments to this type member).
 
 ```ruby
 class NumericBox
@@ -719,8 +721,10 @@ NumericBox[String].new
 #          ^^^^^^ error: `String` is not a subtype of upper bound of `Elem`
 
 IntBox.new
-# ^ Does not need to be invoked like `IntBox[Integer]` because Sorbet can
-#   trivially infer the type argument
+# ^ Does not need to be and cannot be invoked like `IntBox[Integer]`
+#   because Sorbet infers the type argument to be `Integer`.
+IntBox[Integer].new
+#      ^^^^^^^ error: All type parameters for `IntBox` have already been fixed
 ```
 
 Placing the bound on the type member makes it an error to ever instantiate a class with that member outside the given bound.
