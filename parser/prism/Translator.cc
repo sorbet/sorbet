@@ -8,6 +8,9 @@
 
 #include "absl/strings/str_replace.h"
 
+// TODO: Clean up after Prism work is done. https://github.com/sorbet/sorbet/issues/9065
+#include "common/sort/sort.h"
+
 template class std::unique_ptr<sorbet::parser::Node>;
 
 using namespace std;
@@ -4200,6 +4203,37 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
     return make_tuple(move(paramsStore), move(statsStore), true);
 }
 
+std::array<core::LocOffsets, 9>
+Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node *statements, uint8_t maxParamNumber) {
+    ENFORCE(statements != nullptr);
+    ENFORCE(0 < statements->body.size, "Can never have a NumParams node on a block with no statements.");
+
+    auto result = std::array<core::LocOffsets, 9>{};
+
+    // The first `maxParamNumber` elements of `result` which we're actually using for this call.
+    auto activeRegion = absl::MakeSpan(result).first(maxParamNumber);
+
+    walkPrismAST(up_cast(statements), [this, &activeRegion](const pm_node_t *node) -> bool {
+        if (PM_NODE_TYPE_P(node, PM_LOCAL_VARIABLE_READ_NODE)) {
+            auto var = down_cast<pm_local_variable_read_node>(const_cast<pm_node_t *>(node));
+            auto varName = this->parser.resolveConstant(var->name);
+
+            if (varName.length() == 2 && varName[0] == '_' && '1' <= varName[1] && varName[1] <= '9') {
+                auto number = varName[1] - '0';
+                activeRegion[number - 1] = this->translateLoc(node->location);
+            }
+
+            if (absl::c_all_of(activeRegion, [](const core::LocOffsets &loc) { return loc.exists(); })) {
+                // We've seen all the numbered parameters we needed, so we can stop early.
+                return false;
+            }
+        }
+        return true;
+    });
+
+    return result;
+}
+
 // Translate the given numbered parameters into a `NodeVec` of legacy parser nodes.
 // If a paramsStore pointer is provided, we'll also directly desugar params into that store.
 NodeVec Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
@@ -4212,22 +4246,31 @@ NodeVec Translator::translateNumberedParametersNode(pm_numbered_parameters_node 
     ENFORCE(1 <= paramCount, "A `pm_numbered_parameters_node_t` node should have at least one parameter");
     ENFORCE(paramCount <= 9, "Ruby only supports 9 numbered parameters (`_9` but no `_10`).");
 
+    auto numberedParamsUsageLocs = findNumberedParamsUsageLocs(location, statements, paramCount);
+    ENFORCE(paramCount <= numberedParamsUsageLocs.size());
+
     NodeVec params;
     params.reserve(paramCount);
 
     for (auto i = 1; i <= paramCount; i++) {
+        // Numbered parameters are implicit, so they don't have a real location in the body.
+        // However, we need somewhere for the error messages to point to, so we use the
+        // location of the first *usage* of this numbered parameter (or none if it was never used).
+        auto usageLoc = numberedParamsUsageLocs[i - 1];
         auto name = ctx.state.enterNameUTF8("_" + to_string(i));
 
-        // The location is arbitrary and not really used, since these aren't explicitly
-        // written in the source.
-        auto expr = MK::Local(location, name);
-        auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
-        params.emplace_back(move(paramNode));
+        if (usageLoc.exists()) {
+            // The legacy parse tree only includes parameters that were used in the body.
+            params.emplace_back(make_node_with_expr<parser::LVar>(MK::Local(usageLoc, name), usageLoc, name));
+        }
 
         if (paramsStore) {
-            paramsStore->emplace_back(MK::Local(location, name));
+            paramsStore->emplace_back(MK::Local(usageLoc, name));
         }
     }
+
+    // The legacy parse tree stores params in the order they were encountered in the body.
+    fast_sort(params, [](const auto &a, const auto &b) { return a->loc.beginLoc < b->loc.beginLoc; });
 
     return params;
 }

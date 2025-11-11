@@ -96,6 +96,9 @@ private:
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool>
     desugarParametersNode(NodeVec &params, bool attemptToDesugarParams);
 
+    std::array<core::LocOffsets, 9> findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node *statements,
+                                                                uint8_t maxParamNumber);
+
     NodeVec translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
                                             pm_statements_node_t *statements,
                                             ast::MethodDef::PARAMS_store *paramsStore);

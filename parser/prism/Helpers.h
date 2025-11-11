@@ -232,6 +232,25 @@ template <typename SorbetLHSType> constexpr ast::UnresolvedIdent::Kind getIdentK
     return IdentKindHelper<SorbetLHSType>::Kind;
 }
 
+// A C++ friendly wrapper around `pm_visit_node`, which lets you use a capturing lambda as the visitor.
+template <typename Visitor> void walkPrismAST(const pm_node_t *node, Visitor &&visitor) {
+    // Ensure the visitor is callable with const pm_node_t * and returns bool
+    //
+    // TODO: Replace with `requires` clause after C++20 upgrade (https://github.com/sorbet/sorbet/issues/9142):
+    //     `requires std::is_invocable_r_v<bool, Visitor, const pm_node_t *>`
+    static_assert(std::is_invocable_r_v<bool, Visitor, const pm_node_t *>,
+                  "Visitor must be callable with (const pm_node_t *) and return bool");
+
+    // Non-capturing lambda that can convert to function pointer for the `callback` pointer
+    auto callback = [](const pm_node_t *node, void *data) -> bool {
+        auto visitor = *static_cast<Visitor *>(data);
+        return visitor(node);
+    };
+
+    // Pass the visitor lambda as the opaque `data` pointer
+    pm_visit_node(node, callback, &visitor);
+}
+
 } // namespace sorbet::parser::Prism
 
 #endif // SORBET_PARSER_PRISM_HELPERS_H

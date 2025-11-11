@@ -137,7 +137,6 @@ prism_location_test_suite(
             "prism_regression/lambda.rb",
             "prism_regression/multi_target.rb",
             "prism_regression/multi_write.rb",
-            "prism_regression/numbered_params.rb",
         ],
     ),
 )

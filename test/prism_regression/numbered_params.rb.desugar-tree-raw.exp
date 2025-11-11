@@ -82,12 +82,115 @@ ClassDef{
     }
 
     Send{
-      flags = {}
-      recv = UnresolvedConstantLit{
-        cnst = <C <U Kernel>>
-        scope = EmptyTree
+      flags = {privateOk}
+      recv = Self
+      fun = <U proc>
+      block = Block {
+        params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _3>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _4>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _5>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _6>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _7>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _8>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _9>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _9>
+        }
       }
-      fun = <U lambda>
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U proc>
+      block = Block {
+        params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _3>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _4>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _5>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _6>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _7>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _8>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _9>
+          }
+        ]
+        body = UnresolvedIdent{
+          kind = Local
+          name = <U _9>
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U proc>
       block = Block {
         params = [
           UnresolvedIdent{
@@ -103,7 +206,7 @@ ClassDef{
           flags = {}
           recv = UnresolvedIdent{
             kind = Local
-            name = <U _1>
+            name = <U _2>
           }
           fun = <U +>
           block = nullptr
@@ -111,7 +214,44 @@ ClassDef{
           args = [
             UnresolvedIdent{
               kind = Local
-              name = <U _2>
+              name = <U _1>
+            }
+          ]
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U proc>
+      block = Block {
+        params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <U _1>
+          }
+          UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+        ]
+        body = Send{
+          flags = {}
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <U _2>
+          }
+          fun = <U +>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _1>
             }
           ]
         }
