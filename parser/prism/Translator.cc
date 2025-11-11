@@ -1366,7 +1366,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                 // Like the implicit `|_1, _2, _3|` in `foo { _3 }`
                                 auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(blockNode->parameters);
 
-                                auto location = translateLoc(numberedParamsNode->base.location);
+                                // Use a 0-length loc just after the `do` or `{` token, as if you had written:
+                                //     do|_1, _2| ... end`
+                                //       ^
+                                //     {|_1, _2| ... }`
+                                //      ^
+                                auto numParamsLoc =
+                                    translateLoc(blockNode->opening_loc.end, blockNode->opening_loc.end);
 
                                 auto params = translateNumberedParametersNode(
                                     numberedParamsNode, down_cast<pm_statements_node>(blockNode->body),
@@ -1374,7 +1380,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                                 didDesugarBlockParams = true;
 
-                                blockParameters = make_unique<parser::NumParams>(location, move(params));
+                                blockParameters = make_unique<parser::NumParams>(numParamsLoc, move(params));
 
                                 break;
                             }
@@ -4612,11 +4618,31 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
     unique_ptr<parser::Node> parametersNode;
     if (prismParametersNode != nullptr) {
         if (PM_NODE_TYPE_P(prismParametersNode, PM_NUMBERED_PARAMETERS_NODE)) {
+            core::LocOffsets numParamsLoc;
+            if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
+                auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
+
+                // Use a 0-length loc just after the `do` or `{` token, as if you had written:
+                //     do|_1, _2| ... end`
+                //       ^
+                //     {|_1, _2| ... }`
+                //      ^
+                numParamsLoc = translateLoc(prismBlockNode->opening_loc.end, prismBlockNode->opening_loc.end);
+            } else {
+                ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE));
+                auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
+
+                // Use a 0-length loc just after the `->` token, as if you had written:
+                //     ->(_1, _2) { ... }
+                //       ^
+                numParamsLoc = translateLoc(prismLambdaNode->operator_loc.end, prismLambdaNode->operator_loc.end);
+            }
+
             auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(prismParametersNode);
 
             auto params = translateNumberedParametersNode(numberedParamsNode,
                                                           down_cast<pm_statements_node>(prismBodyNode), nullptr);
-            parametersNode = make_unique<parser::NumParams>(blockLoc, move(params));
+            parametersNode = make_unique<parser::NumParams>(numParamsLoc, move(params));
         } else {
             parametersNode = translate(prismParametersNode);
         }
