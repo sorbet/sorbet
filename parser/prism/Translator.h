@@ -109,9 +109,7 @@ private:
                                                          std::unique_ptr<parser::Node> sendNode);
 
     NodeVec translateEnsure(pm_begin_node *beginNode);
-    std::unique_ptr<parser::Node> translateRescue(pm_rescue_node *prismRescueNode,
-                                                  std::unique_ptr<parser::Node> beginNode,
-                                                  std::unique_ptr<parser::Node> elseNode);
+    std::unique_ptr<parser::Node> translateRescue(pm_begin_node *parentBeginNode);
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true,
                                                       core::LocOffsets overrideLocation = core::LocOffsets::none());
 
