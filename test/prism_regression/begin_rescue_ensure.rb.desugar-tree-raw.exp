@@ -1,0 +1,3550 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Literal{ value = nil }
+
+    Literal{ value = nil }
+
+    Literal{ value = "begin line 1" }
+
+    InsSeq{
+      stats = [
+        Literal{ value = "begin line 1" }
+      ],
+      expr = Literal{ value = "begin line 2" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $2>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $3>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $4>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $5>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $6>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $7>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $8>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $9>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $10>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $11>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $12>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $13>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $14>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $15>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $16>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $17>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $18>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $19>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $20>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $21>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $22>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $23>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $24>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $25>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $26>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $27>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $28>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $29>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $30>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $31>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $32>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $33>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $34>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $35>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $36>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $37>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $38>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $39>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $40>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $41>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $42>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $43>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $44>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $45>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $46>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $47>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $48>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $49>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Literal{ value = nil }
+
+    Literal{ value = nil }
+
+    Literal{ value = "begin line 1" }
+
+    InsSeq{
+      stats = [
+        Literal{ value = "begin line 1" }
+      ],
+      expr = Literal{ value = "begin line 2" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $50>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $51>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $52>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $53>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $54>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $55>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $56>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $57>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $58>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $59>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $60>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $61>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $62>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $63>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $64>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $65>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $66>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $67>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $68>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $69>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $70>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $71>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $72>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $73>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $74>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $75>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $76>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $77>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $78>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $79>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $80>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $81>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $82>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $83>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $84>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $85>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $86>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $87>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $88>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $89>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $90>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $91>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $92>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $93>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $94>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $95>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $96>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $97>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Literal{ value = nil }
+
+    Literal{ value = nil }
+
+    Literal{ value = "begin line 1" }
+
+    InsSeq{
+      stats = [
+        Literal{ value = "begin line 1" }
+      ],
+      expr = Literal{ value = "begin line 2" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $98>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $99>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $100>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $101>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $102>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $103>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $104>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $105>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $106>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $107>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $108>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $109>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = InsSeq{
+        stats = [
+          Literal{ value = "else line 1" }
+        ],
+        expr = Literal{ value = "else line 2" }
+      }
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $110>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $111>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $112>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $113>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $114>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $115>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $116>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $117>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $118>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $119>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $120>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $121>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = EmptyTree
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $122>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $123>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $124>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $125>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $126>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $127>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $128>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $129>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $130>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $131>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $132>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $133>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = Literal{ value = "ensure line 1" }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $134>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $135>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $136>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $137>
+          }
+          body = EmptyTree
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $138>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $139>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $140>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $141>
+          }
+          body = Literal{ value = "rescue line 1" }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $142>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = EmptyTree
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $143>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = Literal{ value = "begin line 1" }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $144>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+
+    Rescue{
+      body = InsSeq{
+        stats = [
+          Literal{ value = "begin line 1" }
+        ],
+        expr = Literal{ value = "begin line 2" }
+      }
+      rescueCases = [
+        RescueCase{
+          exceptions = [
+          ]
+          var = UnresolvedIdent{
+            kind = Local
+            name = <D <U <rescueTemp>> $145>
+          }
+          body = InsSeq{
+            stats = [
+              Literal{ value = "rescue line 1" }
+            ],
+            expr = Literal{ value = "rescue line 2" }
+          }
+        }
+      ]
+      else = EmptyTree
+      ensure = InsSeq{
+        stats = [
+          Literal{ value = "ensure line 1" }
+        ],
+        expr = Literal{ value = "ensure line 2" }
+      }
+    }
+  ]
+}

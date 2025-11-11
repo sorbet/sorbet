@@ -1,0 +1,4510 @@
+Begin {
+  stmts = [
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        String {
+          val = <U begin line 1>
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        String {
+          val = <U begin line 1>
+        }
+        String {
+          val = <U begin line 2>
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        String {
+          val = <U begin line 1>
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        String {
+          val = <U begin line 1>
+        }
+        String {
+          val = <U begin line 2>
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        String {
+          val = <U begin line 1>
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        String {
+          val = <U begin line 1>
+        }
+        String {
+          val = <U begin line 2>
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = NULL
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = String {
+                val = <U rescue line 1>
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = String {
+            val = <U begin line 1>
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          rescue = [
+            Resbody {
+              exception = NULL
+              var = NULL
+              body = Begin {
+                stmts = [
+                  String {
+                    val = <U rescue line 1>
+                  }
+                  String {
+                    val = <U rescue line 2>
+                  }
+                ]
+              }
+            }
+          ]
+          else_ = Begin {
+            stmts = [
+              String {
+                val = <U else line 1>
+              }
+              String {
+                val = <U else line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = NULL
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = String {
+            val = <U ensure line 1>
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = NULL
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = String {
+            val = <U begin line 1>
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              String {
+                val = <U begin line 1>
+              }
+              String {
+                val = <U begin line 2>
+              }
+            ]
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescue line 1>
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = String {
+              val = <U begin line 1>
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U begin line 1>
+                }
+                String {
+                  val = <U begin line 2>
+                }
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = Begin {
+                  stmts = [
+                    String {
+                      val = <U rescue line 1>
+                    }
+                    String {
+                      val = <U rescue line 2>
+                    }
+                  ]
+                }
+              }
+            ]
+            else_ = NULL
+          }
+          ensure = Begin {
+            stmts = [
+              String {
+                val = <U ensure line 1>
+              }
+              String {
+                val = <U ensure line 2>
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
