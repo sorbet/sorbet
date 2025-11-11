@@ -231,31 +231,20 @@ Begin {
         }
       ]
     }
-    Send {
-      receiver = Send {
-        receiver = NULL
-        method = <U foo>
+    Block {
+      send = CSend {
+        receiver = Send {
+          receiver = NULL
+          method = <U foo>
+          args = [
+          ]
+        }
+        method = <U bar>
         args = [
         ]
       }
-      method = <U &>
-      args = [
-        Block {
-          send = CSend {
-            receiver = Send {
-              receiver = NULL
-              method = <U foo>
-              args = [
-              ]
-            }
-            method = <U bar>
-            args = [
-            ]
-          }
-          params = NULL
-          body = NULL
-        }
-      ]
+      params = NULL
+      body = NULL
     }
     Block {
       send = Send {
