@@ -1302,35 +1302,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto name = ctx.state.enterNameUTF8(constantNameString);
             auto methodName = MK::Symbol(sendLoc0, name);
 
-            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                // Handle conditional send, e.g. `a&.b`
-
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                    // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
-                    // but not a literal block with `{ ... }` or `do ... end`
-
-                    auto blockPassNode = translate(prismBlock);
-                    args.emplace_back(move(blockPassNode));
-                }
-
-                sendNode = make_unique<parser::CSend>(sendLoc, move(receiver), name, messageLoc, move(args));
-
-                // TODO: Direct desugaring support for conditional sends is not implemented yet.
-
-                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
-                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
-                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
-                    // The legacy parser inverts this , with a parent "Block" with a child
-                    // "Send".
-                    return translateCallWithBlock(prismBlock, move(sendNode));
-                }
-
-                return sendNode;
-            }
-
-            // Regular send, e.g. `a.b`
-
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
             auto supportedArgs = absl::c_all_of(args, [](const auto &arg) {
@@ -1490,6 +1461,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             supportedCallType &= supportedBlock;
 
+            // TODO: Direct desugaring support for conditional sends is not implemented yet.
+            supportedCallType &= !PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION);
+
             if (!directlyDesugar || !supportedCallType) {
                 // We previously popped the kwargs Hash off, in the hopes that we can directly desugar it.
                 // Turns out we can't, so let's put it back (and in the correct order).
@@ -1504,7 +1478,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     args.emplace_back(move(blockPassNode));
                 }
 
-                sendNode = make_unique<parser::Send>(sendLoc, move(receiver), name, messageLoc, move(args));
+                if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+                    sendNode = make_unique<parser::CSend>(sendLoc, move(receiver), name, messageLoc, move(args));
+                } else {
+                    sendNode = make_unique<parser::Send>(sendLoc, move(receiver), name, messageLoc, move(args));
+                }
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                     // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
