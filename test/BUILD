@@ -131,7 +131,6 @@ prism_location_test_suite(
     srcs = glob(
         ["prism_regression/**/*.rb"],
         exclude = [
-            "prism_regression/call_block_param.rb",
             "prism_regression/case_match_variable_pinning.rb",
             "prism_regression/error_recovery/assign.rb",
             "prism_regression/if_elsif.rb",

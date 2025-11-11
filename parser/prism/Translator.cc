@@ -1331,20 +1331,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                 // Like the `|x|` in `foo { |x| ... }`
                                 auto paramsNode = down_cast<pm_block_parameters_node>(blockNode->parameters);
 
+                                auto paramsLoc = translateLoc(paramsNode->base.location);
+
                                 if (paramsNode->parameters == nullptr) {
                                     // This can happen if the block declares block-local variables, but no parameters.
                                     // e.g. `foo { |; block_local_var| ... }`
 
-                                    auto location = translateLoc(paramsNode->base.location);
-
                                     // TODO: future follow up, ensure we add the block local variables ("shadowargs"),
                                     // if any.
-                                    blockParameters = make_unique<parser::Params>(location, NodeVec{});
+                                    blockParameters = make_unique<parser::Params>(paramsLoc, NodeVec{});
                                     didDesugarBlockParams = true;
                                 } else {
                                     unique_ptr<parser::Params> params;
                                     std::tie(params, std::ignore) =
-                                        translateParametersNode(paramsNode->parameters, sendLoc);
+                                        translateParametersNode(paramsNode->parameters, paramsLoc);
 
                                     // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's
                                     // Params node, after all other parameters.
