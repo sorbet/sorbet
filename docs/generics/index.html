@@ -605,7 +605,8 @@ T.reveal_type(int_box.value)
 <ul>
 <li><p><code>upper</code>: Places an upper bound on types that can be applied to a given type member. Only subtypes of that upper bound are valid.</p></li>
 <li><p><code>lower</code>: The opposite—places a lower bound, thus requiring only supertypes of that bound.</p></li>
-<li><p><code>fixed</code>: Syntactic sugar for specifying both <code>lower</code> and <code>upper</code> at the same time. Effectively requires that an equivalent type be applied to the type member. Sorbet then uses this fact to never require that an explicit type argument be provided to the class.</p></li>
+<li><p><code>fixed</code>: Specifies both <code>lower</code> and <code>upper</code> at the same time. Since this effectively requires that any applied type must be equivalent to the <code>fixed</code> type, Sorbet does not allow applying an explicit type argument to a <code>fixed</code> type parameter.</p>
+<p>To reiterate: <code>fixed</code> does two things: specifies bounds <strong>and</strong> changes the “type arity” for a generic class (number of generic type arguments allowed). Use <code>lower: SomeType, upper: SomeType</code> instead of <code>fixed: SomeType</code> to allow an argument to be passed (e.g. when moving from <code>upper</code> to <code>fixed</code> would introduce new type errors in any client that is already explicitly applying type arguments to this type member).</p></li>
 </ul>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NumericBox</span></span>
   extend T::Generic
@@ -621,8 +622,10 @@ NumericBox[String].new
 <span class="hljs-comment">#          ^^^^^^ error: `String` is not a subtype of upper bound of `Elem`</span>
 
 IntBox.new
-<span class="hljs-comment"># ^ Does not need to be invoked like `IntBox[Integer]` because Sorbet can</span>
-<span class="hljs-comment">#   trivially infer the type argument</span>
+<span class="hljs-comment"># ^ Does not need to be and cannot be invoked like `IntBox[Integer]`</span>
+<span class="hljs-comment">#   because Sorbet infers the type argument to be `Integer`.</span>
+IntBox[Integer].new
+<span class="hljs-comment">#      ^^^^^^^ error: All type parameters for `IntBox` have already been fixed</span>
 </code></pre>
 <p>Placing the bound on the type member makes it an error to ever instantiate a class with that member outside the given bound.</p>
 <h2><a class="anchor" aria-hidden="true" id="generic-methods"></a><a href="#generic-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Generic methods</h2>
