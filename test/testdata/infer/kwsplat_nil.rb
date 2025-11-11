@@ -21,12 +21,6 @@ class Example
 
     takes_kwargs(**hash)
 
-    takes_kwargs(**maybe_hash_tm)
-
-    case maybe_hash_tm
-    when nil
-    else
-      T.reveal_type(maybe_hash_tm) # error: `T.all(T::Hash[T.untyped, T.untyped], Example::MaybeHash)`
-    end
+    takes_kwargs(**maybe_hash_tm) # error: Method `to_hash` does not exist on `NilClass` component
   end
 end
