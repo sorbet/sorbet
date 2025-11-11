@@ -433,27 +433,19 @@ unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode)
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
 unique_ptr<parser::Node> Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
                                                               unique_ptr<parser::Node> lhs) {
-    static_assert(
-        is_same_v<SorbetAssignmentNode, parser::OpAsgn> || is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
-            is_same_v<SorbetAssignmentNode, parser::OrAsgn>,
-        "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
-
     auto rhs = translate(node->value);
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
         return translateAndOrAssignment<parser::AndAsgn>(location, move(lhs), move(rhs));
-    }
-
-    if constexpr (is_same_v<SorbetAssignmentNode, parser::OrAsgn>) {
+    } else if constexpr (is_same_v<SorbetAssignmentNode, parser::OrAsgn>) {
         return translateAndOrAssignment<parser::OrAsgn>(location, move(lhs), move(rhs));
-    }
-
-    if constexpr (is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
+    } else if constexpr (is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
         return translateOpAssignment<SorbetAssignmentNode, PrismAssignmentNode>(node, location, move(lhs), move(rhs));
+    } else {
+        static_assert(
+            always_false_v<SorbetAssignmentNode>,
+            "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
     }
-
-    unreachable(
-        "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
 }
 
 // The location is the location of the whole Prism assignment node.
