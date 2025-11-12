@@ -303,7 +303,7 @@ class ERB
     )
     .returns(::T.untyped)
   end
-  def defMethod(mod, methodname, fname=T.unsafe(nil)); end
+  def def_method(mod, methodname, fname=T.unsafe(nil)); end
 
   sig do
     params(
@@ -311,7 +311,7 @@ class ERB
     )
     .returns(::T.untyped)
   end
-  def defModule(methodname=T.unsafe(nil)); end
+  def def_module(methodname=T.unsafe(nil)); end
 
   # The encoding to eval
   sig {returns(::T.untyped)}
