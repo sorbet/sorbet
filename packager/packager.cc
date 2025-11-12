@@ -1182,7 +1182,6 @@ namespace {
 enum class PackagerMode {
     PackagesOnly,
     PackagedFilesOnly,
-    AllFiles,
 };
 
 class PackageDBPackageGraph {
@@ -1238,12 +1237,10 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
         case PackagerMode::PackagedFilesOnly:
             timeit.setTag("mode", "packaged_files_only");
             break;
-        case PackagerMode::AllFiles:
-            break;
     }
 
-    constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly || Mode == PackagerMode::AllFiles;
-    constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
+    constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly;
+    constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly;
 
     if constexpr (buildPackageDB) {
         Packager::findPackages(gs, files);
