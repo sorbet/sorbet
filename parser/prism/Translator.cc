@@ -1181,18 +1181,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 if (PM_NODE_TYPE_P(callNode->block, PM_BLOCK_ARGUMENT_NODE)) {
                     auto blockPassArgLoc = translateLoc(callNode->block->location);
                     sendLoc = sendLoc.join(blockPassArgLoc);
-
-                    // Prism bug: https://github.com/ruby/prism/issues/3708
-                    // If there's a block pass argument, Prism fails to include the closing paren in the call location.
-                    //     foo(&block)
-                    //     ^^^^^^^^^^  Prism call location
-                    //     ^^^^^^^^^^^ Fixed location
-                    if (callNode->closing_loc.end) {
-                        ENFORCE(callNode->closing_loc.start)
-                        auto closingLoc = translateLoc(callNode->closing_loc);
-                        sendWithBlockLoc = sendWithBlockLoc.join(closingLoc);
-                        blockLoc = blockLoc.join(closingLoc);
-                    }
                 }
             }
             auto sendLoc0 = sendLoc.copyWithZeroLength();
