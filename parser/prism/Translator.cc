@@ -1365,28 +1365,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             case PM_NUMBERED_PARAMETERS_NODE: { // The params in a PM_BLOCK_NODE with numbered params
                                 // Like the implicit `|_1, _2, _3|` in `foo { _3 }`
                                 auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(blockNode->parameters);
+
                                 auto location = translateLoc(numberedParamsNode->base.location);
 
-                                auto paramCount = numberedParamsNode->maximum;
+                                auto params = translateNumberedParametersNode(
+                                    numberedParamsNode, down_cast<pm_statements_node>(blockNode->body),
+                                    &blockParamsStore);
 
-                                ENFORCE(1 <= paramCount,
-                                        "A `pm_numbered_parameters_node_t` node should have at least one parameter");
-
-                                NodeVec params;
-                                params.reserve(paramCount);
-
-                                for (auto i = 1; i <= paramCount; i++) {
-                                    auto name = ctx.state.enterNameUTF8("_" + to_string(i));
-
-                                    // The location is arbitrary and not really used, since these aren't explicitly
-                                    // written in the source.
-                                    auto expr = MK::Local(location, name);
-                                    auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
-                                    params.emplace_back(move(paramNode));
-                                }
-
-                                std::tie(blockParamsStore, blockStatsStore, didDesugarBlockParams) =
-                                    desugarParametersNode(params, attemptToDesugarBlockParams);
+                                didDesugarBlockParams = true;
 
                                 blockParameters = make_unique<parser::NumParams>(location, move(params));
 
@@ -3026,23 +3012,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         }
         case PM_NUMBERED_PARAMETERS_NODE: { // An invisible node that models the numbered parameters in a block
             // ... for a block like `proc { _1 + _2 }`, which has no explicitly declared parameters.
-            auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(node);
-
-            auto paramCount = numberedParamsNode->maximum;
-
-            NodeVec params;
-            params.reserve(paramCount);
-
-            for (auto i = 1; i <= paramCount; i++) {
-                auto name = ctx.state.enterNameUTF8("_" + to_string(i));
-
-                // The location is arbitrary and not really used, since these aren't explicitly written in the source.
-                auto expr = MK::Local(location, name);
-                auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
-                params.emplace_back(move(paramNode));
-            }
-
-            return make_unique<parser::NumParams>(location, move(params));
+            unreachable("PM_NUMBERED_PARAMETERS_NODE is handled separately in `translateNumberedParametersNode()`.");
         }
         case PM_NUMBERED_REFERENCE_READ_NODE: {
             auto numberedReferenceReadNode = down_cast<pm_numbered_reference_read_node>(node);
@@ -4224,6 +4194,38 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
     return make_tuple(move(paramsStore), move(statsStore), true);
 }
 
+// Translate the given numbered parameters into a `NodeVec` of legacy parser nodes.
+// If a paramsStore pointer is provided, we'll also directly desugar params into that store.
+NodeVec Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
+                                                    pm_statements_node_t *statements,
+                                                    ast::MethodDef::PARAMS_store *paramsStore) {
+    auto location = translateLoc(numberedParamsNode->base.location);
+
+    auto paramCount = numberedParamsNode->maximum;
+
+    ENFORCE(1 <= paramCount, "A `pm_numbered_parameters_node_t` node should have at least one parameter");
+    ENFORCE(paramCount <= 9, "Ruby only supports 9 numbered parameters (`_9` but no `_10`).");
+
+    NodeVec params;
+    params.reserve(paramCount);
+
+    for (auto i = 1; i <= paramCount; i++) {
+        auto name = ctx.state.enterNameUTF8("_" + to_string(i));
+
+        // The location is arbitrary and not really used, since these aren't explicitly
+        // written in the source.
+        auto expr = MK::Local(location, name);
+        auto paramNode = make_node_with_expr<parser::LVar>(move(expr), location, name);
+        params.emplace_back(move(paramNode));
+
+        if (paramsStore) {
+            paramsStore->emplace_back(MK::Local(location, name));
+        }
+    }
+
+    return params;
+}
+
 // Desugar a Symbol block pass argument (like the `&foo` in `m(&:foo)`) into a block literal.
 // `&:foo` => `{ |*temp| (temp[0]).foo(*temp[1, LONG_MAX]) }`
 //
@@ -4593,19 +4595,34 @@ ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPair
 // or `pm_lambda_node *`, and wrapping it around the given `Send` node.
 unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                             unique_ptr<parser::Node> sendNode) {
-    unique_ptr<parser::Node> parametersNode;
-    unique_ptr<parser::Node> body;
+    pm_node_t *prismParametersNode;
+    pm_node_t *prismBodyNode;
     auto blockLoc = translateLoc(prismBlockOrLambdaNode->location);
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
-        parametersNode = translate(prismBlockNode->parameters);
-        body = this->enterBlockContext().translate(prismBlockNode->body);
+        prismParametersNode = prismBlockNode->parameters;
+        prismBodyNode = prismBlockNode->body;
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
-        parametersNode = translate(prismLambdaNode->parameters);
-        body = this->enterBlockContext().translate(prismLambdaNode->body);
+        prismParametersNode = prismLambdaNode->parameters;
+        prismBodyNode = prismLambdaNode->body;
     }
+
+    unique_ptr<parser::Node> parametersNode;
+    if (prismParametersNode != nullptr) {
+        if (PM_NODE_TYPE_P(prismParametersNode, PM_NUMBERED_PARAMETERS_NODE)) {
+            auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(prismParametersNode);
+
+            auto params = translateNumberedParametersNode(numberedParamsNode,
+                                                          down_cast<pm_statements_node>(prismBodyNode), nullptr);
+            parametersNode = make_unique<parser::NumParams>(blockLoc, move(params));
+        } else {
+            parametersNode = translate(prismParametersNode);
+        }
+    }
+
+    auto body = this->enterBlockContext().translate(prismBodyNode);
 
     // Modify send node's endLoc to be position before first space
     // This fixes location for cases like:
