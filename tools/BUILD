@@ -130,7 +130,6 @@ compilation_database(
         "//third_party/licenses:generate_licenses",
         "//third_party/licenses:licenses",
         "//third_party/progressbar:progressbar",
-        "//third_party/xxd:xxd",
         # END compile_commands targets
     ],
 )
