@@ -4737,6 +4737,7 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
     ENFORCE(prismRescueNode, "translateRescue() should only be called if there's a `rescue` clause.")
 
     NodeVec rescueBodies;
+    bool allRescueBodiesHaveExpr = true;
 
     // Each `rescue` clause generates a `Resbody` node, which is a child of the `Rescue` node.
     for (pm_rescue_node *currentRescueNode = prismRescueNode; currentRescueNode != nullptr;
@@ -4751,13 +4752,35 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
         auto exceptions = translateMulti(currentRescueNode->exceptions);
 
         auto exceptionsNodes = absl::MakeSpan(currentRescueNode->exceptions.nodes, currentRescueNode->exceptions.size);
-        auto exceptionsArray = exceptionsNodes.empty()
-                                   ? nullptr
-                                   : make_unique<parser::Array>(translateLoc(exceptionsNodes.front()->location.start,
-                                                                             exceptionsNodes.back()->location.end),
-                                                                move(exceptions));
+        unique_ptr<parser::Node> exceptionsArray;
+        if (!exceptionsNodes.empty()) {
+            auto arrayLoc = translateLoc(exceptionsNodes.front()->location.start, exceptionsNodes.back()->location.end);
+
+            if (!directlyDesugar || !hasExpr(exceptions)) {
+                exceptionsArray = make_unique<parser::Array>(arrayLoc, move(exceptions));
+            } else {
+                // Check if there are any splats in the exceptions
+                bool hasSplat =
+                    absl::c_any_of(exceptionsNodes, [](auto *ex) { return PM_NODE_TYPE_P(ex, PM_SPLAT_NODE); });
+
+                // Build ast::Array expression from exceptions
+                auto exceptionStore = nodeVecToStore<ast::Array::ENTRY_store>(exceptions);
+
+                ast::ExpressionPtr arrayExpr;
+                if (hasSplat) {
+                    // Use desugarArray to properly handle splats with concat() calls
+                    arrayExpr = desugarArray(arrayLoc, exceptionsNodes, move(exceptionStore));
+                } else {
+                    // Simple case: just create an array without desugaring splats
+                    arrayExpr = ast::make_expression<ast::Array>(arrayLoc, move(exceptionStore));
+                }
+
+                exceptionsArray = make_node_with_expr<parser::Array>(move(arrayExpr), arrayLoc, move(exceptions));
+            }
+        }
 
         auto resbodyLoc = translateLoc(currentRescueNode->base.location);
+        auto rescueKeywordLoc = translateLoc(currentRescueNode->keyword_loc);
 
         // If there's a subsequent rescue clause, we want the previous resbody to end at the end of the line
         // before the subsequent rescue starts, instead of extending all the way to the subsequent rescue.
@@ -4788,8 +4811,82 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
             resbodyLoc = core::LocOffsets{resbodyLoc.beginPos(), endPos};
         }
 
-        rescueBodies.emplace_back(
-            make_unique<parser::Resbody>(resbodyLoc, move(exceptionsArray), move(var), move(rescueBody)));
+        if (!directlyDesugar || !hasExpr(var, rescueBody, exceptionsArray)) {
+            auto body = make_unique<parser::Resbody>(resbodyLoc, move(exceptionsArray), move(var), move(rescueBody));
+            allRescueBodiesHaveExpr = false;
+            rescueBodies.emplace_back(move(body));
+        } else {
+            // Build ast::RescueCase expression
+            ast::RescueCase::EXCEPTION_store astExceptions;
+            if (exceptionsArray != nullptr) {
+                auto exceptionsExpr = exceptionsArray->takeDesugaredExpr();
+                if (auto exceptionsArrayExpr = ast::cast_tree<ast::Array>(exceptionsExpr)) {
+                    astExceptions.insert(astExceptions.end(), make_move_iterator(exceptionsArrayExpr->elems.begin()),
+                                         make_move_iterator(exceptionsArrayExpr->elems.end()));
+                } else if (!ast::isa_tree<ast::EmptyTree>(exceptionsExpr)) {
+                    astExceptions.emplace_back(move(exceptionsExpr));
+                }
+            }
+
+            ast::ExpressionPtr varExpr;
+            ast::ExpressionPtr rescueBodyExpr;
+
+            // Check what kind of variable we have
+            bool isReference = var != nullptr && ast::isa_reference(var->peekDesugaredExpr());
+            bool isLocal = var != nullptr && ast::isa_tree<ast::Local>(var->peekDesugaredExpr());
+
+            if (isReference && !isLocal) {
+                auto &expr = var->peekDesugaredExpr();
+                if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(expr)) {
+                    isLocal = ident->kind == ast::UnresolvedIdent::Kind::Local;
+                }
+            }
+
+            if (isLocal) {
+                // Regular local variable
+                varExpr = var->takeDesugaredExpr();
+
+                if (rescueBody != nullptr) {
+                    rescueBodyExpr = rescueBody->takeDesugaredExpr();
+                } else {
+                    rescueBodyExpr = ast::MK::EmptyTree();
+                }
+            } else if (isReference) {
+                // Non-local reference (lvalue exception variables like @ex, @@ex, $ex)
+                // Create a temp variable and wrap the body
+                auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+                auto varLoc = var->loc;
+                varExpr = ast::MK::Local(varLoc, rescueTemp);
+
+                // Create InsSeq: { @ex = <rescueTemp>; <rescue body> }
+                auto lhsExpr = var->takeDesugaredExpr();
+                auto assignExpr = ast::MK::Assign(varLoc, move(lhsExpr), ast::MK::Local(varLoc, rescueTemp));
+
+                ast::InsSeq::STATS_store stats;
+                stats.emplace_back(move(assignExpr));
+
+                auto bodyExpr = rescueBody != nullptr ? rescueBody->takeDesugaredExpr() : ast::MK::EmptyTree();
+                rescueBodyExpr = ast::MK::InsSeq(varLoc, move(stats), move(bodyExpr));
+            } else {
+                // For bare rescue clauses with no variable, create a <rescueTemp> variable
+                // Legacy parser uses zero-length location only when there are no exceptions AND no body,
+                // otherwise uses full keyword location
+                auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+                auto syntheticVarLoc = (exceptionsArray == nullptr && rescueBody == nullptr)
+                                           ? rescueKeywordLoc.copyWithZeroLength()
+                                           : rescueKeywordLoc;
+                varExpr = ast::MK::Local(syntheticVarLoc, rescueTemp);
+
+                rescueBodyExpr = rescueBody != nullptr ? rescueBody->takeDesugaredExpr() : ast::MK::EmptyTree();
+            }
+
+            auto rescueCaseExpr = ast::make_expression<ast::RescueCase>(resbodyLoc, move(astExceptions), move(varExpr),
+                                                                        move(rescueBodyExpr));
+
+            auto body = make_node_with_expr<parser::Resbody>(move(rescueCaseExpr), resbodyLoc, move(exceptionsArray),
+                                                             move(var), move(rescueBody));
+            rescueBodies.emplace_back(move(body));
+        }
     }
 
     auto bodyNode = translateStatements(parentBeginNode->statements);
@@ -4842,8 +4939,43 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
 
     core::LocOffsets rescueLoc = translateLoc(rescueStart, rescueEnd);
 
+    // Check if all nodes have expressions
+    bool hasExpressions = hasExpr(bodyNode) && allRescueBodiesHaveExpr;
+
     // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
-    return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
+    if (!directlyDesugar || !hasExpressions) {
+        return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
+    }
+
+    // Build the ast::Rescue expression
+    ast::ExpressionPtr bodyExpr;
+    if (bodyNode != nullptr) {
+        bodyExpr = bodyNode->takeDesugaredExpr();
+    } else {
+        bodyExpr = ast::MK::EmptyTree();
+    }
+
+    // Extract RescueCase expressions from each Resbody node
+    ast::Rescue::RESCUE_CASE_store rescueCases;
+    rescueCases.reserve(rescueBodies.size());
+
+    for (auto &resbody : rescueBodies) {
+        // Each Resbody should already have a RescueCase expression from make_node_with_expr
+        auto rescueCaseExpr = resbody->takeDesugaredExpr();
+        ENFORCE(ast::isa_tree<ast::RescueCase>(rescueCaseExpr), "resbody should contain a RescueCase expression");
+        rescueCases.emplace_back(move(rescueCaseExpr));
+    }
+
+    // Extract the else expression
+    ast::ExpressionPtr elseExpr;
+    elseExpr = (elseNode != nullptr) ? elseNode->takeDesugaredExpr() : ast::MK::EmptyTree();
+
+    // Build the ast::Rescue expression (ensure is EmptyTree since this is translateRescue, not translateEnsure)
+    auto rescueExpr = ast::make_expression<ast::Rescue>(rescueLoc, move(bodyExpr), move(rescueCases), move(elseExpr),
+                                                        ast::MK::EmptyTree());
+
+    return make_node_with_expr<parser::Rescue>(move(rescueExpr), rescueLoc, move(bodyNode), move(rescueBodies),
+                                               move(elseNode));
 }
 
 NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
@@ -4866,7 +4998,9 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
             prismStatements = absl::MakeSpan(beginNode->statements->body.nodes, beginNode->statements->body.size);
         }
 
-        unique_ptr<parser::Ensure> translatedEnsure;
+        // Had to widen the type from `parser::Ensure` to `parser::Node` to handle `make_node_with_expr` correctly.
+        // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+        unique_ptr<parser::Node> translatedEnsure;
         if (translatedRescue != nullptr) {
             // When we have a rescue clause, the Ensure node should span from either:
             // - the begin statements start (if present), or
@@ -4924,6 +5058,7 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
             }
 
             auto loc = translateLoc(start, end);
+
             translatedEnsure = make_unique<parser::Ensure>(loc, move(bodyNode), move(ensureBody));
         }
 
