@@ -34,7 +34,8 @@ foo(&FORWARDED_BLOCK)
 foo &FORWARDED_BLOCK
 
 foo(&) # Anonymous block pass argument
-foo &
+# foo &  # Not valid syntax
+#      ^ unexpected end-of-input; expected an expression after the operator
 
 foo&.bar {}
 
