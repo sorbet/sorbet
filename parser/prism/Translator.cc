@@ -4955,14 +4955,14 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     // For multiple statements, convert each statement and add them to the body of a Begin node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
-    auto beginLoc = overrideLocation.exists() ? overrideLocation : translateLoc(stmtsNode->base.location);
+    auto beginNodeLoc = overrideLocation.exists() ? overrideLocation : translateLoc(stmtsNode->base.location);
 
     if (sorbetStmts.empty()) {
-        return make_node_with_expr<parser::Begin>(MK::Nil(beginLoc), beginLoc, NodeVec{});
+        return make_node_with_expr<parser::Begin>(MK::Nil(beginNodeLoc), beginNodeLoc, NodeVec{});
     }
 
     if (!directlyDesugar || !hasExpr(sorbetStmts)) {
-        return make_unique<parser::Begin>(beginLoc, move(sorbetStmts));
+        return make_unique<parser::Begin>(beginNodeLoc, move(sorbetStmts));
     }
 
     ast::InsSeq::STATS_store statements;
@@ -4976,8 +4976,8 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     };
     auto finalExpr = sorbetStmts.back()->takeDesugaredExpr(); // Process the last element separately.
 
-    auto instructionSequence = MK::InsSeq(beginLoc, move(statements), move(finalExpr));
-    return make_node_with_expr<parser::Begin>(move(instructionSequence), beginLoc, move(sorbetStmts));
+    auto instructionSequence = MK::InsSeq(beginNodeLoc, move(statements), move(finalExpr));
+    return make_node_with_expr<parser::Begin>(move(instructionSequence), beginNodeLoc, move(sorbetStmts));
 }
 
 // Helper function for creating if nodes with optional desugaring
