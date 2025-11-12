@@ -169,6 +169,9 @@ ast::ExpressionPtr mergeStrings(core::MutableContext ctx, core::LocOffsets loc,
     }
 }
 
+const uint8_t *startLoc(pm_node_t *anyNode);
+const uint8_t *endLoc(pm_node_t *anyNode);
+
 // Given a `pm_multi_target_node` or `pm_multi_write_node`, return the location of the left-hand side.
 // Conceptually, the location spans from the start of the first element, to the end of the last element.
 // Determining the first/last elements is tricky, because they're split across the `lefts`, `rest`, and `rights` fields.
@@ -218,23 +221,10 @@ template <typename PrismNode> pm_location_t mlhsLocation(PrismNode *node) {
 
     ENFORCE(left != nullptr && right != nullptr);
 
-    const uint8_t *leftStartLoc = nullptr;
-    if (PM_NODE_TYPE_P(left, PM_MULTI_TARGET_NODE)) {
-        auto multiTargetNode = down_cast<pm_multi_target_node>(left);
-        leftStartLoc = mlhsLocation(multiTargetNode).start;
-    } else {
-        leftStartLoc = left->location.start;
-    }
-
-    const uint8_t *rightEndLoc = nullptr;
-    if (PM_NODE_TYPE_P(right, PM_MULTI_TARGET_NODE)) {
-        auto multiTargetNode = down_cast<pm_multi_target_node>(right);
-        rightEndLoc = mlhsLocation(multiTargetNode).end;
-    } else {
-        rightEndLoc = right->location.end;
-    }
-
+    const uint8_t *leftStartLoc = startLoc(left);
+    const uint8_t *rightEndLoc = endLoc(right);
     ENFORCE(leftStartLoc != nullptr && rightEndLoc != nullptr);
+
     return (pm_location_t){.start = leftStartLoc, .end = rightEndLoc};
 }
 
@@ -2966,9 +2956,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto multiLhsNode = translateMultiTargetLhs(multiWriteNode, lhsLoc);
             auto rhsValue = translate(multiWriteNode->value);
 
-            // Sorbet's legacy parser doesn't include the opening `(` (see`mlhsLocation()` for details),
+            // Sorbet's legacy parser doesn't include the opening `(` (see `startLoc()` for details),
             // so we can't just use the entire Prism location for the Masgn node.
-            location = lhsLoc.join(translateLoc(multiWriteNode->value->location));
+            location = translateLoc(startLoc(up_cast(multiWriteNode)), endLoc(multiWriteNode->value));
 
             if (!directlyDesugar || !hasExpr(rhsValue, multiLhsNode->exprs)) {
                 return make_unique<parser::Masgn>(location, move(multiLhsNode), move(rhsValue));
@@ -3599,6 +3589,46 @@ core::LocOffsets Translator::translateLoc(const uint8_t *start, const uint8_t *e
 
 core::LocOffsets Translator::translateLoc(pm_location_t loc) const {
     return parser.translateLocation(loc);
+}
+
+// Find the start location of a node, according to the legacy parser's logic.
+// This is *usually* the same as the start of Prism's node's location,
+// but there are some exceptions, which get handled here.
+const uint8_t *startLoc(pm_node_t *anyNode) {
+    switch (PM_NODE_TYPE(anyNode)) {
+        case PM_MULTI_TARGET_NODE: {
+            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
+            auto *node = down_cast<pm_multi_target_node>(anyNode);
+            return mlhsLocation(node).start;
+        }
+        case PM_MULTI_WRITE_NODE: {
+            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
+            auto *node = down_cast<pm_multi_write_node>(anyNode);
+            return mlhsLocation(node).start;
+        }
+        default: {
+            return anyNode->location.start;
+        }
+    }
+}
+
+// End counterpart of `startLoc()`. See its docs for details.
+const uint8_t *endLoc(pm_node_t *anyNode) {
+    switch (PM_NODE_TYPE(anyNode)) {
+        case PM_MULTI_TARGET_NODE: {
+            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
+            auto *node = down_cast<pm_multi_target_node>(anyNode);
+            return mlhsLocation(node).end;
+        }
+        case PM_MULTI_WRITE_NODE: {
+            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
+            auto *node = down_cast<pm_multi_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        default: {
+            return anyNode->location.end;
+        }
+    }
 }
 
 // Translates a Prism node list into a new `NodeVec` of legacy parser nodes.
