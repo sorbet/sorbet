@@ -64,9 +64,6 @@ std::vector<CondensationStratumInfo> computePackageStrata(const core::GlobalStat
                                                           absl::Span<core::FileRef> files,
                                                           const options::Options &opts);
 
-void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-             WorkerPool &workers);
-
 void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                     WorkerPool &workers);
 
