@@ -1804,6 +1804,8 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                 e.addErrorNote("It looks like you're trying to pattern match on a generic, "
                                "which doesn't work at runtime");
                 e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
+            } else if (Types::isSubType(gs, wrapped, Types::Boolean())) {
+                e.replaceWith("Replace T::Boolean with `true, false`", args.callLoc(), "true, false");
             }
         } else if (auto appliedType = cast_type<AppliedType>(wrapped)) {
             // For T.class_of(Foo), we'll suggest replacing it with the attached class (Foo).

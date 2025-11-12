@@ -1,0 +1,32 @@
+autocorrect-case-t-boolean.rb:7: Call to method `===` on `T::Boolean` mistakes a type for a value https://srb.help/7030
+     7 |  when T::Boolean
+               ^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-case-t-boolean.rb:7: Replaced with `true, false`
+     7 |  when T::Boolean
+               ^^^^^^^^^^
+Errors: 1
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+sig {params(input: T.untyped).returns(T::Boolean)}
+def get_value(input)
+  case input
+  when true, false
+    true
+  else
+    false
+  end
+end
+
+sig {params(input: T.untyped).returns(T::Boolean)}
+def test(input)
+  if input === T::Boolean
+    true
+  else
+    false
+  end
+end
