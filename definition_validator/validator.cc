@@ -1015,8 +1015,9 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Class
 
         auto isSingletonClass = ancst.symbol.data(ctx)->isSingletonClass(ctx);
         auto typeArity = ancst.symbol.data(ctx)->typeArity(ctx);
+        auto isModule = ancst.symbol == core::Symbols::Module() && typeArity == 1;
 
-        if ((isSingletonClass && typeArity > 1) || (!isSingletonClass && typeArity > 0)) {
+        if ((isSingletonClass && typeArity > 1) || (!isSingletonClass && typeArity > 0 && !isModule)) {
             if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
                 e.setHeader("`{}` can't require generic ancestor `{}` (unsupported)", sym.show(ctx),
                             ancst.symbol.show(ctx));
