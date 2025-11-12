@@ -579,7 +579,7 @@ int realmain(int argc, char *argv[]) {
                 indexed = std::move(result.result());
             }
 
-            // Cache these before any pipeline::package rewrites, so that the cache is still
+            // Cache these before any packager rewrites, so that the cache is still
             // usable regardless of whether `--stripe-packages` was passed.
             // Want to keep the kvstore around so we can still write to it later.
             kvstore =
@@ -620,7 +620,7 @@ int realmain(int argc, char *argv[]) {
                 ENFORCE(nonPackageIndexedResult.hasResult(), "There's no cancellation in batch mode");
                 auto nonPackageIndexed = std::move(nonPackageIndexedResult.result());
 
-                // Cache these before any pipeline::package rewrites, so that the cache is still usable
+                // Cache these before any packager rewrites, so that the cache is still usable
                 // regardless of whether `--stripe-packages` was passed.
                 kvstore = cache::ownIfUnchanged(
                     *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
