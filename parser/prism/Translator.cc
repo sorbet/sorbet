@@ -5583,7 +5583,7 @@ unique_ptr<parser::Node> Translator::translateRegexp(core::LocOffsets location, 
         if (directlyDesugar) {
             // Create a String node with its desugared expression
             auto name = ctx.state.enterNameUTF8(source);
-            auto expr = MK::String(location, name);
+            auto expr = MK::String(contentLoc, name);
             auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), contentLoc, name);
             parts.emplace_back(move(sourceStringNode));
         } else {

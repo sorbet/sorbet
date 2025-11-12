@@ -390,13 +390,6 @@ pipeline_tests(
             # Numbered block parameter location differs: Prism uses last occurrence
             # of `_1`, Whitequark uses first occurrence
             "prism_regression/multiple_numbered_params.rb",
-
-            # FIXME: Regex location differences
-            "prism_regression/back_reference_read.rb",
-            "prism_regression/literal_regexp.rb",
-            "prism_regression/match_write.rb",
-            "prism_regression/multiple_numbered_params.rb",
-            "prism_regression/numbered_reference_read.rb",
         ],
     ),
     "PrismPosTests",
