@@ -112,6 +112,11 @@ bool isTClassOf(ast::ExpressionPtr &expr) {
     return send->fun == core::Names::classOf();
 }
 
+bool isGenericType(ast::ExpressionPtr &expr) {
+    auto send = ast::cast_tree<ast::Send>(expr);
+    return send && send->fun == core::Names::squareBrackets() && ast::isa_tree<ast::ConstantLit>(send->recv);
+}
+
 const UnorderedMap<core::NameRef, string> COMMON_TYPOS = {
     {core::Names::Constants::Int(), "Integer"s},
     {core::Names::Constants::Timestamp(), "Time"s},
@@ -955,6 +960,12 @@ private:
                     }
                 }
             }
+        } else if (isGenericType(block->body)) {
+            if (auto e = gs.beginError(blockLoc, core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
+                e.setHeader("`{}` can't require generic ancestor (unsupported)", owner.show(gs));
+            }
+
+            return;
         }
 
         if (symbol == core::Symbols::StubModule()) {

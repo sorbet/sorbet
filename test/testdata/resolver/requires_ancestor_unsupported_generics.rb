@@ -88,3 +88,26 @@ module Test4
     end
   end
 end
+
+module Test5
+  module M1
+    extend T::Helpers
+
+    requires_ancestor { T::Enumerable[String] }
+                      # ^^^^^^^^^^^^^^^^^^^^^ error: `Test5::M1` can't require generic ancestor (unsupported)
+  end
+  module M2
+    extend T::Helpers
+
+    requires_ancestor { T::Hash[String, Integer] }
+                      # ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test5::M2` can't require generic ancestor (unsupported)
+  end
+
+  module M3
+    extend T::Helpers
+
+    requires_ancestor { T::Enumerable[42] }
+                      # ^^^^^^^^^^^^^^^^^ error: `Test5::M3` can't require generic ancestor (unsupported)
+                      #               ^^ error: Unexpected bare `Integer(42)` value found in type position
+  end
+end
