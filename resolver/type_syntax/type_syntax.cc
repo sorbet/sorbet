@@ -341,6 +341,11 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         sig.bind = core::Symbols::MagicBindToSelfType();
                         validBind = true;
                     } else if (arg->fun == core::Names::attachedClass()) {
+                        auto attachedClass = checkValidAttachedClass(ctx, arg->loc);
+                        if (!attachedClass.exists()) {
+                            break;
+                        }
+
                         sig.bind = core::Symbols::MagicBindToAttachedClass();
                         validBind = true;
                     }

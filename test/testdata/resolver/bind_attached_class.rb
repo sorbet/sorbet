@@ -51,12 +51,15 @@ module DoesNotHaveAttachedClass
   extend T::Sig
 
   sig { params(blk: T.proc.bind(T.attached_class).void).returns(T.attached_class) }
+  #                             ^^^^^^^^^^^^^^^^ error: `DoesNotHaveAttachedClass` must declare `has_attached_class!` before module instance methods can use `T.attached_class`
+  #                                                             ^^^^^^^^^^^^^^^^ error: `DoesNotHaveAttachedClass` must declare `has_attached_class!` before module instance methods can use `T.attached_class`
+
   def with_bind(&blk)
   end
 
   def example
     with_bind {
-      T.reveal_type(self)
+      T.reveal_type(self) # error: `DoesNotHaveAttachedClass`
     }
   end
 end
@@ -65,7 +68,7 @@ class ExtendsDoesNotHave
   extend DoesNotHaveAttachedClass
   def self.example
     with_bind {
-      T.reveal_type(self)
+      T.reveal_type(self) # error: `T.class_of(ExtendsDoesNotHave)`
     }
   end
 end
@@ -83,7 +86,7 @@ module HasAttachedClass
 
   def example
     with_bind {
-      T.reveal_type(self)
+      T.reveal_type(self) # error: `T.anything`
     }
   end
 end
@@ -92,7 +95,7 @@ class ExtendsHas
   extend HasAttachedClass
   def self.example
     with_bind {
-      T.reveal_type(self)
+      T.reveal_type(self) # error: `ExtendsHas`
     }
   end
 end
