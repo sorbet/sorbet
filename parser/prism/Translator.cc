@@ -3974,7 +3974,9 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             // Sorbet's parser always wraps the pinned expression in a `Begin` node.
             NodeVec statements;
             statements.emplace_back(move(expr));
-            auto beginNode = make_node_with_expr<parser::Begin>(MK::Nil(location), location, move(statements));
+            auto beginNodeLocation = translateLoc(pinnedExprNode->lparen_loc.start, pinnedExprNode->rparen_loc.end);
+            auto beginNode =
+                make_node_with_expr<parser::Begin>(MK::Nil(beginNodeLocation), beginNodeLocation, move(statements));
 
             if (!directlyDesugar || !hasExpr(beginNode)) {
                 return make_unique<Pin>(location, move(beginNode));
