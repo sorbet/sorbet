@@ -3,7 +3,7 @@ script="$1"
 expect="$2"
 update="$3"
 
-export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_7/bin/llvm-symbolizer
+export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_6/bin/llvm-symbolizer
 
 if ! diff "$expect" -u <("$script"); then
   cat <<EOF

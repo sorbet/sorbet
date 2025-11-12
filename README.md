@@ -1053,7 +1053,7 @@ You are encouraged to play around with various clang-based tools which use the
 
     After successfully compiling Sorbet, point your editor to use the
     `clangd` executable located in
-    `bazel-sorbet/external/llvm_toolchain_15_0_7/bin/clangd`.
+    `bazel-sorbet/external/llvm_toolchain_15_0_6/bin/clangd`.
 
 -   [clang-format] -- Clang-based source code formatter
 
