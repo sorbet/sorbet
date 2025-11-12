@@ -53,9 +53,6 @@ public:
     static void validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);
 
     // For each file, set its package name.
-    static void setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
-
-    // For each file, set its package name.
     static void setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files);
 
     static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);

@@ -1131,18 +1131,13 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
     }
 }
 
-namespace {
-
-template <typename Elem, typename Proj>
-void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> files, Proj &&proj) {
+void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
     vector<pair<core::FileRef, MangledName>> mapping;
     mapping.reserve(files.size());
 
     {
         auto &db = gs.packageDB();
-        for (auto &f : files) {
-            auto fref = proj(f);
-
+        for (auto fref : files) {
             auto pkg = db.getPackageNameForFile(fref);
             if (pkg.exists()) {
                 continue;
@@ -1163,16 +1158,6 @@ void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> fil
             packages.db.setPackageNameForFile(file, package);
         }
     }
-}
-
-} // namespace
-
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
-    setPackageNameOnFilesImpl(gs, files, [](auto &p) { return p.file; });
-}
-
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
-    setPackageNameOnFilesImpl(gs, files, [](auto f) { return f; });
 }
 
 namespace {
