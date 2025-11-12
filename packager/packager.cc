@@ -1112,8 +1112,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
     gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
 
-    setPackageNameOnFiles(gs, files);
-
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
