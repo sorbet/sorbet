@@ -83,9 +83,10 @@ int numparamMax(DesugarContext dctx, parser::NodeVec *decls) {
 // Return a dummy variable if no declaration is found for `num`.
 ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls) {
     for (auto &decl : *decls) {
-        if (auto *lvar = parser::NodeWithExpr::cast_node<parser::LVar>(decl.get())) {
+        if (parser::NodeWithExpr::isa_node<parser::LVar>(decl.get())) {
             if (numparamNum(dctx, decl.get()) == num) {
-                return MK::Local(lvar->loc, lvar->name);
+                ENFORCE(decl != nullptr && decl->hasDesugaredExpr());
+                return decl->takeDesugaredExpr();
             }
         } else {
             ENFORCE(false, "NumParams declaring node is not a LVar.");
