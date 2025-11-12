@@ -1944,6 +1944,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto uid = job.ident;
 
         auto castType = checkFieldTypeTodo(ctx, uid->name, cast);
+        core::TypePtr castTypeSeenFromScope;
 
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.isClassOrModule()) {
@@ -1954,6 +1955,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
             scope = ctx.owner.enclosingClass(ctx);
         } else {
+            scope = ctx.selfClass();
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
             if (job.atTopLevel && ctx.owner.isClassOrModule()) {
@@ -1971,14 +1973,17 @@ class ResolveTypeMembersAndFieldsWalk {
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }
-            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
-                // Inside a method; declaring a normal instance variable
-                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
-                                uid->name.show(ctx), "initialize");
+            } else {
+                // c.f. the similarity between this resultTypeAsSeenFrom and the processBinding case for Cast
+                castTypeSeenFromScope = core::Types::resultTypeAsSeenFromSelf(ctx, castType, scope);
+                if (!core::Types::isSubType(ctx, core::Types::nilClass(), castTypeSeenFromScope)) {
+                    // Inside a method; declaring a normal instance variable
+                    if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                        e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
+                                    uid->name.show(ctx), "initialize");
+                    }
                 }
             }
-            scope = ctx.selfClass();
         }
 
         auto prior = scope.data(ctx)->findMember(ctx, uid->name);
@@ -2001,9 +2006,15 @@ class ResolveTypeMembersAndFieldsWalk {
             fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         }
 
-        if (core::Types::equiv(ctx, priorFieldResultType, castType)) {
-            // We already have a symbol for this field, and it matches what we already saw, so we can short
-            // circuit.
+        auto priorFieldResultTypeSeenFromScope =
+            core::Types::resultTypeAsSeenFromSelf(ctx, priorFieldResultType, scope);
+        if (castTypeSeenFromScope == nullptr) {
+            // We might not have computed this yet, and to avoid eagerly computing it if we were
+            // going to not need it due to an early exit, we make sure it's computed here.
+            castTypeSeenFromScope = core::Types::resultTypeAsSeenFromSelf(ctx, castType, scope);
+        }
+        if (core::Types::equiv(ctx, priorFieldResultTypeSeenFromScope, castTypeSeenFromScope)) {
+            // We already have a symbol for this field, and it matches what we already saw, so we can short circuit.
             return;
         }
 
@@ -3604,8 +3615,8 @@ private:
             [&](const ast::ExpressionPtr &e) {});
     }
 
-    static bool hasCompatibleOverloadedSigsWithKwArgs(core::Context ctx, int numSigs,
-                                                      const OverloadedMethodSigInformation &info,
+    static bool hasCompatibleOverloadedSigsWithKwArgs(const core::GlobalState &gs, core::ClassOrModuleRef owner,
+                                                      int numSigs, const OverloadedMethodSigInformation &info,
                                                       const vector<OverloadedMethodArgInformation> &args) {
         if (numSigs != 2) {
             return false;
@@ -3621,11 +3632,13 @@ private:
         const auto &argv1 = args[1];
 
         // Unlike std::equal, absl::c_equal will test for equal sizes.
-        auto argsEqual = [&ctx](const auto &arg0, const auto &arg1) {
+        auto argsEqual = [&gs, owner](const auto &arg0, const auto &arg1) {
             if (arg0.name != arg1.name) {
                 return false;
             }
-            return core::Types::equiv(ctx, arg0.type, arg1.type);
+            auto arg0type = core::Types::resultTypeAsSeenFromSelf(gs, arg0.type, owner);
+            auto arg1type = core::Types::resultTypeAsSeenFromSelf(gs, arg1.type, owner);
+            return core::Types::equiv(gs, arg0type, arg1type);
         };
 
         // TODO(froydnj) better error messages for users trying to provide overloads with kwargs?
@@ -3697,7 +3710,8 @@ public:
         // This usually comes up in the standard library (e.g. `String#each_line`).
         ENFORCE(combinedInfo.has_value());
         if (isOverloaded && combinedInfo->hasKwArgs) {
-            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, sigs.size(), *combinedInfo, args)) {
+            if (!hasCompatibleOverloadedSigsWithKwArgs(ctx, mdef.symbol.data(ctx)->owner, sigs.size(), *combinedInfo,
+                                                       args)) {
                 for (auto &argv : args) {
                     for (auto &arg : argv.kwArgs) {
                         if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {

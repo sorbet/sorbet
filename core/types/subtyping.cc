@@ -515,11 +515,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    {
-        if (isa_type<LambdaParam>(t1) || isa_type<LambdaParam>(t2)) {
-            return OrType::make_shared(t1, t2);
-        }
-    }
+    ENFORCE(!isa_type<LambdaParam>(t1) && !isa_type<LambdaParam>(t2),
+            "Are you forgetting a call to resultTypeAsSeenFrom?");
 
     {
         if (isa_type<TypeVar>(t1) || isa_type<TypeVar>(t2)) {
@@ -1031,6 +1028,10 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return make_type<AppliedType>(a1->klass, move(newTargs));
         }
     }
+
+    ENFORCE(!isa_type<LambdaParam>(t1) && !isa_type<LambdaParam>(t2),
+            "Are you forgetting a call to resultTypeAsSeenFrom?");
+
     {
         if (isa_type<TypeVar>(t1) || isa_type<TypeVar>(t2)) {
             return AndType::make_shared(t1, t2);
@@ -1215,20 +1216,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             return true;
         }
     }
-    //    ENFORCE(!isa_type<LambdaParam>(t1.get())); // sandly, this is false in Resolver, as we build
-    //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2) == nullptr);
 
-    {
-        auto lambda1 = cast_type<LambdaParam>(t1);
-        auto lambda2 = cast_type<LambdaParam>(t2);
-        if (lambda1 != nullptr || lambda2 != nullptr) {
-            // This should only be reachable in resolver.
-            if (lambda1 == nullptr || lambda2 == nullptr) {
-                return false;
-            }
-            return lambda1->definition == lambda2->definition;
-        }
-    }
+    ENFORCE(!isa_type<LambdaParam>(t1) && !isa_type<LambdaParam>(t2),
+            "Are you forgetting a call to resultTypeAsSeenFrom?");
 
     {
         auto isSelfTypeT1 = isa_type<SelfTypeParam>(t1);
