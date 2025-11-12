@@ -130,7 +130,7 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
         ENFORCE(!canceled);
     }
 
-    packager::Packager::run(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
+    packager::Packager::buildPackageDB(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
 
     {
         core::UnfreezeNameTable nameTableAccess(gs);

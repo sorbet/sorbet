@@ -105,7 +105,7 @@ vector<ast::ParsedFile> PackageHelpers::enterPackages(core::GlobalState &gs,
         ENFORCE(!canceled);
     }
 
-    packager::Packager::run(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
+    packager::Packager::buildPackageDB(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
     return parsedFiles;
 }
 

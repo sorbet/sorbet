@@ -1300,10 +1300,6 @@ bool isTestExport(const ast::ExpressionPtr &expr) {
 
 } // namespace
 
-void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
-    packageRunCore<PackagerMode::AllFiles>(gs, workers, files);
-}
-
 vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files,
                                                  WorkerPool &workers) {
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
