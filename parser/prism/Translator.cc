@@ -4985,7 +4985,21 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
     // For multiple statements, convert each statement and add them to the body of a Begin node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
-    auto beginNodeLoc = overrideLocation.exists() ? overrideLocation : translateLoc(stmtsNode->base.location);
+    core::LocOffsets beginNodeLoc;
+    if (overrideLocation.exists()) {
+        beginNodeLoc = overrideLocation;
+    } else if (!sorbetStmts.empty()) {
+        auto prismStatements = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
+        ENFORCE(!prismStatements.empty());
+        ENFORCE(prismStatements.size() == sorbetStmts.size());
+
+        // Cover the locations spanned from the first to the last statements.
+        // This can be different from the `stmtsNode->base.location`,
+        // because of the special case (handled by `startLoc()` and `endLoc()`).
+        beginNodeLoc = translateLoc(startLoc(prismStatements.front()), endLoc(prismStatements.back()));
+    } else {
+        beginNodeLoc = translateLoc(stmtsNode->base.location);
+    }
 
     if (sorbetStmts.empty()) {
         return make_node_with_expr<parser::Begin>(MK::Nil(beginNodeLoc), beginNodeLoc, NodeVec{});
