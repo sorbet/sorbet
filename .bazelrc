@@ -73,6 +73,13 @@ build --cxxopt=-Wno-unqualified-std-cast-call --host_cxxopt=-Wno-unqualified-std
 build:dbg --copt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
+# With rules_cc 0.2.14 and Abseil 20240722.0, Abseil fails to build
+# if module_maps are enabled:
+# $ ./bazel build @@com_google_absl//absl/types:bad_variant_access --config=dbg
+# ERROR <..> undeclared inclusion(s) in rule <..>
+#  'bazel-out/k8-dbg/bin/external/com_google_absl/absl/base/core_headers.cppmap'
+#  <other cppmap files>
+build:dbg --host_features=-module_maps --features=-module_maps
 
 build:rubydbg --copt=-DRUBY_DEBUG --copt=-DVM_CHECK_MODE=1 --copt=-DTRANSIENT_HEAP_CHECK_MODE --copt=-DRGENGC_CHECK_MODE --copt=-DENC_DEBUG
 
@@ -142,11 +149,11 @@ build:release-linux-aarch64   --copt=-march=armv8.1a
 build:release-mac --config=release-common --config=shared-libs
 
 build:cross-to-darwin-x86_64 --platforms=@//tools/platforms:darwin_x86_64
-build:cross-to-darwin-x86_64 --extra_toolchains=@llvm_toolchain_15_0_7//:cc-toolchain-x86_64-darwin
+build:cross-to-darwin-x86_64 --extra_toolchains=@llvm_toolchain_15_0_6//:cc-toolchain-x86_64-darwin
 build:cross-to-darwin-x86_64 --copt=-stdlib=libc++ --linkopt=-lc++
 
 build:cross-to-darwin-arm64 --platforms=@//tools/platforms:darwin_arm64
-build:cross-to-darwin-arm64 --extra_toolchains=@llvm_toolchain_15_0_7//:cc-toolchain-aarch64-darwin
+build:cross-to-darwin-arm64 --extra_toolchains=@llvm_toolchain_15_0_6//:cc-toolchain-aarch64-darwin
 build:cross-to-darwin-arm64 --copt=-stdlib=libc++ --linkopt=-lc++
 
 build:release-debug-linux --config=release-linux
@@ -249,9 +256,9 @@ build:ubsan --copt=-DHAS_SANITIZER
 # because we're using the toolchain's lld linker now.
 # We could consider replacing this with something more typical.
 # Original motivation: Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_6_llvm/lib/clang/15.0.6/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_6_llvm/lib/clang/15.0.6/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_6_llvm/lib/clang/15.0.6/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
