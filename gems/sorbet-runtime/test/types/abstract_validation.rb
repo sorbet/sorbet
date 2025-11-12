@@ -464,11 +464,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       assert(super_location.end_with?("lib/types/private/abstract/declare.rb"))
       assert_equal(intermediate_abstract_klass.singleton_class, supered.owner)
 
-      # We have redefined the method on the class with its super method, so we haven't
-      # really removed a layer of abstraction -- we've actually made it worse!
-      after_location = after_new.source_location[0]
-      assert(after_location.end_with?("lib/types/private/abstract/declare.rb"))
-      assert_equal(klass.singleton_class, after_new.owner)
+      after_location = after_new.source_location
+      refute(after_location)
       assert_equal("baz", klass.new.bar)
     end
 

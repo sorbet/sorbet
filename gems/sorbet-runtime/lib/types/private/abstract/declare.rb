@@ -48,32 +48,26 @@ module T::Private::Abstract::Declare
 
         # See if we were called on a module that resolved to the abstract override, and
         # bypass the abstract override for the next call.
-        # The owner of the method is actually the singleton class, which is
-        # different from the module on which we are defining the singleton
-        # method.
         me = self.method(:new)
-        owner = me.owner
-        owner = case owner
-                when Class
-                  if owner.singleton_class?
-                    owner.attached_object
-                  else
-                    owner
-                  end
-                else
-                  owner
-        end
-        if owner != mod
+        loc = me.source_location&.[](0)
+        # If the first resolved method on `self` is not in this file, then we can't apply
+        # this optimization, because the `new` that we're now in is somewhere in the
+        # hierarchy above the first resolved method.
+        if loc != __FILE__
           return result
         end
 
-        # This method must exist, or we would have errored in the earlier `super` call.
-        supered = T.must(me.super_method)
+        while loc == __FILE__
+          # This method must exist, or we would have errored in the earlier `super` call.
+          me = T.must(me.super_method)
+          loc = me.source_location&.[](0)
+        end
+
         # TODO(froydnj) we should be able to ladder up the method inheritance
         # chain to see if there are multiple abstract .new methods and resolve
         # to the farthest-away non-abstract one.
         T::Private::DeclState.current.without_on_method_added do
-          self.send(:define_singleton_method, :new, supered.unbind)
+          self.send(:define_singleton_method, :new, me.unbind)
         end
         result
       end
