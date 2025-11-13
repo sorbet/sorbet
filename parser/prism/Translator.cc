@@ -2966,6 +2966,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto multiLhsNode = translateMultiTargetLhs(multiWriteNode, lhsLoc);
             auto rhsValue = translate(multiWriteNode->value);
 
+            // Sorbet's legacy parser doesn't include the opening `(` (see`mlhsLocation()` for details),
+            // so we can't just use the entire Prism location for the Masgn node.
+            location = lhsLoc.join(translateLoc(multiWriteNode->value->location));
+
             if (!directlyDesugar || !hasExpr(rhsValue, multiLhsNode->exprs)) {
                 return make_unique<parser::Masgn>(location, move(multiLhsNode), move(rhsValue));
             }
