@@ -64,15 +64,8 @@ std::vector<CondensationStratumInfo> computePackageStrata(const core::GlobalStat
                                                           absl::Span<core::FileRef> files,
                                                           const options::Options &opts);
 
-void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-             WorkerPool &workers);
-
-void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                    WorkerPool &workers);
-
-// Associates source files with their package in the package DB. This can only be called after `buildPackageDB`.
-void setPackageForSourceFiles(core::GlobalState &gs, absl::Span<core::FileRef> sourceFiles,
-                              const options::Options &opts);
+void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, absl::Span<core::FileRef> nonPackageFiles,
+                    const options::Options &opts, WorkerPool &workers);
 
 void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                            WorkerPool &workers);

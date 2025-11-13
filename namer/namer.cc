@@ -1333,6 +1333,7 @@ private:
             auto pkg = make_unique<core::packages::PackageInfo>(mangledName, ctx.file, package.loc, package.declLoc);
             populatePackagePathPrefixes(ctx, *pkg);
             ctx.state.packageDB().enterPackage(move(pkg));
+            ctx.state.packageDB().setPackageNameForFile(ctx.file, mangledName);
         }
     }
 

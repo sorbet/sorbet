@@ -1112,8 +1112,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
     gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
 
-    setPackageNameOnFiles(gs, files);
-
     {
         core::UnfreezeNameTable unfreeze(gs);
         auto packages = gs.unfreezePackages();
@@ -1135,54 +1133,9 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
 namespace {
 
-template <typename Elem, typename Proj>
-void setPackageNameOnFilesImpl(core::GlobalState &gs, absl::Span<const Elem> files, Proj &&proj) {
-    vector<pair<core::FileRef, MangledName>> mapping;
-    mapping.reserve(files.size());
-
-    {
-        auto &db = gs.packageDB();
-        for (auto &f : files) {
-            auto fref = proj(f);
-
-            auto pkg = db.getPackageNameForFile(fref);
-            if (pkg.exists()) {
-                continue;
-            }
-
-            pkg = db.findPackageByPath(gs, fref);
-            if (!pkg.exists()) {
-                continue;
-            }
-
-            mapping.emplace_back(fref, pkg);
-        }
-    }
-
-    {
-        auto packages = gs.unfreezePackages();
-        for (auto [file, package] : mapping) {
-            packages.db.setPackageNameForFile(file, package);
-        }
-    }
-}
-
-} // namespace
-
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
-    setPackageNameOnFilesImpl(gs, files, [](auto &p) { return p.file; });
-}
-
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
-    setPackageNameOnFilesImpl(gs, files, [](auto f) { return f; });
-}
-
-namespace {
-
 enum class PackagerMode {
     PackagesOnly,
     PackagedFilesOnly,
-    AllFiles,
 };
 
 class PackageDBPackageGraph {
@@ -1238,12 +1191,10 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
         case PackagerMode::PackagedFilesOnly:
             timeit.setTag("mode", "packaged_files_only");
             break;
-        case PackagerMode::AllFiles:
-            break;
     }
 
-    constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly || Mode == PackagerMode::AllFiles;
-    constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly || Mode == PackagerMode::AllFiles;
+    constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly;
+    constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly;
 
     if constexpr (buildPackageDB) {
         Packager::findPackages(gs, files);
@@ -1300,10 +1251,6 @@ bool isTestExport(const ast::ExpressionPtr &expr) {
 
 } // namespace
 
-void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
-    packageRunCore<PackagerMode::AllFiles>(gs, workers, files);
-}
-
 vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files,
                                                  WorkerPool &workers) {
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
@@ -1332,8 +1279,23 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     return files;
 }
 
-void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> packageFiles) {
+void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> packageFiles,
+                              absl::Span<core::FileRef> nonPackageFiles) {
     packageRunCore<PackagerMode::PackagesOnly>(gs, workers, packageFiles);
+
+    for (auto fref : nonPackageFiles) {
+        auto pkg = gs.packageDB().getPackageNameForFile(fref);
+        if (pkg.exists()) {
+            continue;
+        }
+
+        pkg = gs.packageDB().findPackageByPath(gs, fref);
+        if (!pkg.exists()) {
+            continue;
+        }
+
+        gs.packageDB().setPackageNameForFile(fref, pkg);
+    }
 }
 
 void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {

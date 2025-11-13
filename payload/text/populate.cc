@@ -25,7 +25,7 @@ void populateRBIsInto(core::GlobalState &gs) {
     auto indexed = realmain::pipeline::index(gs, absl::Span<core::FileRef>(payloadFiles), emptyOpts, *workers, kvstore);
     ENFORCE(indexed.hasResult(), "Cancelation is not supported during payload generation");
 
-    // We don't run the payload with any packager options, so we can skip pipeline::package()
+    // We don't run the payload with any packager options, so we can skip the packager
 
     // While we want the FoundMethodHashes to end up in the payload, these hashes (including
     // LocalGlobalStateHashes and UsageHash) are not computed until `computeFileHashes` is called in

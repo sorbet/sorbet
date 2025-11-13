@@ -579,7 +579,7 @@ int realmain(int argc, char *argv[]) {
                 indexed = std::move(result.result());
             }
 
-            // Cache these before any pipeline::package rewrites, so that the cache is still
+            // Cache these before any packager rewrites, so that the cache is still
             // usable regardless of whether `--stripe-packages` was passed.
             // Want to keep the kvstore around so we can still write to it later.
             kvstore =
@@ -591,8 +591,7 @@ int realmain(int argc, char *argv[]) {
             auto foundHashes = nullptr;
             auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
-            pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), opts, *workers);
-            pipeline::setPackageForSourceFiles(*gs, inputFilesSpan, opts);
+            pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts, *workers);
         }
 
         // We disable tree leaking if we're targeting emscripten, or if we're typechecking in package dependency order.
@@ -620,7 +619,7 @@ int realmain(int argc, char *argv[]) {
                 ENFORCE(nonPackageIndexedResult.hasResult(), "There's no cancellation in batch mode");
                 auto nonPackageIndexed = std::move(nonPackageIndexedResult.result());
 
-                // Cache these before any pipeline::package rewrites, so that the cache is still usable
+                // Cache these before any packager rewrites, so that the cache is still usable
                 // regardless of whether `--stripe-packages` was passed.
                 kvstore = cache::ownIfUnchanged(
                     *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,

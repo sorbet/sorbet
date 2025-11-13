@@ -424,8 +424,7 @@ void Minimize::indexAndResolveForMinimize(core::GlobalState &sourceGS, core::Glo
     auto foundHashes = nullptr;
     auto canceled = pipeline::name(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers, foundHashes);
     ENFORCE(!canceled, "Can only cancel in LSP mode");
-    // We explicitly disable `sorbetPackages` in realmain for this call, which makes the packager call a no-op here.
-    pipeline::package(rbiGS, absl::MakeSpan(rbiIndexed.result()), opts, workers);
+    // We explicitly disable `sorbetPackages` in realmain for this call, which means we don't have to call packager
 
     auto resolved = pipeline::resolve(rbiGS, std::move(rbiIndexed.result()), opts, workers);
     ENFORCE(resolved.hasResult(), "Can only cancel in LSP mode");
