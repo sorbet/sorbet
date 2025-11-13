@@ -868,9 +868,12 @@ void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
     // We don't count the empty file that we reserve for the invalid FileRef.
     files.reserve(1 + filesSize);
     files.initEmpty();
+    result.symbolsReferencedByFile.reserve(1 + filesSize);
+    result.symbolsReferencedByFile.emplace_back();
 
     for (int i = 0; i < filesSize; i++) {
         files.emplace(unpickleFile(p));
+        result.symbolsReferencedByFile.emplace_back();
     }
 
     result.files = make_shared<FileTable>(move(files));
