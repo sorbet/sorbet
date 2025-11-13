@@ -5037,7 +5037,25 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
 
             auto loc = translateLoc(start, end);
 
-            translatedEnsure = make_unique<parser::Ensure>(loc, move(translatedRescue), move(ensureBody));
+            if (!directlyDesugar || !hasExpr(translatedRescue, ensureBody)) {
+                translatedEnsure = make_unique<parser::Ensure>(loc, move(translatedRescue), move(ensureBody));
+            } else {
+                // Build ast::Rescue expression with ensure field set
+                // When we have both rescue and ensure, the translatedRescue is already an ast::Rescue,
+                // so we just need to set its ensure field
+                auto bodyExpr = translatedRescue->takeDesugaredExpr();
+                auto rescue = ast::cast_tree<ast::Rescue>(bodyExpr);
+                ENFORCE(rescue != nullptr, "translatedRescue should be a Rescue node");
+
+                if (ensureBody != nullptr) {
+                    rescue->ensure = ensureBody->takeDesugaredExpr();
+                } else {
+                    rescue->ensure = ast::MK::EmptyTree();
+                }
+
+                translatedEnsure =
+                    make_node_with_expr<parser::Ensure>(move(bodyExpr), loc, move(translatedRescue), move(ensureBody));
+            }
         } else {
             // When there's no rescue clause, the Ensure node location depends on whether there are begin statements:
             // - If there are begin statements: span from start of begin statements to end of ensure statements
@@ -5059,7 +5077,32 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
 
             auto loc = translateLoc(start, end);
 
-            translatedEnsure = make_unique<parser::Ensure>(loc, move(bodyNode), move(ensureBody));
+            if (!directlyDesugar || !hasExpr(bodyNode, ensureBody)) {
+                translatedEnsure = make_unique<parser::Ensure>(loc, move(bodyNode), move(ensureBody));
+            } else {
+                // Build ast::Rescue expression with ensure field set
+                // When there's no rescue clause, create a new Rescue with empty rescue cases
+                ast::ExpressionPtr bodyExpr;
+                if (bodyNode != nullptr) {
+                    bodyExpr = bodyNode->takeDesugaredExpr();
+                } else {
+                    bodyExpr = ast::MK::EmptyTree();
+                }
+
+                ast::ExpressionPtr ensureExpr;
+                if (ensureBody != nullptr) {
+                    ensureExpr = ensureBody->takeDesugaredExpr();
+                } else {
+                    ensureExpr = ast::MK::EmptyTree();
+                }
+
+                // Create ast::Rescue with empty rescue cases
+                ast::Rescue::RESCUE_CASE_store cases;
+                auto rescueExpr = ast::make_expression<ast::Rescue>(loc, move(bodyExpr), move(cases),
+                                                                    ast::MK::EmptyTree(), move(ensureExpr));
+                translatedEnsure =
+                    make_node_with_expr<parser::Ensure>(move(rescueExpr), loc, move(bodyNode), move(ensureBody));
+            }
         }
 
         statements.emplace_back(move(translatedEnsure));
