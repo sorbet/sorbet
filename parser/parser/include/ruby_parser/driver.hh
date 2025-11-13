@@ -203,6 +203,11 @@ public:
 //  * `top > 0`: at least one numbered parameter in this scope (top being the highest one found)
 class max_numparam_stack {
     struct NumparamScope {
+        // Note: max uses special values:
+        // - 0: No parameters
+        // - -1: Ordinary parameters
+        // - 1-9: Numbered parameters (_1 through _9)
+        // - INT_MAX: 'it' parameter
         int max;
         ruby_parser::node_list *decls;
         bool staticContext = false;
@@ -228,9 +233,38 @@ public:
         return !stack.empty() && top()->max < 0;
     }
 
-    // Have we encountered a num param before? (top > 0)
+    // Have we encountered a num param before? (top > 0, but not IT_PARAM_MARKER)
     bool seen_numparams() {
-        return !stack.empty() && top()->max > 0;
+        return !stack.empty() && top()->max > 0 && top()->max != IT_PARAM_MARKER;
+    }
+
+    // Special value to represent 'it' parameter in max field
+    static constexpr int IT_PARAM_MARKER = std::numeric_limits<int>::max();
+
+    // Mark that 'it' parameter is used in the current scope
+    void set_it_param() {
+        if (!stack.empty()) {
+            top()->max = IT_PARAM_MARKER;
+        }
+    }
+
+    // Have we encountered 'it' parameter before?
+    bool seen_it_param() {
+        return !stack.empty() && top()->max == IT_PARAM_MARKER;
+    }
+
+    // Check if 'it' parameter is used in any outer scope (not current scope)
+    bool seen_it_param_in_outer_scope() {
+        if (stack.size() <= 1) {
+            return false;
+        }
+        // Check all scopes except the current (top) one
+        for (size_t i = 0; i < stack.size() - 1; i++) {
+            if (stack[i].max == IT_PARAM_MARKER) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Register a numparam in the current scope

@@ -1,0 +1,22 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U it>
+      params = NULL
+      body = String {
+        val = <U method_value>
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U x>
+      }
+      rhs = Send {
+        receiver = NULL
+        method = <U it>
+        args = [
+        ]
+      }
+    }
+  ]
+}
