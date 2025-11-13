@@ -7,6 +7,7 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
+#include "rapidjson/writer.h"
 #include "subprocess.hpp"
 
 using namespace std;
@@ -50,24 +51,87 @@ void WatchmanProcess::start() {
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
 
-        // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]], but Stripe
-        // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
-        // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
-        // subscription starts the daemon / causes the daemon to watch this folder for the first time.
-        string subscribeCommand =
-            fmt::format("[\"subscribe\", \"{}\", \"{}\", {{"
-                        "\"expression\": [\"allof\", "
-                        "[\"type\", \"f\"], "
-                        "[\"anyof\", {}], "
-                        // Exclude rsync tmpfiles
-                        "[\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]"
-                        "], "
-                        "\"fields\": [\"name\"], "
-                        "\"empty_on_fresh_instance\": true"
-                        "}}]",
-                        workSpace, subscriptionName, fmt::map_join(extensions, ", ", [](const string &ext) -> string {
-                            return fmt::format("[\"suffix\", \"{}\"]", ext);
-                        }));
+        rapidjson::StringBuffer subscribeCommandBuffer;
+        rapidjson::Writer<rapidjson::StringBuffer> w(subscribeCommandBuffer);
+        {
+            w.StartArray();
+            w.String("subscribe");
+            w.String(workSpace);
+            w.String(subscriptionName);
+
+            {
+                w.StartObject();
+
+                w.String("expression");
+                {
+                    w.StartArray();
+                    w.String("allof");
+                    {
+                        w.StartArray();
+                        w.String("type");
+                        w.String("f");
+                        w.EndArray();
+                    }
+
+                    // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]],
+                    // but Stripe laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix",
+                    // "suffix2" ], ... ].
+                    {
+                        w.StartArray();
+                        w.String("anyof");
+
+                        for (auto &extension : extensions) {
+                            w.StartArray();
+                            w.String("suffix");
+                            w.String(extension);
+                            w.EndArray();
+                        }
+
+                        w.EndArray();
+                    }
+
+                    // Exclude rsync tmpfiles
+                    {
+                        w.StartArray();
+                        w.String("not");
+                        {
+                            w.StartArray();
+                            w.String("match");
+                            w.String("**/.~tmp~/**");
+                            w.String("wholename");
+                            {
+                                w.StartObject();
+                                w.String("includedotfiles");
+                                w.Bool(true);
+                                w.EndObject();
+                            }
+                            w.EndArray();
+                        }
+                        w.EndArray();
+                    }
+
+                    w.EndArray();
+                }
+
+                w.String("fields");
+                {
+                    w.StartArray();
+                    w.String("name");
+                    w.EndArray();
+                }
+
+                // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
+                // subscription starts the daemon / causes the daemon to watch this folder for the first time.
+                w.String("empty_on_fresh_instance");
+                w.Bool(true);
+
+                w.EndObject();
+            }
+
+            w.EndArray();
+        }
+
+        string subscribeCommand = subscribeCommandBuffer.GetString();
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
         logger->debug(subscribeCommand);
 
