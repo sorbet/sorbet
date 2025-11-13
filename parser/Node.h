@@ -143,6 +143,12 @@ public:
 
 using NodeVec = InlinedVector<std::unique_ptr<Node>, 4>;
 
+inline NodeVec NodeVec1(std::unique_ptr<Node> node) {
+    NodeVec result;
+    result.emplace_back(std::move(node));
+    return result;
+}
+
 #include "parser/Node_gen.h"
 }; // namespace sorbet::parser
 

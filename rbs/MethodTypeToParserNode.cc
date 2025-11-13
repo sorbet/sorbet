@@ -144,26 +144,22 @@ unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const parse
             sigBuilder =
                 parser::MK::Send0(annotation.typeLoc, move(sigBuilder), core::Names::override_(), annotation.typeLoc);
         } else if (annotation.string == "override(allow_incompatible: true)") {
-            auto pairs = parser::NodeVec();
             auto key = parser::MK::Symbol(annotation.typeLoc, core::Names::allowIncompatible());
             auto value = parser::MK::True(annotation.typeLoc);
-            pairs.emplace_back(make_unique<parser::Pair>(annotation.typeLoc, move(key), move(value)));
+            auto pairs = NodeVec1(make_unique<parser::Pair>(annotation.typeLoc, move(key), move(value)));
             auto hash = parser::MK::Hash(annotation.typeLoc, true, move(pairs));
 
-            auto args = parser::NodeVec();
-            args.emplace_back(move(hash));
+            auto args = NodeVec1(move(hash));
 
             sigBuilder = parser::MK::Send(annotation.typeLoc, move(sigBuilder), core::Names::override_(),
                                           annotation.typeLoc, move(args));
         } else if (annotation.string == "override(allow_incompatible: :visibility)") {
-            auto pairs = parser::NodeVec();
             auto key = parser::MK::Symbol(annotation.typeLoc, core::Names::allowIncompatible());
             auto value = parser::MK::Symbol(annotation.typeLoc, core::Names::visibility());
-            pairs.emplace_back(make_unique<parser::Pair>(annotation.typeLoc, move(key), move(value)));
+            auto pairs = NodeVec1(make_unique<parser::Pair>(annotation.typeLoc, move(key), move(value)));
             auto hash = parser::MK::Hash(annotation.typeLoc, true, move(pairs));
 
-            auto args = parser::NodeVec();
-            args.emplace_back(move(hash));
+            auto args = NodeVec1(move(hash));
 
             sigBuilder = parser::MK::Send(annotation.typeLoc, move(sigBuilder), core::Names::override_(),
                                           annotation.typeLoc, move(args));
@@ -532,8 +528,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     if (sigParams.size() > 0) {
         auto hash = parser::MK::Hash(fullTypeLoc, true, move(sigParams));
-        auto args = parser::NodeVec();
-        args.emplace_back(move(hash));
+        auto args = NodeVec1(move(hash));
         sigBuilder = parser::MK::Send(fullTypeLoc, move(sigBuilder), core::Names::params(), fullTypeLoc, move(args));
     }
 
@@ -602,12 +597,10 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
             send->args[0]->loc.endPos(),
         };
 
-        auto pairs = parser::NodeVec();
-        pairs.emplace_back(
+        auto pairs = parser::NodeVec1(
             make_unique<parser::Pair>(argLoc, parser::MK::Symbol(argLoc, argName), returnType->deepCopy()));
         auto hash = parser::MK::Hash(send->loc, true, move(pairs));
-        auto sigArgs = parser::NodeVec();
-        sigArgs.emplace_back(move(hash));
+        auto sigArgs = parser::NodeVec1(move(hash));
         sigBuilder = parser::MK::Send(send->loc, move(sigBuilder), core::Names::params(), send->loc, move(sigArgs));
     }
 

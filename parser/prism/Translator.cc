@@ -3208,8 +3208,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 std::unique_ptr<Node> rescuedExceptions = nullptr;
                 auto resBody = make_unique<parser::Resbody>(resbodyLoc, move(rescuedExceptions), nullptr, move(rescue));
 
-                NodeVec cases;
-                cases.emplace_back(move(resBody));
+                auto cases = NodeVec1(move(resBody));
                 return make_unique<parser::Rescue>(location, move(body), move(cases), nullptr);
             }
 
@@ -3230,8 +3229,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto expr = ast::make_expression<ast::Rescue>(location, move(bodyExpr), move(rescueCases),
                                                           ast::MK::EmptyTree(), ast::MK::EmptyTree());
 
-            NodeVec cases;
-            cases.emplace_back(make_unique<parser::Resbody>(resbodyLoc, nullptr, nullptr, move(rescue)));
+            auto cases = NodeVec1(make_unique<parser::Resbody>(resbodyLoc, nullptr, nullptr, move(rescue)));
 
             return make_node_with_expr<parser::Rescue>(move(expr), location, move(body), move(cases), nullptr);
         }
@@ -3527,10 +3525,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto sendBacktick = MK::Send1(location, MK::Self(location), core::Names::backtick(),
                                           location.copyWithZeroLength(), MK::String(contentLoc, content));
 
-            // Create the XString NodeVec with a single string node
-            NodeVec nodes{};
-            nodes.emplace_back(
-                make_node_with_expr<parser::String>(MK::String(contentLoc, content), contentLoc, content));
+            auto nodes =
+                NodeVec1(make_node_with_expr<parser::String>(MK::String(contentLoc, content), contentLoc, content));
 
             return make_node_with_expr<parser::XString>(move(sendBacktick), location, move(nodes));
         }
@@ -3963,8 +3959,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto expr = translate(pinnedExprNode->expression);
 
             // Sorbet's parser always wraps the pinned expression in a `Begin` node.
-            NodeVec statements;
-            statements.emplace_back(move(expr));
+            auto statements = NodeVec1(move(expr));
             auto beginNodeLocation = translateLoc(pinnedExprNode->lparen_loc.start, pinnedExprNode->rparen_loc.end);
             auto beginNode =
                 make_node_with_expr<parser::Begin>(MK::Nil(beginNodeLocation), beginNodeLocation, move(statements));

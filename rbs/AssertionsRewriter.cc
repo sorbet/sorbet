@@ -343,9 +343,7 @@ parser::NodeVec AssertionsRewriter::rewriteNodesAsArray(const unique_ptr<parser:
             auto arr = parser::MK::Array(loc, move(nodes));
             arr = rewriteNode(move(arr));
 
-            auto vector = parser::NodeVec();
-            vector.emplace_back(move(arr));
-            nodes = move(vector);
+            nodes = NodeVec1(move(arr));
         }
         if (auto type = parseComment(ctx, inlineComment.value(), typeParams)) {
             nodes.front() = insertCast(move(nodes.front()), move(type));
