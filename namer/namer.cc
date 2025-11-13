@@ -1110,7 +1110,7 @@ private:
             mod.name == core::Names::packagePrivateClassMethod()) {
             owner = ctx.selfClass();
         } else {
-            owner = ctx.owner.enclosingClass(ctx);
+            owner = methodOwner(ctx, ctx.owner, /* isSelfMethod */ false);
         }
 
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
