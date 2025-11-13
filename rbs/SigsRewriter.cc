@@ -90,8 +90,7 @@ parser::NodeVec extractHelpers(core::MutableContext ctx, vector<Comment> annotat
             helpers.emplace_back(move(send));
         } else if (absl::StartsWith(annotation.string, "requires_ancestor:")) {
             if (auto type = extractHelperArgument(ctx, annotation, 18)) {
-                auto body = make_unique<parser::Begin>(annotation.typeLoc, parser::NodeVec());
-                body->stmts.emplace_back(move(type));
+                auto body = make_unique<parser::Begin>(annotation.typeLoc, NodeVec1(move(type)));
                 auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
                                               core::Names::requiresAncestor(), annotation.typeLoc);
                 auto block = make_unique<parser::Block>(annotation.typeLoc, move(send), nullptr, move(body));
@@ -114,9 +113,7 @@ unique_ptr<parser::Node> maybeWrapBody(unique_ptr<parser::Node> &owner, unique_p
     } else if (parser::isa_node<parser::Begin>(body.get())) {
         return body;
     } else {
-        auto newBody = make_unique<parser::Begin>(body->loc, parser::NodeVec());
-        newBody->stmts.emplace_back(move(body));
-        return newBody;
+        return make_unique<parser::Begin>(body->loc, NodeVec1(move(body)));
     }
 }
 

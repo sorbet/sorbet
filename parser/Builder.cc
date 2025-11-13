@@ -444,9 +444,8 @@ public:
         if (parser::isa_node<Mlhs>(body.get())) {
             return body;
         }
-        sorbet::parser::NodeVec stmts;
-        stmts.emplace_back(std::move(body));
-        return make_unique<Begin>(loc, std::move(stmts));
+
+        return make_unique<Begin>(loc, NodeVec1(std::move(body)));
     }
 
     unique_ptr<Node> beginBody(unique_ptr<Node> body, sorbet::parser::NodeVec rescueBodies, const token *elseTok,
@@ -468,10 +467,8 @@ public:
                     stmts.emplace_back(std::move(body));
                 }
             }
-            sorbet::parser::NodeVec else_stmts;
             auto elseLoc = tokLoc(elseTok).join(maybe_loc(else_));
-            else_stmts.emplace_back(std::move(else_));
-            stmts.emplace_back(make_unique<Begin>(elseLoc, std::move(else_stmts)));
+            stmts.emplace_back(make_unique<Begin>(elseLoc, NodeVec1(std::move(else_))));
             auto loc = collectionLoc(stmts);
             if (auto *block = parser::cast_node<Block>(body.get())) {
                 loc = block->send->loc.join(loc);
@@ -500,9 +497,7 @@ public:
             if (auto *b = parser::cast_node<Begin>(body.get())) {
                 return make_unique<Kwbegin>(loc, std::move(b->stmts));
             } else {
-                sorbet::parser::NodeVec nodes;
-                nodes.emplace_back(std::move(body));
-                return make_unique<Kwbegin>(loc, std::move(nodes));
+                return make_unique<Kwbegin>(loc, NodeVec1(std::move(body)));
             }
         }
         return make_unique<Kwbegin>(loc, sorbet::parser::NodeVec());
@@ -511,8 +506,7 @@ public:
     unique_ptr<Node> binaryOp(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
         core::LocOffsets loc = receiver->loc.join(arg->loc);
 
-        sorbet::parser::NodeVec args;
-        args.emplace_back(std::move(arg));
+        auto args = NodeVec1(std::move(arg));
 
         return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), tokLoc(oper),
                                  std::move(args));
@@ -662,10 +656,8 @@ public:
             loc = loc.join(tokLoc(end));
         }
         auto zloc = loc.copyWithZeroLength();
-        auto whenPatterns = NodeVec{};
-        whenPatterns.emplace_back(error_node(loc.beginPos(), loc.beginPos()));
-        auto whens = NodeVec{};
-        whens.emplace_back(make_unique<When>(zloc, std::move(whenPatterns), nullptr));
+        auto whenPatterns = NodeVec1(error_node(loc.beginPos(), loc.beginPos()));
+        auto whens = NodeVec1(make_unique<When>(zloc, std::move(whenPatterns), nullptr));
         return make_unique<Case>(loc, std::move(cond), std::move(whens), nullptr);
     }
 
@@ -1220,8 +1212,9 @@ public:
         // to support that, we'd need to analyze that here and call
         // `driver_->lex.declare`.
         core::LocOffsets loc = receiver->loc.join(arg->loc);
-        sorbet::parser::NodeVec args;
-        args.emplace_back(std::move(arg));
+
+        auto args = NodeVec1(std::move(arg));
+
         return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->view()), tokLoc(oper),
                                  std::move(args));
     }
@@ -1313,8 +1306,7 @@ public:
         if (parser::isa_node<Mlhs>(item.get())) {
             return item;
         }
-        sorbet::parser::NodeVec args;
-        args.emplace_back(std::move(item));
+        auto args = NodeVec1(std::move(item));
         return make_unique<Mlhs>(collectionLoc(begin, args, end), std::move(args));
     }
 

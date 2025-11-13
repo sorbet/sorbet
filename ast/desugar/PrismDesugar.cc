@@ -1676,9 +1676,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         ExpressionPtr lhs = node2TreeImpl(dctx, mlhsNode);
                         params.emplace_back(move(lhs));
                     } else {
-                        parser::NodeVec vars;
-                        vars.emplace_back(move(mlhsNode));
-                        mlhsNode = make_unique<parser::Mlhs>(loc, move(vars));
+                        mlhsNode = make_unique<parser::Mlhs>(loc, NodeVec1(move(mlhsNode)));
                     }
                 }
 
