@@ -583,8 +583,6 @@ public:
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                 if (db.genPackages()) {
-                    // TODO(neil): this is technically incorrect since it means export errors won't be reported at all
-                    // until we implement export handling in genPackages mode
                     return;
                 }
 
@@ -833,6 +831,76 @@ public:
         return files;
     }
 };
+
+bool ownerAlreadyExported(const core::GlobalState &gs, vector<core::SymbolRef> &alreadyExported,
+                          core::ClassOrModuleRef owner) {
+    while (owner != core::Symbols::root()) {
+        if (absl::c_find(alreadyExported, owner) != alreadyExported.end()) {
+            return true;
+        }
+        owner = owner.data(gs)->owner;
+    }
+    return false;
+}
+
+void exportClassOrModule(const core::GlobalState &gs,
+                         UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport,
+                         core::ClassOrModuleRef symbol, vector<core::FileRef> referencingFiles) {
+    auto data = symbol.data(gs);
+    auto owningPackage = data->package;
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
+        data->flags.isExported) {
+        return;
+    }
+
+    for (auto &f : referencingFiles) {
+        auto packageForF = gs.packageDB().getPackageNameForFile(f);
+        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+            continue;
+        }
+
+        if (ownerAlreadyExported(gs, toExport[owningPackage], data->owner)) {
+            // No need to check the rest of referencingFiles, we're already going to export the owner
+            break;
+        }
+
+        toExport[owningPackage].push_back(symbol);
+        break;
+    }
+}
+
+void exportField(const core::GlobalState &gs,
+                 UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport, core::FieldRef symbol,
+                 vector<core::FileRef> referencingFiles) {
+    auto data = symbol.data(gs);
+    auto owningPackage = data->owner.data(gs)->package;
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
+        data->flags.isExported) {
+        return;
+    }
+
+    for (auto &f : referencingFiles) {
+        auto packageForF = gs.packageDB().getPackageNameForFile(f);
+        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+            continue;
+        }
+
+        if (ownerAlreadyExported(gs, toExport[owningPackage], data->owner)) {
+            // No need to check the rest of referencingFiles, we're already going to export the owner
+            break;
+        }
+
+        auto maybeEnumClass = getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
+        if (maybeEnumClass.exists()) {
+            // No need to check if maybeEnumClass is already going to be exported since we have a ownerAlreadyExported
+            // call above
+            toExport[owningPackage].push_back(maybeEnumClass);
+        } else {
+            toExport[owningPackage].push_back(symbol);
+        }
+        break;
+    }
+}
 } // namespace
 
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
@@ -848,7 +916,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
     auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
-        Timer timeit(gs.tracer(), "visibility_checker.run.missing_imports_autocorrect");
+        Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
         UnorderedSet<core::packages::MangledName> affectedPackages;
         for (auto &parsedFile : result) {
             auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
@@ -858,14 +926,44 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             affectedPackages.insert(pkgName);
         }
 
+        UnorderedMap<core::SymbolRef, vector<core::FileRef>> referencingFiles;
+        {
+            Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencingFiles");
+            auto numFiles = gs.getFiles().size();
+            for (auto i = 1; i < numFiles; i++) {
+                core::FileRef fref(i);
+                auto referencedSymbols = gs.getSymbolsReferencedByFile(i);
+                for (auto &symbol : referencedSymbols) {
+                    referencingFiles[symbol].push_back(fref);
+                }
+            }
+        }
+
+        UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> toExport;
+        for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
+            auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
+            exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
+        }
+        for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
+            auto fieldRef = core::FieldRef(gs, i);
+            exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
+        }
         for (auto package : affectedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
-            if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
+
+            if (auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs)) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
-                    e.addAutocorrect(move(autocorrect.value()));
+                    e.addAutocorrect(move(importsAutocorrect.value()));
                     // TODO(neil): we should also delete imports that are unused but have a modularity error here
+                }
+            }
+
+            if (auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package])) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{} is missing exports", pkgInfo.show(gs));
+                    e.addAutocorrect(move(exportsAutocorrect.value()));
                 }
             }
         }
