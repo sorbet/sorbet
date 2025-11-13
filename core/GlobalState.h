@@ -186,6 +186,7 @@ public:
 class FileTable {
     std::vector<std::shared_ptr<File>> files;
     UnorderedMap<std::string, FileRef> fileRefByPath;
+    std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
 
 public:
     std::shared_ptr<File> &get(size_t ix) {
@@ -196,8 +197,18 @@ public:
         return this->files[ix];
     }
 
+    // Which symbols does this file reference?
+    // NOTE: this is currently only valid in --gen-packages mode
+    UnorderedSet<core::SymbolRef> getSymbolsReferencedByFile(size_t ix) {
+        ENFORCE(this->symbolsReferencedByFile.size() == this->files.size(),
+                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files.size(),
+                symbolsReferencedByFile.size());
+        return this->symbolsReferencedByFile[ix];
+    }
+
     void reserve(size_t size) {
         this->files.reserve(size);
+        this->symbolsReferencedByFile.reserve(size);
     }
 
     size_t size() const {
@@ -214,6 +225,10 @@ public:
         FileRef ref(this->files.size());
         this->fileRefByPath[file->path()] = ref;
         this->files.emplace_back(std::move(file));
+        this->symbolsReferencedByFile.emplace_back();
+        ENFORCE(this->symbolsReferencedByFile.size() == this->files.size(),
+                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files.size(),
+                symbolsReferencedByFile.size());
         return ref;
     }
 
@@ -225,6 +240,7 @@ public:
     void initEmpty() {
         // First file is used to indicate absence of a file
         this->files.emplace_back();
+        this->symbolsReferencedByFile.emplace_back();
     }
 
     absl::Span<const std::shared_ptr<File>> span() const {
@@ -530,6 +546,10 @@ public:
     std::unique_ptr<LocalSymbolTableHashes> hash() const;
     absl::Span<const std::shared_ptr<File>> getFiles() const {
         return this->files->span();
+    }
+
+    std::shared_ptr<FileTable> getFileTable() const {
+        return this->files;
     }
 
     // Contains a string to be used as the base of the error URL.

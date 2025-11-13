@@ -436,6 +436,42 @@ void untrackPackageReferences(core::packages::PackageDB &nonConstPackageDB, absl
     }
 }
 
+void untrackSymbolReferences(core::GlobalState &nonConstGs, absl::Span<ast::ParsedFile> filesSpan) {
+    const core::GlobalState &gs = nonConstGs;
+    std::shared_ptr<core::FileTable> fileTable = nonConstGs.getFileTable();
+    for (auto &parsedFile : filesSpan) {
+        // TODO(neil): we can skip this loop on the slow path since the package references sets will be
+        // empty
+        auto file = parsedFile.file;
+        if (fileTable->getSymbolsReferencedByFile(file.id()).size() == 0) {
+            continue;
+        }
+        for (auto &symbol : fileTable->getSymbolsReferencedByFile(file.id())) {
+            bool deletedFile = false;
+            if (symbol.isClassOrModule()) {
+                auto &files = symbol.asClassOrModuleRef().data(nonConstGs)->referencingFiles;
+                auto it = files.find(file);
+                if (it != files.end()) {
+                    files.erase(it);
+                    deletedFile = true;
+                }
+            } else if (symbol.isFieldOrStaticField()) {
+                auto &files = symbol.asFieldRef().data(nonConstGs)->referencingFiles;
+                auto it = files.find(file);
+                if (it != files.end()) {
+                    files.erase(it);
+                    deletedFile = true;
+                }
+            } else {
+                ENFORCE(false);
+                continue;
+            }
+            ENFORCE(deletedFile, "{} is in symbolsReferencedByFile for {} but not file is not in referencingFiles",
+                    symbol.show(gs), file.data(gs).path());
+        }
+        fileTable->getSymbolsReferencedByFile(file.id()).clear();
+    }
+}
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
@@ -478,6 +514,7 @@ public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> packageReferences;
+    UnorderedSet<core::SymbolRef> symbolsReferenced;
 
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
@@ -517,6 +554,8 @@ public:
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
+
+        symbolsReferenced.insert(litSymbol);
 
         auto loc = litSymbol.loc(ctx);
 
@@ -770,11 +809,13 @@ public:
         }
     }
 
-    static vector<ast::ParsedFile> run(const core::GlobalState &gs, core::packages::PackageDB &nonConstPackageDB,
-                                       WorkerPool &workers, vector<ast::ParsedFile> files) {
-        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<std::pair<
-            core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
-            files.size());
+    static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
+                                       vector<ast::ParsedFile> files) {
+        const core::GlobalState &gs = nonConstGs;
+        core::packages::PackageDB &nonConstPackageDB = nonConstGs.packageDB();
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<
+            std::tuple<core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
+                       UnorderedSet<core::SymbolRef>>>>>(files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto filesSpan = absl::MakeSpan(files);
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(filesSpan.size());
@@ -804,7 +845,8 @@ public:
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
-                resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
+                resultq->push(make_tuple(f.file, std::move(pass.packageReferences), std::move(pass.symbolsReferenced)),
+                              1);
             }
             barrier.DecrementCount();
         });
@@ -815,21 +857,39 @@ public:
                 untrackPackageReferences(nonConstPackageDB, filesSpan);
             }
 
-            std::optional<std::pair<core::FileRef,
-                                    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
+            {
+                Timer timeit(gs.tracer(), "visibility_checker.untrackSymbolReferences");
+                untrackSymbolReferences(nonConstGs, filesSpan);
+            }
+
+            std::optional<std::tuple<core::FileRef,
+                                     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
+                                     UnorderedSet<core::SymbolRef>>>
                 threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem() && threadResult.has_value()) {
-                    auto file = threadResult.value().first;
+                    auto file = std::get<0>(threadResult.value());
                     auto pkgName = gs.packageDB().getPackageNameForFile(file);
                     if (!pkgName.exists()) {
                         continue;
                     }
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
-                    for (auto [p, packageReferenceInfo] : threadResult.value().second) {
+                    for (auto [p, packageReferenceInfo] : std::get<1>(threadResult.value())) {
                         nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
+                    }
+
+                    for (auto symbol : std::get<2>(threadResult.value())) {
+                        if (symbol.isClassOrModule()) {
+                            symbol.asClassOrModuleRef().data(nonConstGs)->referencingFiles.insert(file);
+                        } else if (symbol.isFieldOrStaticField()) {
+                            symbol.asFieldRef().data(nonConstGs)->referencingFiles.insert(file);
+                        } else {
+                            ENFORCE(false);
+                            continue;
+                        }
+                        nonConstGs.getFileTable()->getSymbolsReferencedByFile(file.id()).insert(symbol);
                     }
                 }
             }
@@ -851,7 +911,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             PropagateVisibility::run(gs, f);
         }
     }
-    auto result = VisibilityCheckerPass::run(gs, gs.packageDB(), workers, std::move(files));
+    auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
         for (auto package : gs.packageDB().packages()) {
