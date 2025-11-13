@@ -532,6 +532,25 @@ public:
         return this->files->span();
     }
 
+    // Which symbols does this file reference?
+    // NOTE: this is currently only valid in --gen-packages mode
+    const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(size_t ix) const {
+        ENFORCE(packageDB().genPackages());
+        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
+                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
+                symbolsReferencedByFile.size());
+        ENFORCE(ix < symbolsReferencedByFile.size());
+        return this->symbolsReferencedByFile[ix];
+    }
+
+    void setSymbolsReferencedByFile(size_t ix, UnorderedSet<core::SymbolRef> &referencedSymbols) {
+        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
+                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
+                symbolsReferencedByFile.size());
+        ENFORCE(ix < symbolsReferencedByFile.size());
+        this->symbolsReferencedByFile[ix].swap(referencedSymbols);
+    }
+
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
     std::string errorUrlBase;
@@ -613,6 +632,7 @@ private:
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
+    std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
     bool wasNameTableModified_ = false;
 
     core::packages::PackageDB packageDB_;

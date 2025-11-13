@@ -463,6 +463,7 @@ public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> packageReferences;
+    UnorderedSet<core::SymbolRef> symbolsReferenced;
 
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
@@ -502,6 +503,8 @@ public:
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
+
+        symbolsReferenced.insert(litSymbol);
 
         auto loc = litSymbol.loc(ctx);
 
@@ -755,11 +758,13 @@ public:
         }
     }
 
-    static vector<ast::ParsedFile> run(const core::GlobalState &gs, core::packages::PackageDB &nonConstPackageDB,
-                                       WorkerPool &workers, vector<ast::ParsedFile> files) {
-        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<std::pair<
-            core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
-            files.size());
+    static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
+                                       vector<ast::ParsedFile> files) {
+        const core::GlobalState &gs = nonConstGs;
+        core::packages::PackageDB &nonConstPackageDB = nonConstGs.packageDB();
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<
+            std::tuple<core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
+                       UnorderedSet<core::SymbolRef>>>>>(files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto filesSpan = absl::MakeSpan(files);
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(filesSpan.size());
@@ -789,30 +794,37 @@ public:
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
-                resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
+                resultq->push(make_tuple(f.file, std::move(pass.packageReferences), std::move(pass.symbolsReferenced)),
+                              1);
             }
             barrier.DecrementCount();
         });
 
         if (gs.packageDB().genPackages()) {
-            std::optional<std::pair<core::FileRef,
-                                    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
+            std::optional<std::tuple<core::FileRef,
+                                     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
+                                     UnorderedSet<core::SymbolRef>>>
                 threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem() && threadResult.has_value()) {
-                    auto file = threadResult.value().first;
+                    auto file = std::get<0>(threadResult.value());
                     auto pkgName = gs.packageDB().getPackageNameForFile(file);
                     if (!pkgName.exists()) {
                         continue;
                     }
+
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
                     vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
-                    for (auto &[packageName, packageReferenceInfo] : threadResult.value().second) {
+                    auto referencedPackages = std::get<1>(threadResult.value());
+                    for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
                         references.emplace_back(make_pair(packageName, packageReferenceInfo));
                     }
                     nonConstPackageInfo->trackPackageReferences(file, references);
+
+                    auto referencedSymbols = std::get<2>(threadResult.value());
+                    nonConstGs.setSymbolsReferencedByFile(file.id(), referencedSymbols);
                 }
             }
         }
@@ -833,7 +845,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             PropagateVisibility::run(gs, f);
         }
     }
-    auto result = VisibilityCheckerPass::run(gs, gs.packageDB(), workers, std::move(files));
+    auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
         Timer timeit(gs.tracer(), "visibility_checker.run.missing_imports_autocorrect");
