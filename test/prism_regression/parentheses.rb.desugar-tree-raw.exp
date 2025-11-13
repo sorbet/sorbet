@@ -21,5 +21,15 @@ ClassDef{
         Literal{ value = 2 }
       ]
     }
+
+    MethodDef{
+      flags = {self}
+      name = <U test><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
   ]
 }

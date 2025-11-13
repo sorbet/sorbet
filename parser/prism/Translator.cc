@@ -3104,9 +3104,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 return make_node_with_expr<parser::Begin>(MK::Nil(location), location, NodeVec{});
             }
 
-            auto inlineIfSingle = false;
-            // Override the begin node location to be the parentheses location instead of the statements location
-            return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle, location);
+            if (PM_NODE_TYPE_P(stmtsNode, PM_STATEMENTS_NODE)) {
+                auto inlineIfSingle = false;
+                // Override the begin node location to be the parentheses location instead of the statements location
+                return translateStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle, location);
+            } else {
+                return translate(stmtsNode);
+            }
         }
         case PM_PRE_EXECUTION_NODE: {
             auto preExecutionNode = down_cast<pm_pre_execution_node>(node);
