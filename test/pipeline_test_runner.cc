@@ -146,9 +146,13 @@ public:
                        shared_ptr<core::ErrorCollector> &errorCollector)
         : test(test), errorQueue(errorQueue), errorCollector(errorCollector){};
 
+    bool hasExpectation(string_view expectationType) {
+        return test.expectations.contains(expectationType);
+    }
+
     void addObserved(const core::GlobalState &gs, string_view expectationType, std::function<string()> mkExp,
                      bool addNewline = true) {
-        if (test.expectations.contains(expectationType)) {
+        if (hasExpectation(expectationType)) {
             got[expectationType].append(mkExp());
             if (addNewline) {
                 got[expectationType].append("\n");
@@ -370,6 +374,11 @@ void validatePackagedFiles(core::GlobalState &gs, unique_ptr<WorkerPool> &worker
 
     // Packager runs over all trees.
     packager::Packager::validatePackagedFiles(gs, *workers, trees);
+    if (handler.hasExpectation("package-tree")) {
+        fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+            return lhs.file.data(gs).path() < rhs.file.data(gs).path();
+        });
+    }
     for (auto &tree : trees) {
         handler.addObserved(gs, "package-tree", [&]() {
             return fmt::format("# -- {} --\n{}", tree.file.data(gs).path(), tree.tree.toString(gs));
