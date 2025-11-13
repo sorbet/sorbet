@@ -914,14 +914,54 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
     auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
+        Timer timeit(gs.tracer(), "build_autocorrect");
+        UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> toExport;
+        for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
+            auto sym = core::ClassOrModuleRef(gs, i);
+            auto data = sym.data(gs);
+            auto owningPackage = data->package;
+            if (!owningPackage.exists() || data->flags.isExported) {
+                continue;
+            }
+            for (auto &f : data->referencingFiles) {
+                auto packageForF = gs.packageDB().getPackageNameForFile(f);
+                if (packageForF != owningPackage && !gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+                    toExport[owningPackage].push_back(sym);
+                    break;
+                }
+            }
+        }
+        for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
+            auto sym = core::FieldRef(gs, i);
+            auto data = sym.data(gs);
+            auto owningPackage = data->owner.data(gs)->package;
+            if (!owningPackage.exists() || data->flags.isExported) {
+                continue;
+            }
+            for (auto &f : data->referencingFiles) {
+                auto packageForF = gs.packageDB().getPackageNameForFile(f);
+                if (packageForF != owningPackage && !gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+                    toExport[owningPackage].push_back(sym);
+                    break;
+                }
+            }
+        }
         for (auto package : gs.packageDB().packages()) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
-            if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
+
+            if (auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs)) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
-                    e.addAutocorrect(move(autocorrect.value()));
+                    e.addAutocorrect(move(importsAutocorrect.value()));
                     // TODO(neil): we should also delete imports that are unused but have a modularity error here
+                }
+            }
+
+            if (auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package])) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{} is missing exports", pkgInfo.show(gs));
+                    e.addAutocorrect(move(exportsAutocorrect.value()));
                 }
             }
         }
