@@ -421,6 +421,21 @@ const FileType fileTypeFromCtx(const core::Context ctx) {
     }
 }
 
+void untrackPackageReferences(core::packages::PackageDB &nonConstPackageDB, absl::Span<ast::ParsedFile> filesSpan) {
+    const core::packages::PackageDB &packageDB = nonConstPackageDB;
+    for (auto &parsedFile : filesSpan) {
+        // TODO(neil): we can skip this loop on the slow path since the package references sets will be
+        // empty
+        auto file = parsedFile.file;
+        auto pkgName = packageDB.getPackageNameForFile(file);
+        if (!pkgName.exists()) {
+            continue;
+        }
+        auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
+        nonConstPackageInfo->untrackPackageReferencesFor(file);
+    }
+}
+
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
@@ -795,15 +810,9 @@ public:
         });
 
         if (gs.packageDB().genPackages()) {
-            for (auto &parsedFile : filesSpan) {
-                // TODO(neil): we can skip this loop on the slow path since the package references sets will be empty
-                auto file = parsedFile.file;
-                auto pkgName = gs.packageDB().getPackageNameForFile(file);
-                if (!pkgName.exists()) {
-                    continue;
-                }
-                auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
-                nonConstPackageInfo->untrackPackageReferencesFor(file);
+            {
+                Timer timeit(gs.tracer(), "visibility_checker.untrackPackageReferences");
+                untrackPackageReferences(nonConstPackageDB, filesSpan);
             }
 
             std::optional<std::pair<core::FileRef,
