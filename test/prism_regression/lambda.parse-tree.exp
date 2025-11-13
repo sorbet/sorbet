@@ -60,41 +60,27 @@ Begin {
         name = <U optional_param>
       }
     }
-    Send {
-      receiver = Block {
-        send = Send {
-          receiver = Const {
-            scope = NULL
-            name = <C <U Kernel>>
-          }
-          method = <U lambda>
-          args = [
-          ]
-        }
-        params = NULL
-        body = Integer {
-          val = "456"
-        }
-      }
-      method = <U call>
-      args = [
-      ]
-    }
     Block {
       send = Send {
-        receiver = NULL
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
         method = <U lambda>
         args = [
         ]
       }
       params = NULL
       body = Integer {
-        val = "789"
+        val = "456"
       }
     }
     Block {
       send = Send {
-        receiver = NULL
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
         method = <U lambda>
         args = [
         ]
@@ -108,6 +94,62 @@ Begin {
       }
       body = LVar {
         name = <U param>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
+      }
+      params = Params {
+        params = [
+          OptParam {
+            name = <U optional_param>
+            default_ = Integer {
+              val = "123"
+            }
+          }
+        ]
+      }
+      body = LVar {
+        name = <U optional_param>
+      }
+    }
+    Send {
+      receiver = Block {
+        send = Send {
+          receiver = Const {
+            scope = NULL
+            name = <C <U Kernel>>
+          }
+          method = <U lambda>
+          args = [
+          ]
+        }
+        params = NULL
+        body = Integer {
+          val = "890"
+        }
+      }
+      method = <U chained_method_call>
+      args = [
+      ]
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U lambda>
+        args = [
+        ]
+      }
+      params = NULL
+      body = Integer {
+        val = "123"
       }
     }
     Send {

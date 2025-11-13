@@ -1,0 +1,109 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U multi_assign_parens_not_in_location><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $2>
+                }
+                rhs = Array{
+                  elems = [
+                    Literal{ value = 1 }
+                    Literal{ value = 2 }
+                  ]
+                }
+              }
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $3>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <expand-splat>>
+                  block = nullptr
+                  pos_args = 3
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <assignTemp>> $2>
+                    }
+                    Literal{ value = 2 }
+                    Literal{ value = 0 }
+                  ]
+                }
+              }
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U a>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $3>
+                  }
+                  fun = <U []>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = 0 }
+                  ]
+                }
+              }
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U b>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $3>
+                  }
+                  fun = <U []>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = 1 }
+                  ]
+                }
+              }
+            ],
+            expr = UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $2>
+            }
+          }
+        ],
+        expr = UnresolvedConstantLit{
+          cnst = <C <U FILLER_LINE>>
+          scope = EmptyTree
+        }
+      }
+    }
+  ]
+}

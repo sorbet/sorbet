@@ -229,6 +229,11 @@ private:
     Translator enterBlockContext() const;
     Translator enterModuleContext() const;
     Translator enterClassContext() const;
+
+    template <typename PrismNode>
+    std::pair<core::LocOffsets, core::LocOffsets> computeSendLoc(PrismNode *callNode, pm_node_t *blockNode,
+                                                                 pm_node_t *receiver, core::LocOffsets initialLoc,
+                                                                 const absl::Span<pm_node_t *> prismArgs);
 };
 
 } // namespace sorbet::parser::Prism
