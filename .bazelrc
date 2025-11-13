@@ -9,15 +9,13 @@ startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the d
 common:build --define absl=1
 common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 
-##
-##  Custom toolchain (bazel-contrib/toolchains_llvm).
-##
-# Not needed after https://github.com/bazelbuild/bazel/issues/7260 is closed
-build --incompatible_enable_cc_toolchain_resolution
-# For macOS only, needed for Bazel versions before 7.
-# Without this, one can use `--linkopt='-undefined dynamic_lookup'`.
-# This feature is intentionally not supported on macOS.
-build --features=-supports_dynamic_linker
+# With rules_cc 0.2.14 and Abseil 20240722.0, Abseil fails to build
+# if module_maps are enabled:
+# $ ./bazel build @@com_google_absl//absl/types:bad_variant_access --config=dbg
+# ERROR <..> undeclared inclusion(s) in rule <..>
+#  'bazel-out/k8-dbg/bin/external/com_google_absl/absl/base/core_headers.cppmap'
+#  <other cppmap files>
+build --host_features=-module_maps --features=-module_maps
 
 # Port over all dependencies to use Bzlmod. Until then, disable it,
 # as enabling it pulls in the module version of dependencies such
@@ -73,13 +71,6 @@ build --cxxopt=-Wno-unqualified-std-cast-call --host_cxxopt=-Wno-unqualified-std
 build:dbg --copt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
-# With rules_cc 0.2.14 and Abseil 20240722.0, Abseil fails to build
-# if module_maps are enabled:
-# $ ./bazel build @@com_google_absl//absl/types:bad_variant_access --config=dbg
-# ERROR <..> undeclared inclusion(s) in rule <..>
-#  'bazel-out/k8-dbg/bin/external/com_google_absl/absl/base/core_headers.cppmap'
-#  <other cppmap files>
-build:dbg --host_features=-module_maps --features=-module_maps
 
 build:rubydbg --copt=-DRUBY_DEBUG --copt=-DVM_CHECK_MODE=1 --copt=-DTRANSIENT_HEAP_CHECK_MODE --copt=-DRGENGC_CHECK_MODE --copt=-DENC_DEBUG
 
