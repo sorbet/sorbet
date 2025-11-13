@@ -244,7 +244,7 @@ template <typename Visitor> void walkPrismAST(const pm_node_t *node, Visitor &&v
     // Non-capturing lambda that can convert to function pointer for the `callback` pointer
     auto callback = [](const pm_node_t *node, void *data) -> bool {
         auto visitor = *static_cast<Visitor *>(data);
-        return visitor(node);
+        return std::invoke(visitor, node);
     };
 
     // Pass the visitor lambda as the opaque `data` pointer
