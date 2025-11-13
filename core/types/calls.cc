@@ -1789,6 +1789,13 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
     return true;
 }
 
+bool isBoolean(TypePtr type) {
+    auto orType = cast_type<OrType>(type);
+    return orType != nullptr &&
+           ((orType->left == core::Types::trueClass() && orType->right == core::Types::falseClass()) ||
+            (orType->left == core::Types::falseClass() && orType->right == core::Types::trueClass()));
+}
+
 DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, core::Loc errLoc,
                                const TypePtr &wrapped) {
     if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
@@ -1809,6 +1816,8 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                 e.addErrorNote("It looks like you're trying to pattern match on a generic, "
                                "which doesn't work at runtime");
                 e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
+            } else if (isBoolean(wrapped)) {
+                e.replaceWith("Replace T::Boolean with `true, false`", args.callLoc(), "true, false");
             }
         } else if (auto appliedType = cast_type<AppliedType>(wrapped)) {
             // For T.class_of(Foo), we'll suggest replacing it with the attached class (Foo).
