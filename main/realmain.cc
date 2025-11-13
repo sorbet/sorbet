@@ -591,8 +591,7 @@ int realmain(int argc, char *argv[]) {
             auto foundHashes = nullptr;
             auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
-            pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), opts, *workers);
-            pipeline::setPackageForSourceFiles(*gs, inputFilesSpan, opts);
+            pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts, *workers);
         }
 
         // We disable tree leaking if we're targeting emscripten, or if we're typechecking in package dependency order.

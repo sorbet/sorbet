@@ -347,13 +347,14 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
 }
 
 void buildPackageDB(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
-                    ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
+                    absl::Span<core::FileRef> nonPackageFiles, ExpectationHandler &handler,
+                    vector<shared_ptr<RangeAssertion>> &assertions) {
     if (!gs.packageDB().enabled()) {
         return;
     }
 
     // Packager runs over all trees.
-    packager::Packager::buildPackageDB(gs, *workers, trees);
+    packager::Packager::buildPackageDB(gs, *workers, trees, nonPackageFiles);
     for (auto &tree : trees) {
         handler.addObserved(gs, "package-tree", [&]() {
             return fmt::format("# -- {} --\n{}", tree.file.data(gs).path(), tree.tree.toString(gs));
@@ -455,7 +456,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     auto nonPackageTrees = index(*gs, filesSpan, handler, test);
     name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
-    buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
+    buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));

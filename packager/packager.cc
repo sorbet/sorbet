@@ -1131,35 +1131,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
     }
 }
 
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
-    vector<pair<core::FileRef, MangledName>> mapping;
-    mapping.reserve(files.size());
-
-    {
-        auto &db = gs.packageDB();
-        for (auto fref : files) {
-            auto pkg = db.getPackageNameForFile(fref);
-            if (pkg.exists()) {
-                continue;
-            }
-
-            pkg = db.findPackageByPath(gs, fref);
-            if (!pkg.exists()) {
-                continue;
-            }
-
-            mapping.emplace_back(fref, pkg);
-        }
-    }
-
-    {
-        auto packages = gs.unfreezePackages();
-        for (auto [file, package] : mapping) {
-            packages.db.setPackageNameForFile(file, package);
-        }
-    }
-}
-
 namespace {
 
 enum class PackagerMode {
@@ -1308,8 +1279,23 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     return files;
 }
 
-void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> packageFiles) {
+void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> packageFiles,
+                              absl::Span<core::FileRef> nonPackageFiles) {
     packageRunCore<PackagerMode::PackagesOnly>(gs, workers, packageFiles);
+
+    for (auto fref : nonPackageFiles) {
+        auto pkg = gs.packageDB().getPackageNameForFile(fref);
+        if (pkg.exists()) {
+            continue;
+        }
+
+        pkg = gs.packageDB().findPackageByPath(gs, fref);
+        if (!pkg.exists()) {
+            continue;
+        }
+
+        gs.packageDB().setPackageNameForFile(fref, pkg);
+    }
 }
 
 void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {

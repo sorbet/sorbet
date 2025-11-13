@@ -497,8 +497,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         return;
                     }
 
-                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers);
-                    pipeline::setPackageForSourceFiles(*this->gs, workspaceFilesSpan, this->config->opts);
+                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), workspaceFilesSpan, this->config->opts,
+                                             workers);
                 }
 
                 {

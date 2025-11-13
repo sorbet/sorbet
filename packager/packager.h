@@ -47,13 +47,11 @@ public:
 
     // Build the packageDB only. This requires that the `files` span only contains `__package.rb` files that have been
     // through the indexer and namer.
-    static void buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);
+    static void buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files,
+                               absl::Span<core::FileRef> nonPackageFiles);
 
-    // Validate packaged files. This requires that hte `files` span does not contain any `__package.rb` files.
+    // Validate packaged files. This requires that the `files` span does not contain any `__package.rb` files.
     static void validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);
-
-    // For each file, set its package name.
-    static void setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files);
 
     static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
 
