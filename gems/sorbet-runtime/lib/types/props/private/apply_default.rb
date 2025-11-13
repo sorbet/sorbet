@@ -27,10 +27,10 @@ module T::Props
       sig { abstract.params(instance: T.all(T::Props::Optional, Object)).void.checked(:never) }
       def set_default(instance); end
 
-      NO_CLONE_TYPES = T.let([TrueClass, FalseClass, NilClass, Symbol, Numeric, T::Enum].freeze, T::Array[Module])
+      NO_CLONE_TYPES = T.let([TrueClass, FalseClass, NilClass, Symbol, Numeric, T::Enum].freeze, T::Array[T::Module[T.anything]])
 
       # checked(:never) - Rules hash is expensive to check
-      sig { params(cls: Module, rules: T::Hash[Symbol, T.untyped]).returns(T.nilable(ApplyDefault)).checked(:never) }
+      sig { params(cls: T::Module[T.anything], rules: T::Hash[Symbol, T.untyped]).returns(T.nilable(ApplyDefault)).checked(:never) }
       def self.for(cls, rules)
         accessor_key = rules.fetch(:accessor_key)
         setter = rules.fetch(:setter_proc)
@@ -138,7 +138,7 @@ module T::Props
       # checked(:never) - We do this with `T.let` instead
       sig do
         params(
-          cls: Module,
+          cls: T::Module[T.anything],
           factory: T.any(Proc, Method),
           accessor_key: Symbol,
           setter_proc: SetterFactory::SetterProc,
@@ -147,7 +147,7 @@ module T::Props
         .checked(:never)
       end
       def initialize(cls, factory, accessor_key, setter_proc)
-        @class = T.let(cls, Module)
+        @class = T.let(cls, T::Module[T.anything])
         @factory = T.let(factory, T.any(Proc, Method))
         super(accessor_key, setter_proc)
       end

@@ -8,7 +8,8 @@ def example
   Integer
 end
 
-sig {returns(Module)}
+sig {returns(T::Module[T.anything])}
+#            ^^^^^^ error: Generic class without type arguments `Module`
 def example2
   Integer
 end

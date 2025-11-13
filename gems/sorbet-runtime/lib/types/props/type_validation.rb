@@ -20,9 +20,9 @@ module T::Props::TypeValidation
     sig do
       params(
         name: T.any(Symbol, String),
-        _cls: Module,
+        _cls: T::Module[T.anything],
         rules: T::Hash[Symbol, T.untyped],
-        type: T.any(T::Types::Base, Module)
+        type: T.any(T::Types::Base, T::Module[T.anything])
       )
       .void
       .checked(:never)

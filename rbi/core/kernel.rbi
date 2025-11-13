@@ -437,7 +437,7 @@ module Kernel
 
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T.self_type)
   end
@@ -536,7 +536,7 @@ module Kernel
 
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T::Boolean)
   end
@@ -544,7 +544,7 @@ module Kernel
 
   sig do
     params(
-        arg0: Module,
+      arg0: T::Module[T.anything],
     )
     .returns(T::Boolean)
   end

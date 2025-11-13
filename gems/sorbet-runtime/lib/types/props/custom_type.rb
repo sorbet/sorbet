@@ -50,7 +50,7 @@ module T::Props
     sig { abstract.params(scalar: T.untyped).returns(T.untyped).checked(:never) }
     def deserialize(scalar); end
 
-    sig { override.params(_base: Module).void }
+    sig { override.params(_base: T::Module[T.anything]).void }
     def self.included(_base)
       super
 

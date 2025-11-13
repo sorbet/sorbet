@@ -8,6 +8,7 @@ def example
 end
 
 sig {returns(Module)}
+#            ^^^^^^ error: Generic class without type arguments `Module`
 def example2
   Integer
 end

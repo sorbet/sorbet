@@ -14,7 +14,7 @@ def uri_parser
   URI::Parser
 end
 
-sig {returns(Module)}
+sig {returns(T::Module[T.anything])}
 def uri_regexp
   URI::REGEXP
 end

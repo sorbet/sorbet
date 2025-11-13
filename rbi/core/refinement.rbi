@@ -41,8 +41,8 @@ class Refinement < Object
   # Also aliased as: import_methods
   sig do
     params(
-      mod: Module,
-      rest: Module,
+      mod: T::Module[T.anything],
+      rest: T::Module[T.anything],
     )
     .returns(Refinement)
   end

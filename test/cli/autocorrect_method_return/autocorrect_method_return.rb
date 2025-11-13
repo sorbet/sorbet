@@ -12,7 +12,7 @@ def double_return
   return puts nil
 end
 
-sig {params(x: Module).returns(String)}
+sig {params(x: T::Module[T.anything]).returns(String)}
 def initialized_twice(x)
   if T.unsafe(nil)
     res = x.name

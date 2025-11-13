@@ -273,7 +273,7 @@ class T::Enum
 
   ### Private implementation ###
 
-  UNSET = T.let(Module.new.freeze, Module)
+  UNSET = T.let(Module.new.freeze, T::Module[T.anything])
   private_constant :UNSET
 
   sig { params(serialized_val: SerializedVal).void }

@@ -82,7 +82,7 @@ module FromHash
   end
 end
 
-sig { params(klass: T.all(Module, FromHash[T.anything])).void }
+sig { params(klass: T.all(T::Module[T.anything], FromHash[T.anything])).void }
 def module_lt_module(klass)
   if klass < Exportable
     T.reveal_type(klass) # error: `T.all(FromHash[T.anything], T::Module[Exportable])`
@@ -102,7 +102,7 @@ module HasClassMethods
   mixes_in_class_methods(ClassMethods)
 end
 
-sig { params(klass: T::Class[T.anything], mod: Module).void }
+sig { params(klass: T::Class[T.anything], mod: T::Module[T.anything]).void }
 def nothing_special_for_class_methods(klass, mod)
   if klass < HasClassMethods
     T.reveal_type(klass) # error: `T::Class[HasClassMethods]`

@@ -85,6 +85,8 @@ module ObjectSpace
   # is a lambda or method, make sure it can be called with a single argument.
   def self.define_finalizer(*_); end
 
+  ### TODO(jez) Can improve `each_object` typing with `T::Module` if we want
+
   # Calls the block once for each living, nonimmediate object in this Ruby
   # process. If *module* is specified, calls the block for only those classes or
   # modules that match (or are a subclass of) *module*. Returns the number of
@@ -119,8 +121,8 @@ module ObjectSpace
   sig {params(blk: T.proc.params(obj: BasicObject).void).returns(Integer)}
   sig {type_parameters(:Instance).params(mod: T::Class[T.type_parameter(:Instance)]).returns(T::Enumerator[T.type_parameter(:Instance)])}
   sig {type_parameters(:Instance).params(mod: T::Class[T.type_parameter(:Instance)], blk: T.proc.params(obj: T.type_parameter(:Instance)).void).returns(Integer)}
-  sig {params(mod: Module).returns(T::Enumerator[BasicObject])}
-  sig {params(mod: Module, blk: T.proc.params(obj: BasicObject).void).returns(Integer)}
+  sig {params(mod: T::Module[T.anything]).returns(T::Enumerator[BasicObject])}
+  sig {params(mod: T::Module[T.anything], blk: T.proc.params(obj: BasicObject).void).returns(Integer)}
   def self.each_object(mod=BasicObject, &blk)
   end
 

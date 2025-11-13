@@ -59,7 +59,10 @@ void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuild
             e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
         } else {
             auto numTypeArgs = klass.data(gs)->typeArity(gs);
-            auto arg = (klass == Symbols::Class() || klass == Symbols::T_Class()) ? "T.anything" : "T.untyped";
+            auto arg = ((klass == Symbols::Class() || klass == Symbols::T_Class()) ||
+                        (klass == Symbols::Module() || klass == Symbols::T_Module()))
+                           ? "T.anything"
+                           : "T.untyped";
             vector<string> untypeds;
             for (int i = 0; i < numTypeArgs; i++) {
                 untypeds.emplace_back(arg);

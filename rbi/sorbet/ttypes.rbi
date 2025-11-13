@@ -42,7 +42,7 @@ class T::Types::Base
 end
 
 class T::Types::Simple < T::Types::Base
-  sig { params(raw_type: Module).void }
+  sig { params(raw_type: T::Module[T.anything]).void }
   def initialize(raw_type); end
 
   sig { override.returns(T.nilable(String)) }
@@ -51,7 +51,7 @@ class T::Types::Simple < T::Types::Base
   sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
-  sig { returns(Module) }
+  sig { returns(T::Module[T.anything]) }
   def raw_type; end
 end
 
@@ -87,7 +87,7 @@ class T::Types::Intersection < T::Types::Base
 end
 
 class T::Types::ClassOf < T::Types::Base
-  sig { params(type: Module).void }
+  sig { params(type: T::Module[T.anything]).void }
   def initialize(type); end
 
   sig { override.returns(String) }
@@ -99,7 +99,7 @@ class T::Types::ClassOf < T::Types::Base
   def subtype_of_single?(other); end
   def describe_obj(obj); end
 
-  sig { returns(Module) }
+  sig { returns(T::Module[T.anything]) }
   def type; end
 
   def [](*types); end
@@ -276,7 +276,7 @@ class T::Types::TypedArray < T::Types::TypedEnumerable
   sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
-  sig { override.returns(Module) }
+  sig { override.returns(T::Module[T.anything]) }
   def underlying_class; end
 
   def new(...); end
@@ -298,7 +298,7 @@ class T::Types::TypedHash < T::Types::TypedEnumerable
   sig { returns(T::Types::Base) }
   def values; end
 
-  sig { override.returns(Module) }
+  sig { override.returns(T::Module[T.anything]) }
   def underlying_class; end
 
   def new(...); end
@@ -319,7 +319,7 @@ class T::Types::TypedEnumerable < T::Types::Base
   sig { overridable.returns(T::Types::Base) }
   def type; end
 
-  sig { overridable.returns(Module) }
+  sig { overridable.returns(T::Module[T.anything]) }
   def underlying_class; end
 end
 
@@ -334,7 +334,7 @@ class T::Types::TypedSet < T::Types::TypedEnumerable
 
   def new(...); end
 
-  sig { override.returns(Module) }
+  sig { override.returns(T::Module[T.anything]) }
   def underlying_class; end
 end
 
@@ -349,7 +349,7 @@ class T::Types::TypedRange < T::Types::TypedEnumerable
 
   def new(...); end
 
-  sig { override.returns(Module) }
+  sig { override.returns(T::Module[T.anything]) }
   def underlying_class; end
 end
 
@@ -364,7 +364,7 @@ class T::Types::TypedEnumerator < T::Types::TypedEnumerable
 
   def new(...); end
 
-  sig { override.returns(Module) }
+  sig { override.returns(T::Module[T.anything]) }
   def underlying_class; end
 end
 
@@ -379,7 +379,7 @@ class T::Types::TypedEnumeratorLazy < T::Types::TypedEnumerable
 
   def new(...); end
 
-  sig { override.returns(Module) }
+  sig { override.returns(T::Module[T.anything]) }
   def underlying_class; end
 end
 
@@ -394,7 +394,7 @@ class T::Types::TypedEnumeratorChain < T::Types::TypedEnumerable
 
   def new(...); end
 
-  sig { override.returns(Module) }
+  sig { override.returns(T::Module[T.anything]) }
   def underlying_class; end
 end
 

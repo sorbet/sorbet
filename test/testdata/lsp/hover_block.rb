@@ -20,7 +20,7 @@ end
 
 class Parent; end
 
-sig {params(classes: T::Array[Module]).void}
+sig {params(classes: T::Array[T::Module[T.anything]]).void}
 def example(classes)
   thing =
     if classes.empty?
