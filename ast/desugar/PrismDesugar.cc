@@ -56,6 +56,46 @@ core::NameRef blockParam2Name(DesugarContext dctx, const BlockParam &blockParam)
     return blkIdent->name;
 }
 
+// Get the num from the name of the Node if it's a LVar.
+// Return -1 otherwise.
+int numparamNum(DesugarContext dctx, parser::Node *decl) {
+    if (auto *lvar = parser::NodeWithExpr::cast_node<parser::LVar>(decl)) {
+        auto name_str = lvar->name.show(dctx.ctx);
+        return name_str[1] - '0';
+    }
+    return -1;
+}
+
+// Get the highest numparams used in `decls`
+// Return 0 if the list of declarations is empty.
+int numparamMax(DesugarContext dctx, parser::NodeVec *decls) {
+    int max = 0;
+    for (auto &decl : *decls) {
+        auto num = numparamNum(dctx, decl.get());
+        if (num > max) {
+            max = num;
+        }
+    }
+    return max;
+}
+
+// Create a local variable from the first declaration for the name "_num" from all the `decls` if any.
+// Return a dummy variable if no declaration is found for `num`.
+ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls) {
+    for (auto &decl : *decls) {
+        if (parser::NodeWithExpr::isa_node<parser::LVar>(decl.get())) {
+            if (numparamNum(dctx, decl.get()) == num) {
+                ENFORCE(decl != nullptr && decl->hasDesugaredExpr());
+                return decl->takeDesugaredExpr();
+            }
+        } else {
+            ENFORCE(false, "NumParams declaring node is not a LVar.");
+        }
+    }
+    core::NameRef name = dctx.ctx.state.enterNameUTF8("_" + to_string(num));
+    return MK::Local(core::LocOffsets::none(), name);
+}
+
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what);
 
 pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext dctx, parser::Node *anyParamsNode) {
@@ -89,9 +129,15 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
             }
         }
     } else if (auto *numParamsNode = parser::NodeWithExpr::cast_node<parser::NumParams>(anyParamsNode)) {
-        // Register any numbered parameters (`_1`, `_2`, ..., `_9`)
-        for (const auto &numberedParam : numParamsNode->decls) {
-            params.emplace_back(numberedParam->takeDesugaredExpr());
+        // The parse tree only contains declarations for numbered parameters that were actually used in the block or
+        // lambda body, listed in the order they were encountered in the body. The desugar tree always contains all
+        // params (`_1, _2, ..., _9`) in numbered order.
+        auto max = numparamMax(dctx, &numParamsNode->decls);
+
+        // The block uses numbered parameters like `_1` or `_9` so we add them as parameters
+        // from _1 to the highest number used.
+        for (int i = 1; i <= max; i++) {
+            params.emplace_back(numparamTree(dctx, i, &numParamsNode->decls));
         }
     } else if (anyParamsNode == nullptr) {
         // do nothing
