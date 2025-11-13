@@ -933,66 +933,21 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
 }
 
 // packager intentionally runs outside of rewriter so that its output does not get cached.
-// TODO(jez) How much of this still needs to be outside of rewriter?
-void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-             WorkerPool &workers) {
+void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, absl::Span<core::FileRef> nonPackageFiles,
+                    const options::Options &opts, WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.cacheSensitiveOptions.sorbetPackages) {
         return;
     }
 
     try {
-        packager::Packager::run(gs, workers, what);
+        packager::Packager::buildPackageDB(gs, workers, what, nonPackageFiles);
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
         }
-    } catch (SorbetException &) {
-        Exception::failInFuzzer();
-        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
-            e.setHeader("Exception packaging (backtrace is above)");
-        }
-    }
-#endif
-}
-
-// packager intentionally runs outside of rewriter so that its output does not get cached.
-void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                    WorkerPool &workers) {
-#ifndef SORBET_REALMAIN_MIN
-    if (!opts.cacheSensitiveOptions.sorbetPackages) {
-        return;
-    }
-
-    try {
-        packager::Packager::buildPackageDB(gs, workers, what);
-        if (opts.print.Packager.enabled) {
-            for (auto &f : what) {
-                opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
-                opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
-            }
-        }
-    } catch (SorbetException &) {
-        Exception::failInFuzzer();
-        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
-            e.setHeader("Exception packaging (backtrace is above)");
-        }
-    }
-#endif
-}
-
-// packager intentionally runs outside of rewriter so that its output does not get cached.
-void setPackageForSourceFiles(core::GlobalState &gs, absl::Span<core::FileRef> packageFiles,
-                              const options::Options &opts) {
-#ifndef SORBET_REALMAIN_MIN
-    if (!opts.cacheSensitiveOptions.sorbetPackages) {
-        return;
-    }
-
-    try {
-        packager::Packager::setPackageNameOnFiles(gs, packageFiles);
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {

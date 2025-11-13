@@ -70,7 +70,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     auto indexed = realmain::pipeline::index(*gs, absl::MakeSpan(inputFiles), *opts, *workers, kvstore);
     ENFORCE(indexed.hasResult(), "Cancellation is not supported with fuzzing");
-    // We don't run this fuzzer with any packager options, so we can skip pipeline::package()
+    // We don't run this fuzzer with any packager options, so we can skip the packager
     auto foundHashes = nullptr;
     indexed =
         move(realmain::pipeline::nameAndResolve(*gs, move(indexed.result()), *opts, *workers, foundHashes).result());

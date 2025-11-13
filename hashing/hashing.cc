@@ -76,7 +76,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, core::G
     vector<ast::ParsedFile> single;
     single.emplace_back(move(file));
 
-    // We run computeFileHashForAST with the empty set of options which means we can skip calling pipeline::package()
+    // We run computeFileHashForAST with the empty set of options which means we can skip running packager
 
     auto workers = WorkerPool::create(0, lgs.tracer());
     core::FoundDefHashes foundHashes; // out parameter

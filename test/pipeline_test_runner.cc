@@ -146,9 +146,13 @@ public:
                        shared_ptr<core::ErrorCollector> &errorCollector)
         : test(test), errorQueue(errorQueue), errorCollector(errorCollector){};
 
+    bool hasExpectation(string_view expectationType) {
+        return test.expectations.contains(expectationType);
+    }
+
     void addObserved(const core::GlobalState &gs, string_view expectationType, std::function<string()> mkExp,
                      bool addNewline = true) {
-        if (test.expectations.contains(expectationType)) {
+        if (hasExpectation(expectationType)) {
             got[expectationType].append(mkExp());
             if (addNewline) {
                 got[expectationType].append("\n");
@@ -346,14 +350,35 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
     return trees;
 }
 
-void package(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
-             ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
+void buildPackageDB(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
+                    absl::Span<core::FileRef> nonPackageFiles, ExpectationHandler &handler,
+                    vector<shared_ptr<RangeAssertion>> &assertions) {
     if (!gs.packageDB().enabled()) {
         return;
     }
 
     // Packager runs over all trees.
-    packager::Packager::run(gs, *workers, trees);
+    packager::Packager::buildPackageDB(gs, *workers, trees, nonPackageFiles);
+    for (auto &tree : trees) {
+        handler.addObserved(gs, "package-tree", [&]() {
+            return fmt::format("# -- {} --\n{}", tree.file.data(gs).path(), tree.tree.toString(gs));
+        });
+    }
+}
+
+void validatePackagedFiles(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
+                           ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
+    if (!gs.packageDB().enabled()) {
+        return;
+    }
+
+    // Packager runs over all trees.
+    packager::Packager::validatePackagedFiles(gs, *workers, trees);
+    if (handler.hasExpectation("package-tree")) {
+        fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+            return lhs.file.data(gs).path() < rhs.file.data(gs).path();
+        });
+    }
     for (auto &tree : trees) {
         handler.addObserved(gs, "package-tree", [&]() {
             return fmt::format("# -- {} --\n{}", tree.file.data(gs).path(), tree.tree.toString(gs));
@@ -440,9 +465,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     auto nonPackageTrees = index(*gs, filesSpan, handler, test);
     name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
-    package(*gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
+    buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
-    package(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+    validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     for (auto &tree : trees) {

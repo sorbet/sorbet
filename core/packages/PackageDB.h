@@ -107,9 +107,8 @@ private:
     UnorderedSet<MangledName> packagesWithRelaxedChecks_;
     std::vector<core::NameRef> layers_;
 
-    // This vector is kept in sync with the size of the file table in the global state by
-    // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having
-    // no associated package.
+    // This vector is kept in sync with the size of the file table in the global state by `setPackageNameForFile`.
+    // A `FileRef` being out of bounds in this vector is treated as the file having no associated package.
     std::vector<MangledName> packageForFile_;
 
     UnorderedMap<MangledName, std::unique_ptr<packages::PackageInfo>> packages_;
