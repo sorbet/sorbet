@@ -370,6 +370,7 @@ unique_ptr<parser::Node> SigsRewriter::replaceSyntheticTypeAlias(unique_ptr<pars
 
 parser::NodeVec SigsRewriter::rewriteNodes(parser::NodeVec nodes) {
     parser::NodeVec result;
+    result.reserve(nodes.size());
 
     for (auto &node : nodes) {
         result.emplace_back(rewriteBody(move(node)));
