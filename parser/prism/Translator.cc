@@ -5047,11 +5047,7 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
                 auto rescue = ast::cast_tree<ast::Rescue>(bodyExpr);
                 ENFORCE(rescue != nullptr, "translatedRescue should be a Rescue node");
 
-                if (ensureBody != nullptr) {
-                    rescue->ensure = ensureBody->takeDesugaredExpr();
-                } else {
-                    rescue->ensure = ast::MK::EmptyTree();
-                }
+                rescue->ensure = ensureBody != nullptr ? ensureBody->takeDesugaredExpr() : ast::MK::EmptyTree();
 
                 translatedEnsure =
                     make_node_with_expr<parser::Ensure>(move(bodyExpr), loc, move(translatedRescue), move(ensureBody));
@@ -5083,23 +5079,16 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
                 // Build ast::Rescue expression with ensure field set
                 // When there's no rescue clause, create a new Rescue with empty rescue cases
                 ast::ExpressionPtr bodyExpr;
-                if (bodyNode != nullptr) {
-                    bodyExpr = bodyNode->takeDesugaredExpr();
-                } else {
-                    bodyExpr = ast::MK::EmptyTree();
-                }
+                bodyExpr = (bodyNode != nullptr) ? bodyNode->takeDesugaredExpr() : ast::MK::EmptyTree();
 
-                ast::ExpressionPtr ensureExpr;
-                if (ensureBody != nullptr) {
-                    ensureExpr = ensureBody->takeDesugaredExpr();
-                } else {
-                    ensureExpr = ast::MK::EmptyTree();
-                }
+                ast::ExpressionPtr ensureExpr =
+                    (ensureBody != nullptr) ? ensureBody->takeDesugaredExpr() : ast::MK::EmptyTree();
 
                 // Create ast::Rescue with empty rescue cases
-                ast::Rescue::RESCUE_CASE_store cases;
-                auto rescueExpr = ast::make_expression<ast::Rescue>(loc, move(bodyExpr), move(cases),
-                                                                    ast::MK::EmptyTree(), move(ensureExpr));
+                ast::Rescue::RESCUE_CASE_store emptyCases;
+                auto emptyElseClause = ast::MK::EmptyTree();
+                auto rescueExpr = ast::make_expression<ast::Rescue>(loc, move(bodyExpr), move(emptyCases),
+                                                                    move(emptyElseClause), move(ensureExpr));
                 translatedEnsure =
                     make_node_with_expr<parser::Ensure>(move(rescueExpr), loc, move(bodyNode), move(ensureBody));
             }
