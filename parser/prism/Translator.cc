@@ -4153,7 +4153,17 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
         params.emplace_back(translate(paramsNode->rest));
     }
 
-    translateMultiInto(params, posts);
+    for (auto &prismNode : posts) {
+        // Valid Ruby can only have `**nil` once in the parameter list, which is modelled with a
+        // `NoKeywordsParameterNode` in the `keyword_rest` field.
+        // If invalid code tries to use more than one `**nil` (like `def foo(**nil, **nil)`),
+        // Prism will report an error, but still place the excess `**nil` nodes in `posts` list (never the others like
+        // `requireds` or `optionals`), which we need to skip here.
+        if (!PM_NODE_TYPE_P(prismNode, PM_NO_KEYWORDS_PARAMETER_NODE)) {
+            params.emplace_back(translate(prismNode));
+        }
+    }
+
     translateMultiInto(params, keywords);
 
     if (auto *prismKwRestNode = paramsNode->keyword_rest) {

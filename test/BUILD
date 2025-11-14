@@ -133,6 +133,7 @@ prism_location_test_suite(
         exclude = [
             "prism_regression/error_recovery/assign.rb",
             "prism_regression/lambda.rb",
+            "prism_regression/call_kw_nil_args.rb",
         ],
     ),
 )

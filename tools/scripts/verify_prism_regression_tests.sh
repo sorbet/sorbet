@@ -6,12 +6,20 @@ echo "Building Sorbet..."
 
 echo "Verifying parse trees and desugar trees..."
 
+# Files to skip (known behavior mismatches)
+skip_files=("call_kw_nil_args")
+
 mismatched_parse_tree_files=()
 mismatched_desugar_tree_files=()
 
 # Iterate through Ruby files in test/prism_regression
 for file in test/prism_regression/*.rb; do
   file_name=$(basename "$file" .rb)
+
+  if [[ " ${skip_files[@]} " =~ " ${file_name} " ]]; then
+    echo "⏭️  ${file_name}.rb (skipped)"
+    continue
+  fi
 
   # Generate parse tree
   set +e # Disable exit on error for the next command

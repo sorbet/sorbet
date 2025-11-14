@@ -1,0 +1,87 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U f1><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U f2><<U <todo method>>>
+      params = [RestParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U args>
+        } }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U kwargs>
+        } } }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U f3><<U <todo method>>>
+      params = [RestParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U args>
+        } }, KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U a>
+        } }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U f4><<U <todo method>>>
+      params = [KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U a>
+        } }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U f5><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          UnresolvedConstantLit{
+            cnst = <C <U <ErrorNode>>>
+            scope = EmptyTree
+          }
+          Literal{ value = 10 }
+        ],
+        expr = UnresolvedConstantLit{
+          cnst = <C <U <ErrorNode>>>
+          scope = EmptyTree
+        }
+      }
+    }
+  ]
+}
