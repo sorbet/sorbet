@@ -1157,33 +1157,6 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly;
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly;
 
-    if constexpr (buildPackageDB) {
-        Timer timeit(gs.tracer(), "packager.findPackages");
-
-        gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
-
-        {
-            core::UnfreezeNameTable unfreeze(gs);
-            auto packages = gs.unfreezePackages();
-
-            for (auto &file : files) {
-                if (!file.file.data(gs).isPackage(gs)) {
-                    continue;
-                }
-
-                auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
-                if (!pkgName.exists()) {
-                    continue;
-                }
-                auto &info = PackageInfo::from(gs, pkgName);
-                rewritePackageSpec(gs, file, info);
-            }
-        }
-
-        PackageDBPackageGraph packageGraph{gs.packageDB()};
-        gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
-    }
-
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
@@ -1262,6 +1235,33 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
                               absl::Span<core::FileRef> nonPackageFiles) {
     Timer timeit(gs.tracer(), "packager");
     timeit.setTag("mode", "packages_only");
+
+    {
+        Timer timeit(gs.tracer(), "packager.findPackages");
+
+        gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
+
+        {
+            core::UnfreezeNameTable unfreeze(gs);
+            auto packages = gs.unfreezePackages();
+
+            for (auto &file : packageFiles) {
+                if (!file.file.data(gs).isPackage(gs)) {
+                    continue;
+                }
+
+                auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
+                if (!pkgName.exists()) {
+                    continue;
+                }
+                auto &info = PackageInfo::from(gs, pkgName);
+                rewritePackageSpec(gs, file, info);
+            }
+        }
+
+        PackageDBPackageGraph packageGraph{gs.packageDB()};
+        gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
+    }
 
     packageRunCore<PackagerMode::PackagesOnly>(gs, workers, packageFiles);
 
