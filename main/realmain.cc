@@ -674,6 +674,14 @@ int realmain(int argc, char *argv[]) {
                 }
             }
 
+            // Freeze all symbols introduced in this step
+            if (opts.packageDirected) {
+                Timer timeit(*logger, "freezeSymbols");
+                for (auto ref : offsets.classOrModuleRefs(*gs)) {
+                    ref.data(*gs)->freeze();
+                }
+            }
+
             // Update offsets for the next iteration, so that the first iteration includes everything from the stdlib as
             // well.
             offsets = core::SymbolTableOffsets(*gs);
