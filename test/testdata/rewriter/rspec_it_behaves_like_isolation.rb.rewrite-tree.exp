@@ -1,0 +1,165 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        def expect<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
+        def eq<<todo method>>(arg, &<blk>)
+          <emptyTree>
+        end
+
+        <runtime method definition of expect>
+
+        <runtime method definition of eq>
+      end
+    end
+  end
+
+  class <emptyTree>::<C MyClass><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    class <emptyTree>::<C <describe 'it_behaves_like provides isolation'>><<C <todo sym>>> < (<self>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C Integer>)
+      end
+
+      def shared_value<<todo method>>(&<blk>)
+        100
+      end
+
+      def <it 'outer context has its own value'><<todo method>>(&<blk>)
+        begin
+          result = <self>.shared_value()
+          <emptyTree>::<C T>.reveal_type(result)
+          <self>.expect(result).to(<self>.eq(100))
+        end
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      module <emptyTree>::<C <shared_examples 'shared behavior'>><<C <todo sym>>> < ()
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C String>)
+        end
+
+        def shared_value<<todo method>>(&<blk>)
+          "from_shared"
+        end
+
+        def <it 'uses shared value'><<todo method>>(&<blk>)
+          begin
+            result = <self>.shared_value()
+            <emptyTree>::<C T>.reveal_type(result)
+            <self>.expect(result).to(<self>.eq("from_shared"))
+          end
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        <runtime method definition of shared_value>
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+
+      <runtime method definition of shared_value>
+
+      class <emptyTree>::<C <it_behaves_like 'shared behavior'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'shared behavior'>>)
+      end
+
+      class <emptyTree>::<C <describe 'method isolation'>><<C <todo sym>>> < (<self>)
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C Integer>)
+        end
+
+        def helper_method<<todo method>>(&<blk>)
+          42
+        end
+
+        def <it 'outer helper_method is not clobbered'><<todo method>>(&<blk>)
+          begin
+            result = <self>.helper_method()
+            <emptyTree>::<C T>.reveal_type(result)
+            <self>.expect(result).to(<self>.eq(42))
+          end
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        module <emptyTree>::<C <shared_examples 'defines helper method'>><<C <todo sym>>> < ()
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def helper_method<<todo method>>(&<blk>)
+            "from_shared"
+          end
+
+          def <it 'uses helper from shared'><<todo method>>(&<blk>)
+            begin
+              result = <self>.helper_method()
+              <emptyTree>::<C T>.reveal_type(result)
+              <self>.expect(result).to(<self>.eq("from_shared"))
+            end
+          end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+          <runtime method definition of helper_method>
+
+          ::<Magic>.requires_ancestor() do ||
+            <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+          end
+        end
+
+        <runtime method definition of helper_method>
+
+        class <emptyTree>::<C <it_behaves_like 'defines helper method'>><<C <todo sym>>> < (<self>)
+          <self>.include(<emptyTree>::<C <shared_examples 'defines helper method'>>)
+        end
+      end
+
+      module <emptyTree>::<C <shared_examples 'parameterized behavior'>><<C <todo sym>>> < ()
+        def <it 'receives parameter'><<todo method>>(&<blk>)
+          [::T.unsafe(nil)].each() do |expected_value|
+            <self>.expect(expected_value).to(<self>.eq("param_value"))
+          end
+        end
+
+        <runtime method definition of <it 'receives parameter'>>
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+
+      class <emptyTree>::<C <it_behaves_like 'parameterized behavior'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'parameterized behavior'>>)
+      end
+
+      module <emptyTree>::<C <shared_examples 'math behavior'>><<C <todo sym>>> < ()
+        def <it 'performs calculation'><<todo method>>(&<blk>)
+          [::T.unsafe(nil)].each() do |a, b, result|
+            <self>.expect(a.+(b)).to(<self>.eq(result))
+          end
+        end
+
+        <runtime method definition of <it 'performs calculation'>>
+
+        ::<Magic>.requires_ancestor() do ||
+          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+        end
+      end
+
+      class <emptyTree>::<C <it_behaves_like 'math behavior'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'math behavior'>>)
+      end
+
+      class <emptyTree>::<C <it_behaves_like 'math behavior'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'math behavior'>>)
+      end
+    end
+  end
+end

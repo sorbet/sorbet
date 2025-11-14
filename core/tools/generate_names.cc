@@ -293,6 +293,7 @@ NameDef names[] = {
     {"sharedExamplesFor", "shared_examples_for"},
     {"includeExamples", "include_examples"},
     {"includeContext", "include_context"},
+    {"itBehavesLike", "it_behaves_like"},
     {"RSpec", "RSpec", true},
     {"Core", "Core", true},
     {"ExampleGroup", "ExampleGroup", true},

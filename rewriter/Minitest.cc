@@ -897,6 +897,39 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
             return ast::MK::Send1(send->loc, move(send->recv), core::Names::include(), send->funLoc, move(name));
         }
+
+        case core::Names::itBehavesLike().rawId(): {
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || block != nullptr ||
+                !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
+                return nullptr;
+            }
+
+            auto &arg = send->getPosArg(0);
+            auto argString = to_s(ctx, arg);
+
+            // it_behaves_like creates a nested class for isolation.
+            // This wraps the shared examples in a new context so their definitions
+            // (like let-defined methods) don't clobber the outer context's definitions.
+            auto testName = fmt::format("<it_behaves_like '{}'>", argString);
+            auto isolatedClassName =
+                ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
+
+            // Inherit from self to maintain access to outer context
+            ast::ClassDef::ANCESTORS_store ancestors;
+            ancestors.emplace_back(ast::MK::Self(arg.loc()));
+
+            // Include the shared examples module in this isolated context
+            auto sharedExamplesName = makeSharedExamplesConstant(ctx, arg);
+            auto includeStmt = ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
+                                              send->funLoc, move(sharedExamplesName));
+
+            ast::ClassDef::RHS_store rhs;
+            rhs.emplace_back(move(includeStmt));
+
+            auto declLoc = send->loc.copyWithZeroLength();
+            return ast::MK::Class(send->loc, declLoc, std::move(isolatedClassName), std::move(ancestors),
+                                  std::move(rhs));
+        }
     }
 
     return nullptr;
