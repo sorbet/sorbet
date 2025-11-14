@@ -920,7 +920,8 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             auto sym = core::ClassOrModuleRef(gs, i);
             auto data = sym.data(gs);
             auto owningPackage = data->package;
-            if (!owningPackage.exists() || data->flags.isExported) {
+            if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
+                data->flags.isExported) {
                 continue;
             }
             for (auto &f : data->referencingFiles) {
@@ -935,7 +936,8 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             auto sym = core::FieldRef(gs, i);
             auto data = sym.data(gs);
             auto owningPackage = data->owner.data(gs)->package;
-            if (!owningPackage.exists() || data->flags.isExported) {
+            if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
+                data->flags.isExported) {
                 continue;
             }
             for (auto &f : data->referencingFiles) {
