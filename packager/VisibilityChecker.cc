@@ -899,6 +899,17 @@ public:
         return files;
     }
 };
+
+bool ownerAlreadyExported(const core::GlobalState &gs, vector<core::SymbolRef> &alreadyExported,
+                          core::ClassOrModuleRef owner) {
+    while (owner != core::Symbols::root()) {
+        if (absl::c_find(alreadyExported, owner) != alreadyExported.end()) {
+            return true;
+        }
+        owner = owner.data(gs)->owner;
+    }
+    return false;
+}
 } // namespace
 
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
@@ -927,7 +938,9 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             for (auto &f : data->referencingFiles) {
                 auto packageForF = gs.packageDB().getPackageNameForFile(f);
                 if (packageForF != owningPackage && !gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
-                    toExport[owningPackage].push_back(sym);
+                    if (!ownerAlreadyExported(gs, toExport[owningPackage], data->owner)) {
+                        toExport[owningPackage].push_back(sym);
+                    }
                     break;
                 }
             }
@@ -943,7 +956,9 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             for (auto &f : data->referencingFiles) {
                 auto packageForF = gs.packageDB().getPackageNameForFile(f);
                 if (packageForF != owningPackage && !gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
-                    toExport[owningPackage].push_back(sym);
+                    if (!ownerAlreadyExported(gs, toExport[owningPackage], data->owner)) {
+                        toExport[owningPackage].push_back(sym);
+                    }
                     break;
                 }
             }
