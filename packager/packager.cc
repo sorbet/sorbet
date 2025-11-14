@@ -1154,17 +1154,6 @@ template <PackagerMode Mode>
 void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
 
-    Timer timeit(gs.tracer(), "packager");
-
-    switch (Mode) {
-        case PackagerMode::PackagesOnly:
-            timeit.setTag("mode", "packages_only");
-            break;
-        case PackagerMode::PackagedFilesOnly:
-            timeit.setTag("mode", "packaged_files_only");
-            break;
-    }
-
     constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly;
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly;
 
@@ -1273,6 +1262,9 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
 
 void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> packageFiles,
                               absl::Span<core::FileRef> nonPackageFiles) {
+    Timer timeit(gs.tracer(), "packager");
+    timeit.setTag("mode", "packages_only");
+
     packageRunCore<PackagerMode::PackagesOnly>(gs, workers, packageFiles);
 
     for (auto fref : nonPackageFiles) {
@@ -1291,6 +1283,9 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
 }
 
 void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "packager");
+    timeit.setTag("mode", "packaged_files_only");
+
     packageRunCore<PackagerMode::PackagedFilesOnly>(gs, workers, files);
 }
 
