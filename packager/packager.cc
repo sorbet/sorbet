@@ -548,8 +548,13 @@ struct PackageSpecBodyWalk {
 
                     // No such thing as "wildcard imports"--imports must pass a complete package name.
                     auto allowNamespace = false;
-                    info.importedPackageNames.emplace_back(resolvePackageName(ctx, target, allowNamespace),
-                                                           method2ImportType(send), send.loc);
+                    auto importName = resolvePackageName(ctx, target, allowNamespace);
+                    if (importName == info.mangledName()) {
+                        if (auto e = ctx.beginError(send.loc, core::errors::Packager::NoSelfImport)) {
+                            e.setHeader("Package `{}` cannot {} itself", info.show(ctx), send.fun.show(ctx));
+                        }
+                    }
+                    info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
                 }
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
@@ -1049,22 +1054,6 @@ void validatePackage(core::Context ctx) {
 
         if (!skipImportVisibilityCheck) {
             validateVisibility(ctx, pkgInfo, i);
-        }
-
-        if (i.mangledName == pkgInfo.mangledName()) {
-            if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
-                string import_;
-                switch (i.type) {
-                    case ImportType::Normal:
-                        import_ = "import";
-                        break;
-                    case ImportType::TestUnit:
-                    case ImportType::TestHelper:
-                        import_ = "test_import";
-                        break;
-                }
-                e.setHeader("Package `{}` cannot {} itself", pkgInfo.mangledName_.owner.show(ctx), import_);
-            }
         }
     }
 }
