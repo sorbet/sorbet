@@ -39,8 +39,6 @@ namespace sorbet::packager {
  */
 class Packager final {
 public:
-    static void findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files);
-
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
     static std::vector<ast::ParsedFile> runIncremental(const core::GlobalState &gs, std::vector<ast::ParsedFile> files,
                                                        WorkerPool &workers);
