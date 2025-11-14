@@ -1145,7 +1145,7 @@ public:
     }
 };
 
-void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+void validatePackagesAndFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
 
     {
@@ -1247,7 +1247,7 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
         gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
     }
 
-    packageRunCore(gs, workers, packageFiles);
+    validatePackagesAndFiles(gs, workers, packageFiles);
 
     for (auto fref : nonPackageFiles) {
         auto pkg = gs.packageDB().getPackageNameForFile(fref);
@@ -1268,7 +1268,7 @@ void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers,
     Timer timeit(gs.tracer(), "packager");
     timeit.setTag("mode", "packaged_files_only");
 
-    packageRunCore(gs, workers, files);
+    validatePackagesAndFiles(gs, workers, files);
 }
 
 ast::ParsedFile Packager::copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &ast) {
