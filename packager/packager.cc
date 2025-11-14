@@ -1104,27 +1104,6 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 } // namespace
 
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "packager.findPackages");
-
-    gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
-
-    {
-        core::UnfreezeNameTable unfreeze(gs);
-        auto packages = gs.unfreezePackages();
-
-        for (auto &file : files) {
-            if (!file.file.data(gs).isPackage(gs)) {
-                continue;
-            }
-
-            auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
-            if (!pkgName.exists()) {
-                continue;
-            }
-            auto &info = PackageInfo::from(gs, pkgName);
-            rewritePackageSpec(gs, file, info);
-        }
-    }
 }
 
 namespace {
@@ -1193,7 +1172,27 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
     constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly;
 
     if constexpr (buildPackageDB) {
-        Packager::findPackages(gs, files);
+    Timer timeit(gs.tracer(), "packager.findPackages");
+
+    gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
+
+    {
+        core::UnfreezeNameTable unfreeze(gs);
+        auto packages = gs.unfreezePackages();
+
+        for (auto &file : files) {
+            if (!file.file.data(gs).isPackage(gs)) {
+                continue;
+            }
+
+            auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
+            if (!pkgName.exists()) {
+                continue;
+            }
+            auto &info = PackageInfo::from(gs, pkgName);
+            rewritePackageSpec(gs, file, info);
+        }
+    }
     }
 
     {
