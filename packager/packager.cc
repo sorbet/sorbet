@@ -1253,11 +1253,12 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
     }
 }
 
-void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+void Packager::validatePackagedFiles(const core::GlobalState &gs, WorkerPool &workers,
+                                     absl::Span<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "packager");
     timeit.setTag("mode", "packaged_files_only");
 
-    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &job) {
+    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs](auto &job) {
         core::Context ctx(gs, core::Symbols::root(), job.file);
         ENFORCE(!job.file.data(gs).isPackage(gs));
         validatePackagedFile(ctx, job.tree);
