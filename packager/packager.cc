@@ -1179,15 +1179,13 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
                 rewritePackageSpec(gs, file, info);
             }
         }
+
+        PackageDBPackageGraph packageGraph{gs.packageDB()};
+        gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
     }
 
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
-
-        if constexpr (buildPackageDB) {
-            PackageDBPackageGraph packageGraph{gs.packageDB()};
-            gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
-        }
 
         {
             Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
