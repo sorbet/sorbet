@@ -1145,24 +1145,6 @@ public:
     }
 };
 
-void validatePackagesAndFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
-    ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
-
-    {
-        Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
-        Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &job) {
-            auto file = job.file;
-            core::Context ctx(gs, core::Symbols::root(), file);
-
-            if (file.data(gs).isPackage(gs)) {
-                validatePackage(ctx);
-            } else {
-                validatePackagedFile(ctx, job.tree);
-            }
-        });
-    }
-}
-
 bool isTestExport(const ast::ExpressionPtr &expr) {
     auto send = ast::cast_tree<ast::Send>(expr);
     if (!send || send->fun != core::Names::export_() || send->numPosArgs() != 1) {
@@ -1247,7 +1229,14 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
         gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
     }
 
-    validatePackagesAndFiles(gs, workers, packageFiles);
+    {
+        Timer timeit(gs.tracer(), "packager.validatePackages");
+        Parallel::iterate(workers, "validatePackages", absl::MakeSpan(packageFiles), [&gs = as_const(gs)](auto &job) {
+            core::Context ctx(gs, core::Symbols::root(), job.file);
+            ENFORCE(job.file.data(gs).isPackage(gs));
+            validatePackage(ctx);
+        });
+    }
 
     for (auto fref : nonPackageFiles) {
         auto pkg = gs.packageDB().getPackageNameForFile(fref);
@@ -1268,7 +1257,11 @@ void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers,
     Timer timeit(gs.tracer(), "packager");
     timeit.setTag("mode", "packaged_files_only");
 
-    validatePackagesAndFiles(gs, workers, files);
+    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &job) {
+        core::Context ctx(gs, core::Symbols::root(), job.file);
+        ENFORCE(!job.file.data(gs).isPackage(gs));
+        validatePackagedFile(ctx, job.tree);
+    });
 }
 
 ast::ParsedFile Packager::copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &ast) {
