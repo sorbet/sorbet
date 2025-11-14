@@ -7,7 +7,7 @@ module B
       puts A::CONSTANT_FROM_A
 
       # Try to use another unexported constant
-      puts A::ANOTHER_CONSTANT
+      puts A::UnexportedClass::ANOTHER_CONSTANT
 
       # Try to use unexported class
       puts A::UnexportedClass.hello
