@@ -1,0 +1,10 @@
+DefMethod {
+  name = <U foo>
+  params = Params {
+    params = [
+      ForwardArg {
+      }
+    ]
+  }
+  body = NULL
+}
