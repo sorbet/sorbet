@@ -634,8 +634,6 @@ public:
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                 if (db.genPackages()) {
-                    // TODO(neil): this is technically incorrect since it means export errors won't be reported at all
-                    // until we implement export handling in genPackages mode
                     return;
                 }
 
