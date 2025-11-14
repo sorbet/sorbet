@@ -1148,20 +1148,19 @@ public:
 void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
 
-        {
-            Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
-            Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
-                              [&gs = as_const(gs)](auto &job) {
-                                  auto file = job.file;
-                                  core::Context ctx(gs, core::Symbols::root(), file);
+    {
+        Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
+        Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs = as_const(gs)](auto &job) {
+            auto file = job.file;
+            core::Context ctx(gs, core::Symbols::root(), file);
 
-                                  if (file.data(gs).isPackage(gs)) {
-                                      validatePackage(ctx);
-                                  } else {
-                                      validatePackagedFile(ctx, job.tree);
-                                  }
-                              });
-        }
+            if (file.data(gs).isPackage(gs)) {
+                validatePackage(ctx);
+            } else {
+                validatePackagedFile(ctx, job.tree);
+            }
+        });
+    }
 }
 
 bool isTestExport(const ast::ExpressionPtr &expr) {
