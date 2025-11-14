@@ -21,11 +21,9 @@ class Upper
   sig { params(x: X, y: Y, z: Z).void }
   def example(x, y, z)
     takes_any(x)
-    #         ^ error: Expected `T.any(Integer, String)` but found `Upper::X` for argument `x`
     takes_all(y)
 
     takes_any(z)
-    #         ^ error: Expected `T.any(Integer, String)` but found `Upper::Z` for argument `x`
     takes_all(z)
   end
 end
@@ -58,14 +56,11 @@ class Lower
   }
   def example(mn, i_or_s, mn_or_i_or_s)
     takes_x(mn)
-    #       ^^ error: Expected `Lower::X` but found `T.all(M, N)` for argument `x`
     takes_z(mn)
-    #       ^^ error: Expected `Lower::Z` but found `T.all(M, N)` for argument `z`
 
     takes_y(i_or_s)
     takes_z(i_or_s)
 
     takes_z(mn_or_i_or_s)
-    #       ^^^^^^^^^^^^ error: Expected `Lower::Z` but found `T.any(Integer, T.all(M, N), String)` for argument `z`
   end
 end

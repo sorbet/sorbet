@@ -1732,6 +1732,15 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
             return true;
         } else if (Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode, errorDetailsCollector)) {
             return true;
+        } else if (isa_type<SelfTypeParam>(t1)) {
+            auto selfTypeParam1 = cast_type_nonnull<SelfTypeParam>(t1);
+            if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam1.definition.resultType(gs))) {
+                if (isa_type<OrType>(lambdaParam->upperBound) || isa_type<AndType>(lambdaParam->upperBound)) {
+                    return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
+                                                           errorDetailsCollector);
+                }
+            }
+            return false;
         } else if (a1 == nullptr) {
             // If neither t1 <: o2->left nor t1 <: o2->right, it might mean that we tried to split
             // up an OrType when we weren't meant to. It could be that t1 is an AndType of an OrType
@@ -1752,8 +1761,19 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (leftIsSubType && !stillNeedToCheckRight) {
             // Short circuit to save time
             return true;
+        } else if (Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode, errorDetailsCollector)) {
+            return true;
+        } else if (isa_type<SelfTypeParam>(t2)) {
+            auto selfTypeParam2 = cast_type_nonnull<SelfTypeParam>(t2);
+            if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam2.definition.resultType(gs))) {
+                if (isa_type<OrType>(lambdaParam->lowerBound) || isa_type<AndType>(lambdaParam->lowerBound)) {
+                    return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
+                                                           errorDetailsCollector);
+                }
+            }
+            return false;
         } else {
-            return Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode, errorDetailsCollector);
+            return false;
         }
     }
 
