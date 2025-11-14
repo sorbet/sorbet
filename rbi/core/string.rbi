@@ -2963,4 +2963,7 @@ class String < Object
     .returns(T.nilable(String))
   end
   def slice(arg0, arg1=T.unsafe(nil)); end
+
+  sig { overridable.returns(FalseClass) }
+  def !(); end
 end
