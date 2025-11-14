@@ -1105,11 +1105,6 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 namespace {
 
-enum class PackagerMode {
-    PackagesOnly,
-    PackagedFilesOnly,
-};
-
 class PackageDBPackageGraph {
     PackageDB &packageDB;
 
@@ -1150,12 +1145,8 @@ public:
     }
 };
 
-template <PackagerMode Mode>
 void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
-
-    constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly;
-    constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly;
 
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
@@ -1168,10 +1159,8 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
                                   core::Context ctx(gs, core::Symbols::root(), file);
 
                                   if (file.data(gs).isPackage(gs)) {
-                                      ENFORCE(buildPackageDB);
                                       validatePackage(ctx);
                                   } else {
-                                      ENFORCE(validatePackagedFiles);
                                       validatePackagedFile(ctx, job.tree);
                                   }
                               });
@@ -1263,7 +1252,7 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
         gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
     }
 
-    packageRunCore<PackagerMode::PackagesOnly>(gs, workers, packageFiles);
+    packageRunCore(gs, workers, packageFiles);
 
     for (auto fref : nonPackageFiles) {
         auto pkg = gs.packageDB().getPackageNameForFile(fref);
@@ -1284,7 +1273,7 @@ void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers,
     Timer timeit(gs.tracer(), "packager");
     timeit.setTag("mode", "packaged_files_only");
 
-    packageRunCore<PackagerMode::PackagedFilesOnly>(gs, workers, files);
+    packageRunCore(gs, workers, files);
 }
 
 ast::ParsedFile Packager::copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &ast) {
