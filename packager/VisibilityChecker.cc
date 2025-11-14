@@ -4,6 +4,7 @@
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/Parallel.h"
+#include "common/sort/sort.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
 
@@ -908,6 +909,29 @@ bool ownerAlreadyExported(const core::GlobalState &gs, vector<core::SymbolRef> &
     }
     return false;
 }
+void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) {
+    fast_sort(edits, [](const auto &lhs, const auto &rhs) {
+        if (lhs.loc == rhs.loc) {
+            // TODO: import should come before export
+            return lhs.replacement < rhs.replacement;
+        }
+        return lhs.loc.beginPos() < rhs.loc.beginPos();
+    });
+    auto i = 0;
+    while (edits.size() > 0 && i < edits.size() - 1) {
+        if (edits[i].loc.beginPos() == edits[i + 1].loc.beginPos() && edits[i].loc.empty() &&
+            edits[i + 1].loc.empty()) {
+            // If we're inserting 2 imports at the same location, combine them into a single edit.
+            // TODO(neil): maybe this logic should be moved/added to AutocorrectSuggestion::apply, to handle other
+            // cases where 2 autocorrects add at the same loc?
+            edits[i].replacement += edits[i + 1].replacement;
+            edits.erase(edits.begin() + i + 1);
+        } else {
+            i++;
+        }
+    }
+}
+
 } // namespace
 
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
@@ -964,16 +988,26 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
         for (auto package : gs.packageDB().packages()) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
-
-            if (auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs)) {
+            auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs);
+            auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package]);
+            if (importsAutocorrect && exportsAutocorrect) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
+                    importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
+                                                     make_move_iterator(exportsAutocorrect->edits.begin()),
+                                                     make_move_iterator(exportsAutocorrect->edits.end()));
+                    mergeAdjacentEdits(importsAutocorrect->edits);
+                    e.addAutocorrect(core::AutocorrectSuggestion{"Add missing imports and exports",
+                                                                 move(importsAutocorrect->edits)});
+                    // TODO(neil): we should also delete imports that are unused but have a modularity error here
+                }
+            } else if (importsAutocorrect) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
                     e.addAutocorrect(move(importsAutocorrect.value()));
                     // TODO(neil): we should also delete imports that are unused but have a modularity error here
                 }
-            }
-
-            if (auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package])) {
+            } else if (exportsAutocorrect) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing exports", pkgInfo.show(gs));
                     e.addAutocorrect(move(exportsAutocorrect.value()));
