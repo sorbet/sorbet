@@ -1148,9 +1148,6 @@ public:
 void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
 
-    {
-        Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
-
         {
             Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
             Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
@@ -1165,7 +1162,6 @@ void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::
                                   }
                               });
         }
-    }
 }
 
 bool isTestExport(const ast::ExpressionPtr &expr) {
