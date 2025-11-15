@@ -426,7 +426,7 @@ void Minimize::indexAndResolveForMinimize(core::GlobalState &sourceGS, core::Glo
     ENFORCE(!canceled, "Can only cancel in LSP mode");
     // We explicitly disable `sorbetPackages` in realmain for this call, which means we don't have to call packager
 
-    auto resolved = pipeline::resolve(rbiGS, std::move(rbiIndexed.result()), opts, workers);
+    auto resolved = pipeline::resolve(rbiGS, core::SymbolTableOffsets{}, std::move(rbiIndexed.result()), opts, workers);
     ENFORCE(resolved.hasResult(), "Can only cancel in LSP mode");
     if (rbiGS.hadCriticalError()) {
         rbiGS.errorQueue->flushAllErrors(rbiGS);
