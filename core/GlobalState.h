@@ -207,7 +207,6 @@ public:
     void reserve(size_t size) {
         this->files.reserve(size);
         this->symbolsReferencedByFile.reserve(size);
-        ENFORCE(this->symbolsReferencedByFile.size() == this->files.size());
     }
 
     size_t size() const {
