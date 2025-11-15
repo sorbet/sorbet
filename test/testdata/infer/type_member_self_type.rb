@@ -20,14 +20,15 @@ class A
   extend T::Sig, T::Generic
 
   X = type_member { { fixed: T.self_type} }
+  #                          ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
 
   sig { returns(X) }
-  def my_dup = self # error: Expression does not have a fully-defined type
+  def my_dup = self
 end
 
-p(A) # error: Expression does not have a fully-defined type
-a = A.new # error: Expression does not have a fully-defined type
-T.reveal_type(a) # error: `T.untyped`
+p(A)
+a = A.new
+T.reveal_type(a) # error: `A`
 
 class ChildABad < A # error: Type `X` declared by parent `A` must be re-declared in `ChildABad`
 end
@@ -36,18 +37,20 @@ class ChildA < A
   # should this be allowed?
   # it almost seems like you should be required to do `fixed: A`
   X = type_member { {fixed: T.self_type} }
+  #                         ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
 end
 
 res = ChildA.new.my_dup
-#     ^^^^^^ error: Expression does not have a fully-defined type
 T.reveal_type(res) # error: `T.untyped`
 
 class B
   extend T::Sig, T::Generic
   X = type_member { {lower: T.self_type, upper: T.self_type} }
+  #                         ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
+  #                                             ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
 
   sig { returns(X) }
-  def my_dup = self # error: Expected `B::X` but found `B[B::X]` for method result type
+  def my_dup = self
 end
 
 p(B)
@@ -56,18 +59,20 @@ T.reveal_type(b) # error: `B[T.untyped]`
 
 class ChildB < B
   X = type_member { {lower: T.self_type, upper: T.self_type} }
+  #                         ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
+  #                                             ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
 end
 
 class C
   extend T::Sig, T::Generic
   X = type_member(:out) { {lower: T.self_type, upper: T.self_type} }
+  #                               ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
+  #                                                   ^^^^^^^^^^^ error: `T.self_type` is not supported inside generic type bounds
 
   sig { returns(X) }
-  def my_dup = self # error: Expected `C::X` but found `C[C::X]`
+  def my_dup = self
 end
 
 p(C)
-# ^ error: does not have a fully-defined type
 b = C.new
-#   ^ error: does not have a fully-defined type
-T.reveal_type(b) # error: `T.untyped`
+T.reveal_type(b) # error: `C[T.untyped]`
