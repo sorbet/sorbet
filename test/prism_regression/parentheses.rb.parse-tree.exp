@@ -30,5 +30,17 @@ Begin {
         }
       ]
     }
+    DefS {
+      singleton = Send {
+        receiver = Self {
+        }
+        method = <U foo>
+        args = [
+        ]
+      }
+      name = <U test>
+      params = NULL
+      body = NULL
+    }
   ]
 }
