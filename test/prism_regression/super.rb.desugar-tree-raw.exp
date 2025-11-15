@@ -51,6 +51,18 @@ ClassDef{
             flags = {privateOk}
             recv = Self
             fun = <U <super>>
+            block = nullptr
+            pos_args = 3
+            args = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+              Literal{ value = 3 }
+            ]
+          }
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U <super>>
             block = Block {
               params = [
               ]
@@ -69,6 +81,60 @@ ClassDef{
             }
             pos_args = 0
             args = [
+            ]
+          }
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U <super>>
+            block = Block {
+              params = [
+              ]
+              body = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
+                }
+                fun = <U call>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            }
+            pos_args = 3
+            args = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+              Literal{ value = 3 }
+            ]
+          }
+          Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U <super>>
+            block = Block {
+              params = [
+              ]
+              body = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U <blk>>
+                }
+                fun = <U call>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            }
+            pos_args = 3
+            args = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+              Literal{ value = 3 }
             ]
           }
         ],
