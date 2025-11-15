@@ -948,6 +948,15 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     if (auto a1 = cast_type<AppliedType>(t1)) {
         auto a2 = cast_type<AppliedType>(t2);
         if (a2 == nullptr) {
+            if (isa_type<SelfTypeParam>(t2)) {
+                if (isAsSpecificAs(gs, t2, t1)) {
+                    return t2;
+                }
+                if (isAsSpecificAs(gs, t1, t2)) {
+                    return t1;
+                }
+                return AndType::make_shared(t1, t2);
+            }
             if (a1->klass.data(gs)->isModule() || !isa_type<ClassType>(t2)) {
                 return AndType::make_shared(t1, t2);
             }
@@ -1173,7 +1182,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
     if (isa_type<TypeVar>(t1) || isa_type<TypeVar>(t2)) {
         if (constr.isSolved()) {
-            return constr.isAlreadyASubType(gs, t1, t2);
+            return constr.isAlreadyASubType(gs, t1, t2, mode);
         } else {
             return constr.rememberIsSubtype(gs, Types::dropLiteral(gs, t1), Types::dropLiteral(gs, t2));
         }
