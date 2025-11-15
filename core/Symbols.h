@@ -679,8 +679,10 @@ public:
     NameRef name; // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
+private:
     UnorderedMap<NameRef, SymbolRef> members_;
 
+public:
     UnorderedMap<NameRef, SymbolRef> &members() {
         return members_;
     };
