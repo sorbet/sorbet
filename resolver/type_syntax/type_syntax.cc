@@ -989,13 +989,38 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            if (args.allowSelfType) {
-                return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
+
+            switch (args.typeMember) {
+                case TypeSyntaxArgs::TypeMember::Allowed:
+                case TypeSyntaxArgs::TypeMember::BannedInTypeAlias:
+                    break;
+
+                case TypeSyntaxArgs::TypeMember::BannedInTypeMember:
+                    // It would cause problems in `ClassOrModule::selfType` if we allowed this.
+                    //
+                    // The naive implementation (what's there now) produces a type that is not fully
+                    // defined, despite the point of that function being to produce a fully-defined type.
+                    //
+                    // An alternative implementation might be to try to recursively expand `T.self_type`
+                    // LambdaParam's to `FreshSelfType`, but that would produce an infinite type.
+                    //
+                    // We'll need a smarter approach, and it's not clear what that is. Since `T.self_type`
+                    // in type member bounds already failed (with a use-site error), turning it into a
+                    // definition-site error should be more straightforward and prevent crashes in the mean time.
+                    if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        e.setHeader("`{}` is not supported inside generic type bounds", "T.self_type");
+                    }
+                    return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Only top-level `{}` is supported", "T.self_type");
+
+            if (!args.allowSelfType) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Only top-level `{}` is supported", "T.self_type");
+                }
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+
+            return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
         case core::Names::experimentalAttachedClass().rawId():
         case core::Names::attachedClass().rawId(): {
             if (send.fun == core::Names::experimentalAttachedClass()) {
