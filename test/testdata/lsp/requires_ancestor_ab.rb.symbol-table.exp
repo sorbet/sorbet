@@ -21,11 +21,17 @@ class ::<root> < ::Object ()
     method ::<Class:B>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:13
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   class ::C < ::Object (Target) @ test/testdata/lsp/requires_ancestor_ab.rb:35
+    method ::C#<required-ancestor-lin> (<arg>) -> [A] @ test/testdata/lsp/requires_ancestor_ab.rb:25
+      argument <arg><> -> [Target] @ Loc {file=??? start=??? end=???}
   class ::<Class:C>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/lsp/requires_ancestor_ab.rb:35
     type-member(+) ::<Class:C>::<AttachedClass> -> T.attached_class (of C) @ test/testdata/lsp/requires_ancestor_ab.rb:35
     method ::<Class:C>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:35
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   module ::Target < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/lsp/requires_ancestor_ab.rb:22
+    method ::Target#<required-ancestor-lin> (<arg>) -> [A] @ test/testdata/lsp/requires_ancestor_ab.rb:25
+      argument <arg><> -> [Target] @ Loc {file=??? start=??? end=???}
+    method ::Target#<required-ancestor> (<arg>) -> [A] @ test/testdata/lsp/requires_ancestor_ab.rb:25
+      argument <arg><> -> [Target] @ Loc {file=??? start=??? end=???}
     method ::Target#foo_b (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:27
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   class ::<Class:Target>[<AttachedClass>] < ::Module (Helpers) @ test/testdata/lsp/requires_ancestor_ab.rb:22
