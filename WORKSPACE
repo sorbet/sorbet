@@ -33,15 +33,30 @@ load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
 
+# bazel_features is used by rules_cc and toolchains_llvm to detect Bazel version
+# capabilities. bazel_features_deps() sets up the @bazel_features_version repository
+# which is needed by bazel_features internally.
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
+
+# rules_cc 0.2.14+ requires the @cc_compatibility_proxy repository to be set up
+# for WORKSPACE builds. This provides compatibility shims for native cc_* rules.
+load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
+
+compatibility_proxy_repo()
+
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
-    name = "llvm_toolchain_15_0_7",
-    absolute_paths = True,
-    alternative_llvm_sources = [
-        "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
-    ],
-    llvm_version = "15.0.7",
+    name = "llvm_toolchain_15_0_6",
+    # absolute_paths = False (the default) creates symlinks for tools like
+    # llvm-libtool-darwin -> libtool in the toolchain bin directory, which is
+    # required for proper tool resolution on macOS.
+    llvm_versions = {
+        "": "15.0.6",  # default for Linux and arm64 macOS
+        "darwin-x86_64": "15.0.7",
+    },
     # The sysroots are needed for cross-compiling
     sysroot = {
         "": "",
@@ -50,7 +65,7 @@ llvm_toolchain(
     },
 )
 
-load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+load("@llvm_toolchain_15_0_6//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 

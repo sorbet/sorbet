@@ -13,7 +13,7 @@ def dropExtension(p):
     return p.partition(".")[0]
 
 _TEST_SCRIPT = """#!/usr/bin/env bash
-export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_7/bin/llvm-symbolizer
+export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_6/bin/llvm-symbolizer
 set -x
 exec {runner} --single_test="{test}" {parser}
 """
