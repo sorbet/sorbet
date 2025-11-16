@@ -911,17 +911,17 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             // This wraps the shared examples in a new context so their definitions
             // (like let-defined methods) don't clobber the outer context's definitions.
             auto testName = fmt::format("<it_behaves_like '{}'>", argString);
-            auto isolatedClassName =
-                ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
+            auto isolatedClassName = ast::MK::UnresolvedConstantParts(send->loc.copyWithZeroLength(),
+                                                                      {ctx.state.enterNameConstant(testName)});
 
             // Inherit from self to maintain access to outer context
             ast::ClassDef::ANCESTORS_store ancestors;
-            ancestors.emplace_back(ast::MK::Self(arg.loc()));
+            ancestors.emplace_back(ast::MK::Self(send->loc.copyWithZeroLength()));
 
             // Include the shared examples module in this isolated context
             auto sharedExamplesName = makeSharedExamplesConstant(ctx, arg);
             auto includeStmt = ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
-                                              send->funLoc, move(sharedExamplesName));
+                                              arg.loc(), move(sharedExamplesName));
 
             ast::ClassDef::RHS_store rhs;
             rhs.emplace_back(move(includeStmt));
