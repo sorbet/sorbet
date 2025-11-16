@@ -3,6 +3,8 @@ cc_library(
     srcs = glob([
         "*.cc",
         "*.h",
+        "prism/*.cc",
+        "prism/*.h",
     ]),
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -14,6 +16,7 @@ cc_library(
         "//common",
         "//core",
         "//parser",
+        "//parser/prism",
         "//rewriter/util",
         "@rbs_parser",
     ],
