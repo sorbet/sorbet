@@ -1104,10 +1104,6 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 } // namespace
 
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
-    // Ensure files are in canonical order.
-    // TODO(jez) Is this sort redundant? Should we move this sort to callers?
-    fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
-
     Timer timeit(gs.tracer(), "packager.findPackages");
 
     gs.packageDB().resolvePackagesWithRelaxedChecks(gs);

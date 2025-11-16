@@ -359,6 +359,11 @@ void buildPackageDB(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl
 
     // Packager runs over all trees.
     packager::Packager::buildPackageDB(gs, *workers, trees, nonPackageFiles);
+    if (handler.hasExpectation("package-tree")) {
+        fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+            return lhs.file.data(gs).path() < rhs.file.data(gs).path();
+        });
+    }
     for (auto &tree : trees) {
         handler.addObserved(gs, "package-tree", [&]() {
             return fmt::format("# -- {} --\n{}", tree.file.data(gs).path(), tree.tree.toString(gs));
