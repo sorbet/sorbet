@@ -65,6 +65,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of shared_value>
 
+      <self>.include(<emptyTree>::<C <shared_examples 'shared behavior'>>)
+
       class <emptyTree>::<C <it_behaves_like 'shared behavior'>><<C <todo sym>>> < (<self>)
         <self>.include(<emptyTree>::<C <shared_examples 'shared behavior'>>)
       end
