@@ -990,16 +990,26 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
         for (auto package : gs.packageDB().packages()) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
-
-            if (auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs)) {
+            auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs);
+            auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package]);
+            if (importsAutocorrect && exportsAutocorrect) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                    e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
+                    importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
+                                                     make_move_iterator(exportsAutocorrect->edits.begin()),
+                                                     make_move_iterator(exportsAutocorrect->edits.end()));
+                    core::AutocorrectSuggestion::mergeAdjacentEdits(importsAutocorrect->edits);
+                    e.addAutocorrect(core::AutocorrectSuggestion{"Add missing imports and exports",
+                                                                 move(importsAutocorrect->edits)});
+                    // TODO(neil): we should also delete imports that are unused but have a modularity error here
+                }
+            } else if (importsAutocorrect) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
                     e.addAutocorrect(move(importsAutocorrect.value()));
                     // TODO(neil): we should also delete imports that are unused but have a modularity error here
                 }
-            }
-
-            if (auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package])) {
+            } else if (exportsAutocorrect) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
                     e.setHeader("{} is missing exports", pkgInfo.show(gs));
                     e.addAutocorrect(move(exportsAutocorrect.value()));
