@@ -510,29 +510,6 @@ core::packages::ImportType broadestImportType(const core::GlobalState &gs, const
     }
     return broadestImport;
 }
-
-void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) {
-    fast_sort(edits, [](const auto &lhs, const auto &rhs) {
-        if (lhs.loc == rhs.loc) {
-            return lhs.replacement < rhs.replacement;
-        }
-        return lhs.loc.beginPos() < rhs.loc.beginPos();
-    });
-    auto i = 0;
-    while (edits.size() > 0 && i < edits.size() - 1) {
-        if (edits[i].loc.beginPos() == edits[i + 1].loc.beginPos() && edits[i].loc.empty() &&
-            edits[i + 1].loc.empty()) {
-            // If we're inserting 2 imports at the same location, combine them into a single edit.
-            // TODO(neil): maybe this logic should be moved/added to AutocorrectSuggestion::apply, to handle other
-            // cases where 2 autocorrects add at the same loc?
-            edits[i].replacement += edits[i + 1].replacement;
-            edits.erase(edits.begin() + i + 1);
-        } else {
-            i++;
-        }
-    }
-}
-
 }; // namespace
 
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
@@ -554,7 +531,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
     if (allEdits.size() == 0) {
         return nullopt;
     }
-    mergeAdjacentEdits(allEdits);
+    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
     return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
 }
 
@@ -573,7 +550,7 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
         return nullopt;
     }
 
-    mergeAdjacentEdits(allEdits);
+    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
     return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
 }
 
