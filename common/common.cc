@@ -104,6 +104,14 @@ void sorbet::FileOps::removeDir(const string &path) {
     }
 }
 
+optional<string> sorbet::FileOps::realpath(const string &path) {
+    unique_ptr<char[], void (*)(void *)> resolved(::realpath(path.c_str(), nullptr), free);
+    if (resolved == nullptr) {
+        return nullopt;
+    }
+    return string(resolved.get());
+}
+
 void sorbet::FileOps::removeFile(const string &path) {
     auto err = remove(path.c_str());
     if (err) {

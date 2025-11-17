@@ -530,6 +530,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("watchman-pause-state-name",
                                  "Name of watchman state that halts processing for its duration",
                                  cxxopts::value<string>()->default_value(empty.watchmanPauseStateName), "<state>");
+    options.add_options(section)("watchman-namespace", "Namespace for watchman",
+                                 cxxopts::value<string>()->default_value(empty.watchmanNamespace), "<namespace>");
     options.add_options(section)(
         "lsp-directories-missing-from-client",
         "Directory prefixes that only exist where the LSP server is running, not on the client. "
@@ -1065,6 +1067,7 @@ void readOptions(Options &opts,
             logger->error("watchman-pause-state-name must be used with watchman enabled");
             throw EarlyReturnWithCode(1);
         }
+        opts.watchmanNamespace = raw["watchman-namespace"].as<string>();
 
         // Certain features only need certain passes
         auto isAutogen =

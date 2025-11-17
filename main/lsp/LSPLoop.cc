@@ -222,7 +222,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
 
         watchmanProcess = make_unique<watchman::WatchmanProcess>(
             logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}), messageQueue,
-            messageQueueMutex, initializedNotification, this->config);
+            messageQueueMutex, initializedNotification, this->config, opts.watchmanNamespace);
     }
 
     auto readerThread =

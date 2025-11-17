@@ -1,4 +1,5 @@
 #include "WatchmanProcess.h"
+#include "absl/strings/strip.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
@@ -17,12 +18,12 @@ namespace sorbet::realmain::lsp::watchman {
 WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
                                  vector<string> extensions, MessageQueueState &messageQueue,
                                  absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
-                                 shared_ptr<const LSPConfiguration> config)
+                                 shared_ptr<const LSPConfiguration> config, string_view watchmanNamespace)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))), messageQueue(messageQueue),
-      messageQueueMutex(messageQueueMutex), initializedNotification(initializedNotification),
-      config(std::move(config)) {}
+      messageQueueMutex(messageQueueMutex), initializedNotification(initializedNotification), config(std::move(config)),
+      watchmanNamespace(watchmanNamespace) {}
 
 WatchmanProcess::~WatchmanProcess() {
     exitWithCode(0, "");
@@ -38,6 +39,7 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
         logger.error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
     }
 }
+
 } // namespace
 
 void WatchmanProcess::start() {
@@ -45,18 +47,47 @@ void WatchmanProcess::start() {
     try {
         string subscriptionName = fmt::format("ruby-typer-{}", getpid());
 
-        logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
-                      workSpace, fmt::join(extensions, ","), subscriptionName);
-
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
+
+        string modifiedWorkspace = workSpace;
+        if (!watchmanNamespace.empty()) {
+            const optional<string> maybeResolved = FileOps::realpath(workSpace);
+            if (!maybeResolved.has_value()) {
+                logger->debug("Unable to resolve workspace path {} for namespacing", workSpace);
+                watchmanNamespace.clear();
+            } else {
+                string_view root(*maybeResolved);
+                logger->debug("realpath({}) = {}", workSpace, root);
+                if (absl::ConsumeSuffix(&root, watchmanNamespace)) {
+                    string gitDirectory(root);
+                    gitDirectory += "/.git";
+                    if (FileOps::dirExists(gitDirectory)) {
+                        logger->debug("Using {} as watchman root", root);
+                        modifiedWorkspace = root;
+                    } else {
+                        logger->debug(
+                            "Parent directory {} of namespace {} is not a git repository, disabling namespacing", root,
+                            watchmanNamespace);
+                        watchmanNamespace.clear();
+                    }
+                } else {
+                    logger->debug("Watched directory {} is not in namespace {}, disabling namespacing", root,
+                                  watchmanNamespace);
+                    watchmanNamespace.clear();
+                }
+            }
+        }
+
+        logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
+                      modifiedWorkspace, fmt::join(extensions, ","), subscriptionName);
 
         rapidjson::StringBuffer subscribeCommandBuffer;
         rapidjson::Writer<rapidjson::StringBuffer> w(subscribeCommandBuffer);
         {
             w.StartArray();
             w.String("subscribe");
-            w.String(workSpace);
+            w.String(modifiedWorkspace);
             w.String(subscriptionName);
 
             {
@@ -70,6 +101,13 @@ void WatchmanProcess::start() {
                         w.StartArray();
                         w.String("type");
                         w.String("f");
+                        w.EndArray();
+                    }
+
+                    if (!watchmanNamespace.empty()) {
+                        w.StartArray();
+                        w.String("dirname");
+                        w.String(watchmanNamespace);
                         w.EndArray();
                     }
 
@@ -170,6 +208,18 @@ void WatchmanProcess::start() {
             } else if (d.HasMember("is_fresh_instance")) {
                 catchDeserializationError(*logger, line, [&d, this]() {
                     auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
+                    if (!watchmanNamespace.empty()) {
+                        auto prefix(watchmanNamespace);
+                        prefix += "/";
+
+                        for (auto &file : queryResponse->files) {
+                            string_view view(file);
+                            if (!absl::ConsumePrefix(&view, prefix)) {
+                                continue;
+                            }
+                            file = view;
+                        }
+                    }
                     processQueryResponse(move(queryResponse));
                 });
             } else if (d.HasMember("state-enter")) {

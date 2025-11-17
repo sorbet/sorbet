@@ -27,6 +27,7 @@ public:
     static bool writeIfDifferent(const std::string &filename, std::string_view text);
     static bool dirExists(const std::string &path);
     static void createDir(const std::string &path);
+    static std::optional<std::string> realpath(const std::string &path);
 
     // This differs from createDir, as it will not raise an exception if the directory already exists. Returns true when
     // the directory was created, and false if it already existed.
