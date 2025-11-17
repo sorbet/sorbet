@@ -1781,7 +1781,13 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                       move(excludeEnd));
                 result = move(send);
             },
-            [&](parser::Regexp *regexpNode) { desugaredByPrismTranslator(regexpNode); },
+            [&](parser::Regexp *regexpNode) {
+                ExpressionPtr cnst = MK::Constant(loc, core::Symbols::Regexp());
+                auto pattern = desugarDString(dctx, loc, move(regexpNode->regex));
+                auto opts = node2TreeImpl(dctx, regexpNode->opts);
+                auto send = MK::Send2(loc, move(cnst), core::Names::new_(), locZeroLen, move(pattern), move(opts));
+                result = move(send);
+            },
             [&](parser::Regopt *regopt) { desugaredByPrismTranslator(regopt); },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {

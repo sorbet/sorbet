@@ -255,6 +255,9 @@ ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list
     for (pm_node *prismNode : prismNodes) {
         auto parserNode = translate(prismNode);
         auto expr = parserNode->takeDesugaredExpr();
+        ENFORCE(expr != nullptr, "All arguments must have a desugared expression by now, failed on {}",
+                ctx.file.data(ctx).path());
+
         if (allStringsSoFar && isStringLit(expr)) {
             stringsAccumulated.emplace_back(move(expr));
         } else {
@@ -2728,7 +2731,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto parts = translateMulti(interpolatedRegexNode->parts);
             auto options = translateRegexpOptions(interpolatedRegexNode->closing_loc);
 
-            if (!directlyDesugar) {
+            if (!directlyDesugar || !hasExpr(parts)) {
                 return make_unique<parser::Regexp>(location, move(parts), move(options));
             }
 
