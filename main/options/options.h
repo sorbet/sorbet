@@ -145,6 +145,7 @@ struct Options {
     bool suppressNonCriticalErrors = false;
     bool runLSP = false;
     bool disableWatchman = false;
+    std::string watchmanNamespace;
     std::string watchmanPath = "watchman";
     std::string watchmanPauseStateName;
     bool stressIncrementalResolver = false;

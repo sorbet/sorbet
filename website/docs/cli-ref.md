@@ -204,6 +204,8 @@ Usage:
       --watchman-pause-state-name <state>
                                 Name of watchman state that halts processing for its
                                 duration (default: "")
+      --watchman-namespace <namespace>
+                                Namespace for watchman (default: "")
       --lsp-directories-missing-from-client <path>
                                 Directory prefixes that only exist where the LSP server
                                 is running, not on the client. Useful when running Sorbet
