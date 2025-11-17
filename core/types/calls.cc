@@ -2263,7 +2263,8 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
-        auto tClassSelfType = Types::tClass(Types::widen(gs, args.selfType));
+        auto widenedSelfType = Types::widen(gs, args.selfType);
+        auto tClassSelfType = Types::tClass(widenedSelfType);
         if (self.data(gs)->isModule()) {
             ENFORCE(gs.cacheSensitiveOptions.requiresAncestorEnabled,
                     "Congrats, you've found a test case. Please add it, then delete this.");
@@ -2286,16 +2287,37 @@ public:
         }
 
         // `singleton` might have more type members than just the `<AttachedClass>` one.
-        // Calling `externalType` is the easiest way to get proper defaults for all of those.
-        // For the `<AttachedClass>` type member, we'll default it to its upper bound, like
-        //     T.class_of(MyClass)[MyClass, ...]
-        // Then the `T.all` is the easiest way to narrow *only* the type argument that
-        // corresponds to the `<AttachedClass>` type member, because `T.all` has logic to align
-        // type members in parent/child classes. The `T.all` gets pushed through and collapsed
-        // like normal, and ends up something like
-        //     T.class_of(MyClass)[T.all(TypeOfReceiver, MyClass)]
-        // (This matters, btw, in case the receiver is something like a generic.)
-        res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
+        // Calling `externalType` is the easiest way to get proper defaults for all of those other ones.
+        // For the `<AttachedClass>` type member, we want to manually provide a value.
+        //
+        // The way we used to do this was by using `T.all(T::Class[widenedSelfType], singletonExternalType)`
+        // That no longer works with the new `T.self_type` treatment we have here, because
+        //     T.all(T.self_type (of Box[Elem]), Box[T.untyped])
+        // doesn't collapse if `Box::Elem` is invariant. I'm not sure whether it can (all my
+        // experiments compromise something else, either collapsing not enough to solve this issue,
+        // or too much and making it so that `T.untyped` wins when it shouldn't).
+        //
+        // Instead, for this specific case, we just overwrite the default `upperBound` that `externalType`
+        // choses with the thing we know we want to apply it to, so that we don't have to rely on
+        // the `<AttachedClass>` upper bound collapsing. (This all matters, btw, in case the
+        // receiver is something like a generic.)
+        //
+        // This new approach has the side effect of allocating fewer types and doing one fewer
+        // `T.all` call, which is marginally faster.
+
+        auto singletonExternalType = singleton.data(gs)->externalType();
+        auto externalTypeApplied = cast_type<AppliedType>(singletonExternalType);
+        ENFORCE_NO_TIMER(externalTypeApplied != nullptr, "Must have at least <AttachedClass> type member");
+        int idx = -1;
+        for (const auto &tm : singleton.data(gs)->typeMembers()) {
+            idx++;
+            auto tmData = tm.data(gs);
+            if (tmData->name == core::Names::Constants::AttachedClass()) {
+                externalTypeApplied->targs[idx] = widenedSelfType;
+            }
+        }
+
+        res.returnType = singletonExternalType;
     }
 } Object_class;
 
