@@ -6,7 +6,6 @@
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
 #include "parser/prism/Parser.h"
 #include <memory>
-#include <optional>
 
 extern "C" {
 #include "prism.h"
@@ -214,8 +213,8 @@ private:
     ast::ExpressionPtr desugarMlhs(core::LocOffsets loc, parser::Mlhs *lhs, ast::ExpressionPtr rhs);
 
     // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
-    std::optional<ast::ClassDef::RHS_store> desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
-                                                                       std::unique_ptr<parser::Node> &scopeBody);
+    ast::ClassDef::RHS_store desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
+                                                        std::unique_ptr<parser::Node> &scopeBody);
 
     void reportError(core::LocOffsets loc, const std::string &message) const;
 

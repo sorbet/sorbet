@@ -2037,11 +2037,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             enforceHasExpr(name, superclass, body);
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(classNode->body, body);
-            if (!bodyExprsOpt.has_value()) {
-                return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
-            }
-            auto bodyExprs = move(*bodyExprsOpt);
+            auto bodyExprs = desugarScopeBodyToRHSStore(classNode->body, body);
 
             ast::ClassDef::ANCESTORS_store ancestors;
             if (superclass == nullptr) {
@@ -2957,11 +2953,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             enforceHasExpr(name, body);
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(moduleNode->body, body);
-            if (!bodyExprsOpt.has_value()) {
-                return make_unique<parser::Module>(location, declLoc, move(name), move(body));
-            }
-            auto bodyExprs = move(*bodyExprsOpt);
+            auto bodyExprs = desugarScopeBodyToRHSStore(moduleNode->body, body);
 
             auto nameExpr = name->takeDesugaredExpr();
             auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(bodyExprs));
@@ -3320,11 +3312,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_node_with_expr<parser::SClass>(move(emptyTree), location, declLoc, move(receiver), nullptr);
             }
 
-            auto bodyExprsOpt = desugarScopeBodyToRHSStore(classNode->body, body);
-            if (!bodyExprsOpt.has_value()) {
-                return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
-            }
-            auto bodyExprs = move(*bodyExprsOpt);
+            auto bodyExprs = desugarScopeBodyToRHSStore(classNode->body, body);
 
             // Singleton classes are modelled as a class with a special name `<singleton>`
             auto singletonClassName = ast::make_expression<ast::UnresolvedIdent>(
@@ -5447,10 +5435,9 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
 // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
 // The body can be a Begin node comprising multiple statements, or a single statement.
 // Return nullopt if the body does not have all of its expressions desugared.
-// TODO: make the return non-optional after direct desugaring is complete.
-// https://github.com/Shopify/sorbet/issues/671
-optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
-                                                                          unique_ptr<parser::Node> &scopeBody) {
+// TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
+                                                                unique_ptr<parser::Node> &scopeBody) {
     if (scopeBody == nullptr) { // Empty body
         ast::ClassDef::RHS_store result;
         result.emplace_back(MK::EmptyTree());
