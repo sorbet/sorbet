@@ -282,12 +282,11 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
             }
         }
 
-        bool directlyDesugar = !gs.cacheSensitiveOptions.rbsEnabled;
         auto enclosingBlockParamLoc = core::LocOffsets::none();
         auto enclosingBlockParamName = core::NameRef::noName();
         auto translatedTree =
-            parser::Prism::Translator(parser, ctx, prismResult.getParseErrors(), directlyDesugar,
-                                      preserveConcreteSyntax, enclosingBlockParamLoc, enclosingBlockParamName)
+            parser::Prism::Translator(parser, ctx, prismResult.getParseErrors(), preserveConcreteSyntax,
+                                      enclosingBlockParamLoc, enclosingBlockParamName)
                 .translate(node);
 
         parseResult = parser::ParseResult{move(translatedTree), prismResult.getCommentLocations()};

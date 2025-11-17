@@ -9,7 +9,7 @@ namespace sorbet::parser::Prism {
 
 using namespace std::literals::string_view_literals;
 
-parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, bool preserveConcreteSyntax) {
+parser::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSyntax) {
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
@@ -18,8 +18,8 @@ parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, 
 
     auto enclosingBlockParamLoc = core::LocOffsets::none();
     auto enclosingBlockParamName = core::NameRef::noName();
-    auto translatedTree = Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar,
-                                            preserveConcreteSyntax, enclosingBlockParamLoc, enclosingBlockParamName)
+    auto translatedTree = Prism::Translator(parser, ctx, parseResult.parseErrors, preserveConcreteSyntax,
+                                            enclosingBlockParamLoc, enclosingBlockParamName)
                               .translate(parseResult.getRawNodePointer());
     return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
 }

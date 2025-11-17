@@ -268,18 +268,16 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 }
                 case realmain::options::Parser::PRISM: {
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
-                        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
-                        // in `PrismDesugar.cc`. For now, just use the legacy parser for RBS.
-                    } else {
-                        auto directlyDesugar = true;
-
-                        try {
-                            prismParseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
-                        } catch (parser::Prism::PrismFallback &) {
-                            // Hit a fallback case during Prism parsing.
-                            // Leave the `prismParseResult` unset, but continue wit the rest of this test case.
-                        }
+                        continue;
                     }
+
+                    try {
+                        prismParseResult = parser::Prism::Parser::run(ctx);
+                    } catch (parser::Prism::PrismFallback &) {
+                        continue;
+                    }
+
+                    break;
                 }
             }
         }

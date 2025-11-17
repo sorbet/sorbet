@@ -481,10 +481,6 @@ pipeline_tests(
             # of `_1`, Whitequark uses first occurrence
             "prism_regression/multiple_numbered_params.rb",
 
-            # We don't directly desugar `super` nodes yet, which means that
-            # super calls with blocks don't get the implicitYield treatment.
-            "prism_regression/super.rb",
-
             # FIXME: Regex location differences
             "prism_regression/back_reference_read.rb",
             "prism_regression/literal_regexp.rb",

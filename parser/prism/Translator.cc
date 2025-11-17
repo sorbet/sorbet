@@ -4408,8 +4408,6 @@ NodeVec Translator::translateNumberedParametersNode(pm_numbered_parameters_node 
 // - temp[1, LONG_MAX]  (evalutes to a tuple type if temp is a tuple type)
 // - foo(*expr)         (call-with-splat handles case of splatted tuple type)
 ast::ExpressionPtr Translator::desugarSymbolProc(pm_symbol_node *symbol) {
-    ENFORCE(directlyDesugar, "desugarSymbolProc should only be called when direct desugaring is enabled");
-
     auto [symbolName, loc] = translateSymbol(symbol);
     auto loc0 = loc.copyWithZeroLength(); // TODO: shorten name
 
@@ -5441,7 +5439,6 @@ core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
 }
 
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
-    ENFORCE(directlyDesugar, "This shouldn't be called if we're not directly desugaring.");
     return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++desugarUniqueCounter);
 }
 
@@ -5586,8 +5583,6 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
 // TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
                                                                           unique_ptr<parser::Node> &scopeBody) {
-    ENFORCE(directlyDesugar, "desugarScopeBodyToRHSStore should only be called when direct desugaring is enabled");
-
     if (scopeBody == nullptr) { // Empty body
         ast::ClassDef::RHS_store result;
         result.emplace_back(MK::EmptyTree());
