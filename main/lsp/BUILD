@@ -67,6 +67,7 @@ cc_library(
         "//payload:interface",
         "//payload/binary",
         "//payload/text",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@cpp_subprocess",
         "@rapidjson",
