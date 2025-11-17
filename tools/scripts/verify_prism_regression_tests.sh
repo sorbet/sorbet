@@ -15,12 +15,7 @@ for file in test/prism_regression/*.rb; do
 
   # Generate parse tree
   set +e # Disable exit on error for the next command
-  ./bazel-bin/main/sorbet --stop-after=parser --print=parse-tree "$file" > temp_parse_tree.txt 2> /dev/null
-  set -e # Re-enable exit on error
-
-  # Generate desugar tree
-  set +e # Disable exit on error for the next command
-  ./bazel-bin/main/sorbet --stop-after=desugarer --print=desugar-tree-raw "$file" > temp_desugar_tree.txt 2> /dev/null
+  ./bazel-bin/main/sorbet --stop-after=desugarer --print=parse-tree:temp_parse_tree.txt --print=desugar-tree-raw:temp_desugar_tree.txt "$file" 2>/dev/null
   set -e # Re-enable exit on error
 
   parse_tree_match=true
@@ -56,16 +51,16 @@ done
 # Clean up temporary files
 rm temp_parse_tree.txt temp_desugar_tree.txt
 
-if [ ${#mismatched_parse_tree_files[@]:-0} -gt 0 ] || [ ${#mismatched_desugar_tree_files[@]:-0} -gt 0 ]; then
+if [ ${#mismatched_parse_tree_files[@]} -gt 0 ] || [ ${#mismatched_desugar_tree_files[@]} -gt 0 ]; then
   echo ""
   echo "Some of your test files are out of date. Run the following commands to regenerate them:"
   echo ""
 
-  for file in "${mismatched_parse_tree_files[@]+"${mismatched_parse_tree_files[@]}"}"; do
+  for file in "${mismatched_parse_tree_files[@]}"; do
     echo "bazel-bin/main/sorbet --stop-after=parser --print=parse-tree test/prism_regression/${file}.rb > test/prism_regression/${file}.rb.parse-tree.exp"
   done
 
-  for file in "${mismatched_desugar_tree_files[@]+"${mismatched_desugar_tree_files[@]}"}"; do
+  for file in "${mismatched_desugar_tree_files[@]}"; do
     echo "bazel-bin/main/sorbet --stop-after=desugarer --print=desugar-tree-raw test/prism_regression/${file}.rb > test/prism_regression/${file}.rb.desugar-tree-raw.exp"
   done
 
