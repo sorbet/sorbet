@@ -3391,6 +3391,29 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto blockArgumentNode = superNode->block;
             NodeVec returnValues;
 
+            if (blockArgumentNode) { // Adjust the location to exclude the literal block argument.
+                const uint8_t *start = superNode->base.location.start;
+                const uint8_t *end;
+
+                if (superNode->rparen_loc.end) { // Try to use the location of the `)`, if any
+                    end = superNode->rparen_loc.end;
+                } else { // Otherwise, use the end of the last argument
+                    auto *argP = superNode->arguments;
+
+                    constexpr auto msg =
+                        "`PM_SUPER_NODE` must have arguments if it has no parens. If there's no args and no "
+                        "parens, then you wouldn't even have a `PM_SUPER_NODE` to begin with, but a "
+                        "`PM_FORWARDING_SUPER` instead)";
+                    ENFORCE(argP, msg);
+
+                    auto args = absl::MakeSpan(argP->arguments.nodes, argP->arguments.size);
+                    ENFORCE(!args.empty(), msg);
+                    end = args.back()->location.end;
+                }
+
+                location = translateLoc(start, end);
+            }
+
             if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
                 returnValues = translateArguments(superNode->arguments);
                 auto superNode = make_unique<parser::Super>(location, move(returnValues));
