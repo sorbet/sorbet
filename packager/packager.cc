@@ -548,8 +548,13 @@ struct PackageSpecBodyWalk {
 
                     // No such thing as "wildcard imports"--imports must pass a complete package name.
                     auto allowNamespace = false;
-                    info.importedPackageNames.emplace_back(resolvePackageName(ctx, target, allowNamespace),
-                                                           method2ImportType(send), send.loc);
+                    auto importName = resolvePackageName(ctx, target, allowNamespace);
+                    if (importName == info.mangledName()) {
+                        if (auto e = ctx.beginError(send.loc, core::errors::Packager::NoSelfImport)) {
+                            e.setHeader("Package `{}` cannot {} itself", info.show(ctx), send.fun.show(ctx));
+                        }
+                    }
+                    info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
                 }
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
@@ -1050,22 +1055,6 @@ void validatePackage(core::Context ctx) {
         if (!skipImportVisibilityCheck) {
             validateVisibility(ctx, pkgInfo, i);
         }
-
-        if (i.mangledName == pkgInfo.mangledName()) {
-            if (auto e = ctx.beginError(i.loc, core::errors::Packager::NoSelfImport)) {
-                string import_;
-                switch (i.type) {
-                    case ImportType::Normal:
-                        import_ = "import";
-                        break;
-                    case ImportType::TestUnit:
-                    case ImportType::TestHelper:
-                        import_ = "test_import";
-                        break;
-                }
-                e.setHeader("Package `{}` cannot {} itself", pkgInfo.mangledName_.owner.show(ctx), import_);
-            }
-        }
     }
 }
 
@@ -1103,36 +1092,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 } // namespace
 
-void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "packager.findPackages");
-
-    gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
-
-    {
-        core::UnfreezeNameTable unfreeze(gs);
-        auto packages = gs.unfreezePackages();
-
-        for (auto &file : files) {
-            if (!file.file.data(gs).isPackage(gs)) {
-                continue;
-            }
-
-            auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
-            if (!pkgName.exists()) {
-                continue;
-            }
-            auto &info = PackageInfo::from(gs, pkgName);
-            rewritePackageSpec(gs, file, info);
-        }
-    }
-}
-
 namespace {
-
-enum class PackagerMode {
-    PackagesOnly,
-    PackagedFilesOnly,
-};
 
 class PackageDBPackageGraph {
     PackageDB &packageDB;
@@ -1173,55 +1133,6 @@ public:
         pkgInfoPtr->testSccID_ = sccID;
     }
 };
-
-template <PackagerMode Mode>
-void packageRunCore(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
-    ENFORCE(!gs.cacheSensitiveOptions.runningUnderAutogen, "Packager pass does not run in autogen");
-
-    Timer timeit(gs.tracer(), "packager");
-
-    switch (Mode) {
-        case PackagerMode::PackagesOnly:
-            timeit.setTag("mode", "packages_only");
-            break;
-        case PackagerMode::PackagedFilesOnly:
-            timeit.setTag("mode", "packaged_files_only");
-            break;
-    }
-
-    constexpr bool buildPackageDB = Mode == PackagerMode::PackagesOnly;
-    constexpr bool validatePackagedFiles = Mode == PackagerMode::PackagedFilesOnly;
-
-    if constexpr (buildPackageDB) {
-        Packager::findPackages(gs, files);
-    }
-
-    {
-        Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
-
-        if constexpr (buildPackageDB) {
-            PackageDBPackageGraph packageGraph{gs.packageDB()};
-            gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
-        }
-
-        {
-            Timer timeit(gs.tracer(), "packager.validatePackagesAndFiles");
-            Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files),
-                              [&gs = as_const(gs)](auto &job) {
-                                  auto file = job.file;
-                                  core::Context ctx(gs, core::Symbols::root(), file);
-
-                                  if (file.data(gs).isPackage(gs)) {
-                                      ENFORCE(buildPackageDB);
-                                      validatePackage(ctx);
-                                  } else {
-                                      ENFORCE(validatePackagedFiles);
-                                      validatePackagedFile(ctx, job.tree);
-                                  }
-                              });
-        }
-    }
-}
 
 bool isTestExport(const ast::ExpressionPtr &expr) {
     auto send = ast::cast_tree<ast::Send>(expr);
@@ -1277,7 +1188,44 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
 
 void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> packageFiles,
                               absl::Span<core::FileRef> nonPackageFiles) {
-    packageRunCore<PackagerMode::PackagesOnly>(gs, workers, packageFiles);
+    Timer timeit(gs.tracer(), "packager");
+    timeit.setTag("mode", "packages_only");
+
+    {
+        Timer timeit(gs.tracer(), "packager.findPackages");
+
+        gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
+
+        {
+            core::UnfreezeNameTable unfreeze(gs);
+            auto packages = gs.unfreezePackages();
+
+            for (auto &file : packageFiles) {
+                if (!file.file.data(gs).isPackage(gs)) {
+                    continue;
+                }
+
+                auto pkgName = gs.packageDB().getPackageNameForFile(file.file);
+                if (!pkgName.exists()) {
+                    continue;
+                }
+                auto &info = PackageInfo::from(gs, pkgName);
+                rewritePackageSpec(gs, file, info);
+            }
+        }
+
+        PackageDBPackageGraph packageGraph{gs.packageDB()};
+        gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
+    }
+
+    {
+        Timer timeit(gs.tracer(), "packager.validatePackages");
+        Parallel::iterate(workers, "validatePackages", absl::MakeSpan(packageFiles), [&gs = as_const(gs)](auto &job) {
+            core::Context ctx(gs, core::Symbols::root(), job.file);
+            ENFORCE(job.file.data(gs).isPackage(gs));
+            validatePackage(ctx);
+        });
+    }
 
     for (auto fref : nonPackageFiles) {
         auto pkg = gs.packageDB().getPackageNameForFile(fref);
@@ -1294,8 +1242,16 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
     }
 }
 
-void Packager::validatePackagedFiles(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
-    packageRunCore<PackagerMode::PackagedFilesOnly>(gs, workers, files);
+void Packager::validatePackagedFiles(const core::GlobalState &gs, WorkerPool &workers,
+                                     absl::Span<ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "packager");
+    timeit.setTag("mode", "packaged_files_only");
+
+    Parallel::iterate(workers, "validatePackagesAndFiles", absl::MakeSpan(files), [&gs](auto &job) {
+        core::Context ctx(gs, core::Symbols::root(), job.file);
+        ENFORCE(!job.file.data(gs).isPackage(gs));
+        validatePackagedFile(ctx, job.tree);
+    });
 }
 
 ast::ParsedFile Packager::copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &ast) {
