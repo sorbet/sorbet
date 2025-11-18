@@ -271,11 +271,10 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
         parser::Prism::ParseResult prismResult = parser.parseWithoutTranslation(collectComments);
 
         auto node = prismResult.getRawNodePointer();
-        // TODO: Enable once RBS Prism pipeline is fully implemented. For now, we use the legacy RBS rewrite
-        // path (see indexOne): https://github.com/sorbet/sorbet/issues/9065
-        // if (gs.cacheSensitiveOptions.rbsEnabled) {
-        //     node = runPrismRBSRewrite(gs, file, node, prismResult.getCommentLocations(), print, ctx, parser);
-        // }
+
+        if (gs.cacheSensitiveOptions.rbsEnabled) {
+            node = runPrismRBSRewrite(gs, file, node, prismResult.getCommentLocations(), print, ctx, parser);
+        }
 
         bool directlyDesugar = !gs.cacheSensitiveOptions.rbsEnabled;
         auto translatedTree = parser::Prism::Translator(parser, ctx, prismResult.getParseErrors(), directlyDesugar,
@@ -388,7 +387,7 @@ pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node
     node = assertionsRewriter.run(node);
 
     if (print.RBSRewriteTree.enabled) {
-        // TODO: print RBS rewrite tree (https://github.com/sorbet/sorbet/issues/9065)
+        print.RBSRewriteTree.fmt("{}\n", parser.prettyPrint(node));
     }
 
     return node;
