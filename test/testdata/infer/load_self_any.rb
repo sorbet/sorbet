@@ -59,5 +59,5 @@ x.bind_self do
 end
 
 x.maybe_bind do
-  T.reveal_type(self) # error: `T.any(B, T.self_type(of T.class_of(<root>)))`
+  T.reveal_type(self) # error: `T.any(B, T.self_type (of T.class_of(<root>)))`
 end
