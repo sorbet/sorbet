@@ -9,6 +9,6 @@ class Test
 end
 
 Test.test do
-  T.reveal_type(self) # error: Revealed type: `T.self_type (of T.class_of(Test))`
+  T.reveal_type(self) # error: Revealed type: `T.class_of(Test)`
 end
 

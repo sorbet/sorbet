@@ -1899,6 +1899,10 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
             result.type = main.receiver;
         } else if (rebind == core::Symbols::MagicBindToAttachedClass()) {
             auto appliedType = core::cast_type<core::AppliedType>(main.receiver);
+            if (appliedType == nullptr) {
+                auto selfType = core::cast_type<core::FreshSelfType>(main.receiver);
+                appliedType = core::cast_type<core::AppliedType>(selfType->upperBound);
+            }
             auto attachedClass = appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
 
             auto lambdaParam =
