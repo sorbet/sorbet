@@ -85,4 +85,12 @@ vector<core::LocOffsets> Parser::collectCommentLocations() {
 
     return commentLocations;
 }
+
+string Parser::prettyPrint(pm_node_t *node) const {
+    pm_buffer_t buffer{};
+    pm_prettyprint(&buffer, const_cast<pm_parser_t *>(&parser), node);
+    string result(buffer.value, buffer.length);
+    pm_buffer_free(&buffer);
+    return result;
+}
 }; // namespace sorbet::parser::Prism
