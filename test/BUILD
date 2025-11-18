@@ -132,7 +132,6 @@ prism_location_test_suite(
         ["prism_regression/**/*.rb"],
         exclude = [
             "prism_regression/error_recovery/assign.rb",
-            "prism_regression/lambda.rb",
         ],
     ),
 )

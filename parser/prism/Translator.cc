@@ -869,6 +869,66 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
                                                                                              move(lhs));
 }
 
+template <typename PrismNode>
+pair<core::LocOffsets, core::LocOffsets> Translator::computeSendLoc(PrismNode *callNode, pm_node_t *blockNode,
+                                                                    pm_node_t *receiver, core::LocOffsets initialLoc,
+                                                                    const absl::Span<pm_node_t *> prismArgs) {
+    static_assert(is_same_v<PrismNode, pm_call_node> || is_same_v<PrismNode, pm_lambda_node>,
+                  "computeSendLoc must be call with a `pm_call_node` or `pm_lambda_node`.");
+    auto sendLoc = initialLoc;
+
+    if (receiver) {
+        auto receiverStart = startLoc(receiver);
+
+        // Special case: the legacy parser ignores the `->` and parameters of a lambda node,
+        // but only if it's used as a receiver to a method call.
+        // Instead, it used the opening_loc (the `{`/`do`)
+        //     -> (a, b) { 123 }.chained_method_call()
+        //               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Outter Send loc (chained method call)
+        //               ^^^^^^^                       Inner Block loc (receiver)
+        //     ^^                                      Inner Send loc  (receiver)
+        // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9631 is fixed
+        if (PM_NODE_TYPE_P(receiver, PM_LAMBDA_NODE)) {
+            auto lambdaNode = down_cast<pm_lambda_node>(receiver);
+            receiverStart = lambdaNode->opening_loc.start;
+        }
+
+        auto receiverEnd = endLoc(receiver);
+        sendLoc = translateLoc(receiverStart, receiverEnd).join(sendLoc);
+    }
+
+    if constexpr (is_same_v<PrismNode, pm_call_node>) {
+        // Extend the location to include the closing `)`/`]` of the arguments, if any, but only for `pm_call_node`s.
+        // Not for `pm_lambda_node` though, because its `closing_loc` is the closing `}` or `end` of the block.
+
+        if (callNode->closing_loc.start && callNode->closing_loc.end) { // explicit `( )` or `[ ]` around the params
+            sendLoc = sendLoc.join(translateLoc(callNode->closing_loc));
+        }
+    }
+
+    if (!prismArgs.empty()) { // Extend to last argument's location, if any.
+        // For index expressions, the closing_loc can come before the last
+        // argument's location:
+        //     a[1, 2] = 3
+        //           ^     closing loc
+        //               ^ last arg loc
+        sendLoc = sendLoc.join(translateLoc(prismArgs.back()->location));
+    }
+
+    core::LocOffsets blockLoc;
+    if (blockNode) {
+        blockLoc = translateLoc(blockNode->location);
+
+        // The block pass arugment is not stored with the other arguments, so we handle it separately here.
+        if (PM_NODE_TYPE_P(blockNode, PM_BLOCK_ARGUMENT_NODE)) {
+            auto blockPassArgLoc = translateLoc(blockNode->location);
+            sendLoc = sendLoc.join(blockPassArgLoc);
+        }
+    }
+
+    return std::make_pair(sendLoc, blockLoc);
+}
+
 unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveConcreteSyntax) {
     if (node == nullptr)
         return nullptr;
@@ -1143,41 +1203,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
             }
 
+            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9631 is fixed
+            auto needsLambdaLocWorkaround = callNode->receiver && PM_NODE_TYPE_P(callNode->receiver, PM_LAMBDA_NODE);
+
             // The legacy parser nodes don't include the literal block argument (if any), but the desugar nodes do
             // include it.
             core::LocOffsets sendLoc;  // The location of the "send" node, exluding any literal block, if any.
             core::LocOffsets blockLoc; // The location of just the block node, on its own.
             core::LocOffsets sendWithBlockLoc = location;
             location = core::LocOffsets::none(); // Invalidate this to ensure we don't use it again in this path.
-            if (callNode->block == nullptr) { // There's no block, so the `sendLoc` and `sendWithBlockLoc` are the same.
+            if (callNode->block == nullptr && !needsLambdaLocWorkaround) {
+                // There's no block, so the `sendLoc` and `sendWithBlockLoc` are the same, so we can just skip
+                // the finicky logic in `computeSendLoc()`.
                 sendLoc = sendWithBlockLoc;
             } else { // There's a block, so we need to calculate the location of the "send" node, excluding it.
-                sendLoc = messageLoc;
-                blockLoc = translateLoc(callNode->block->location);
-
-                if (callNode->receiver) {
-                    sendLoc = translateLoc(callNode->receiver->location).join(sendLoc);
-                }
-
-                if (callNode->closing_loc.start &&
-                    callNode->closing_loc.end) { // explicit `( )` or `[ ]` around the params
-                    sendLoc = sendLoc.join(translateLoc(callNode->closing_loc));
-                }
-
-                if (!prismArgs.empty()) { // Extend to last argument's location, if any.
-                    // For index expressions, the closing_loc can come before the last
-                    // argument's location:
-                    //     a[1, 2] = 3
-                    //           ^     closing loc
-                    //               ^ last arg loc
-                    sendLoc = sendLoc.join(translateLoc(prismArgs.back()->location));
-                }
-
-                // The block pass arugment is not stored with the other arguments, so we handle it separately here.
-                if (PM_NODE_TYPE_P(callNode->block, PM_BLOCK_ARGUMENT_NODE)) {
-                    auto blockPassArgLoc = translateLoc(callNode->block->location);
-                    sendLoc = sendLoc.join(blockPassArgLoc);
-                }
+                std::tie(sendLoc, blockLoc) =
+                    this->computeSendLoc(callNode, callNode->block, callNode->receiver, messageLoc, prismArgs);
             }
             auto sendLoc0 = sendLoc.copyWithZeroLength();
 
@@ -2848,9 +2889,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
             auto lambdaNode = down_cast<pm_lambda_node>(node);
 
-            auto receiver = make_unique<parser::Const>(location, nullptr, core::Names::Constants::Kernel());
-            auto sendNode = make_unique<parser::Send>(location, move(receiver), core::Names::lambda(),
-                                                      translateLoc(lambdaNode->operator_loc), NodeVec{});
+            absl::Span<pm_node_t *> prismArgs; // TODO: set this.
+
+            auto operatorLoc = translateLoc(lambdaNode->operator_loc);
+            auto [sendLoc, blockLoc] = computeSendLoc(lambdaNode, lambdaNode->body, nullptr, operatorLoc, prismArgs);
+
+            auto receiver = make_unique<parser::Const>(operatorLoc, nullptr, core::Names::Constants::Kernel());
+            auto sendNode =
+                make_unique<parser::Send>(sendLoc, move(receiver), core::Names::lambda(), operatorLoc, NodeVec{});
 
             return translateCallWithBlock(node, move(sendNode));
         }
@@ -4695,16 +4741,18 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     pm_node_t *prismParametersNode;
     pm_node_t *prismBodyNode;
-    auto blockLoc = translateLoc(prismBlockOrLambdaNode->location);
+    core::LocOffsets blockLoc;
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         prismParametersNode = prismBlockNode->parameters;
         prismBodyNode = prismBlockNode->body;
+        blockLoc = translateLoc(prismBlockOrLambdaNode->location);
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
         prismParametersNode = prismLambdaNode->parameters;
         prismBodyNode = prismLambdaNode->body;
+        blockLoc = translateLoc(prismLambdaNode->opening_loc.start, prismLambdaNode->closing_loc.end);
     }
 
     unique_ptr<parser::Node> parametersNode;

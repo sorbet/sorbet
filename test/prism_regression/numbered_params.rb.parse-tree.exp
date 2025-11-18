@@ -60,6 +60,38 @@ Begin {
     }
     Block {
       send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
+      }
+      params = NumParams {
+        decls = [
+          LVar {
+            name = <U _1>
+          }
+          LVar {
+            name = <U _2>
+          }
+        ]
+      }
+      body = Send {
+        receiver = LVar {
+          name = <U _1>
+        }
+        method = <U +>
+        args = [
+          LVar {
+            name = <U _2>
+          }
+        ]
+      }
+    }
+    Block {
+      send = Send {
         receiver = NULL
         method = <U proc>
         args = [
@@ -80,6 +112,27 @@ Begin {
       send = Send {
         receiver = NULL
         method = <U proc>
+        args = [
+        ]
+      }
+      params = NumParams {
+        decls = [
+          LVar {
+            name = <U _9>
+          }
+        ]
+      }
+      body = LVar {
+        name = <U _9>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
         args = [
         ]
       }
@@ -127,6 +180,38 @@ Begin {
       send = Send {
         receiver = NULL
         method = <U proc>
+        args = [
+        ]
+      }
+      params = NumParams {
+        decls = [
+          LVar {
+            name = <U _2>
+          }
+          LVar {
+            name = <U _1>
+          }
+        ]
+      }
+      body = Send {
+        receiver = LVar {
+          name = <U _2>
+        }
+        method = <U +>
+        args = [
+          LVar {
+            name = <U _1>
+          }
+        ]
+      }
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
         args = [
         ]
       }
