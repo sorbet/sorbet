@@ -47,8 +47,7 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         [&](const parser::Backref *backref) { result = std::make_unique<Backref>(backref->loc, backref->name); },
         [&](const parser::Begin *begin) { result = std::make_unique<Begin>(begin->loc, deepCopyVec(begin->stmts)); },
         [&](const parser::Block *block) {
-            result = std::make_unique<Block>(block->loc, deepCopy(block->send.get()), deepCopy(block->params.get()),
-                                             deepCopy(block->body.get()));
+            result = std::make_unique<Block>(block->loc, deepCopy(block->params.get()), deepCopy(block->body.get()));
         },
         [&](const parser::BlockParam *blockParam) {
             result = std::make_unique<BlockParam>(blockParam->loc, blockParam->name);
@@ -83,7 +82,7 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         },
         [&](const parser::CSend *cSend) {
             result = std::make_unique<CSend>(cSend->loc, deepCopy(cSend->receiver.get()), cSend->method,
-                                             cSend->methodLoc, deepCopyVec(cSend->args));
+                                             cSend->methodLoc, deepCopyVec(cSend->args), deepCopy(cSend->block.get()));
         },
         [&](const parser::CVar *cVar) { result = std::make_unique<CVar>(cVar->loc, cVar->name); },
         [&](const parser::CVarLhs *cVarLhs) { result = std::make_unique<CVarLhs>(cVarLhs->loc, cVarLhs->name); },
@@ -299,7 +298,7 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         [&](const parser::Self *self) { result = std::make_unique<Self>(self->loc); },
         [&](const parser::Send *send) {
             result = std::make_unique<Send>(send->loc, deepCopy(send->receiver.get()), send->method, send->methodLoc,
-                                            deepCopyVec(send->args));
+                                            deepCopyVec(send->args), deepCopy(send->block.get()));
         },
         [&](const parser::Shadowarg *shadowarg) {
             result = std::make_unique<Shadowarg>(shadowarg->loc, shadowarg->name);
@@ -309,7 +308,9 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
             result = std::make_unique<SplatLhs>(splatLhs->loc, deepCopy(splatLhs->var.get()));
         },
         [&](const parser::String *string) { result = std::make_unique<String>(string->loc, string->val); },
-        [&](const parser::Super *super) { result = std::make_unique<Super>(super->loc, deepCopyVec(super->args)); },
+        [&](const parser::Super *super) {
+            result = std::make_unique<Super>(super->loc, deepCopyVec(super->args), deepCopy(super->block.get()));
+        },
         [&](const parser::Symbol *symbol) { result = std::make_unique<Symbol>(symbol->loc, symbol->val); },
         [&](const parser::True *true_) { result = std::make_unique<True>(true_->loc); },
         [&](const parser::Undef *undef) { result = std::make_unique<Undef>(undef->loc, deepCopyVec(undef->exprs)); },
@@ -337,7 +338,9 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
             result = std::make_unique<XString>(xString->loc, deepCopyVec(xString->nodes));
         },
         [&](const parser::Yield *yield) { result = std::make_unique<Yield>(yield->loc, deepCopyVec(yield->exprs)); },
-        [&](const parser::ZSuper *zSuper) { result = std::make_unique<ZSuper>(zSuper->loc); },
+        [&](const parser::ZSuper *zSuper) {
+            result = std::make_unique<ZSuper>(zSuper->loc, deepCopy(zSuper->block.get()));
+        },
         [&](const parser::Node *other) { ENFORCE(false, "Unimplemented node type: {}", other->nodeName()); });
 
     return result;

@@ -93,8 +93,9 @@ parser::NodeVec extractHelpers(core::MutableContext ctx, vector<Comment> annotat
                 auto body = make_unique<parser::Begin>(annotation.typeLoc, NodeVec1(move(type)));
                 auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
                                               core::Names::requiresAncestor(), annotation.typeLoc);
-                auto block = make_unique<parser::Block>(annotation.typeLoc, move(send), nullptr, move(body));
-                helpers.emplace_back(move(block));
+                parser::cast_node<parser::Send>(send.get())->block =
+                    make_unique<parser::Block>(annotation.typeLoc, nullptr, move(body));
+                helpers.emplace_back(move(send));
             }
         }
     }

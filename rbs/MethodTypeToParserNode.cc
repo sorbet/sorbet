@@ -152,7 +152,7 @@ unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const parse
             auto args = NodeVec1(move(hash));
 
             sigBuilder = parser::MK::Send(annotation.typeLoc, move(sigBuilder), core::Names::override_(),
-                                          annotation.typeLoc, move(args));
+                                          annotation.typeLoc, move(args), nullptr);
         } else if (annotation.string == "override(allow_incompatible: :visibility)") {
             auto key = parser::MK::Symbol(annotation.typeLoc, core::Names::allowIncompatible());
             auto value = parser::MK::Symbol(annotation.typeLoc, core::Names::visibility());
@@ -162,7 +162,7 @@ unique_ptr<parser::Node> handleAnnotations(core::MutableContext ctx, const parse
             auto args = NodeVec1(move(hash));
 
             sigBuilder = parser::MK::Send(annotation.typeLoc, move(sigBuilder), core::Names::override_(),
-                                          annotation.typeLoc, move(args));
+                                          annotation.typeLoc, move(args), nullptr);
         }
     }
 
@@ -523,13 +523,14 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
             typeParamsVector.emplace_back(parser::MK::Symbol(param.first, param.second));
         }
         sigBuilder = parser::MK::Send(fullTypeLoc, move(sigBuilder), core::Names::typeParameters(), fullTypeLoc,
-                                      move(typeParamsVector));
+                                      move(typeParamsVector), nullptr);
     }
 
     if (sigParams.size() > 0) {
         auto hash = parser::MK::Hash(fullTypeLoc, true, move(sigParams));
         auto args = NodeVec1(move(hash));
-        sigBuilder = parser::MK::Send(fullTypeLoc, move(sigBuilder), core::Names::params(), fullTypeLoc, move(args));
+        sigBuilder =
+            parser::MK::Send(fullTypeLoc, move(sigBuilder), core::Names::params(), fullTypeLoc, move(args), nullptr);
     }
 
     rbs_node_t *returnValue = functionType->return_type;
@@ -550,10 +551,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
         sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
     }
 
-    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc), core::Names::sig(),
-                                firstLineTypeLoc, move(sigArgs));
-
-    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
+    return parser::MK::Send(fullTypeLoc, parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc), core::Names::sig(),
+                            firstLineTypeLoc, move(sigArgs),
+                            make_unique<parser::Block>(commentLoc, nullptr, move(sigBuilder)));
 }
 
 unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Send *send, const rbs_node_t *type,
@@ -601,7 +601,8 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
             make_unique<parser::Pair>(argLoc, parser::MK::Symbol(argLoc, argName), returnType->deepCopy()));
         auto hash = parser::MK::Hash(send->loc, true, move(pairs));
         auto sigArgs = parser::NodeVec1(move(hash));
-        sigBuilder = parser::MK::Send(send->loc, move(sigBuilder), core::Names::params(), send->loc, move(sigArgs));
+        sigBuilder =
+            parser::MK::Send(send->loc, move(sigBuilder), core::Names::params(), send->loc, move(sigArgs), nullptr);
     }
 
     sigBuilder =
@@ -614,10 +615,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
     }
 
-    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc), core::Names::sig(),
-                                firstLineTypeLoc, move(sigArgs));
-
-    return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
+    return parser::MK::Send(fullTypeLoc, parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc), core::Names::sig(),
+                            firstLineTypeLoc, move(sigArgs),
+                            make_unique<parser::Block>(commentLoc, nullptr, move(sigBuilder)));
 }
 
 } // namespace sorbet::rbs

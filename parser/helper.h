@@ -54,8 +54,9 @@ public:
      * Create a `recv.name(args...)` send node.
      */
     static std::unique_ptr<parser::Node> Send(core::LocOffsets loc, std::unique_ptr<parser::Node> recv,
-                                              core::NameRef name, core::LocOffsets nameLoc, parser::NodeVec args) {
-        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, move(args));
+                                              core::NameRef name, core::LocOffsets nameLoc, parser::NodeVec args,
+                                              std::unique_ptr<parser::Node> block) {
+        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, move(args), move(block));
     }
 
     /*
@@ -63,7 +64,7 @@ public:
      */
     static std::unique_ptr<parser::Node> Send0(core::LocOffsets loc, std::unique_ptr<parser::Node> recv,
                                                core::NameRef name, core::LocOffsets nameLoc) {
-        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, parser::NodeVec());
+        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, parser::NodeVec(), nullptr);
     }
 
     /*
@@ -75,7 +76,7 @@ public:
         auto args = parser::NodeVec();
         args.reserve(1);
         args.push_back(move(arg));
-        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, move(args));
+        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, move(args), nullptr);
     }
 
     /*
@@ -88,7 +89,7 @@ public:
         args.reserve(2);
         args.push_back(move(arg1));
         args.push_back(move(arg2));
-        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, move(args));
+        return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, move(args), nullptr);
     }
 
     /*
@@ -225,14 +226,14 @@ public:
      * Create a `T.all(args...)` send node.
      */
     static std::unique_ptr<parser::Node> TAll(core::LocOffsets loc, parser::NodeVec args) {
-        return Send(loc, T(loc), core::Names::all(), loc, move(args));
+        return Send(loc, T(loc), core::Names::all(), loc, move(args), nullptr);
     }
 
     /*
      * Create a `T.any(args...)` send node.
      */
     static std::unique_ptr<parser::Node> TAny(core::LocOffsets loc, parser::NodeVec args) {
-        return Send(loc, T(loc), core::Names::any(), loc, move(args));
+        return Send(loc, T(loc), core::Names::any(), loc, move(args), nullptr);
     }
 
     /*
@@ -308,7 +309,7 @@ public:
             auto argsVec = parser::NodeVec();
             argsVec.reserve(1);
             argsVec.push_back(move(args));
-            builder = Send(loc, move(builder), core::Names::params(), loc, move(argsVec));
+            builder = Send(loc, move(builder), core::Names::params(), loc, move(argsVec), nullptr);
         }
         builder = Send1(loc, move(builder), core::Names::returns(), loc, move(returnType));
         return builder;
@@ -324,7 +325,7 @@ public:
             auto argsVec = parser::NodeVec();
             argsVec.reserve(1);
             argsVec.push_back(move(args));
-            builder = Send(loc, move(builder), core::Names::params(), loc, move(argsVec));
+            builder = Send(loc, move(builder), core::Names::params(), loc, move(argsVec), nullptr);
         }
         return Send0(loc, move(builder), core::Names::void_(), loc);
     }
@@ -343,7 +344,8 @@ public:
         auto send = Send0(loc, T(loc), core::Names::typeAlias(), loc);
         auto body = std::make_unique<parser::Begin>(loc, parser::NodeVec());
         body->stmts.push_back(move(type));
-        return std::make_unique<parser::Block>(loc, move(send), nullptr, move(body));
+        parser::cast_node<parser::Send>(send.get())->block = std::make_unique<parser::Block>(loc, nullptr, move(body));
+        return send;
     }
 
     /*
@@ -364,7 +366,7 @@ public:
      * Create a `T.untyped()` send node.
      */
     static std::unique_ptr<parser::Node> TUntyped(core::LocOffsets loc) {
-        return std::make_unique<parser::Send>(loc, T(loc), core::Names::untyped(), loc, parser::NodeVec());
+        return std::make_unique<parser::Send>(loc, T(loc), core::Names::untyped(), loc, parser::NodeVec(), nullptr);
     }
 
     /* is helpers */

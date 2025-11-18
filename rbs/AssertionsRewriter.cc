@@ -224,17 +224,13 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(const unique_ptr
  *
  * Returns `true` if the block is a `sig` send, `false` otherwise.
  */
-bool AssertionsRewriter::saveTypeParams(parser::Block *block) {
+bool AssertionsRewriter::saveTypeParams(parser::Send *send) {
+    if (send->method != core::Names::sig() || send->block == nullptr) {
+        return false;
+    }
+
+    auto block = parser::cast_node<parser::Block>(send->block.get());
     if (block->body == nullptr) {
-        return false;
-    }
-
-    auto send = parser::cast_node<parser::Send>(block->send.get());
-    if (send == nullptr) {
-        return false;
-    }
-
-    if (send->method != core::Names::sig()) {
         return false;
     }
 
@@ -473,9 +469,17 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
         // Sends
 
         [&](parser::Send *send) {
+            if (saveTypeParams(send)) {
+                // If this is a `sig` block, we need to save the type parameters so we can use them to resolve the type
+                // parameters from the method signature.
+                result = move(node);
+                return;
+            }
+
             send->receiver = rewriteNode(move(send->receiver));
             node = maybeInsertCast(move(node));
             rewriteNodes(&send->args);
+            send->block = rewriteNode(move(send->block));
             result = move(node);
         },
         [&](parser::CSend *csend) {
@@ -487,15 +491,7 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
             result = move(node);
         },
         [&](parser::Block *block) {
-            if (saveTypeParams(block)) {
-                // If this is a `sig` block, we need to save the type parameters so we can use them to resolve the type
-                // parameters from the method signature.
-                result = move(node);
-                return;
-            }
-
             node = maybeInsertCast(move(node));
-            block->send = rewriteNode(move(block->send));
             block->body = rewriteBody(move(block->body));
             result = move(node);
         },

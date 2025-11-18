@@ -42,8 +42,7 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
         }
 
         auto typeConst = parser::MK::Const(loc, nullptr, nameConstant);
-        auto typeSend =
-            parser::MK::Send(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::typeMember(), loc, move(args));
+        unique_ptr<parser::Node> block;
 
         auto defaultType = rbsTypeParam->default_type;
         auto upperBound = rbsTypeParam->upper_bound;
@@ -69,8 +68,11 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
             }
 
             auto body = parser::MK::Hash(loc, false, move(pairs));
-            typeSend = make_unique<parser::Block>(loc, move(typeSend), nullptr, move(body));
+            block = make_unique<parser::Block>(loc, nullptr, move(body));
         }
+
+        auto typeSend = parser::MK::Send(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::typeMember(), loc,
+                                         move(args), move(block));
 
         auto assign = make_unique<parser::Assign>(loc, move(typeConst), move(typeSend));
         result.emplace_back(move(assign));

@@ -44,7 +44,7 @@ private:
     parser::NodeVec rewriteNodesAsArray(const std::unique_ptr<parser::Node> &node, parser::NodeVec nodes);
     void rewriteNodes(parser::NodeVec *nodes);
 
-    bool saveTypeParams(parser::Block *block);
+    bool saveTypeParams(parser::Send *send);
     std::unique_ptr<parser::Node> maybeInsertCast(std::unique_ptr<parser::Node> node);
     std::unique_ptr<parser::Node> replaceSyntheticBind(std::unique_ptr<parser::Node> node);
     std::unique_ptr<parser::Node>

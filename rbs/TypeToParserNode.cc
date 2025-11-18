@@ -125,7 +125,8 @@ unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_cla
             args.emplace_back(move(argType));
         }
 
-        return parser::MK::Send(loc, move(typeConstant), core::Names::syntheticSquareBrackets(), loc, move(args));
+        return parser::MK::Send(loc, move(typeConstant), core::Names::syntheticSquareBrackets(), loc, move(args),
+                                nullptr);
     }
 
     return typeConstant;

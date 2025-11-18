@@ -393,9 +393,8 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "begin");
         },
         [&](parser::Block *block) {
-            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), block->send->loc.beginPos()).line;
+            auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), block->loc.beginPos()).line;
             associateAssertionCommentsToNode(node);
-            walkNode(block->send.get());
             consumeCommentsUntilLine(beginLine);
             block->body = walkBody(block, move(block->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
@@ -448,6 +447,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             associateAssertionCommentsToNode(node);
             walkNode(csend->receiver.get());
             walkNodes(csend->args);
+            walkNode(csend->block.get());
             consumeCommentsInsideNode(node, "csend");
         },
         [&](parser::DefMethod *def) {
@@ -622,6 +622,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 associateAssertionCommentsToNode(send);
                 walkNode(send->receiver.get());
                 walkNodes(send->args);
+                walkNode(send->block.get());
                 consumeCommentsInsideNode(send, "send");
             } else if (send->method == core::Names::squareBracketsEq() || send->method.isSetter(ctx.state)) {
                 // This is an assign through a send, either: `foo[key]=(y)` or `foo.x=(y)`
@@ -651,6 +652,8 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         [&](parser::Super *super_) {
             associateAssertionCommentsToNode(node);
             walkNodes(super_->args);
+            walkNode(super_->block.get());
+            walkNode(super_->block.get());
             consumeCommentsInsideNode(node, "super");
         },
         [&](parser::Until *until) {

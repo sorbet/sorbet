@@ -546,15 +546,19 @@ public:
         return UnresolvedConstantParts(loc, {core::Names::Constants::T(), core::Names::Constants::Set()});
     }
 
-    static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
+    static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method, ExpressionPtr block) {
         // A ZSuper call can have a block argument. Don't include it in the location.
         const uint32_t length = "super"sv.size();
         auto superKeywordLoc = core::LocOffsets{loc.beginPos(), loc.beginPos() + length};
 
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(superKeywordLoc.copyWithZeroLength()), method, loc, 1,
-                    SendArgs(make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength())), flags);
+        auto send = Send(loc, Self(superKeywordLoc.copyWithZeroLength()), method, loc, 1,
+                         SendArgs(make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength())), flags);
+        if (block != nullptr) {
+            cast_tree<ast::Send>(send)->setBlock(std::move(block));
+        }
+        return send;
     }
 
     static ExpressionPtr Magic(core::LocOffsets loc) {
