@@ -905,8 +905,8 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
                     // When processing the application source of a package, we need to make a copy of the package file,
                     // and edit out any reference to test symbols.
                     for (auto member : scc.members) {
-                        const auto &package = packagesToPackageRb[member];
-                        packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
+                        auto &package = packagesToPackageRb[member];
+                        packageFiles.emplace_back(packager::Packager::splitOutTextExports(gs, package));
                     }
                 }
             }
