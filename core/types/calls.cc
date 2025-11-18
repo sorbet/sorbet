@@ -2305,19 +2305,22 @@ public:
         // This new approach has the side effect of allocating fewer types and doing one fewer
         // `T.all` call, which is marginally faster.
 
-        auto singletonExternalType = singleton.data(gs)->externalType();
+        const auto singletonExternalType = singleton.data(gs)->externalType();
         auto externalTypeApplied = cast_type<AppliedType>(singletonExternalType);
+        auto targs = vector<TypePtr>{};
         ENFORCE_NO_TIMER(externalTypeApplied != nullptr, "Must have at least <AttachedClass> type member");
         int idx = -1;
         for (const auto &tm : singleton.data(gs)->typeMembers()) {
             idx++;
             auto tmData = tm.data(gs);
             if (tmData->name == core::Names::Constants::AttachedClass()) {
-                externalTypeApplied->targs[idx] = widenedSelfType;
+                targs.emplace_back(widenedSelfType);
+            } else {
+                targs.emplace_back(externalTypeApplied->targs[idx]);
             }
         }
 
-        res.returnType = singletonExternalType;
+        res.returnType = make_type<AppliedType>(externalTypeApplied->klass, move(targs));
     }
 } Object_class;
 
