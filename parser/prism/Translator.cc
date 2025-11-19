@@ -3113,6 +3113,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_PROGRAM_NODE: { // The root node of the parse tree, representing the entire program
             pm_program_node *programNode = down_cast<pm_program_node>(node);
 
+            // Report parse errors once at the root level
+            for (auto &error : parseErrors) {
+                // EOF error is always pointed to the very last line of the file, which can't be expressed in Sorbet's
+                // error comments
+                if (error.id != PM_ERR_UNEXPECTED_TOKEN_CLOSE_CONTEXT) {
+                    reportError(translateLoc(error.location), error.message);
+                }
+            }
+
             return translate(up_cast(programNode->statements));
         }
         case PM_POST_EXECUTION_NODE: {
@@ -3599,16 +3608,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
         case PM_MISSING_NODE:
-            // For now, we only report errors when we hit a missing node because we don't want to always report dynamic
-            // constant assignment errors
-            // TODO: We will improve this in the future when we handle more errored cases
-            for (auto &error : parseErrors) {
-                // EOF error is always pointed to the very last line of the file, which can't be expressed in Sorbet's
-                // error comments
-                if (error.id != PM_ERR_UNEXPECTED_TOKEN_CLOSE_CONTEXT) {
-                    reportError(translateLoc(error.location), error.message);
-                }
-            }
             return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
     }
 }
