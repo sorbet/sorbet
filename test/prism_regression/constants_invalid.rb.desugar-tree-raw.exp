@@ -1,0 +1,26 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U test_invalid_constant><<U <todo method>>>
+      params = [UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = UnresolvedConstantLit{
+        cnst = <U >
+        scope = EmptyTree
+      }
+    }
+  ]
+}

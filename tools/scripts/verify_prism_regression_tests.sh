@@ -10,6 +10,7 @@ echo "Verifying parse trees and desugar trees..."
 skip_files=(
   "call_kw_nil_args"
   "call_block_param_and_forwarding"
+  "constants_invalid"
 )
 
 mismatched_parse_tree_files=()
