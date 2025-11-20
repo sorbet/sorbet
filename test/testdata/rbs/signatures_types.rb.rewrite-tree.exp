@@ -176,6 +176,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C Class>)
+  end
+
+  def non_generic_type_class<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C Class>)
+  end
+
+  def non_generic_type_class_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.returns(::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
   end
 
@@ -188,6 +204,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def generic_type_class_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C Module>)
+  end
+
+  def non_generic_type_module<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C Module>)
+  end
+
+  def non_generic_type_module_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Module>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_module<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Module>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_module_root<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
@@ -571,6 +619,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(<self>.generic_type_array_root())
 
+  <runtime method definition of non_generic_type_class>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_class())
+
+  <runtime method definition of non_generic_type_class_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_class_root())
+
   <runtime method definition of generic_type_class>
 
   <emptyTree>::<C T>.reveal_type(<self>.generic_type_class())
@@ -578,6 +634,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of generic_type_class_root>
 
   <emptyTree>::<C T>.reveal_type(<self>.generic_type_class_root())
+
+  <runtime method definition of non_generic_type_module>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_module())
+
+  <runtime method definition of non_generic_type_module_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_module_root())
+
+  <runtime method definition of generic_type_module>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_module())
+
+  <runtime method definition of generic_type_module_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_module_root())
 
   <runtime method definition of generic_type_enumerable>
 

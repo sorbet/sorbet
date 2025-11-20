@@ -123,6 +123,16 @@ T.reveal_type(generic_type_array) # error: Revealed type: `T::Array[Integer]`
 def generic_type_array_root; T.unsafe(nil); end
 T.reveal_type(generic_type_array_root) # error: Revealed type: `T::Array[Integer]`
 
+#: -> Class
+#     ^^^^^ error: Malformed type declaration. Generic class without type arguments `Class`
+def non_generic_type_class; T.unsafe(nil); end
+T.reveal_type(non_generic_type_class) # error: Revealed type: `T::Class[T.anything]`
+
+#: -> ::Class
+#     ^^^^^^^ error: Malformed type declaration. Generic class without type arguments `Class`
+def non_generic_type_class_root; T.unsafe(nil); end
+T.reveal_type(non_generic_type_class_root) # error: Revealed type: `T::Class[T.anything]`
+
 #: -> Class[Integer]
 def generic_type_class; T.unsafe(nil); end
 T.reveal_type(generic_type_class) # error: Revealed type: `T::Class[Integer]`
@@ -130,6 +140,24 @@ T.reveal_type(generic_type_class) # error: Revealed type: `T::Class[Integer]`
 #: -> ::Class[Integer]
 def generic_type_class_root; T.unsafe(nil); end
 T.reveal_type(generic_type_class_root) # error: Revealed type: `T::Class[Integer]`
+
+#: -> Module
+#     ^^^^^^ error: Malformed type declaration. Generic class without type arguments `Module`
+def non_generic_type_module; T.unsafe(nil); end
+T.reveal_type(non_generic_type_module) # error: Revealed type: `T::Module[T.anything]`
+
+#: -> ::Module
+#     ^^^^^^^^ error: Malformed type declaration. Generic class without type arguments `Module`
+def non_generic_type_module_root; T.unsafe(nil); end
+T.reveal_type(non_generic_type_module_root) # error: Revealed type: `T::Module[T.anything]`
+
+#: -> Module[Integer]
+def generic_type_module; T.unsafe(nil); end
+T.reveal_type(generic_type_module) # error: Revealed type: `T::Module[Integer]`
+
+#: -> ::Module[Integer]
+def generic_type_module_root; T.unsafe(nil); end
+T.reveal_type(generic_type_module_root) # error: Revealed type: `T::Module[Integer]`
 
 #: -> Enumerable[Integer]
 def generic_type_enumerable; T.unsafe(nil); end

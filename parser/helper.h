@@ -192,6 +192,13 @@ public:
     }
 
     /*
+     * Create a `T::Module` constant node.
+     */
+    static std::unique_ptr<parser::Node> T_Module(core::LocOffsets loc) {
+        return Const(loc, T(loc), core::Names::Constants::Module());
+    }
+
+    /*
      * Create a `T::Set` constant node.
      */
     static std::unique_ptr<parser::Node> T_Set(core::LocOffsets loc) {
