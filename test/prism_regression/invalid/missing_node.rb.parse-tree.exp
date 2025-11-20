@@ -1,0 +1,12 @@
+Send {
+  receiver = Integer {
+    val = "1"
+  }
+  method = <U +>
+  args = [
+    Const {
+      scope = NULL
+      name = <C <U <ErrorNode>>>
+    }
+  ]
+}
