@@ -1,0 +1,81 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U f1>
+      params = Params {
+        params = [
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f2>
+      params = Params {
+        params = [
+          RestParam {
+            name = <U args>
+          }
+          Kwrestarg {
+            name = <U kwargs>
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f3>
+      params = Params {
+        params = [
+          RestParam {
+            name = <U args>
+          }
+          Kwarg {
+            name = <U a>
+          }
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f4>
+      params = Params {
+        params = [
+          Kwarg {
+            name = <U a>
+          }
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
+    DefMethod {
+      name = <U f5>
+      params = Params {
+        params = [
+          Kwnilarg {
+          }
+        ]
+      }
+      body = Begin {
+        stmts = [
+          Const {
+            scope = NULL
+            name = <C <U <ErrorNode>>>
+          }
+          Integer {
+            val = "10"
+          }
+          Const {
+            scope = NULL
+            name = <C <U <ErrorNode>>>
+          }
+        ]
+      }
+    }
+  ]
+}
