@@ -251,7 +251,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                 for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                     ++n;
                     auto &tree = indexed[idx];
-                    // This does package-specific behavior without checking `--stripe-packages`!
+                    // This does package-specific behavior without checking `--sorbet-packages`!
                     if (tree.file.data(gs).hasPackageRbPath()) {
                         continue;
                     }
@@ -580,7 +580,7 @@ int realmain(int argc, char *argv[]) {
             }
 
             // Cache these before any packager rewrites, so that the cache is still
-            // usable regardless of whether `--stripe-packages` was passed.
+            // usable regardless of whether `--sorbet-packages` was passed.
             // Want to keep the kvstore around so we can still write to it later.
             kvstore =
                 cache::ownIfUnchanged(*gs, cache::maybeCacheGlobalStateAndFiles(
@@ -620,7 +620,7 @@ int realmain(int argc, char *argv[]) {
                 auto nonPackageIndexed = std::move(nonPackageIndexedResult.result());
 
                 // Cache these before any packager rewrites, so that the cache is still usable
-                // regardless of whether `--stripe-packages` was passed.
+                // regardless of whether `--sorbet-packages` was passed.
                 kvstore = cache::ownIfUnchanged(
                     *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
                                                               *workers, nonPackageIndexed));

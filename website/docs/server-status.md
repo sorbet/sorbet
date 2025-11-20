@@ -125,7 +125,7 @@ Today, this happens for these kinds of edits:
 
 - Edits which change over 50 files at once.
 - Edits which add a new file.
-- Edits which make any change in a `__package.rb` file (only if using the `--stripe-packages` flag).
+- Edits which make any change in a `__package.rb` file (only if using the `--sorbet-packages` flag).
 - Edits which produce an **unrecoverable** syntax error in the file. (Sorbet is able to recover from most but not all syntax errors.)
 - Edits which change the class or inheritance hierarchy.
 - Edits which change a definition used in over 50 files.

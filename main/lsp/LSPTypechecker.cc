@@ -477,7 +477,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     // Only write the cache during initialization to avoid unbounded growth.
                     if (mode == SlowPathMode::Init) {
                         // Cache these before any packager rewrites, so that the cache is still
-                        // usable regardless of whether `--stripe-packages` was passed.
+                        // usable regardless of whether `--sorbet-packages` was passed.
                         // Want to keep the kvstore around so we can still write to it later.
                         ownedKvstore = cache::ownIfUnchanged(
                             *this->gs,
@@ -516,7 +516,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 // Only write the cache during initialization to avoid unbounded growth.
                 if (mode == SlowPathMode::Init) {
                     // Cache these before any packager rewrites, so that the cache is still usable
-                    // regardless of whether `--stripe-packages` was passed.
+                    // regardless of whether `--sorbet-packages` was passed.
                     ownedKvstore = cache::ownIfUnchanged(
                         *this->gs, cache::maybeCacheGlobalStateAndFiles(
                                        OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
