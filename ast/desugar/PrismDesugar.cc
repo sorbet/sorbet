@@ -185,28 +185,6 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
 }
 
 ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
-    block->send->loc = block->send->loc.join(block->loc);
-    auto recv = node2TreeImpl(dctx, block->send);
-    Send *send;
-    ExpressionPtr res;
-    if ((send = cast_tree<Send>(recv)) != nullptr) {
-        res = move(recv);
-    } else {
-        // This must have been a csend; That will have been desugared
-        // into an insseq with an If in the expression.
-        res = move(recv);
-        auto is = cast_tree<InsSeq>(res);
-        if (!is) {
-            if (auto e = dctx.ctx.beginIndexerError(block->loc, core::errors::Desugar::UnsupportedNode)) {
-                e.setHeader("No body in block");
-            }
-            return MK::EmptyTree();
-        }
-        auto iff = cast_tree<If>(is->expr);
-        ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
-        send = cast_tree<Send>(iff->elsep);
-        ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
-    }
     auto [params, destructures] = desugarParams(dctx, block->params.get());
 
     checkBlockRestParam(dctx, params);
@@ -216,9 +194,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     auto desugaredBody = desugarBody(dctx1, block->loc, block->body, move(destructures));
 
-    // TODO the send->block's loc is too big and includes the whole send
-    send->setBlock(MK::Block(block->loc, move(desugaredBody), move(params)));
-    return res;
+    return MK::Block(block->loc, move(desugaredBody), move(params));
 }
 
 ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::NodeVec &stmts) {
@@ -948,6 +924,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         result = move(res);
                     }
                 }
+                if (auto sendBlock = parser::cast_node<parser::Block>(send->block.get())) {
+                    if (auto sendResult = cast_tree<ast::Send>(result)) {
+                        sendResult->setBlock(desugarBlock(dctx, sendBlock));
+                    }
+                }
             },
             [&](parser::String *string) {
                 ExpressionPtr res = MK::String(loc, string->val);
@@ -1086,7 +1067,6 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     result = MK::InsSeq(loc, move(updateStmts), MK::Local(loc, acc));
                 }
             },
-            [&](parser::Block *block) { result = desugarBlock(dctx, block); },
             [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
                 auto lhs = node2TreeImpl(dctx, asgn->lhs);
@@ -1424,8 +1404,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // Replace the original method name with a new special one that conveys that this is a CSend, so
                     // that a&.foo is treated as different from a.foo when checking for structural equality.
                     auto newFun = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, csend->method, 1);
-                    unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(loc, move(csend->receiver), newFun,
-                                                                                  csend->methodLoc, move(csend->args));
+                    unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
+                        loc, move(csend->receiver), newFun, csend->methodLoc, move(csend->args), move(csend->block));
                     auto send = node2TreeImpl(dctx, sendNode);
                     result = move(send);
                     return;
@@ -1456,7 +1436,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 unique_ptr<parser::Node> sendNode =
                     make_unique<parser::Send>(loc, make_unique<parser::LVar>(zeroLengthRecvLoc, tempRecv),
-                                              csend->method, csend->methodLoc, move(csend->args));
+                                              csend->method, csend->methodLoc, move(csend->args), move(csend->block));
                 auto send = node2TreeImpl(dctx, sendNode);
 
                 ExpressionPtr nil =
@@ -1648,8 +1628,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Do this by synthesizing a `Send` parse node and letting our
                 // Send desugar handle it.
                 auto method = maybeTypedSuper(dctx);
-                unique_ptr<parser::Node> send =
-                    make_unique<parser::Send>(super->loc, nullptr, method, super->loc, move(super->args));
+                unique_ptr<parser::Node> send = make_unique<parser::Send>(super->loc, nullptr, method, super->loc,
+                                                                          move(super->args), move(super->block));
                 auto res = node2TreeImpl(dctx, send);
                 result = move(res);
             },
@@ -2183,6 +2163,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
 
+            [&](parser::Block *block) { Exception::raise("Unexpected bare block!"); },
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) {
                 Exception::raise("Unimplemented Parser Node: PrismDesugar: {} (class: {})", node->nodeName(),

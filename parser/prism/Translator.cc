@@ -463,7 +463,8 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
 
     unique_ptr<parser::Node> lhs;
     if (!directlyDesugar || !hasExpr(receiver) || !hasExpr(args)) {
-        lhs = make_unique<parser::Send>(lhsLoc, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
+        lhs = make_unique<parser::Send>(lhsLoc, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args),
+                                        nullptr);
     } else {
         auto receiverExpr = receiver->takeDesugaredExpr();
         auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
@@ -472,7 +473,7 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
         auto send =
             MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
         lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), core::Names::squareBrackets(),
-                                                lBracketLoc, move(args));
+                                                lBracketLoc, move(args), nullptr);
     }
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
@@ -787,7 +788,7 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
                                                               core::LocOffsets messageLoc) {
     if (!directlyDesugar || !hasExpr(receiver)) {
         // Fall back to CSend if we can't desugar directly
-        auto lhs = make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
+        auto lhs = make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{}, nullptr);
         return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::CSend>(callNode, location,
                                                                                                   move(lhs));
     }
@@ -808,7 +809,8 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
                           core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
     auto send =
         MK::Send(location, MK::Local(zeroLengthRecvLoc, tempRecv), name, messageLoc, 0, ast::Send::ARGS_store{});
-    auto tempSend = make_node_with_expr<parser::Send>(move(send), location, nullptr, name, messageLoc, NodeVec{});
+    auto tempSend =
+        make_node_with_expr<parser::Send>(move(send), location, nullptr, name, messageLoc, NodeVec{}, nullptr);
 
     // Recursively handle the assignment operation on the temporary send
     auto assignmentResult = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
@@ -821,7 +823,7 @@ unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNod
     auto result = MK::InsSeq1(location, move(tempAssign), move(ifExpr));
 
     // Create a node that directly contains the InsSeq expression for the safe navigation pattern
-    auto lhs = make_node_with_expr<parser::Send>(move(result), location, nullptr, name, messageLoc, NodeVec{});
+    auto lhs = make_node_with_expr<parser::Send>(move(result), location, nullptr, name, messageLoc, NodeVec{}, nullptr);
     return move(lhs);
 }
 
@@ -852,7 +854,7 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
 
     // Handle operator assignment to the result of a method call, like `a.b += 1`
     if (!directlyDesugar || !hasExpr(receiver)) {
-        auto lhs = make_unique<parser::Send>(lhsLoc, move(receiver), name, messageLoc, NodeVec{});
+        auto lhs = make_unique<parser::Send>(lhsLoc, move(receiver), name, messageLoc, NodeVec{}, nullptr);
         auto result = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
             callNode, location, move(lhs));
         return result;
@@ -863,7 +865,8 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
     flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
     auto send = MK::Send(lhsLoc, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
-    auto lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), name, messageLoc, NodeVec{});
+    auto lhs =
+        make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), name, messageLoc, NodeVec{}, nullptr);
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(callNode, location,
                                                                                              move(lhs));
@@ -1448,9 +1451,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 }
 
                 if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                    sendNode = make_unique<parser::CSend>(sendLoc, move(receiver), name, messageLoc, move(args));
+                    sendNode =
+                        make_unique<parser::CSend>(sendLoc, move(receiver), name, messageLoc, move(args), nullptr);
                 } else {
-                    sendNode = make_unique<parser::Send>(sendLoc, move(receiver), name, messageLoc, move(args));
+                    sendNode =
+                        make_unique<parser::Send>(sendLoc, move(receiver), name, messageLoc, move(args), nullptr);
                 }
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
@@ -1612,7 +1617,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                         MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
                                  messageLoc, numPosArgs, move(magicSendArgs), flags);
                     return make_node_with_expr<parser::Send>(move(sendExpr), sendWithBlockLoc, move(receiver), name,
-                                                             messageLoc, move(args));
+                                                             messageLoc, move(args), nullptr);
                 }
 
                 if (prismBlock != nullptr) {
@@ -1652,7 +1657,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 auto sendExpr = MK::Send(sendWithBlockLoc, MK::Magic(sendWithBlockLoc), core::Names::callWithSplat(),
                                          messageLoc, numPosArgs, move(magicSendArgs), flags);
                 auto sendNode = make_node_with_expr<parser::Send>(move(sendExpr), sendWithBlockLoc, move(receiver),
-                                                                  name, messageLoc, move(args));
+                                                                  name, messageLoc, move(args), nullptr);
 
                 if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                     // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
@@ -1662,7 +1667,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     //       It just puts them at the end of the arguments list,
                     //       which is why we checked for `PM_BLOCK_NODE` specifically here.
 
-                    return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), blockLoc, move(sendNode),
+                    return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), blockLoc,
                                                               move(blockParameters), move(blockBody));
                 }
 
@@ -1713,7 +1718,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                                          messageLoc, numPosArgs, move(magicSendArgs), flags);
 
                 return make_node_with_expr<parser::Send>(move(sendExpr), sendWithBlockLoc, move(receiver), name,
-                                                         messageLoc, move(args));
+                                                         messageLoc, move(args), nullptr);
             }
 
             ast::Send::ARGS_store sendArgs{};
@@ -1765,8 +1770,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto expr =
                 MK::Send(sendWithBlockLoc, move(receiverExpr), name, messageLoc, numPosArgs, move(sendArgs), flags);
 
-            sendNode =
-                make_node_with_expr<parser::Send>(move(expr), sendLoc, move(receiver), name, messageLoc, move(args));
+            sendNode = make_node_with_expr<parser::Send>(move(expr), sendLoc, move(receiver), name, messageLoc,
+                                                         move(args), nullptr);
 
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
                 // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child,
@@ -1776,7 +1781,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 //       It just puts them at the end of the arguments list,
                 //       which is why we checked for `PM_BLOCK_NODE` specifically here.
 
-                return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), blockLoc, move(sendNode),
+                return make_node_with_expr<parser::Block>(sendNode->takeDesugaredExpr(), blockLoc,
                                                           move(blockParameters), move(blockBody));
             }
 
@@ -1799,9 +1804,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 // Handle conditional send, e.g. `self&.target1, self&.target2 = 1, 2`
                 // It's not valid Ruby, but the parser needs to support it for the diagnostics to work
-                return make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
+                return make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{}, nullptr);
             } else { // Regular send, e.g. `self.target1, self.target2 = 1, 2`
-                return make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{});
+                return make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{}, nullptr);
             }
         }
         case PM_CASE_MATCH_NODE: { // A pattern-matching `case` statement that only uses `in` (and not `when`)
@@ -2466,8 +2471,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             constexpr uint32_t length = "super"sv.size();
             auto keywordLoc = translateLoc(node->location.start, node->location.start + length);
 
-            auto expr = MK::ZSuper(location, maybeTypedSuper());
-            auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), keywordLoc);
+            // TODO(jez) Basically all the nullptr that I have added here are just to silence the
+            // compiler errors because I can't be bothered to deal with prism rn.
+            auto expr = MK::ZSuper(location, maybeTypedSuper(), nullptr);
+            auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), keywordLoc, nullptr);
 
             auto blockArgumentNode = forwardingSuperNode->block;
 
@@ -2576,7 +2583,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 return make_node_with_expr<parser::Send>(move(unarySend), location, move(complexNode), unaryOp,
                                                          core::LocOffsets{location.beginLoc, location.beginLoc + 1},
-                                                         NodeVec{});
+                                                         NodeVec{}, nullptr);
             }
 
             // No leading sign; return the Complex node directly
@@ -2613,7 +2620,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (!directlyDesugar || !hasExpr(receiver, arguments)) {
                 return make_unique<parser::Send>(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
-                                                 move(arguments));
+                                                 move(arguments), nullptr);
             }
 
             // Build the arguments for the Send expression
@@ -2626,7 +2633,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             auto expr = MK::Send(location, receiver->takeDesugaredExpr(), core::Names::squareBracketsEq(), lBracketLoc,
                                  argExprs.size(), move(argExprs));
             return make_node_with_expr<parser::Send>(move(expr), location, move(receiver),
-                                                     core::Names::squareBracketsEq(), lBracketLoc, move(arguments));
+                                                     core::Names::squareBracketsEq(), lBracketLoc, move(arguments),
+                                                     nullptr);
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
             return translateVariableAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(
@@ -2850,7 +2858,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             auto receiver = make_unique<parser::Const>(location, nullptr, core::Names::Constants::Kernel());
             auto sendNode = make_unique<parser::Send>(location, move(receiver), core::Names::lambda(),
-                                                      translateLoc(lambdaNode->operator_loc), NodeVec{});
+                                                      translateLoc(lambdaNode->operator_loc), NodeVec{}, nullptr);
 
             return translateCallWithBlock(node, move(sendNode));
         }
@@ -3425,12 +3433,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
                 returnValues = translateArguments(superNode->arguments);
-                auto superNode = make_unique<parser::Super>(location, move(returnValues));
+                auto superNode = make_unique<parser::Super>(location, move(returnValues), nullptr);
                 return translateCallWithBlock(blockArgumentNode, move(superNode));
             }
 
             returnValues = translateArguments(superNode->arguments, blockArgumentNode);
-            return make_unique<parser::Super>(location, move(returnValues));
+            return make_unique<parser::Super>(location, move(returnValues), nullptr);
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
             auto symNode = down_cast<pm_symbol_node>(node);
@@ -4787,7 +4795,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         }
     }
 
-    return make_unique<parser::Block>(blockLoc, move(sendNode), move(parametersNode), move(body));
+    return make_unique<parser::Block>(blockLoc, move(parametersNode), move(body));
 }
 
 // Prism represents a `begin ... rescue ... end` construct using a `pm_begin_node` that may contain:

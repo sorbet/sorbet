@@ -88,12 +88,10 @@ NodeDef nodes[] = {
         "begin",
         vector<FieldDef>({{"stmts", FieldType::NodeVec}}),
     },
-    // A method call with a blockis modelled as a Send node with a Block as a parent.
-    // The `send` is always a `parser::Send` node, and the `params` models the parameters of the block.
     {
         "Block",
         "block",
-        vector<FieldDef>({{"send", FieldType::Node}, {"params", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"params", FieldType::Node}, {"body", FieldType::Node}}),
     },
     // Wraps a `&foo` parameter in a parameter list
     {
@@ -168,10 +166,13 @@ NodeDef nodes[] = {
     {
         "CSend",
         "csend",
-        vector<FieldDef>({{"receiver", FieldType::Node},
-                          {"method", FieldType::Name},
-                          {"methodLoc", FieldType::Loc},
-                          {"args", FieldType::NodeVec}}),
+        vector<FieldDef>({
+            {"receiver", FieldType::Node},
+            {"method", FieldType::Name},
+            {"methodLoc", FieldType::Loc},
+            {"args", FieldType::NodeVec},
+            {"block", FieldType::Node},
+        }),
     },
     // @@foo class variable
     {
@@ -691,10 +692,13 @@ NodeDef nodes[] = {
     {
         "Send",
         "send",
-        vector<FieldDef>({{"receiver", FieldType::Node},
-                          {"method", FieldType::Name},
-                          {"methodLoc", FieldType::Loc},
-                          {"args", FieldType::NodeVec}}),
+        vector<FieldDef>({
+            {"receiver", FieldType::Node},
+            {"method", FieldType::Name},
+            {"methodLoc", FieldType::Loc},
+            {"args", FieldType::NodeVec},
+            {"block", FieldType::Node},
+        }),
     },
     // m { |;shadowarg| }
     {
@@ -722,7 +726,7 @@ NodeDef nodes[] = {
     {
         "Super",
         "super",
-        vector<FieldDef>({{"args", FieldType::NodeVec}}),
+        vector<FieldDef>({{"args", FieldType::NodeVec}, {"block", FieldType::Node}}),
     },
     // symbol literal
     {
@@ -787,7 +791,7 @@ NodeDef nodes[] = {
     {
         "ZSuper",
         "zsuper",
-        vector<FieldDef>(),
+        vector<FieldDef>({{"block", FieldType::Node}}),
     },
 };
 
