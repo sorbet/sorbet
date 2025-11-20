@@ -4165,10 +4165,14 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
 
     translateMultiInto(params, keywords);
 
+    bool hasForwardingParameter = false;
     if (auto *prismKwRestNode = paramsNode->keyword_rest) {
         switch (PM_NODE_TYPE(prismKwRestNode)) {
             case PM_KEYWORD_REST_PARAMETER_NODE: // `def foo(**kwargs)`
+                params.emplace_back(translate(prismKwRestNode));
+                break;
             case PM_FORWARDING_PARAMETER_NODE: { // `def foo(...)`
+                hasForwardingParameter = true;
                 params.emplace_back(translate(prismKwRestNode));
                 break;
             }
@@ -4182,7 +4186,10 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
     }
 
     core::NameRef enclosingBlockParamName;
-    if (auto *prismBlockParam = paramsNode->block) {
+    if (hasForwardingParameter) {
+        // Skip invalid block parameter when there is a forwarding parameter, like `def foo(&, ...)`
+        enclosingBlockParamName = core::Names::fwdBlock();
+    } else if (auto *prismBlockParam = paramsNode->block) {
         auto blockParamLoc = translateLoc(prismBlockParam->base.location);
 
         if (auto prismName = prismBlockParam->name; prismName != PM_CONSTANT_ID_UNSET) {

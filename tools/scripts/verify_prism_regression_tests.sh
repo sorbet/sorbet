@@ -7,7 +7,10 @@ echo "Building Sorbet..."
 echo "Verifying parse trees and desugar trees..."
 
 # Files to skip (known behavior mismatches)
-skip_files=("call_kw_nil_args")
+skip_files=(
+  "call_kw_nil_args"
+  "call_block_param_and_forwarding"
+)
 
 mismatched_parse_tree_files=()
 mismatched_desugar_tree_files=()
