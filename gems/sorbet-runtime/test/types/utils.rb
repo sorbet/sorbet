@@ -111,7 +111,6 @@ module Opus::Types::Test
           sig { void }
           def method_5; end
         end
-        
         bar_class = Class.new do
           extend T::Sig
 
@@ -141,7 +140,6 @@ module Opus::Types::Test
           sig { void }
           def method_11; end
         end
-        
         self.class.const_set(:Foo, foo_module)
         foo_module.const_set(:Bar, bar_class)
 
@@ -193,7 +191,6 @@ module Opus::Types::Test
           sig_wrappers = T::Private::Methods.instance_variable_get(:@sig_wrappers)[method_id]
           assert_nil(sig_wrappers)
         end
-        
         # Clean up the constant to avoid polluting the test environment
         self.class.send(:remove_const, :Foo) if self.class.const_defined?(:Foo)
       end

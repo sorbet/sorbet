@@ -169,7 +169,7 @@ module T::Utils
   # Unload a constant and remove all associated sigs/hooks.
   # Avoiding leaking memory when reloading code in development mode when
   # using Zeitwerk or other code reloader.
-  # 
+  #
   # @param [Module] mod the module to unload
   # @return [void]
   #
