@@ -73,6 +73,8 @@ unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *t
                 return parser::MK::T_Array(loc);
             } else if (nameConstant == core::Names::Constants::Class()) {
                 return parser::MK::T_Class(loc);
+            } else if (nameConstant == core::Names::Constants::Module()) {
+                return parser::MK::T_Module(loc);
             } else if (nameConstant == core::Names::Constants::Enumerable()) {
                 return parser::MK::T_Enumerable(loc);
             } else if (nameConstant == core::Names::Constants::Enumerator()) {
