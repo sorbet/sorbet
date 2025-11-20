@@ -609,8 +609,8 @@ module T::Private::Methods
     unload_const_sigs(mod)
     unload_const_sigs(mod.singleton_class)
     mod.constants(false).each do |const_name|
-      # The inner module could be already unloaded. By other
-      # parent module
+      # Because this code is run when a code reloader is about to unload a constant, triggering an inner
+      # module autoload will probably confuse the reloader.
       next if mod.autoload?(const_name)
       inner_const = mod.const_get(const_name)
       next unless inner_const.is_a?(Module)
