@@ -1,7 +1,7 @@
 method ::Object#a {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -56,7 +56,7 @@ bb9[firstDead=3](a: Integer(2)):
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <returnMethodTemp>$2: Symbol(:a) = :a
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:a)
     <unconditional> -> bb1

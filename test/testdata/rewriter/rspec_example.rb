@@ -134,7 +134,7 @@ class A
     #     end
     #   end
     its(:size) do
-      T.reveal_type(self) # error: Revealed type: `A::<describe 'its support'>::<describe 'size'>`
+      T.reveal_type(self) # error: Revealed type: `T.self_type (of A::<describe 'its support'>::<describe 'size'>)`
     end
   end
 

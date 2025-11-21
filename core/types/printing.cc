@@ -527,24 +527,24 @@ string SelfTypeParam::show(const GlobalState &gs, ShowOptions options) const {
     return this->definition.show(gs, options);
 }
 
-string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return show(gs);
-}
-
-string SelfType::show(const GlobalState &gs, ShowOptions options) const {
-    return "T.self_type";
-}
-
-string SelfType::showValue(const GlobalState &gs) const {
-    return show(gs);
-}
-
 string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
 
 string MetaType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("Runtime object representing type: {}", wrapped.show(gs, options));
+}
+
+string FreshSelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    return fmt::format("FreshSelfType {{ upperBound = {} }}", this->upperBound.toStringWithTabs(gs, tabs));
+}
+
+string FreshSelfType::show(const GlobalState &gs, ShowOptions options) const {
+    if (options.useValidSyntax) {
+        return "T.self_type";
+    } else {
+        return fmt::format("T.self_type (of {})", this->upperBound.show(gs, options));
+    }
 }
 
 } // namespace sorbet::core

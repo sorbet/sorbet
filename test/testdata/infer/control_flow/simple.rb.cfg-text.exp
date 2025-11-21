@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::ControlFlow#orZero0 {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     a -> (T.nilable(Integer) ? bb2 : bb3)
 
@@ -44,7 +44,7 @@ bb3[firstDead=2]():
 method ::ControlFlow#orZero0a {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: Integer = load_arg(a)
     a -> (Integer ? bb2 : bb3)
 
@@ -73,7 +73,7 @@ bb3[firstDead=0]():
 method ::ControlFlow#orZero0n {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     b: T::Boolean = a: T.nilable(Integer).!()
     b -> (T::Boolean ? bb2 : bb3)
@@ -103,7 +103,7 @@ bb3[firstDead=1](a: Integer):
 method ::ControlFlow#orZero1n {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     <cfgAlias>$7: T.class_of(Integer) = alias <C Integer>
     <statTemp>$4: T::Boolean = a: T.nilable(Integer).is_a?(<cfgAlias>$7: T.class_of(Integer))
@@ -135,7 +135,7 @@ bb3[firstDead=1](a: Integer):
 method ::ControlFlow#orZero2 {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     a -> (T.nilable(Integer) ? bb4 : bb3)
 
@@ -163,7 +163,7 @@ bb4[firstDead=2](a: Integer):
 method ::ControlFlow#orZero3 {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     a -> (T.nilable(Integer) ? bb2 : bb3)
 
@@ -209,7 +209,7 @@ bb6[firstDead=2]():
 method ::ControlFlow#orZero3n {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     a -> (T.nilable(Integer) ? bb2 : bb3)
 
@@ -260,7 +260,7 @@ bb6[firstDead=2]():
 method ::ControlFlow#orZero4 {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     a -> (T.nilable(Integer) ? bb2 : bb3)
 
@@ -303,7 +303,7 @@ bb6[firstDead=0]():
 method ::ControlFlow#orZero5 {
 
 bb0[firstDead=-1]():
-    <self>: ControlFlow = cast(<self>: NilClass, ControlFlow);
+    <self>: T.self_type (of ControlFlow) = cast(<self>: NilClass, T.self_type (of ControlFlow));
     a: T.nilable(Integer) = load_arg(a)
     a -> (T.nilable(Integer) ? bb2 : bb3)
 
@@ -346,9 +346,9 @@ bb6[firstDead=2]():
 method ::<Class:ControlFlow>#<static-init> {
 
 bb0[firstDead=-1]():
-    <self>: T.class_of(ControlFlow) = cast(<self>: NilClass, T.class_of(ControlFlow));
-    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$6: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = cast(<self>: NilClass, T.self_type (of T.class_of(ControlFlow)));
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$6: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -359,22 +359,22 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(ControlFlow)):
+bb2[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(ControlFlow)):
+bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$6
-    <block-pre-call-temp>$23: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$24: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$6
+    <block-pre-call-temp>$23: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$24: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb6
 
 # backedges
 # - bb2
-bb5[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(ControlFlow)):
+bb5[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$10: Symbol(:a) = :a
@@ -391,22 +391,22 @@ bb5[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$5: Sorb
 # backedges
 # - bb3
 # - bb9
-bb6[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(ControlFlow)):
+bb6[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6
-bb7[firstDead=-1](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(ControlFlow)):
+bb7[firstDead=-1](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$24
-    <block-pre-call-temp>$36: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$37: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$24
+    <block-pre-call-temp>$36: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$37: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb10
 
 # backedges
 # - bb6
-bb9[firstDead=7](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(ControlFlow)):
+bb9[firstDead=7](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$28: Symbol(:a) = :a
@@ -420,22 +420,22 @@ bb9[firstDead=7](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$23: Sorb
 # backedges
 # - bb7
 # - bb13
-bb10[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$36: Sorbet::Private::Static::Void, <selfRestore>$37: T.class_of(ControlFlow)):
+bb10[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$36: Sorbet::Private::Static::Void, <selfRestore>$37: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb13 : bb11)
 
 # backedges
 # - bb10
-bb11[firstDead=-1](<block-pre-call-temp>$36: Sorbet::Private::Static::Void, <selfRestore>$37: T.class_of(ControlFlow)):
+bb11[firstDead=-1](<block-pre-call-temp>$36: Sorbet::Private::Static::Void, <selfRestore>$37: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$34: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$36, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$37
-    <block-pre-call-temp>$54: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$55: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$37
+    <block-pre-call-temp>$54: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$55: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb14
 
 # backedges
 # - bb10
-bb13[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$36: Sorbet::Private::Static::Void, <selfRestore>$37: T.class_of(ControlFlow)):
+bb13[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$36: Sorbet::Private::Static::Void, <selfRestore>$37: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$41: Symbol(:a) = :a
@@ -452,22 +452,22 @@ bb13[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$36: So
 # backedges
 # - bb11
 # - bb17
-bb14[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$54: Sorbet::Private::Static::Void, <selfRestore>$55: T.class_of(ControlFlow)):
+bb14[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$54: Sorbet::Private::Static::Void, <selfRestore>$55: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb17 : bb15)
 
 # backedges
 # - bb14
-bb15[firstDead=-1](<block-pre-call-temp>$54: Sorbet::Private::Static::Void, <selfRestore>$55: T.class_of(ControlFlow)):
+bb15[firstDead=-1](<block-pre-call-temp>$54: Sorbet::Private::Static::Void, <selfRestore>$55: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$52: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$54, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$55
-    <block-pre-call-temp>$72: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$73: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$55
+    <block-pre-call-temp>$72: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$73: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb18
 
 # backedges
 # - bb14
-bb17[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$54: Sorbet::Private::Static::Void, <selfRestore>$55: T.class_of(ControlFlow)):
+bb17[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$54: Sorbet::Private::Static::Void, <selfRestore>$55: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$59: Symbol(:a) = :a
@@ -484,22 +484,22 @@ bb17[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$54: So
 # backedges
 # - bb15
 # - bb21
-bb18[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.class_of(ControlFlow)):
+bb18[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb21 : bb19)
 
 # backedges
 # - bb18
-bb19[firstDead=-1](<block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.class_of(ControlFlow)):
+bb19[firstDead=-1](<block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$70: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$72, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$73
-    <block-pre-call-temp>$90: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$91: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$73
+    <block-pre-call-temp>$90: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$91: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb22
 
 # backedges
 # - bb18
-bb21[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.class_of(ControlFlow)):
+bb21[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$72: Sorbet::Private::Static::Void, <selfRestore>$73: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$77: Symbol(:a) = :a
@@ -516,22 +516,22 @@ bb21[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$72: So
 # backedges
 # - bb19
 # - bb25
-bb22[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$90: Sorbet::Private::Static::Void, <selfRestore>$91: T.class_of(ControlFlow)):
+bb22[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$90: Sorbet::Private::Static::Void, <selfRestore>$91: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb25 : bb23)
 
 # backedges
 # - bb22
-bb23[firstDead=-1](<block-pre-call-temp>$90: Sorbet::Private::Static::Void, <selfRestore>$91: T.class_of(ControlFlow)):
+bb23[firstDead=-1](<block-pre-call-temp>$90: Sorbet::Private::Static::Void, <selfRestore>$91: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$88: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$90, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$91
-    <block-pre-call-temp>$108: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$109: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$91
+    <block-pre-call-temp>$108: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$109: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb26
 
 # backedges
 # - bb22
-bb25[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$90: Sorbet::Private::Static::Void, <selfRestore>$91: T.class_of(ControlFlow)):
+bb25[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$90: Sorbet::Private::Static::Void, <selfRestore>$91: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$95: Symbol(:a) = :a
@@ -548,22 +548,22 @@ bb25[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$90: So
 # backedges
 # - bb23
 # - bb29
-bb26[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$108: Sorbet::Private::Static::Void, <selfRestore>$109: T.class_of(ControlFlow)):
+bb26[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$108: Sorbet::Private::Static::Void, <selfRestore>$109: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb29 : bb27)
 
 # backedges
 # - bb26
-bb27[firstDead=-1](<block-pre-call-temp>$108: Sorbet::Private::Static::Void, <selfRestore>$109: T.class_of(ControlFlow)):
+bb27[firstDead=-1](<block-pre-call-temp>$108: Sorbet::Private::Static::Void, <selfRestore>$109: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$106: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$108, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$109
-    <block-pre-call-temp>$126: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$127: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$109
+    <block-pre-call-temp>$126: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$127: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb30
 
 # backedges
 # - bb26
-bb29[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$108: Sorbet::Private::Static::Void, <selfRestore>$109: T.class_of(ControlFlow)):
+bb29[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$108: Sorbet::Private::Static::Void, <selfRestore>$109: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$113: Symbol(:a) = :a
@@ -580,22 +580,22 @@ bb29[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$108: S
 # backedges
 # - bb27
 # - bb33
-bb30[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$126: Sorbet::Private::Static::Void, <selfRestore>$127: T.class_of(ControlFlow)):
+bb30[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$126: Sorbet::Private::Static::Void, <selfRestore>$127: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb33 : bb31)
 
 # backedges
 # - bb30
-bb31[firstDead=-1](<block-pre-call-temp>$126: Sorbet::Private::Static::Void, <selfRestore>$127: T.class_of(ControlFlow)):
+bb31[firstDead=-1](<block-pre-call-temp>$126: Sorbet::Private::Static::Void, <selfRestore>$127: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$124: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$126, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$127
-    <block-pre-call-temp>$144: Sorbet::Private::Static::Void = <self>: T.class_of(ControlFlow).sig()
-    <selfRestore>$145: T.class_of(ControlFlow) = <self>
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$127
+    <block-pre-call-temp>$144: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(ControlFlow)).sig()
+    <selfRestore>$145: T.self_type (of T.class_of(ControlFlow)) = <self>
     <unconditional> -> bb34
 
 # backedges
 # - bb30
-bb33[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$126: Sorbet::Private::Static::Void, <selfRestore>$127: T.class_of(ControlFlow)):
+bb33[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$126: Sorbet::Private::Static::Void, <selfRestore>$127: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$131: Symbol(:a) = :a
@@ -612,24 +612,24 @@ bb33[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$126: S
 # backedges
 # - bb31
 # - bb37
-bb34[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.class_of(ControlFlow)):
+bb34[firstDead=-1](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb37 : bb35)
 
 # backedges
 # - bb34
-bb35[firstDead=6](<block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.class_of(ControlFlow)):
+bb35[firstDead=6](<block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.self_type (of T.class_of(ControlFlow))):
     <statTemp>$142: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$144, sig>
-    <self>: T.class_of(ControlFlow) = <selfRestore>$145
+    <self>: T.self_type (of T.class_of(ControlFlow)) = <selfRestore>$145
     <cfgAlias>$163: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$165: T.class_of(T) = alias <C T>
-    <statTemp>$160: T.class_of(ControlFlow) = <self>: T.class_of(ControlFlow).extend(<cfgAlias>$163: T.class_of(T::Sig))
+    <statTemp>$160: T.self_type (of T.class_of(ControlFlow)) = <self>: T.self_type (of T.class_of(ControlFlow)).extend(<cfgAlias>$163: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb34
-bb37[firstDead=10](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.class_of(ControlFlow)):
+bb37[firstDead=10](<self>: T.self_type (of T.class_of(ControlFlow)), <block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.self_type (of T.class_of(ControlFlow))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$149: Symbol(:a) = :a

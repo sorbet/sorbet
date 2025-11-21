@@ -433,7 +433,7 @@ public:
     // selfType and externalType return the type of an instance of this Symbol
     // if instantiated without specific type parameters, as seen from inside or
     // outside of the class, respectively.
-    TypePtr selfType(const GlobalState &gs) const;
+    TypePtr selfType(const GlobalState &gs, std::vector<TypePtr> selfTypeArgs) const;
     TypePtr externalType() const;
 
     // !! THREAD UNSAFE !! operation that computes the external type of this symbol.
