@@ -199,7 +199,7 @@ public:
 
     // Which symbols does this file reference?
     // NOTE: this is currently only valid in --gen-packages mode
-    UnorderedSet<core::SymbolRef> getSymbolsReferencedByFile(size_t ix) {
+    UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(size_t ix) {
         ENFORCE(this->symbolsReferencedByFile.size() == this->files.size(),
                 "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files.size(),
                 symbolsReferencedByFile.size());

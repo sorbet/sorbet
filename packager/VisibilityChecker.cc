@@ -891,6 +891,15 @@ public:
                     }
                 }
             }
+            {
+                Timer timeit(gs.tracer(), "visibility_checker.untrackPackageReferences_after");
+                untrackPackageReferences(nonConstPackageDB, filesSpan);
+            }
+
+            {
+                Timer timeit(gs.tracer(), "visibility_checker.untrackSymbolReferences_after");
+                untrackSymbolReferences(nonConstGs, filesSpan);
+            }
         }
         barrier.Wait();
 
