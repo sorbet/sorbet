@@ -22,12 +22,16 @@ enum class dlevel {
 class diagnostic {
 public:
     struct range {
-        const size_t beginPos;
-        const size_t endPos;
+        size_t beginPos;
+        size_t endPos;
 
         range(size_t beginPos, size_t endPos) : beginPos(beginPos), endPos(endPos) {}
         explicit range(token_t token) : beginPos(token->start()), endPos(token->end()) {}
         explicit range(location loc) : beginPos(loc.beginPos()), endPos(loc.endPos()) {}
+
+        bool operator==(const range &rhs) const {
+            return this->beginPos == rhs.beginPos && this->endPos == rhs.endPos;
+        }
     };
 
 private:
@@ -65,6 +69,10 @@ public:
 
     const std::optional<range> &extra_location() const {
         return extra_location_;
+    }
+
+    void set_extra_location(range extra_location) {
+        this->extra_location_ = extra_location;
     }
 };
 
