@@ -5544,9 +5544,7 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
-// Had to widen the type from `parser::Assign` to `parser::Node` to handle `make_node_with_expr` correctly.
-// TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
+unique_ptr<ExprOnly> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     ENFORCE(closingLoc.start && closingLoc.end);
 
     auto prismLoc = closingLoc;
@@ -5586,8 +5584,7 @@ unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closin
                 break;
         }
     }
-    auto flagsExpr = MK::Int(location, flags);
-    return make_node_with_expr<parser::Regopt>(move(flagsExpr), location, options);
+    return expr_only(MK::Int(location, flags));
 }
 
 // Translate an unescaped string from a Regexp literal

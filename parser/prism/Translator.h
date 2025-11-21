@@ -127,7 +127,7 @@ private:
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true,
                                                       core::LocOffsets overrideLocation = core::LocOffsets::none());
 
-    std::unique_ptr<parser::Node> translateRegexpOptions(pm_location_t closingLoc);
+    std::unique_ptr<ExprOnly> translateRegexpOptions(pm_location_t closingLoc);
     std::unique_ptr<ExprOnly> translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
                                               pm_string_t content, pm_location_t closingLoc);
 
