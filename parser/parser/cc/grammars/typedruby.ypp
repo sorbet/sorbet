@@ -519,7 +519,7 @@ void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 
   driver.diagnostics.emplace_back(
     dlevel::ERROR, dclass::UnexpectedToken,
-    diagnostic::range(lloc.beginPos(), lloc.endPos()),
+    diagnostic::range(lloc),
     error_message);
 }
 
@@ -2074,7 +2074,7 @@ array_premature_end: eof
                     {
                       $$ = driver.build.constFetchError(self, $1, $2);
                       driver.rewind_and_reset(@2.endPos());
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2.beginPos(), @2.endPos()));
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2));
                     }
                 | tCOLON3 tCONSTANT
                     {
@@ -2087,7 +2087,7 @@ array_premature_end: eof
                 | tLBRACK aref_args array_premature_end
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1.beginPos(), @1.endPos()), "\"[\"");
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1), "\"[\"");
                       driver.rewind_and_reset(@2.endPos());
                     }
                 | tLBRACE assoc_list tRCURLY
@@ -2172,7 +2172,7 @@ array_premature_end: eof
                     }
                 | kIF strings kDO compstmt if_tail
                     {
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.beginPos(), @1.endPos()));
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1));
                       auto &else_ = $5;
                       auto end_t = else_ ? else_->tok : nullptr;
                       $$ = driver.build.condition(self, $1, $2, $3, $4->body,
@@ -4121,7 +4121,7 @@ f_opt_paren_args: f_paren_args
                 | f_arg tCOMMA error
                     {
                       $$ = $1;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.beginPos(), @2.endPos()), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2), "\",\"");
                     }
 
          f_label: tLABEL
@@ -4324,7 +4324,7 @@ f_opt_paren_args: f_paren_args
                 | tCOMMA error
                     {
                       $$ = driver.alloc.node_list();
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@1.beginPos(), @1.endPos()), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@1), "\",\"");
                     }
                 |
                     {
@@ -4365,7 +4365,7 @@ f_opt_paren_args: f_paren_args
                 | assocs tCOMMA error
                     {
                       $$ = $1;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.beginPos(), @2.endPos()), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2), "\",\"");
                     }
                 | assocs tCOMMA tIDENTIFIER error
                     {
@@ -4373,7 +4373,7 @@ f_opt_paren_args: f_paren_args
                       auto err = driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr);
                       list->emplace_back(driver.build.pair_keyword(self, $3, err));
                       $$ = list;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::PositionalAfterKeyword, diagnostic::range(@3.beginPos(), @3.endPos()), $3->asString());
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::PositionalAfterKeyword, diagnostic::range(@3), $3->asString());
                       driver.rewind_and_reset_to_beg(@3.endPos());
                       driver.lex.unadvance($2);
                     }

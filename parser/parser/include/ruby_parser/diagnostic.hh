@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "diagnostic_class.hh"
+#include "location.hh"
 #include "token.hh"
 
 namespace ruby_parser {
@@ -26,6 +27,7 @@ public:
 
         range(size_t beginPos, size_t endPos) : beginPos(beginPos), endPos(endPos) {}
         explicit range(token_t token) : beginPos(token->start()), endPos(token->end()) {}
+        explicit range(location loc) : beginPos(loc.beginPos()), endPos(loc.endPos()) {}
     };
 
 private:
