@@ -348,7 +348,8 @@ using namespace std::string_literals;
 
 %type <token>
   args_forward
-  array_premature_end
+  premature_end_k
+  premature_rbrack
   blkarg_mark
   call_op
   cname
@@ -2008,7 +2009,7 @@ lbrace_cmd_block_start:
 
                      // While scanning an array, if we hit any of these tokens in places where a terminating `]` would
                      // fit, we should stop scanning the array and report an error.
-array_premature_end: eof
+    premature_end_k: eof
                    | kRESCUE
                    | kENSURE
                    | kEND
@@ -2017,7 +2018,7 @@ array_premature_end: eof
                    | kELSE
                    | kWHEN
                    | kIN
-                   | tRPAREN
+   premature_rbrack: tRPAREN
                    | tRCURLY
                    | tCOLON
 
@@ -2084,7 +2085,13 @@ array_premature_end: eof
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
                     }
-                | tLBRACK aref_args array_premature_end
+                | tLBRACK aref_args premature_end_k
+                    {
+                      $$ = driver.build.array(self, $1, $2, $3);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1), "\"[\"");
+                      driver.rewind_and_reset(@2.endPos());
+                    }
+                | tLBRACK aref_args premature_rbrack
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
                       driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1), "\"[\"");
