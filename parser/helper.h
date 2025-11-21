@@ -72,9 +72,7 @@ public:
     static std::unique_ptr<parser::Node> Send1(core::LocOffsets loc, std::unique_ptr<parser::Node> recv,
                                                core::NameRef name, core::LocOffsets nameLoc,
                                                std::unique_ptr<parser::Node> arg) {
-        auto args = parser::NodeVec();
-        args.reserve(1);
-        args.push_back(move(arg));
+        auto args = parser::NodeVec1(move(arg));
         return std::make_unique<parser::Send>(loc, move(recv), name, nameLoc, move(args));
     }
 
@@ -341,8 +339,7 @@ public:
      */
     static std::unique_ptr<parser::Node> TTypeAlias(core::LocOffsets loc, std::unique_ptr<parser::Node> type) {
         auto send = Send0(loc, T(loc), core::Names::typeAlias(), loc);
-        auto body = std::make_unique<parser::Begin>(loc, parser::NodeVec());
-        body->stmts.push_back(move(type));
+        auto body = std::make_unique<parser::Begin>(loc, parser::NodeVec1(move(type)));
         return std::make_unique<parser::Block>(loc, move(send), nullptr, move(body));
     }
 
