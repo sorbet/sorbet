@@ -1,8 +1,10 @@
 #ifndef SORBET_PARSER_PRISM_FACTORY_H
 #define SORBET_PARSER_PRISM_FACTORY_H
 
+#include "absl/types/span.h"
 #include "common/common.h"
 #include "core/LocOffsets.h"
+#include <new>
 #include <string_view>
 #include <vector>
 extern "C" {
@@ -22,7 +24,8 @@ public:
     Factory(Parser &parser) : parser(parser) {}
 
     template <typename T> T *allocateNode() const {
-        return new T{};
+        void *memory = this->malloc(sizeof(T));
+        return new (memory) T{};
     }
 
     pm_node_t initializeBaseNode(pm_node_type_t type, const pm_location_t loc) const;
@@ -40,8 +43,8 @@ public:
     pm_node_t *Symbol(core::LocOffsets nameLoc, std::string_view name) const;
     pm_node_t *SymbolFromConstant(core::LocOffsets nameLoc, pm_constant_id_t nameId) const;
     pm_node_t *AssocNode(core::LocOffsets loc, pm_node_t *key, pm_node_t *value) const;
-    pm_node_t *Hash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs) const;
-    pm_node_t *KeywordHash(core::LocOffsets loc, const std::vector<pm_node_t *> &pairs) const;
+    pm_node_t *Hash(core::LocOffsets loc, absl::Span<const pm_node_t *> pairs) const;
+    pm_node_t *KeywordHash(core::LocOffsets loc, absl::Span<const pm_node_t *> pairs) const;
 
     // Low-level method call creation
     pm_call_node_t *createSendNode(pm_node_t *receiver, pm_constant_id_t method_id, pm_node_t *arguments,
@@ -50,7 +53,7 @@ public:
 
     // High-level method call builders (similar to ast::MK)
     pm_node_t *Send(core::LocOffsets loc, pm_node_t *receiver, std::string_view method,
-                    const std::vector<pm_node_t *> &args, pm_node_t *block = nullptr) const;
+                    absl::Span<const pm_node_t *> args, pm_node_t *block = nullptr) const;
     pm_node_t *Send0(core::LocOffsets loc, pm_node_t *receiver, std::string_view method) const;
     pm_node_t *Send1(core::LocOffsets loc, pm_node_t *receiver, std::string_view method, pm_node_t *arg1) const;
     pm_node_t *Send2(core::LocOffsets loc, pm_node_t *receiver, std::string_view method, pm_node_t *arg1,
@@ -68,8 +71,8 @@ public:
     pm_node_t *THelpers(core::LocOffsets loc) const;
     pm_node_t *TUntyped(core::LocOffsets loc) const;
     pm_node_t *TNilable(core::LocOffsets loc, pm_node_t *type) const;
-    pm_node_t *TAny(core::LocOffsets loc, const std::vector<pm_node_t *> &args) const;
-    pm_node_t *TAll(core::LocOffsets loc, const std::vector<pm_node_t *> &args) const;
+    pm_node_t *TAny(core::LocOffsets loc, absl::Span<const pm_node_t *> args) const;
+    pm_node_t *TAll(core::LocOffsets loc, absl::Span<const pm_node_t *> args) const;
     pm_node_t *TTypeParameter(core::LocOffsets loc, pm_node_t *name) const;
     pm_node_t *TProc(core::LocOffsets loc, pm_node_t *args, pm_node_t *returnType) const;
     pm_node_t *TProcVoid(core::LocOffsets loc, pm_node_t *args) const;
@@ -88,9 +91,9 @@ public:
     pm_node_t *T_Set(core::LocOffsets loc) const;
     pm_node_t *T_Range(core::LocOffsets loc) const;
 
-    pm_node_t *Array(core::LocOffsets loc, const std::vector<pm_node_t *> &elements) const;
+    pm_node_t *Array(core::LocOffsets loc, absl::Span<const pm_node_t *> elements) const;
     pm_node_t *Block(core::LocOffsets loc, pm_node_t *body) const;
-    pm_node_t *StatementsNode(core::LocOffsets loc, const std::vector<pm_node_t *> &body) const;
+    pm_node_t *StatementsNode(core::LocOffsets loc, absl::Span<const pm_node_t *> body) const;
 
     // Wrappers around Prism's allocator functions, which raise `std::bad_alloc` instead of returning `nullptr`.
     // Use these to allocate memory that will be owned by Prism.
@@ -100,8 +103,8 @@ public:
     void free(void *ptr) const;
 
 private:
-    pm_node_list_t copyNodesToList(const std::vector<pm_node_t *> &nodes) const;
-    pm_arguments_node_t *createArgumentsNode(std::vector<pm_node_t *> args, const pm_location_t loc) const;
+    pm_node_list_t copyNodesToList(absl::Span<const pm_node_t *> nodes) const;
+    pm_arguments_node_t *createArgumentsNode(absl::Span<const pm_node_t *> args, pm_location_t loc) const;
 };
 
 } // namespace sorbet::parser::Prism

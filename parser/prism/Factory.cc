@@ -1,6 +1,7 @@
 #include "parser/prism/Factory.h"
 #include "parser/prism/Helpers.h"
 #include "parser/prism/Parser.h"
+#include <array>
 
 namespace sorbet::parser::Prism {
 
@@ -17,7 +18,7 @@ inline constexpr auto prismFree = [](void *p) { xfree(p); };
 // * In the event of an exception, will be freed correctly using Prism's `xfree()`.
 template <typename T> using PrismUniquePtr = std::unique_ptr<T, decltype(prismFree)>;
 
-pm_node_list_t Factory::copyNodesToList(const vector<pm_node_t *> &nodes) const {
+pm_node_list_t Factory::copyNodesToList(absl::Span<const pm_node_t *> nodes) const {
     auto size = nodes.size();
 
     if (size == 0) {
@@ -31,7 +32,7 @@ pm_node_list_t Factory::copyNodesToList(const vector<pm_node_t *> &nodes) const 
     return (pm_node_list_t){.size = size, .capacity = size, .nodes = result};
 }
 
-pm_arguments_node_t *Factory::createArgumentsNode(vector<pm_node_t *> args, const pm_location_t loc) const {
+pm_arguments_node_t *Factory::createArgumentsNode(absl::Span<const pm_node_t *> args, const pm_location_t loc) const {
     pm_arguments_node_t *arguments = allocateNode<pm_arguments_node_t>();
 
     pm_node_list_t argNodes = copyNodesToList(args);
@@ -98,7 +99,7 @@ pm_node_t *Factory::ConstantPathNode(core::LocOffsets loc, pm_node_t *parent, st
 pm_node_t *Factory::SingleArgumentNode(pm_node_t *arg) const {
     ENFORCE(arg, "SingleArgumentNode: arg is required");
 
-    vector<pm_node_t *> args = {arg};
+    array<pm_node_t *, 1> args = {arg};
     pm_arguments_node_t *arguments = createArgumentsNode(args, arg->location);
 
     return up_cast(arguments);
@@ -189,7 +190,7 @@ pm_node_t *Factory::AssocNode(core::LocOffsets loc, pm_node_t *key, pm_node_t *v
     return up_cast(assocNode);
 }
 
-pm_node_t *Factory::Hash(core::LocOffsets loc, const vector<pm_node_t *> &pairs) const {
+pm_node_t *Factory::Hash(core::LocOffsets loc, absl::Span<const pm_node_t *> pairs) const {
     pm_hash_node_t *hashNode = allocateNode<pm_hash_node_t>();
 
     pm_node_list_t elements = copyNodesToList(pairs);
@@ -206,7 +207,7 @@ pm_node_t *Factory::Hash(core::LocOffsets loc, const vector<pm_node_t *> &pairs)
     return up_cast(hashNode);
 }
 
-pm_node_t *Factory::KeywordHash(core::LocOffsets loc, const vector<pm_node_t *> &pairs) const {
+pm_node_t *Factory::KeywordHash(core::LocOffsets loc, absl::Span<const pm_node_t *> pairs) const {
     pm_keyword_hash_node_t *hashNode = allocateNode<pm_keyword_hash_node_t>();
 
     pm_node_list_t elements = copyNodesToList(pairs);
@@ -262,8 +263,8 @@ pm_node_t *Factory::Send1(core::LocOffsets loc, pm_node_t *receiver, string_view
     return up_cast(createSendNode(receiver, methodId, arguments, tinyLoc, fullLoc, tinyLoc));
 }
 
-pm_node_t *Factory::Send(core::LocOffsets loc, pm_node_t *receiver, string_view method, const vector<pm_node_t *> &args,
-                         pm_node_t *block) const {
+pm_node_t *Factory::Send(core::LocOffsets loc, pm_node_t *receiver, string_view method,
+                         absl::Span<const pm_node_t *> args, pm_node_t *block) const {
     ENFORCE(receiver && !method.empty(), "Receiver or method is null");
 
     pm_constant_id_t methodId = addConstantToPool(method);
@@ -296,7 +297,7 @@ pm_node_t *Factory::TNilable(core::LocOffsets loc, pm_node_t *type) const {
     return Send1(loc, T(loc), "nilable"sv, type);
 }
 
-pm_node_t *Factory::TAny(core::LocOffsets loc, const vector<pm_node_t *> &args) const {
+pm_node_t *Factory::TAny(core::LocOffsets loc, absl::Span<const pm_node_t *> args) const {
     ENFORCE(!args.empty(), "Args is empty");
 
     pm_constant_id_t methodId = addConstantToPool("any"sv);
@@ -307,7 +308,7 @@ pm_node_t *Factory::TAny(core::LocOffsets loc, const vector<pm_node_t *> &args) 
     return up_cast(createSendNode(T(loc), methodId, up_cast(arguments), tinyLoc, fullLoc, tinyLoc));
 }
 
-pm_node_t *Factory::TAll(core::LocOffsets loc, const vector<pm_node_t *> &args) const {
+pm_node_t *Factory::TAll(core::LocOffsets loc, absl::Span<const pm_node_t *> args) const {
     ENFORCE(!args.empty(), "Args is empty");
 
     pm_constant_id_t methodId = addConstantToPool("all"sv);
@@ -354,14 +355,8 @@ pm_node_t *Factory::Send2(core::LocOffsets loc, pm_node_t *receiver, string_view
                           pm_node_t *arg2) const {
     ENFORCE(receiver && !method.empty() && arg1 && arg2, "Receiver or method or arguments are null");
 
-    pm_constant_id_t methodId = addConstantToPool(method);
-    vector<pm_node_t *> args = {arg1, arg2};
-    pm_arguments_node_t *arguments = createArgumentsNode(args, parser.convertLocOffsets(loc));
-
-    pm_location_t fullLoc = parser.convertLocOffsets(loc);
-    pm_location_t tinyLoc = parser.convertLocOffsets(loc.copyWithZeroLength());
-
-    return up_cast(createSendNode(receiver, methodId, up_cast(arguments), tinyLoc, fullLoc, tinyLoc));
+    array<pm_node_t *, 2> args = {arg1, arg2};
+    return Send(loc, receiver, method, args);
 }
 
 pm_node_t *Factory::TLet(core::LocOffsets loc, pm_node_t *value, pm_node_t *type) const {
@@ -412,7 +407,7 @@ pm_node_t *Factory::TTypeAlias(core::LocOffsets loc, pm_node_t *type) const {
     return send;
 }
 
-pm_node_t *Factory::Array(core::LocOffsets loc, const vector<pm_node_t *> &elements) const {
+pm_node_t *Factory::Array(core::LocOffsets loc, absl::Span<const pm_node_t *> elements) const {
     pm_array_node_t *array = allocateNode<pm_array_node_t>();
 
     pm_node_list_t elemNodes = copyNodesToList(elements);
@@ -468,14 +463,11 @@ pm_node_t *Factory::T_Range(core::LocOffsets loc) const {
     return ConstantPathNode(loc, T(loc), "Range"sv);
 }
 
-pm_node_t *Factory::StatementsNode(core::LocOffsets loc, const vector<pm_node_t *> &body) const {
+pm_node_t *Factory::StatementsNode(core::LocOffsets loc, absl::Span<const pm_node_t *> body) const {
     pm_statements_node_t *stmts = allocateNode<pm_statements_node_t>();
+    pm_node_list_t nodes = copyNodesToList(body);
     *stmts = (pm_statements_node_t){.base = initializeBaseNode(PM_STATEMENTS_NODE, parser.convertLocOffsets(loc)),
-                                    .body = {.size = 0, .capacity = 0, .nodes = nullptr}};
-
-    for (auto *node : body) {
-        pm_node_list_append(&stmts->body, node);
-    }
+                                    .body = nodes};
 
     return up_cast(stmts);
 }
