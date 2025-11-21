@@ -15,3 +15,8 @@ class << self
 end
 
 class << Parent; end
+
+# Body is implicit BeginNode
+class N
+rescue
+end

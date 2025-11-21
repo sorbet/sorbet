@@ -55,5 +55,27 @@ Begin {
       }
       body = NULL
     }
+    Class {
+      name = Const {
+        scope = NULL
+        name = <C <U N>>
+      }
+      superclass = NULL
+      body = Kwbegin {
+        stmts = [
+          Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+        ]
+      }
+    }
   ]
 }
