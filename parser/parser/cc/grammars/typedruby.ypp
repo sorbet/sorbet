@@ -350,6 +350,7 @@ using namespace std::string_literals;
   args_forward
   premature_end_k
   premature_rbrack
+  premature_rparen
   blkarg_mark
   call_op
   cname
@@ -2019,6 +2020,9 @@ lbrace_cmd_block_start:
                    | kWHEN
                    | kIN
    premature_rbrack: tRPAREN
+                   | tRCURLY
+                   | tCOLON
+   premature_rparen: tRBRACK
                    | tRCURLY
                    | tCOLON
 
@@ -4469,6 +4473,18 @@ f_opt_paren_args: f_paren_args
           rparen: opt_nl tRPAREN
                     {
                       $$ = $2;
+                    }
+                | opt_nl premature_end_k error
+                    {
+                      $$ = $2;
+                      driver.rewind_and_reset(@1.beginPos());
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnterminatedToken, $2, "(");
+                    }
+                | opt_nl premature_rparen error
+                    {
+                      $$ = $2;
+                      driver.rewind_and_reset(@1.beginPos());
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnterminatedToken, $2, "(");
                     }
         rbracket: opt_nl tRBRACK
                     {
