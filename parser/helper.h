@@ -303,10 +303,7 @@ public:
         auto builder = T(loc);
         builder = Send0(loc, move(builder), core::Names::proc(), loc);
         if (args != nullptr && !args->pairs.empty()) {
-            auto argsVec = parser::NodeVec();
-            argsVec.reserve(1);
-            argsVec.push_back(move(args));
-            builder = Send(loc, move(builder), core::Names::params(), loc, move(argsVec));
+            builder = Send1(loc, move(builder), core::Names::params(), loc, move(args));
         }
         builder = Send1(loc, move(builder), core::Names::returns(), loc, move(returnType));
         return builder;
@@ -319,10 +316,7 @@ public:
         auto builder = T(loc);
         builder = Send0(loc, move(builder), core::Names::proc(), loc);
         if (args != nullptr && !args->pairs.empty()) {
-            auto argsVec = parser::NodeVec();
-            argsVec.reserve(1);
-            argsVec.push_back(move(args));
-            builder = Send(loc, move(builder), core::Names::params(), loc, move(argsVec));
+            builder = Send1(loc, move(builder), core::Names::params(), loc, move(args));
         }
         return Send0(loc, move(builder), core::Names::void_(), loc);
     }
