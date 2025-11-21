@@ -1,0 +1,69 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U B>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        Rescue{
+          body = EmptyTree
+          rescueCases = [
+            RescueCase{
+              exceptions = [
+              ]
+              var = UnresolvedIdent{
+                kind = Local
+                name = <D <U <rescueTemp>> $2>
+              }
+              body = EmptyTree
+            }
+          ]
+          else = EmptyTree
+          ensure = EmptyTree
+        }
+      ]
+    }
+
+    ClassDef{
+      kind = module
+      name = UnresolvedConstantLit{
+        cnst = <C <U A>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = []
+      rhs = [
+        Rescue{
+          body = EmptyTree
+          rescueCases = [
+            RescueCase{
+              exceptions = [
+              ]
+              var = UnresolvedIdent{
+                kind = Local
+                name = <D <U <rescueTemp>> $2>
+              }
+              body = EmptyTree
+            }
+          ]
+          else = EmptyTree
+          ensure = EmptyTree
+        }
+      ]
+    }
+  ]
+}
