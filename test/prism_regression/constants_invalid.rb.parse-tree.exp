@@ -1,0 +1,14 @@
+DefMethod {
+  name = <U test_invalid_constant>
+  params = Params {
+    params = [
+      Param {
+        name = <U x>
+      }
+    ]
+  }
+  body = Const {
+    scope = NULL
+    name = <U >
+  }
+}

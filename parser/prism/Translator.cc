@@ -5271,6 +5271,13 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     static_assert(is_same_v<SorbetLHSNode, parser::Const> || is_same_v<SorbetLHSNode, parser::ConstLhs>,
                   "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
 
+    // Constant name might be unset, e.g. `::`.
+    if (node->name == PM_CONSTANT_ID_UNSET) {
+        auto location = translateLoc(node->base.location);
+        auto expr = MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::empty());
+        return make_node_with_expr<SorbetLHSNode>(move(expr), location, nullptr, core::Names::empty());
+    }
+
     // It's important that in all branches `enterNameUTF8` is called, which `translateConstantName` does,
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
