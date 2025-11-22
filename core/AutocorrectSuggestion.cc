@@ -26,6 +26,28 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
+void AutocorrectSuggestion::mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) {
+    fast_sort(edits, [](const auto &lhs, const auto &rhs) {
+        if (lhs.loc == rhs.loc) {
+            return lhs.replacement < rhs.replacement;
+        }
+        return lhs.loc.beginPos() < rhs.loc.beginPos();
+    });
+    auto i = 0;
+    while (edits.size() > 0 && i < edits.size() - 1) {
+        if (edits[i].loc.beginPos() == edits[i + 1].loc.beginPos() && edits[i].loc.empty() &&
+            edits[i + 1].loc.empty()) {
+            // If we're inserting 2 edits at the same location, combine them into a single edit.
+            // TODO(neil): maybe this logic should be moved/added to AutocorrectSuggestion::apply, to handle other
+            // cases where 2 autocorrects add at the same loc?
+            edits[i].replacement += edits[i + 1].replacement;
+            edits.erase(edits.begin() + i + 1);
+        } else {
+            i++;
+        }
+    }
+}
+
 UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs, FileSystem &fs,
                                                            const vector<AutocorrectSuggestion> &autocorrects) {
     UnorderedMap<FileRef, string> sources;
