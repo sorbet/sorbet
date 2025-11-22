@@ -120,19 +120,22 @@ bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1,
     return true;
 }
 
-bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) const {
+bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                                       UntypedMode mode) const {
+    auto &constr = EmptyFrozenConstraint;
+    auto noOp = ErrorSection::Collector::NO_OP;
     if (auto t1p = cast_type<TypeVar>(t1)) {
         if (!hasLowerBound(t1p->sym)) {
-            return Types::isSubType(gs, Types::top(), t2);
+            return Types::isSubTypeUnderConstraint(gs, constr, Types::top(), t2, mode, noOp);
         }
-        return Types::isSubType(gs, findLowerBound(t1p->sym), t2);
+        return Types::isSubTypeUnderConstraint(gs, constr, findLowerBound(t1p->sym), t2, mode, noOp);
     } else {
         auto t2p = cast_type<TypeVar>(t2);
         ENFORCE(t2p != nullptr);
         if (!hasUpperBound(t2p->sym)) {
-            return Types::isSubType(gs, t1, Types::bottom());
+            return Types::isSubTypeUnderConstraint(gs, constr, t1, Types::bottom(), mode, noOp);
         }
-        return Types::isSubType(gs, t1, findUpperBound(t2p->sym));
+        return Types::isSubTypeUnderConstraint(gs, constr, t1, findUpperBound(t2p->sym), mode, noOp);
     }
 }
 

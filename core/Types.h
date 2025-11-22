@@ -9,6 +9,7 @@
 #include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include "core/TypeConstraint.h"
+#include "core/UntypedMode.h"
 #include <memory>
 #include <optional>
 #include <string>
@@ -59,11 +60,6 @@ template <class T, class... Args> TypePtr make_type(Args &&...args) {
                                                        "of argument types; is one specialization missing?");
     return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
 }
-
-enum class UntypedMode {
-    AlwaysCompatible = 1,
-    AlwaysIncompatible = 2,
-};
 
 class Types final {
 public:
