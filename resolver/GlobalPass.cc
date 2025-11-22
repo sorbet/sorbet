@@ -270,21 +270,19 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
 
 }; // namespace
 
-void Resolver::finalizeAncestors(core::GlobalState &gs) {
+void Resolver::finalizeAncestors(core::GlobalState &gs, const core::SymbolTableOffsets &offsets) {
     Timer timer(gs.tracer(), "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
     int singletonClassCount = 0;
     int moduleCount = 0;
-    for (size_t i = 1; i < gs.methodsUsed(); ++i) {
-        auto ref = core::MethodRef(gs, i);
+    for (auto ref : offsets.methodRefs(gs)) {
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             methodCount++;
         }
     }
-    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto ref = core::ClassOrModuleRef(gs, i);
+    for (auto ref : offsets.classOrModuleRefs(gs)) {
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
@@ -293,8 +291,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     }
 
     auto n = gs.classAndModulesUsed();
-    for (int i = 1; i < n; ++i) {
-        auto ref = core::ClassOrModuleRef(gs, i);
+    for (auto ref : offsets.classOrModuleRefs(gs)) {
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (ref.data(gs)->isClass()) {
@@ -353,7 +350,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     prodCounterAdd("types.input.methods.total", methodCount);
 }
 
-void Resolver::finalizeSymbols(core::GlobalState &gs,
+void Resolver::finalizeSymbols(core::GlobalState &gs, const core::SymbolTableOffsets &offsets,
                                optional<absl::Span<const core::ClassOrModuleRef>> symbolsToRecompute) {
     Timer timer(gs.tracer(), "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
@@ -364,9 +361,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
     {
         Timer timer(gs.tracer(), "resolver.mix_in_class_methods");
 
-        for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
-            auto sym = core::ClassOrModuleRef(gs, i);
-
+        for (auto sym : offsets.classOrModuleRefs(gs)) {
             if (sym.data(gs)->flags.isLinearizationComputed) {
                 // Without this, the addMixin below for mixedInClassMethods is not idempotent on the
                 // fast path, and will accidentally mix a `ClassMethods` module into all children (not
@@ -421,11 +416,10 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
     } else {
         // As we don't mutate mixins during incremental resolution, we only compute the linearization of the hieararchy
         // when we don't have a known set of symbols that need to be updated.
-        gs.computeLinearization();
+        gs.computeLinearization(offsets);
 
         Timer timer(gs.tracer(), "resolver.resolve_type_members");
-        for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-            auto sym = core::ClassOrModuleRef(gs, i);
+        for (auto sym : offsets.classOrModuleRefs(gs)) {
             resolveTypeMembers(gs, sym, typeAliases, resolved);
 
             if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {

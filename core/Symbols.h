@@ -398,14 +398,15 @@ public:
         bool isDeclared : 1;
         bool isExported : 1;
         bool isBehaviorDefining : 1;
+        bool isFrozen : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 11;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
               isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isExported(false),
-              isBehaviorDefining(false) {}
+              isBehaviorDefining(false), isFrozen(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
@@ -690,6 +691,11 @@ public:
 
     ClassOrModule deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
+
+    // Freeze this class or module, indicating that no further modifications to mixins, or generic will happen.
+    void freeze() {
+        this->flags.isFrozen = true;
+    }
 
 private:
     static void sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out);
