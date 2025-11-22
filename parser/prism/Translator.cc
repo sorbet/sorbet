@@ -3607,8 +3607,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_SCOPE_NODE: // An internal node type only created by the MRI's Ruby compiler, and not Prism itself.
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
-        case PM_MISSING_NODE:
-            return make_unique<parser::Const>(location, nullptr, core::Names::Constants::ErrorNode());
+        case PM_MISSING_NODE: {
+            ast::ExpressionPtr expr =
+                MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::Constants::ErrorNode());
+            return make_node_with_expr<parser::Const>(move(expr), location, nullptr,
+                                                      core::Names::Constants::ErrorNode());
+        }
     }
 }
 
