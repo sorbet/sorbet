@@ -307,6 +307,8 @@ unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(parser::Node *node) 
     }
 
     auto signatures = make_unique<parser::NodeVec>();
+    signatures->reserve(comments.signatures.size());
+
     auto signatureTranslator = rbs::SignatureTranslator(ctx);
 
     for (auto &declaration : comments.signatures) {
@@ -412,12 +414,17 @@ unique_ptr<parser::Node> SigsRewriter::rewriteBody(unique_ptr<parser::Node> node
 
     if (auto target = signaturesTarget(node.get())) {
         if (auto signatures = signaturesForNode(target)) {
-            auto begin = make_unique<parser::Begin>(node->loc, parser::NodeVec());
+            auto stmts = parser::NodeVec();
+            stmts.reserve(signatures->size() + 1);
+
             for (auto &declaration : *signatures) {
-                begin->stmts.emplace_back(move(declaration));
+                stmts.emplace_back(move(declaration));
             }
-            begin->stmts.emplace_back(move(node));
-            return move(begin);
+
+            auto loc = node->loc; // Grab the loc before moving the node out.
+            stmts.emplace_back(move(node));
+
+            return make_unique<parser::Begin>(loc, move(stmts));
         }
     }
 

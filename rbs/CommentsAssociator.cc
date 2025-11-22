@@ -303,11 +303,15 @@ unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique
 
     if (!beforeNodes.empty() || !afterNodes.empty()) {
         auto nodes = parser::NodeVec();
+        nodes.reserve(beforeNodes.size() + 1 + afterNodes.size());
+
         for (auto &before : beforeNodes) {
             nodes.emplace_back(move(before));
         }
-        auto loc = body->loc;
+
+        auto loc = body->loc; // Grab the loc before moving the node out.
         nodes.emplace_back(move(body));
+
         for (auto &after : afterNodes) {
             nodes.emplace_back(move(after));
         }

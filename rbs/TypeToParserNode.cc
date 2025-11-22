@@ -142,6 +142,7 @@ unique_ptr<parser::Node> TypeToParserNode::classSingletonType(const rbs_types_cl
 unique_ptr<parser::Node> TypeToParserNode::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
                                                      const RBSDeclaration &declaration) {
     auto args = parser::NodeVec();
+    args.reserve(node->types->length);
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = toParserNode(list_node->node, declaration);
@@ -154,6 +155,7 @@ unique_ptr<parser::Node> TypeToParserNode::unionType(const rbs_types_union_t *no
 unique_ptr<parser::Node> TypeToParserNode::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
                                                             const RBSDeclaration &declaration) {
     auto args = parser::NodeVec();
+    args.reserve(node->types->length);
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = toParserNode(list_node->node, declaration);
@@ -181,6 +183,8 @@ unique_ptr<parser::Node> TypeToParserNode::voidType(const rbs_types_bases_void_t
 unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
                                                         const RBSDeclaration &declaration) {
     auto pairs = parser::NodeVec();
+    pairs.reserve(node->required_positionals->length);
+
     int i = 0;
     for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
          list_node = list_node->next) {
@@ -287,6 +291,7 @@ unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *no
 unique_ptr<parser::Node> TypeToParserNode::tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc,
                                                      const RBSDeclaration &declaration) {
     auto typesStore = parser::NodeVec();
+    typesStore.reserve(node->types->length);
 
     for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
         auto innerType = toParserNode(list_node->node, declaration);
@@ -299,6 +304,7 @@ unique_ptr<parser::Node> TypeToParserNode::tupleType(const rbs_types_tuple_t *no
 unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *node, core::LocOffsets loc,
                                                       const RBSDeclaration &declaration) {
     auto pairs = parser::NodeVec();
+    pairs.reserve(node->all_fields->length);
 
     for (rbs_hash_node_t *hash_node = node->all_fields->head; hash_node != nullptr; hash_node = hash_node->next) {
         unique_ptr<parser::Node> key;
