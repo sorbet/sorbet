@@ -378,6 +378,155 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
           "baz"
         end
       end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("lib/types/private/abstract/declare.rb"))
+      assert_equal("baz", klass.new.bar)
+
+      if !T::Private::Abstract::Declare::HAS_ATTACHED_OBJECT
+        skip "can't test this"
+      end
+
+      after_new = klass.method(:new)
+      after_location = after_new.source_location
+      assert_nil(after_location)
+      assert_equal(klass.singleton_class, after_new.owner)
+      assert_equal("baz", klass.new.bar)
+    end
+
+    it "succeeds when instantiating a final concrete subclass" do
+      klass = Class.new(AbstractClass) do
+        extend T::Sig
+        extend T::Helpers
+
+        final!
+
+        sig(:final) { override.returns(Object) }
+        def self.foo; end
+
+        sig(:final) { override.returns(Object) }
+        def bar
+          "baz"
+        end
+      end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("lib/types/private/abstract/declare.rb"))
+      assert_equal("baz", klass.new.bar)
+
+      if !T::Private::Abstract::Declare::HAS_ATTACHED_OBJECT
+        skip "can't test this"
+      end
+
+      after_new = klass.method(:new)
+      after_location = after_new.source_location
+      assert_nil(after_location)
+      assert_equal(klass.singleton_class, after_new.owner)
+      assert_equal("baz", klass.new.bar)
+    end
+
+    it "handles multiple intermediate abstract classes" do
+      intermediate_abstract_klass = Class.new(AbstractClass) do
+        extend T::Sig
+        extend T::Helpers
+
+        abstract!
+      end
+      klass = Class.new(intermediate_abstract_klass) do
+        sig { override.returns(Object) }
+        def self.foo; end
+
+        sig { override.returns(Object) }
+        def bar
+          "baz"
+        end
+      end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("lib/types/private/abstract/declare.rb"))
+      assert_equal(intermediate_abstract_klass.singleton_class, before_new.owner)
+      assert_equal("baz", klass.new.bar)
+
+      if !T::Private::Abstract::Declare::HAS_ATTACHED_OBJECT
+        skip "can't test this"
+      end
+
+      after_new = klass.method(:new)
+
+      # The super method is still going to be in sorbet-runtime, but owned by the
+      # intermediate class
+      assert(after_new.super_method)
+      supered = after_new.super_method
+      super_location = supered.source_location[0]
+      assert(super_location.end_with?("lib/types/private/abstract/declare.rb"))
+      assert_equal(intermediate_abstract_klass.singleton_class, supered.owner)
+
+      after_location = after_new.source_location
+      refute(after_location)
+      assert_equal("baz", klass.new.bar)
+    end
+
+    it 'does not redefine .new on a concrete subclass' do
+      klass = Class.new(AbstractClass) do
+        extend T::Sig
+        extend T::Helpers
+        sig { override.returns(Object) }
+        def self.foo; end
+
+        sig { override.returns(Object) }
+        def bar
+          "baz"
+        end
+
+        def self.new
+          super
+        end
+      end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("abstract_validation.rb"))
+      assert_equal("baz", klass.new.bar)
+      after_new = klass.method(:new)
+      after_location = after_new.source_location[0]
+      assert(after_location.end_with?("abstract_validation.rb"))
+      assert_equal(klass.singleton_class, after_new.owner)
+      assert_equal("baz", klass.new.bar)
+    end
+
+    it 'works if .new is inherited from a mixin' do
+      mixin = Module.new do
+        def new
+          super
+        end
+      end
+
+      klass = Class.new(AbstractClass) do
+        extend T::Sig
+        extend T::Helpers
+        extend mixin
+
+        sig { override.returns(Object) }
+        def self.foo; end
+
+        sig { override.returns(Object) }
+        def bar
+          "baz"
+        end
+      end
+
+      before_new = klass.method(:new)
+      assert(mixin, before_new.owner)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("abstract_validation.rb"), before_location)
+      assert_equal("baz", klass.new.bar)
+      after_new = klass.method(:new)
+      after_location = after_new.source_location[0]
+      assert(after_location.end_with?("abstract_validation.rb"))
+      assert_equal(mixin, after_new.owner)
       assert_equal("baz", klass.new.bar)
     end
 
