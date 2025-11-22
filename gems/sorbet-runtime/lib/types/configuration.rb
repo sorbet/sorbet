@@ -455,7 +455,7 @@ module T::Configuration
 
   # Set to override the default behavior for converting types
   #   to names in generated code. Used by the runtime implementation
-  #   associated with `--stripe-packages` mode.
+  #   associated with `--sorbet-packages` mode.
   #
   # @param [Lambda, Proc, nil] handler Proc that converts a type (Class/Module)
   #   to a String (pass nil to reset to default behavior)

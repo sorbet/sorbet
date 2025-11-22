@@ -7,7 +7,7 @@ namespace sorbet::rewriter {
 /**
  * Does some syntactic rewrites of `__package.rb` files.
  *
- * This rewriter only has an effect if `--stripe-packages` has been passed.
+ * This rewriter only has an effect if `--sorbet-packages` has been passed.
  *
  * Rewrites:
  *

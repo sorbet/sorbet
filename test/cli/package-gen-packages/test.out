@@ -1,4 +1,4 @@
---gen-packages can only be used when --stripe-packages is also enabled
+--gen-packages can only be used when --sorbet-packages is also enabled
 --gen-packages can not be used when --lsp is also enabled
 C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
      7 |  import A

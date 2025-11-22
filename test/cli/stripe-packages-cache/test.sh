@@ -14,7 +14,7 @@ echo "class Root::B; end" > "$dir/b.rb"
 echo "class Root::C; end" > "$dir/c.rb"
 
 run_sorbet() {
-  if ! main/sorbet --silence-dev-message --stripe-packages --counters --cache-dir "$dir/cache" "$dir"/{__package,a,b,c}.rb 2> "$dir/stderr.txt"; then
+  if ! main/sorbet --silence-dev-message --sorbet-packages --counters --cache-dir "$dir/cache" "$dir"/{__package,a,b,c}.rb 2> "$dir/stderr.txt"; then
     cat "$dir/stderr.txt"
     exit 1
   fi

@@ -236,7 +236,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
       fi
 
       if $needs_stripe_packages; then
-        args+=("--stripe-packages")
+        args+=("--sorbet-packages")
 
         extra_underscore_prefixes=()
         while IFS='' read -r prefix; do

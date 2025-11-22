@@ -195,7 +195,7 @@ class EnforcePackagePrefix final {
 
     // So that we only have to compute this once (makes certain comparisons easier)
     // Note that we don't enter this in GlobalState::initEmpty with a well-known ID,
-    // because Sorbet does not always run with --stripe-packages.
+    // because Sorbet does not always run with --sorbet-packages.
     const core::SymbolRef maybeTestNamespace;
 
     // By contrast with `Context::owner`, this `scope` field:

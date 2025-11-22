@@ -10,6 +10,6 @@
 
 cd test/cli/condensation-package-test-import || exit 1
 
-../../../main/sorbet --silence-dev-message --stripe-packages \
+../../../main/sorbet --silence-dev-message --sorbet-packages \
   --experimental-package-directed \
   --max-threads=0 a b c 2>&1

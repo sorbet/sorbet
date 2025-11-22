@@ -19,7 +19,7 @@ mkdir -p $inner_dir_to_delete
 touch "$inner_dir_to_delete/__file_to_delete.rb"
 
 "$cwd/main/sorbet" --silence-dev-message --stop-after=namer \
-  --stripe-packages \
+  --sorbet-packages \
   -p autogen-autoloader:output \
   --autogen-autoloader-modules=RootPackage \
   --autogen-autoloader-exclude-require=byebug \

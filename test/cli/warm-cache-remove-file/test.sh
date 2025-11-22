@@ -22,7 +22,7 @@ for i in {01..10}; do
 done
 
 run_sorbet() {
-  if ! main/sorbet --silence-dev-message --counters --cache-dir "$dir/cache" --stripe-packages "$@" 2> "$dir/stderr.txt"; then
+  if ! main/sorbet --silence-dev-message --counters --cache-dir "$dir/cache" --sorbet-packages "$@" 2> "$dir/stderr.txt"; then
     cat "$dir/stderr.txt"
     exit 1
   fi

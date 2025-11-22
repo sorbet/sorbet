@@ -1279,7 +1279,7 @@ void readOptions(Options &opts,
 
         opts.genPackages = raw["gen-packages"].as<bool>();
         if (opts.genPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
-            logger->error("--gen-packages can only be used when --stripe-packages is also enabled");
+            logger->error("--gen-packages can only be used when --sorbet-packages is also enabled");
             throw EarlyReturnWithCode(1);
         }
         if (opts.genPackages && opts.runLSP) {
