@@ -36,12 +36,12 @@ bazel_toolchain_dependencies()
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
-    name = "llvm_toolchain_15_0_7",
+    name = "llvm_toolchain_16_0_5",
     absolute_paths = True,
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
-    llvm_version = "15.0.7",
+    llvm_version = "16.0.5",
     # The sysroots are needed for cross-compiling
     sysroot = {
         "": "",
@@ -50,7 +50,7 @@ llvm_toolchain(
     },
 )
 
-load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+load("@llvm_toolchain_16_0_5//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
