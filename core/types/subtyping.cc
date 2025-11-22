@@ -319,9 +319,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 i++;
             }
             ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
-            if (idxTypeMember.data(gs)->flags.isCovariant) {
-                newTargs.emplace_back(Types::any(gs, a1->targs[i], a2->targs[j]));
-            } else if (idxTypeMember.data(gs)->flags.isInvariant) {
+            if (idxTypeMember.data(gs)->flags.isCovariant || idxTypeMember.data(gs)->flags.isInvariant) {
                 if (!Types::equiv(gs, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
                 }
