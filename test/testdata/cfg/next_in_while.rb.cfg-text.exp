@@ -1,7 +1,7 @@
 method ::Object#foo {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <unconditional> -> bb2
 
 # backedges
@@ -14,7 +14,7 @@ bb1[firstDead=-1](<self>):
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: Object):
+bb2[firstDead=-1](<self>: T.self_type (of Object)):
     # outerLoops: 1
     <whileTemp>$3: TrueClass = true
     <whileTemp>$3 -> (TrueClass ? bb5 : bb3)
@@ -28,10 +28,10 @@ bb3[firstDead=0]():
 
 # backedges
 # - bb2
-bb5[firstDead=-1](<self>: Object):
+bb5[firstDead=-1](<self>: T.self_type (of Object)):
     # outerLoops: 1
-    <statTemp>$5: T.untyped = <self>: Object.good()
-    <nextTemp>$8: T.untyped = <self>: Object.value()
+    <statTemp>$5: T.untyped = <self>: T.self_type (of Object).good()
+    <nextTemp>$8: T.untyped = <self>: T.self_type (of Object).value()
     <unconditional> -> bb2
 
 }
@@ -39,7 +39,7 @@ bb5[firstDead=-1](<self>: Object):
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <returnMethodTemp>$2: Symbol(:foo) = :foo
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1
