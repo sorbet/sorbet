@@ -1379,42 +1379,24 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             }
 
                             case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
-                                // After upstream commit 58185d6573, the original parser uses
-                                // tokLoc(tok).copyEndWithZeroLength() for NumParams location.
-                                // We need to compute precise locations to match this behavior.
+                                // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
+                                auto itParamLoc = translateLoc(blockNode->opening_loc.end, blockNode->opening_loc.end);
 
-                                auto blockBaseLocation = translateLoc(blockNode->base.location);
-                                const auto &source = ctx.file.data(ctx).source();
+                                auto name = core::Names::it();
+                                NodeVec params;
 
-                                // NumParams: zero-length location after opening token
-                                // Block location starts after the opening token (after `{` or `do`)
-                                // Check if the block starts with '{' (1 char) or 'do' (2 chars)
-                                uint32_t tokenLength = (source[blockBaseLocation.beginPos()] == '{') ? 1 : 2;
-                                auto numParamsPos = blockBaseLocation.beginPos() + tokenLength;
-                                auto numParamsLoc = core::LocOffsets{numParamsPos, numParamsPos};
+                                // Find the actual usage location of 'it' in the block body by walking the AST
+                                if (blockNode->body != nullptr) {
+                                    auto statements = down_cast<pm_statements_node>(blockNode->body);
+                                    auto itUsageLoc = findItParamUsageLoc(statements);
 
-                                // LVar: find the actual 'it' identifier location in the source
-                                auto itPos = source.find("it", blockBaseLocation.beginPos());
-                                auto itLoc = numParamsLoc; // Default if not found
-                                if (itPos != std::string_view::npos && itPos < blockBaseLocation.endPos()) {
-                                    // Verify it's a whole word
-                                    bool startOk =
-                                        (itPos == 0 || (!isalnum(source[itPos - 1]) && source[itPos - 1] != '_'));
-                                    bool endOk = (itPos + 2 >= source.size() ||
-                                                  (!isalnum(source[itPos + 2]) && source[itPos + 2] != '_'));
-                                    if (startOk && endOk) {
-                                        itLoc = core::LocOffsets{static_cast<uint32_t>(itPos),
-                                                                 static_cast<uint32_t>(itPos) + 2};
+                                    if (itUsageLoc.exists()) {
+                                        // Create LVar node at the actual usage location
+                                        params.emplace_back(make_unique<parser::LVar>(itUsageLoc, name));
                                     }
                                 }
 
-                                auto name = core::Names::it();
-                                auto paramNode = make_unique<parser::LVar>(itLoc, name);
-
-                                NodeVec params;
-                                params.emplace_back(move(paramNode));
-
-                                blockParameters = make_unique<parser::NumParams>(numParamsLoc, move(params));
+                                blockParameters = make_unique<parser::NumParams>(itParamLoc, move(params));
                                 break;
                             }
 
@@ -2836,35 +2818,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // Reading the `it` default param in a block, e.g. `a.map { it + 1 }`
             return make_unique<parser::LVar>(location, core::Names::it());
         }
-        case PM_IT_PARAMETERS_NODE: { // Represents the `it` default param in a lambda, e.g. `-> { it + 1 }`
-            // Similar to blocks, compute precise locations to match upstream changes
-            const auto &source = ctx.file.data(ctx).source();
-
-            // NumParams: zero-length location after opening (location starts after opening token)
-            // Check if the block starts with '{' (1 char) or 'do' (2 chars)
-            uint32_t tokenLength = (source[location.beginPos()] == '{') ? 1 : 2;
-            auto numParamsPos = location.beginPos() + tokenLength;
-            auto numParamsLoc = core::LocOffsets{numParamsPos, numParamsPos};
-
-            // LVar: find the actual 'it' identifier location
-            auto itPos = source.find("it", location.beginPos());
-            auto itLoc = numParamsLoc; // Default if not found
-            if (itPos != std::string_view::npos && itPos < location.endPos()) {
-                // Verify it's a whole word
-                bool startOk = (itPos == 0 || (!isalnum(source[itPos - 1]) && source[itPos - 1] != '_'));
-                bool endOk = (itPos + 2 >= source.size() || (!isalnum(source[itPos + 2]) && source[itPos + 2] != '_'));
-                if (startOk && endOk) {
-                    itLoc = core::LocOffsets{static_cast<uint32_t>(itPos), static_cast<uint32_t>(itPos) + 2};
-                }
-            }
-
-            auto name = core::Names::it();
-            auto paramNode = make_unique<parser::LVar>(itLoc, name);
-
-            NodeVec params;
-            params.emplace_back(move(paramNode));
-
-            return make_unique<parser::NumParams>(numParamsLoc, move(params));
+        case PM_IT_PARAMETERS_NODE: { // An invisible node that models the 'it' parameter in a block/lambda
+            // ... for a block like `proc { it + 1 }` or lambda like `-> { it + 1 }`, which has no explicitly declared
+            // parameters. When translating this node directly (not through the translateCallWithBlock handler), we
+            // don't have access to the block body to find actual usage locations via AST walking. Return a NumParams
+            // with no parameter nodes (similar to when numbered params aren't used).
+            auto itParamLoc = location.copyWithZeroLength();
+            return make_unique<parser::NumParams>(itParamLoc, NodeVec{});
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
@@ -4345,6 +4305,39 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
     return make_tuple(move(paramsStore), move(statsStore), true);
 }
 
+core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements) {
+    ENFORCE(statements != nullptr);
+    ENFORCE(0 < statements->body.size, "Can never have an ItParam node on a block with no statements.");
+
+    core::LocOffsets result;
+
+    walkPrismAST(up_cast(statements), [this, &result](const pm_node_t *node) -> bool {
+        if (PM_NODE_TYPE_P(node, PM_IT_LOCAL_VARIABLE_READ_NODE)) {
+            result = this->translateLoc(node->location);
+            // Found the first usage, stop walking
+            return false;
+        }
+        // Don't descend into nested blocks/lambdas that have their own 'it' parameter
+        if (PM_NODE_TYPE_P(node, PM_BLOCK_NODE)) {
+            auto blockNode = down_cast<pm_block_node>(const_cast<pm_node_t *>(node));
+            if (blockNode->parameters != nullptr && PM_NODE_TYPE_P(blockNode->parameters, PM_IT_PARAMETERS_NODE)) {
+                // This nested block has its own 'it', don't descend into it
+                return false;
+            }
+        }
+        if (PM_NODE_TYPE_P(node, PM_LAMBDA_NODE)) {
+            auto lambdaNode = down_cast<pm_lambda_node>(const_cast<pm_node_t *>(node));
+            if (lambdaNode->parameters != nullptr && PM_NODE_TYPE_P(lambdaNode->parameters, PM_IT_PARAMETERS_NODE)) {
+                // This nested lambda has its own 'it', don't descend into it
+                return false;
+            }
+        }
+        return true;
+    });
+
+    return result;
+}
+
 std::array<core::LocOffsets, 9>
 Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node *statements, uint8_t maxParamNumber) {
     ENFORCE(statements != nullptr);
@@ -4829,6 +4822,35 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
             auto params = translateNumberedParametersNode(numberedParamsNode,
                                                           down_cast<pm_statements_node>(prismBodyNode), nullptr);
             parametersNode = make_unique<parser::NumParams>(numParamsLoc, move(params));
+        } else if (PM_NODE_TYPE_P(prismParametersNode, PM_IT_PARAMETERS_NODE)) {
+            // Handle 'it' parameter
+            core::LocOffsets itParamLoc;
+            if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
+                auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
+                // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
+                itParamLoc = translateLoc(prismBlockNode->opening_loc.end, prismBlockNode->opening_loc.end);
+            } else {
+                ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE));
+                auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
+                // Use a 0-length loc just after the `->` token
+                itParamLoc = translateLoc(prismLambdaNode->operator_loc.end, prismLambdaNode->operator_loc.end);
+            }
+
+            auto name = core::Names::it();
+            NodeVec params;
+
+            // Find the actual usage location of 'it' in the block body by walking the AST
+            if (prismBodyNode != nullptr) {
+                auto statements = down_cast<pm_statements_node>(prismBodyNode);
+                auto itUsageLoc = findItParamUsageLoc(statements);
+
+                if (itUsageLoc.exists()) {
+                    // Create LVar node at the actual usage location
+                    params.emplace_back(make_unique<parser::LVar>(itUsageLoc, name));
+                }
+            }
+
+            parametersNode = make_unique<parser::NumParams>(itParamLoc, move(params));
         } else {
             parametersNode = translate(prismParametersNode);
         }

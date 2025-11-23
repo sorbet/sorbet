@@ -1,0 +1,148 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = LVarLhs {
+        name = <U result1>
+      }
+      rhs = Block {
+        send = Send {
+          receiver = Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          method = <U map>
+          args = [
+          ]
+        }
+        params = NumParams {
+          decls = [
+            LVar {
+              name = <U it>
+            }
+          ]
+        }
+        body = Send {
+          receiver = LVar {
+            name = <U it>
+          }
+          method = <U *>
+          args = [
+            Integer {
+              val = "2"
+            }
+          ]
+        }
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U result2>
+      }
+      rhs = Block {
+        send = Send {
+          receiver = Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          method = <U map>
+          args = [
+          ]
+        }
+        params = NumParams {
+          decls = [
+            LVar {
+              name = <U it>
+            }
+          ]
+        }
+        body = DString {
+          nodes = [
+            String {
+              val = <U it is: >
+            }
+            Begin {
+              stmts = [
+                LVar {
+                  name = <U it>
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U result3>
+      }
+      rhs = Block {
+        send = Send {
+          receiver = Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          method = <U map>
+          args = [
+          ]
+        }
+        params = NumParams {
+          decls = [
+            LVar {
+              name = <U it>
+            }
+          ]
+        }
+        body = Begin {
+          stmts = [
+            Assign {
+              lhs = LVarLhs {
+                name = <U str>
+              }
+              rhs = String {
+                val = <U it works>
+              }
+            }
+            Send {
+              receiver = LVar {
+                name = <U it>
+              }
+              method = <U +>
+              args = [
+                Integer {
+                  val = "1"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
