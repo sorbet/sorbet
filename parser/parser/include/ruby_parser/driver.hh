@@ -233,13 +233,13 @@ public:
         return !stack.empty() && top()->max < 0;
     }
 
+    // Special value to represent 'it' parameter in max field
+    static constexpr int IT_PARAM_MARKER = std::numeric_limits<int>::max();
+
     // Have we encountered a num param before? (top > 0, but not IT_PARAM_MARKER)
     bool seen_numparams() {
         return !stack.empty() && top()->max > 0 && top()->max != IT_PARAM_MARKER;
     }
-
-    // Special value to represent 'it' parameter in max field
-    static constexpr int IT_PARAM_MARKER = std::numeric_limits<int>::max();
 
     // Mark that 'it' parameter is used in the current scope
     void set_it_param() {
