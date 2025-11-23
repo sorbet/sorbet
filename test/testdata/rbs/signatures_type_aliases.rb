@@ -151,3 +151,23 @@ module TypeAliasWithNamespace
     T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
   end
 end
+
+class EmptyClass
+  #: type fooType = Integer
+end
+
+#: -> EmptyClass::fooType
+def class_alias_type
+  "42"
+# ^^^^ error: Expected `Integer` but found `String("42")` for method result type
+end
+
+module EmptyModule
+  #: type fooType = String
+end
+
+#: -> EmptyModule::fooType
+def module_alias_type
+  42
+# ^^ error: Expected `String` but found `Integer(42)` for method result type
+end
