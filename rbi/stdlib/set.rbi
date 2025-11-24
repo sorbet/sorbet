@@ -2045,5 +2045,13 @@ module Enumerable
   # arguments.
   # Needs
   # to `require "set"` to use this method.
-  def to_set(klass = _, *args, &block); end
+  sig do
+    returns(T::Set[Elem])
+  end
+  sig do
+    type_parameters(:Return)
+    .params(blk: T.nilable(T.proc.params(arg0: Elem).returns(T.type_parameter(:Return))))
+    .returns(T::Set[T.type_parameter(:Return)])
+  end
+  def to_set(&blk); end
 end
