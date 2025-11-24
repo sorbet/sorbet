@@ -1310,7 +1310,7 @@ class Regexp < Object
 
   # It returns the current default timeout interval for Regexp matching in
   # second. nil means no default timeout configuration.
-  sig { returns(T.nilable(Float)) }
+  sig { returns(T.any(Float, Integer, NilClass)) }
   def self.timeout; end
 
   # It sets the default timeout interval for
@@ -1319,7 +1319,7 @@ class Regexp < Object
   # is process-global. If you want to set timeout for each
   # [`Regexp`](https://docs.ruby-lang.org/en/3.2/Regexp.html), use `timeout`
   # keyword for `Regexp.new`.
-  sig { params(value: T.nilable(Float)).returns(T.nilable(Float)) }
+  sig { params(value: T.any(Float, Integer, NilClass)).returns(T.any(Float, Integer, NilClass)) }
   def self.timeout=(value); end
 
   # Equality---Two regexps are equal if their patterns are identical, they have
