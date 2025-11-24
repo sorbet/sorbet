@@ -275,6 +275,9 @@ public:
     NameRef name;
     ClassOrModuleRef owner;
     TypePtr resultType;
+    // Which files reference this symbol?
+    // NOTE: this is currently only valid in --gen-packages mode
+    UnorderedSet<core::FileRef> referencingFiles;
 
 private:
     SymbolRef::LOC_store locs_;
@@ -282,7 +285,7 @@ private:
 public:
     Flags flags;
 };
-CheckSize(Field, 56, 8);
+CheckSize(Field, 88, 8);
 
 class TypeParameter final {
     friend class GlobalState;
@@ -691,6 +694,8 @@ public:
     ClassOrModule deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
 
+    UnorderedSet<core::FileRef> referencingFiles;
+
 private:
     static void sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out);
 
@@ -732,7 +737,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-CheckSize(ClassOrModule, 128, 8);
+CheckSize(ClassOrModule, 160, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H
