@@ -444,7 +444,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="3702"></a><a href="#3702" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3702</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Package definitions must be formatted like this:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Opus::Foo</span> &lt; PackageSpec</span>
@@ -454,12 +454,12 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <p>In this example, <code>Opus::Foo</code> is the name of the package, and <code>PackageSpec</code> explicitly declares that this class definition is a package spec.</p>
 <h2><a class="anchor" aria-hidden="true" id="3703"></a><a href="#3703" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3703</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Each package must have only one definition. A package definition is the place where there is a line like <code>class Opus::Foo &lt; PackageSpec</code> in a <code>__package.rb</code> file.</p>
 <h2><a class="anchor" aria-hidden="true" id="3704"></a><a href="#3704" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3704</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Sorbet found an <code>import</code> in a <code>__package.rb</code> file, but the imported constant did not exist.</p>
 <h2><a class="anchor" aria-hidden="true" id="3705"></a><a href="#3705" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3705</h2>
@@ -468,23 +468,23 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="3706"></a><a href="#3706" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3706</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>All <code>import</code> and <code>export</code> lines in a <code>__package.rb</code> file must have constant literals as their argument. Doing arbitrary computation of imports and exports is not allowed in <code>__package.rb</code> files.</p>
 <p>Also note that all <code>import</code> declarations must be unique, with no duplicated imports.</p>
 <h2><a class="anchor" aria-hidden="true" id="3707"></a><a href="#3707" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3707</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p><code>__package.rb</code> files must declare exactly one package.</p>
 <h2><a class="anchor" aria-hidden="true" id="3709"></a><a href="#3709" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3709</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>A package cannot import itself. Double check which files and/or packages you intended to modify, as you’ve likely made a typo.</p>
 <h2><a class="anchor" aria-hidden="true" id="3710"></a><a href="#3710" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3710</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Even though <code>__package.rb</code> files use Ruby syntax, they do not allow arbitrary Ruby code. The fact that they use Ruby syntax is a convenience so that:</p>
 <ul>
@@ -495,23 +495,23 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <p>But despite that, <code>__package.rb</code> files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.</p>
 <h2><a class="anchor" aria-hidden="true" id="3711"></a><a href="#3711" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3711</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Package files must be <code># typed: strict</code>. If you are in the process of migrating a codebase to use the packager mode and want to sometimes ignore a <code>__package.rb</code> file, use the <code>--ignore=__package.rb</code> command line flag which will ignore all files whose name matches <code>__package.rb</code> exactly, in any folder.</p>
 <h2><a class="anchor" aria-hidden="true" id="3712"></a><a href="#3712" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3712</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Package names must not contain underscores. Internally, the packager assumes it can use the underscore character to join components of a package name together. For example, internally the package uses names like <code>Opus_Foo</code> to represent the package <code>Opus::Foo</code>. If underscores were allowed in package names, <code>Opus_Foo_Bar</code> could represent a package called <code>Opus::Foo_Bar</code>, <code>Opus_Foo::Bar</code> or <code>Opus::Foo::Bar</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="3713"></a><a href="#3713" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3713</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>All code inside a package must live within the namespace declared by it’s enclosing <code>__package.rb</code> file. Note that since packages are allowed to nest inside each other, sometimes you might have attempted to add code in a folder that you didn’t realize was actually managed by a nested package.</p>
 <p>If you’re seeing this error and surprised, double check which folders have <code>__package.rb</code> files in them, and the names of the packages declared by them.</p>
 <h2><a class="anchor" aria-hidden="true" id="3714"></a><a href="#3714" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3714</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>This error arises when it’s unclear which import actually provides a constant, which in turn usually happens with nested packages: given a constant <code>A::B::C</code> and a package that imports both the packages <code>A</code> and <code>A::B</code>, it’s difficult to tell without deep examination which actually exports <code>A::B::C</code>.</p>
 <p>In these cases, it’s best to refactor the packages so they are clearly delineated: instead of <code>A</code> and <code>A::B</code>, it might be best to figure out what behavior lives in <code>A</code> but not <code>A::B</code> and move it to a new package entirely, like <code>A::X</code> (and then update the import structure as needed).</p>
@@ -519,35 +519,35 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <p>Again, this probably implies you should try to move away from the nested package structure, and move the contents of <code>A</code> that aren’t in a nested package into another less ambiguous package.</p>
 <h2><a class="anchor" aria-hidden="true" id="3715"></a><a href="#3715" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3715</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>The <code>export_for_test</code> directive is used to say, “Make this constant from the non-test namespace available in the test namespace for the same package.” That means it only makes sense to <code>export_for_test</code> constants from the non-test namespace.</p>
 <p>Trying to apply this directive to a constant defined in the <code>Test::</code> namespace will result in this error.</p>
 <p>If you’re trying to export a constant from the test namespace to be used in other packages, then just use <code>export</code>. Otherwise, these lines can be safely deleted.</p>
 <h2><a class="anchor" aria-hidden="true" id="3716"></a><a href="#3716" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3716</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>This error means that you’re exporting a constant redundantly. In Stripe Packages mode, exporting a constant <code>A::B</code> will export anything accessible underneath <code>A::B</code>. That means that if you try to export <code>A::B</code> and <code>A::B::C</code>, you’ll get this error—the latter export is redundant, as it’s implied by export <code>A::B</code>.</p>
 <p>To fix this error, simply remove the more specific export.</p>
 <h2><a class="anchor" aria-hidden="true" id="3717"></a><a href="#3717" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3717</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Referencing a constant defined in another package that has not been explicitly exported by that package is not allowed.</p>
 <p>To fix this error, either change the upstream package to start exporting the constant, or change the code in the current package to depend on only public exports of the upstream package. When changing an upstream package to expose things that were not previously exposed, double check whether it’s intentional that the constant has not been exported.</p>
 <h2><a class="anchor" aria-hidden="true" id="3718"></a><a href="#3718" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3718</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>To reference constants defined in other packages, the package must first be imported into the current package.</p>
 <p>Fix the error by explicitly <code>import</code>'ing the upstream package into the <code>__package.rb</code> file for the package where this error was reported.</p>
 <p>Note that sometimes it is not possible to import another package because doing so would make the dependency graph of packages have a dependency cycle. In these cases, a common solution is to factor the shared functionality to a new package, and import that new package wherever it’s needed. In some situations, there may be simpler ways to restructure the code that don’t involve making a new package.</p>
 <h2><a class="anchor" aria-hidden="true" id="3720"></a><a href="#3720" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3720</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
-<p>The <code>--stripe-packages</code> mode draws a distinction between test and non-test code. For a package called <code>A::B</code></p>
+<p>The <code>--sorbet-packages</code> mode draws a distinction between test and non-test code. For a package called <code>A::B</code></p>
 <ul>
 <li><p>Some of the constants defined outside of <code>A::B</code> but imported into <code>A::B</code> are <strong>test-only</strong> imports (created by writing <code>test_import</code> instead of <code>import</code> in a <code>__package.rb</code> file).</p>
 <p>To fix this error, if the change is desired, replace <code>test_import</code> with <code>import</code> for the constant.</p></li>
@@ -556,7 +556,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="3721"></a><a href="#3721" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3721</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>A package may only export a constant defined within itself.</p>
 <p>To re-export a constant defined by another package, make a constant alias to the other constant, and export that:</p>
@@ -598,7 +598,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="3722"></a><a href="#3722" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3722</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Sorbet’s package mode does not currently exporting type aliases. The workaround is to declare the type alias inside a module, and export the containing module instead:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A::B</span></span>
@@ -618,13 +618,13 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="3723"></a><a href="#3723" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3723</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
-<p>The <code>--stripe-packages</code> mode allows packages to explicitly enumerate which other packages are allowed to import them by using the <code>visible_to</code> directive. If a package uses one or more <code>visible_to</code> lines, and is imported by a package <em>not</em> referenced by a <code>visible_to</code> line, then Sorbet will report an error pointing to that import.</p>
+<p>The <code>--sorbet-packages</code> mode allows packages to explicitly enumerate which other packages are allowed to import them by using the <code>visible_to</code> directive. If a package uses one or more <code>visible_to</code> lines, and is imported by a package <em>not</em> referenced by a <code>visible_to</code> line, then Sorbet will report an error pointing to that import.</p>
 <p>Often, if you’re running across this error, it means that you’re trying to rely on an implementation detail that was deliberately made private. However, if you’re sure that it should be okay to import this package, then you can add an additional <code>visible_to</code> directive in order to allow the import you’re trying to add.</p>
 <h2><a class="anchor" aria-hidden="true" id="3724"></a><a href="#3724" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3724</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/strict-dependencies">go/strict-dependencies</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/strict-dependencies">go/strict-dependencies</a> for more.</p>
 </blockquote>
 <p>All packages have a <code>strict_dependencies</code> level, which controls what restrictions are applied on imported packages.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyPackage</span> &lt; PackageSpec</span>
@@ -640,7 +640,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="3725"></a><a href="#3725" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3725</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/layers">go/layers</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/layers">go/layers</a> for more.</p>
 </blockquote>
 <p>All packages have a <code>layer</code>, which is used when checking for layering violations. See <a href="#3726">3726</a>.</p>
 <!-- TODO(neil): Replace [3726](#3726) with a link to layering/strict_deps documentation when we write that. -->
@@ -656,13 +656,13 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <p>If the flag is passed with no argument, then the default valid layers are <code>library</code> and <code>application</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="3726"></a><a href="#3726" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3726</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/layers">go/layers</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/layers">go/layers</a> for more.</p>
 </blockquote>
 <p>If a package is at <code>strict_dependencies 'layered'</code> or stricter, all packages it imports or references must have the same or lower layer. For example, given <code>--packager-layers util,lib,app</code>, all imports for a package with layer <code>lib</code> must either also have layer <code>lib</code>, or have layer <code>util</code> (but not layer <code>app</code>).</p>
 <p>Note: <code>test_import</code>s are not checked for layering violations.</p>
 <h2><a class="anchor" aria-hidden="true" id="3727"></a><a href="#3727" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3727</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/strict-dependencies">go/strict-dependencies</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/strict-dependencies">go/strict-dependencies</a> for more.</p>
 </blockquote>
 <p>If a package is at <code>strict_dependencies 'layered'</code> or stricter, all packages it imports or references must also be <code>strict_dependencies 'layered'</code>.</p>
 <p>If a package is at <code>strict_dependencies 'layered_dag'</code> or stricter, it cannot be part of a cycle of dependencies. For example, the following is invalid:</p>
@@ -680,7 +680,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <p>Note: <code>test_import</code>s are not checked for strict dependency violations.</p>
 <h2><a class="anchor" aria-hidden="true" id="3728"></a><a href="#3728" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3728</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>The following directives can only appear once per <code>__package.rb</code> file:</p>
 <ul>
@@ -690,12 +690,12 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="3729"></a><a href="#3729" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3729</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>The <code>sorbet</code> directive in <code>__package.rb</code> specifies what the minimum sigil must be for source files in that package. It takes two keyword arguments: <code>min_typed_level</code> and <code>tests_min_typed_level</code>. For each, the valid options are: <code>'ignore'</code>, <code>'false'</code>, <code>'true'</code>, <code>'strict'</code>, and <code>'strong'</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="3731"></a><a href="#3731" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3731</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/strict-dependencies">go/strict-dependencies</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> and <a href="http://go/strict-dependencies">go/strict-dependencies</a> for more.</p>
 </blockquote>
 <p>If a package is marked with <code>prelude_package</code>, it is restricted to only importing other packages marked as <code>prelude_package</code>. This error indicates that a <code>prelude_package</code> is importing a non-prelude package.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> &lt; PackageSpec</span>
@@ -709,7 +709,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="3734"></a><a href="#3734" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3734</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>This error occurs in the <code>--gen-packages</code> mode, and is reported on <code>__package.rb</code> files that are missing imports.</p>
 <h2><a class="anchor" aria-hidden="true" id="4001"></a><a href="#4001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4001</h2>
@@ -917,7 +917,7 @@ const_set(<span class="hljs-symbol">:MyClass</span>, method_to_compute_a_Class_o
 <p>You can resolve this error by giving a different name to one of the conflicting arguments.</p>
 <h2><a class="anchor" aria-hidden="true" id="4025"></a><a href="#4025" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4025</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>A method can only be made package-private if the class it’s defined in has a package. For example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- lib/some_package/example.rb</span>
@@ -930,7 +930,7 @@ const_set(<span class="hljs-symbol">:MyClass</span>, method_to_compute_a_Class_o
 <p>This file defines a global class called <code>::SomeGlobalClass</code> outside of the enclosing namespace of the current package. This means it will not be treated as belonging to the package <code>SomePackage</code>, and therefore cannot be made <code>package_private</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="4026"></a><a href="#4026" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4026</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Package files can only share a name with class or module. For example, given a file like this:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Some::Namespace</span></span>
@@ -946,7 +946,7 @@ const_set(<span class="hljs-symbol">:MyClass</span>, method_to_compute_a_Class_o
 <p>(<strong>Note</strong>: this requires updating references to point at the new <code>Value</code> constant.)</p>
 <h2><a class="anchor" aria-hidden="true" id="4027"></a><a href="#4027" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4027</h2>
 <blockquote>
-<p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
+<p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>Each package must have only one definition. A package definition is the place where there is a line like <code>class Opus::Foo &lt; PackageSpec</code> in a <code>__package.rb</code> file.</p>
 <h2><a class="anchor" aria-hidden="true" id="5001"></a><a href="#5001" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5001</h2>
