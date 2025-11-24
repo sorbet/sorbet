@@ -1,0 +1,24 @@
+test/cli/rparen/rparen_other.rb:6: unexpected token "end" https://srb.help/2001
+     6 |end
+        ^^^
+
+test/cli/rparen/rparen_other.rb:11: unexpected token "end" https://srb.help/2001
+    11 |end
+        ^^^
+
+test/cli/rparen/rparen_other.rb:16: unexpected token "end" https://srb.help/2001
+    16 |end
+        ^^^
+Errors: 3
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def ex1<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
+  def ex3<<todo method>>(&<blk>)
+    begin
+      <self>.puts("before")
+      <blk>.call(<emptyTree>::<C <ErrorNode>>)
+    end
+  end
+end
