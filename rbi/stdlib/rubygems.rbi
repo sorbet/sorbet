@@ -7549,6 +7549,29 @@ end
 module Gem::UriParsing
 end
 
+# SpecFetcher handles metadata updates from remote gem repositories.
+class Gem::SpecFetcher
+  # Default fetcher instance. Use this instead of ::new to reduce object allocation.
+  def self.fetcher; end
+
+  # Returns a list of gems available for each source in Gem::sources
+  def available_specs(type); end
+
+  # Return all gem name tuples who’s names match obj
+  def detect(type=:complete); end
+
+  # Find and fetch gem name tuples that match dependency.
+  # If matching_platform is false, gems for all platforms are returned.
+  def search_for_dependency(dependency, matching_platform=true); end
+
+  # Find and fetch specs that match dependency.
+  # If matching_platform is false, gems for all platforms are returned.
+  def spec_for_dependency(dependency, matching_platform=true); end
+
+  # Suggests gems based on the supplied gem_name. Returns an array of alternative gem names.
+  def suggest_gems_from_name(gem_name, type = :latest, num_results = 5); end
+end
+
 # This module contains various utility methods as module methods.
 module Gem::Util
   # Corrects `path` (usually returned by `URI.parse().path` on Windows), that
