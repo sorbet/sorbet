@@ -2806,10 +2806,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE: { // A regular expression with interpolation, like `/a #{b} c/`
             auto interpolatedRegexNode = down_cast<pm_interpolated_regular_expression_node>(node);
 
-            auto parts = translateMulti(interpolatedRegexNode->parts);
             auto options = translateRegexpOptions(interpolatedRegexNode->closing_loc);
-
-            enforceHasExpr(parts);
 
             // Desugar interpolated regexp to Regexp.new(pattern, options)
             auto pattern = desugarDString(location, interpolatedRegexNode->parts);
@@ -2819,42 +2816,29 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(),
                                   move(pattern), move(optsExpr));
 
-            return make_node_with_expr<parser::Regexp>(move(expr), location, move(parts), move(options));
+            return expr_only(move(expr));
         }
         case PM_INTERPOLATED_STRING_NODE: { // An interpolated string like `"foo #{bar} baz"`
             auto interpolatedStringNode = down_cast<pm_interpolated_string_node>(node);
 
-            auto sorbetParts = translateMulti(interpolatedStringNode->parts);
-
-            enforceHasExpr(sorbetParts);
-
             // Desugar `"a #{b} c"` to `::Magic.<string-interpolate>("a ", b, " c")`
             auto desugared = desugarDString(location, interpolatedStringNode->parts);
-            return make_node_with_expr<parser::DString>(move(desugared), location, move(sorbetParts));
+            return expr_only(move(desugared));
         }
         case PM_INTERPOLATED_SYMBOL_NODE: { // A symbol like `:"a #{b} c"`
             auto interpolatedSymbolNode = down_cast<pm_interpolated_symbol_node>(node);
 
-            auto sorbetParts = translateMulti(interpolatedSymbolNode->parts);
-
-            enforceHasExpr(sorbetParts);
-
             // Desugar `:"a #{b} c"` to `::Magic.<string-interpolate>("a ", b, " c").intern()`
             auto desugared = desugarDString(location, interpolatedSymbolNode->parts);
             auto interned = MK::Send0(location, move(desugared), core::Names::intern(), location.copyWithZeroLength());
-            return make_node_with_expr<parser::DSymbol>(move(interned), location, move(sorbetParts));
+            return expr_only(move(interned));
         }
         case PM_INTERPOLATED_X_STRING_NODE: { // An executable string with backticks, like `echo "Hello, world!"`
             auto interpolatedXStringNode = down_cast<pm_interpolated_x_string_node>(node);
-
-            auto sorbetParts = translateMulti(interpolatedXStringNode->parts);
-
-            enforceHasExpr(sorbetParts);
-
             auto desugared = desugarDString(location, interpolatedXStringNode->parts);
             auto res = MK::Send1(location, MK::Self(location), core::Names::backtick(), location.copyWithZeroLength(),
                                  move(desugared));
-            return make_node_with_expr<parser::XString>(move(res), location, move(sorbetParts));
+            return expr_only(move(res));
         }
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // Reading the `it` default param in a block, e.g. `a.map { it + 1 }`
             return expr_only(MK::Local(location, core::Names::it()));
