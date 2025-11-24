@@ -11,7 +11,7 @@ cp "$cwd/test/cli/autocorrect-package-import/b/foo.rb" "$tmp/b"
 
 cd "$tmp" || exit 1
 
-if "$cwd/main/sorbet" --silence-dev-message --stripe-packages -a . 2>&1; then
+if "$cwd/main/sorbet" --silence-dev-message --sorbet-packages -a . 2>&1; then
     echo "Expected to fail!"
     exit 1
 fi

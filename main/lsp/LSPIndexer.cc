@@ -114,7 +114,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         const auto &oldFile = getOldFile(fref, *gs, evictedFiles);
         // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
         // source text has changed at all. If it does, we take the slow path.
-        // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
+        // Only relevant in `--sorbet-packages` mode. This prevents LSP editing features like autocomplete from
         // working in `__package.rb` since every edit causes a slow path.
         // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS yet
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages && oldFile.hasPackageRbPath() &&

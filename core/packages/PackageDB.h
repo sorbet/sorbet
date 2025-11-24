@@ -55,7 +55,7 @@ public:
     PackageDB &operator=(const PackageDB &) = delete;
     PackageDB &operator=(PackageDB &&) = default;
 
-    // Whether the --stripe-packages mode is active.
+    // Whether the --sorbet-packages mode is active.
     bool enabled() const {
         return this->enabled_;
     }

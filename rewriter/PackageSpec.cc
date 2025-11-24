@@ -57,7 +57,7 @@ void mustContainPackageDef(core::MutableContext ctx, core::LocOffsets loc) {
 } // namespace
 
 void PackageSpec::run(core::MutableContext ctx, ast::ClassDef *klass) {
-    // Aware of whether the --stripe-packages option was passed
+    // Aware of whether the --sorbet-packages option was passed
     if (!ctx.file.data(ctx).isPackage(ctx)) {
         return;
     }

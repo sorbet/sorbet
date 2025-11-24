@@ -133,7 +133,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         ENFORCE(fref.exists());
         ENFORCE(updatedFile->getFileHash() != nullptr);
         if (config.opts.cacheSensitiveOptions.sorbetPackages && updatedFile->isPackage(gs)) {
-            // Only relevant in --stripe-packages mode. Package declarations do not have method
+            // Only relevant in --sorbet-packages mode. Package declarations do not have method
             // hashes. Instead we rely on recomputing packages if any __package.rb source
             // changes.
             continue;
@@ -192,7 +192,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         if (config.opts.cacheSensitiveOptions.sorbetPackages && oldFile->isPackage(gs)) {
-            continue; // See note above about --stripe-packages.
+            continue; // See note above about --sorbet-packages.
         }
 
         if (oldFile->isPayload()) {

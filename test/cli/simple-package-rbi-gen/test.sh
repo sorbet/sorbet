@@ -1,6 +1,6 @@
 cd test/cli/simple-package-rbi-gen || exit 1
 
-../../../main/sorbet --silence-dev-message --stripe-packages . 2>&1
+../../../main/sorbet --silence-dev-message --sorbet-packages . 2>&1
 
 stderr_log="$(mktemp)"
 minimize_rbi="$(mktemp)"
@@ -19,4 +19,4 @@ module Project::Foo
 end
 RUBY
 
-../../../main/sorbet --silence-dev-message --stripe-packages . --minimize-to-rbi="$minimize_rbi" --print=minimized-rbi
+../../../main/sorbet --silence-dev-message --sorbet-packages . --minimize-to-rbi="$minimize_rbi" --print=minimized-rbi
