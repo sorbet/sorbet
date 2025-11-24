@@ -290,9 +290,9 @@ Usage:
 ## SORBET PACKAGES MODE options
 
 ```plaintext
-      --sorbet-packages         Enable support for Sorbet's experimental Ruby package
+      --stripe-packages         Enable support for Sorbet's experimental Ruby package
                                 system
-      --sorbet-packages-hint-message arg
+      --stripe-packages-hint-message arg
                                 Optional hint message to add to all packaging related
                                 errors (default: "")
       --sorbet-packages         Enable support for Sorbet's experimental Ruby package
