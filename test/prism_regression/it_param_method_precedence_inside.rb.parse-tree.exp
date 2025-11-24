@@ -50,5 +50,21 @@ Begin {
         }
       }
     }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U tap>
+        args = [
+        ]
+      }
+      params = NULL
+      body = Send {
+        receiver = Self {
+        }
+        method = <U it>
+        args = [
+        ]
+      }
+    }
   ]
 }

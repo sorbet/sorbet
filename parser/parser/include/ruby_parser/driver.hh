@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "absl/algorithm/container.h"
 #include "absl/types/span.h"
 #include "common/StableStringStorage.h"
 
@@ -259,12 +260,8 @@ public:
             return false;
         }
         // Check all scopes except the current (top) one
-        for (size_t i = 0; i < stack.size() - 1; i++) {
-            if (stack[i].max == IT_PARAM_MARKER) {
-                return true;
-            }
-        }
-        return false;
+        return absl::c_any_of(absl::MakeConstSpan(stack.data(), stack.size() - 1),
+            [](auto const& scope) { return scope.max == IT_PARAM_MARKER; });
     }
 
     // Register a numparam in the current scope
