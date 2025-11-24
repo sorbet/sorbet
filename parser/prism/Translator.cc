@@ -1372,8 +1372,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
                                 // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
                                 auto itParamLoc = translateLoc(blockNode->opening_loc.end, blockNode->opening_loc.end);
-
-                                auto name = core::Names::it();
                                 NodeVec params;
 
                                 // Find the actual usage location of 'it' in the block body by walking the AST
@@ -1383,7 +1381,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                                     if (itUsageLoc.exists()) {
                                         // Create LVar node at the actual usage location
-                                        params.emplace_back(make_unique<parser::LVar>(itUsageLoc, name));
+                                        params.emplace_back(make_unique<parser::LVar>(itUsageLoc, core::Names::it()));
                                     }
                                 }
 
@@ -4820,7 +4818,6 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                 itParamLoc = translateLoc(prismLambdaNode->operator_loc.end, prismLambdaNode->operator_loc.end);
             }
 
-            auto name = core::Names::it();
             NodeVec params;
 
             // Find the actual usage location of 'it' in the block body by walking the AST
@@ -4830,7 +4827,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
 
                 if (itUsageLoc.exists()) {
                     // Create LVar node at the actual usage location
-                    params.emplace_back(make_unique<parser::LVar>(itUsageLoc, name));
+                    params.emplace_back(make_unique<parser::LVar>(itUsageLoc, core::Names::it()));
                 }
             }
 
