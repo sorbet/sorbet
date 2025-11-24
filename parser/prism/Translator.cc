@@ -1019,6 +1019,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto newName = translate(aliasGlobalVariableNode->new_name);
             auto oldName = translate(aliasGlobalVariableNode->old_name);
 
+            enforceHasExpr(newName, oldName);
+
             auto toExpr = newName->takeDesugaredExpr();
             auto fromExpr = oldName->takeDesugaredExpr();
 
@@ -1026,7 +1028,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto expr = MK::Send2(location, MK::Self(location), core::Names::aliasMethod(),
                                   location.copyWithZeroLength(), std::move(toExpr), std::move(fromExpr));
 
-            return make_node_with_expr<parser::Alias>(move(expr), location, move(newName), move(oldName));
+            return expr_only(move(expr));
         }
         case PM_ALIAS_METHOD_NODE: { // The `alias` keyword, like `alias new_method old_method`
             auto aliasMethodNode = down_cast<pm_alias_method_node>(node);
@@ -1043,7 +1045,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto expr = MK::Send2(location, MK::Self(location), core::Names::aliasMethod(),
                                   location.copyWithZeroLength(), std::move(toExpr), std::move(fromExpr));
 
-            return make_node_with_expr<parser::Alias>(move(expr), location, move(newName), move(oldName));
+            return expr_only(move(expr));
         }
         case PM_AND_NODE: { // operator `&&` and `and`
             auto andNode = down_cast<pm_and_node>(node);
