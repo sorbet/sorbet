@@ -3358,7 +3358,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
         }
         case PM_STATEMENTS_NODE: { // A sequence of statements, such a in a `begin` block, `()`, etc.
-            return translateStatements(down_cast<pm_statements_node>(node));
+            auto statementsNode = down_cast<pm_statements_node>(node);
+            auto expr = desugarStatements(statementsNode);
+            return expr_only(move(expr), location);
         }
         case PM_STRING_NODE: { // A string literal, e.g. `"foo"`
             auto strNode = down_cast<pm_string_node>(node);
