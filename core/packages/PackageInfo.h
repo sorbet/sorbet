@@ -182,6 +182,8 @@ public:
 
     StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
+    // Map from file -> [{a package referenced by file, whether the import is missing, and whether importing it would be
+    // a modularity error}]
     // TODO(neil): once we track a list of files in this package, we can `.reserve(files.size())` in the constructor
     UnorderedMap<core::FileRef, std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>>>
         packagesReferencedByFile;
@@ -259,6 +261,7 @@ public:
         return this->isPreludePackage_;
     }
 
+    // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
                                 std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
 
