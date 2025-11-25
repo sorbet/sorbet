@@ -3200,11 +3200,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto desugaredExpr = MK::Send3(location, move(recv), core::Names::buildRange(), locZeroLen, move(fromExpr),
                                            move(toExpr), move(excludeEndExpr));
 
-            if (isExclusive) { // `...`
-                return make_node_with_expr<parser::ERange>(move(desugaredExpr), location, move(left), move(right));
-            } else { // `..`
-                return make_node_with_expr<parser::IRange>(move(desugaredExpr), location, move(left), move(right));
-            }
+            return expr_only(move(desugaredExpr));
         }
         case PM_RATIONAL_NODE: { // A rational number literal, e.g. `1r`
             // Note: in `1/2r`, only the `2r` is part of the `PM_RATIONAL_NODE`.
