@@ -74,6 +74,12 @@ void explainError(core::GlobalState &gs, core::FileRef file, core::ErrorBuilder 
             e.addErrorLine(rangeToLoc(gs, file, diag.extra_location().value()),
                            "Matching `{}` found here but is not indented as far", "end");
             break;
+        case ruby_parser::dclass::UnterminatedToken:
+            if (diag.extra_location().has_value()) {
+                e.addErrorLine(rangeToLoc(gs, file, diag.extra_location().value()), "Corresponding `{}` was here",
+                               diag.data());
+            }
+            break;
         default:
             break;
     }

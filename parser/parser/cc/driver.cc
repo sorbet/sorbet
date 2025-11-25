@@ -48,6 +48,22 @@ const char *const base_driver::token_name(token_type type) {
     }
 }
 
+void base_driver::enrich_diagnostic_at(dclass type, diagnostic::range location, diagnostic::range extra_location) {
+    for (auto it = this->diagnostics.rbegin(); it != this->diagnostics.rend(); it++) {
+        if (it->error_class() == type && it->location() == location) {
+            it->set_extra_location(extra_location);
+        }
+    }
+}
+
+void base_driver::enrich_rparen_diagnostic(ruby_parser::token_t rparen, ruby_parser::location extra_location) {
+    if (rparen->type() == ruby_parser::token_type::tRPAREN) {
+        return;
+    }
+
+    enrich_diagnostic_at(dclass::UnterminatedToken, diagnostic::range(rparen), diagnostic::range(extra_location));
+}
+
 void base_driver::rewind_and_reset(size_t newPos) {
     this->clear_lookahead();
     this->lex.rewind_and_reset_to_expr_end(newPos);
