@@ -350,6 +350,7 @@ using namespace std::string_literals;
   args_forward
   premature_end_k
   premature_rbrack
+  premature_rparen
   blkarg_mark
   call_op
   cname
@@ -382,6 +383,7 @@ using namespace std::string_literals;
   kend_or_eof
   until
   while
+  opt_nl
 
 %type <delimited_list>
   defs_head_pre
@@ -2019,6 +2021,9 @@ lbrace_cmd_block_start:
                    | kWHEN
                    | kIN
    premature_rbrack: tRPAREN
+                   | tRCURLY
+                   | tCOLON
+   premature_rparen: tRBRACK
                    | tRCURLY
                    | tCOLON
 
@@ -4465,10 +4470,34 @@ f_opt_paren_args: f_paren_args
                       $$ = $1;
                     }
        opt_terms:  | terms
-          opt_nl:  | tNL
+          opt_nl: // nothing
+                   {
+                     // @1 doesn't get updated here because there is no location to update to, which means
+                     // that any rule which would otherwise want to access @1 for an opt_nl will actually
+                     // be accessing the location of whatever came before this `opt_nl`. By making opt_nl
+                     // return a token, we can at least detect this case in those rules.
+                     $$ = nullptr;
+                   }
+                | tNL
+                   {
+                     $$ = $1;
+                   }
+
           rparen: opt_nl tRPAREN
                     {
                       $$ = $2;
+                    }
+                | opt_nl premature_end_k
+                    {
+                      $$ = $2;
+                      driver.rewind_and_reset(($1 != nullptr ? @1 : @2).beginPos());
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, $2, "\"(\"");
+                    }
+                | opt_nl premature_rparen
+                    {
+                      $$ = $2;
+                      driver.rewind_and_reset(($1 != nullptr ? @1 : @2).beginPos());
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, $2, "\"(\"");
                     }
         rbracket: opt_nl tRBRACK
                     {
