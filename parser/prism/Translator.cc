@@ -3472,18 +3472,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto cond = predicate->takeDesugaredExpr();
             auto body = statements ? statements->takeDesugaredExpr() : MK::EmptyTree();
 
+            ast::ExpressionPtr expr;
             if (beginModifier) {
                 auto breaker = MK::If(location, std::move(cond), MK::Break(location, MK::EmptyTree()), MK::EmptyTree());
                 auto breakWithBody = MK::InsSeq1(location, std::move(body), std::move(breaker));
-                ast::ExpressionPtr expr = MK::While(location, MK::True(location), std::move(breakWithBody));
-                return make_node_with_expr<parser::UntilPost>(move(expr), location, move(predicate), move(statements));
+                expr = MK::While(location, MK::True(location), std::move(breakWithBody));
             } else {
                 // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
                 auto negatedCond =
                     MK::Send0(location, std::move(cond), core::Names::bang(), location.copyWithZeroLength());
-                auto expr = MK::While(location, std::move(negatedCond), std::move(body));
-                return make_node_with_expr<parser::Until>(move(expr), location, move(predicate), move(statements));
+                expr = MK::While(location, std::move(negatedCond), std::move(body));
             }
+            return expr_only(move(expr));
         }
         case PM_WHEN_NODE: { // A `when` clause, as part of a `case` statement
             auto whenNode = down_cast<pm_when_node>(node);
@@ -3507,6 +3507,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto cond = predicate->takeDesugaredExpr();
             auto body = statements ? statements->takeDesugaredExpr() : MK::EmptyTree();
 
+            ast::ExpressionPtr expr;
             if (beginModifier) {
                 // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
                 auto negatedCond =
@@ -3514,12 +3515,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto breaker =
                     MK::If(location, std::move(negatedCond), MK::Break(location, MK::EmptyTree()), MK::EmptyTree());
                 auto breakWithBody = MK::InsSeq1(location, std::move(body), std::move(breaker));
-                ast::ExpressionPtr expr = MK::While(location, MK::True(location), std::move(breakWithBody));
-                return make_node_with_expr<parser::WhilePost>(move(expr), location, move(predicate), move(statements));
+                expr = MK::While(location, MK::True(location), std::move(breakWithBody));
             } else {
-                auto expr = MK::While(location, std::move(cond), std::move(body));
-                return make_node_with_expr<parser::While>(move(expr), location, move(predicate), move(statements));
+                expr = MK::While(location, std::move(cond), std::move(body));
             }
+            return expr_only(move(expr));
         }
         case PM_X_STRING_NODE: { // A non-interpolated x-string, like `/usr/bin/env ls`
             auto strNode = down_cast<pm_x_string_node>(node);
