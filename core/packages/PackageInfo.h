@@ -182,10 +182,9 @@ public:
 
     StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
-    // Map from pkg -> {list of files in this package that reference pkg, whether this package is missing an import
-    // for pkg and whether importing this package would cause a modularity error}
-    UnorderedMap<core::packages::MangledName, std::pair<UnorderedSet<core::FileRef>, PackageReferenceInfo>>
-        referencedPackages = {};
+    // TODO(neil): once we track a list of files in this package, we can `.reserve(files.size())` in the constructor
+    UnorderedMap<core::FileRef, std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>>>
+        packagesReferencedByFile;
 
     // The id of the SCC that this package's normal imports belong to.
     //
@@ -260,13 +259,8 @@ public:
         return this->isPreludePackage_;
     }
 
-    // Track that this package references `package` in `file`
-    void trackPackageReference(const core::FileRef file, const core::packages::MangledName package,
-                               const PackageReferenceInfo packageReferenceInfo);
-
-    // Remove knowledge of what this package is in `file`.
-    // We do this so that when VisibilityChecker is re-run over `file`, we can delete stale information.
-    void untrackPackageReferencesFor(const core::FileRef file);
+    void trackPackageReferences(const core::FileRef file,
+                                std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
 };

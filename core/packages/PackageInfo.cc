@@ -467,26 +467,9 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
     return nullopt;
 }
 
-void PackageInfo::trackPackageReference(const core::FileRef file, const core::packages::MangledName package,
-                                        const PackageReferenceInfo packageReferenceInfo) {
-    auto r = referencedPackages.find(package);
-    if (r != referencedPackages.end()) {
-        r->second.first.insert(file);
-    } else {
-        referencedPackages[package] = {{file}, packageReferenceInfo};
-    }
-}
-
-void PackageInfo::untrackPackageReferencesFor(const core::FileRef file) {
-    for (auto &[_, v] : referencedPackages) {
-        auto files = v.first;
-        auto it = files.find(file);
-        if (it == files.end()) {
-            continue;
-        }
-        files.erase(it);
-    }
-    erase_if(referencedPackages, [](const auto &x) { return x.second.first.empty(); });
+void PackageInfo::trackPackageReferences(
+    const core::FileRef file, std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references) {
+    packagesReferencedByFile[file].swap(references);
 }
 
 namespace {
@@ -498,17 +481,6 @@ core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::F
     } else {
         return core::packages::ImportType::Normal;
     }
-}
-
-core::packages::ImportType broadestImportType(const core::GlobalState &gs, const UnorderedSet<core::FileRef> &files) {
-    auto broadestImport = core::packages::ImportType::TestUnit;
-    for (auto f : files) {
-        auto importType = fileToImportType(gs, f);
-        if (importType < broadestImport) {
-            broadestImport = importType;
-        }
-    }
-    return broadestImport;
 }
 
 void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) {
@@ -536,15 +508,29 @@ void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) {
 }; // namespace
 
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
+    Timer timeit(gs.tracer(), "PackageInfo::aggregateMissingImports");
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
-    for (auto &[p, value] : referencedPackages) {
-        auto &pkgInfo = gs.packageDB().getPackageInfo(p);
-        auto files = value.first;
-        auto packageReferenceInfo = value.second;
-        if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
-            continue;
+    UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
+    for (auto &[file, value] : packagesReferencedByFile) {
+        for (auto &[packageName, packageReferenceInfo] : value) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
+            if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
+                continue;
+            }
+            auto importType = fileToImportType(gs, file);
+            auto it = toImport.find(packageName);
+            if (it != toImport.end()) {
+                auto currentBroadestImport = it->second;
+                if (importType < currentBroadestImport) {
+                    it->second = importType;
+                }
+            } else {
+                toImport[packageName] = importType;
+            }
         }
-        auto importType = broadestImportType(gs, files);
+    }
+    for (auto &[packageName, importType] : toImport) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
         auto autocorrect = this->addImport(gs, pkgInfo, importType);
         if (autocorrect.has_value()) {
             allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
