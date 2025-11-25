@@ -2649,19 +2649,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // If there was a sign, wrap in unary operation
             // E.g. desugar `+42` to `42.+()`
             if (hasSign) {
-                auto complexNode = make_unique<parser::Complex>(numberLoc, string(value));
                 core::NameRef unaryOp = (sign == '-') ? core::Names::unaryMinus() : core::Names::unaryPlus();
 
                 auto unarySend = MK::Send0(location, move(complexCall), unaryOp,
                                            core::LocOffsets{location.beginLoc, numberLoc.beginLoc});
 
-                return make_node_with_expr<parser::Send>(move(unarySend), location, move(complexNode), unaryOp,
-                                                         core::LocOffsets{location.beginLoc, location.beginLoc + 1},
-                                                         NodeVec{});
+                return expr_only(move(unarySend));
             }
 
             // No leading sign; return the Complex node directly
-            return make_node_with_expr<parser::Complex>(move(complexCall), location, string(value));
+            return expr_only(move(complexCall));
         }
         case PM_IMPLICIT_NODE: { // A hash key without explicit value, like the `k4` in `{ k4: }`
             auto implicitNode = down_cast<pm_implicit_node>(node);
