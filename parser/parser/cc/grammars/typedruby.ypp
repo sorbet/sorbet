@@ -1968,6 +1968,20 @@ lbrace_cmd_block_start:
                       list->emplace_back($3);
                       $$ = list;
                     }
+                | args tCOMMA fcall user_variable
+                    {
+                      auto &list = $1;
+                      if ($3->type() == ruby_parser::token_type::tCONSTANT) {
+                        list->emplace_back(driver.build.const_(self, $3));
+                      } else {
+                        list->emplace_back(driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr));
+                      }
+                      $$ = list;
+                      auto commaPos = @3.endPos(); // location where comma was expected
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::MissingToken, diagnostic::range(commaPos, commaPos), "\",\"");
+                      driver.rewind_and_reset(commaPos);
+                      driver.lex.emit(ruby_parser::token_type::tCOMMA, ",", commaPos);
+                    }
                 | args tCOMMA error
                     {
                       auto &list = $1;

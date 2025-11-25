@@ -1,3 +1,15 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  nil
+  <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>, <self>.x())
+
+  <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>, <emptyTree>::<C Float>)
+
+  <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>, @x)
+
+  <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>, <self>.puts(<self>.x()))
+
+  <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Float>))
+
+  def even_missing_paren<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>, <self>.x())
+  end
 end

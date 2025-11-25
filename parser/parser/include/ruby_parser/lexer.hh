@@ -158,6 +158,12 @@ private:
     void emit(token_type type);
     void emit(token_type type, std::string_view str);
     void emit(token_type type, std::string_view str, const char *start, const char *end);
+
+public:
+    // Meant for error recovery to allow the parser to emit a token that would have been expected
+    void emit(token_type type, std::string_view str, size_t offset);
+
+private:
     // Without these overloads, emit(..., "do") would be ambiguous.
     // It's OK to store points to constants, as they live in static storage and will
     // therefore not be going away.
