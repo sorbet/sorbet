@@ -6,3 +6,4 @@
     puts 'after'
   # ^^^^ error: unexpected token tIDENTIFIER
   end
+# ^^^ error: unterminated "("

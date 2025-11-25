@@ -8,5 +8,6 @@ class A
     puts 'after'
   # ^^^^ error: unexpected token tIDENTIFIER
   end
+# ^^^ error: unterminated "("
   def after; end
 end

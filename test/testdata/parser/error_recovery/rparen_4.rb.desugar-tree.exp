@@ -1,3 +1,18 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  nil
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def before<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def foo<<todo method>>(&<blk>)
+      begin
+        <self>.puts("before")
+        <emptyTree>::<C T>.any(<emptyTree>::<C <ErrorNode>>)
+      end
+    end
+
+    def after<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
 end

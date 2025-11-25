@@ -3,6 +3,6 @@
 def foo
   puts 'before'
   {key: T.any(Integer, String}
-              #              ^ error: unexpected token tRCURLY
+              #              ^ error: unterminated "("
   puts 'after'
 end

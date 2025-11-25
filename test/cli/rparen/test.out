@@ -1,24 +1,43 @@
-test/cli/rparen/rparen_other.rb:6: unexpected token "end" https://srb.help/2001
+test/cli/rparen/rparen_other.rb:6: unterminated "(" https://srb.help/2001
      6 |end
         ^^^
+    test/cli/rparen/rparen_other.rb:5: Corresponding `"("` was here
+     5 |  foo( 0
+             ^
 
-test/cli/rparen/rparen_other.rb:11: unexpected token "end" https://srb.help/2001
+test/cli/rparen/rparen_other.rb:11: unterminated "(" https://srb.help/2001
     11 |end
         ^^^
+    test/cli/rparen/rparen_other.rb:10: Corresponding `"("` was here
+    10 |  not ( 0
+              ^
 
-test/cli/rparen/rparen_other.rb:16: unexpected token "end" https://srb.help/2001
+test/cli/rparen/rparen_other.rb:16: unterminated "(" https://srb.help/2001
     16 |end
         ^^^
+    test/cli/rparen/rparen_other.rb:15: Corresponding `"("` was here
+    15 |  yield ( 0
+                ^
 Errors: 3
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def ex1<<todo method>>(&<blk>)
-    <emptyTree>
+    begin
+      <self>.puts("before")
+      <self>.foo(0)
+    end
+  end
+
+  def ex2<<todo method>>(&<blk>)
+    begin
+      <self>.puts("before")
+      0.!()
+    end
   end
 
   def ex3<<todo method>>(&<blk>)
     begin
       <self>.puts("before")
-      <blk>.call(<emptyTree>::<C <ErrorNode>>)
+      <blk>.call(0)
     end
   end
 end

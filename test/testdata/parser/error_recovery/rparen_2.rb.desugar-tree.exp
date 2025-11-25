@@ -1,3 +1,9 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  nil
+  def foo<<todo method>>(&<blk>)
+    begin
+      <self>.puts("before")
+      {:key => <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)}
+      <self>.puts("after")
+    end
+  end
 end
