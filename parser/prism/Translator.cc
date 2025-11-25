@@ -2669,21 +2669,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto openingLoc = translateLoc(indexedTargetNode->opening_loc);                  // The location of `[]=`
             auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1}; // Drop the `=`
             auto receiver = translate(indexedTargetNode->receiver);
-            auto arguments = translateArguments(indexedTargetNode->arguments, up_cast(indexedTargetNode->block));
 
-            enforceHasExpr(receiver, arguments);
+            enforceHasExpr(receiver);
 
-            // Build the arguments for the Send expression
-            ast::Send::ARGS_store argExprs;
-            argExprs.reserve(arguments.size());
-            for (auto &arg : arguments) {
-                argExprs.emplace_back(arg->takeDesugaredExpr());
-            }
+            auto argExprs = desugarArguments<ast::Send::ARGS_store>(indexedTargetNode->arguments,
+                                                                    up_cast(indexedTargetNode->block));
 
             auto expr = MK::Send(location, receiver->takeDesugaredExpr(), core::Names::squareBracketsEq(), lBracketLoc,
                                  argExprs.size(), move(argExprs));
-            return make_node_with_expr<parser::Send>(move(expr), location, move(receiver),
-                                                     core::Names::squareBracketsEq(), lBracketLoc, move(arguments));
+            return expr_only(move(expr));
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
             return translateVariableAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(
