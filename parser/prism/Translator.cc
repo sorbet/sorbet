@@ -3487,9 +3487,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_YIELD_NODE: { // The `yield` keyword, like `yield`, `yield 1, 2, 3`
             auto yieldNode = down_cast<pm_yield_node>(node);
 
-            auto yieldArgs = translateArguments(yieldNode->arguments);
-
-            enforceHasExpr(yieldArgs);
+            auto yieldArgs = desugarArguments<ast::Send::ARGS_store>(yieldNode->arguments);
 
             ExpressionPtr recv;
             if (this->enclosingBlockParamName.exists()) {
@@ -3502,10 +3500,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 recv = MK::RaiseUnimplemented(location);
             }
 
-            auto args = nodeVecToStore<ast::Send::ARGS_store>(yieldArgs);
             auto expr = MK::Send(location, std::move(recv), core::Names::call(), location.copyWithZeroLength(),
-                                 args.size(), std::move(args));
-            return make_node_with_expr<parser::Yield>(std::move(expr), location, move(yieldArgs));
+                                 yieldArgs.size(), std::move(yieldArgs));
+            return expr_only(move(expr));
         }
 
         case PM_ALTERNATION_PATTERN_NODE: // A pattern like `1 | 2`
