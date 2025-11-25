@@ -134,6 +134,22 @@ template <typename StoreType> StoreType nodeVecToStore(const sorbet::parser::Nod
     return store;
 }
 
+// Helper template to convert a pm_node_list to any store type.
+// This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
+// ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
+template <typename StoreType> StoreType Translator::nodeListToStore(const pm_node_list &nodeList) {
+    auto span = absl::MakeSpan(nodeList.nodes, nodeList.size);
+
+    StoreType store;
+    store.reserve(span.size());
+    for (auto &element : span) {
+        auto expr = translate(element);
+        enforceHasExpr(expr);
+        store.emplace_back(expr->takeDesugaredExpr());
+    }
+    return store;
+}
+
 // Collect pattern variable assignments from a pattern node (similar to desugarPatternMatchingVars in PrismDesugar.cc)
 static void collectPatternMatchingVars(ast::InsSeq::STATS_store &vars, parser::Node *node) {
     if (auto *var = parser::NodeWithExpr::cast_node<parser::MatchVar>(node)) {
@@ -1120,23 +1136,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ARRAY_NODE: { // An array literal, e.g. `[1, 2, 3]`
             auto arrayNode = down_cast<pm_array_node>(node);
 
-            auto sorbetElements = translateMulti(arrayNode->elements);
-
-            enforceHasExpr(sorbetElements);
-
-            ast::Array::ENTRY_store elements;
-            elements.reserve(arrayNode->elements.size);
-
-            ENFORCE(sorbetElements.size() == arrayNode->elements.size);
-            for (auto &stat : sorbetElements) {
-                auto expr = stat->takeDesugaredExpr();
-                ENFORCE(expr != nullptr);
-                elements.emplace_back(move(expr));
-            }
-
             auto prismElements = absl::MakeSpan(arrayNode->elements.nodes, arrayNode->elements.size);
+            auto elements = nodeListToStore<ast::Array::ENTRY_store>(arrayNode->elements);
+
             auto expr = desugarArray(location, prismElements, move(elements));
-            return make_node_with_expr<parser::Array>(move(expr), location, move(sorbetElements));
+            return expr_only(move(expr));
         }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash literal, e.g. the `a: 1` in `{ a: 1 }
             auto assocNode = down_cast<pm_assoc_node>(node);
