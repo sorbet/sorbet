@@ -3479,10 +3479,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto sendBacktick = MK::Send1(location, MK::Self(location), core::Names::backtick(),
                                           location.copyWithZeroLength(), MK::String(contentLoc, content));
 
-            auto nodes =
-                NodeVec1(make_node_with_expr<parser::String>(MK::String(contentLoc, content), contentLoc, content));
-
-            return make_node_with_expr<parser::XString>(move(sendBacktick), location, move(nodes));
+            return expr_only(move(sendBacktick));
         }
         case PM_YIELD_NODE: { // The `yield` keyword, like `yield`, `yield 1, 2, 3`
             auto yieldNode = down_cast<pm_yield_node>(node);
