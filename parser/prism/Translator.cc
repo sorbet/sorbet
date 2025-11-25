@@ -4342,7 +4342,7 @@ ast::ExpressionPtr Translator::desugarBreakNextReturn(pm_arguments_node *argsNod
         return desugar(argsNode->arguments.nodes[0]);
     }
 
-    auto arguments = desugarArguments<ast::Array::ENTRY_store>(argsNode);
+    auto arguments = nodeListToStore<ast::Array::ENTRY_store>(argsNode->arguments);
 
     // Exclude the "return", "break", or "next" keywords from the array location
     auto arrayLoc = arguments.front().loc().join(arguments.back().loc());
