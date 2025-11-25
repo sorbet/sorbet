@@ -135,6 +135,8 @@ private:
     std::unique_ptr<parser::Node> translateRescue(pm_begin_node *parentBeginNode);
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true,
                                                       core::LocOffsets overrideLocation = core::LocOffsets::none());
+    ast::ExpressionPtr desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
+                                         core::LocOffsets overrideLocation);
 
     std::unique_ptr<ExprOnly> translateRegexpOptions(pm_location_t closingLoc);
     std::unique_ptr<ExprOnly> translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,

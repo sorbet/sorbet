@@ -2426,11 +2426,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto stmtsNode = embeddedStmtsNode->statements;
             if (stmtsNode == nullptr) {
-                return make_node_with_expr<parser::Begin>(MK::Nil(location), location, NodeVec{});
+                return expr_only(MK::Nil(location));
             }
 
             auto inlineIfSingle = false;
-            return translateStatements(stmtsNode, inlineIfSingle, location);
+            auto statements = desugarStatements(stmtsNode, inlineIfSingle, location);
+            return expr_only(move(statements));
         }
         case PM_EMBEDDED_VARIABLE_NODE: {
             auto embeddedVariableNode = down_cast<pm_embedded_variable_node>(node);
@@ -5371,6 +5372,42 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
 
     auto instructionSequence = MK::InsSeq(beginNodeLoc, move(statements), move(finalExpr));
     return make_node_with_expr<parser::Begin>(move(instructionSequence), beginNodeLoc, move(sorbetStmts));
+}
+
+// Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
+// @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
+// @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
+ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
+                                                 core::LocOffsets overrideLocation) {
+    if (stmtsNode == nullptr || stmtsNode->body.size == 0) {
+        return ast::MK::EmptyTree();
+    }
+
+    // For a single statement, do not create a `Begin` node and just return the statement, if that's enabled.
+    if (inlineIfSingle && stmtsNode->body.size == 1) {
+        auto node = translate(stmtsNode->body.nodes[0]);
+        return node ? node->takeDesugaredExpr() : ast::MK::EmptyTree();
+    }
+
+    core::LocOffsets beginNodeLoc;
+    if (overrideLocation.exists()) {
+        beginNodeLoc = overrideLocation;
+    } else {
+        auto prismStatements = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
+
+        // Cover the locations spanned from the first to the last statements.
+        // This can be different from the `stmtsNode->base.location`,
+        // because of the special case (handled by `startLoc()` and `endLoc()`).
+        beginNodeLoc = translateLoc(startLoc(prismStatements.front()), endLoc(prismStatements.back()));
+    }
+
+    auto statements = nodeListToStore<ast::InsSeq::STATS_store>(stmtsNode->body);
+
+    auto finalExpr = move(statements.back());
+    statements.pop_back();
+
+    auto instructionSequence = MK::InsSeq(beginNodeLoc, move(statements), move(finalExpr));
+    return instructionSequence;
 }
 
 // Helper function for creating if nodes with optional desugaring
