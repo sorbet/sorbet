@@ -140,7 +140,8 @@ class T::Props::Decorator
     .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
-    instance.instance_exec(val, &rules.fetch(:setter_proc))
+    rules.fetch(:value_validate_proc).call(val)
+    instance.instance_variable_set(rules.fetch(:accessor_key), val)
   end
   alias_method :set, :prop_set
 
