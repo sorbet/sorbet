@@ -18,9 +18,8 @@ class A
     cls = klass
     T.reveal_type(cls) # error: `A::Klass`
     if cls <= Parent
-      T.reveal_type(cls) # error: `A::Klass`
+      T.reveal_type(cls) # error: `T.all(T.class_of(Parent), A::Klass)`
       cls.on_parent
-      #   ^^^^^^^^^ error: Method `on_parent` does not exist on `T::Module[T.anything]` component of `A::Klass`
     end
   end
 end
