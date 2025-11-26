@@ -2431,7 +2431,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto inlineIfSingle = false;
             auto statements = desugarStatements(stmtsNode, inlineIfSingle, location);
-            return expr_only(move(statements));
+            return expr_only(move(statements), location);
         }
         case PM_EMBEDDED_VARIABLE_NODE: {
             auto embeddedVariableNode = down_cast<pm_embedded_variable_node>(node);
@@ -3111,14 +3111,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             if (PM_NODE_TYPE_P(stmtsNode, PM_STATEMENTS_NODE)) {
                 auto inlineIfSingle = false;
-                // Override the begin node location to be the parentheses location instead of the statements location
-                auto statements = desugarStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle, location);
-                
-                if (ast::isa_tree<ast::EmptyTree>(statements)) {
-                    return empty_expr();
-                }
-
-                return expr_only(move(statements));
+                auto statements = desugarStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle);
+                // Use inner location if it exists, otherwise fall back to parentheses location.
+                // Inner location matches legacy parser for || desugaring; parens location is needed
+                // when inner content has no valid location (e.g., unsupported nodes).
+                auto loc = statements.loc().exists() ? statements.loc() : location;
+                return expr_only(move(statements), loc);
             } else {
                 return translate(stmtsNode);
             }
