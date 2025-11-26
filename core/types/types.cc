@@ -811,7 +811,11 @@ bool LambdaParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) con
 }
 
 bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    return false;
+    if (auto lambdaParam = cast_type<LambdaParam>(this->definition.resultType(gs))) {
+        return lambdaParam->upperBound.derivesFrom(gs, klass);
+    } else {
+        return false;
+    }
 }
 
 void LambdaParam::_sanityCheck(const GlobalState &gs) const {}
