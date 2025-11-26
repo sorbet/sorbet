@@ -638,6 +638,11 @@ void lexer::emit(token_type type, const std::string &str, const char* start, con
   token_queue.push_back(mempool.alloc(type, offset_start, offset_end, scratch_view, line));
 }
 
+void lexer::emit(token_type type, std::string_view str, size_t offset) {
+  size_t line = line_start(type, offset);
+  token_queue.push_back(mempool.alloc(type, offset, offset, str, line));
+}
+
 void lexer::emit_do(bool do_block) {
   if (cond.active()) {
     emit(token_type::kDO_COND, "do");
