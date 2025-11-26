@@ -5597,7 +5597,9 @@ unique_ptr<ExprOnly> Translator::translateRegexp(core::LocOffsets location, core
     auto source = parser.extractString(&content);
 
     auto stringContent = source.empty() ? core::Names::empty() : ctx.state.enterNameUTF8(source);
-    auto pattern = MK::String(contentLoc, stringContent);
+    // Use full location for empty regexps, to match original parser.
+    auto patternLoc = contentLoc.empty() ? location : contentLoc;
+    auto pattern = MK::String(patternLoc, stringContent);
 
     auto options = translateRegexpOptions(closingLoc);
     auto optsExpr = options->takeDesugaredExpr();
