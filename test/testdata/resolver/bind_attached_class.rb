@@ -59,7 +59,7 @@ module DoesNotHaveAttachedClass
 
   def example
     with_bind {
-      T.reveal_type(self) # error: `DoesNotHaveAttachedClass`
+      T.reveal_type(self) # error: `T.self_type (of DoesNotHaveAttachedClass)`
     }
   end
 end
@@ -68,7 +68,7 @@ class ExtendsDoesNotHave
   extend DoesNotHaveAttachedClass
   def self.example
     with_bind {
-      T.reveal_type(self) # error: `T.class_of(ExtendsDoesNotHave)`
+      T.reveal_type(self) # error: `T.self_type (of T.class_of(ExtendsDoesNotHave))`
     }
   end
 end

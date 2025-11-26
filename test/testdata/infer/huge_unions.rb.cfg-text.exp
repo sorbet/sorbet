@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::<Class:C1>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C1) = cast(<self>: NilClass, T.class_of(C1));
+    <self>: T.self_type (of T.class_of(C1)) = cast(<self>: NilClass, T.self_type (of T.class_of(C1)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -29,7 +29,7 @@ bb1[firstDead=-1]():
 method ::<Class:C2>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C2) = cast(<self>: NilClass, T.class_of(C2));
+    <self>: T.self_type (of T.class_of(C2)) = cast(<self>: NilClass, T.self_type (of T.class_of(C2)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -43,7 +43,7 @@ bb1[firstDead=-1]():
 method ::<Class:C3>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C3) = cast(<self>: NilClass, T.class_of(C3));
+    <self>: T.self_type (of T.class_of(C3)) = cast(<self>: NilClass, T.self_type (of T.class_of(C3)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -57,7 +57,7 @@ bb1[firstDead=-1]():
 method ::<Class:C4>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C4) = cast(<self>: NilClass, T.class_of(C4));
+    <self>: T.self_type (of T.class_of(C4)) = cast(<self>: NilClass, T.self_type (of T.class_of(C4)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -71,7 +71,7 @@ bb1[firstDead=-1]():
 method ::<Class:C5>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C5) = cast(<self>: NilClass, T.class_of(C5));
+    <self>: T.self_type (of T.class_of(C5)) = cast(<self>: NilClass, T.self_type (of T.class_of(C5)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -85,7 +85,7 @@ bb1[firstDead=-1]():
 method ::<Class:C6>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C6) = cast(<self>: NilClass, T.class_of(C6));
+    <self>: T.self_type (of T.class_of(C6)) = cast(<self>: NilClass, T.self_type (of T.class_of(C6)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -99,7 +99,7 @@ bb1[firstDead=-1]():
 method ::<Class:C7>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C7) = cast(<self>: NilClass, T.class_of(C7));
+    <self>: T.self_type (of T.class_of(C7)) = cast(<self>: NilClass, T.self_type (of T.class_of(C7)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -113,7 +113,7 @@ bb1[firstDead=-1]():
 method ::<Class:C8>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C8) = cast(<self>: NilClass, T.class_of(C8));
+    <self>: T.self_type (of T.class_of(C8)) = cast(<self>: NilClass, T.self_type (of T.class_of(C8)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -127,7 +127,7 @@ bb1[firstDead=-1]():
 method ::<Class:C9>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C9) = cast(<self>: NilClass, T.class_of(C9));
+    <self>: T.self_type (of T.class_of(C9)) = cast(<self>: NilClass, T.self_type (of T.class_of(C9)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -141,7 +141,7 @@ bb1[firstDead=-1]():
 method ::<Class:C10>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C10) = cast(<self>: NilClass, T.class_of(C10));
+    <self>: T.self_type (of T.class_of(C10)) = cast(<self>: NilClass, T.self_type (of T.class_of(C10)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -155,7 +155,7 @@ bb1[firstDead=-1]():
 method ::<Class:C11>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C11) = cast(<self>: NilClass, T.class_of(C11));
+    <self>: T.self_type (of T.class_of(C11)) = cast(<self>: NilClass, T.self_type (of T.class_of(C11)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -169,7 +169,7 @@ bb1[firstDead=-1]():
 method ::<Class:C12>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C12) = cast(<self>: NilClass, T.class_of(C12));
+    <self>: T.self_type (of T.class_of(C12)) = cast(<self>: NilClass, T.self_type (of T.class_of(C12)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -183,7 +183,7 @@ bb1[firstDead=-1]():
 method ::<Class:C13>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
+    <self>: T.self_type (of T.class_of(C13)) = cast(<self>: NilClass, T.self_type (of T.class_of(C13)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -197,7 +197,7 @@ bb1[firstDead=-1]():
 method ::<Class:C13>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
+    <self>: T.self_type (of T.class_of(C13)) = cast(<self>: NilClass, T.self_type (of T.class_of(C13)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -211,7 +211,7 @@ bb1[firstDead=-1]():
 method ::<Class:C13>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
+    <self>: T.self_type (of T.class_of(C13)) = cast(<self>: NilClass, T.self_type (of T.class_of(C13)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -225,7 +225,7 @@ bb1[firstDead=-1]():
 method ::<Class:C13>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
+    <self>: T.self_type (of T.class_of(C13)) = cast(<self>: NilClass, T.self_type (of T.class_of(C13)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -239,7 +239,7 @@ bb1[firstDead=-1]():
 method ::<Class:C13>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
+    <self>: T.self_type (of T.class_of(C13)) = cast(<self>: NilClass, T.self_type (of T.class_of(C13)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -253,7 +253,7 @@ bb1[firstDead=-1]():
 method ::<Class:C13>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
+    <self>: T.self_type (of T.class_of(C13)) = cast(<self>: NilClass, T.self_type (of T.class_of(C13)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -267,7 +267,7 @@ bb1[firstDead=-1]():
 method ::<Class:C13>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C13) = cast(<self>: NilClass, T.class_of(C13));
+    <self>: T.self_type (of T.class_of(C13)) = cast(<self>: NilClass, T.self_type (of T.class_of(C13)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -281,7 +281,7 @@ bb1[firstDead=-1]():
 method ::<Class:C14>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C14) = cast(<self>: NilClass, T.class_of(C14));
+    <self>: T.self_type (of T.class_of(C14)) = cast(<self>: NilClass, T.self_type (of T.class_of(C14)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -295,7 +295,7 @@ bb1[firstDead=-1]():
 method ::<Class:C15>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C15) = cast(<self>: NilClass, T.class_of(C15));
+    <self>: T.self_type (of T.class_of(C15)) = cast(<self>: NilClass, T.self_type (of T.class_of(C15)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -309,7 +309,7 @@ bb1[firstDead=-1]():
 method ::<Class:C16>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C16) = cast(<self>: NilClass, T.class_of(C16));
+    <self>: T.self_type (of T.class_of(C16)) = cast(<self>: NilClass, T.self_type (of T.class_of(C16)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -323,7 +323,7 @@ bb1[firstDead=-1]():
 method ::<Class:C17>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C17) = cast(<self>: NilClass, T.class_of(C17));
+    <self>: T.self_type (of T.class_of(C17)) = cast(<self>: NilClass, T.self_type (of T.class_of(C17)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -337,7 +337,7 @@ bb1[firstDead=-1]():
 method ::<Class:C18>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C18) = cast(<self>: NilClass, T.class_of(C18));
+    <self>: T.self_type (of T.class_of(C18)) = cast(<self>: NilClass, T.self_type (of T.class_of(C18)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -351,7 +351,7 @@ bb1[firstDead=-1]():
 method ::<Class:C19>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C19) = cast(<self>: NilClass, T.class_of(C19));
+    <self>: T.self_type (of T.class_of(C19)) = cast(<self>: NilClass, T.self_type (of T.class_of(C19)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -365,7 +365,7 @@ bb1[firstDead=-1]():
 method ::<Class:C20>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(C20) = cast(<self>: NilClass, T.class_of(C20));
+    <self>: T.self_type (of T.class_of(C20)) = cast(<self>: NilClass, T.self_type (of T.class_of(C20)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -379,7 +379,7 @@ bb1[firstDead=-1]():
 method ::<Class:A>#send_beta_invitation {
 
 bb0[firstDead=-1]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <self>: T.self_type (of T.class_of(A)) = cast(<self>: NilClass, T.self_type (of T.class_of(A)));
     invite: T.untyped = load_arg(invite)
     <statTemp>$6: Integer(1) = 1
     <ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)
@@ -400,7 +400,7 @@ bb2[firstDead=-1]():
 
 # backedges
 # - bb0
-bb3[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb3[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$10: Integer(2) = 2
     <ifTemp>$9: T::Boolean = <statTemp>$10: Integer(2).===(invite: T.untyped)
     <ifTemp>$9 -> (T::Boolean ? bb4 : bb5)
@@ -414,7 +414,7 @@ bb4[firstDead=-1]():
 
 # backedges
 # - bb3
-bb5[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb5[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$14: Integer(3) = 3
     <ifTemp>$13: T::Boolean = <statTemp>$14: Integer(3).===(invite: T.untyped)
     <ifTemp>$13 -> (T::Boolean ? bb6 : bb7)
@@ -428,7 +428,7 @@ bb6[firstDead=-1]():
 
 # backedges
 # - bb5
-bb7[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb7[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$18: Integer(4) = 4
     <ifTemp>$17: T::Boolean = <statTemp>$18: Integer(4).===(invite: T.untyped)
     <ifTemp>$17 -> (T::Boolean ? bb8 : bb9)
@@ -442,7 +442,7 @@ bb8[firstDead=-1]():
 
 # backedges
 # - bb7
-bb9[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb9[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$22: Integer(5) = 5
     <ifTemp>$21: T::Boolean = <statTemp>$22: Integer(5).===(invite: T.untyped)
     <ifTemp>$21 -> (T::Boolean ? bb10 : bb11)
@@ -456,7 +456,7 @@ bb10[firstDead=-1]():
 
 # backedges
 # - bb9
-bb11[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb11[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$26: Integer(6) = 6
     <ifTemp>$25: T::Boolean = <statTemp>$26: Integer(6).===(invite: T.untyped)
     <ifTemp>$25 -> (T::Boolean ? bb12 : bb13)
@@ -470,7 +470,7 @@ bb12[firstDead=-1]():
 
 # backedges
 # - bb11
-bb13[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb13[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$30: Integer(7) = 7
     <ifTemp>$29: T::Boolean = <statTemp>$30: Integer(7).===(invite: T.untyped)
     <ifTemp>$29 -> (T::Boolean ? bb14 : bb15)
@@ -484,7 +484,7 @@ bb14[firstDead=-1]():
 
 # backedges
 # - bb13
-bb15[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb15[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$34: Integer(8) = 8
     <ifTemp>$33: T::Boolean = <statTemp>$34: Integer(8).===(invite: T.untyped)
     <ifTemp>$33 -> (T::Boolean ? bb16 : bb17)
@@ -498,7 +498,7 @@ bb16[firstDead=-1]():
 
 # backedges
 # - bb15
-bb17[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb17[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$38: Integer(9) = 9
     <ifTemp>$37: T::Boolean = <statTemp>$38: Integer(9).===(invite: T.untyped)
     <ifTemp>$37 -> (T::Boolean ? bb18 : bb19)
@@ -512,7 +512,7 @@ bb18[firstDead=-1]():
 
 # backedges
 # - bb17
-bb19[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb19[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$42: Integer(10) = 10
     <ifTemp>$41: T::Boolean = <statTemp>$42: Integer(10).===(invite: T.untyped)
     <ifTemp>$41 -> (T::Boolean ? bb20 : bb21)
@@ -526,7 +526,7 @@ bb20[firstDead=-1]():
 
 # backedges
 # - bb19
-bb21[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb21[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$46: Integer(11) = 11
     <ifTemp>$45: T::Boolean = <statTemp>$46: Integer(11).===(invite: T.untyped)
     <ifTemp>$45 -> (T::Boolean ? bb22 : bb23)
@@ -540,7 +540,7 @@ bb22[firstDead=-1]():
 
 # backedges
 # - bb21
-bb23[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb23[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$50: Integer(12) = 12
     <ifTemp>$49: T::Boolean = <statTemp>$50: Integer(12).===(invite: T.untyped)
     <ifTemp>$49 -> (T::Boolean ? bb24 : bb25)
@@ -554,7 +554,7 @@ bb24[firstDead=-1]():
 
 # backedges
 # - bb23
-bb25[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb25[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$54: Integer(13) = 13
     <ifTemp>$53: T::Boolean = <statTemp>$54: Integer(13).===(invite: T.untyped)
     <ifTemp>$53 -> (T::Boolean ? bb26 : bb27)
@@ -568,7 +568,7 @@ bb26[firstDead=-1]():
 
 # backedges
 # - bb25
-bb27[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb27[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$58: Integer(14) = 14
     <ifTemp>$57: T::Boolean = <statTemp>$58: Integer(14).===(invite: T.untyped)
     <ifTemp>$57 -> (T::Boolean ? bb28 : bb29)
@@ -582,7 +582,7 @@ bb28[firstDead=-1]():
 
 # backedges
 # - bb27
-bb29[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb29[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$62: Integer(15) = 15
     <ifTemp>$61: T::Boolean = <statTemp>$62: Integer(15).===(invite: T.untyped)
     <ifTemp>$61 -> (T::Boolean ? bb30 : bb31)
@@ -596,7 +596,7 @@ bb30[firstDead=-1]():
 
 # backedges
 # - bb29
-bb31[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb31[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$66: Integer(16) = 16
     <ifTemp>$65: T::Boolean = <statTemp>$66: Integer(16).===(invite: T.untyped)
     <ifTemp>$65 -> (T::Boolean ? bb32 : bb33)
@@ -610,7 +610,7 @@ bb32[firstDead=-1]():
 
 # backedges
 # - bb31
-bb33[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb33[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$70: Integer(17) = 17
     <ifTemp>$69: T::Boolean = <statTemp>$70: Integer(17).===(invite: T.untyped)
     <ifTemp>$69 -> (T::Boolean ? bb34 : bb35)
@@ -624,7 +624,7 @@ bb34[firstDead=-1]():
 
 # backedges
 # - bb33
-bb35[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb35[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$74: Integer(18) = 18
     <ifTemp>$73: T::Boolean = <statTemp>$74: Integer(18).===(invite: T.untyped)
     <ifTemp>$73 -> (T::Boolean ? bb36 : bb37)
@@ -638,7 +638,7 @@ bb36[firstDead=-1]():
 
 # backedges
 # - bb35
-bb37[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb37[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$78: Integer(19) = 19
     <ifTemp>$77: T::Boolean = <statTemp>$78: Integer(19).===(invite: T.untyped)
     <ifTemp>$77 -> (T::Boolean ? bb38 : bb39)
@@ -652,7 +652,7 @@ bb38[firstDead=-1]():
 
 # backedges
 # - bb37
-bb39[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
+bb39[firstDead=-1](<self>: T.self_type (of T.class_of(A)), invite: T.untyped):
     <statTemp>$82: Integer(20) = 20
     <ifTemp>$81: T::Boolean = <statTemp>$82: Integer(20).===(invite: T.untyped)
     <ifTemp>$81 -> (T::Boolean ? bb40 : bb41)
@@ -666,9 +666,9 @@ bb40[firstDead=-1]():
 
 # backedges
 # - bb39
-bb41[firstDead=2](<self>: T.class_of(A)):
+bb41[firstDead=2](<self>: T.self_type (of T.class_of(A))):
     <statTemp>$86: String("Bla bla bla") = "Bla bla bla"
-    <statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$86: String("Bla bla bla"))
+    <statTemp>$3: T.noreturn = <self>: T.self_type (of T.class_of(A)).raise(<statTemp>$86: String("Bla bla bla"))
     <unconditional> -> bb61
 
 # backedges
@@ -703,7 +703,7 @@ bb61[firstDead=2](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.cla
 method ::<Class:A>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <self>: T.self_type (of T.class_of(A)) = cast(<self>: NilClass, T.self_type (of T.class_of(A)));
     <returnMethodTemp>$2: Symbol(:send_beta_invitation) = :send_beta_invitation
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:send_beta_invitation)
     <unconditional> -> bb1

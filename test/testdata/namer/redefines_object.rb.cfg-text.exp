@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::<Class:Object>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(Object) = cast(<self>: NilClass, T.class_of(Object));
+    <self>: T.self_type (of T.class_of(Object)) = cast(<self>: NilClass, T.self_type (of T.class_of(Object)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -30,7 +30,7 @@ method ::Trigger#trigger {
 
 bb0[firstDead=4]():
     @__fake_logger$3: T.untyped = alias <C <undeclared-field-stub>> (@__fake_logger)
-    <self>: Trigger = cast(<self>: NilClass, Trigger);
+    <self>: T.self_type (of Trigger) = cast(<self>: NilClass, T.self_type (of Trigger));
     <returnMethodTemp>$2: T.untyped = @__fake_logger$3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -45,7 +45,7 @@ bb1[firstDead=-1]():
 method ::<Class:Trigger>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(Trigger) = cast(<self>: NilClass, T.class_of(Trigger));
+    <self>: T.self_type (of T.class_of(Trigger)) = cast(<self>: NilClass, T.self_type (of T.class_of(Trigger)));
     <returnMethodTemp>$2: Symbol(:trigger) = :trigger
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:trigger)
     <unconditional> -> bb1
@@ -60,7 +60,7 @@ bb1[firstDead=-1]():
 method ::<Class:Foo>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(Foo) = cast(<self>: NilClass, T.class_of(Foo));
+    <self>: T.self_type (of T.class_of(Foo)) = cast(<self>: NilClass, T.self_type (of T.class_of(Foo)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -74,7 +74,7 @@ bb1[firstDead=-1]():
 method ::<Class:Bar>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(Bar) = cast(<self>: NilClass, T.class_of(Bar));
+    <self>: T.self_type (of T.class_of(Bar)) = cast(<self>: NilClass, T.self_type (of T.class_of(Bar)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
