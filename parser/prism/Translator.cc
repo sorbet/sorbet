@@ -2405,17 +2405,44 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
             bool canProvideNiceDesugar = true;
-            auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(variable.get());
+            bool isMultiTarget = PM_NODE_TYPE_P(forNode->index, PM_MULTI_TARGET_NODE);
 
-            // Check if the variable is a simple local variable or a multi-target with only local variables
-            if (mlhs) {
-                // Multi-target: check if all are local variables (no nested Mlhs or other complex targets)
-                canProvideNiceDesugar = absl::c_all_of(mlhs->exprs, [](const auto &c) {
-                    return parser::NodeWithExpr::isa_node<parser::LVarLhs>(c.get());
-                });
+            // For multi-target, translate all elements once and store them for checking and reuse
+            NodeVec multiTargetElements;
+
+            if (isMultiTarget) {
+                // Multi-target: translate all elements and check if all are local variables
+                auto *multiTargetNode = down_cast<pm_multi_target_node>(forNode->index);
+                auto lefts = absl::MakeSpan(multiTargetNode->lefts.nodes, multiTargetNode->lefts.size);
+                auto rights = absl::MakeSpan(multiTargetNode->rights.nodes, multiTargetNode->rights.size);
+
+                // Check and translate all left elements
+                for (auto *elem : lefts) {
+                    if (!PM_NODE_TYPE_P(elem, PM_LOCAL_VARIABLE_TARGET_NODE)) {
+                        canProvideNiceDesugar = false;
+                    }
+                    multiTargetElements.emplace_back(translate(elem));
+                }
+
+                // Translate and check rest element if present
+                if (multiTargetNode->rest != nullptr && PM_NODE_TYPE_P(multiTargetNode->rest, PM_SPLAT_NODE)) {
+                    auto *splatNode = down_cast<pm_splat_node>(multiTargetNode->rest);
+                    if (splatNode->expression != nullptr) {
+                        canProvideNiceDesugar = false;
+                        multiTargetElements.emplace_back(translate(splatNode->expression));
+                    }
+                }
+
+                // Check and translate all right elements
+                for (auto *elem : rights) {
+                    if (!PM_NODE_TYPE_P(elem, PM_LOCAL_VARIABLE_TARGET_NODE)) {
+                        canProvideNiceDesugar = false;
+                    }
+                    multiTargetElements.emplace_back(translate(elem));
+                }
             } else {
                 // Single variable: check if it's a local variable
-                canProvideNiceDesugar = parser::NodeWithExpr::isa_node<parser::LVarLhs>(variable.get());
+                canProvideNiceDesugar = PM_NODE_TYPE_P(forNode->index, PM_LOCAL_VARIABLE_TARGET_NODE);
             }
 
             auto bodyExpr = takeDesugaredExprOrEmptyTree(body);
@@ -2425,9 +2452,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
             if (canProvideNiceDesugar) {
                 // Simple case: `for x in a; body; end` -> `a.each { |x| body }`
-                if (mlhs) {
-                    for (auto &c : mlhs->exprs) {
-                        params.emplace_back(c->takeDesugaredExpr());
+                if (isMultiTarget) {
+                    // Use the already-translated elements for block parameters
+                    for (auto &elemNode : multiTargetElements) {
+                        params.emplace_back(elemNode->takeDesugaredExpr());
                     }
                 } else {
                     params.emplace_back(variable->takeDesugaredExpr());
@@ -2439,8 +2467,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
 
                 // Desugar the assignment
                 ExpressionPtr masgnExpr;
-                if (mlhs) {
-                    // Multi-target: use desugarMlhs for complex expansion
+                if (isMultiTarget) {
+                    // Multi-target: use desugarMlhs with the translated Mlhs node
+                    auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(variable.get());
+                    ENFORCE(mlhs != nullptr, "Expected Mlhs node for multi-target");
                     masgnExpr = desugarMlhs(location, mlhs, move(tempLocal));
                 } else {
                     // Single variable: simple assignment
