@@ -71,7 +71,7 @@ private:
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           directlyDesugar(parent.directlyDesugar), preserveConcreteSyntax(parent.preserveConcreteSyntax),
           parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
-          desugarUniqueCounterStorage(resetDesugarUniqueCounter ? std::numeric_limits<uint32_t>::min() : 1),
+          desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : std::numeric_limits<uint32_t>::min()),
           parserUniqueCounter(parent.parserUniqueCounter),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
