@@ -1170,20 +1170,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_BEGIN_NODE: { // A `begin ... end` block
             auto beginNode = down_cast<pm_begin_node>(node);
-
-            NodeVec statements = translateEnsure(beginNode);
-
-            if (statements.empty()) {
-                return make_node_with_expr<parser::Kwbegin>(MK::Nil(location), location, std::move(statements));
-            }
-
-            enforceHasExpr(statements);
-
-            auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
-            auto finalExpr = std::move(args.back());
-            args.pop_back();
-            auto expr = MK::InsSeq(location, std::move(args), std::move(finalExpr));
-            return make_node_with_expr<parser::Kwbegin>(std::move(expr), location, std::move(statements));
+            auto expr = desugarBegin(beginNode);
+            return expr_only(move(expr));
         }
         case PM_BLOCK_ARGUMENT_NODE: { // A block arg passed into a method call, e.g. the `&b` in `a.map(&b)`
             auto blockArg = down_cast<pm_block_argument_node>(node);
@@ -2252,9 +2240,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unique_ptr<parser::Node> body;
             if (defNode->body != nullptr) {
                 if (PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
-                    auto beginNode = down_cast<pm_begin_node>(defNode->body);
-                    auto statements = methodContext.translateEnsure(beginNode);
-
                     // Prism uses a PM_BEGIN_NODE to model the body of a method that has a top level rescue/ensure, e.g.
                     //
                     //     def method_with_top_level_rescue
@@ -2263,23 +2248,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     //       "fallback"
                     //     end
                     //
-                    // This gets parsed as-if the body had an explicit begin/rescue/ensure block nested in it.
-                    //
-                    // This would cause the legacy parse tree to have an extra `parser::Kwbegin` node wrapping the body.
-                    // To match the legacy parse tree, we dig into the `beginNode` and pull out its statements,
-                    // skipping the creation of that parent `parser::Kwbegin` node.
-                    if (statements.size() == 1) {
-                        body = move(statements[0]);
-                    } else {
-                        enforceHasExpr(statements);
-
-                        auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
-                        auto finalExpr = move(args.back());
-                        args.pop_back();
-                        auto expr = MK::InsSeq(location, move(args), move(finalExpr));
-                        body = make_node_with_expr<parser::Kwbegin>(move(expr), location, move(statements));
-                    }
-
+                    // desugarBegin handles this directly, returning the desugared expression.
+                    auto beginNode = down_cast<pm_begin_node>(defNode->body);
+                    auto beginExpr = methodContext.desugarBegin(beginNode);
+                    body = expr_only(move(beginExpr));
                 } else {
                     // Side effect: If method has no explicit block parameter and contains a `yield`, translating it
                     // will change the `methodContext.enclosingBlockParamName` from `<blk>` to `<implicit yield>`.
@@ -3245,7 +3217,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_node_with_expr<parser::Rescue>(move(expr), location, move(body), move(cases), nullptr);
         }
         case PM_RESCUE_NODE: {
-            unreachable("PM_RESCUE_NODE is handled separately in translateRescue, see its docs for details.");
+            unreachable("PM_RESCUE_NODE is handled separately in PM_BEGIN_NODE, see its docs for details.");
         }
         case PM_REST_PARAMETER_NODE: { // A rest parameter, like `def foo(*rest)`
             auto restParamNode = down_cast<pm_rest_parameter_node>(node);
@@ -4962,369 +4934,174 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
     return make_unique<parser::Block>(blockLoc, move(sendNode), move(parametersNode), move(body));
 }
 
-// Prism represents a `begin ... rescue ... end` construct using a `pm_begin_node` that may contain:
-//   - `statements`: the code before the `rescue` clauses (the main body).
-//   - `rescue_clause`: a `pm_rescue_node` representing the first `rescue` clause.
-//   - `else_clause`: an optional `pm_else_node` representing the `else` clause.
-//
-// Each `pm_rescue_node` represents a single `rescue` clause and is linked to subsequent `rescue` clauses via its
-// `subsequent` pointer. Each `pm_rescue_node` contains:
-//   - `exceptions`: the exceptions to rescue (e.g., `RuntimeError`).
-//   - `reference`: the exception variable (e.g., `=> e`).
-//   - `statements`: the body of the rescue clause.
-//
-// In contrast, Sorbet's legacy parser represents the same construct using a `Rescue` node that contains:
-//   - `body`: the code before the `rescue` clauses (the main body).
-//   - `rescue`: a list of `Resbody` nodes, each representing a `rescue` clause.
-//   - `else_`: an optional node representing the `else` clause.
-//
-// This function and the PM_BEGIN_NODE case translate between the two representations by processing the `pm_rescue_node`
-// (and its linked `subsequent` nodes) and assembling the corresponding `Rescue` and `Resbody` nodes in Sorbet's AST.
-unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginNode) {
-    auto *prismRescueNode = parentBeginNode->rescue_clause;
-    ENFORCE(prismRescueNode, "translateRescue() should only be called if there's a `rescue` clause.")
+// Helper to desugar statements from a clause node (rescue/ensure/else), returning EmptyTree if null or empty.
+template <typename ClauseNode> ast::ExpressionPtr Translator::desugarClauseStatements(ClauseNode *clause) {
+    if (clause == nullptr || clause->statements == nullptr || clause->statements->body.size == 0) {
+        return ast::MK::EmptyTree();
+    }
+    return desugarStatements(clause->statements);
+}
 
-    NodeVec rescueBodies;
+// Helper: Calculate the end position for a RescueCase's location.
+// Priority: statements > reference > exceptions > keyword
+uint32_t Translator::rescueCaseEndPos(const pm_rescue_node &rescueNode) {
+    if (rescueNode.statements != nullptr) {
+        return translateLoc(rescueNode.statements->base.location).endPos();
+    }
+    if (rescueNode.reference != nullptr) {
+        return translateLoc(rescueNode.reference->location).endPos();
+    }
+    if (rescueNode.exceptions.size > 0) {
+        auto lastEx = rescueNode.exceptions.nodes[rescueNode.exceptions.size - 1];
+        return translateLoc(lastEx->location).endPos();
+    }
+    return translateLoc(rescueNode.keyword_loc).endPos();
+}
 
-    // Each `rescue` clause generates a `Resbody` node, which is a child of the `Rescue` node.
-    for (pm_rescue_node *currentRescueNode = prismRescueNode; currentRescueNode != nullptr;
-         currentRescueNode = currentRescueNode->subsequent) {
-        // Translate the exception variable (e.g. the `=> e` in `rescue => e`)
-        auto var = translate(currentRescueNode->reference);
+// Builds rescue cases from a linked list of pm_rescue_node clauses.
+ast::Rescue::RESCUE_CASE_store Translator::desugarRescueCases(pm_rescue_node *firstRescueNode) {
+    ast::Rescue::RESCUE_CASE_store rescueCases;
 
-        // Translate the body of the rescue clause
-        auto rescueBody = translateStatements(currentRescueNode->statements);
+    for (pm_rescue_node *rescueNode = firstRescueNode; rescueNode != nullptr; rescueNode = rescueNode->subsequent) {
+        auto resbodyLoc = translateLoc(rescueNode->base.location);
+        auto rescueKeywordLoc = translateLoc(rescueNode->keyword_loc);
 
-        // Translate the exceptions being rescued (e.g., `RuntimeError` in `rescue RuntimeError`)
-        auto exceptions = translateMulti(currentRescueNode->exceptions);
-
-        auto exceptionsNodes = absl::MakeSpan(currentRescueNode->exceptions.nodes, currentRescueNode->exceptions.size);
-        unique_ptr<parser::Node> exceptionsArray;
-        if (!exceptionsNodes.empty()) {
-            auto arrayLoc = translateLoc(exceptionsNodes.front()->location.start, exceptionsNodes.back()->location.end);
-
-            enforceHasExpr(exceptions);
-
-            // Check if there are any splats in the exceptions
-            bool hasSplat = absl::c_any_of(exceptionsNodes, [](auto *ex) { return PM_NODE_TYPE_P(ex, PM_SPLAT_NODE); });
-
-            // Build ast::Array expression from exceptions
-            auto exceptionStore = nodeVecToStore<ast::Array::ENTRY_store>(exceptions);
-
-            ast::ExpressionPtr arrayExpr;
-            if (hasSplat) {
-                // Use desugarArray to properly handle splats with concat() calls
-                arrayExpr = desugarArray(arrayLoc, exceptionsNodes, move(exceptionStore));
-            } else {
-                // Simple case: just create an array without desugaring splats
-                arrayExpr = ast::make_expression<ast::Array>(arrayLoc, move(exceptionStore));
-            }
-
-            exceptionsArray = make_node_with_expr<parser::Array>(move(arrayExpr), arrayLoc, move(exceptions));
-        }
-
-        auto resbodyLoc = translateLoc(currentRescueNode->base.location);
-        auto rescueKeywordLoc = translateLoc(currentRescueNode->keyword_loc);
-
-        // If there's a subsequent rescue clause, we want the previous resbody to end at the end of the line
-        // before the subsequent rescue starts, instead of extending all the way to the subsequent rescue.
+        // If there's a subsequent rescue clause, we want the previous resbody to end at its actual content,
+        // not extend all the way to the subsequent rescue.
         //
-        // For example, in this code:
-        //   begin
-        //   rescue => e
-        //   rescue => e
-        //     e #: as String
-        //   end
-        //
-        // In Prism, the first `rescue` clause extends all the way to `end`, which would consume
-        // the assertion comment. In Whitequark (WQ), the first `rescue` ends at the end of its line.
-        // We need proper location for RBS rewriting.
-        if (currentRescueNode->subsequent != nullptr) {
-            auto subsequentLoc = translateLoc(currentRescueNode->subsequent->base.location);
-
-            // We want to end just before the subsequent rescue begins
-            // So we use the position right before the subsequent rescue starts
-            auto endPos = subsequentLoc.beginPos();
-
-            // Move back to find the end of the previous line (before any whitespace)
-            const auto &source = ctx.file.data(ctx).source();
-            while (endPos > resbodyLoc.beginPos() && isspace(source[endPos - 1])) {
-                endPos--;
-            }
-
-            resbodyLoc = core::LocOffsets{resbodyLoc.beginPos(), endPos};
+        // In Prism, the first `rescue` clause extends all the way to `end`, which would consume any comments
+        // between rescue clauses. In Whitequark (WQ), each rescue ends at its own statements/reference/exceptions.
+        if (rescueNode->subsequent != nullptr) {
+            resbodyLoc = core::LocOffsets{resbodyLoc.beginPos(), rescueCaseEndPos(*rescueNode)};
         }
 
-        enforceHasExpr(var, rescueBody, exceptionsArray);
-
-        // Build ast::RescueCase expression
-        ast::RescueCase::EXCEPTION_store astExceptions;
-        if (exceptionsArray != nullptr) {
-            auto exceptionsExpr = exceptionsArray->takeDesugaredExpr();
-            if (auto exceptionsArrayExpr = ast::cast_tree<ast::Array>(exceptionsExpr)) {
-                astExceptions.insert(astExceptions.end(), make_move_iterator(exceptionsArrayExpr->elems.begin()),
-                                     make_move_iterator(exceptionsArrayExpr->elems.end()));
-            } else if (!ast::isa_tree<ast::EmptyTree>(exceptionsExpr)) {
-                astExceptions.emplace_back(move(exceptionsExpr));
-            }
+        // Build exception store from exceptions being rescued
+        ast::RescueCase::EXCEPTION_store exceptions;
+        auto exceptionsNodes = absl::MakeSpan(rescueNode->exceptions.nodes, rescueNode->exceptions.size);
+        for (auto *ex : exceptionsNodes) {
+            exceptions.emplace_back(desugar(ex));
         }
 
+        // Desugar the rescue body
+        ast::ExpressionPtr rescueBodyExpr = desugarStatements(rescueNode->statements);
+
+        // Handle exception variable (e.g., the `e` in `rescue => e`)
         ast::ExpressionPtr varExpr;
-        ast::ExpressionPtr rescueBodyExpr;
-
-        // Check what kind of variable we have
-        bool isReference = var != nullptr && ast::isa_reference(var->peekDesugaredExpr());
-        bool isLocal = var != nullptr && ast::isa_tree<ast::Local>(var->peekDesugaredExpr());
-
-        if (isReference && !isLocal) {
-            auto &expr = var->peekDesugaredExpr();
-            if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(expr)) {
-                isLocal = ident->kind == ast::UnresolvedIdent::Kind::Local;
+        if (rescueNode->reference != nullptr) {
+            auto refExpr = desugar(rescueNode->reference);
+            bool isLocal = ast::isa_tree<ast::Local>(refExpr);
+            if (!isLocal) {
+                if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(refExpr)) {
+                    isLocal = ident->kind == ast::UnresolvedIdent::Kind::Local;
+                }
             }
-        }
 
-        if (isLocal) {
-            // Regular local variable
-            varExpr = var->takeDesugaredExpr();
-
-            if (rescueBody != nullptr) {
-                rescueBodyExpr = rescueBody->takeDesugaredExpr();
+            if (isLocal) {
+                varExpr = move(refExpr);
             } else {
-                rescueBodyExpr = ast::MK::EmptyTree();
+                // Non-local reference (e.g., @ex, @@ex, $ex) - create temp and wrap body
+                auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+                auto varLoc = refExpr.loc();
+                varExpr = ast::MK::Local(varLoc, rescueTemp);
+
+                ast::InsSeq::STATS_store stats;
+                stats.emplace_back(ast::MK::Assign(varLoc, move(refExpr), ast::MK::Local(varLoc, rescueTemp)));
+                rescueBodyExpr = ast::MK::InsSeq(varLoc, move(stats), move(rescueBodyExpr));
             }
-        } else if (isReference) {
-            // Non-local reference (lvalue exception variables like @ex, @@ex, $ex)
-            // Create a temp variable and wrap the body
-            auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
-            auto varLoc = var->loc;
-            varExpr = ast::MK::Local(varLoc, rescueTemp);
-
-            // Create InsSeq: { @ex = <rescueTemp>; <rescue body> }
-            auto lhsExpr = var->takeDesugaredExpr();
-            auto assignExpr = ast::MK::Assign(varLoc, move(lhsExpr), ast::MK::Local(varLoc, rescueTemp));
-
-            ast::InsSeq::STATS_store stats;
-            stats.emplace_back(move(assignExpr));
-
-            auto bodyExpr = takeDesugaredExprOrEmptyTree(rescueBody);
-            rescueBodyExpr = ast::MK::InsSeq(varLoc, move(stats), move(bodyExpr));
         } else {
-            // For bare rescue clauses with no variable, create a <rescueTemp> variable
-            // Legacy parser uses zero-length location only when there are no exceptions AND no body,
-            // otherwise uses full keyword location
+            // Bare rescue clause with no variable - create synthetic temp variable
             auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
-            auto syntheticVarLoc = (exceptionsArray == nullptr && rescueBody == nullptr)
+            auto syntheticVarLoc = (exceptionsNodes.empty() && ast::isa_tree<ast::EmptyTree>(rescueBodyExpr))
                                        ? rescueKeywordLoc.copyWithZeroLength()
                                        : rescueKeywordLoc;
             varExpr = ast::MK::Local(syntheticVarLoc, rescueTemp);
-
-            rescueBodyExpr = takeDesugaredExprOrEmptyTree(rescueBody);
         }
 
-        auto rescueCaseExpr =
-            ast::make_expression<ast::RescueCase>(resbodyLoc, move(astExceptions), move(varExpr), move(rescueBodyExpr));
-
-        auto body = make_node_with_expr<parser::Resbody>(move(rescueCaseExpr), resbodyLoc, move(exceptionsArray),
-                                                         move(var), move(rescueBody));
-        rescueBodies.emplace_back(move(body));
+        rescueCases.emplace_back(
+            ast::make_expression<ast::RescueCase>(resbodyLoc, move(exceptions), move(varExpr), move(rescueBodyExpr)));
     }
 
-    auto bodyNode = translateStatements(parentBeginNode->statements);
-    auto elseNode = translate(up_cast(parentBeginNode->else_clause));
-
-    // Find the last rescue clause by traversing the linked list
-    pm_rescue_node *lastRescueNode = prismRescueNode;
-    while (lastRescueNode->subsequent != nullptr) {
-        lastRescueNode = lastRescueNode->subsequent;
-    }
-
-    const uint8_t *rescueStart;
-    // Determine the start location, prioritize: begin statements > else statements > rescue keyword
-    if (auto *beginStmts = parentBeginNode->statements) {
-        // If there are begin statements, start there
-        rescueStart = beginStmts->base.location.start;
-    } else if (auto *prismElseNode = parentBeginNode->else_clause) {
-        if (auto *elseStmts = prismElseNode->statements) {
-            // No begin statements, but there are else statements - start at else statements
-            rescueStart = elseStmts->base.location.start;
-        } else {
-            // No begin statements and no else statements - start at rescue keyword
-            rescueStart = prismRescueNode->keyword_loc.start;
-        }
-    } else {
-        // No begin statements and no else clause - start at rescue keyword
-        rescueStart = prismRescueNode->keyword_loc.start;
-    }
-
-    const uint8_t *rescueEnd;
-    // Determine the end location, prioritize: rescue keyword < rescue statements < else statements
-    if (auto *prismElseNode = parentBeginNode->else_clause) {
-        if (auto *elseStmts = prismElseNode->statements) {
-            // If there are else statements, end at their end
-            rescueEnd = elseStmts->base.location.end;
-        } else if (auto *rescueStmts = lastRescueNode->statements) {
-            // No else statements but there are rescue statements
-            rescueEnd = rescueStmts->base.location.end;
-        } else {
-            // No else statements and no rescue statements - use rescue keyword end
-            rescueEnd = lastRescueNode->base.location.end;
-        }
-    } else if (auto *rescueStmts = lastRescueNode->statements) {
-        // No else clause but there are rescue statements
-        rescueEnd = rescueStmts->base.location.end;
-    } else {
-        // No else clause and no rescue statements - use rescue keyword end
-        rescueEnd = lastRescueNode->base.location.end;
-    }
-
-    core::LocOffsets rescueLoc = translateLoc(rescueStart, rescueEnd);
-
-    enforceHasExpr(bodyNode);
-
-    // Build the ast::Rescue expression
-    auto bodyExpr = takeDesugaredExprOrEmptyTree(bodyNode);
-
-    // Extract RescueCase expressions from each Resbody node
-    ast::Rescue::RESCUE_CASE_store rescueCases;
-    rescueCases.reserve(rescueBodies.size());
-
-    for (auto &resbody : rescueBodies) {
-        // Each Resbody should already have a RescueCase expression from make_node_with_expr
-        auto rescueCaseExpr = resbody->takeDesugaredExpr();
-        ENFORCE(ast::isa_tree<ast::RescueCase>(rescueCaseExpr), "resbody should contain a RescueCase expression");
-        rescueCases.emplace_back(move(rescueCaseExpr));
-    }
-
-    // Extract the else expression
-    auto elseExpr = takeDesugaredExprOrEmptyTree(elseNode);
-
-    // Build the ast::Rescue expression (ensure is EmptyTree since this is translateRescue, not translateEnsure)
-    auto rescueExpr = ast::make_expression<ast::Rescue>(rescueLoc, move(bodyExpr), move(rescueCases), move(elseExpr),
-                                                        ast::MK::EmptyTree());
-
-    return make_node_with_expr<parser::Rescue>(move(rescueExpr), rescueLoc, move(bodyNode), move(rescueBodies),
-                                               move(elseNode));
+    return rescueCases;
 }
 
-NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
-    NodeVec statements;
-
-    unique_ptr<parser::Node> translatedRescue;
-    if (beginNode->rescue_clause != nullptr) {
-        translatedRescue = translateRescue(beginNode);
+// Helper: Calculate the start position for a Rescue node's location.
+// Priority: body statements > else statements > rescue keyword > ensure keyword > begin location
+const uint8_t *rescueLocStart(const pm_begin_node &beginNode) {
+    if (beginNode.statements != nullptr) {
+        return beginNode.statements->base.location.start;
+    } else if (beginNode.else_clause != nullptr && beginNode.else_clause->statements != nullptr) {
+        return beginNode.else_clause->statements->base.location.start;
+    } else if (beginNode.rescue_clause != nullptr) {
+        return beginNode.rescue_clause->keyword_loc.start;
+    } else if (beginNode.ensure_clause != nullptr) {
+        return beginNode.ensure_clause->ensure_keyword_loc.start;
+    } else {
+        return beginNode.base.location.start;
     }
+}
 
-    if (auto *ensureNode = beginNode->ensure_clause) {
-        // Handle `begin ... ensure ... end`
-        // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
-        // Ensure node.
-        auto bodyNode = translateStatements(beginNode->statements);
-        auto ensureBody = translateStatements(ensureNode->statements);
-
-        absl::Span<pm_node_t *> prismStatements;
-        if (beginNode->statements) {
-            prismStatements = absl::MakeSpan(beginNode->statements->body.nodes, beginNode->statements->body.size);
+// Helper: Calculate the end position for a Rescue node's location.
+// Priority: else > rescue > ensure statements (if present) > body > ensure keyword > begin location
+const uint8_t *rescueLocEnd(const pm_begin_node &beginNode) {
+    if (beginNode.else_clause != nullptr && beginNode.else_clause->statements != nullptr) {
+        return beginNode.else_clause->statements->base.location.end;
+    } else if (beginNode.rescue_clause != nullptr) {
+        // Find the last rescue clause
+        pm_rescue_node *lastRescue = beginNode.rescue_clause;
+        while (lastRescue->subsequent != nullptr) {
+            lastRescue = lastRescue->subsequent;
         }
-
-        // Had to widen the type from `parser::Ensure` to `parser::Node` to handle `make_node_with_expr` correctly.
-        // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-        unique_ptr<parser::Node> translatedEnsure;
-        if (translatedRescue != nullptr) {
-            // When we have a rescue clause, the Ensure node should span from either:
-            // - the begin statements start (if present), or
-            // - the rescue keyword (if no begin statements)
-            // to the end of the body (rescue/else clause or ensure statements, whichever comes last)
-            const uint8_t *start = prismStatements.empty() ? beginNode->rescue_clause->keyword_loc.start
-                                                           : beginNode->statements->base.location.start;
-
-            const uint8_t *end;
-
-            // If there are ensure statements, always extend to include them
-            if (ensureNode->statements) {
-                end = ensureNode->statements->base.location.end;
-            } else {
-                // No ensure statements, so find the end of the rescue clause (including else if present)
-                pm_rescue_node *lastRescueNode = beginNode->rescue_clause;
-                while (lastRescueNode->subsequent != nullptr) {
-                    lastRescueNode = lastRescueNode->subsequent;
-                }
-
-                if (auto *prismElseNode = beginNode->else_clause) {
-                    if (auto *elseStmts = prismElseNode->statements) {
-                        end = elseStmts->base.location.end;
-                    } else {
-                        end = prismElseNode->base.location.end;
-                    }
-                } else if (auto *rescueStmts = lastRescueNode->statements) {
-                    end = rescueStmts->base.location.end;
-                } else {
-                    // When the last rescue clause has no statements, use the end of the rescue clause itself
-                    end = lastRescueNode->base.location.end;
-                }
-            }
-
-            auto loc = translateLoc(start, end);
-
-            enforceHasExpr(translatedRescue, ensureBody);
-
-            // Build ast::Rescue expression with ensure field set
-            // When we have both rescue and ensure, the translatedRescue is already an ast::Rescue,
-            // so we just need to set its ensure field
-            auto bodyExpr = translatedRescue->takeDesugaredExpr();
-            auto rescue = ast::cast_tree<ast::Rescue>(bodyExpr);
-            ENFORCE(rescue != nullptr, "translatedRescue should be a Rescue node");
-
-            rescue->ensure = takeDesugaredExprOrEmptyTree(ensureBody);
-
-            translatedEnsure =
-                make_node_with_expr<parser::Ensure>(move(bodyExpr), loc, move(translatedRescue), move(ensureBody));
+        if (lastRescue->statements != nullptr) {
+            return lastRescue->statements->base.location.end;
         } else {
-            // When there's no rescue clause, the Ensure node location depends on whether there are begin statements:
-            // - If there are begin statements: span from start of begin statements to end of ensure statements
-            // - If there are no begin statements: span from ensure keyword to end of ensure statements
-            const uint8_t *start = prismStatements.empty() ? ensureNode->ensure_keyword_loc.start
-                                                           : beginNode->statements->base.location.start;
-
-            const uint8_t *end;
-            if (ensureNode->statements) {
-                // If there are ensure statements, always extend to include them
-                end = ensureNode->statements->base.location.end;
-            } else if (!prismStatements.empty()) {
-                // No ensure statements but there are begin statements
-                end = beginNode->statements->base.location.end;
-            } else {
-                // No ensure statements and no begin statements
-                end = ensureNode->ensure_keyword_loc.end;
-            }
-
-            auto loc = translateLoc(start, end);
-
-            enforceHasExpr(bodyNode, ensureBody);
-
-            // Build ast::Rescue expression with ensure field set
-            // When there's no rescue clause, create a new Rescue with empty rescue cases
-            auto bodyExpr = takeDesugaredExprOrEmptyTree(bodyNode);
-            auto ensureExpr = takeDesugaredExprOrEmptyTree(ensureBody);
-
-            // Create ast::Rescue with empty rescue cases
-            ast::Rescue::RESCUE_CASE_store emptyCases;
-            auto emptyElseClause = ast::MK::EmptyTree();
-            auto rescueExpr = ast::make_expression<ast::Rescue>(loc, move(bodyExpr), move(emptyCases),
-                                                                move(emptyElseClause), move(ensureExpr));
-            translatedEnsure =
-                make_node_with_expr<parser::Ensure>(move(rescueExpr), loc, move(bodyNode), move(ensureBody));
+            return lastRescue->base.location.end;
         }
+    } else if (beginNode.ensure_clause != nullptr && beginNode.ensure_clause->statements != nullptr) {
+        // Ensure has statements - include them in location
+        return beginNode.ensure_clause->statements->base.location.end;
+    } else if (beginNode.statements != nullptr) {
+        // Empty ensure - end at body statements
+        return beginNode.statements->base.location.end;
+    } else if (beginNode.ensure_clause != nullptr) {
+        // Empty body with empty ensure - use ensure keyword
+        return beginNode.ensure_clause->ensure_keyword_loc.end;
+    } else {
+        return beginNode.base.location.end;
+    }
+}
 
-        statements.emplace_back(move(translatedEnsure));
-    } else if (translatedRescue != nullptr) {
-        // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
-        statements.emplace_back(move(translatedRescue));
-    } else if (beginNode->statements != nullptr) {
-        // Handle just `begin ... end` without ensure or rescue
-        statements = translateMulti(beginNode->statements->body);
+// Desugars a pm_begin_node directly into an ast::ExpressionPtr.
+// Returns an ast::Rescue when there are rescue or ensure clauses, otherwise returns an InsSeq (or single expression).
+ast::ExpressionPtr Translator::desugarBegin(pm_begin_node *beginNodePtr) {
+    if (beginNodePtr == nullptr) {
+        return ast::MK::EmptyTree();
     }
 
-    return statements;
+    auto &beginNode = *beginNodePtr;
+    auto beginLoc = translateLoc(beginNode.base.location);
+    auto ensureExpr = desugarClauseStatements(beginNode.ensure_clause);
+    auto elseExpr = desugarClauseStatements(beginNode.else_clause);
+    auto rescueCases = desugarRescueCases(beginNode.rescue_clause);
+    bool hasRescue = !rescueCases.empty();
+    bool hasEnsure = beginNode.ensure_clause != nullptr;
+
+    // For the body, use the begin node's location when it's a plain begin block (no rescue/ensure)
+    // so the InsSeq spans the whole begin...end block
+    auto bodyLoc = (hasRescue || hasEnsure) ? core::LocOffsets::none() : beginLoc;
+    auto bodyExpr = desugarStatements(beginNode.statements, true, bodyLoc);
+
+    if (hasRescue || hasEnsure) {
+        auto loc = translateLoc(rescueLocStart(beginNode), rescueLocEnd(beginNode));
+        return ast::make_expression<ast::Rescue>(loc, move(bodyExpr), move(rescueCases), move(elseExpr),
+                                                 move(ensureExpr));
+    }
+
+    // No rescue or ensure - just return the body (already an InsSeq or single expression)
+    // If body is empty, return Nil with the begin node's location
+    if (ast::isa_tree<ast::EmptyTree>(bodyExpr)) {
+        return ast::MK::Nil(beginLoc);
+    }
+    return bodyExpr;
 }
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
