@@ -28,8 +28,8 @@ class A
     if x
       return x.to_s
     else
-      T.reveal_type(x) # error: `T.nilable(T.all(FalseClass, A::X))`
-      return x # error: Expected `T.nilable(String)` but found `T.nilable(T.all(FalseClass, A::X))` for method result type
+      T.reveal_type(x) # error: `NilClass`
+      return x
     end
   end
 
