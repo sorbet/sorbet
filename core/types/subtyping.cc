@@ -899,7 +899,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return t2;
         }
 
-        if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1) || isa_type<SelfTypeParam>(t1)) {
+        if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1) || isa_type<SelfTypeParam>(t1) ||
+            isa_type<FreshSelfType>(t1)) {
             auto lft = Types::all(gs, t1, o2->left);
             if (Types::isAsSpecificAs(gs, lft, o2->right) && !lft.isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
@@ -1080,6 +1081,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         } else if (freshSelfTypeT2 != nullptr) {
             if (!freshSelfTypeT2->upperBound.isUntyped() && isSubType(gs, freshSelfTypeT2->upperBound, t1)) {
                 return t2;
+            } else if (glb(gs, t1, freshSelfTypeT2->upperBound).isBottom()) {
+                return bottom();
             }
             return AndType::make_shared(t1, t2);
         } else if (freshSelfTypeT1 != nullptr) {
