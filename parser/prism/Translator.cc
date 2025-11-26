@@ -2253,7 +2253,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (defNode->body != nullptr) {
                 if (PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                     auto beginNode = down_cast<pm_begin_node>(defNode->body);
-                    auto statements = this->translateEnsure(beginNode);
+                    auto statements = methodContext.translateEnsure(beginNode);
 
                     // Prism uses a PM_BEGIN_NODE to model the body of a method that has a top level rescue/ensure, e.g.
                     //
