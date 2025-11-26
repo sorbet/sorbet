@@ -1921,21 +1921,23 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                 args.emplace_back(takeDesugaredExprOrEmptyTree(predicate));
                 args.emplace_back(MK::Int(locZeroLen, totalPatterns));
 
-                for (auto &whenNodePtr : whenNodes) {
-                    auto whenNodeWrapped = parser::NodeWithExpr::cast_node<parser::When>(whenNodePtr.get());
-                    ENFORCE(whenNodeWrapped != nullptr, "case without a when?");
-                    // Each pattern node already has a desugared expression (populated by translateMulti +
-                    // NodeWithExpr). Consume them now; the wrapper's placeholder expression is intentionally ignored.
-                    for (auto &patternNode : whenNodeWrapped->patterns) {
+                // Extract pattern expressions directly from Prism nodes
+                for (auto *prismWhenPtr : prismWhenNodes) {
+                    auto *prismWhen = down_cast<pm_when_node>(prismWhenPtr);
+                    auto prismPatterns = absl::MakeSpan(prismWhen->conditions.nodes, prismWhen->conditions.size);
+
+                    for (auto *prismPattern : prismPatterns) {
+                        auto patternNode = translate(prismPattern);
                         args.emplace_back(takeDesugaredExprOrEmptyTree(patternNode));
                     }
                 }
 
-                for (auto &whenNodePtr : whenNodes) {
-                    auto whenNodeWrapped = parser::NodeWithExpr::cast_node<parser::When>(whenNodePtr.get());
-                    ENFORCE(whenNodeWrapped != nullptr, "case without a when?");
-                    // The body node also carries a real expression once translateStatements has run.
-                    args.emplace_back(takeDesugaredExprOrEmptyTree(whenNodeWrapped->body));
+                // Extract body expressions directly from Prism nodes
+                for (auto *prismWhenPtr : prismWhenNodes) {
+                    auto *prismWhen = down_cast<pm_when_node>(prismWhenPtr);
+                    auto bodyNode = translateStatements(prismWhen->statements);
+                    auto bodyExpr = takeDesugaredExprOrEmptyTree(bodyNode);
+                    args.emplace_back(move(bodyExpr));
                 }
 
                 args.emplace_back(takeDesugaredExprOrEmptyTree(elseClause));
@@ -1963,17 +1965,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
             // building backwards
             ExpressionPtr resultExpr = takeDesugaredExprOrEmptyTree(elseClause);
 
-            for (auto it = whenNodes.rbegin(); it != whenNodes.rend(); ++it) {
-                auto whenNodeWrapped = parser::NodeWithExpr::cast_node<parser::When>(it->get());
-                ENFORCE(whenNodeWrapped != nullptr, "case without a when?");
+            // Iterate over Prism when nodes in reverse to build the if/else ladder backwards
+            for (auto it = prismWhenNodes.rbegin(); it != prismWhenNodes.rend(); ++it) {
+                auto *prismWhen = down_cast<pm_when_node>(*it);
+                auto whenLoc = translateLoc(prismWhen->base.location);
+                auto prismPatterns = absl::MakeSpan(prismWhen->conditions.nodes, prismWhen->conditions.size);
 
                 ExpressionPtr patternsResult; // the if/else ladder for this when clause's patterns
-                for (auto &patternNode : whenNodeWrapped->patterns) {
+                for (auto *prismPattern : prismPatterns) {
+                    auto patternNode = translate(prismPattern);
                     auto patternExpr = takeDesugaredExprOrEmptyTree(patternNode);
                     auto patternLoc = patternExpr.loc();
 
                     ExpressionPtr testExpr;
-                    if (parser::NodeWithExpr::isa_node<parser::Splat>(patternNode.get())) {
+                    if (PM_NODE_TYPE_P(prismPattern, PM_SPLAT_NODE)) {
                         // splat pattern in when clause, predicate is required, `case a when *others`
                         ENFORCE(hasPredicate, "splats need something to test against");
                         auto local = MK::Local(predicateLoc, tempName);
@@ -2004,8 +2009,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                     }
                 }
 
-                auto thenExpr = takeDesugaredExprOrEmptyTree(whenNodeWrapped->body);
-                resultExpr = MK::If(whenNodeWrapped->loc, move(patternsResult), move(thenExpr), move(resultExpr));
+                auto bodyNode = translateStatements(prismWhen->statements);
+                auto thenExpr = takeDesugaredExprOrEmptyTree(bodyNode);
+                resultExpr = MK::If(whenLoc, move(patternsResult), move(thenExpr), move(resultExpr));
             }
 
             if (hasPredicate) {
