@@ -39,3 +39,6 @@ T.reveal_type(Regexp.timeout) # error: type: `T.nilable(T.any(Float, Integer))`
 T.reveal_type(Regexp.timeout = nil) # error: type: `NilClass`
 
 Regexp::TimeoutError.new
+
+T.reveal_type(Regexp.new(/foo/m, timeout: 10)) # error: type: `Regexp`
+T.reveal_type(Regexp.new('foo', timeout: 10)) # error: type: `Regexp`

@@ -1074,21 +1074,17 @@ class Regexp < Object
   sig {returns(Integer)}
   def hash(); end
 
-  sig do
-    params(
-        arg0: String,
-        options: BasicObject,
-        kcode: String,
-    )
-    .void
-  end
+  # This is unsound due to the inability to overload sigs with kwargs
+  # See https://github.com/sorbet/sorbet/issues/37
   sig do
     params(
         arg0: T.any(Regexp, String),
+        options: BasicObject,
+        timeout: T.any(Float, Integer, NilClass),
     )
     .void
   end
-  def initialize(arg0, options=T.unsafe(nil), kcode=T.unsafe(nil)); end
+  def initialize(arg0, options=T.unsafe(nil), timeout: nil); end
 
   # Produce a nicely formatted string-version of *rxp*. Perhaps surprisingly,
   # `#inspect` actually produces the more natural version of the string than
