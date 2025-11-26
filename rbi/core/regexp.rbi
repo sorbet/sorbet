@@ -1074,7 +1074,7 @@ class Regexp < Object
   sig {returns(Integer)}
   def hash(); end
 
-  # This is unsound due to the inability to overload sigs with kwargs
+  # This is not as precise as it could be due to the inability to overload sigs with kwargs
   # See https://github.com/sorbet/sorbet/issues/37
   sig do
     params(
