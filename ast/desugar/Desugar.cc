@@ -986,13 +986,14 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     Hash::ENTRY_store keys;
                     Hash::ENTRY_store values;
 
-                    keys.reserve(mergeValues.size() / 2);
-                    values.reserve(mergeValues.size() / 2);
-
                     // skip the first positional argument for the accumulator that would have been mutated
-                    for (auto it = mergeValues.begin() + 1; it != mergeValues.end();) {
-                        keys.emplace_back(move(*it++));
-                        values.emplace_back(move(*it++));
+                    auto args = absl::MakeSpan(mergeValues.begin() + 1, mergeValues.end());
+                    keys.reserve(args.size() / 2);
+                    values.reserve(args.size() / 2);
+
+                    for (auto [key, val] : core::KwPairSpan<ExpressionPtr>{args}) {
+                        keys.emplace_back(move(key));
+                        values.emplace_back(move(val));
                     }
 
                     return MK::Hash(loc, move(keys), move(values));
