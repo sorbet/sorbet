@@ -2522,7 +2522,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto keywordLoc = translateLoc(node->location.start, node->location.start + length);
 
             auto expr = MK::ZSuper(location, maybeTypedSuper());
-            auto translatedNode = make_node_with_expr<parser::ZSuper>(move(expr), keywordLoc);
+            auto translatedNode = expr_only(move(expr), keywordLoc);
 
             auto blockArgumentNode = forwardingSuperNode->block;
 
