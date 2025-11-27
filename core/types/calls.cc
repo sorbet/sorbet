@@ -2590,7 +2590,8 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
             Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun,
+                          absl::MakeSpan(sendArgLocs)};
         DispatchArgs innerArgs{fn,
                                sendLocs,
                                numPosArgs,
@@ -2633,13 +2634,12 @@ private:
         }
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
         CallLocs sendLocs{
             .file = file,
             .call = blockArgLoc,
             .receiver = blockArgLoc,
             .fun = blockArgLoc.copyWithZeroLength(),
-            .args = sendArgLocs,
+            .args = absl::Span<const core::LocOffsets>(nullptr, 0),
         };
         DispatchArgs innerArgs{core::Names::toProc(),
                                sendLocs,
@@ -2837,10 +2837,9 @@ public:
 
         uint16_t numPosArgs = args.numPosArgs - 3;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
+        absl::Span<const LocOffsets> sendArgLocs = absl::MakeSpan(args.locs.args).subspan(3);
         for (int i = 3; i < args.args.size(); i++) {
             sendArgs.emplace_back(args.args[i]);
-            sendArgLocs.emplace_back(args.locs.args[i]);
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
@@ -2958,7 +2957,8 @@ public:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
             Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun,
+                          absl::MakeSpan(sendArgLocs)};
 
         auto &blockArgTpo = *args.args[4];
         auto finalBlockType = Magic_callWithBlockPass::typeToProc(gs, blockArgTpo, args.locs.file, args.locs.args[4],
@@ -3142,10 +3142,9 @@ public:
         uint16_t numPosArgs = args.numPosArgs - 3;
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
+        absl::Span<const LocOffsets> sendArgLocs = absl::MakeSpan(args.locs.args).subspan(3);
         for (int i = 3; i < args.args.size(); ++i) {
             sendArgStore.emplace_back(args.args[i]);
-            sendArgLocs.emplace_back(args.locs.args[i]);
         }
         auto recvLoc = args.locs.args[0];
         CallLocs sendLocs{args.locs.file, args.locs.call, recvLoc, args.locs.fun, sendArgLocs};
@@ -3262,8 +3261,8 @@ public:
         ENFORCE(args.args.size() == 1);
 
         auto &arg = args.args[0];
-        InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
-        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs};
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun,
+                      absl::MakeSpan(&args.locs.receiver, 1)};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
         TypeAndOrigins wrappedFullType{arg->type, args.fullType.origins};
 
@@ -3705,8 +3704,8 @@ public:
             return;
         }
 
-        InlinedVector<LocOffsets, 2> argLocs;
-        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs};
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, args.locs.fun,
+                      absl::Span<const LocOffsets>(nullptr, 0)};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
         TypeAndOrigins wrappedFullType{argType, args.fullType.origins};
 
@@ -3743,12 +3742,11 @@ class Magic_mergeHash : public IntrinsicMethod {
         auto accType = args.args.front()->type;
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
 
         sendArgs.emplace_back(args.args[1]);
-        sendArgLocs.emplace_back(args.locs.args[1]);
 
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun,
+                          absl::MakeSpan(&args.locs.args[1], 1)};
         TypeAndOrigins wrappedFullType{accType, args.args[0]->origins};
 
         // emulate a call to `resType#merge`
@@ -3811,15 +3809,14 @@ class Magic_mergeHashValues : public IntrinsicMethod {
         }
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
 
         TypeAndOrigins argument{argType, InlinedVector<Loc, 1>{}};
         sendArgs.emplace_back(&argument);
 
         auto hashLoc = args.locs.args[1].join(args.locs.args.back());
-        sendArgLocs.emplace_back(hashLoc);
 
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun,
+                          absl::MakeSpan(&hashLoc, 1)};
         TypeAndOrigins wrappedFullType{accType, args.args[0]->origins};
 
         // emulate a call to `resType#merge` with a shape argument
@@ -3920,14 +3917,12 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
         return;
     }
 
-    auto baseCaseArgLocs = InlinedVector<LocOffsets, 2>{};
-    baseCaseArgLocs.emplace_back(args.locs.args[0]);
     auto baseCaseLocs = CallLocs{
         args.locs.file,                         // file
         args.locs.call.copyWithZeroLength(),    // call
         args.locs.args[0].copyWithZeroLength(), // receiver
         args.locs.args[0].copyWithZeroLength(), // fun
-        baseCaseArgLocs,                        // args
+        absl::MakeSpan(&args.locs.args[0], 1),  // args
     };
     auto baseCaseArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
     baseCaseArgTypes.emplace_back(args.args[0]);
@@ -3975,10 +3970,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
 
     // ---- Recursive case ----
 
-    auto digArgLocs = InlinedVector<LocOffsets, 2>{};
-    for (int i = 1; i < args.locs.args.size(); i++) {
-        digArgLocs.emplace_back(args.locs.args[i]);
-    }
+    auto digArgLocs = absl::MakeSpan(args.locs.args).subspan(1);
     auto digLocs = CallLocs{
         args.locs.file,                         // file
         args.locs.args[1],                      // call
@@ -4049,8 +4041,8 @@ class Array_flatten : public IntrinsicMethod {
         NameRef toAry = core::Names::toAry();
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        InlinedVector<LocOffsets, 2> sendArgLocs;
-        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun, sendArgLocs};
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, args.locs.fun,
+                          absl::Span<const core::LocOffsets>(nullptr, 0)};
         TypeAndOrigins wrappedFullType{type, args.fullType.origins};
 
         DispatchArgs innerArgs{toAry,
@@ -4426,7 +4418,7 @@ public:
             /* callLoc */ args.locs.args[0].join(args.locs.args[newNumPosArgs]),
             /* receiverLoc */ args.locs.args[0],
             /* funLoc */ args.locs.args[0].copyEndWithZeroLength(),
-            newSendArgLocs,
+            absl::MakeSpan(newSendArgLocs),
         };
 
         auto newSendArgs = InlinedVector<const TypeAndOrigins *, 2>();
@@ -4473,9 +4465,8 @@ public:
         }
 
         auto hash = make_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs));
-        InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
         CallLocs locs{
-            args.locs.file, args.locs.call, args.locs.call, args.locs.fun, argLocs,
+            args.locs.file, args.locs.call, args.locs.call, args.locs.fun, absl::MakeSpan(&args.locs.receiver, 1),
         };
         TypeAndOrigins myType{args.selfType, args.receiverLoc()};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
