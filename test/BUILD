@@ -457,16 +457,6 @@ pipeline_tests(
             "prism_regression/**/*.exp",
         ],
         exclude = [
-            # Prism parses invalid Ruby that Whitequark rejects:
-            # - `def foo(&, ...); end` - block param combined with forwarding args
-            "prism_regression/call_block_param_and_forwarding.rb",
-            # - Multiple invalid `**nil` combinations in method signatures
-            "prism_regression/call_kw_nil_args.rb",
-
-            # Different AST for invalid empty constant `::` - Prism produces
-            # UnresolvedConstantLit with empty name, Whitequark produces EmptyTree
-            "prism_regression/constants_invalid.rb",
-
             # Location differences in error recovery - Prism provides tighter/different
             # location spans for ErrorNode compared to Whitequark:
             # - `x =` (missing RHS) has different Assign/ErrorNode locations

@@ -6,13 +6,6 @@ echo "Building Sorbet..."
 
 echo "Verifying parse trees and desugar trees..."
 
-# Files to skip (known behavior mismatches)
-skip_files=(
-  "call_kw_nil_args"
-  "call_block_param_and_forwarding"
-  "constants_invalid"
-)
-
 mismatched_parse_tree_files=()
 mismatched_desugar_tree_files=()
 
@@ -20,8 +13,9 @@ mismatched_desugar_tree_files=()
 for file in test/prism_regression/*.rb; do
   file_name=$(basename "$file" .rb)
 
-  if [[ " ${skip_files[@]} " =~ " ${file_name} " ]]; then
-    echo "⏭️  ${file_name}.rb (skipped)"
+  # Check if the file has the disable-parser-comparison magic comment
+  if grep -q "^# disable-parser-comparison: true" "$file"; then
+    echo "⏭️  ${file_name}.rb (disable-parser-comparison)"
     continue
   fi
 
