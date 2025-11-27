@@ -2248,16 +2248,12 @@ class ResolveTypeMembersAndFieldsWalk {
         core::Loc upperBoundTypeLoc;
         if (rhs->block() != nullptr) {
             if (const auto hash = ast::cast_tree<ast::Hash>(rhs->block()->body)) {
-                int i = -1;
-                for (const auto &keyExpr : hash->keys) {
-                    i++;
+                for (const auto [keyExpr, value] : hash->kviter()) {
                     const auto key = ast::cast_tree<ast::Literal>(keyExpr);
                     if (key == nullptr || !key->isSymbol()) {
                         // Namer reported an error already
                         continue;
                     }
-
-                    const auto &value = hash->values[i];
 
                     ParsedSig emptySig;
                     auto allowSelfType = true;

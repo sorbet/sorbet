@@ -1131,8 +1131,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         vector<core::TypePtr> keys;
         vector<core::TypePtr> values;
 
-        for (auto &ktree : hash.keys) {
-            auto &vtree = hash.values[&ktree - &hash.keys.front()];
+        for (auto [ktree, vtree] : hash.kviter()) {
             auto maybeVal = getResultTypeWithSelfTypeParams(ctx, vtree, sigBeingParsed, args.withoutSelfType());
             if (!maybeVal.has_value()) {
                 return nullopt;

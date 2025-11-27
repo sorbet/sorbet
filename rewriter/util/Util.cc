@@ -113,15 +113,12 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
         auto keys = ast::Hash::ENTRY_store{};
         auto values = ast::Hash::ENTRY_store{};
         ENFORCE(hashLit->keys.size() == hashLit->values.size());
-        for (size_t i = 0; i < hashLit->keys.size(); i++) {
-            const auto &key = hashLit->keys[i];
-
+        for (auto [key, value] : hashLit->kviter()) {
             auto keyLit = ast::cast_tree<ast::Literal>(key);
             if (keyLit == nullptr) {
                 return nullptr;
             }
 
-            const auto &value = hashLit->values[i];
             auto duppedValue = dupType(value);
             if (duppedValue == nullptr) {
                 return nullptr;
@@ -149,12 +146,10 @@ bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core
 }
 
 bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
-    int i = -1;
-    for (const auto &keyExpr : hash.keys) {
-        i++;
+    for (auto [keyExpr, valExpr] : hash.kviter()) {
         auto key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol() && key->asSymbol() == name) {
-            auto val = ast::cast_tree<ast::Literal>(hash.values[i]);
+            auto val = ast::cast_tree<ast::Literal>(valExpr);
             if (!val) {
                 // All non-literals are truthy
                 return true;
@@ -170,15 +165,13 @@ bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash
 
 pair<ast::ExpressionPtr, ast::ExpressionPtr> ASTUtil::extractHashValue(core::MutableContext ctx, ast::Hash &hash,
                                                                        core::NameRef name) {
-    int i = -1;
-    for (auto &keyExpr : hash.keys) {
-        i++;
+    for (auto [keyExpr, valExpr] : hash.kviter()) {
         auto key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol() && key->asSymbol() == name) {
             auto key = std::move(keyExpr);
-            auto value = std::move(hash.values[i]);
-            hash.keys.erase(hash.keys.begin() + i);
-            hash.values.erase(hash.values.begin() + i);
+            auto value = std::move(valExpr);
+            hash.keys.erase(&keyExpr);
+            hash.values.erase(&valExpr);
             return make_pair(move(key), move(value));
         }
     }
@@ -268,9 +261,9 @@ ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
         if (auto hash = ast::cast_tree<ast::Hash>(send->hasKwSplat() ? *send->kwSplat()
                                                                      : send->getPosArg(send->numPosArgs() - 1))) {
             explicitEmptyHash = hash->keys.empty();
-            for (auto i = 0; i < hash->keys.size(); ++i) {
-                keys.emplace_back(hash->keys[i].deepCopy());
-                values.emplace_back(hash->values[i].deepCopy());
+            for (auto [key, val] : hash->kviter()) {
+                keys.emplace_back(key.deepCopy());
+                values.emplace_back(val.deepCopy());
             }
         }
     }

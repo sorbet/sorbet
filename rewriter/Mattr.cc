@@ -64,9 +64,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
 
     auto optionsTree = ASTUtil::mkKwArgsHash(send);
     if (auto options = ast::cast_tree<ast::Hash>(optionsTree)) {
-        for (int i = 0; i < options->keys.size(); i++) {
-            auto &key = options->keys[i];
-            auto &value = options->values[i];
+        for (auto [key, value] : options->kviter()) {
             if (literalSymbolEqual(ctx, key, core::Names::instanceReader()) && isLiteralFalse(ctx, value)) {
                 instanceReader = false;
             }
