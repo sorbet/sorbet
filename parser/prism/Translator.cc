@@ -2979,7 +2979,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto rhsExpr = rhsValue->takeDesugaredExpr();
             auto expr = desugarMlhs(location, multiLhsNode.get(), move(rhsExpr));
-            return make_node_with_expr<parser::Masgn>(move(expr), location, move(multiLhsNode), move(rhsValue));
+            return expr_only(move(expr));
         }
         case PM_NEXT_NODE: { // A `next` statement, e.g. `next`, `next 1, 2, 3`
             auto nextNode = down_cast<pm_next_node>(node);
