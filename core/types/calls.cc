@@ -2838,16 +2838,11 @@ public:
         }
 
         uint16_t numPosArgs = args.numPosArgs - 3;
-        InlinedVector<TypeAndOrigins, 2> sendArgStore;
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         for (int i = 3; i < args.args.size(); i++) {
-            sendArgStore.emplace_back(*args.args[i]);
+            sendArgs.emplace_back(args.args[i]);
             sendArgLocs.emplace_back(args.locs.args[i]);
-        }
-        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
-        sendArgs.reserve(sendArgStore.size());
-        for (auto &arg : sendArgStore) {
-            sendArgs.emplace_back(&arg);
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
