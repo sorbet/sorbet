@@ -3310,7 +3310,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (expr == nullptr) { // An anonymous splat like `f(*)`
                 auto var = MK::Local(location, core::Names::star());
                 auto splatExpr = MK::Splat(location, move(var));
-                return make_node_with_expr<parser::ForwardedRestArg>(move(splatExpr), location);
+                return expr_only(move(splatExpr));
             } else { // Splatting an expression like `f(*a)`
                 // Directly desugaring a splat node is a destructive operation, which can leave the "expr" in an invalid
                 // state (because it would have a null desugared expr), which is incompatible with the "fallback" path
@@ -3323,7 +3323,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // it out of the splatted expressions's `NodeWithExpr`.
                 auto childExpr = expr->peekDesugaredExpr().deepCopy();
                 auto splatExpr = MK::Splat(location, move(childExpr));
-                return make_node_with_expr<parser::Splat>(move(splatExpr), location, move(expr));
+                return expr_only(move(splatExpr));
             }
         }
         case PM_STATEMENTS_NODE: { // A sequence of statements, such a in a `begin` block, `()`, etc.
