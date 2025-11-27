@@ -105,11 +105,12 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
                         }
                     } else if (send->fun == core::Names::eqeq()) {
                         if (send->args.size() == 1) {
-                            if (isNeeded(send->args[0].variable) && !isNeeded(send->recv.variable)) {
+                            auto arg0 = send->args[0].variable;
+                            if (isNeeded(arg0) && !isNeeded(send->recv.variable)) {
                                 used_vars[send->recv.variable.id()] = true;
                                 changed = true;
-                            } else if (isNeeded(send->recv.variable) && !isNeeded(send->args[0].variable)) {
-                                used_vars[send->args[0].variable.id()] = true;
+                            } else if (isNeeded(send->recv.variable) && !isNeeded(arg0)) {
+                                used_vars[arg0.id()] = true;
                                 changed = true;
                             }
                         }
@@ -652,9 +653,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         if (!recvType.isUntyped()) {
-            truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
+            auto arg0 = send->args[0].variable;
+            truthy.addYesTypeTest(local, typeTestsWithVar, arg0, recvType);
             if (isSingleton(ctx, recvType, includeSingletonClasses)) {
-                falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
+                falsy.addNoTypeTest(local, typeTestsWithVar, arg0, recvType);
             }
         }
 
@@ -664,7 +666,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     if (send->fun == core::Names::tripleEq()) {
         const auto &klassType = send->recv.type;
-        auto ref = send->args[0].variable;
+        const auto ref = send->args[0].variable;
         // `when` against class literal
         updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter, send->fun);
 
@@ -679,8 +681,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         // `updateKnowledge`, excluding Module objects.
         auto includeSingletonClasses = false;
         if (isSingleton(ctx, klassType, includeSingletonClasses)) {
-            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
-            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, klassType);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, klassType);
         }
         whoKnows.sanityCheck();
         return;
