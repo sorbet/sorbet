@@ -46,15 +46,15 @@ template <typename KeyT, typename ValueT> struct ZippedPairSpan {
     // controlling the iteration anyway.  Doing a single check is also slightly more
     // efficient; we check in debug mode for an extra measure of safety.
     bool operator==(const ZippedPairSpan &other) const {
-        bool done = keys.begin() == other.keys.begin();
-        ENFORCE(done == (values.begin() == other.values.begin()));
-        return done;
+        bool equal = keys.begin() == other.keys.begin();
+        ENFORCE(equal == (values.begin() == other.values.begin()));
+        return equal;
     }
 
     bool operator!=(const ZippedPairSpan &other) const {
-        bool done = keys.begin() != other.keys.begin();
-        ENFORCE(done == (values.begin() != other.values.begin()));
-        return done;
+        bool equal = keys.begin() != other.keys.begin();
+        ENFORCE(equal == (values.begin() != other.values.begin()));
+        return equal;
     }
 };
 
