@@ -1397,8 +1397,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (kwParam.flags.isBlock) {
                     break;
                 } else if (kwParam.flags.isRepeated) {
-                    for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
-                        auto key = cast_type_nonnull<NamedLiteralType>(*it);
+                    for (auto [hkey, val] : hash->kviter()) {
+                        auto key = cast_type_nonnull<NamedLiteralType>(hkey);
                         auto underlying = key.underlying(gs);
                         ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                         if (klass != Symbols::Symbol()) {
@@ -1413,8 +1413,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         // TODO(trevor) this location could be more precise, as we can track the location of the inlined
                         // keyword arguments separately from the ones that come from the kwsplat
-                        auto offset = it - hash->keys.begin();
-                        TypeAndOrigins tpe{hash->values[offset], kwargsLoc};
+                        TypeAndOrigins tpe{val, kwargsLoc};
                         if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam,
                                                   args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
                             result.main.errors.emplace_back(std::move(e));
@@ -3657,12 +3656,12 @@ public:
 
         // then kwsplat
         if (kwsplat != nullptr) {
-            for (auto &keyType : kwsplat->keys) {
+            for (auto [keyType, valType] : kwsplat->kviter()) {
                 if (!isa_type<NamedLiteralType>(keyType) && !isa_type<IntegerLiteralType>(keyType) &&
                     !isa_type<FloatLiteralType>(keyType)) {
                     return;
                 }
-                addShapeEntry(keyType, kwsplat->values[&keyType - &kwsplat->keys.front()]);
+                addShapeEntry(keyType, valType);
             }
         }
 

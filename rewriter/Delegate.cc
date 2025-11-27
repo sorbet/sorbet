@@ -54,12 +54,12 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
     core::NameRef toName;
     {
         optional<core::NameRef> to;
-        for (int i = 0; i < options->keys.size(); i++) {
-            if (literalSymbolEqual(ctx, options->keys[i], core::Names::to())) {
-                to = stringOrSymbolNameRef(ctx, options->values[i]);
+        for (auto [key, val] : options->kviter()) {
+            if (literalSymbolEqual(ctx, key, core::Names::to())) {
+                to = stringOrSymbolNameRef(ctx, val);
             }
-            if (literalSymbolEqual(ctx, options->keys[i], core::Names::prefix())) {
-                prefixNode = &options->values[i];
+            if (literalSymbolEqual(ctx, key, core::Names::prefix())) {
+                prefixNode = &val;
             }
         }
 

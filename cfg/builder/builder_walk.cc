@@ -222,15 +222,15 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
 BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
     InlinedVector<cfg::LocalRef, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
-    for (int i = 0; i < h.keys.size(); i++) {
+    for (auto [key, val] : h.kviter()) {
         LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
         LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
-        current = walk(cctx.withTarget(keyTmp), h.keys[i], current);
-        current = walk(cctx.withTarget(valTmp), h.values[i], current);
+        current = walk(cctx.withTarget(keyTmp), key, current);
+        current = walk(cctx.withTarget(valTmp), val, current);
         vars.emplace_back(keyTmp);
         vars.emplace_back(valTmp);
-        locs.emplace_back(h.keys[i].loc());
-        locs.emplace_back(h.values[i].loc());
+        locs.emplace_back(key.loc());
+        locs.emplace_back(val.loc());
     }
     LocalRef magic = cctx.newTemporary(core::Names::magic());
     synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));

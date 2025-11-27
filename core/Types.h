@@ -9,6 +9,7 @@
 #include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include "core/TypeConstraint.h"
+#include "core/ZippedPair.h"
 #include <memory>
 #include <optional>
 #include <string>
@@ -887,6 +888,13 @@ public:
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
+
+    ZippedPairSpan<TypePtr, TypePtr> kviter() {
+        return ZippedPairSpan<TypePtr, TypePtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+    }
+    ZippedPairSpan<const TypePtr, const TypePtr> kviter() const {
+        return ZippedPairSpan<const TypePtr, const TypePtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+    }
 
     std::optional<size_t> indexForKey(const TypePtr &t) const;
     std::optional<size_t> indexForKey(const NamedLiteralType &lit) const;

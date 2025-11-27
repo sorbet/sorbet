@@ -1183,11 +1183,7 @@ string Hash::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "pairs = [\n");
-    int i = -1;
-    for (auto &key : keys) {
-        i++;
-        auto &value = values[i];
-
+    for (auto [key, value] : kviter()) {
         printTabs(buf, tabs + 2);
         fmt::format_to(std::back_inserter(buf), "[\n");
         printTabs(buf, tabs + 3);
@@ -1230,10 +1226,7 @@ string Hash::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{{");
     bool first = true;
-    int i = -1;
-    for (auto &key : this->keys) {
-        i++;
-        auto &value = this->values[i];
+    for (auto [key, value] : kviter()) {
         if (!first) {
             fmt::format_to(std::back_inserter(buf), ", ");
         }
@@ -1890,10 +1883,7 @@ string Hash::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, in
     fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, this->loc).fileShortPosToString(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "pairs = [\n");
-    int i = -1;
-    for (auto &key : keys) {
-        i++;
-        auto &value = values[i];
+    for (auto [key, value] : kviter()) {
         printTabs(buf, tabs + 2);
         fmt::format_to(std::back_inserter(buf), "[\n");
         printTabs(buf, tabs + 3);
