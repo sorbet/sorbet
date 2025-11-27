@@ -687,7 +687,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
-        auto argType = send->args[0].type;
+        const auto &argType = send->args[0].type;
         if (argType.isUntyped() ||
             (!core::isa_type<core::ClassType>(argType) && !core::isa_type<core::AppliedType>(argType))) {
             return;
