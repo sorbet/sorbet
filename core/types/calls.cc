@@ -2628,7 +2628,7 @@ private:
         }
 
         if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
-            nonNilBlockType = TypeAndOrigins{Types::dropNil(gs, blockType.type), blockType.origins};
+            nonNilBlockType.type = Types::dropNil(gs, blockType.type);
             typeIsNilable = true;
 
             if (nonNilBlockType.type.isBottom()) {
