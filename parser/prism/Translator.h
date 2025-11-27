@@ -223,11 +223,6 @@ private:
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
-    // Helper function for creating if nodes with optional desugaring
-    std::unique_ptr<parser::Node> translateIfNode(core::LocOffsets location, std::unique_ptr<parser::Node> predicate,
-                                                  std::unique_ptr<parser::Node> ifTrue,
-                                                  std::unique_ptr<parser::Node> ifFalse);
-
     std::pair<core::NameRef, core::LocOffsets> translateSymbol(pm_symbol_node *symbol);
 
     // String interpolation desugaring
