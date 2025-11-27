@@ -256,7 +256,7 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
 }
 
 parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                   bool preserveConcreteSyntax = false) {
+                                   const options::Options &opts, bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
 
     parser::ParseResult parseResult;
@@ -269,6 +269,10 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
         parser::Prism::Parser parser{source};
         bool collectComments = gs.cacheSensitiveOptions.rbsEnabled;
         parser::Prism::ParseResult prismResult = parser.parseWithoutTranslation(collectComments);
+
+        if (opts.stopAfterPhase == options::Phase::PARSER) {
+            return parser::ParseResult{nullptr, prismResult.getCommentLocations()};
+        }
 
         auto node = prismResult.getRawNodePointer();
 
@@ -458,22 +462,23 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     break;
                 }
                 case options::Parser::PRISM: {
-                    auto parseResult = runPrismParser(lgs, file, print);
+                    auto parseResult = runPrismParser(lgs, file, print, opts);
 
-                    // TODO: Move this check into runPrismParser when it performs rewriting
-                    // https://github.com/sorbet/sorbet/issues/9065
-                    if (opts.stopAfterPhase == options::Phase::PARSER) {
+                    // parseResult is null if runPrismParser stopped after an intermediate phase
+                    if (parseResult.tree == nullptr) {
                         return emptyParsedFile(file);
                     }
 
-                    // TODO: Remove once RBS Prism pipeline is fully implemented. For now, use the legacy
-                    // RBS rewrite path to ensure RBS support continues to work with Prism.
+                    // TODO: Remove this check once runPrismRBSRewrite is no longer no-oped inside of runPrismParser
+                    // https://github.com/sorbet/sorbet/issues/9065
                     if (lgs.cacheSensitiveOptions.rbsEnabled) {
                         parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
                     } else {
                         parseTree = move(parseResult.tree);
                     }
 
+                    // TODO: Move into runPrismParser once runPrismRBSRewrite is no longer no-oped
+                    // https://github.com/sorbet/sorbet/issues/9065
                     if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                         return emptyParsedFile(file);
                     }
