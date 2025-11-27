@@ -3212,9 +3212,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto expr = ast::make_expression<ast::Rescue>(location, move(bodyExpr), move(rescueCases),
                                                           ast::MK::EmptyTree(), ast::MK::EmptyTree());
 
-            auto cases = NodeVec1(make_unique<parser::Resbody>(resbodyLoc, nullptr, nullptr, move(rescue)));
-
-            return make_node_with_expr<parser::Rescue>(move(expr), location, move(body), move(cases), nullptr);
+            return expr_only(move(expr));
         }
         case PM_RESCUE_NODE: {
             unreachable("PM_RESCUE_NODE is handled separately in PM_BEGIN_NODE, see its docs for details.");
