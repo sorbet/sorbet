@@ -5530,33 +5530,23 @@ optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_nod
         return result;
     }
 
-    ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
+    ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE) || PM_NODE_TYPE_P(prismBodyNode, PM_BEGIN_NODE));
 
-    if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
-        if (!hasExpr(scopeBody)) {
-            return nullopt;
-        }
+    auto beginExpr = scopeBody->takeDesugaredExpr();
 
-        auto beginExpr = scopeBody->takeDesugaredExpr();
-
-        auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
-        ENFORCE(insSeqExpr != nullptr, "The cached expr on every multi-statement Begin should be an InsSeq.")
-
+    auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
+    if (insSeqExpr != nullptr) {
         ast::ClassDef::RHS_store result;
         result.reserve(insSeqExpr->stats.size());
         for (auto &statement : insSeqExpr->stats) {
             result.emplace_back(move(statement));
         }
-        // Move the the final expression too, which is separated out in the `ast::InsSeq`.
         result.emplace_back(move(insSeqExpr->expr));
         return result;
-    } else { // Handle single-statement body
-        if (!hasExpr(scopeBody)) {
-            return nullopt;
-        }
-
+    } else {
+        // Single expression case (empty begin or single statement)
         ast::ClassDef::RHS_store result;
-        result.emplace_back(scopeBody->takeDesugaredExpr());
+        result.emplace_back(move(beginExpr));
         return result;
     }
 }

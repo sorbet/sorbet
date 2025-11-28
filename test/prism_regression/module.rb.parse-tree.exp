@@ -1,19 +1,44 @@
-Module {
-  name = Const {
-    scope = NULL
-    name = <C <U M>>
-  }
-  body = Begin {
-    stmts = [
-      Integer {
-        val = "1"
+Begin {
+  stmts = [
+    Module {
+      name = Const {
+        scope = NULL
+        name = <C <U M>>
       }
-      Integer {
-        val = "2"
+      body = Begin {
+        stmts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+        ]
       }
-      Integer {
-        val = "3"
+    }
+    Module {
+      name = Const {
+        scope = NULL
+        name = <C <U N>>
       }
-    ]
-  }
+      body = Kwbegin {
+        stmts = [
+          Rescue {
+            body = NULL
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = NULL
+              }
+            ]
+            else_ = NULL
+          }
+        ]
+      }
+    }
+  ]
 }

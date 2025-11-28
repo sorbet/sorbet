@@ -23,5 +23,33 @@ ClassDef{
         Literal{ value = 3 }
       ]
     }
+
+    ClassDef{
+      kind = module
+      name = UnresolvedConstantLit{
+        cnst = <C <U N>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = []
+      rhs = [
+        Rescue{
+          body = EmptyTree
+          rescueCases = [
+            RescueCase{
+              exceptions = [
+              ]
+              var = UnresolvedIdent{
+                kind = Local
+                name = <D <U <rescueTemp>> $1>
+              }
+              body = EmptyTree
+            }
+          ]
+          else = EmptyTree
+          ensure = EmptyTree
+        }
+      ]
+    }
   ]
 }
