@@ -29,7 +29,17 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
                               ^^^^^^^^^
   Note:
     `F::CONSTANT_FROM_F`'s package is not imported
-Errors: 3
+
+D/__package.rb:3: D is missing exports https://srb.help/3734
+     3 |class D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/__package.rb:5: Inserted `export D::CONSTANT_FROM_D
+      export D::ClassFromD
+      export D::EnumFromD`
+     5 |  layer 'util'
+                      ^
+Errors: 4
 # typed: strict
 
 class C < PackageSpec
@@ -40,4 +50,13 @@ class C < PackageSpec
   import B
   import D
   import E
+end
+# typed: strict
+
+class D < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+  export D::CONSTANT_FROM_D
+  export D::ClassFromD
+  export D::EnumFromD
 end

@@ -26,6 +26,10 @@ struct AutocorrectSuggestion {
     // to disk.
     static UnorderedMap<FileRef, std::string> apply(const GlobalState &gs, FileSystem &fs,
                                                     const std::vector<AutocorrectSuggestion> &autocorrects);
+    // Given a list of edits, sorts them by loc and replacement string, and then merges edits that insert at the same
+    // location into one edit.
+    // Ex. [{locA, "b"}, {locA, "a"}] will be combined to [{locA, "ab"}]
+    static void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits);
 };
 
 } // namespace sorbet::core
