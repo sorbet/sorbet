@@ -1,0 +1,151 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U result1>
+      }
+      rhs = Send{
+        flags = {}
+        recv = Array{
+          elems = [
+            Literal{ value = 1 }
+            Literal{ value = 2 }
+            Literal{ value = 3 }
+          ]
+        }
+        fun = <U map>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U it>
+            }
+          ]
+          body = Send{
+            flags = {}
+            recv = UnresolvedIdent{
+              kind = Local
+              name = <U it>
+            }
+            fun = <U *>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 2 }
+            ]
+          }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U result2>
+      }
+      rhs = Send{
+        flags = {}
+        recv = Array{
+          elems = [
+            Literal{ value = 1 }
+            Literal{ value = 2 }
+            Literal{ value = 3 }
+          ]
+        }
+        fun = <U map>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U it>
+            }
+          ]
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <string-interpolate>>
+            block = nullptr
+            pos_args = 2
+            args = [
+              Literal{ value = "it is: " }
+              UnresolvedIdent{
+                kind = Local
+                name = <U it>
+              }
+            ]
+          }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    Assign{
+      lhs = UnresolvedIdent{
+        kind = Local
+        name = <U result3>
+      }
+      rhs = Send{
+        flags = {}
+        recv = Array{
+          elems = [
+            Literal{ value = 1 }
+            Literal{ value = 2 }
+            Literal{ value = 3 }
+          ]
+        }
+        fun = <U map>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U it>
+            }
+          ]
+          body = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U str>
+                }
+                rhs = Literal{ value = "it works" }
+              }
+            ],
+            expr = Send{
+              flags = {}
+              recv = UnresolvedIdent{
+                kind = Local
+                name = <U it>
+              }
+              fun = <U +>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 1 }
+              ]
+            }
+          }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+  ]
+}
