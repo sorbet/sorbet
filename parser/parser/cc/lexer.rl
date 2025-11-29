@@ -2906,13 +2906,6 @@ void lexer::set_state_expr_value() {
         cond.pop();
         cmdarg.pop();
 
-        if (ts[0] == '}' || ts[0] == ']') {
-          fnext expr_end;
-        } else { // ')'
-          // this was commented out in the original lexer.rl:
-          // fnext expr_endfn; ?
-        }
-
         fbreak;
       };
 
