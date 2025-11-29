@@ -1403,7 +1403,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
                   bool intentionallyLeakASTs) {
     core::FileRef f = resolved.file;
 
-    if (opts.stopAfterPhase == options::Phase::NAMER) {
+    if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::VISIBILITY_CHECKER) {
         if (intentionallyLeakASTs) {
             intentionallyLeakMemory(resolved.tree.release());
         }
