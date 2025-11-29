@@ -1108,8 +1108,8 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return canceled;
 }
 
-ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                    WorkerPool &workers) {
+ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, const core::SymbolTableOffsets &offsets,
+                                    vector<ast::ParsedFile> what, const options::Options &opts, WorkerPool &workers) {
     try {
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
@@ -1117,7 +1117,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                 Timer timeit(gs.tracer(), "resolving");
                 core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
                 core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-                auto maybeResult = resolver::Resolver::run(gs, move(what), workers);
+                auto maybeResult = resolver::Resolver::run(gs, move(what), workers, offsets);
                 if (!maybeResult.hasResult()) {
                     return maybeResult;
                 }
@@ -1273,15 +1273,15 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
-                                           const options::Options &opts, WorkerPool &workers,
-                                           core::FoundDefHashes *foundHashes) {
+ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, const core::SymbolTableOffsets &offsets,
+                                           vector<ast::ParsedFile> what, const options::Options &opts,
+                                           WorkerPool &workers, core::FoundDefHashes *foundHashes) {
     auto canceled = name(gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
     if (canceled) {
         return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
     }
 
-    return resolve(gs, move(what), opts, workers);
+    return resolve(gs, offsets, move(what), opts, workers);
 }
 
 vector<ast::ParsedFile>

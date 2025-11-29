@@ -553,7 +553,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         pipeline::unpartitionPackageFiles(indexed, std::move(nonPackagedIndexed));
         // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
 
-        auto maybeResolved = pipeline::resolve(*gs, move(indexed), config->opts, workers);
+        core::SymbolTableOffsets offsets;
+        auto maybeResolved = pipeline::resolve(*gs, offsets, move(indexed), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
         }
