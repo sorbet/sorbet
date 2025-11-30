@@ -42,10 +42,10 @@ bb4[firstDead=3](xyz: Integer):
 bb5[firstDead=-1](xyz: Integer, found: TrueClass):
     # outerLoops: 1
     found: FalseClass = false
-    <arrayTemp>$23: TrueClass = true
-    <arrayTemp>$24: FalseClass = false
-    <magic>$25: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$22: [TrueClass, FalseClass] = <magic>$25: T.class_of(<Magic>).<build-array>(<arrayTemp>$23: TrueClass, <arrayTemp>$24: FalseClass)
+    <arrayTemp>$24: TrueClass = true
+    <arrayTemp>$25: FalseClass = false
+    <magic>$23: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$22: [TrueClass, FalseClass] = <magic>$23: T.class_of(<Magic>).<build-array>(<arrayTemp>$24: TrueClass, <arrayTemp>$25: FalseClass)
     <ifTemp>$21: T::Boolean = <statTemp>$22: [TrueClass, FalseClass].sample()
     <ifTemp>$21 -> (T::Boolean ? bb6 : bb2)
 

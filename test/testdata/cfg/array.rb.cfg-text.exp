@@ -48,16 +48,16 @@ bb0[firstDead=14]():
     <self>: TestArray = cast(<self>: NilClass, TestArray);
     <magic>$4: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$3: [] = <magic>$4: T.class_of(<Magic>).<build-array>()
-    <arrayTemp>$6: Integer(1) = 1
-    <arrayTemp>$7: Integer(2) = 2
-    <magic>$8: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$5: [Integer(1), Integer(2)] = <magic>$8: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))
-    <arrayTemp>$9: Integer = <self>: TestArray.an_int()
-    <arrayTemp>$11: String = <self>: TestArray.a_string()
-    <magic>$14: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$13: [] = <magic>$14: T.class_of(<Magic>).<build-array>()
+    <arrayTemp>$7: Integer(1) = 1
+    <arrayTemp>$8: Integer(2) = 2
+    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$5: [Integer(1), Integer(2)] = <magic>$6: T.class_of(<Magic>).<build-array>(<arrayTemp>$7: Integer(1), <arrayTemp>$8: Integer(2))
+    <arrayTemp>$10: Integer = <self>: TestArray.an_int()
+    <arrayTemp>$12: String = <self>: TestArray.a_string()
     <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
-    <returnMethodTemp>$2: [Integer, String, []] = <magic>$15: T.class_of(<Magic>).<build-array>(<arrayTemp>$9: Integer, <arrayTemp>$11: String, <arrayTemp>$13: [])
+    <arrayTemp>$14: [] = <magic>$15: T.class_of(<Magic>).<build-array>()
+    <magic>$9: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: [Integer, String, []] = <magic>$9: T.class_of(<Magic>).<build-array>(<arrayTemp>$10: Integer, <arrayTemp>$12: String, <arrayTemp>$14: [])
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, []]
     <unconditional> -> bb1
 

@@ -2,9 +2,9 @@ method ::Object#foo {
 
 bb0[firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <arrayTemp>$4: Integer(1) = 1
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$3: [Integer(1)] = <magic>$5: T.class_of(<Magic>).<build-array>(<arrayTemp>$4: Integer(1))
+    <arrayTemp>$5: Integer(1) = 1
+    <magic>$4: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$3: [Integer(1)] = <magic>$4: T.class_of(<Magic>).<build-array>(<arrayTemp>$5: Integer(1))
     <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <statTemp>$3: [Integer(1)].map()
     <selfRestore>$7: Object = <self>
     <unconditional> -> bb2

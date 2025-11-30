@@ -92,9 +92,9 @@ method ::TestRescue#untyped_exceptions {
 
 bb0[firstDead=5]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <cfgAlias>$4: T.class_of(Exception) = alias <C Exception>
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <returnMethodTemp>$2: [T.class_of(Exception)] = <magic>$5: T.class_of(<Magic>).<build-array>(<cfgAlias>$4: T.class_of(Exception))
+    <cfgAlias>$5: T.class_of(Exception) = alias <C Exception>
+    <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: [T.class_of(Exception)] = <magic>$3: T.class_of(<Magic>).<build-array>(<cfgAlias>$5: T.class_of(Exception))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: [T.class_of(Exception)]
     <unconditional> -> bb1
 
@@ -109,9 +109,9 @@ method ::TestRescue#typed_exceptions {
 
 bb0[firstDead=5]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <cfgAlias>$4: T.class_of(Exception) = alias <C Exception>
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <returnMethodTemp>$2: [T.class_of(Exception)] = <magic>$5: T.class_of(<Magic>).<build-array>(<cfgAlias>$4: T.class_of(Exception))
+    <cfgAlias>$5: T.class_of(Exception) = alias <C Exception>
+    <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: [T.class_of(Exception)] = <magic>$3: T.class_of(<Magic>).<build-array>(<cfgAlias>$5: T.class_of(Exception))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: [T.class_of(Exception)]
     <unconditional> -> bb1
 
@@ -126,10 +126,10 @@ method ::TestRescue#tuple_exceptions {
 
 bb0[firstDead=6]():
     <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    <cfgAlias>$4: T.class_of(TypeError) = alias <C TypeError>
-    <cfgAlias>$6: T.class_of(ArgumentError) = alias <C ArgumentError>
-    <magic>$7: T.class_of(<Magic>) = alias <C <Magic>>
-    <returnMethodTemp>$2: [T.class_of(TypeError), T.class_of(ArgumentError)] = <magic>$7: T.class_of(<Magic>).<build-array>(<cfgAlias>$4: T.class_of(TypeError), <cfgAlias>$6: T.class_of(ArgumentError))
+    <cfgAlias>$5: T.class_of(TypeError) = alias <C TypeError>
+    <cfgAlias>$7: T.class_of(ArgumentError) = alias <C ArgumentError>
+    <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: [T.class_of(TypeError), T.class_of(ArgumentError)] = <magic>$3: T.class_of(<Magic>).<build-array>(<cfgAlias>$5: T.class_of(TypeError), <cfgAlias>$7: T.class_of(ArgumentError))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: [T.class_of(TypeError), T.class_of(ArgumentError)]
     <unconditional> -> bb1
 
@@ -1518,14 +1518,14 @@ bb7[firstDead=6](<block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfR
 bb9[firstDead=11](<self>: T.class_of(TestRescue), <block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.class_of(TestRescue)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <cfgAlias>$29: T.class_of(T) = alias <C T>
-    <cfgAlias>$31: T.class_of(TypeError) = alias <C TypeError>
-    <arrayTemp>$27: Runtime object representing type: T.class_of(TypeError) = <cfgAlias>$29: T.class_of(T).class_of(<cfgAlias>$31: T.class_of(TypeError))
-    <cfgAlias>$34: T.class_of(T) = alias <C T>
-    <cfgAlias>$36: T.class_of(ArgumentError) = alias <C ArgumentError>
-    <arrayTemp>$32: Runtime object representing type: T.class_of(ArgumentError) = <cfgAlias>$34: T.class_of(T).class_of(<cfgAlias>$36: T.class_of(ArgumentError))
-    <magic>$37: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$26: [Runtime object representing type: T.class_of(TypeError), Runtime object representing type: T.class_of(ArgumentError)] = <magic>$37: T.class_of(<Magic>).<build-array>(<arrayTemp>$27: Runtime object representing type: T.class_of(TypeError), <arrayTemp>$32: Runtime object representing type: T.class_of(ArgumentError))
+    <cfgAlias>$30: T.class_of(T) = alias <C T>
+    <cfgAlias>$32: T.class_of(TypeError) = alias <C TypeError>
+    <arrayTemp>$28: Runtime object representing type: T.class_of(TypeError) = <cfgAlias>$30: T.class_of(T).class_of(<cfgAlias>$32: T.class_of(TypeError))
+    <cfgAlias>$35: T.class_of(T) = alias <C T>
+    <cfgAlias>$37: T.class_of(ArgumentError) = alias <C ArgumentError>
+    <arrayTemp>$33: Runtime object representing type: T.class_of(ArgumentError) = <cfgAlias>$35: T.class_of(T).class_of(<cfgAlias>$37: T.class_of(ArgumentError))
+    <magic>$27: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$26: [Runtime object representing type: T.class_of(TypeError), Runtime object representing type: T.class_of(ArgumentError)] = <magic>$27: T.class_of(<Magic>).<build-array>(<arrayTemp>$28: Runtime object representing type: T.class_of(TypeError), <arrayTemp>$33: Runtime object representing type: T.class_of(ArgumentError))
     <blockReturnTemp>$24: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$26: [Runtime object representing type: T.class_of(TypeError), Runtime object representing type: T.class_of(ArgumentError)])
     <blockReturnTemp>$38: T.noreturn = blockreturn<sig> <blockReturnTemp>$24: T::Private::Methods::DeclBuilder
     <unconditional> -> bb6

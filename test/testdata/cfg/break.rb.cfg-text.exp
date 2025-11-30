@@ -2,10 +2,10 @@ method ::Object#foo {
 
 bb0[firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <arrayTemp>$5: Integer(1) = 1
-    <arrayTemp>$6: Integer(2) = 2
-    <magic>$7: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$4: [Integer(1), Integer(2)] = <magic>$7: T.class_of(<Magic>).<build-array>(<arrayTemp>$5: Integer(1), <arrayTemp>$6: Integer(2))
+    <arrayTemp>$6: Integer(1) = 1
+    <arrayTemp>$7: Integer(2) = 2
+    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$4: [Integer(1), Integer(2)] = <magic>$5: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))
     <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <statTemp>$4: [Integer(1), Integer(2)].map()
     <selfRestore>$9: Object = <self>
     <unconditional> -> bb2
