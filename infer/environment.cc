@@ -401,13 +401,33 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
     return fnd->second.typeAndOrigins.type != nullptr;
 }
 
-const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+Environment::VariableInfo Environment::getRefInfo(cfg::LocalRef symbol) const {
     auto fnd = _vars.find(symbol);
     if (fnd == _vars.end()) {
-        return uninitialized;
+        return VariableInfo{
+            uninitialized,
+            TestedKnowledge::empty,
+            false,
+            false,
+        };
     }
-    ENFORCE(fnd->second.typeAndOrigins.type != nullptr);
-    return fnd->second.typeAndOrigins;
+
+    return VariableInfo{
+        fnd->second.typeAndOrigins,
+        fnd->second.knowledge,
+        fnd->second.knownTruthy,
+        true,
+    };
+}
+
+const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+    auto info = getRefInfo(symbol);
+
+    if (info.wasFound) {
+        ENFORCE(info.typeAndOrigins.type != nullptr);
+    }
+
+    return info.typeAndOrigins;
 }
 
 const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
@@ -417,11 +437,7 @@ const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUs
 }
 
 bool Environment::getKnownTruthy(cfg::LocalRef var) const {
-    auto fnd = _vars.find(var);
-    if (fnd == _vars.end()) {
-        return false;
-    }
-    return fnd->second.knownTruthy;
+    return getRefInfo(var).knownTruthy;
 }
 
 void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from,
@@ -1910,13 +1926,13 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
-    auto fnd = _vars.find(symbol);
-    if (fnd == _vars.end()) {
+    auto info = getRefInfo(symbol);
+    if (!info.wasFound) {
         ENFORCE(!shouldFail, "Missing knowledge?");
-        return TestedKnowledge::empty;
+    } else {
+        info.knowledge.sanityCheck();
     }
-    fnd->second.knowledge.sanityCheck();
-    return fnd->second.knowledge;
+    return info.knowledge;
 }
 
 void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
