@@ -974,9 +974,10 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        pair.second.typeAndOrigins = other.getTypeAndOrigin(var);
-        pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
-        pair.second.knownTruthy = other.getKnownTruthy(var);
+        auto info = other.getRefInfo(var);
+        pair.second.typeAndOrigins = info.typeAndOrigins;
+        pair.second.knowledge.replace(var, typeTestsWithVar, info.knowledge);
+        pair.second.knownTruthy = info.knownTruthy;
     }
 
     this->pinnedTypes = other.pinnedTypes;
