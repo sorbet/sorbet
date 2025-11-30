@@ -877,7 +877,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
     this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        const auto &otherTO = other.getTypeAndOrigin(var);
+        const auto &otherInfo = other.getRefInfo(var);
+        const auto &otherTO = otherInfo.typeAndOrigins;
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
@@ -887,22 +888,22 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
                     thisTO.origins.emplace_back(origin);
                 }
             }
-            pair.second.knownTruthy = pair.second.knownTruthy && other.getKnownTruthy(var);
+            pair.second.knownTruthy = pair.second.knownTruthy && otherInfo.knownTruthy;
         } else {
             thisTO = otherTO;
-            pair.second.knownTruthy = other.getKnownTruthy(var);
+            pair.second.knownTruthy = otherInfo.knownTruthy;
         }
 
         if (bb->flags.isLoopHeader && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
-        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
+        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !otherInfo.knownTruthy;
         bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
             auto &thisKnowledge = pair.second.knowledge;
             auto otherTruthy =
-                other.getKnowledge(var, false).truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+                otherInfo.knowledge.truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
                     thisKnowledge.seenTruthyOption = true;
@@ -915,8 +916,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
 
         if (canBeFalsy) {
             auto &thisKnowledge = pair.second.knowledge;
-            auto otherFalsy =
-                other.getKnowledge(var, false).falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+            auto otherFalsy = otherInfo.knowledge.falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;
