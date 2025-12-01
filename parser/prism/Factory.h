@@ -4,7 +4,6 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/LocOffsets.h"
-#include <new>
 #include <string_view>
 #include <vector>
 extern "C" {

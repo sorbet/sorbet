@@ -51,6 +51,14 @@ string_view Parser::extractString(pm_string_t *string) const {
     return cast_prism_string(pm_string_source(string), pm_string_length(string));
 }
 
+pm_location_t Parser::getZeroWidthLocation() const {
+    return {.start = parser.start, .end = parser.start};
+}
+
+pm_location_t Parser::convertLocOffsets(core::LocOffsets loc) const {
+    return {.start = parser.start + loc.beginPos(), .end = parser.start + loc.endPos()};
+}
+
 vector<ParseError> Parser::collectErrors() {
     vector<ParseError> parseErrors;
     parseErrors.reserve(parser.error_list.size);

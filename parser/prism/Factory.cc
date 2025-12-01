@@ -1,4 +1,5 @@
 #include "parser/prism/Factory.h"
+#include "absl/types/span.h"
 #include "parser/prism/Helpers.h"
 #include "parser/prism/Parser.h"
 #include <array>
@@ -27,7 +28,7 @@ pm_node_list_t Factory::copyNodesToList(absl::Span<const pm_node_t *> nodes) con
 
     auto result = static_cast<pm_node_t **>(this->calloc(size, sizeof(pm_node_t *)));
     for (size_t i = 0; i < size; i++) {
-        result[i] = nodes[i];
+        result[i] = const_cast<pm_node_t *>(nodes[i]);
     }
     return (pm_node_list_t){.size = size, .capacity = size, .nodes = result};
 }
@@ -99,8 +100,8 @@ pm_node_t *Factory::ConstantPathNode(core::LocOffsets loc, pm_node_t *parent, st
 pm_node_t *Factory::SingleArgumentNode(pm_node_t *arg) const {
     ENFORCE(arg, "SingleArgumentNode: arg is required");
 
-    array<pm_node_t *, 1> args = {arg};
-    pm_arguments_node_t *arguments = createArgumentsNode(args, arg->location);
+    array<const pm_node_t *, 1> args = {arg};
+    pm_arguments_node_t *arguments = createArgumentsNode(absl::MakeSpan(args), arg->location);
 
     return up_cast(arguments);
 }
@@ -355,8 +356,8 @@ pm_node_t *Factory::Send2(core::LocOffsets loc, pm_node_t *receiver, string_view
                           pm_node_t *arg2) const {
     ENFORCE(receiver && !method.empty() && arg1 && arg2, "Receiver or method or arguments are null");
 
-    array<pm_node_t *, 2> args = {arg1, arg2};
-    return Send(loc, receiver, method, args);
+    array<const pm_node_t *, 2> args = {arg1, arg2};
+    return Send(loc, receiver, method, absl::MakeSpan(args));
 }
 
 pm_node_t *Factory::TLet(core::LocOffsets loc, pm_node_t *value, pm_node_t *type) const {
