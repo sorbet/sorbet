@@ -5378,6 +5378,8 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closingLoc) {
     ENFORCE(closingLoc.start && closingLoc.end);
 
+    auto prismLoc = closingLoc;
+
     // Chop off Regexp's closing delimiter from the start of the Regopt location,
     // so the location only spans the options themselves:
     //     /foo/im
@@ -5388,7 +5390,9 @@ unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closin
     //            ^^
     //     $r{foo}im
     //            ^^
-    auto prismLoc = pm_location_t{.start = closingLoc.start + 1, .end = closingLoc.end};
+    if (closingLoc.start < closingLoc.end) {
+        prismLoc.start = closingLoc.start + 1;
+    }
     auto location = translateLoc(prismLoc);
 
     string_view options = sliceLocation(prismLoc);
