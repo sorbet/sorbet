@@ -10,12 +10,12 @@ class TypeConstraint;
 
 class SendResponse final {
 public:
-    SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, InlinedVector<core::LocOffsets, 2> argLocOffsets,
+    SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, absl::Span<const core::LocOffsets> argLocOffsets,
                  core::NameRef callerSideName, core::NameRef originalName, core::MethodRef enclosingMethod,
                  bool isPrivateOk, uint16_t numPosArgs, core::FileRef file, core::LocOffsets termLocOffsets,
                  core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
                  core::LocOffsets locOffsetsWithoutBlock)
-        : dispatchResult(std::move(dispatchResult)), argLocOffsets(std::move(argLocOffsets)),
+        : dispatchResult(std::move(dispatchResult)), argLocOffsets(argLocOffsets.begin(), argLocOffsets.end()),
           callerSideName(callerSideName), originalName(originalName), enclosingMethod(enclosingMethod),
           isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), file(file), termLocOffsets(termLocOffsets),
           receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
