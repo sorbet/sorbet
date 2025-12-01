@@ -354,6 +354,11 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         return;
     }
 
+    // If all RBS comments have been processed and associated with nodes, we can skip walking the rest of the tree.
+    if (commentByLine.empty()) {
+        return;
+    }
+
     typecase(
         node,
 
