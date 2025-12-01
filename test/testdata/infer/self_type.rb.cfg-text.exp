@@ -64,15 +64,15 @@ bb2[firstDead=-1](<self>: T.class_of(<root>), a: T.all(Generic[String], B)):
 # - bb0
 # - bb2
 bb4[firstDead=-1](<self>: T.class_of(<root>)):
-    <cfgAlias>$49: T.class_of(Integer) = alias <C Integer>
-    <cfgAlias>$51: T.class_of(Integer) = alias <C Integer>
-    <magic>$52: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$47: [T.class_of(Integer), T.class_of(Integer)] = <magic>$52: T.class_of(<Magic>).<build-array>(<cfgAlias>$49: T.class_of(Integer), <cfgAlias>$51: T.class_of(Integer))
+    <cfgAlias>$50: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$52: T.class_of(Integer) = alias <C Integer>
+    <magic>$48: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$47: [T.class_of(Integer), T.class_of(Integer)] = <magic>$48: T.class_of(<Magic>).<build-array>(<cfgAlias>$50: T.class_of(Integer), <cfgAlias>$52: T.class_of(Integer))
     keep_for_ide$47: T.untyped = <keep-alive> keep_for_ide$47
-    <arrayTemp>$55: Integer(1) = 1
-    <arrayTemp>$56: Integer(2) = 2
-    <magic>$57: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$54: [Integer(1), Integer(2)] = <magic>$57: T.class_of(<Magic>).<build-array>(<arrayTemp>$55: Integer(1), <arrayTemp>$56: Integer(2))
+    <arrayTemp>$56: Integer(1) = 1
+    <arrayTemp>$57: Integer(2) = 2
+    <magic>$55: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$54: [Integer(1), Integer(2)] = <magic>$55: T.class_of(<Magic>).<build-array>(<arrayTemp>$56: Integer(1), <arrayTemp>$57: Integer(2))
     <castTemp>$53: [Integer(1), Integer(2)] = <statTemp>$54: [Integer(1), Integer(2)].returns_self()
     <statTemp>$46: [Integer, Integer] = cast(<castTemp>$53: [Integer(1), Integer(2)], [Integer, Integer]);
     <cfgAlias>$60: T.class_of(A) = alias <C A>

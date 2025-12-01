@@ -31,14 +31,14 @@ method ::TestHash#test {
 
 bb0[firstDead=10]():
     <self>: TestHash = cast(<self>: NilClass, TestHash);
-    <hashTemp>$3: T.untyped = <self>: TestHash.something()
-    <hashTemp>$4: Symbol(:bar) = :bar
-    <statTemp>$8: Integer(1) = 1
-    <statTemp>$9: Integer(2) = 2
-    <hashTemp>$6: Integer = <statTemp>$8: Integer(1).+(<statTemp>$9: Integer(2))
-    <hashTemp>$7: Integer(2) = 2
-    <magic>$10: T.class_of(<Magic>) = alias <C <Magic>>
-    <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped] = <magic>$10: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: T.untyped, <hashTemp>$4: Symbol(:bar), <hashTemp>$6: Integer, <hashTemp>$7: Integer(2))
+    <hashTemp>$4: T.untyped = <self>: TestHash.something()
+    <hashTemp>$5: Symbol(:bar) = :bar
+    <statTemp>$9: Integer(1) = 1
+    <statTemp>$10: Integer(2) = 2
+    <hashTemp>$7: Integer = <statTemp>$9: Integer(1).+(<statTemp>$10: Integer(2))
+    <hashTemp>$8: Integer(2) = 2
+    <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped] = <magic>$3: T.class_of(<Magic>).<build-hash>(<hashTemp>$4: T.untyped, <hashTemp>$5: Symbol(:bar), <hashTemp>$7: Integer, <hashTemp>$8: Integer(2))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Hash[T.untyped, T.untyped]
     <unconditional> -> bb1
 
@@ -53,16 +53,16 @@ method ::TestHash#test_shaped {
 
 bb0[firstDead=12]():
     <self>: TestHash = cast(<self>: NilClass, TestHash);
-    <hashTemp>$3: Integer(1) = 1
-    <hashTemp>$4: Integer(2) = 2
+    <hashTemp>$4: Integer(1) = 1
     <hashTemp>$5: Integer(2) = 2
-    <hashTemp>$6: Integer(3) = 3
-    <hashTemp>$7: Symbol(:foo) = :foo
-    <hashTemp>$8: Symbol(:bar) = :bar
-    <hashTemp>$9: Symbol(:baz) = :baz
-    <hashTemp>$10: T.untyped = <self>: TestHash.something()
-    <magic>$12: T.class_of(<Magic>) = alias <C <Magic>>
-    <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped} = <magic>$12: T.class_of(<Magic>).<build-hash>(<hashTemp>$3: Integer(1), <hashTemp>$4: Integer(2), <hashTemp>$5: Integer(2), <hashTemp>$6: Integer(3), <hashTemp>$7: Symbol(:foo), <hashTemp>$8: Symbol(:bar), <hashTemp>$9: Symbol(:baz), <hashTemp>$10: T.untyped)
+    <hashTemp>$6: Integer(2) = 2
+    <hashTemp>$7: Integer(3) = 3
+    <hashTemp>$8: Symbol(:foo) = :foo
+    <hashTemp>$9: Symbol(:bar) = :bar
+    <hashTemp>$10: Symbol(:baz) = :baz
+    <hashTemp>$11: T.untyped = <self>: TestHash.something()
+    <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped} = <magic>$3: T.class_of(<Magic>).<build-hash>(<hashTemp>$4: Integer(1), <hashTemp>$5: Integer(2), <hashTemp>$6: Integer(2), <hashTemp>$7: Integer(3), <hashTemp>$8: Symbol(:foo), <hashTemp>$9: Symbol(:bar), <hashTemp>$10: Symbol(:baz), <hashTemp>$11: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped}
     <unconditional> -> bb1
 

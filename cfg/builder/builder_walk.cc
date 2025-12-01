@@ -220,6 +220,7 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
 }
 
 BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
+    LocalRef magic = cctx.newTemporary(core::Names::magic());
     InlinedVector<cfg::LocalRef, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
     for (auto [key, val] : h.kviter()) {
@@ -232,7 +233,6 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
         locs.emplace_back(key.loc());
         locs.emplace_back(val.loc());
     }
-    LocalRef magic = cctx.newTemporary(core::Names::magic());
     synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
 
     auto isPrivateOk = false;
@@ -959,6 +959,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Hash &h) { ret = walkHash(cctx, h, current, core::Names::buildHash()); },
 
             [&](ast::Array &a) {
+                LocalRef magic = cctx.newTemporary(core::Names::magic());
                 InlinedVector<LocalRef, 2> vars;
                 InlinedVector<core::LocOffsets, 2> locs;
                 for (auto &elem : a.elems) {
@@ -967,7 +968,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     vars.emplace_back(tmp);
                     locs.emplace_back(a.loc);
                 }
-                LocalRef magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
                 auto isPrivateOk = false;
                 current->exprs.emplace_back(cctx.target, a.loc,

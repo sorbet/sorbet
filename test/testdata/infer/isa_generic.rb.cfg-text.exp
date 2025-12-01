@@ -261,10 +261,10 @@ bb3[firstDead=2](<block-pre-call-temp>$12: Sorbet::Private::Static::Void, <selfR
 bb5[firstDead=6](<self>: T.class_of(Concrete), <block-pre-call-temp>$12: Sorbet::Private::Static::Void, <selfRestore>$13: T.class_of(Concrete)):
     # outerLoops: 1
     <self>: T.class_of(Concrete) = loadSelf(type_template)
-    <hashTemp>$15: Symbol(:fixed) = :fixed
-    <cfgAlias>$17: T.class_of(String) = alias <C String>
-    <magic>$18: T.class_of(<Magic>) = alias <C <Magic>>
-    <blockReturnTemp>$14: {fixed: T.class_of(String)} = <magic>$18: T.class_of(<Magic>).<build-hash>(<hashTemp>$15: Symbol(:fixed), <cfgAlias>$17: T.class_of(String))
+    <hashTemp>$16: Symbol(:fixed) = :fixed
+    <cfgAlias>$18: T.class_of(String) = alias <C String>
+    <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
+    <blockReturnTemp>$14: {fixed: T.class_of(String)} = <magic>$15: T.class_of(<Magic>).<build-hash>(<hashTemp>$16: Symbol(:fixed), <cfgAlias>$18: T.class_of(String))
     <blockReturnTemp>$19: T.noreturn = blockreturn<type_template> <blockReturnTemp>$14: {fixed: T.class_of(String)}
     <unconditional> -> bb2
 
