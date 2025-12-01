@@ -541,21 +541,6 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
     }
 }
 
-// Desugar `in` and `=>` oneline pattern matching
-ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, parser::Node *match) {
-    auto matchExpr = MK::RaiseUnimplemented(loc);
-    auto bodyExpr = MK::RaiseUnimplemented(loc);
-    auto elseExpr = MK::EmptyTree();
-
-    InsSeq::STATS_store vars;
-    desugarPatternMatchingVars(vars, dctx, match);
-    if (!vars.empty()) {
-        bodyExpr = MK::InsSeq(match->loc, move(vars), move(bodyExpr));
-    }
-
-    return MK::If(loc, move(matchExpr), move(bodyExpr), move(elseExpr));
-}
-
 bool locReported = false;
 
 ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node> node) {
@@ -2153,14 +2138,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             [&](parser::MatchCurLine *matchCurLine) { desugaredByPrismTranslator(matchCurLine); },
             [&](parser::Redo *redo) { desugaredByPrismTranslator(redo); },
             [&](parser::EncodingLiteral *encodingLiteral) { desugaredByPrismTranslator(encodingLiteral); },
-            [&](parser::MatchPattern *pattern) {
-                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs.get());
-                result = move(res);
-            },
-            [&](parser::MatchPatternP *pattern) {
-                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs.get());
-                result = move(res);
-            },
+            [&](parser::MatchPattern *pattern) { desugaredByPrismTranslator(pattern); },
+            [&](parser::MatchPatternP *pattern) { desugaredByPrismTranslator(pattern); },
             [&](parser::EmptyElse *else_) { result = MK::EmptyTree(); },
             [&](parser::ResolvedConst *resolvedConst) {
                 result = make_expression<ConstantLit>(resolvedConst->loc, move(resolvedConst->symbol));
