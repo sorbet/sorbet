@@ -147,19 +147,17 @@ private:
     // log2 of the required alignment.
     uint8_t shiftValue = 0;
 
+    explicit Align(uint64_t value) {
+        shiftValue = value;
+        ENFORCE(shiftValue < 64);
+    }
+
 public:
     constexpr Align() noexcept = default;
     constexpr Align(const Align &) = default;
     constexpr Align(Align &&) = default;
     Align &operator=(const Align &) = default;
     Align &operator=(Align &&) = default;
-
-    explicit Align(uint64_t value) {
-        ENFORCE(value > 0);
-        ENFORCE(isPowerOf2(value));
-        shiftValue = log2_64(value);
-        ENFORCE(shiftValue < 64);
-    }
 
     uint64_t value() const {
         return uint64_t(1) << shiftValue;
