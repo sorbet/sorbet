@@ -15,6 +15,10 @@ namespace sorbet::parser::Prism {
 
 class ExprOnly;
 
+// Enum to specify the type of compound assignment operation.
+// Used by the desugar*OpAssign functions to determine the appropriate desugaring strategy.
+enum class OpAssignKind { And, Or, Operator };
+
 class Translator final {
     const Parser &parser;
     // This context holds a reference to the GlobalState allocated up the call stack, which is why we don't allow
@@ -150,9 +154,6 @@ private:
     template <typename PrismNode>
     std::unique_ptr<parser::Mlhs> translateMultiTargetLhs(PrismNode *node, core::LocOffsets location);
 
-    template <typename PrismAssignmentNode, typename SorbetLHSNode>
-    std::unique_ptr<parser::Node> translateAssignment(pm_node_t *node);
-
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Node> translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
                                                            std::unique_ptr<parser::Node> lhs);
@@ -165,27 +166,6 @@ private:
     template <typename SorbetAssignmentNode>
     std::unique_ptr<parser::Node> translateAndOrAssignment(core::LocOffsets location, std::unique_ptr<parser::Node> lhs,
                                                            std::unique_ptr<parser::Node> rhs);
-
-    template <typename PrismConstantNode, typename SorbetAssignmentNode>
-    std::unique_ptr<parser::Node> translateConstantAssignment(pm_node_t *node, core::LocOffsets location);
-
-    // Translate a constant path assignment, e.g. `A::B = 1`
-    template <typename PrismConstantPathNode, typename SorbetAssignmentNode>
-    std::unique_ptr<parser::Node> translateConstantPathAssignment(pm_node_t *node, core::LocOffsets location);
-
-    // Translates regular assignments, not including e.g. `x[i] = y`, `x &&= y`, `x ||= y`, etc.
-    template <typename PrismVariableNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-    std::unique_ptr<parser::Node> translateVariableAssignment(pm_node_t *node, core::LocOffsets location);
-
-    // Translates an assignment to a method call, e.g. `x.y = z`
-    template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
-    std::unique_ptr<parser::Node> translateSendAssignment(pm_node_t *node, core::LocOffsets location);
-
-    // Translate operator assignment targeting a safe navigation call (e.g., `a&.b += 1`).
-    template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
-    std::unique_ptr<parser::Node> translateCSendAssignment(PrismAssignmentNode *callNode, core::LocOffsets location,
-                                                           std::unique_ptr<parser::Node> receiver, core::NameRef name,
-                                                           core::LocOffsets messageLoc);
 
     template <typename PrismLhsNode, typename SorbetLHSNode, bool checkForDynamicConstAssign = false>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node);
@@ -214,6 +194,59 @@ private:
     std::unique_ptr<parser::Node> translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
                                                         std::unique_ptr<parser::Node> lhs,
                                                         std::unique_ptr<parser::Node> rhs);
+
+    // ========================================================================
+    // Direct Desugaring Functions for Op-Assignment Nodes
+    // ========================================================================
+    // These functions return ast::ExpressionPtr directly without creating
+    // intermediate parser::Node objects.
+
+    // Core desugaring helper for &&= and ||= with reference LHS (local, instance, class, global variables)
+    template <OpAssignKind Kind>
+    ast::ExpressionPtr desugarAndOrReference(core::LocOffsets location, ast::ExpressionPtr lhsExpr,
+                                             ast::ExpressionPtr rhsExpr, bool isIvarOrCvar);
+
+    // Core desugaring helper for operator assignment (+=, -=, etc.) with reference LHS
+    ast::ExpressionPtr desugarOpReference(core::LocOffsets location, ast::ExpressionPtr lhsExpr, core::NameRef op,
+                                          core::LocOffsets opLoc, ast::ExpressionPtr rhsExpr);
+
+    // Desugar compound assignment when LHS is a Send expression
+    template <OpAssignKind Kind>
+    ast::ExpressionPtr desugarOpAssignSend(core::LocOffsets location, ast::Send *s, ast::ExpressionPtr rhsExpr,
+                                           core::NameRef op, core::LocOffsets opLoc);
+
+    // Desugar compound assignment when LHS is a safe navigation send (InsSeq from CSend)
+    template <OpAssignKind Kind>
+    ast::ExpressionPtr desugarOpAssignCSend(core::LocOffsets location, ast::InsSeq *insSeq, ast::ExpressionPtr rhsExpr,
+                                            core::NameRef op, core::LocOffsets opLoc);
+
+    // Core dispatcher for compound assignment desugaring based on LHS expression type
+    template <OpAssignKind Kind>
+    ast::ExpressionPtr desugarAnyOpAssign(core::LocOffsets location, ast::ExpressionPtr lhsExpr,
+                                          ast::ExpressionPtr rhsExpr, core::NameRef op, core::LocOffsets opLoc,
+                                          bool isIvarOrCvar);
+
+    // Desugar variable compound assignment (local, instance, class, global)
+    template <typename PrismVariableNode, OpAssignKind Kind, ast::UnresolvedIdent::Kind IdentKind>
+    ast::ExpressionPtr desugarVariableOpAssign(pm_node_t *node);
+
+    // Desugar constant compound assignment (e.g., `CONST &&= val`)
+    template <typename PrismConstantNode, OpAssignKind Kind>
+    ast::ExpressionPtr desugarConstantOpAssign(pm_node_t *node);
+
+    // Desugar constant path compound assignment (e.g., `A::B &&= val`)
+    template <typename PrismConstantPathNode, OpAssignKind Kind>
+    ast::ExpressionPtr desugarConstantPathOpAssign(pm_node_t *node);
+
+    // Desugar index compound assignment (e.g., `arr[i] &&= val`)
+    template <typename PrismIndexNode, OpAssignKind Kind> ast::ExpressionPtr desugarIndexOpAssign(pm_node_t *node);
+
+    // Desugar send compound assignment (e.g., `obj.method &&= val`, handles both regular and safe navigation)
+    template <typename PrismSendNode, OpAssignKind Kind> ast::ExpressionPtr desugarSendOpAssign(pm_node_t *node);
+
+    // Desugar regular (non-compound) assignment (e.g., `x = 1`, `@x = 1`, `CONST = 1`)
+    template <typename PrismAssignmentNode, ast::UnresolvedIdent::Kind IdentKind = ast::UnresolvedIdent::Kind::Local>
+    ast::ExpressionPtr desugarAssignment(pm_node_t *node);
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
