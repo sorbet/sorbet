@@ -3,6 +3,8 @@
 
 #include "absl/types/span.h"
 
+#include <iterator>
+
 namespace sorbet::core {
 
 template <typename KeyT, typename ValueT> struct ZipPair {
@@ -10,33 +12,28 @@ template <typename KeyT, typename ValueT> struct ZipPair {
     ValueT &value;
 };
 
-// We're going to use this type to encapsulate both the span over the args,
-// and also as the iterator type over that selfsame span.
-template <typename KeyT, typename ValueT> struct ZippedPairSpan {
+template <typename KeyT, typename ValueT> struct ZippedPairIterator {
     absl::Span<KeyT> keys;
     absl::Span<ValueT> values;
 
-    ZippedPairSpan begin() const {
-        return ZippedPairSpan{keys, values};
-    }
-
-    ZippedPairSpan end() const {
-        ENFORCE(keys.size() == values.size());
-        return ZippedPairSpan{absl::MakeSpan(keys.end(), keys.end()), absl::MakeSpan(values.end(), values.end())};
-    }
+    using value_type = ZipPair<KeyT, ValueT>;
+    using difference_type = void;
+    using pointer = ZipPair<KeyT, ValueT> *;
+    using reference = ZipPair<KeyT, ValueT> &;
+    using iterator_category = std::forward_iterator_tag;
 
     ZipPair<KeyT, ValueT> operator*() {
         return ZipPair<KeyT, ValueT>{keys[0], values[0]};
     }
 
-    ZippedPairSpan &operator++() {
+    ZippedPairIterator &operator++() {
         keys = keys.subspan(1);
         values = values.subspan(1);
         return *this;
     }
 
-    ZippedPairSpan operator++(int) {
-        ZippedPairSpan copy(*this);
+    ZippedPairIterator operator++(int) {
+        ZippedPairIterator copy(*this);
         ++*this;
         return copy;
     }
@@ -45,16 +42,33 @@ template <typename KeyT, typename ValueT> struct ZippedPairSpan {
     // correct, but the loops that use this were previously using only the keys for
     // controlling the iteration anyway.  Doing a single check is also slightly more
     // efficient; we check in debug mode for an extra measure of safety.
-    bool operator==(const ZippedPairSpan &other) const {
+    bool operator==(const ZippedPairIterator &other) const {
         bool equal = keys.begin() == other.keys.begin();
         ENFORCE(equal == (values.begin() == other.values.begin()));
         return equal;
     }
 
-    bool operator!=(const ZippedPairSpan &other) const {
+    bool operator!=(const ZippedPairIterator &other) const {
         bool equal = keys.begin() != other.keys.begin();
         ENFORCE(equal == (values.begin() != other.values.begin()));
         return equal;
+    }
+};
+
+template <typename KeyT, typename ValueT> struct ZippedPairSpan {
+    absl::Span<KeyT> keys;
+    absl::Span<ValueT> values;
+
+    using iterator = ZippedPairIterator<KeyT, ValueT>;
+    using const_iterator = ZippedPairIterator<const KeyT, const ValueT>;
+
+    iterator begin() const {
+        return iterator{keys, values};
+    }
+
+    iterator end() const {
+        ENFORCE(keys.size() == values.size());
+        return iterator{absl::MakeSpan(keys.end(), keys.end()), absl::MakeSpan(values.end(), values.end())};
     }
 };
 
