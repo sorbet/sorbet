@@ -1381,20 +1381,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
                             case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
                                 // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
                                 auto itParamLoc = translateLoc(blockNode->opening_loc.end, blockNode->opening_loc.end);
-                                NodeVec params;
 
                                 // Find the actual usage location of 'it' in the block body by walking the AST
+                                auto itUsageLoc = itParamLoc;
                                 if (blockNode->body != nullptr) {
                                     auto statements = down_cast<pm_statements_node>(blockNode->body);
-                                    auto itUsageLoc = findItParamUsageLoc(statements);
-
-                                    if (itUsageLoc.exists()) {
-                                        // Create LVar node at the actual usage location
-                                        params.emplace_back(make_unique<parser::LVar>(itUsageLoc, core::Names::it()));
+                                    auto foundLoc = findItParamUsageLoc(statements);
+                                    if (foundLoc.exists()) {
+                                        itUsageLoc = foundLoc;
                                     }
                                 }
 
-                                blockParameters = make_unique<parser::NumParams>(itParamLoc, move(params));
+                                auto itDecl = make_unique<parser::LVar>(itUsageLoc, core::Names::it());
+                                blockParameters = make_unique<parser::ItParam>(itParamLoc, move(itDecl));
                                 break;
                             }
 
@@ -2819,10 +2818,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveCon
         case PM_IT_PARAMETERS_NODE: { // An invisible node that models the 'it' parameter in a block/lambda
             // ... for a block like `proc { it + 1 }` or lambda like `-> { it + 1 }`, which has no explicitly declared
             // parameters. When translating this node directly (not through the translateCallWithBlock handler), we
-            // don't have access to the block body to find actual usage locations via AST walking. Return a NumParams
-            // with no parameter nodes (similar to when numbered params aren't used).
+            // don't have access to the block body to find actual usage locations via AST walking.
             auto itParamLoc = location.copyWithZeroLength();
-            return make_unique<parser::NumParams>(itParamLoc, NodeVec{});
+            auto itDecl = make_unique<parser::LVar>(itParamLoc, core::Names::it());
+            return make_unique<parser::ItParam>(itParamLoc, move(itDecl));
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
@@ -4834,20 +4833,18 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                 itParamLoc = translateLoc(prismLambdaNode->operator_loc.end, prismLambdaNode->operator_loc.end);
             }
 
-            NodeVec params;
-
             // Find the actual usage location of 'it' in the block body by walking the AST
+            auto itUsageLoc = itParamLoc;
             if (prismBodyNode != nullptr) {
                 auto statements = down_cast<pm_statements_node>(prismBodyNode);
-                auto itUsageLoc = findItParamUsageLoc(statements);
-
-                if (itUsageLoc.exists()) {
-                    // Create LVar node at the actual usage location
-                    params.emplace_back(make_unique<parser::LVar>(itUsageLoc, core::Names::it()));
+                auto foundLoc = findItParamUsageLoc(statements);
+                if (foundLoc.exists()) {
+                    itUsageLoc = foundLoc;
                 }
             }
 
-            parametersNode = make_unique<parser::NumParams>(itParamLoc, move(params));
+            auto itDecl = make_unique<parser::LVar>(itUsageLoc, core::Names::it());
+            parametersNode = make_unique<parser::ItParam>(itParamLoc, move(itDecl));
         } else {
             parametersNode = translate(prismParametersNode);
         }

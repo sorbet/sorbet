@@ -99,6 +99,7 @@ struct builder {
     ForeignPtr (*indexAsgn)(SelfPtr builder, ForeignPtr receiver, const token *lbrack, const node_list *indexes,
                             const token *rbrack);
     ForeignPtr (*integer)(SelfPtr builder, const token *tok);
+    ForeignPtr (*itparams)(SelfPtr builder, const token *tok, const node_list *declaringNodes);
     ForeignPtr (*ivar)(SelfPtr builder, const token *tok);
     ForeignPtr (*keywordBreak)(SelfPtr builder, const token *keyword, const token *lparen, const node_list *args,
                                const token *rparen);

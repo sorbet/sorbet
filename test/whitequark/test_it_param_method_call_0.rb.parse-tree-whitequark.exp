@@ -3,7 +3,7 @@ s(:block,
     s(:array,
       s(:str, "hello"),
       s(:str, "world")), :map),
-  s(:numparams,
+  s(:itparam,
     s(:lvar, :it)),
   s(:send,
     s(:lvar, :it), :upcase))

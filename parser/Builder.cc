@@ -1087,6 +1087,17 @@ public:
         return make_unique<Integer>(tokLoc(tok), tok->view());
     }
 
+    unique_ptr<Node> itparams(const token *tok, sorbet::parser::NodeVec declaringNodes) {
+        ENFORCE(!declaringNodes.empty(), "ItParam node created without declaring node.");
+        // The 'it' parameter is a single implicit parameter for blocks.
+        // In error cases (mixing 'it' with numbered params), there may be multiple nodes,
+        // but we only use the first one (which should be the 'it' LVar).
+
+        auto loc = tokLoc(tok).copyEndWithZeroLength();
+
+        return make_unique<ItParam>(loc, std::move(declaringNodes[0]));
+    }
+
     unique_ptr<Node> ivar(const token *tok) {
         auto view = tok->view();
         auto name = view == "@" ? core::Names::ivarNameMissing() : gs_.enterNameUTF8(view);
@@ -1951,12 +1962,12 @@ public:
         }
     }
 
-    bool isNumberedParameterName(std::string_view name) {
-        return name.length() == 2 && name[0] == '_' && name[1] >= '1' && name[1] <= '9';
-    }
-
     bool isItParameterName(core::NameRef name) {
         return name == core::Names::it();
+    }
+
+    bool isNumberedParameterName(std::string_view name) {
+        return name.length() == 2 && name[0] == '_' && name[1] >= '1' && name[1] <= '9';
     }
 };
 
@@ -2345,6 +2356,11 @@ ForeignPtr indexAsgn(SelfPtr builder, ForeignPtr receiver, const token *lbrack, 
 ForeignPtr integer(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->integer(tok));
+}
+
+ForeignPtr itparams(SelfPtr builder, const token *tok, const node_list *declaringNodes) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->itparams(tok, build->convertNodeList(declaringNodes)));
 }
 
 ForeignPtr ivar(SelfPtr builder, const token *tok) {
@@ -2852,6 +2868,7 @@ struct ruby_parser::builder Builder::interface = {
     index,
     indexAsgn,
     integer,
+    itparams,
     ivar,
     keywordBreak,
     keywordDefined,

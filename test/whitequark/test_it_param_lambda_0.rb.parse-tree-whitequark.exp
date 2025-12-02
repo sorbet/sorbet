@@ -1,6 +1,6 @@
 s(:block,
   s(:send, nil, :lambda),
-  s(:numparams,
+  s(:itparam,
     s(:lvar, :it)),
   s(:send,
     s(:lvar, :it), :+,

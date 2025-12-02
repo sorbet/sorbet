@@ -10,12 +10,10 @@ Begin {
         args = [
         ]
       }
-      params = NumParams {
-        decls = [
-          LVar {
-            name = <U it>
-          }
-        ]
+      params = ItParam {
+        decl = LVar {
+          name = <U it>
+        }
       }
       body = LVar {
         name = <U it>

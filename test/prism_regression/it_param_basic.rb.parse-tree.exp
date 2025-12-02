@@ -17,12 +17,10 @@ Block {
     args = [
     ]
   }
-  params = NumParams {
-    decls = [
-      LVar {
-        name = <U it>
-      }
-    ]
+  params = ItParam {
+    decl = LVar {
+      name = <U it>
+    }
   }
   body = Send {
     receiver = LVar {

@@ -2789,7 +2789,9 @@ opt_block_args_tail:
                     {
                       auto &lambda_arrow = $1; // The `->` token with context
                       auto &delimited_block = $4;
-                      if (driver.numparam_stack.seen_numparams() || driver.numparam_stack.seen_it_param()) {
+                      if (driver.numparam_stack.seen_it_param()) {
+                        delimited_block->args = driver.build.itparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
+                      } else if (driver.numparam_stack.seen_numparams()) {
                         delimited_block->args = driver.build.numparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
                       } else {
                         delimited_block->args = $2;
@@ -3049,7 +3051,10 @@ lcurly_block_start:
                     }
                     opt_block_param bodystmt
                     {
-                      if (driver.numparam_stack.seen_numparams() || driver.numparam_stack.seen_it_param()) {
+                      if (driver.numparam_stack.seen_it_param()) {
+                        auto itparams = driver.build.itparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
+                        $$ = driver.alloc.delimited_block(nullptr, itparams, $3->body, nullptr);
+                      } else if (driver.numparam_stack.seen_numparams()) {
                         auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
                         $$ = driver.alloc.delimited_block(nullptr, numparams, $3->body, nullptr);
                       } else {
@@ -3065,7 +3070,10 @@ lcurly_block_start:
                     }
                     opt_block_param bodystmt
                     {
-                      if (driver.numparam_stack.seen_numparams() || driver.numparam_stack.seen_it_param()) {
+                      if (driver.numparam_stack.seen_it_param()) {
+                        auto itparams = driver.build.itparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
+                        $$ = driver.alloc.delimited_block(nullptr, itparams, $3->body, nullptr);
+                      } else if (driver.numparam_stack.seen_numparams()) {
                         auto numparams = driver.build.numparams(self, driver.numparam_stack.top()->opening_token, driver.numparam_stack.top()->decls);
                         $$ = driver.alloc.delimited_block(nullptr, numparams, $3->body, nullptr);
                       } else {
