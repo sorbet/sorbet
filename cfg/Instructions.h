@@ -67,6 +67,142 @@ private:
     friend InstructionPtr;
 };
 
+class InstructionPtr final {
+    using tagged_storage = uint64_t;
+
+    static constexpr tagged_storage TAG_MASK = 0xff;
+    static constexpr tagged_storage FLAG_MASK = 0xff00;
+    static constexpr tagged_storage SYNTHETIC_FLAG = 0x0100;
+    static_assert((TAG_MASK & FLAG_MASK) == 0, "no bits should be shared between tags and flags");
+    static constexpr tagged_storage PTR_MASK = ~(FLAG_MASK | TAG_MASK);
+
+    tagged_storage ptr;
+
+    template <typename T, typename... Args> friend InstructionPtr make_insn(Args &&...);
+    friend Send;
+
+    static tagged_storage tagPtr(Tag tag, void *i) {
+        auto val = static_cast<tagged_storage>(tag);
+        auto maskedPtr = reinterpret_cast<tagged_storage>(i) << 16;
+
+        return maskedPtr | val;
+    }
+
+    static void deleteTagged(Tag tag, void *ptr) noexcept;
+
+    InstructionPtr(Tag tag, Instruction *i) : ptr(tagPtr(tag, i)) {}
+
+    void resetTagged(tagged_storage i) noexcept {
+        Tag tagVal;
+        void *saved = nullptr;
+
+        if (ptr != 0) {
+            tagVal = tag();
+            saved = get();
+        }
+
+        ptr = i;
+
+        if (saved != nullptr) {
+            deleteTagged(tagVal, saved);
+        }
+    }
+    tagged_storage releaseTagged() noexcept {
+        auto i = ptr;
+        ptr = 0;
+        return i;
+    }
+
+    uint16_t tagMaybeZero() const noexcept {
+        return ptr & TAG_MASK;
+    }
+
+public:
+    // Required for typecase
+    template <class To> static bool isa(const InstructionPtr &insn);
+    template <class To> static const To &cast(const InstructionPtr &insn);
+    template <class To> static To &cast(InstructionPtr &insn) {
+        return const_cast<To &>(cast<To>(static_cast<const InstructionPtr &>(insn)));
+    }
+
+    constexpr InstructionPtr() noexcept : ptr(0) {}
+    constexpr InstructionPtr(std::nullptr_t) : ptr(0) {}
+    ~InstructionPtr() {
+        if (ptr != 0) {
+            deleteTagged(tag(), get());
+        }
+    }
+
+    InstructionPtr(const InstructionPtr &) = delete;
+    InstructionPtr &operator=(const InstructionPtr &) = delete;
+
+    InstructionPtr(InstructionPtr &&other) noexcept {
+        ptr = other.releaseTagged();
+    }
+    InstructionPtr &operator=(InstructionPtr &&other) noexcept {
+        if (*this == other) {
+            return *this;
+        }
+
+        resetTagged(other.releaseTagged());
+        return *this;
+    }
+
+    Instruction *operator->() const noexcept {
+        return get();
+    }
+    Instruction *get() const noexcept {
+        auto val = ptr & PTR_MASK;
+        return reinterpret_cast<Instruction *>(val >> 16);
+    }
+
+    explicit operator bool() const noexcept {
+        return ptr != 0;
+    }
+
+    bool operator==(const InstructionPtr &other) const noexcept {
+        return ptr == other.ptr;
+    }
+    bool operator==(std::nullptr_t) const noexcept {
+        return ptr == 0;
+    }
+    bool operator!=(const InstructionPtr &other) const noexcept {
+        return ptr != other.ptr;
+    }
+    bool operator!=(std::nullptr_t) const noexcept {
+        return ptr != 0;
+    }
+
+    Tag tag() const noexcept {
+        ENFORCE(ptr != 0);
+
+        return static_cast<Tag>(ptr & TAG_MASK);
+    }
+
+    bool isSynthetic() const noexcept {
+        return (this->ptr & SYNTHETIC_FLAG) != 0;
+    }
+
+    template <class To> core::UntaggedPtr<To> as_instruction() {
+        bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
+        auto *ptr = isValid ? reinterpret_cast<To *>(get()) : nullptr;
+        return core::UntaggedPtr<To>(ptr, isValid);
+    }
+
+    template <class To> core::UntaggedPtr<const To> as_instruction() const {
+        bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
+        auto *ptr = isValid ? reinterpret_cast<const To *>(get()) : nullptr;
+        return core::UntaggedPtr<const To>(ptr, isValid);
+    }
+
+    void setSynthetic() noexcept {
+        this->ptr |= SYNTHETIC_FLAG;
+    }
+
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+};
+
 #define INSN(name)                              \
     class name;                                 \
     template <> struct InsnToTag<name> {        \
@@ -294,141 +430,6 @@ public:
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(KeepAlive, 8, 8);
-
-class InstructionPtr final {
-    using tagged_storage = uint64_t;
-
-    static constexpr tagged_storage TAG_MASK = 0xff;
-    static constexpr tagged_storage FLAG_MASK = 0xff00;
-    static constexpr tagged_storage SYNTHETIC_FLAG = 0x0100;
-    static_assert((TAG_MASK & FLAG_MASK) == 0, "no bits should be shared between tags and flags");
-    static constexpr tagged_storage PTR_MASK = ~(FLAG_MASK | TAG_MASK);
-
-    tagged_storage ptr;
-
-    template <typename T, typename... Args> friend InstructionPtr make_insn(Args &&...);
-
-    static tagged_storage tagPtr(Tag tag, void *i) {
-        auto val = static_cast<tagged_storage>(tag);
-        auto maskedPtr = reinterpret_cast<tagged_storage>(i) << 16;
-
-        return maskedPtr | val;
-    }
-
-    static void deleteTagged(Tag tag, void *ptr) noexcept;
-
-    InstructionPtr(Tag tag, Instruction *i) : ptr(tagPtr(tag, i)) {}
-
-    void resetTagged(tagged_storage i) noexcept {
-        Tag tagVal;
-        void *saved = nullptr;
-
-        if (ptr != 0) {
-            tagVal = tag();
-            saved = get();
-        }
-
-        ptr = i;
-
-        if (saved != nullptr) {
-            deleteTagged(tagVal, saved);
-        }
-    }
-    tagged_storage releaseTagged() noexcept {
-        auto i = ptr;
-        ptr = 0;
-        return i;
-    }
-
-    uint16_t tagMaybeZero() const noexcept {
-        return ptr & TAG_MASK;
-    }
-
-public:
-    // Required for typecase
-    template <class To> static bool isa(const InstructionPtr &insn);
-    template <class To> static const To &cast(const InstructionPtr &insn);
-    template <class To> static To &cast(InstructionPtr &insn) {
-        return const_cast<To &>(cast<To>(static_cast<const InstructionPtr &>(insn)));
-    }
-
-    constexpr InstructionPtr() noexcept : ptr(0) {}
-    constexpr InstructionPtr(std::nullptr_t) : ptr(0) {}
-    ~InstructionPtr() {
-        if (ptr != 0) {
-            deleteTagged(tag(), get());
-        }
-    }
-
-    InstructionPtr(const InstructionPtr &) = delete;
-    InstructionPtr &operator=(const InstructionPtr &) = delete;
-
-    InstructionPtr(InstructionPtr &&other) noexcept {
-        ptr = other.releaseTagged();
-    }
-    InstructionPtr &operator=(InstructionPtr &&other) noexcept {
-        if (*this == other) {
-            return *this;
-        }
-
-        resetTagged(other.releaseTagged());
-        return *this;
-    }
-
-    Instruction *operator->() const noexcept {
-        return get();
-    }
-    Instruction *get() const noexcept {
-        auto val = ptr & PTR_MASK;
-        return reinterpret_cast<Instruction *>(val >> 16);
-    }
-
-    explicit operator bool() const noexcept {
-        return ptr != 0;
-    }
-
-    bool operator==(const InstructionPtr &other) const noexcept {
-        return ptr == other.ptr;
-    }
-    bool operator==(std::nullptr_t) const noexcept {
-        return ptr == 0;
-    }
-    bool operator!=(const InstructionPtr &other) const noexcept {
-        return ptr != other.ptr;
-    }
-    bool operator!=(std::nullptr_t) const noexcept {
-        return ptr != 0;
-    }
-
-    Tag tag() const noexcept {
-        ENFORCE(ptr != 0);
-
-        return static_cast<Tag>(ptr & TAG_MASK);
-    }
-
-    bool isSynthetic() const noexcept {
-        return (this->ptr & SYNTHETIC_FLAG) != 0;
-    }
-
-    template <class To> core::UntaggedPtr<To> as_instruction() {
-        bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
-        auto *ptr = isValid ? reinterpret_cast<To *>(get()) : nullptr;
-        return core::UntaggedPtr<To>(ptr, isValid);
-    }
-
-    template <class To> core::UntaggedPtr<const To> as_instruction() const {
-        bool isValid = tagMaybeZero() == uint16_t(InsnToTag<To>::value);
-        auto *ptr = isValid ? reinterpret_cast<const To *>(get()) : nullptr;
-        return core::UntaggedPtr<const To>(ptr, isValid);
-    }
-
-    void setSynthetic() noexcept {
-        this->ptr |= SYNTHETIC_FLAG;
-    }
-
-    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
-};
 
 template <class To> bool isa_instruction(const InstructionPtr &what) {
     return bool(what.as_instruction<To>());
