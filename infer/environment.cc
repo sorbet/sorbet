@@ -410,10 +410,14 @@ const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) 
     return fnd->second.typeAndOrigins;
 }
 
-const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
-    const auto &ret = getTypeAndOrigin(symbol.variable);
-    symbol.type = ret.type;
+const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::LocalRef symbol, core::TypePtr &ty) const {
+    const auto &ret = getTypeAndOrigin(symbol);
+    ty = ret.type;
     return ret;
+}
+
+const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
+    return getAndFillTypeAndOrigin(symbol.variable, symbol.type);
 }
 
 bool Environment::getKnownTruthy(cfg::LocalRef var) const {
