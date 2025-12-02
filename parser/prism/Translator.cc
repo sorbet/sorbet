@@ -2261,49 +2261,26 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CASE_NODE: { // A classic `case` statement that only uses `when` (and not pattern matching with `in`)
             auto caseNode = down_cast<pm_case_node>(node);
 
-            auto predicate = translate(caseNode->predicate);
+            auto predicate = desugarNullable(caseNode->predicate);
 
             auto prismWhenNodes = absl::MakeSpan(caseNode->conditions.nodes, caseNode->conditions.size);
 
-            NodeVec whenNodes;
-            whenNodes.reserve(prismWhenNodes.size());
-
+            // Count the total number of patterns across all when clauses
             size_t totalPatterns = 0;
-
             for (auto *whenNodePtr : prismWhenNodes) {
                 auto *whenNode = down_cast<pm_when_node>(whenNodePtr);
-                auto whenLoc = translateLoc(whenNode->base.location);
-
-                auto prismPatterns = absl::MakeSpan(whenNode->conditions.nodes, whenNode->conditions.size);
-
-                NodeVec patternNodes;
-                patternNodes.reserve(prismPatterns.size());
-                translateMultiInto(patternNodes, prismPatterns);
-                totalPatterns += patternNodes.size();
-
-                auto statementsNode = translateStatements(whenNode->statements);
-
-                enforceHasExpr(statementsNode, patternNodes);
-
-                // A single `when` clause does not desugar into a standalone Ruby expression; it only
-                // becomes meaningful when the enclosing `case` stitches together all clauses. Wrapping it
-                // in a NodeWithExpr seeded with `EmptyTree` satisfies the API contract so that
-                // `hasExpr(whenNodes)` can succeed. The enclosing `case` later consumes the real
-                // expressions from the patterns and body when it assembles the final AST.
-                whenNodes.emplace_back(make_node_with_expr<parser::When>(MK::EmptyTree(), whenLoc, move(patternNodes),
-                                                                         move(statementsNode)));
+                totalPatterns += whenNode->conditions.size;
             }
 
-            auto elseClause = translate(up_cast(caseNode->else_clause));
-
-            enforceHasExpr(predicate, elseClause);
+            auto elseClause = desugarNullable(up_cast(caseNode->else_clause));
 
             if (preserveConcreteSyntax) {
                 auto locZeroLen = location.copyWithZeroLength();
 
                 ast::Send::ARGS_store args;
-                args.reserve(2 + whenNodes.size() + totalPatterns); // +2 is for the predicate and the patterns count
-                args.emplace_back(takeDesugaredExprOrEmptyTree(predicate));
+                args.reserve(2 + prismWhenNodes.size() +
+                             totalPatterns); // +2 is for the predicate and the patterns count
+                args.emplace_back(move(predicate));
                 args.emplace_back(MK::Int(locZeroLen, totalPatterns));
 
                 // Extract pattern expressions directly from Prism nodes
@@ -2325,7 +2302,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     args.emplace_back(move(bodyExpr));
                 }
 
-                args.emplace_back(takeDesugaredExprOrEmptyTree(elseClause));
+                args.emplace_back(move(elseClause));
 
                 // Desugar to `::Magic.caseWhen(predicate, num_patterns, patterns..., bodies..., else)`
                 auto expr = MK::Send(location, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, args.size(),
@@ -2339,7 +2316,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             bool hasPredicate = (predicate != nullptr);
 
             if (hasPredicate) {
-                predicateLoc = predicate->loc;
+                predicateLoc = predicate.loc();
                 tempName = nextUniqueDesugarName(core::Names::assignTemp());
             } else {
                 tempName = core::NameRef::noName();
@@ -2347,7 +2324,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             // The if/else ladder for the entire case statement, starting with the else clause as the final `else` when
             // building backwards
-            ExpressionPtr resultExpr = takeDesugaredExprOrEmptyTree(elseClause);
+            ExpressionPtr resultExpr = move(elseClause);
 
             // Iterate over Prism when nodes in reverse to build the if/else ladder backwards
             for (auto it = prismWhenNodes.rbegin(); it != prismWhenNodes.rend(); ++it) {
@@ -2399,7 +2376,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             if (hasPredicate) {
-                auto assignExpr = MK::Assign(predicateLoc, tempName, predicate->takeDesugaredExpr());
+                auto assignExpr = MK::Assign(predicateLoc, tempName, move(predicate));
                 resultExpr = MK::InsSeq1(location, move(assignExpr), move(resultExpr));
             }
 
