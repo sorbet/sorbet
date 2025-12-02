@@ -4451,29 +4451,6 @@ ast::ExpressionPtr Translator::desugarSymbolProc(pm_symbol_node *symbol) {
     return MK::Block1(loc, move(body), MK::RestParam(loc0, MK::Local(loc0, tempName)));
 }
 
-// The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
-// of argument nodes. It just uses a NodeVec directly, which is what this function produces.
-NodeVec Translator::translateArguments(pm_arguments_node *argsNode, pm_node *blockArgumentNode) {
-    NodeVec results;
-
-    absl::Span<pm_node *> prismArgs;
-
-    if (argsNode != nullptr) {
-        prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
-    }
-
-    results.reserve(prismArgs.size() + (blockArgumentNode == nullptr ? 0 : 1));
-
-    translateMultiInto(results, prismArgs);
-    if (blockArgumentNode != nullptr) {
-        results.emplace_back(translate(blockArgumentNode));
-    }
-
-    return results;
-}
-
-// Similar to translateArguments, but returns the desugared expressions directly as a
-// store type (e.g., ast::Send::ARGS_store or ast::Array::ENTRY_store) instead of a NodeVec of parser nodes.
 template <typename StoreType>
 StoreType Translator::desugarArguments(pm_arguments_node *argsNode, pm_node *blockArgumentNode) {
     static_assert(std::is_same_v<StoreType, ast::Send::ARGS_store> ||
