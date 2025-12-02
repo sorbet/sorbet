@@ -2289,17 +2289,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     auto prismPatterns = absl::MakeSpan(prismWhen->conditions.nodes, prismWhen->conditions.size);
 
                     for (auto *prismPattern : prismPatterns) {
-                        auto patternNode = translate(prismPattern);
-                        args.emplace_back(takeDesugaredExprOrEmptyTree(patternNode));
+                        auto pattern = desugarNullable(prismPattern);
+                        args.emplace_back(move(pattern));
                     }
                 }
 
                 // Extract body expressions directly from Prism nodes
                 for (auto *prismWhenPtr : prismWhenNodes) {
                     auto *prismWhen = down_cast<pm_when_node>(prismWhenPtr);
-                    auto bodyNode = translateStatements(prismWhen->statements);
-                    auto bodyExpr = takeDesugaredExprOrEmptyTree(bodyNode);
-                    args.emplace_back(move(bodyExpr));
+                    auto body = desugarStatements(prismWhen->statements);
+                    args.emplace_back(move(body));
                 }
 
                 args.emplace_back(move(elseClause));
@@ -2334,9 +2333,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                 ExpressionPtr patternsResult; // the if/else ladder for this when clause's patterns
                 for (auto *prismPattern : prismPatterns) {
-                    auto patternNode = translate(prismPattern);
-                    auto patternExpr = takeDesugaredExprOrEmptyTree(patternNode);
-                    auto patternLoc = patternExpr.loc();
+                    auto pattern = desugarNullable(prismPattern);
+                    auto patternLoc = pattern.loc();
 
                     ExpressionPtr testExpr;
                     if (PM_NODE_TYPE_P(prismPattern, PM_SPLAT_NODE)) {
@@ -2346,12 +2344,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         // Desugar `case x when *patterns` to `::Magic.<check-match-array>(x, patterns)`,
                         // which behaves like `patterns.any?(x)`
                         testExpr = MK::Send2(patternLoc, MK::Magic(location), core::Names::checkMatchArray(),
-                                             patternLoc.copyWithZeroLength(), move(local), move(patternExpr));
+                                             patternLoc.copyWithZeroLength(), move(local), move(pattern));
                     } else if (hasPredicate) {
                         // regular pattern when case predicate is present, `case a when 1`
                         auto local = MK::Local(predicateLoc, tempName);
                         // Desugar `case x when 1` to `1 === x`
-                        testExpr = MK::Send1(patternLoc, move(patternExpr), core::Names::tripleEq(),
+                        testExpr = MK::Send1(patternLoc, move(pattern), core::Names::tripleEq(),
                                              patternLoc.copyWithZeroLength(), move(local));
                     } else {
                         // regular pattern when case predicate is not present, `case when 1 then "one" end`
@@ -2359,7 +2357,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         // when 1
                         //   "one"
                         // end
-                        testExpr = move(patternExpr);
+                        testExpr = move(pattern);
                     }
 
                     if (patternsResult == nullptr) {
@@ -2370,9 +2368,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     }
                 }
 
-                auto bodyNode = translateStatements(prismWhen->statements);
-                auto thenExpr = takeDesugaredExprOrEmptyTree(bodyNode);
-                resultExpr = MK::If(whenLoc, move(patternsResult), move(thenExpr), move(resultExpr));
+                auto then = desugarStatements(prismWhen->statements);
+                resultExpr = MK::If(whenLoc, move(patternsResult), move(then), move(resultExpr));
             }
 
             if (hasPredicate) {
