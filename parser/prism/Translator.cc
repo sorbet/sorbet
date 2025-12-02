@@ -8,9 +8,6 @@
 
 #include "absl/strings/str_replace.h"
 
-// TODO: Clean up after Prism work is done. https://github.com/sorbet/sorbet/issues/9065
-#include "common/sort/sort.h"
-
 template class std::unique_ptr<sorbet::parser::Node>;
 
 using namespace std;
@@ -1813,9 +1810,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                 //     {|_1, _2| ... }`
                                 //      ^
 
-                                auto params = translateNumberedParametersNode(
-                                    numberedParamsNode, down_cast<pm_statements_node>(blockNode->body),
-                                    &blockParamsStore);
+                                translateNumberedParametersNode(numberedParamsNode,
+                                                                down_cast<pm_statements_node>(blockNode->body),
+                                                                &blockParamsStore);
 
                                 break;
                             }
@@ -4415,9 +4412,9 @@ Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node
 
 // Translate the given numbered parameters into a `NodeVec` of legacy parser nodes.
 // If a paramsStore pointer is provided, we'll also directly desugar params into that store.
-NodeVec Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
-                                                    pm_statements_node_t *statements,
-                                                    ast::MethodDef::PARAMS_store *paramsStore) {
+void Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
+                                                 pm_statements_node_t *statements,
+                                                 ast::MethodDef::PARAMS_store *paramsStore) {
     auto location = translateLoc(numberedParamsNode->base.location);
 
     auto paramCount = numberedParamsNode->maximum;
@@ -4428,9 +4425,6 @@ NodeVec Translator::translateNumberedParametersNode(pm_numbered_parameters_node 
     auto numberedParamsUsageLocs = findNumberedParamsUsageLocs(location, statements, paramCount);
     ENFORCE(paramCount <= numberedParamsUsageLocs.size());
 
-    NodeVec params;
-    params.reserve(paramCount);
-
     for (auto i = 1; i <= paramCount; i++) {
         // Numbered parameters are implicit, so they don't have a real location in the body.
         // However, we need somewhere for the error messages to point to, so we use the
@@ -4438,20 +4432,10 @@ NodeVec Translator::translateNumberedParametersNode(pm_numbered_parameters_node 
         auto usageLoc = numberedParamsUsageLocs[i - 1];
         auto name = ctx.state.enterNameUTF8("_" + to_string(i));
 
-        if (usageLoc.exists()) {
-            // The legacy parse tree only includes parameters that were used in the body.
-            params.emplace_back(make_node_with_expr<parser::LVar>(MK::Local(usageLoc, name), usageLoc, name));
-        }
-
         if (paramsStore) {
             paramsStore->emplace_back(MK::Local(usageLoc, name));
         }
     }
-
-    // The legacy parse tree stores params in the order they were encountered in the body.
-    fast_sort(params, [](const auto &a, const auto &b) { return a->loc.beginLoc < b->loc.beginLoc; });
-
-    return params;
 }
 
 // Desugar a Symbol block pass argument (like the `&foo` in `m(&:foo)`) into a block literal.
