@@ -203,10 +203,12 @@ public:
                 error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
             }
 
+            bool isItParam = isItParameterName(id->name);
+
             // For 'it' parameter: check if already declared FIRST (soft keyword behavior)
             // If 'it' is a local variable OR parameter in current scope, use it
             // But if it's only from an outer block parameter, allow creating new parameter
-            if (isItParameterName(id->name) && driver_->lex.is_declared(name_str)) {
+            if (isItParam && driver_->lex.is_declared(name_str)) {
                 // Check if 'it' is from current scope (parameter or local var) vs outer block parameter
                 bool isFromCurrentScope = driver_->numparam_stack.seen_it_param();
                 bool isFromOuterBlockParam = driver_->numparam_stack.seen_it_param_in_outer_scope();
@@ -262,8 +264,7 @@ public:
                 auto decls = driver_->alloc.node_list();
                 decls->emplace_back(toForeign(std::move(intro)));
                 driver_->numparam_stack.regis(name_str[1] - '0', std::move(decls));
-            } else if (isItParameterName(id->name) && driver_->lex.context.allowNumparams &&
-                       !driver_->numparam_stack.seen_it_param()) {
+            } else if (isItParam && driver_->lex.context.allowNumparams && !driver_->numparam_stack.seen_it_param()) {
                 // Handle 'it' parameter (Ruby 3.4+) - allow in nested blocks, but not duplicate in same scope
                 if (driver_->numparam_stack.seen_ordinary_params()) {
                     error(ruby_parser::dclass::ItParamWithOrdinaryParam, id->loc);
