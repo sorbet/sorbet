@@ -367,7 +367,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 120, 8);
+CheckSize(Send, 64, 8);
 
 INSN(Return) : public Instruction {
 public:
