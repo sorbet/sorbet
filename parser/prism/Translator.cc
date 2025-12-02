@@ -2604,22 +2604,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             ast::MethodDef::PARAMS_store paramsStore;
             ast::InsSeq::STATS_store statsStore;
-            bool didDesugarParams = false; // ...and by impliciation, everything else (see `attemptToDesugarParams`)
             if (params != nullptr) {
+                bool didDesugarParams = false;
                 std::tie(paramsStore, statsStore, didDesugarParams) = desugarParametersNode(params->params, true);
-                
+
+                if (!didDesugarParams) {
+                    throw PrismFallback{};
+                }
+
                 if (paramsStore.empty() || !ast::isa_tree<ast::BlockParam>(paramsStore.back())) {
                     auto blkLoc = core::LocOffsets::none();
                     paramsStore.emplace_back(MK::BlockParam(blkLoc, MK::Local(methodContext.enclosingBlockParamLoc,
                                                                               methodContext.enclosingBlockParamName)));
                 }
-            } else {
-                didDesugarParams = true;
-            }
-
-            if (!didDesugarParams) {
-                throw PrismFallback{};
-            }
+            } 
 
             auto methodBody = takeDesugaredExprOrEmptyTree(body);
 
