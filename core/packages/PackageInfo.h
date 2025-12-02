@@ -185,8 +185,7 @@ public:
     // Map from file -> [{a package referenced by file, whether the import is missing, and whether importing it would be
     // a modularity error}]
     // TODO(neil): once we track a list of files in this package, we can `.reserve(files.size())` in the constructor
-    UnorderedMap<core::FileRef, std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>>>
-        packagesReferencedByFile;
+    UnorderedMap<core::FileRef, std::vector<std::pair<MangledName, PackageReferenceInfo>>> packagesReferencedByFile;
 
     // The id of the SCC that this package's normal imports belong to.
     //

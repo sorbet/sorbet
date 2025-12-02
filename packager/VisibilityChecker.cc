@@ -808,8 +808,7 @@ public:
                         continue;
                     }
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
-                    std::vector<std::pair<core::packages::MangledName, core::packages::PackageReferenceInfo>>
-                        references;
+                    vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
                     for (auto &[packageName, packageReferenceInfo] : threadResult.value().second) {
                         references.push_back(make_pair(packageName, packageReferenceInfo));
                     }

@@ -467,8 +467,7 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
     return nullopt;
 }
 
-void PackageInfo::trackPackageReferences(
-    const core::FileRef file, std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references) {
+void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, PackageReferenceInfo>> &references) {
     packagesReferencedByFile[file].swap(references);
 }
 
