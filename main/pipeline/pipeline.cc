@@ -311,23 +311,24 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
     auto node = move(parseResult.tree);
     auto commentLocations = move(parseResult.commentLocations);
 
-    Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
-    core::MutableContext ctx(gs, core::Symbols::root(), file);
-    core::UnfreezeNameTable nameTableAccess(gs);
+    if (gs.cacheSensitiveOptions.rbsEnabled) {
+        Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
+        core::UnfreezeNameTable nameTableAccess(gs);
 
-    auto associator = rbs::CommentsAssociator(ctx, commentLocations);
-    auto commentMap = associator.run(node);
+        auto associator = rbs::CommentsAssociator(ctx, commentLocations);
+        auto commentMap = associator.run(node);
 
-    auto sigsRewriter = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-    node = sigsRewriter.run(move(node));
+        auto sigsRewriter = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
+        node = sigsRewriter.run(move(node));
 
-    auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-    node = assertionsRewriter.run(move(node));
+        auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
+        node = assertionsRewriter.run(move(node));
 
-    if (print.RBSRewriteTree.enabled) {
-        print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
+        if (print.RBSRewriteTree.enabled) {
+            print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
+        }
     }
-
     return node;
 }
 
@@ -408,12 +409,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
         }
         auto parseResult = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
 
-        unique_ptr<parser::Node> parseTree;
-        if (gs.cacheSensitiveOptions.rbsEnabled) {
-            parseTree = runRBSRewrite(gs, file, move(parseResult), print);
-        } else {
-            parseTree = move(parseResult.tree);
-        }
+        auto parseTree = runRBSRewrite(gs, file, move(parseResult), print);
 
         return runDesugar(gs, file, move(parseTree), print, preserveConcreteSyntax);
     } catch (SorbetException &) {
@@ -449,11 +445,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                         return emptyParsedFile(file);
                     }
 
-                    if (lgs.cacheSensitiveOptions.rbsEnabled) {
-                        parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
-                    } else {
-                        parseTree = move(parseResult.tree);
-                    }
+                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
 
                     if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                         return emptyParsedFile(file);
@@ -471,11 +463,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
                     // TODO: Remove this check once runPrismRBSRewrite is no longer no-oped inside of runPrismParser
                     // https://github.com/sorbet/sorbet/issues/9065
-                    if (lgs.cacheSensitiveOptions.rbsEnabled) {
-                        parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
-                    } else {
-                        parseTree = move(parseResult.tree);
-                    }
+                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
 
                     // TODO: Move into runPrismParser once runPrismRBSRewrite is no longer no-oped
                     // https://github.com/sorbet/sorbet/issues/9065
