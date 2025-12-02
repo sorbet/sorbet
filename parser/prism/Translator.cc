@@ -1607,7 +1607,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(move(expr));
         }
         case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
-            unreachable("PM_BLOCK_PARAMETER_NODE is handled separately in `Translator::translateParametersNode()`.");
+            unreachable("PM_BLOCK_PARAMETER_NODE is handled separately in `Translator::desugarParametersNode()`.");
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             unreachable("PM_BLOCK_PARAMETERS_NODE is handled separately in `PM_CALL_NODE`.");
@@ -3307,7 +3307,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(move(wrapped));
         }
         case PM_PARAMETERS_NODE: { // The parameters declared at the top of a PM_DEF_NODE
-            unreachable("PM_PARAMETERS_NODE is handled separately in translateParametersNode.");
+            unreachable("PM_PARAMETERS_NODE is handled separately in desugarParametersNode.");
         }
         case PM_PARENTHESES_NODE: { // A parethesized expression, e.g. `(a)`
             auto parensNode = down_cast<pm_parentheses_node>(node);
@@ -4176,119 +4176,6 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
     }
 }
 
-tuple<unique_ptr<parser::Params>, core::LocOffsets, core::NameRef /* enclosingBlockParamName */>
-Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location, bool isDef) {
-    auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
-    auto optionals = absl::MakeSpan(paramsNode->optionals.nodes, paramsNode->optionals.size);
-    auto keywords = absl::MakeSpan(paramsNode->keywords.nodes, paramsNode->keywords.size);
-    auto posts = absl::MakeSpan(paramsNode->posts.nodes, paramsNode->posts.size);
-
-    parser::NodeVec params;
-
-    auto restSize = paramsNode->rest == nullptr ? 0 : 1;
-    auto kwrestSize = paramsNode->keyword_rest == nullptr ? 0 : 1;
-    auto blockSize = paramsNode->block == nullptr ? 0 : 1;
-
-    params.reserve(requireds.size() + optionals.size() + restSize + posts.size() + keywords.size() + kwrestSize +
-                   blockSize);
-
-    for (auto &n : requireds) {
-        if (PM_NODE_TYPE_P(n, PM_MULTI_TARGET_NODE)) {
-            auto multiTargetNode = down_cast<pm_multi_target_node>(n);
-
-            ENFORCE(multiTargetNode->lparen_loc.start);
-            ENFORCE(multiTargetNode->lparen_loc.end);
-            ENFORCE(multiTargetNode->rparen_loc.start);
-            ENFORCE(multiTargetNode->rparen_loc.end);
-
-            // The legacy parser doesn't usually include the parens in the location of a multi-target node,
-            // *except* in a block's parameter list.
-            auto mlhsLoc = translateLoc(multiTargetNode->lparen_loc.start, multiTargetNode->rparen_loc.end);
-
-            auto multiLhsNode = translateMultiTargetLhs(multiTargetNode, mlhsLoc);
-
-            params.emplace_back(move(multiLhsNode));
-            throw PrismFallback{};
-        } else {
-            params.emplace_back(translate(n));
-        }
-    }
-
-    translateMultiInto(params, optionals);
-
-    if (paramsNode->rest != nullptr) {
-        params.emplace_back(translate(paramsNode->rest));
-    }
-
-    for (auto &prismNode : posts) {
-        // Valid Ruby can only have `**nil` once in the parameter list, which is modelled with a
-        // `NoKeywordsParameterNode` in the `keyword_rest` field.
-        // If invalid code tries to use more than one `**nil` (like `def foo(**nil, **nil)`),
-        // Prism will report an error, but still place the excess `**nil` nodes in `posts` list (never the others like
-        // `requireds` or `optionals`), which we need to skip here.
-        if (!PM_NODE_TYPE_P(prismNode, PM_NO_KEYWORDS_PARAMETER_NODE)) {
-            params.emplace_back(translate(prismNode));
-        }
-    }
-
-    translateMultiInto(params, keywords);
-
-    bool hasForwardingParameter = false;
-    if (auto *prismKwRestNode = paramsNode->keyword_rest) {
-        switch (PM_NODE_TYPE(prismKwRestNode)) {
-            case PM_KEYWORD_REST_PARAMETER_NODE: // `def foo(**kwargs)`
-                params.emplace_back(translate(prismKwRestNode));
-                break;
-            case PM_FORWARDING_PARAMETER_NODE: { // `def foo(...)`
-                hasForwardingParameter = true;
-                params.emplace_back(translate(prismKwRestNode));
-                break;
-            }
-            case PM_NO_KEYWORDS_PARAMETER_NODE: { // `def foo(**nil)`
-                params.emplace_back(make_unique<parser::Kwnilarg>(translateLoc(prismKwRestNode->location)));
-                break;
-            }
-            default:
-                unreachable("Unexpected keyword_rest node type in Hash pattern.");
-        }
-    }
-
-    core::LocOffsets enclosingBlockParamLoc = core::LocOffsets::none();
-    core::NameRef enclosingBlockParamName;
-    if (hasForwardingParameter) {
-        // Skip invalid block parameter when there is a forwarding parameter, like `def foo(&, ...)`
-        enclosingBlockParamName = core::Names::fwdBlock();
-    } else if (auto *prismBlockParam = paramsNode->block) {
-        auto blockParamLoc = translateLoc(prismBlockParam->base.location);
-
-        if (auto prismName = prismBlockParam->name; prismName != PM_CONSTANT_ID_UNSET) {
-            // A named block parameter, like `def foo(&block)`
-            enclosingBlockParamName = translateConstantName(prismName);
-
-            // The location doesn't include the `&`, only the name of the block parameter
-            constexpr uint32_t length = "&"sv.size();
-            blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + length, blockParamLoc.endPos()};
-        } else if (isDef) { // An anonymous block parameter, like `def foo(&)`
-            enclosingBlockParamName = core::Names::ampersand();
-        } else {
-            enclosingBlockParamName = nextUniqueParserName(core::Names::ampersand());
-        }
-        enclosingBlockParamLoc = blockParamLoc;
-
-        auto blockParamExpr = MK::BlockParam(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
-        auto blockParamNode =
-            make_node_with_expr<parser::BlockParam>(move(blockParamExpr), blockParamLoc, enclosingBlockParamName);
-
-        params.emplace_back(move(blockParamNode));
-    } else {
-        // Desugaring a method def like `def foo(a, b)` should behave like `def foo(a, b, &<blk>)`,
-        // so we set a synthetic name here for `yield` to use.
-        enclosingBlockParamName = core::Names::blkArg();
-    }
-
-    return {make_unique<parser::Params>(location, move(params)), enclosingBlockParamLoc, enclosingBlockParamName};
-}
-
 tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, core::LocOffsets /* enclosingBlockParamLoc */,
       core::NameRef /* enclosingBlockParamName */>
 Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location,
@@ -4460,50 +4347,6 @@ Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffse
     }
 
     return make_tuple(move(paramsStore), move(statsStore), enclosingBlockParamLoc, enclosingBlockParamName);
-}
-
-tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store> Translator::desugarParametersNode(NodeVec &params) {
-    for (auto &param : params) {
-        if (!(param->hasDesugaredExpr() ||
-              // These other block types don't have their own dedicated desugared
-              // representation, so they won't be directly translated.
-              // Instead, they have special desugar logic below.
-              parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `def f(**nil)`
-              parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `def f(...)`
-              parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `def foo(*)`
-              parser::NodeWithExpr::isa_node<parser::Splat>(param.get()))) {           // a splat like `def foo(*a)`)
-            throw PrismFallback{};
-        }
-    };
-
-    ast::MethodDef::PARAMS_store paramsStore;
-    ast::InsSeq::STATS_store statsStore;
-
-    for (auto &param : params) {
-        auto loc = param->loc;
-
-        if (parser::NodeWithExpr::isa_node<parser::Mlhs>(param.get())) { // `def f((a, b))`
-            unreachable("Support for Mlhs is not implemented yet!");
-        } else if (parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get())) { // `def foo(**nil)`
-            // TODO: implement logic for `**nil` args
-        } else if (parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get())) { // `def foo(...)`
-            // Desugar `def foo(m, n, ...)` into:
-            // `def foo(m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)`
-
-            // add `*<fwd-args>`
-            paramsStore.emplace_back(MK::RestParam(loc, MK::Local(loc, core::Names::fwdArgs())));
-
-            // add `**<fwd-kwargs>`
-            paramsStore.emplace_back(MK::RestParam(loc, MK::KeywordArg(loc, core::Names::fwdKwargs())));
-
-            // add `&<fwd-block>`
-            paramsStore.emplace_back(MK::BlockParam(loc, MK::Local(loc, core::Names::fwdBlock())));
-        } else {
-            paramsStore.emplace_back(param->takeDesugaredExpr());
-        }
-    }
-
-    return make_tuple(move(paramsStore), move(statsStore));
 }
 
 core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements) {
