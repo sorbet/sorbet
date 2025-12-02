@@ -441,6 +441,9 @@ end
 class JSON::CircularDatastructure < JSON::NestingError
 end
 
+class JSON::Coder
+end
+
 # This exception is raised if a generator or unparser error occurs.
 class JSON::GeneratorError < JSON::JSONError
 end
