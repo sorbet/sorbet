@@ -810,7 +810,7 @@ public:
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
                     vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
                     for (auto &[packageName, packageReferenceInfo] : threadResult.value().second) {
-                        references.push_back(make_pair(packageName, packageReferenceInfo));
+                        references.emplace_back(make_pair(packageName, packageReferenceInfo));
                     }
                     nonConstPackageInfo->trackPackageReferences(file, references);
                 }
