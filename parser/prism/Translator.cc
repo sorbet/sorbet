@@ -1831,7 +1831,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                                           make_move_iterator(sorbetShadowParams.begin()),
                                                           make_move_iterator(sorbetShadowParams.end()));
 
-                                    std::tie(blockParamsStore, blockStatsStore, std::ignore) =
+                                    std::tie(blockParamsStore, blockStatsStore) =
                                         desugarParametersNode(params->params, true);
 
                                     blockParameters = move(params);
@@ -2600,7 +2600,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             ast::MethodDef::PARAMS_store paramsStore;
             ast::InsSeq::STATS_store statsStore;
             if (params != nullptr) {
-                std::tie(paramsStore, statsStore, std::ignore) = desugarParametersNode(params->params, true);
+                std::tie(paramsStore, statsStore) = desugarParametersNode(params->params, true);
 
                 if (paramsStore.empty() || !ast::isa_tree<ast::BlockParam>(paramsStore.back())) {
                     auto blkLoc = core::LocOffsets::none();
@@ -4347,7 +4347,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
     return {make_unique<parser::Params>(location, move(params)), enclosingBlockParamLoc, enclosingBlockParamName};
 }
 
-tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool /* didDesugarParams */>
+tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store>
 Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) {
     if (!attemptToDesugarParams) {
         throw PrismFallback{};
@@ -4395,7 +4395,7 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
         }
     }
 
-    return make_tuple(move(paramsStore), move(statsStore), true);
+    return make_tuple(move(paramsStore), move(statsStore));
 }
 
 core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements) {
