@@ -225,22 +225,23 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, const ast::Hash &h, BasicBlock
     LocalRef magic = cctx.newTemporary(core::Names::magic());
     InlinedVector<cfg::LocalRef, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
+    auto isPrivateOk = false;
+    auto numArgs = 2 * h.keys.size();
+    auto snd = Send::make(magic, h.loc, method, core::LocOffsets::none(), numArgs, isPrivateOk, numArgs);
+
     for (auto [key, val] : h.kviter()) {
         LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
         LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
         current = walk(cctx.withTarget(keyTmp), key, current);
         current = walk(cctx.withTarget(valTmp), val, current);
-        vars.emplace_back(keyTmp);
-        vars.emplace_back(valTmp);
-        locs.emplace_back(key.loc());
-        locs.emplace_back(val.loc());
+        *snd.refs++ = keyTmp;
+        *snd.refs++ = valTmp;
+        *snd.locs++ = key.loc();
+        *snd.locs++ = val.loc();
     }
-    synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
 
-    auto isPrivateOk = false;
-    current->exprs.emplace_back(cctx.target, h.loc,
-                                make_insn<Send>(magic, h.loc, method, core::LocOffsets::none(), vars.size(), vars,
-                                                std::move(locs), isPrivateOk));
+    synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
+    current->exprs.emplace_back(cctx.target, h.loc, std::move(snd).asInsnPtr());
     return current;
 }
 
@@ -412,15 +413,14 @@ BasicBlock *CFGBuilder::buildExceptionHandler(CFGContext cctx, const ast::Expres
     rescueHandlersBlock = walk(cctx.withTarget(exceptionClass), ex, rescueHandlersBlock);
 
     auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
-    InlinedVector<cfg::LocalRef, 2> args;
-    InlinedVector<core::LocOffsets, 2> argLocs = {loc};
-    args.emplace_back(exceptionValue);
-
+    const size_t numPosArgs = 1;
+    const size_t numArgs = 1;
     auto isPrivateOk = false;
-    rescueHandlersBlock->exprs.emplace_back(isaCheck, loc,
-                                            make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(),
-                                                            loc.copyWithZeroLength(), args.size(), args,
-                                                            std::move(argLocs), isPrivateOk));
+    auto snd = Send::make(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(), numPosArgs,
+                          isPrivateOk, numArgs);
+    *snd.refs++ = exceptionValue;
+    *snd.locs++ = loc;
+    rescueHandlersBlock->exprs.emplace_back(isaCheck, loc, std::move(snd).asInsnPtr());
 
     auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
     conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -687,13 +687,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 recv = cctx.newTemporary(core::Names::statTemp());
                 current = walk(cctx.withTarget(recv), s.recv, current);
 
-                InlinedVector<LocalRef, 2> args;
-                InlinedVector<core::LocOffsets, 2> argLocs;
+                // Note that we do not have to include the block in the count here,
+                // as the block is not represented as an arg.
+                const size_t numArgs = s.numNonBlockArgs();
+                auto snd =
+                    Send::make(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), !!s.flags.isPrivateOk, numArgs);
+
                 for (auto &exp : s.posArgs()) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp, current);
-                    args.emplace_back(temp);
-                    argLocs.emplace_back(exp.loc());
+                    *snd.refs++ = temp;
+                    *snd.locs++ = exp.loc();
                 }
 
                 for (auto [key, value] : s.kwArgPairs()) {
@@ -701,17 +705,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
                     current = walk(cctx.withTarget(keyTmp), key, current);
                     current = walk(cctx.withTarget(valTmp), value, current);
-                    args.emplace_back(keyTmp);
-                    args.emplace_back(valTmp);
-                    argLocs.emplace_back(key.loc());
-                    argLocs.emplace_back(value.loc());
+                    *snd.refs++ = keyTmp;
+                    *snd.refs++ = valTmp;
+                    *snd.locs++ = key.loc();
+                    *snd.locs++ = value.loc();
                 }
 
                 if (auto *exp = s.kwSplat()) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), *exp, current);
-                    args.emplace_back(temp);
-                    argLocs.emplace_back(exp->loc());
+                    *snd.refs++ = temp;
+                    *snd.locs++ = exp->loc();
                 }
 
                 if (auto *block = s.block()) {
@@ -722,8 +726,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                         paramFlags.emplace_back(e.flags);
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, block->loc, move(paramFlags));
-                    auto send = make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), args,
-                                                std::move(argLocs), !!s.flags.isPrivateOk, link);
+                    auto send = std::move(snd).asInsnPtr();
+                    (*cast_instruction<Send>(send)).link = link;
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     auto solveConstraint = make_insn<SolveConstraint>(link, sendTemp);
                     current->exprs.emplace_back(sendTemp, s.loc, move(send));
@@ -854,9 +858,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                      *
                      */
                 } else {
-                    current->exprs.emplace_back(cctx.target, s.loc,
-                                                make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(),
-                                                                args, std::move(argLocs), !!s.flags.isPrivateOk));
+                    current->exprs.emplace_back(cctx.target, s.loc, std::move(snd).asInsnPtr());
                 }
 
                 ret = current;
@@ -891,8 +893,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     auto magic = cctx.newTemporary(core::Names::magic());
                     auto ignored = cctx.newTemporary(core::Names::blockBreak());
                     synthesizeExpr(afterBreak, magic, a.loc, make_insn<Alias>(core::Symbols::Magic()));
-                    InlinedVector<LocalRef, 2> args{exprSym};
-                    InlinedVector<core::LocOffsets, 2> locs{core::LocOffsets::none()};
+                    const size_t numArgs = 1;
                     auto isPrivateOk = false;
 
                     // This represents the throw in the Ruby VM to the appropriate control frame.
@@ -900,10 +901,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     // but see above for the rationale) because the actual assignment is a) done
                     // by the VM itself; and b) may not actually happen depending on the frames
                     // that the break unwinds through.
-                    synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
-                                   make_insn<Send>(magic, core::LocOffsets::none(), core::Names::blockBreak(),
-                                                   core::LocOffsets::none(), args.size(), args, std::move(locs),
-                                                   isPrivateOk));
+                    auto snd = Send::make(magic, core::LocOffsets::none(), core::Names::blockBreak(),
+                                          core::LocOffsets::none(), numArgs, isPrivateOk, numArgs);
+                    *snd.refs++ = exprSym;
+                    *snd.locs++ = core::LocOffsets::none();
+
+                    synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(), std::move(snd).asInsnPtr());
                 }
 
                 afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a.loc, make_insn<Ident>(blockBreakAssign));
@@ -933,10 +936,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     auto retryTemp = cctx.newTemporary(core::Names::retryTemp());
                     InlinedVector<cfg::LocalRef, 2> args{};
                     InlinedVector<core::LocOffsets, 2> argLocs{};
+                    const size_t numArgs = 0;
                     auto isPrivateOk = false;
-                    synthesizeExpr(current, retryTemp, core::LocOffsets::none(),
-                                   make_insn<Send>(magic, what.loc(), core::Names::retry(), core::LocOffsets::none(),
-                                                   args.size(), args, std::move(argLocs), isPrivateOk));
+                    auto snd = Send::make(magic, what.loc(), core::Names::retry(), core::LocOffsets::none(), numArgs,
+                                          isPrivateOk, numArgs);
+                    synthesizeExpr(current, retryTemp, core::LocOffsets::none(), std::move(snd).asInsnPtr());
                     unconditionalJump(current, cctx.rescueScope, cctx.inWhat, a.loc);
                 }
                 ret = cctx.inWhat.deadBlock();
@@ -1049,18 +1053,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 LocalRef magic = cctx.newTemporary(core::Names::magic());
                 InlinedVector<LocalRef, 2> vars;
                 InlinedVector<core::LocOffsets, 2> locs;
+                const auto numArgs = a.elems.size();
+                auto isPrivateOk = false;
+                auto snd = Send::make(magic, a.loc, core::Names::buildArray(), core::LocOffsets::none(), numArgs,
+                                      isPrivateOk, numArgs);
+
                 for (auto &elem : a.elems) {
                     LocalRef tmp = cctx.newTemporary(core::Names::arrayTemp());
                     current = walk(cctx.withTarget(tmp), elem, current);
-                    vars.emplace_back(tmp);
-                    locs.emplace_back(a.loc);
+                    *snd.refs++ = tmp;
+                    *snd.locs++ = a.loc;
                 }
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
-                auto isPrivateOk = false;
-                current->exprs.emplace_back(cctx.target, a.loc,
-                                            make_insn<Send>(magic, a.loc, core::Names::buildArray(),
-                                                            core::LocOffsets::none(), vars.size(), vars,
-                                                            std::move(locs), isPrivateOk));
+                current->exprs.emplace_back(cctx.target, a.loc, std::move(snd).asInsnPtr());
                 ret = current;
             },
 
