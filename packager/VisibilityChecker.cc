@@ -795,17 +795,6 @@ public:
         });
 
         if (gs.packageDB().genPackages()) {
-            for (auto &parsedFile : filesSpan) {
-                // TODO(neil): we can skip this loop on the slow path since the package references sets will be empty
-                auto file = parsedFile.file;
-                auto pkgName = gs.packageDB().getPackageNameForFile(file);
-                if (!pkgName.exists()) {
-                    continue;
-                }
-                auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
-                nonConstPackageInfo->untrackPackageReferencesFor(file);
-            }
-
             std::optional<std::pair<core::FileRef,
                                     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
                 threadResult;
@@ -819,9 +808,11 @@ public:
                         continue;
                     }
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
-                    for (auto [p, packageReferenceInfo] : threadResult.value().second) {
-                        nonConstPackageInfo->trackPackageReference(file, p, packageReferenceInfo);
+                    vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
+                    for (auto &[packageName, packageReferenceInfo] : threadResult.value().second) {
+                        references.emplace_back(make_pair(packageName, packageReferenceInfo));
                     }
+                    nonConstPackageInfo->trackPackageReferences(file, references);
                 }
             }
         }
@@ -845,7 +836,17 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
     auto result = VisibilityCheckerPass::run(gs, gs.packageDB(), workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
-        for (auto package : gs.packageDB().packages()) {
+        Timer timeit(gs.tracer(), "visibility_checker.run.missing_imports_autocorrect");
+        UnorderedSet<core::packages::MangledName> affectedPackages;
+        for (auto &parsedFile : result) {
+            auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
+            if (!pkgName.exists()) {
+                continue;
+            }
+            affectedPackages.insert(pkgName);
+        }
+
+        for (auto package : affectedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
             if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
