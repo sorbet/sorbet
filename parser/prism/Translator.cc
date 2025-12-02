@@ -3678,12 +3678,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(move(expr));
         }
         case PM_WHEN_NODE: { // A `when` clause, as part of a `case` statement
-            auto whenNode = down_cast<pm_when_node>(node);
-
-            auto sorbetConditions = translateMulti(whenNode->conditions);
-            auto statements = translateStatements(whenNode->statements);
-
-            return make_unique<parser::When>(location, move(sorbetConditions), move(statements));
+            unreachable("`PM_WHEN_NODE` is handled separately in `PM_CASE_NODE`.");
         }
         case PM_WHILE_NODE: { // A `while` loop, like `while condition; ...; end`
             auto whileNode = down_cast<pm_while_node>(node);
