@@ -596,8 +596,7 @@ ast::Send *asTLet(ExpressionPtr &arg) {
 // The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
 unique_ptr<ExprOnly> Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                          unique_ptr<ExprOnly> lhs) {
-    auto lhsExpr = lhs->takeDesugaredExpr();
+                                                          ast::ExpressionPtr lhsExpr) {
     auto rhsExpr = desugar(node->value);
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
@@ -637,9 +636,8 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
     auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
 
     // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
-    auto send =
+    auto lhs =
         MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
-    auto lhs = expr_only(move(send));
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
 }

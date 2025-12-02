@@ -150,7 +150,7 @@ private:
 
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
     std::unique_ptr<ExprOnly> translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                       std::unique_ptr<ExprOnly> lhs);
+                                                       ast::ExpressionPtr lhsExpr);
 
     // Translate operator assignment targeting an indexed expression (e.g., `a[0] += 1`).
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
