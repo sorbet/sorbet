@@ -208,16 +208,12 @@ static unique_ptr<NodeWithExpr> make_node_with_expr(ast::ExpressionPtr desugared
     return make_unique<NodeWithExpr>(move(whiteQuarkNode), move(desugaredExpr));
 }
 
-// Like `make_node_with_expr`, but specifically for unsupported nodes.
-template <typename SorbetNode, typename... TArgs>
-std::unique_ptr<NodeWithExpr> Translator::make_unsupported_node(TArgs &&...args) const {
-    auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
-
-    if (auto e = ctx.beginIndexerError(whiteQuarkNode->loc, core::errors::Desugar::UnsupportedNode)) {
-        e.setHeader("Unsupported node type `{}`", whiteQuarkNode->nodeName());
+std::unique_ptr<ExprOnly> Translator::make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const {
+    if (auto e = ctx.beginIndexerError(loc, core::errors::Desugar::UnsupportedNode)) {
+        e.setHeader("Unsupported node type `{}`", nodeName);
     }
 
-    return make_unique<NodeWithExpr>(move(whiteQuarkNode), MK::EmptyTree());
+    return empty_expr();
 }
 
 // Indicates that a particular code path should never be reached, with an explanation of why.
@@ -2731,15 +2727,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(MK::Float(location, val));
         }
         case PM_FLIP_FLOP_NODE: { // A flip-flop pattern, like the `flip..flop` in `if flip..flop`
-            auto flipFlopNode = down_cast<pm_flip_flop_node>(node);
-
-            auto left = patternTranslate(flipFlopNode->left);
-            auto right = patternTranslate(flipFlopNode->right);
-
-            if (PM_NODE_FLAG_P(flipFlopNode, PM_RANGE_FLAGS_EXCLUDE_END)) { // 3 dots: `flip...flop`
-                return make_unsupported_node<parser::EFlipflop>(location, move(left), move(right));
+            if (PM_NODE_FLAG_P(node, PM_RANGE_FLAGS_EXCLUDE_END)) { // 3 dots: `flip...flop`
+                return make_unsupported_node(location, "EFlipflop");
             } else { // 2 dots: `flip..flop`
-                return make_unsupported_node<parser::IFlipflop>(location, move(left), move(right));
+                return make_unsupported_node(location, "IFlipflop");
             }
         }
         case PM_FOR_NODE: { // `for x in a; ...; end`
@@ -3046,13 +3037,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE: { // An interpolated regex literal in a conditional...
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat #{123}/`
-            auto interpolatedMatchLastLineNode = down_cast<pm_interpolated_match_last_line_node>(node);
-
-            auto parts = translateMulti(interpolatedMatchLastLineNode->parts);
-            auto options = translateRegexpOptions(interpolatedMatchLastLineNode->closing_loc);
-            auto regex = make_unique<parser::Regexp>(location, move(parts), move(options));
-
-            return make_unsupported_node<parser::MatchCurLine>(location, move(regex));
+            return make_unsupported_node(location, "MatchCurLine");
         }
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE: { // A regular expression with interpolation, like `/a #{b} c/`
             auto interpolatedRegexNode = down_cast<pm_interpolated_regular_expression_node>(node);
@@ -3194,14 +3179,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_MATCH_LAST_LINE_NODE: { // A regex literal in a conditional...
             // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat/`
-            auto matchLastLineNode = down_cast<pm_match_last_line_node>(node);
-
-            auto contentLoc = translateLoc(matchLastLineNode->content_loc);
-
-            auto regex =
-                translateRegexp(location, contentLoc, matchLastLineNode->unescaped, matchLastLineNode->closing_loc);
-
-            return make_unsupported_node<parser::MatchCurLine>(location, move(regex));
+            return make_unsupported_node(location, "MatchCurLine");
         }
         case PM_MATCH_REQUIRED_NODE: {
             auto matchRequiredNode = down_cast<pm_match_required_node>(node);
@@ -3391,10 +3369,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return translate(stmtsNode);
             }
         }
-        case PM_PRE_EXECUTION_NODE: {
-            auto preExecutionNode = down_cast<pm_pre_execution_node>(node);
-            auto body = translateStatements(preExecutionNode->statements);
-            return make_unsupported_node<parser::Preexe>(location, move(body));
+        case PM_PRE_EXECUTION_NODE: { // The BEGIN keyword and body, like `BEGIN { ... }`
+            return make_unsupported_node(location, "Preexe");
         }
         case PM_PROGRAM_NODE: { // The root node of the parse tree, representing the entire program
             pm_program_node *programNode = down_cast<pm_program_node>(node);
@@ -3410,10 +3386,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return translate(up_cast(programNode->statements));
         }
-        case PM_POST_EXECUTION_NODE: {
-            auto postExecutionNode = down_cast<pm_post_execution_node>(node);
-            auto body = translateStatements(postExecutionNode->statements);
-            return make_unsupported_node<parser::Postexe>(location, move(body));
+        case PM_POST_EXECUTION_NODE: { // The END keyword and body, like `END { ... }`
+            return make_unsupported_node(location, "Postexe");
         }
         case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a..`, `..b`, `a...b`, `a...`, `...b`
             auto rangeNode = down_cast<pm_range_node>(node);
@@ -3459,7 +3433,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(move(send));
         }
         case PM_REDO_NODE: { // The `redo` keyword
-            return make_unsupported_node<parser::Redo>(location);
+            return make_unsupported_node(location, "Redo");
         }
         case PM_REGULAR_EXPRESSION_NODE: { // A regular expression literal, e.g. `/foo/`
             auto regexNode = down_cast<pm_regular_expression_node>(node);
