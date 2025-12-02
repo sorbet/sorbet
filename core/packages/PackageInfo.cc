@@ -507,7 +507,6 @@ void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits) {
 }; // namespace
 
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
-    Timer timeit(gs.tracer(), "PackageInfo::aggregateMissingImports");
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
     for (auto &[file, value] : packagesReferencedByFile) {
