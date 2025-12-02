@@ -167,10 +167,10 @@ core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
         return bindLoc;
     }
 
-    if (!this->argLocs.empty()) {
+    if (!this->argLocs().empty()) {
         // For sig, the arg will often be a reference to an implicit self,
         // so the back of argLocs is a zero width loc.
-        return this->receiverLoc.join(this->funLoc).join(this->argLocs.back());
+        return this->receiverLoc.join(this->funLoc).join(this->argLocs().back());
     }
 
     return this->receiverLoc.join(this->funLoc);
@@ -240,16 +240,20 @@ string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 }
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format(
-        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
-        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs, cfg); }));
+    return fmt::format("{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
+                       fmt::map_join(this->argSpan(), ", ", [&](const auto &arg) -> string {
+                           VariableUseSite site(arg.key, arg.value);
+                           return site.toString(gs, cfg);
+                       }));
 }
 
 string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format(
-        "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
-        this->recv.toString(gs, cfg), this->fun.showRaw(gs),
-        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, cfg, tabs + 1); }));
+    return fmt::format("Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}",
+                       spacesForTabLevel(tabs), this->recv.toString(gs, cfg), this->fun.showRaw(gs),
+                       fmt::map_join(this->argSpan(), ", ", [&](const auto &arg) -> string {
+                           VariableUseSite site(arg.key, arg.value);
+                           return site.showRaw(gs, cfg, tabs + 1);
+                       }));
 }
 
 string LoadArg::toString(const core::GlobalState &gs, const CFG &cfg) const {
