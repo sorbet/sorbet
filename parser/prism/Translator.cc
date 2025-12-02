@@ -614,7 +614,7 @@ unique_ptr<ExprOnly> Translator::translateAnyOpAssignment(PrismAssignmentNode *n
 
 // The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
-unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untypedNode, core::LocOffsets location) {
+unique_ptr<ExprOnly> Translator::translateIndexAssignment(pm_node_t *untypedNode, core::LocOffsets location) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
 
     // The LHS location includes the receiver and the `[]`, but not the `=` or rhs.

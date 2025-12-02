@@ -153,7 +153,7 @@ private:
 
     // Translate operator assignment targeting an indexed expression (e.g., `a[0] += 1`).
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
-    std::unique_ptr<parser::Node> translateIndexAssignment(pm_node_t *node, core::LocOffsets location);
+    std::unique_ptr<ExprOnly> translateIndexAssignment(pm_node_t *node, core::LocOffsets location);
 
     // Translate AndAsgn/OrAsgn operator assignments (e.g., `x &&= y`, `x ||= y`).
     template <typename SorbetAssignmentNode>
