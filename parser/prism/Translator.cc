@@ -1770,6 +1770,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = ctx.state.enterNameUTF8(constantNameString);
             auto methodName = MK::Symbol(sendLoc0, name);
 
+            if (name == core::Names::blockGiven_p()) {
+                throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
+            }
+
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This loop throws if any of the arguments are not supported by our desugar logic.
             for (auto &arg : args) {
@@ -1782,7 +1786,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             };
 
             enforceHasExpr(receiver);
-            auto supportedCallType = constantNameString != "block_given?";
+            auto supportedCallType = true;
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
