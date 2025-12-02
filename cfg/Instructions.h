@@ -6,8 +6,10 @@
 #include "core/GlobalState.h"
 #include "core/LocalVariable.h"
 #include "core/NameRef.h"
+#include "core/TrailingObjects.h"
 #include "core/Types.h"
 #include "core/UntaggedPtr.h"
+#include "core/ZippedPair.h"
 #include <climits>
 #include <memory>
 
@@ -56,6 +58,7 @@ template <typename T> struct InsnToTag;
 
 class InstructionPtr;
 class Instruction;
+class Send;
 
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
@@ -244,7 +247,20 @@ public:
 };
 CheckSize(SolveConstraint, 24, 8);
 
-INSN(Send) : public Instruction {
+INSN(Send) : public Instruction, private core::TrailingObjects<Send, LocalRef, core::TypePtr, core::LocOffsets> {
+    friend core::TrailingObjects<Send, LocalRef, core::TypePtr, core::LocOffsets>;
+    using Parent = core::TrailingObjects<Send, LocalRef, core::TypePtr, core::LocOffsets>;
+
+    template <typename T> absl::Span<T> span() {
+        return absl::MakeSpan(getTrailingObjects<T>(), numArgs);
+    }
+    template <typename T> absl::Span<const T> span() const {
+        return absl::MakeSpan(getTrailingObjects<T>(), numArgs);
+    }
+
+    Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
+         bool isPrivateOk, size_t numArgs);
+
 public:
     bool isPrivateOk;
     uint16_t numPosArgs;
@@ -252,13 +268,99 @@ public:
     VariableUseSite recv;
     core::LocOffsets funLoc;
     core::LocOffsets receiverLoc;
-    InlinedVector<VariableUseSite, 2> args;
-    InlinedVector<core::LocOffsets, 2> argLocs;
+    size_t numArgs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
-         const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs, bool isPrivateOk = false,
-         std::shared_ptr<core::SendAndBlockLink> link = nullptr);
+    // We only need this for the first two sets of trailing types, but it's
+    // defined identically for all three types and it's convenient to have it
+    // for defining `span`, above.
+    template <typename T> size_t numTrailingObjects(OverloadToken<T>) const {
+        return numArgs;
+    }
+
+    class SendInitializer {
+        // We want to hide the details of the uninitialized memory for the trailing
+        // fields of `Send` from the client, and this class is how we're going to
+        // do it: it is effectively a wrapper around a pointer that knows how to
+        // use placement new for assignments.
+        template <typename T> class SlotInit {
+            // Note that these point to _uninitialized_ memory.
+            T *current;
+            T *end;
+
+        public:
+            SlotInit(absl::Span<T> span) : current(span.begin()), end(span.end()) {}
+
+        public:
+            SlotInit &operator=(const T &value) {
+                new (current) T(value);
+                return *this;
+            }
+
+            // Not necessary, but it makes the code look a little more idiomatic,
+            // letting you write something like:
+            //
+            // *slot++ = val;
+            //
+            // Just like you would with a pointer.
+            SlotInit &operator*() {
+                return *this;
+            }
+
+            SlotInit &operator++() {
+                ENFORCE(current != end);
+                ENFORCE(current < end);
+                ++current;
+                return *this;
+            }
+
+            SlotInit operator++(int) {
+                SlotInit copy(*this);
+                ++*this;
+                return copy;
+            }
+        };
+
+        Send *snd;
+
+    public:
+        SendInitializer(Send *snd);
+
+        SlotInit<LocalRef> refs;
+        SlotInit<core::LocOffsets> locs;
+
+        InstructionPtr asInsnPtr() && {
+            return InstructionPtr(InsnToTag<Send>::value, snd);
+        }
+    };
+
+    static SendInitializer make(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc,
+                                uint16_t numPosArgs, bool isPrivateOk, size_t numArgs);
+
+    absl::Span<LocalRef> argRefs() {
+        return span<LocalRef>();
+    }
+    absl::Span<const LocalRef> argRefs() const {
+        return span<LocalRef>();
+    }
+    absl::Span<core::TypePtr> argTypes() {
+        return span<core::TypePtr>();
+    }
+    absl::Span<const core::TypePtr> argTypes() const {
+        return span<core::TypePtr>();
+    }
+    absl::Span<core::LocOffsets> argLocs() {
+        return span<core::LocOffsets>();
+    }
+
+    core::ZippedPairSpan<LocalRef, core::TypePtr> argSpan() {
+        return core::ZippedPairSpan<LocalRef, core::TypePtr>{argRefs(), argTypes()};
+    }
+    core::ZippedPairSpan<const LocalRef, const core::TypePtr> argSpan() const {
+        return core::ZippedPairSpan<const LocalRef, const core::TypePtr>{argRefs(), argTypes()};
+    }
+
+    ~Send();
 
     core::LocOffsets locWithoutBlock(core::LocOffsets bindLoc);
 
