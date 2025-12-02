@@ -168,7 +168,7 @@ private:
                                                            std::unique_ptr<parser::Node> rhs);
 
     template <typename PrismLhsNode, typename SorbetLHSNode, bool checkForDynamicConstAssign = false>
-    std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node);
+    std::unique_ptr<ExprOnly> translateConst(PrismLhsNode *node);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
 
     // Generates a unique name for a `parser::Node`.

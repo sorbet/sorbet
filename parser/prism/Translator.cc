@@ -5539,7 +5539,7 @@ ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, 
 // Usually returns the `SorbetLHSNode`, but for constant writes and targets,
 // it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
 template <typename PrismLhsNode, typename SorbetLHSNode, bool checkForDynamicConstAssign>
-unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
+unique_ptr<ExprOnly> Translator::translateConst(PrismLhsNode *node) {
     static_assert(is_same_v<SorbetLHSNode, parser::Const> || is_same_v<SorbetLHSNode, parser::ConstLhs>,
                   "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
 
@@ -5547,7 +5547,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     if (node->name == PM_CONSTANT_ID_UNSET) {
         auto location = translateLoc(node->base.location);
         auto expr = MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::empty());
-        return make_node_with_expr<SorbetLHSNode>(move(expr), location, nullptr, core::Names::empty());
+        return expr_only(move(expr));
     }
 
     // It's important that in all branches `enterNameUTF8` is called, which `translateConstantName` does,
@@ -5572,7 +5572,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
             // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
             // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
             auto expr = MK::Local(location, core::Names::dynamicConstAssign());
-            return make_node_with_expr<LVarLhs>(move(expr), location, core::Names::dynamicConstAssign());
+            return expr_only(move(expr));
         }
     }
 
@@ -5626,7 +5626,7 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     }
 
     ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
-    return make_node_with_expr<SorbetLHSNode>(move(desugaredExpr), location, move(parent), constantName);
+    return expr_only(move(desugaredExpr));
 }
 
 core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
