@@ -2614,12 +2614,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             if (isSingletonMethod) {
                 ast::cast_tree<ast::MethodDef>(methodExpr)->flags.isSelfMethod = true;
-                return make_node_with_expr<parser::DefS>(move(methodExpr), location, declLoc, move(receiver), name,
-                                                         move(params), move(body));
             }
 
-            return make_node_with_expr<parser::DefMethod>(move(methodExpr), location, declLoc, name, move(params),
-                                                          move(body));
+            return expr_only(move(methodExpr));
         }
         case PM_DEFINED_NODE: {
             auto definedNode = down_cast<pm_defined_node>(node);
