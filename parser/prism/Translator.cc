@@ -597,14 +597,16 @@ ast::Send *asTLet(ExpressionPtr &arg) {
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
 unique_ptr<ExprOnly> Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
                                                           unique_ptr<ExprOnly> lhs) {
-    auto rhs = expr_only(desugar(node->value));
+    auto lhsExpr = lhs->takeDesugaredExpr();
+    auto rhsExpr = desugar(node->value);
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
-        return translateAndOrAssignment<parser::AndAsgn>(location, move(lhs), move(rhs));
+        return translateAndOrAssignment<parser::AndAsgn>(location, move(lhsExpr), move(rhsExpr));
     } else if constexpr (is_same_v<SorbetAssignmentNode, parser::OrAsgn>) {
-        return translateAndOrAssignment<parser::OrAsgn>(location, move(lhs), move(rhs));
+        return translateAndOrAssignment<parser::OrAsgn>(location, move(lhsExpr), move(rhsExpr));
     } else if constexpr (is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
-        return translateOpAssignment<SorbetAssignmentNode, PrismAssignmentNode>(node, location, move(lhs), move(rhs));
+        return translateOpAssignment<SorbetAssignmentNode, PrismAssignmentNode>(node, location, move(lhsExpr),
+                                                                                move(rhsExpr));
     } else {
         static_assert(
             always_false_v<SorbetAssignmentNode>,
@@ -644,14 +646,11 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
 
 // The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode>
-unique_ptr<ExprOnly> Translator::translateAndOrAssignment(core::LocOffsets location, unique_ptr<ExprOnly> lhs,
-                                                          unique_ptr<ExprOnly> rhs) {
+unique_ptr<ExprOnly> Translator::translateAndOrAssignment(core::LocOffsets location, ast::ExpressionPtr lhsExpr,
+                                                          ast::ExpressionPtr rhsExpr) {
     const auto isOrAsgn = is_same_v<SorbetAssignmentNode, parser::OrAsgn>;
     const auto isAndAsgn = is_same_v<SorbetAssignmentNode, parser::AndAsgn>;
     static_assert(isOrAsgn || isAndAsgn);
-
-    auto lhsExpr = lhs->takeDesugaredExpr();
-    auto rhsExpr = rhs->takeDesugaredExpr();
 
     if (preserveConcreteSyntax) {
         auto magicName = isAndAsgn ? core::Names::andAsgn() : core::Names::orAsgn();
@@ -692,8 +691,12 @@ unique_ptr<ExprOnly> Translator::translateAndOrAssignment(core::LocOffsets locat
         auto cond = MK::cpRef(lhsExpr);
 
         // Check for T.let handling for instance and class variables in ||= assignments
-        auto lhsIsIvar = parser::NodeWithExpr::isa_node<parser::IVarLhs>(lhs.get());
-        auto lhsIsCvar = parser::NodeWithExpr::isa_node<parser::CVarLhs>(lhs.get());
+        auto lhsIdentifier = ast::cast_tree<ast::UnresolvedIdent>(lhsExpr);
+        auto rhsIdentifier = ast::cast_tree<ast::UnresolvedIdent>(rhsExpr);
+        ENFORCE(lhsIdentifier);
+        ENFORCE(rhsIdentifier);
+        auto lhsIsIvar = lhsIdentifier->kind == ast::UnresolvedIdent::Kind::Instance;
+        auto lhsIsCvar = lhsIdentifier->kind == ast::UnresolvedIdent::Kind::Class;
         auto rhsIsTLet = asTLet(rhsExpr);
 
         ExpressionPtr assignExpr;
@@ -811,13 +814,10 @@ Translator::OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
 // The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
 unique_ptr<ExprOnly> Translator::translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                       unique_ptr<ExprOnly> lhs, unique_ptr<ExprOnly> rhs) {
+                                                       ast::ExpressionPtr lhsExpr, ast::ExpressionPtr rhsExpr) {
     // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
     auto opLoc = translateLoc(node->binary_operator_loc);
     auto op = translateConstantName(node->binary_operator);
-
-    auto lhsExpr = lhs->takeDesugaredExpr();
-    auto rhsExpr = rhs->takeDesugaredExpr();
 
     if (preserveConcreteSyntax) {
         auto magicName = core::Names::opAsgn();

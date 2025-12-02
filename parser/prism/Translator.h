@@ -158,8 +158,8 @@ private:
 
     // Translate AndAsgn/OrAsgn operator assignments (e.g., `x &&= y`, `x ||= y`).
     template <typename SorbetAssignmentNode>
-    std::unique_ptr<ExprOnly> translateAndOrAssignment(core::LocOffsets location, std::unique_ptr<ExprOnly> lhs,
-                                                       std::unique_ptr<ExprOnly> rhs);
+    std::unique_ptr<ExprOnly> translateAndOrAssignment(core::LocOffsets location, ast::ExpressionPtr lhs,
+                                                       ast::ExpressionPtr rhs);
 
     template <typename PrismLhsNode, bool checkForDynamicConstAssign = false>
     ast::ExpressionPtr translateConst(pm_node_t *node);
@@ -186,7 +186,7 @@ private:
     // Translate OpAsgn operator assignments
     template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
     std::unique_ptr<ExprOnly> translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                    std::unique_ptr<ExprOnly> lhs, std::unique_ptr<ExprOnly> rhs);
+                                                    ast::ExpressionPtr lhsExpr, ast::ExpressionPtr rhsExpr);
 
     // ========================================================================
     // Direct Desugaring Functions for Op-Assignment Nodes
