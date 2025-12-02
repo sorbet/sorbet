@@ -595,9 +595,9 @@ ast::Send *asTLet(ExpressionPtr &arg) {
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 // The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-unique_ptr<parser::Node> Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                              unique_ptr<parser::Node> lhs) {
-    auto rhs = translate(node->value);
+unique_ptr<ExprOnly> Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                          unique_ptr<ExprOnly> lhs) {
+    auto rhs = expr_only(desugar(node->value));
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
         return translateAndOrAssignment<parser::AndAsgn>(location, move(lhs), move(rhs));
@@ -637,21 +637,18 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
     // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
     auto send =
         MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
-    auto lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), core::Names::squareBrackets(),
-                                                 lBracketLoc, move(args));
+    auto lhs = expr_only(move(send));
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
 }
 
 // The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode>
-unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets location, unique_ptr<parser::Node> lhs,
-                                                              unique_ptr<parser::Node> rhs) {
+unique_ptr<ExprOnly> Translator::translateAndOrAssignment(core::LocOffsets location, unique_ptr<ExprOnly> lhs,
+                                                          unique_ptr<ExprOnly> rhs) {
     const auto isOrAsgn = is_same_v<SorbetAssignmentNode, parser::OrAsgn>;
     const auto isAndAsgn = is_same_v<SorbetAssignmentNode, parser::AndAsgn>;
     static_assert(isOrAsgn || isAndAsgn);
-
-    enforceHasExpr(lhs, rhs);
 
     auto lhsExpr = lhs->takeDesugaredExpr();
     auto rhsExpr = rhs->takeDesugaredExpr();
@@ -663,7 +660,7 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
         // Desugar `x &&= y` to `<Magic>.&&=(x, y)` (likewise for `||=`)
         auto magicSend =
             MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
-        return make_node_with_expr<SorbetAssignmentNode>(move(magicSend), location, move(lhs), move(rhs));
+        return expr_only(move(magicSend));
     }
 
     if (auto s = ast::cast_tree<ast::Send>(lhsExpr)) {
@@ -687,7 +684,7 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
             if_ = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(elsep), move(body));
         }
         auto wrapped = MK::InsSeq(location, move(stats), move(if_));
-        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), move(rhs));
+        return expr_only(move(wrapped));
     }
 
     if (isa_reference(lhsExpr)) {
@@ -736,7 +733,7 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
             if_ = MK::If(location, move(cond), move(lhsCopy), move(assignExpr));
         }
 
-        return make_node_with_expr<SorbetAssignmentNode>(move(if_), location, move(lhs), move(rhs));
+        return expr_only(move(if_));
     }
 
     if (ast::isa_tree<ast::UnresolvedConstantLit>(lhsExpr)) {
@@ -744,7 +741,7 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
             e.setHeader("Constant reassignment is not supported");
         }
         ExpressionPtr res = MK::EmptyTree();
-        return make_node_with_expr<SorbetAssignmentNode>(move(res), location, move(lhs), move(rhs));
+        return expr_only(move(res));
     }
 
     if (ast::isa_tree<ast::InsSeq>(lhsExpr)) {
@@ -770,7 +767,7 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
         auto elsep = MK::Local(sendLoc, tempResult);
         auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
         auto wrapped = MK::InsSeq(location, move(stats), move(iff));
-        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), move(rhs));
+        return expr_only(move(wrapped));
     }
 
     Exception::raise("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
@@ -813,12 +810,11 @@ Translator::OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
 
 // The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
-unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                           unique_ptr<parser::Node> lhs, unique_ptr<parser::Node> rhs) {
+unique_ptr<ExprOnly> Translator::translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                       unique_ptr<ExprOnly> lhs, unique_ptr<ExprOnly> rhs) {
     // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
     auto opLoc = translateLoc(node->binary_operator_loc);
     auto op = translateConstantName(node->binary_operator);
-    enforceHasExpr(lhs, rhs);
 
     auto lhsExpr = lhs->takeDesugaredExpr();
     auto rhsExpr = rhs->takeDesugaredExpr();
@@ -828,7 +824,7 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
         auto locZeroLen = location.copyWithZeroLength();
         auto magicSend =
             MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhsExpr), move(rhsExpr));
-        return make_node_with_expr<parser::OpAsgn>(move(magicSend), location, move(lhs), op, opLoc, move(rhs));
+        return expr_only(move(magicSend));
     }
 
     if (ast::isa_tree<ast::Send>(lhsExpr)) {
@@ -852,14 +848,14 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
                             numPosAssgnArgs, move(assgnArgs), s->flags);
 
         auto wrapped = MK::InsSeq(location, move(stats), move(res));
-        return make_node_with_expr<SorbetAssignmentNode>(move(wrapped), location, move(lhs), op, opLoc, move(rhs));
+        return expr_only(move(wrapped));
     }
 
     if (isa_reference(lhsExpr)) {
         auto lhsCopy = MK::cpRef(lhsExpr);
         auto callOp = MK::Send1(location, move(lhsExpr), op, opLoc, move(rhsExpr));
         auto assign = MK::Assign(location, move(lhsCopy), move(callOp));
-        return make_node_with_expr<SorbetAssignmentNode>(move(assign), location, move(lhs), op, opLoc, move(rhs));
+        return expr_only(move(assign));
     }
 
     if (ast::isa_tree<ast::UnresolvedConstantLit>(lhsExpr)) {
@@ -867,7 +863,7 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
             e.setHeader("Constant reassignment is not supported");
         }
         ExpressionPtr res = MK::EmptyTree();
-        return make_node_with_expr<SorbetAssignmentNode>(move(res), location, move(lhs), op, opLoc, move(rhs));
+        return expr_only(move(res));
     }
 
     if (auto i = ast::cast_tree<ast::InsSeq>(lhsExpr)) {
@@ -899,7 +895,7 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
                             numPosAssgnArgs, move(assgnArgs), s->flags);
         auto wrapped = MK::InsSeq(location, move(stats), move(res));
         ifExpr->elsep = move(wrapped);
-        return make_node_with_expr<SorbetAssignmentNode>(move(lhsExpr), location, move(lhs), op, opLoc, move(rhs));
+        return expr_only(move(lhsExpr));
     }
 
     auto s = fmt::format("the LHS has been desugared to something we haven't expected: {}", lhsExpr.toString(ctx));
