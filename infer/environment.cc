@@ -97,15 +97,15 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
                     }
                 } else if (auto send = cfg::cast_instruction<cfg::Send>(bind.value)) {
                     if (send->fun == core::Names::bang()) {
-                        if (send->args.empty()) {
+                        if (send->argRefs().empty()) {
                             if (isNeeded(bind.bind.variable) && !isNeeded(send->recv.variable)) {
                                 used_vars[send->recv.variable.id()] = true;
                                 changed = true;
                             }
                         }
                     } else if (send->fun == core::Names::eqeq()) {
-                        if (send->args.size() == 1) {
-                            auto arg0 = send->args[0].variable;
+                        if (send->argRefs().size() == 1) {
+                            auto arg0 = send->argRefs()[0];
                             if (isNeeded(arg0) && !isNeeded(send->recv.variable)) {
                                 used_vars[send->recv.variable.id()] = true;
                                 changed = true;
@@ -625,13 +625,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
-    if (send->args.empty()) {
+    if (send->argRefs().empty()) {
         return;
     }
 
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p() ||
         send->fun == core::Names::instanceOf_p()) {
-        const auto &klassType = send->args[0].type;
+        const auto &klassType = send->argTypes()[0];
         auto ref = send->recv.variable;
         updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter, send->fun);
         whoKnows.sanityCheck();
@@ -639,7 +639,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() || send->fun == core::Names::neq()) {
-        const auto &argType = send->args[0].type;
+        const auto &argType = send->argTypes()[0];
         const auto &recvType = send->recv.type;
 
         auto funIsEq = send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p();
@@ -657,7 +657,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         if (!recvType.isUntyped()) {
-            auto arg0 = send->args[0].variable;
+            auto arg0 = send->argRefs()[0];
             truthy.addYesTypeTest(local, typeTestsWithVar, arg0, recvType);
             if (isSingleton(ctx, recvType, includeSingletonClasses)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, arg0, recvType);
@@ -670,7 +670,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     if (send->fun == core::Names::tripleEq()) {
         const auto &klassType = send->recv.type;
-        const auto ref = send->args[0].variable;
+        const auto ref = send->argRefs()[0];
         // `when` against class literal
         updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter, send->fun);
 
@@ -693,7 +693,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
-        auto argType = send->args[0].type;
+        auto argType = send->argTypes()[0];
         if (argType.isUntyped() ||
             (!core::isa_type<core::ClassType>(argType) && !core::isa_type<core::AppliedType>(argType))) {
             return;
@@ -733,7 +733,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::checkMatchArray()) {
-        auto tupleType = core::cast_type<core::TupleType>(send->args[1].type);
+        auto tupleType = core::cast_type<core::TupleType>(send->argTypes()[1]);
         if (tupleType == nullptr) {
             return;
         }
@@ -757,7 +757,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             }
         }
 
-        auto ref = send->args[0].variable;
+        auto ref = send->argRefs()[0];
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, typeTestType);
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, typeTestType);
 
@@ -1036,9 +1036,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 InlinedVector<const core::TypeAndOrigins *, 2> args;
 
-                args.reserve(send.args.size());
-                for (cfg::VariableUseSite &arg : send.args) {
-                    args.emplace_back(&getAndFillTypeAndOrigin(arg));
+                args.reserve(send.numArgs);
+                for (auto [var, type] : send.argSpan()) {
+                    args.emplace_back(&getAndFillTypeAndOrigin(var, type));
                 }
 
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(send.recv);
@@ -1046,7 +1046,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     checkFullyDefined = false;
                 }
                 core::CallLocs locs{
-                    ctx.file, bind.loc, send.receiverLoc, send.funLoc, send.argLocs,
+                    ctx.file, bind.loc, send.receiverLoc, send.funLoc, send.argLocs(),
                 };
 
                 // This is the main place where we type check a method, so we default by assuming
@@ -1197,15 +1197,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         fun = lit.name;
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(
-                                 retainedResult, send.argLocs, fun, send.fun, ctx.owner.asMethodRef(), send.isPrivateOk,
-                                 send.numPosArgs, ctx.file, bind.loc, send.receiverLoc, send.funLoc, locWithoutBlock));
+                        ctx,
+                        core::lsp::SendResponse(retainedResult, send.argLocs(), fun, send.fun, ctx.owner.asMethodRef(),
+                                                send.isPrivateOk, send.numPosArgs, ctx.file, bind.loc, send.receiverLoc,
+                                                send.funLoc, locWithoutBlock));
                 }
                 if (send.link) {
                     send.link->result = move(retainedResult);
                 }
                 if (send.fun == core::Names::toHashDup()) {
-                    ENFORCE(send.args.size() == 1, "Desugar invariant");
+                    ENFORCE(send.numArgs == 1, "Desugar invariant");
                     tp.origins = args[0]->origins;
                 }
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
