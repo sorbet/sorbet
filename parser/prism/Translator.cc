@@ -1934,15 +1934,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 blockPassLoc = sendLoc.copyEndWithZeroLength();
             }
 
-            auto supportedCallType = true;
-
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
-                throw PrismFallback{};
-            }
-
-            if (!supportedCallType) {
-                categoryCounterInc("Prism fallback", "supportedCallType was false");
                 throw PrismFallback{};
             }
 
