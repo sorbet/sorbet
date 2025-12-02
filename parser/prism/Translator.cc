@@ -4348,15 +4348,14 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
 
 tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store> Translator::desugarParametersNode(NodeVec &params) {
     for (auto &param : params) {
-        if (param->hasDesugaredExpr() ||
-            // These other block types don't have their own dedicated desugared
-            // representation, so they won't be directly translated.
-            // Instead, they have special desugar logic below.
-            parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `def f(**nil)`
-            parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `def f(...)`
-            parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `def foo(*)`
-            parser::NodeWithExpr::isa_node<parser::Splat>(param.get())) {            // a splat like `def foo(*a)`)
-        } else {
+        if (!(param->hasDesugaredExpr() ||
+              // These other block types don't have their own dedicated desugared
+              // representation, so they won't be directly translated.
+              // Instead, they have special desugar logic below.
+              parser::NodeWithExpr::isa_node<parser::Kwnilarg>(param.get()) ||         // `def f(**nil)`
+              parser::NodeWithExpr::isa_node<parser::ForwardArg>(param.get()) ||       // `def f(...)`
+              parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(param.get()) || // a splat like `def foo(*)`
+              parser::NodeWithExpr::isa_node<parser::Splat>(param.get()))) {           // a splat like `def foo(*a)`)
             throw PrismFallback{};
         }
     };
