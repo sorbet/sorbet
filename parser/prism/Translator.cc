@@ -617,26 +617,22 @@ template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untypedNode, core::LocOffsets location) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
 
-    // Handle operator assignment to an indexed expression, like `a[0] += 1`
-    auto openingLoc = translateLoc(node->opening_loc);
-    auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
-
-    auto receiver = translate(node->receiver);
-    auto args = translateArguments(node->arguments, up_cast(node->block));
-
     // The LHS location includes the receiver and the `[]`, but not the `=` or rhs.
     // self.example[k] = v
     // ^^^^^^^^^^^^^^^
     auto lhsLoc = translateLoc(node->receiver->location.start, node->closing_loc.end);
 
-    enforceHasExpr(receiver, args);
+    auto receiver = desugar(node->receiver);
 
-    auto receiverExpr = receiver->takeDesugaredExpr();
-    auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
+    // Handle operator assignment to an indexed expression, like `a[0] += 1`
+    auto openingLoc = translateLoc(node->opening_loc);
+    auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
+
+    auto args = desugarArguments<ast::Send::ARGS_store>(node->arguments, up_cast(node->block));
+    auto argsSize = args.size(); // Grab the size before moving out of `args`
 
     // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
-    auto lhs =
-        MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
+    auto lhs = MK::Send(lhsLoc, move(receiver), core::Names::squareBrackets(), lBracketLoc, argsSize, move(args));
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
 }
