@@ -2469,9 +2469,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_CONSTANT_PATH_NODE: { // Part of a constant path, like the `A::B` in `A::B::C`.
             // See`PM_CONSTANT_READ_NODE`, which handles the `::C` part
-            auto constantPathNode = down_cast<pm_constant_path_node>(node);
-
-            return translateConst<pm_constant_path_node, parser::Const>(constantPathNode);
+            return expr_only(translateConst<pm_constant_path_node>(node));
         }
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE: { // Compound assignment to a constant path, e.g. `A::B += 1`
             return expr_only(
@@ -2484,17 +2482,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_CONSTANT_PATH_TARGET_NODE: { // Target of an indirect write to a constant path
             // ... like `A::TARGET1, A::TARGET2 = 1, 2`, `rescue => A::TARGET`, etc.
-            auto constantPathTargetNode = down_cast<pm_constant_path_target_node>(node);
-
-            return translateConst<pm_constant_path_target_node, parser::ConstLhs>(constantPathTargetNode);
+            return expr_only(translateConst<pm_constant_path_target_node>(node));
         }
         case PM_CONSTANT_PATH_WRITE_NODE: { // Regular assignment to a constant path, e.g. `A::B = 1`
             return expr_only(desugarAssignment<pm_constant_path_write_node>(node));
         }
         case PM_CONSTANT_TARGET_NODE: { // Target of an indirect write to a constant
             // ... like `TARGET1, TARGET2 = 1, 2`, `rescue => TARGET`, etc.
-            auto constantTargetNode = down_cast<pm_constant_target_node>(node);
-            return translateConst<pm_constant_target_node, parser::ConstLhs>(constantTargetNode);
+            return expr_only(translateConst<pm_constant_target_node>(node));
         }
         case PM_CONSTANT_AND_WRITE_NODE: { // And-assignment to a constant, e.g. `C &&= false`
             return expr_only(desugarConstantOpAssign<pm_constant_and_write_node, OpAssignKind::And>(node), location);
@@ -2507,8 +2502,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(desugarConstantOpAssign<pm_constant_or_write_node, OpAssignKind::Or>(node), location);
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like `Foo`
-            auto constantReadNode = down_cast<pm_constant_read_node>(node);
-            return translateConst<pm_constant_read_node, parser::Const>(constantReadNode);
+            return expr_only(translateConst<pm_constant_read_node>(node));
         }
         case PM_CONSTANT_WRITE_NODE: { // Regular assignment to a constant, e.g. `Foo = 1`
             return expr_only(desugarAssignment<pm_constant_write_node>(node));
@@ -5538,16 +5532,14 @@ ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, 
 //
 // Usually returns the `SorbetLHSNode`, but for constant writes and targets,
 // it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
-template <typename PrismLhsNode, typename SorbetLHSNode, bool checkForDynamicConstAssign>
-unique_ptr<ExprOnly> Translator::translateConst(PrismLhsNode *node) {
-    static_assert(is_same_v<SorbetLHSNode, parser::Const> || is_same_v<SorbetLHSNode, parser::ConstLhs>,
-                  "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
+template <typename PrismLhsNode, bool checkForDynamicConstAssign>
+ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
+    auto node = down_cast<PrismLhsNode>(anyNode);
 
     // Constant name might be unset, e.g. `::`.
     if (node->name == PM_CONSTANT_ID_UNSET) {
         auto location = translateLoc(node->base.location);
-        auto expr = MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::empty());
-        return expr_only(move(expr));
+        return MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::empty());
     }
 
     // It's important that in all branches `enterNameUTF8` is called, which `translateConstantName` does,
@@ -5571,8 +5563,7 @@ unique_ptr<ExprOnly> Translator::translateConst(PrismLhsNode *node) {
             // Check if this is a dynamic constant assignment (SyntaxError at runtime)
             // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
             // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
-            auto expr = MK::Local(location, core::Names::dynamicConstAssign());
-            return expr_only(move(expr));
+            return MK::Local(location, core::Names::dynamicConstAssign());
         }
     }
 
@@ -5583,8 +5574,7 @@ unique_ptr<ExprOnly> Translator::translateConst(PrismLhsNode *node) {
                                     is_same_v<PrismLhsNode, pm_constant_path_write_node> ||
                                     is_same_v<PrismLhsNode, pm_constant_path_node>;
 
-    unique_ptr<parser::Node> parent;
-    ast::ExpressionPtr parentExpr = nullptr;
+    ast::ExpressionPtr parentExpr;
 
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
         if (auto *prismParentNode = node->parent) {
@@ -5596,11 +5586,9 @@ unique_ptr<ExprOnly> Translator::translateConst(PrismLhsNode *node) {
             //  A::B   ::C
             //  /  \
             // A   ::B
-            parent = translate(prismParentNode);
-            parentExpr = parent ? parent->takeDesugaredExpr() : nullptr;
+            parentExpr = takeDesugaredExprOrEmptyTree(translate(prismParentNode));
         } else { // This is the root of a fully qualified constant reference, like `::A`.
             auto delimiterLoc = translateLoc(node->delimiter_loc); // The location of the `::`
-            parent = make_unique<parser::Cbase>(delimiterLoc);
             parentExpr = MK::Constant(delimiterLoc, core::Symbols::root());
         }
     } else { // Handle plain constants like `A`, that aren't part of a constant path.
@@ -5617,16 +5605,10 @@ unique_ptr<ExprOnly> Translator::translateConst(PrismLhsNode *node) {
                       is_same_v<PrismLhsNode, pm_constant_write_node>) {
             location = translateLoc(node->name_loc);
         }
-        parent = nullptr;
         parentExpr = MK::EmptyTree();
     }
 
-    if (parentExpr == nullptr) {
-        parentExpr = MK::EmptyTree();
-    }
-
-    ast::ExpressionPtr desugaredExpr = MK::UnresolvedConstant(location, move(parentExpr), constantName);
-    return expr_only(move(desugaredExpr));
+    return MK::UnresolvedConstant(location, move(parentExpr), constantName);
 }
 
 core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
