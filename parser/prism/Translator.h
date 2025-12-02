@@ -97,9 +97,13 @@ private:
 
     // Collect pattern variable assignments from a prism pattern node
     void collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, pm_node_t *node);
-    
+
     std::tuple<std::unique_ptr<parser::Params>, core::LocOffsets, core::NameRef /* enclosingBlockParamName */>
     translateParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location, bool isDef);
+
+    std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, core::LocOffsets /* enclosingBlockParamLoc */,
+               core::NameRef /* enclosingBlockParamName */>
+    desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location);
 
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store> desugarParametersNode(NodeVec &params);
 
