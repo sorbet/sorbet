@@ -1,0 +1,58 @@
+# typed: true
+extend T::Sig
+
+# Test hover for 'it' parameter
+
+# Basic usage - hover on 'it' should show the type
+result1 = [1, 2, 3].map { it * 2 }
+                        # ^ hover: Integer
+
+# Hover on 'it' in method call
+result2 = ["a", "b"].map { it.upcase }
+                         # ^ hover: String
+
+# Nested blocks - each 'it' should have independent type
+result3 = [[1, 2], [3, 4]].map { it.map { it * 2 } }
+                               # ^ hover: [Integer, Integer] (2-tuple)
+                                        # ^ hover: Integer
+
+# Multiple uses of 'it' in same block
+result4 = [1, 2, 3].map { it + it }
+                        # ^ hover: Integer
+                            # ^ hover: Integer
+                                 # ^ hover: T::Array[Integer]
+
+# 'it' with lambda
+lam = ->(x) { [x].map { it * 2 } }
+                      # ^ hover: T.untyped
+
+# 'it' with proc
+prc = proc { [1, 2].map { it + 1 } }
+                        # ^ hover: Integer
+
+# Test with local variable scope
+class TestLocalScope
+  # Local variable named 'it' takes precedence
+  def test1
+    it = "local"
+  # ^ def: it-local
+    result = [1, 2, 3].map { it }
+                           # ^ hover: String("local")
+                           # ^ usage: it-local
+  end
+
+  # In a different method, 'it' refers to block param
+  def test2
+    result = [1, 2, 3].map { it * 2 }
+                           # ^ hover: Integer
+  end
+end
+
+# 'it' in block with typed signature
+sig { params(blk: T.proc.params(x: Integer).returns(Integer)).returns(T::Array[Integer]) }
+def with_typed_block(&blk)
+  [1, 2, 3].map(&blk)
+end
+
+result5 = with_typed_block { it * 2 }
+                           # ^ hover: Integer
