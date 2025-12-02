@@ -836,7 +836,16 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
     auto result = VisibilityCheckerPass::run(gs, gs.packageDB(), workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
-        for (auto package : gs.packageDB().packages()) {
+        UnorderedSet<core::packages::MangledName> affectedPackages;
+        for (auto &parsedFile : result) {
+            auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
+            if (!pkgName.exists()) {
+                continue;
+            }
+            affectedPackages.insert(pkgName);
+        }
+
+        for (auto package : affectedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(package);
             ENFORCE(pkgInfo.exists());
             if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
