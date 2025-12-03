@@ -32,7 +32,7 @@ class Translator final {
 
     // Unique counters used to create synthetic names via `ctx.state.freshNameUnique`.
     // - The storage integers either store an "active" count used by a translator and some of its children,
-    //   or a dummy value (int min).
+    //   or a dummy value.
     // - The pointer variables point to the "active" count for each translator,
     //   which is either pointing to its own storage, or to a parent's storage.
     uint16_t parserUniqueCounterStorage;  // Minics the `Builder::Impl.uniqueCounter_` in `parser/Builder.cc`
@@ -64,14 +64,13 @@ public:
 
 private:
     // This private constructor is used for creating child translators with modified context.
-    // uniqueCounterStorage is passed as the minimum integer value and is never used
+    // uniqueCounterStorage is passed as a dummy value and is never used
     Translator(const Translator &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
                core::NameRef enclosingMethodName, core::NameRef enclosingBlockParamName, bool isInModule,
                bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           directlyDesugar(parent.directlyDesugar), preserveConcreteSyntax(parent.preserveConcreteSyntax),
-          parserUniqueCounterStorage(std::numeric_limits<uint16_t>::min()),
-          desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : std::numeric_limits<uint32_t>::min()),
+          parserUniqueCounterStorage(9999), desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
           parserUniqueCounter(parent.parserUniqueCounter),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
