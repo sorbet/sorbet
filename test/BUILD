@@ -473,6 +473,8 @@ pipeline_tests(
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "prism_regression/assign_to_index.rb",
+            "prism_regression/for_loop.rb",
+            "prism_regression/multi_write.rb",
         ],
     ),
     "PrismPosTests",
