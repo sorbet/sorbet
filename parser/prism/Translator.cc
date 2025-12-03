@@ -2491,28 +2491,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
             auto classNode = down_cast<pm_class_node>(node);
 
-            auto name = translate(classNode->constant_path);
-            auto declLoc = translateLoc(classNode->class_keyword_loc).join(name->loc);
-            auto superclass = translate(classNode->superclass);
+            auto name = desugar(classNode->constant_path);
+            auto declLoc = translateLoc(classNode->class_keyword_loc).join(name.loc());
 
-            if (superclass != nullptr) {
-                declLoc = declLoc.join(superclass->loc);
+            ast::ClassDef::ANCESTORS_store ancestors;
+            if (classNode->superclass) {
+                auto superclass = desugar(classNode->superclass);
+                declLoc = declLoc.join(superclass.loc());
+                ancestors.emplace_back(move(superclass));
+            } else {
+                ancestors.emplace_back(MK::Constant(location, core::Symbols::todo()));
             }
-
-            enforceHasExpr(name, superclass);
 
             auto body = this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName)
                             .desugarClassOrModule(classNode->body);
 
-            ast::ClassDef::ANCESTORS_store ancestors;
-            if (superclass == nullptr) {
-                ancestors.emplace_back(MK::Constant(location, core::Symbols::todo()));
-            } else {
-                ancestors.emplace_back(superclass->takeDesugaredExpr());
-            }
-
-            auto nameExpr = name->takeDesugaredExpr();
-            auto classDef = MK::Class(location, declLoc, move(nameExpr), move(ancestors), move(body));
+            auto classDef = MK::Class(location, declLoc, move(name), move(ancestors), move(body));
             return expr_only(move(classDef));
         }
         case PM_CLASS_VARIABLE_AND_WRITE_NODE: { // And-assignment to a class variable, e.g. `@@a &&= 1`
@@ -3330,16 +3324,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MODULE_NODE: { // Modules declarations, like `module A::B::C; ...; end`
             auto moduleNode = down_cast<pm_module_node>(node);
 
-            auto name = translate(moduleNode->constant_path);
-            auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
-
-            enforceHasExpr(name);
+            auto name = desugar(moduleNode->constant_path);
+            auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name.loc());
 
             auto body = this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName)
                             .desugarClassOrModule(moduleNode->body);
 
-            auto nameExpr = name->takeDesugaredExpr();
-            auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(body));
+            auto moduleDef = MK::Module(location, declLoc, move(name), move(body));
             return expr_only(move(moduleDef));
         }
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
@@ -3640,12 +3631,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto classNode = down_cast<pm_singleton_class_node>(node);
 
             auto declLoc = translateLoc(classNode->class_keyword_loc);
-            auto receiver = translate(classNode->expression); // The receiver like `self` in `class << self`
+            auto receiverLoc = translateLoc(classNode->expression->location);
 
-            enforceHasExpr(receiver);
-
-            if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) {
-                if (auto e = ctx.beginIndexerError(receiver->loc, core::errors::Desugar::InvalidSingletonDef)) {
+            if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) { // Only `class << self` is supported
+                if (auto e = ctx.beginIndexerError(receiverLoc, core::errors::Desugar::InvalidSingletonDef)) {
                     e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                 }
                 return empty_expr();
@@ -3656,7 +3645,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             // Singleton classes are modelled as a class with a special name `<singleton>`
             auto singletonClassName = ast::make_expression<ast::UnresolvedIdent>(
-                receiver->loc, ast::UnresolvedIdent::Kind::Class, core::Names::singleton());
+                receiverLoc, ast::UnresolvedIdent::Kind::Class, core::Names::singleton());
 
             auto sClassDef =
                 MK::Class(location, declLoc, move(singletonClassName), ast::ClassDef::ANCESTORS_store{}, move(body));
