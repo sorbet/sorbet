@@ -917,13 +917,13 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
 
     if (gs.packageDB().genPackages()) {
         Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
-        UnorderedSet<core::packages::MangledName> affectedPackages;
+        UnorderedSet<core::packages::MangledName> packagesInEdit;
         for (auto &parsedFile : result) {
             auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
             if (!pkgName.exists()) {
                 continue;
             }
-            affectedPackages.insert(pkgName);
+            packagesInEdit.insert(pkgName);
         }
 
         UnorderedMap<core::SymbolRef, vector<core::FileRef>> referencingFiles;
@@ -948,11 +948,12 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             auto fieldRef = core::FieldRef(gs, i);
             exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
         }
-        for (auto package : affectedPackages) {
-            auto &pkgInfo = gs.packageDB().getPackageInfo(package);
+
+        for (auto pkgName : gs.packageDB().packages()) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
             ENFORCE(pkgInfo.exists());
-            auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs);
-            auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package]);
+            auto importsAutocorrect = packagesInEdit.contains(pkgName) ? pkgInfo.aggregateMissingImports(gs) : nullopt;
+            auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
             if (importsAutocorrect && exportsAutocorrect) {
                 if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
                     e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
