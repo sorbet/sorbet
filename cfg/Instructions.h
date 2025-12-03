@@ -263,12 +263,12 @@ INSN(Send) : public Instruction, private core::TrailingObjects<Send, LocalRef, c
 
 public:
     bool isPrivateOk;
-    uint16_t numPosArgs;
+    const uint16_t numPosArgs;
     core::NameRef fun;
     VariableUseSite recv;
     core::LocOffsets funLoc;
     core::LocOffsets receiverLoc;
-    size_t numArgs;
+    const size_t numArgs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
     // We only need this for the first two sets of trailing types, but it's
