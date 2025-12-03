@@ -264,8 +264,7 @@ private:
     ast::ExpressionPtr desugarMlhs(core::LocOffsets loc, parser::Mlhs *lhs, ast::ExpressionPtr rhs);
 
     // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
-    ast::ClassDef::RHS_store desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
-                                                        std::unique_ptr<parser::Node> &scopeBody);
+    ast::ClassDef::RHS_store desugarScopeBodyToRHSStore(pm_node *prismBodyNode, ast::ExpressionPtr &beginExpr);
 
     void reportError(core::LocOffsets loc, const std::string &message) const;
 

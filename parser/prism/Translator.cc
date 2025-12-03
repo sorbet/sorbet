@@ -2497,13 +2497,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto enclosingBlockParamLoc = core::LocOffsets::none();
             auto enclosingBlockParamName = core::Names::blkArg();
             auto body =
-                this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName).translate(classNode->body);
+                this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName).desugarNullable(classNode->body);
 
             if (superclass != nullptr) {
                 declLoc = declLoc.join(superclass->loc);
             }
 
-            enforceHasExpr(name, superclass, body);
+            enforceHasExpr(name, superclass);
 
             auto bodyExprs = desugarScopeBodyToRHSStore(classNode->body, body);
 
@@ -3338,9 +3338,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto enclosingBlockParamLoc = core::LocOffsets::none();
             auto enclosingBlockParamName = core::Names::blkArg();
             auto body =
-                this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName).translate(moduleNode->body);
+                this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName).desugarNullable(moduleNode->body);
 
-            enforceHasExpr(name, body);
+            enforceHasExpr(name);
 
             auto bodyExprs = desugarScopeBodyToRHSStore(moduleNode->body, body);
 
@@ -3650,9 +3650,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto enclosingBlockParamLoc = core::LocOffsets::none();
             auto enclosingBlockParamName = core::Names::blkArg();
             auto body =
-                this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName).translate(classNode->body);
+                this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName).desugarNullable(classNode->body);
 
-            enforceHasExpr(receiver, body);
+            enforceHasExpr(receiver);
 
             if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) {
                 if (auto e = ctx.beginIndexerError(receiver->loc, core::errors::Desugar::InvalidSingletonDef)) {
@@ -5625,21 +5625,16 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
 // The body can be a Begin node comprising multiple statements, or a single statement.
 // Return nullopt if the body does not have all of its expressions desugared.
 // TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
-                                                                unique_ptr<parser::Node> &scopeBody) {
-    if (scopeBody == nullptr) { // Empty body
+ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode, ast::ExpressionPtr &beginExpr) {
+    if (prismBodyNode == nullptr) { // Empty body
         ast::ClassDef::RHS_store result;
         result.emplace_back(MK::EmptyTree());
         return result;
     }
 
-    enforceHasExpr(scopeBody);
-
     ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
 
     if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
-        auto beginExpr = scopeBody->takeDesugaredExpr();
-
         auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
         ENFORCE(insSeqExpr != nullptr, "The cached expr on every multi-statement Begin should be an InsSeq.")
 
@@ -5653,7 +5648,7 @@ ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBo
         return result;
     } else { // Handle single-statement body
         ast::ClassDef::RHS_store result;
-        result.emplace_back(scopeBody->takeDesugaredExpr());
+        result.emplace_back(move(beginExpr));
         return result;
     }
 }
