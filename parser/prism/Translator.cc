@@ -2850,10 +2850,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto forNode = down_cast<pm_for_node>(node);
 
             auto variable = translate(forNode->index);
-            auto collection = translate(forNode->collection);
+            auto collection = desugar(forNode->collection);
             auto body = desugarStatements(forNode->statements);
 
-            enforceHasExpr(variable, collection);
+            enforceHasExpr(variable);
 
             // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
             bool canProvideNiceDesugar = true;
@@ -2870,7 +2870,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 canProvideNiceDesugar = parser::NodeWithExpr::isa_node<parser::LVarLhs>(variable.get());
             }
 
-            auto collectionExpr = collection->takeDesugaredExpr();
             auto locZeroLen = location.copyWithZeroLength();
             ast::MethodDef::PARAMS_store params;
 
@@ -2902,7 +2901,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             auto block = MK::Block(location, move(body), move(params));
-            auto expr = MK::Send0Block(location, move(collectionExpr), core::Names::each(), locZeroLen, move(block));
+            auto expr = MK::Send0Block(location, move(collection), core::Names::each(), locZeroLen, move(block));
 
             return expr_only(move(expr));
         }
