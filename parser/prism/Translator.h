@@ -103,7 +103,8 @@ private:
 
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, core::LocOffsets /* enclosingBlockParamLoc */,
                core::NameRef /* enclosingBlockParamName */>
-    desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location);
+    desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location,
+                          absl::Span<pm_node_t *> blockLocalVariables = {});
 
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store> desugarParametersNode(NodeVec &params);
 
