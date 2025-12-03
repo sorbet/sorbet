@@ -144,8 +144,6 @@ private:
     // Helper to desugar statements from a clause node (rescue/ensure/else), returning EmptyTree if null or empty.
     template <typename ClauseNode> ast::ExpressionPtr desugarClauseStatements(ClauseNode *clause);
 
-    std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true,
-                                                      core::LocOffsets overrideLocation = core::LocOffsets::none());
     ast::ExpressionPtr desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true,
                                          core::LocOffsets overrideLocation = core::LocOffsets::none());
 

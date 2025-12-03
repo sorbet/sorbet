@@ -5486,60 +5486,6 @@ ast::ExpressionPtr Translator::desugarBegin(pm_begin_node *beginNodePtr) {
 }
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
-// @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one
-// `parser::Node`
-// @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
-unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
-                                                         core::LocOffsets overrideLocation) {
-    if (stmtsNode == nullptr)
-        return nullptr;
-
-    // For a single statement, do not create a `Begin` node and just return the statement, if that's enabled.
-    if (inlineIfSingle && stmtsNode->body.size == 1) {
-        return translate(stmtsNode->body.nodes[0]);
-    }
-
-    // For multiple statements, convert each statement and add them to the body of a Begin node
-    parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
-
-    core::LocOffsets beginNodeLoc;
-    if (overrideLocation.exists()) {
-        beginNodeLoc = overrideLocation;
-    } else if (!sorbetStmts.empty()) {
-        auto prismStatements = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
-        ENFORCE(!prismStatements.empty());
-        ENFORCE(prismStatements.size() == sorbetStmts.size());
-
-        // Cover the locations spanned from the first to the last statements.
-        // This can be different from the `stmtsNode->base.location`,
-        // because of the special case (handled by `startLoc()` and `endLoc()`).
-        beginNodeLoc = translateLoc(startLoc(prismStatements.front()), endLoc(prismStatements.back()));
-    } else {
-        beginNodeLoc = translateLoc(stmtsNode->base.location);
-    }
-
-    if (sorbetStmts.empty()) {
-        return make_node_with_expr<parser::Begin>(MK::Nil(beginNodeLoc), beginNodeLoc, NodeVec{});
-    }
-
-    enforceHasExpr(sorbetStmts);
-
-    ast::InsSeq::STATS_store statements;
-    statements.reserve(sorbetStmts.size() - 1); // -1 because the `Begin` node stores the last element separately.
-
-    auto end = sorbetStmts.end();
-    --end; // Chop one off the end, so we iterate over all but the last element.
-    for (auto it = sorbetStmts.begin(); it != end; ++it) {
-        auto &statement = *it;
-        statements.emplace_back(statement->takeDesugaredExpr());
-    };
-    auto finalExpr = sorbetStmts.back()->takeDesugaredExpr(); // Process the last element separately.
-
-    auto instructionSequence = MK::InsSeq(beginNodeLoc, move(statements), move(finalExpr));
-    return make_node_with_expr<parser::Begin>(move(instructionSequence), beginNodeLoc, move(sorbetStmts));
-}
-
-// Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
 // @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
 ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
