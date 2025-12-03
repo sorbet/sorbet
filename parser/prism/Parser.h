@@ -15,6 +15,7 @@ extern "C" {
 
 namespace sorbet::parser::Prism {
 
+class Factory;
 class ParseResult;
 
 class ParseError {
@@ -37,6 +38,7 @@ class Parser final {
 
     friend class ParseResult;
     friend struct NodeDeleter;
+    friend class Factory;
 
 public:
     Parser(std::string_view sourceCode) : parser{}, options{} {
@@ -63,6 +65,9 @@ public:
     core::LocOffsets translateLocation(const uint8_t *start, const uint8_t *end) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
     std::string_view extractString(pm_string_t *string) const;
+
+    pm_location_t getZeroWidthLocation() const;
+    pm_location_t convertLocOffsets(core::LocOffsets loc) const;
 
 private:
     std::vector<ParseError> collectErrors();

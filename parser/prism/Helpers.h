@@ -7,6 +7,9 @@ extern "C" {
 #include "prism.h"
 }
 
+#include "ast/ast.h"
+#include "parser/Node.h"
+
 template <> struct fmt::formatter<pm_node_type> : formatter<const char *> {
     auto format(pm_node_type type, format_context &ctx) const {
         return formatter<const char *>::format(pm_node_type_to_str(type), ctx);
