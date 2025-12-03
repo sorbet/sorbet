@@ -197,41 +197,85 @@ void Translator::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars,
         auto val = MK::RaiseUnimplemented(loc);
         auto name = translateConstantName(localVarTargetNode->name);
         vars.emplace_back(MK::Assign(loc, name, move(val)));
+    } else if (PM_NODE_TYPE_P(node, PM_SPLAT_NODE)) {
+        // MatchRest in array patterns - recurse on the expression (variable being splatted into)
+        auto splatNode = down_cast<pm_splat_node>(node);
+        collectPatternMatchingVarsPrism(vars, splatNode->expression);
     } else if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) {
+        // MatchRest in hash patterns - recurse on the value
         auto assocSplatNode = down_cast<pm_assoc_splat_node>(node);
         collectPatternMatchingVarsPrism(vars, assocSplatNode->value);
     } else if (PM_NODE_TYPE_P(node, PM_ASSOC_NODE)) {
+        // Pair in hash pattern - only recurse on the value (key is a symbol, not a variable)
         auto assocNode = down_cast<pm_assoc_node>(node);
-        collectPatternMatchingVarsPrism(vars, assocNode->key);
+        // Special handling for implicit hash pattern keys like `n1:` which means `n1: n1`
+        // Legacy parser uses the assoc node's location (including colon) for the variable
+        if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
+            auto implicitNode = down_cast<pm_implicit_node>(assocNode->value);
+            if (PM_NODE_TYPE_P(implicitNode->value, PM_LOCAL_VARIABLE_TARGET_NODE)) {
+                auto localVarTargetNode = down_cast<pm_local_variable_target_node>(implicitNode->value);
+                auto loc = translateLoc(assocNode->base.location); // Use assoc node's location
+                auto name = translateConstantName(localVarTargetNode->name);
+                auto val = MK::RaiseUnimplemented(loc);
+                vars.emplace_back(MK::Assign(loc, name, move(val)));
+                return;
+            }
+        }
         collectPatternMatchingVarsPrism(vars, assocNode->value);
     } else if (PM_NODE_TYPE_P(node, PM_CAPTURE_PATTERN_NODE)) {
+        // MatchAs - use the target's location, not the whole pattern's location
         auto matchAsNode = down_cast<pm_capture_pattern_node>(node);
-        auto loc = translateLoc(matchAsNode->base.location);
+        auto loc = translateLoc(matchAsNode->target->base.location);
         auto name = translateConstantName(matchAsNode->target->name);
         auto val = MK::RaiseUnimplemented(loc);
         vars.emplace_back(MK::Assign(loc, name, move(val)));
         collectPatternMatchingVarsPrism(vars, matchAsNode->value);
     } else if (PM_NODE_TYPE_P(node, PM_ARRAY_PATTERN_NODE)) {
         auto arrayPatternNode = down_cast<pm_array_pattern_node>(node);
+        // Skip ConstPattern - legacy parser doesn't collect variables from ConstPattern
+        if (arrayPatternNode->constant != nullptr) {
+            return;
+        }
         auto requireds = absl::MakeSpan(arrayPatternNode->requireds.nodes, arrayPatternNode->requireds.size);
         for (auto &elt : requireds) {
             collectPatternMatchingVarsPrism(vars, elt);
         }
-        collectPatternMatchingVarsPrism(vars, arrayPatternNode->rest);
+        // Process rest element (skip implicit rest nodes as they don't bind variables)
+        if (arrayPatternNode->rest != nullptr && !PM_NODE_TYPE_P(arrayPatternNode->rest, PM_IMPLICIT_REST_NODE)) {
+            collectPatternMatchingVarsPrism(vars, arrayPatternNode->rest);
+        }
         auto posts = absl::MakeSpan(arrayPatternNode->posts.nodes, arrayPatternNode->posts.size);
         for (auto &elt : posts) {
             collectPatternMatchingVarsPrism(vars, elt);
         }
     } else if (PM_NODE_TYPE_P(node, PM_HASH_PATTERN_NODE)) {
         auto hashPatternNode = down_cast<pm_hash_pattern_node>(node);
+        // Skip ConstPattern - legacy parser doesn't collect variables from ConstPattern
+        if (hashPatternNode->constant != nullptr) {
+            return;
+        }
         auto elements = absl::MakeSpan(hashPatternNode->elements.nodes, hashPatternNode->elements.size);
         for (auto &elt : elements) {
             collectPatternMatchingVarsPrism(vars, elt);
         }
+        // Process rest element
+        collectPatternMatchingVarsPrism(vars, hashPatternNode->rest);
     } else if (PM_NODE_TYPE_P(node, PM_ALTERNATION_PATTERN_NODE)) {
         auto alternationPatternNode = down_cast<pm_alternation_pattern_node>(node);
         collectPatternMatchingVarsPrism(vars, alternationPatternNode->left);
         collectPatternMatchingVarsPrism(vars, alternationPatternNode->right);
+    } else if (PM_NODE_TYPE_P(node, PM_IF_NODE)) {
+        // Pattern with if guard - the actual pattern is inside statements
+        auto ifNode = down_cast<pm_if_node>(node);
+        if (ifNode->statements != nullptr && ifNode->statements->body.size > 0) {
+            collectPatternMatchingVarsPrism(vars, ifNode->statements->body.nodes[0]);
+        }
+    } else if (PM_NODE_TYPE_P(node, PM_UNLESS_NODE)) {
+        // Pattern with unless guard - the actual pattern is inside statements
+        auto unlessNode = down_cast<pm_unless_node>(node);
+        if (unlessNode->statements != nullptr && unlessNode->statements->body.size > 0) {
+            collectPatternMatchingVarsPrism(vars, unlessNode->statements->body.nodes[0]);
+        }
     }
 }
 
@@ -2279,9 +2323,26 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 ENFORCE(PM_NODE_TYPE_P(*it, PM_IN_NODE));
                 auto inPattern = down_cast<pm_in_node>(*it);
 
+                // Get the actual pattern location (unwrapping if/unless guards)
+                pm_location_t patternLoc = inPattern->base.location;
+                pm_node_t *actualPattern = inPattern->pattern;
+                if (actualPattern != nullptr) {
+                    if (PM_NODE_TYPE_P(actualPattern, PM_IF_NODE)) {
+                        auto ifNode = down_cast<pm_if_node>(actualPattern);
+                        if (ifNode->statements != nullptr && ifNode->statements->body.size > 0) {
+                            patternLoc = ifNode->statements->body.nodes[0]->location;
+                        }
+                    } else if (PM_NODE_TYPE_P(actualPattern, PM_UNLESS_NODE)) {
+                        auto unlessNode = down_cast<pm_unless_node>(actualPattern);
+                        if (unlessNode->statements != nullptr && unlessNode->statements->body.size > 0) {
+                            patternLoc = unlessNode->statements->body.nodes[0]->location;
+                        }
+                    } else {
+                        patternLoc = actualPattern->location;
+                    }
+                }
+
                 // Use RaiseUnimplemented as the condition (like desugarOnelinePattern)
-                auto patternLoc =
-                    inPattern->pattern != nullptr ? inPattern->pattern->location : inPattern->base.location;
                 auto matchExpr = MK::RaiseUnimplemented(translateLoc(patternLoc));
 
                 // The body is the statements from the "in" clause
