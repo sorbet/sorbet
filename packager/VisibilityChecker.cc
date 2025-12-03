@@ -954,24 +954,28 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs);
             auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[package]);
             if (importsAutocorrect && exportsAutocorrect) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
                     e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
                     importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
                                                      make_move_iterator(exportsAutocorrect->edits.begin()),
                                                      make_move_iterator(exportsAutocorrect->edits.end()));
+                    // TODO(neil): for a file with no imports or exports, this will produce something like:
+                    //   export MyPkg::Foo
+                    //   import OtherPkg
+                    // because e < i
                     core::AutocorrectSuggestion::mergeAdjacentEdits(importsAutocorrect->edits);
                     e.addAutocorrect(core::AutocorrectSuggestion{"Add missing imports and exports",
                                                                  move(importsAutocorrect->edits)});
                     // TODO(neil): we should also delete imports that are unused but have a modularity error here
                 }
             } else if (importsAutocorrect) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
                     e.setHeader("{} is missing imports", pkgInfo.show(gs));
                     e.addAutocorrect(move(importsAutocorrect.value()));
                     // TODO(neil): we should also delete imports that are unused but have a modularity error here
                 }
             } else if (exportsAutocorrect) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
+                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
                     e.setHeader("{} is missing exports", pkgInfo.show(gs));
                     e.addAutocorrect(move(exportsAutocorrect.value()));
                 }
