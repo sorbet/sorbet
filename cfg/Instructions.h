@@ -284,6 +284,8 @@ public:
         // do it: it is effectively a wrapper around a pointer that knows how to
         // use placement new for assignments.
         template <typename T> class SlotInit {
+            friend SendInitializer;
+
             // Note that these point to _uninitialized_ memory.
             T *current;
             T *end;
@@ -291,7 +293,6 @@ public:
         public:
             SlotInit(absl::Span<T> span) : current(span.begin()), end(span.end()) {}
 
-        public:
             SlotInit &operator=(const T &value) {
                 new (current) T(value);
                 return *this;
@@ -330,6 +331,8 @@ public:
         SlotInit<core::LocOffsets> locs;
 
         InstructionPtr asInsnPtr() && {
+            ENFORCE(refs.current == refs.end, "must have initialized all send arguments");
+            ENFORCE(locs.current == locs.end, "must have initialized all send argument locs");
             return InstructionPtr(InsnToTag<Send>::value, snd);
         }
     };
