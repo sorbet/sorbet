@@ -173,18 +173,14 @@ pm_call_node_t *Factory::createCallNode(pm_node_t *receiver, pm_constant_id_t me
 
 pm_node_t *Factory::SymbolFromConstant(core::LocOffsets nameLoc, pm_constant_id_t nameId) const {
     auto nameView = parser.resolveConstant(nameId);
-    size_t nameSize = nameView.size();
-
-    PrismUniquePtr<uint8_t> stable{reinterpret_cast<uint8_t *>(this->calloc(nameSize, sizeof(uint8_t))), prismFree};
-    memcpy(stable.get(), nameView.data(), nameSize);
 
     pm_symbol_node_t *symbolNode = allocateNode<pm_symbol_node_t>();
 
     pm_location_t location = parser.convertLocOffsets(nameLoc.copyWithZeroLength());
 
     pm_string_t unescapedString;
-    // Mark string as owned so it'll be freed when the node is destroyed
-    pm_string_owned_init(&unescapedString, stable.release(), nameSize);
+    // Point at constant pool data which outlives the symbol node
+    pm_string_constant_init(&unescapedString, reinterpret_cast<const char *>(nameView.data()), nameView.size());
 
     *symbolNode = (pm_symbol_node_t){.base = initializeBaseNode(PM_SYMBOL_NODE, location),
                                      .opening_loc = location,
