@@ -2494,10 +2494,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translate(classNode->constant_path);
             auto declLoc = translateLoc(classNode->class_keyword_loc).join(name->loc);
             auto superclass = translate(classNode->superclass);
-            auto enclosingBlockParamLoc = core::LocOffsets::none();
-            auto enclosingBlockParamName = core::Names::blkArg();
-            auto body =
-                this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName).desugarNullable(classNode->body);
 
             if (superclass != nullptr) {
                 declLoc = declLoc.join(superclass->loc);
@@ -2505,7 +2501,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             enforceHasExpr(name, superclass);
 
-            auto bodyExprs = desugarScopeBodyToRHSStore(classNode->body, body);
+            auto body = this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName)
+                            .desugarScopeBodyToRHSStore(classNode->body);
 
             ast::ClassDef::ANCESTORS_store ancestors;
             if (superclass == nullptr) {
@@ -2515,7 +2512,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             auto nameExpr = name->takeDesugaredExpr();
-            auto classDef = MK::Class(location, declLoc, move(nameExpr), move(ancestors), move(bodyExprs));
+            auto classDef = MK::Class(location, declLoc, move(nameExpr), move(ancestors), move(body));
             return expr_only(move(classDef));
         }
         case PM_CLASS_VARIABLE_AND_WRITE_NODE: { // And-assignment to a class variable, e.g. `@@a &&= 1`
@@ -3335,17 +3332,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto name = translate(moduleNode->constant_path);
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name->loc);
-            auto enclosingBlockParamLoc = core::LocOffsets::none();
-            auto enclosingBlockParamName = core::Names::blkArg();
-            auto body =
-                this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName).desugarNullable(moduleNode->body);
 
             enforceHasExpr(name);
 
-            auto bodyExprs = desugarScopeBodyToRHSStore(moduleNode->body, body);
+            auto body = this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName)
+                            .desugarScopeBodyToRHSStore(moduleNode->body);
 
             auto nameExpr = name->takeDesugaredExpr();
-            auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(bodyExprs));
+            auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(body));
             return expr_only(move(moduleDef));
         }
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
@@ -3647,10 +3641,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto declLoc = translateLoc(classNode->class_keyword_loc);
             auto receiver = translate(classNode->expression); // The receiver like `self` in `class << self`
-            auto enclosingBlockParamLoc = core::LocOffsets::none();
-            auto enclosingBlockParamName = core::Names::blkArg();
-            auto body =
-                this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName).desugarNullable(classNode->body);
 
             enforceHasExpr(receiver);
 
@@ -3661,14 +3651,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return empty_expr();
             }
 
-            auto bodyExprs = desugarScopeBodyToRHSStore(classNode->body, body);
+            auto body = this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName)
+                            .desugarScopeBodyToRHSStore(classNode->body);
 
             // Singleton classes are modelled as a class with a special name `<singleton>`
             auto singletonClassName = ast::make_expression<ast::UnresolvedIdent>(
                 receiver->loc, ast::UnresolvedIdent::Kind::Class, core::Names::singleton());
 
-            auto sClassDef = MK::Class(location, declLoc, move(singletonClassName), ast::ClassDef::ANCESTORS_store{},
-                                       move(bodyExprs));
+            auto sClassDef =
+                MK::Class(location, declLoc, move(singletonClassName), ast::ClassDef::ANCESTORS_store{}, move(body));
 
             return expr_only(move(sClassDef));
         }
@@ -5625,7 +5616,7 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
 // The body can be a Begin node comprising multiple statements, or a single statement.
 // Return nullopt if the body does not have all of its expressions desugared.
 // TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode, ast::ExpressionPtr &beginExpr) {
+ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode) {
     if (prismBodyNode == nullptr) { // Empty body
         ast::ClassDef::RHS_store result;
         result.emplace_back(MK::EmptyTree());
@@ -5634,8 +5625,10 @@ ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBo
 
     ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
 
+    auto body = desugar(prismBodyNode);
+
     if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
-        auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
+        auto insSeqExpr = ast::cast_tree<ast::InsSeq>(body);
         ENFORCE(insSeqExpr != nullptr, "The cached expr on every multi-statement Begin should be an InsSeq.")
 
         ast::ClassDef::RHS_store result;
@@ -5648,7 +5641,7 @@ ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBo
         return result;
     } else { // Handle single-statement body
         ast::ClassDef::RHS_store result;
-        result.emplace_back(move(beginExpr));
+        result.emplace_back(move(body));
         return result;
     }
 }
