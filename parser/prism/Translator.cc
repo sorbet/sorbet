@@ -878,7 +878,7 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
                                                                                              move(lhs));
 }
 
-unique_ptr<parser::Node> Translator::translate(pm_node_t *node, bool preserveConcreteSyntax) {
+unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
 

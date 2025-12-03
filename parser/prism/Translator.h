@@ -60,7 +60,7 @@ public:
           desugarUniqueCounter(this->desugarUniqueCounterStorage) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
-    std::unique_ptr<parser::Node> translate(pm_node_t *node, bool preserveConcreteSyntax = false);
+    std::unique_ptr<parser::Node> translate(pm_node_t *node);
 
 private:
     // This private constructor is used for creating child translators with modified context.
