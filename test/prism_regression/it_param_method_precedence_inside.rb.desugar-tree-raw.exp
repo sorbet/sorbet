@@ -80,5 +80,27 @@ ClassDef{
       args = [
       ]
     }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U tap>
+      block = Block {
+        params = [
+        ]
+        body = Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U it>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
   ]
 }
