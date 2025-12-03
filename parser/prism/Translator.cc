@@ -2610,21 +2610,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_HASH_NODE: { // A hash literal, like `{ a: 1, b: 2 }`
             auto hashNode = down_cast<pm_hash_node>(node);
 
-            auto kvPairs = translateKeyValuePairs(hashNode->elements);
+            auto hashExpr = desugarKeyValuePairs(location, hashNode->elements);
 
-            for (const auto &node : kvPairs) {
-                // `parser::Pair` nodes never have a desugared expr, because they have no ExpressionPtr equivalent.
-                // Instead, we check their children ourselves.
-                if (auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get())) {
-                    enforceHasExpr(pair->key, pair->value);
-                } else {
-                    enforceHasExpr(node);
-                }
-            }
-
-            auto hashExpr = desugarHash(location, kvPairs);
-
-            return make_node_with_expr<parser::Hash>(move(hashExpr), location, false, move(kvPairs));
+            return expr_only(move(hashExpr));
         }
         case PM_IF_NODE: { // An `if` statement or modifier, like `if cond; ...; end` or `a.b if cond`
             auto ifNode = down_cast<pm_if_node>(node);
@@ -4577,6 +4565,186 @@ parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
     }
 
     return sorbetElements;
+}
+
+ast::ExpressionPtr Translator::desugarKeyValuePairs(core::LocOffsets loc, pm_node_list_t elements) {
+    auto kvPairs = absl::MakeSpan(elements.nodes, elements.size);
+
+    auto locZeroLen = loc.copyWithZeroLength();
+
+    ast::InsSeq::STATS_store updateStmts;
+    updateStmts.reserve(kvPairs.size());
+
+    auto acc = nextUniqueDesugarName(core::Names::hashTemp());
+
+    ast::desugar::DuplicateHashKeyCheck hashKeyDupes(ctx);
+    ast::Send::ARGS_store mergeValues;
+    mergeValues.reserve(kvPairs.size() * 2 + 1);
+    mergeValues.emplace_back(MK::Local(loc, acc));
+    bool havePairsToMerge = false;
+
+    // build a hash literal assuming that the argument follows the same format as `mergeValues`:
+    // arg 0: the hash to merge into
+    // arg 1: key
+    // arg 2: value
+    // ...
+    // arg n: key
+    // arg n+1: value
+    auto buildHashLiteral = [loc](ast::Send::ARGS_store &mergeValues) {
+        ast::Hash::ENTRY_store keys;
+        ast::Hash::ENTRY_store values;
+
+        keys.reserve(mergeValues.size() / 2);
+        values.reserve(mergeValues.size() / 2);
+
+        // skip the first positional argument for the accumulator that would have been mutated
+        for (auto it = mergeValues.begin() + 1; it != mergeValues.end();) {
+            keys.emplace_back(move(*it++));
+            values.emplace_back(move(*it++));
+        }
+
+        return MK::Hash(loc, move(keys), move(values));
+    };
+
+    // Desguar
+    //   {**x, a: 'a', **y, remaining}
+    // into
+    //   acc = <Magic>.<to-hash-dup>(x)
+    //   acc = <Magic>.<merge-hash-values>(acc, :a, 'a')
+    //   acc = <Magic>.<merge-hash>(acc, <Magic>.<to-hash-nodup>(y))
+    //   acc = <Magic>.<merge-hash>(acc, remaining)
+    //   acc
+    for (auto &pairAsExpression : kvPairs) {
+        ENFORCE(pairAsExpression != nullptr);
+
+        if (PM_NODE_TYPE_P(pairAsExpression, PM_ASSOC_NODE)) {
+            auto *pair = down_cast<pm_assoc_node>(pairAsExpression);
+
+            ast::ExpressionPtr key;
+            if (PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE)) { // Special case to modify Symbol locations
+                auto symbolNode = down_cast<pm_symbol_node>(pair->key);
+
+                auto [symbolContent, _] = translateSymbol(symbolNode);
+
+                // If the opening location is null, the symbol is used as a key with a colon postfix, like `{ a: 1 }`
+                // The legacy parser sometimes includes symbol's colons, othertimes not:
+                //
+                //     k3 = nil    # The implicit lvar accessed by k3 below
+                //     def k4; end # The implicit method called by k4 below
+                //
+                //             :k1        #  9-12 Regular symbol
+                //             ^^^
+                //            { k2: 1 }   # 10-12 Key with explicit value
+                //              ^^
+                //            { k3:   }   # 10-13 Key with implicit lvar value access
+                //              ^^^         key symbol loc
+                //            { k4:   }   # 10-13 Key with implicit method call
+                //              ^^^         key symbol loc
+                //              ^^^         Sorbet send node loc
+                //              ^^^         Sorbet send node methodLoc (Prism excludes the ':' here)
+                //     def demo(k5:); end # 10-13 Keyword parameter
+                //              ^^^
+                //         call(k6:)      # 10-13 Keyword argument
+                //              ^^
+                if (symbolNode->opening_loc.start == nullptr) {
+                    core::LocOffsets symbolLoc;
+                    if (PM_NODE_TYPE_P(pair->value, PM_IMPLICIT_NODE)) {
+                        auto implicitNode = down_cast<pm_implicit_node>(pair->value);
+
+                        if (PM_NODE_TYPE_P(implicitNode->value, PM_CALL_NODE)) {
+                            auto callNode = down_cast<pm_call_node>(implicitNode->value);
+
+                            // Prism's method_loc excludes the ':' here, but Sorbet's legacy parser includes it.
+                            // Not a fan of modifying the Prism tree in-place, but the alternative is much trickier.
+                            // TODO: revisit this when we extract a helper function for translating call nodes.
+                            ENFORCE(symbolNode->base.location.end[-1] == ':');
+                            callNode->message_loc.end = symbolNode->base.location.end;
+                        }
+
+                        symbolLoc = translateLoc(symbolNode->base.location);
+                    } else {
+                        // Drop the trailing colon in the key's location
+                        symbolLoc = translateLoc(symbolNode->base.location.start, symbolNode->base.location.end - 1);
+                    }
+
+                    key = MK::Symbol(symbolLoc, symbolContent);
+                } else {
+                    key = desugar(pair->key);
+                }
+            } else {
+                key = desugar(pair->key);
+            }
+            ENFORCE(key != nullptr);
+
+            hashKeyDupes.check(key);
+            mergeValues.emplace_back(move(key));
+
+            auto value = desugar(pair->value);
+            mergeValues.emplace_back(move(value));
+
+            havePairsToMerge = true;
+            continue;
+        }
+
+        ENFORCE(PM_NODE_TYPE_P(pairAsExpression, PM_ASSOC_SPLAT_NODE));
+        auto splatNode = down_cast<pm_assoc_splat_node>(pairAsExpression);
+
+        ast::ExpressionPtr expr;
+        if (splatNode->value) { // Splatting an expression like `f(**h)`
+            expr = desugar(splatNode->value);
+        } else { // An anonymous splat like `f(**)`
+            expr = MK::Unsafe(loc, MK::Local(loc, core::Names::fwdKwargs()));
+        }
+
+        if (havePairsToMerge) {
+            havePairsToMerge = false;
+
+            // ensure that there's something to update
+            if (updateStmts.empty()) {
+                updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
+            } else {
+                int numPosArgs = mergeValues.size();
+                updateStmts.emplace_back(MK::Assign(loc, acc,
+                                                    MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(),
+                                                             locZeroLen, numPosArgs, move(mergeValues))));
+            }
+
+            mergeValues.clear();
+            mergeValues.emplace_back(MK::Local(loc, acc));
+        }
+
+        // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
+        // intrinsic is assumed to mutate its first argument.
+        if (updateStmts.empty()) {
+            updateStmts.emplace_back(
+                MK::Assign(loc, acc, MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(expr))));
+        } else {
+            updateStmts.emplace_back(MK::Assign(
+                loc, acc,
+                MK::Send2(loc, MK::Magic(loc), core::Names::mergeHash(), locZeroLen, MK::Local(loc, acc),
+                          MK::Send1(loc, MK::Magic(loc), core::Names::toHashNoDup(), locZeroLen, move(expr)))));
+        }
+    };
+
+    if (havePairsToMerge) {
+        // There were only keyword args/values present, so construct a hash literal directly
+        if (updateStmts.empty()) {
+            return buildHashLiteral(mergeValues);
+        }
+
+        // there are already other entries in updateStmts, so append the `merge-hash-values` call and fall
+        // through to the rest of the processing
+        int numPosArgs = mergeValues.size();
+        updateStmts.emplace_back(MK::Assign(
+            loc, acc,
+            MK::Send(loc, MK::Magic(loc), core::Names::mergeHashValues(), locZeroLen, numPosArgs, move(mergeValues))));
+    }
+
+    if (updateStmts.empty()) {
+        return MK::Hash0(loc);
+    } else {
+        return MK::InsSeq(loc, move(updateStmts), MK::Local(loc, acc));
+    }
 }
 
 ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPairs) {

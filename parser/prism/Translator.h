@@ -112,6 +112,9 @@ private:
     NodeVec translateArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
     parser::NodeVec translateKeyValuePairs(pm_node_list_t elements);
 
+    // translateKeyValuePairs + desugarHash in one
+    ast::ExpressionPtr desugarKeyValuePairs(core::LocOffsets loc, pm_node_list_t elements);
+
     ast::ExpressionPtr desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
                                     ast::Array::ENTRY_store elements);
     ast::ExpressionPtr desugarHash(core::LocOffsets loc, NodeVec &kvPairs);
