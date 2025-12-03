@@ -21,6 +21,31 @@ using namespace std::literals::string_view_literals;
 using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
+void enforceHasExpr(const std::unique_ptr<parser::Node> &node) {
+    if (node && !node->hasDesugaredExpr()) {
+        categoryCounterInc("Prism fallback", "enforceHasExpr(parser::Node) was false");
+        throw PrismFallback{};
+    }
+}
+
+void enforceHasExpr(const std::unique_ptr<NodeWithExpr> &node) {
+    if (node && !node->hasDesugaredExpr()) {
+        categoryCounterInc("Prism fallback", "enforceHasExpr(NodeWithExpr) was false");
+        throw PrismFallback{};
+    }
+}
+
+void enforceHasExpr(const parser::NodeVec &nodes) {
+    for (const auto &node : nodes) {
+        enforceHasExpr(node);
+    }
+}
+
+template <typename... Tail> void enforceHasExpr(const std::unique_ptr<parser::Node> &head, const Tail &...tail) {
+    enforceHasExpr(head);
+    enforceHasExpr(tail...);
+}
+
 bool hasExpr(const std::unique_ptr<parser::Node> &node) {
     if (node && !node->hasDesugaredExpr()) {
         categoryCounterInc("Prism fallback", "hasExpr(parser::Node) was false");
@@ -448,9 +473,7 @@ unique_ptr<parser::Node> Translator::translateAssignment(pm_node_t *untypedNode)
         lhs = make_node_with_expr<SorbetLHSNode>(move(expr), loc, name);
     }
 
-    if (!hasExpr(lhs, rhs)) {
-        return make_unique<parser::Assign>(location, move(lhs), move(rhs));
-    }
+    enforceHasExpr(lhs, rhs);
 
     auto exp = MK::Assign(location, lhs->takeDesugaredExpr(), rhs->takeDesugaredExpr());
     return make_node_with_expr<parser::Assign>(move(exp), location, move(lhs), move(rhs));
@@ -494,19 +517,16 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
     // ^^^^^^^^^^^^^^^
     auto lhsLoc = translateLoc(node->receiver->location.start, node->closing_loc.end);
 
-    unique_ptr<parser::Node> lhs;
-    if (!hasExpr(receiver) || !hasExpr(args)) {
-        lhs = make_unique<parser::Send>(lhsLoc, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
-    } else {
-        auto receiverExpr = receiver->takeDesugaredExpr();
-        auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
+    enforceHasExpr(receiver, args);
 
-        // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
-        auto send =
-            MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
-        lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), core::Names::squareBrackets(),
-                                                lBracketLoc, move(args));
-    }
+    auto receiverExpr = receiver->takeDesugaredExpr();
+    auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
+
+    // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
+    auto send =
+        MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
+    auto lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), core::Names::squareBrackets(),
+                                                 lBracketLoc, move(args));
 
     return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
 }
@@ -519,9 +539,7 @@ unique_ptr<parser::Node> Translator::translateAndOrAssignment(core::LocOffsets l
     const auto isAndAsgn = is_same_v<SorbetAssignmentNode, parser::AndAsgn>;
     static_assert(isOrAsgn || isAndAsgn);
 
-    if (!hasExpr(lhs, rhs)) {
-        return make_unique<SorbetAssignmentNode>(location, move(lhs), move(rhs));
-    }
+    enforceHasExpr(lhs, rhs);
 
     auto lhsExpr = lhs->takeDesugaredExpr();
     auto rhsExpr = rhs->takeDesugaredExpr();
@@ -688,9 +706,7 @@ unique_ptr<parser::Node> Translator::translateOpAssignment(PrismAssignmentNode *
     // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
     auto opLoc = translateLoc(node->binary_operator_loc);
     auto op = translateConstantName(node->binary_operator);
-    if (!hasExpr(lhs, rhs)) {
-        return make_unique<parser::OpAsgn>(location, move(lhs), op, opLoc, move(rhs));
-    }
+    enforceHasExpr(lhs, rhs);
 
     auto lhsExpr = lhs->takeDesugaredExpr();
     auto rhsExpr = rhs->takeDesugaredExpr();
@@ -818,12 +834,7 @@ template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
 unique_ptr<parser::Node> Translator::translateCSendAssignment(PrismAssignmentNode *callNode, core::LocOffsets location,
                                                               unique_ptr<parser::Node> receiver, core::NameRef name,
                                                               core::LocOffsets messageLoc) {
-    if (!hasExpr(receiver)) {
-        // Fall back to CSend if we can't desugar directly
-        auto lhs = make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
-        return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::CSend>(callNode, location,
-                                                                                                  move(lhs));
-    }
+    enforceHasExpr(receiver);
 
     // Create temporary variable to hold the receiver
     auto tempRecv = nextUniqueDesugarName(core::Names::assignTemp());
@@ -884,12 +895,8 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
     }
 
     // Handle operator assignment to the result of a method call, like `a.b += 1`
-    if (!hasExpr(receiver)) {
-        auto lhs = make_unique<parser::Send>(lhsLoc, move(receiver), name, messageLoc, NodeVec{});
-        auto result = translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, parser::Send>(
-            callNode, location, move(lhs));
-        return result;
-    }
+    enforceHasExpr(receiver);
+
     auto receiverExpr = receiver->takeDesugaredExpr();
 
     ast::Send::Flags flags;
@@ -968,9 +975,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto newName = translate(aliasMethodNode->new_name);
             auto oldName = translate(aliasMethodNode->old_name);
 
-            if (!hasExpr(newName, oldName)) {
-                return make_unique<parser::Alias>(location, move(newName), move(oldName));
-            }
+            enforceHasExpr(newName, oldName);
 
             auto toExpr = newName->takeDesugaredExpr();
             auto fromExpr = oldName->takeDesugaredExpr();
@@ -987,9 +992,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto left = translate(andNode->left);
             auto right = translate(andNode->right);
 
-            if (!hasExpr(left, right)) {
-                return make_unique<parser::And>(location, move(left), move(right));
-            }
+            enforceHasExpr(left, right);
 
             auto lhsExpr = left->takeDesugaredExpr();
             auto rhsExpr = right->takeDesugaredExpr();
@@ -1058,9 +1061,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto sorbetElements = translateMulti(arrayNode->elements);
 
-            if (!hasExpr(sorbetElements)) {
-                return make_unique<parser::Array>(location, move(sorbetElements));
-            }
+            enforceHasExpr(sorbetElements);
 
             ast::Array::ENTRY_store elements;
             elements.reserve(arrayNode->elements.size);
@@ -1111,9 +1112,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_node_with_expr<parser::Kwbegin>(MK::Nil(location), location, std::move(statements));
             }
 
-            if (!hasExpr(statements)) {
-                return make_unique<parser::Kwbegin>(location, move(statements));
-            }
+            enforceHasExpr(statements);
 
             auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
             auto finalExpr = std::move(args.back());
@@ -1171,9 +1170,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_node_with_expr<parser::Break>(move(expr), location, move(arguments));
             }
 
-            if (!hasExpr(arguments)) {
-                return make_unique<parser::Break>(location, move(arguments));
-            }
+            enforceHasExpr(arguments);
 
             ExpressionPtr breakArgs;
             if (arguments.size() == 1) {
@@ -1280,7 +1277,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                             // TODO: Add support for Kwsplat and ForwardedKwrestArg
 
                             auto pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get());
-                            return pair != nullptr && hasExpr(pair->key, pair->value);
+                            if (pair == nullptr) {
+                                return false;
+                            }
+
+                            enforceHasExpr(pair->key, pair->value);
+
+                            return true;
                         });
                     }
                 }
@@ -1322,11 +1325,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Method defs are really complex, and we're building support for different kinds of arguments bit
             // by bit. This bool is true when this particular method call is supported by our desugar logic.
             auto supportedArgs = absl::c_all_of(args, [](const auto &arg) {
-                return hasExpr(arg) || parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get()) ||
-                       parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get());
+                if (parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get()) ||
+                    parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get())) {
+                    return true;
+                }
+
+                enforceHasExpr(arg);
+
+                return true;
             });
-            auto supportedCallType =
-                constantNameString != "block_given?" && kwargsHashHasExpr && hasExpr(receiver) && supportedArgs;
+
+            enforceHasExpr(receiver);
+            auto supportedCallType = constantNameString != "block_given?" && kwargsHashHasExpr && supportedArgs;
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
@@ -1344,7 +1354,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                     blockBody = this->enterBlockContext().translate(blockNode->body);
 
-                    supportedCallType &= hasExpr(blockBody);
+                    enforceHasExpr(blockBody);
 
                     auto attemptToDesugarBlockParams = supportedCallType;
                     bool didDesugarBlockParams = false;
@@ -1466,7 +1476,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         } else {
                             auto blockPassArgNode = translate(bp->expression);
 
-                            if (supportedCallType && hasExpr(blockPassArgNode)) {
+                            if (supportedCallType) {
+                                enforceHasExpr(blockPassArgNode);
+
                                 blockPassArg = blockPassArgNode->takeDesugaredExpr();
                                 supportedBlock = true;
                             } else {
@@ -1896,7 +1908,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             whenNodes.reserve(prismWhenNodes.size());
 
             size_t totalPatterns = 0;
-            bool allWhensHaveDesugaredExpr = true;
 
             for (auto *whenNodePtr : prismWhenNodes) {
                 auto *whenNode = down_cast<pm_when_node>(whenNodePtr);
@@ -1910,8 +1921,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 totalPatterns += patternNodes.size();
 
                 auto statementsNode = translateStatements(whenNode->statements);
-                allWhensHaveDesugaredExpr =
-                    allWhensHaveDesugaredExpr && hasExpr(statementsNode) && hasExpr(patternNodes);
+
+                enforceHasExpr(statementsNode, patternNodes);
 
                 // A single `when` clause does not desugar into a standalone Ruby expression; it only
                 // becomes meaningful when the enclosing `case` stitches together all clauses. Wrapping it
@@ -1924,9 +1935,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto elseClause = translate(up_cast(caseNode->else_clause));
 
-            if (!allWhensHaveDesugaredExpr || !hasExpr(predicate, elseClause)) {
-                return make_unique<Case>(location, move(predicate), move(whenNodes), move(elseClause));
-            }
+            enforceHasExpr(predicate, elseClause);
 
             if (preserveConcreteSyntax) {
                 auto locZeroLen = location.copyWithZeroLength();
@@ -2052,9 +2061,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 declLoc = declLoc.join(superclass->loc);
             }
 
-            if (!hasExpr(name, superclass, body)) {
-                return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
-            }
+            enforceHasExpr(name, superclass, body);
 
             auto bodyExprsOpt = desugarScopeBodyToRHSStore(classNode->body, body);
             if (!bodyExprsOpt.has_value()) {
@@ -2226,15 +2233,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     if (statements.size() == 1) {
                         body = move(statements[0]);
                     } else {
-                        if (!hasExpr(statements)) {
-                            body = make_unique<parser::Kwbegin>(location, move(statements));
-                        } else {
-                            auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
-                            auto finalExpr = move(args.back());
-                            args.pop_back();
-                            auto expr = MK::InsSeq(location, move(args), move(finalExpr));
-                            body = make_node_with_expr<parser::Kwbegin>(move(expr), location, move(statements));
-                        }
+                        enforceHasExpr(statements);
+
+                        auto args = nodeVecToStore<ast::InsSeq::STATS_store>(statements);
+                        auto finalExpr = move(args.back());
+                        args.pop_back();
+                        auto expr = MK::InsSeq(location, move(args), move(finalExpr));
+                        body = make_node_with_expr<parser::Kwbegin>(move(expr), location, move(statements));
                     }
 
                 } else {
@@ -2248,7 +2253,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             // Method defs are complex, and we're building support for different kinds of arguments bit by
             // bit. This bool is true when this particular method def is supported by our desugar logic.
-            auto attemptToDesugarParams = hasExpr(receiver, body);
+            enforceHasExpr(receiver, body);
+            auto attemptToDesugarParams = true;
 
             ast::MethodDef::PARAMS_store paramsStore;
             ast::InsSeq::STATS_store statsStore;
@@ -2434,9 +2440,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto collection = translate(forNode->collection);
             auto body = translateStatements(forNode->statements);
 
-            if (!hasExpr(variable, collection, body)) {
-                return make_unique<parser::For>(location, move(variable), move(collection), move(body));
-            }
+            enforceHasExpr(variable, collection, body);
 
             // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
             bool canProvideNiceDesugar = true;
@@ -2557,10 +2561,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // `parser::Pair` nodes never have a desugared expr, because they have no ExpressionPtr equivalent.
                 // Instead, we check their children ourselves.
                 if (auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get())) {
-                    return hasExpr(pair->key, pair->value);
+                    enforceHasExpr(pair->key, pair->value);
+                    return true;
                 }
 
-                return hasExpr(node);
+                enforceHasExpr(node);
+
+                return true;
             });
 
             if (!elementsHaveExprs) {
@@ -2652,10 +2659,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto receiver = translate(indexedTargetNode->receiver);
             auto arguments = translateArguments(indexedTargetNode->arguments, up_cast(indexedTargetNode->block));
 
-            if (!hasExpr(receiver, arguments)) {
-                return make_unique<parser::Send>(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
-                                                 move(arguments));
-            }
+            enforceHasExpr(receiver, arguments);
 
             // Build the arguments for the Send expression
             ast::Send::ARGS_store argExprs;
@@ -2772,9 +2776,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto parts = translateMulti(interpolatedRegexNode->parts);
             auto options = translateRegexpOptions(interpolatedRegexNode->closing_loc);
 
-            if (!hasExpr(parts)) {
-                return make_unique<parser::Regexp>(location, move(parts), move(options));
-            }
+            enforceHasExpr(parts);
 
             // Desugar interpolated regexp to Regexp.new(pattern, options)
             auto pattern = desugarDString(location, interpolatedRegexNode->parts);
@@ -2791,9 +2793,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto sorbetParts = translateMulti(interpolatedStringNode->parts);
 
-            if (!hasExpr(sorbetParts)) {
-                return make_unique<parser::DString>(location, move(sorbetParts));
-            }
+            enforceHasExpr(sorbetParts);
 
             // Desugar `"a #{b} c"` to `::Magic.<string-interpolate>("a ", b, " c")`
             auto desugared = desugarDString(location, interpolatedStringNode->parts);
@@ -2804,9 +2804,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto sorbetParts = translateMulti(interpolatedSymbolNode->parts);
 
-            if (!hasExpr(sorbetParts)) {
-                return make_unique<parser::DSymbol>(location, move(sorbetParts));
-            }
+            enforceHasExpr(sorbetParts);
 
             // Desugar `:"a #{b} c"` to `::Magic.<string-interpolate>("a ", b, " c").intern()`
             auto desugared = desugarDString(location, interpolatedSymbolNode->parts);
@@ -2818,9 +2816,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto sorbetParts = translateMulti(interpolatedXStringNode->parts);
 
-            if (!hasExpr(sorbetParts)) {
-                return make_unique<parser::XString>(location, move(sorbetParts));
-            }
+            enforceHasExpr(sorbetParts);
 
             auto desugared = desugarDString(location, interpolatedXStringNode->parts);
             auto res = MK::Send1(location, MK::Self(location), core::Names::backtick(), location.copyWithZeroLength(),
@@ -2948,9 +2944,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto value = patternTranslate(matchRequiredNode->value);
             auto pattern = patternTranslate(matchRequiredNode->pattern);
 
-            if (!hasExpr(value, pattern)) {
-                return make_unique<parser::MatchPattern>(location, move(value), move(pattern));
-            }
+            enforceHasExpr(value, pattern);
 
             auto expr = desugarOnelinePattern(location, pattern.get());
             return make_node_with_expr<parser::MatchPattern>(move(expr), location, move(value), move(pattern));
@@ -2961,9 +2955,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto value = patternTranslate(matchPredicateNode->value);
             auto pattern = patternTranslate(matchPredicateNode->pattern);
 
-            if (!hasExpr(value, pattern)) {
-                return make_unique<parser::MatchPatternP>(location, move(value), move(pattern));
-            }
+            enforceHasExpr(value, pattern);
 
             auto expr = desugarOnelinePattern(location, pattern.get());
             return make_node_with_expr<parser::MatchPatternP>(move(expr), location, move(value), move(pattern));
@@ -2989,9 +2981,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto body =
                 this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName).translate(moduleNode->body);
 
-            if (!hasExpr(name, body)) {
-                return make_unique<parser::Module>(location, declLoc, move(name), move(body));
-            }
+            enforceHasExpr(name, body);
 
             auto bodyExprsOpt = desugarScopeBodyToRHSStore(moduleNode->body, body);
             if (!bodyExprsOpt.has_value()) {
@@ -3023,9 +3013,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // so we can't just use the entire Prism location for the Masgn node.
             location = translateLoc(startLoc(up_cast(multiWriteNode)), endLoc(multiWriteNode->value));
 
-            if (!hasExpr(rhsValue, multiLhsNode->exprs)) {
-                return make_unique<parser::Masgn>(location, move(multiLhsNode), move(rhsValue));
-            }
+            enforceHasExpr(rhsValue, multiLhsNode->exprs);
 
             auto rhsExpr = rhsValue->takeDesugaredExpr();
             auto expr = desugarMlhs(location, multiLhsNode.get(), move(rhsExpr));
@@ -3041,9 +3029,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_node_with_expr<parser::Next>(move(expr), location, move(arguments));
             }
 
-            if (!hasExpr(arguments)) {
-                return make_unique<parser::Next>(location, move(arguments));
-            }
+            enforceHasExpr(arguments);
 
             ExpressionPtr nextArgs;
             if (arguments.size() == 1) {
@@ -3084,9 +3070,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translateConstantName(optionalKeywordParamNode->name);
             auto value = translate(optionalKeywordParamNode->value);
 
-            if (!hasExpr(value)) {
-                return make_unique<parser::Kwoptarg>(location, name, nameLoc, move(value));
-            }
+            enforceHasExpr(value);
 
             auto expr = MK::OptionalParam(location, MK::KeywordArg(nameLoc, name), value->takeDesugaredExpr());
             return make_node_with_expr<parser::Kwoptarg>(move(expr), location, name, nameLoc, move(value));
@@ -3098,9 +3082,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = translateConstantName(optionalParamNode->name);
             auto value = translate(optionalParamNode->value);
 
-            if (!hasExpr(value)) {
-                return make_unique<parser::OptParam>(location, name, nameLoc, move(value));
-            }
+            enforceHasExpr(value);
 
             auto expr = MK::OptionalParam(location, MK::Local(nameLoc, name), value->takeDesugaredExpr());
             return make_node_with_expr<parser::OptParam>(move(expr), location, name, nameLoc, move(value));
@@ -3111,9 +3093,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto left = translate(orNode->left);
             auto right = translate(orNode->right);
 
-            if (!hasExpr(left, right)) {
-                return make_unique<parser::Or>(location, move(left), move(right));
-            }
+            enforceHasExpr(left, right);
 
             auto lhsExpr = left->takeDesugaredExpr();
             auto rhsExpr = right->takeDesugaredExpr();
@@ -3197,13 +3177,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             bool isExclusive = PM_NODE_FLAG_P(rangeNode, PM_RANGE_FLAGS_EXCLUDE_END);
 
-            if (!hasExpr(left, right)) {
-                if (isExclusive) { // `...`
-                    return make_unique<parser::ERange>(location, move(left), move(right));
-                } else { // `..`
-                    return make_unique<parser::IRange>(location, move(left), move(right));
-                }
-            }
+            enforceHasExpr(left, right);
 
             auto recv = MK::Magic(location);
             auto locZeroLen = core::LocOffsets{location.beginPos(), location.beginPos()};
@@ -3273,14 +3247,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto resbodyLoc = core::LocOffsets{keywordLoc.beginPos(), location.endPos()};
 
-            if (!hasExpr(body, rescue)) {
-                // In rescue modifiers, users can't specify exception classes or names, so they're always null.
-                std::unique_ptr<Node> rescuedExceptions = nullptr;
-                auto resBody = make_unique<parser::Resbody>(resbodyLoc, move(rescuedExceptions), nullptr, move(rescue));
-
-                auto cases = NodeVec1(move(resBody));
-                return make_unique<parser::Rescue>(location, move(body), move(cases), nullptr);
-            }
+            enforceHasExpr(body, rescue);
 
             auto bodyExpr = body->takeDesugaredExpr();
             auto rescueExpr = rescue->takeDesugaredExpr();
@@ -3333,9 +3300,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_node_with_expr<parser::Return>(move(expr), location, move(returnValues));
             }
 
-            if (!hasExpr(returnValues)) {
-                return make_unique<parser::Return>(location, move(returnValues));
-            }
+            enforceHasExpr(returnValues);
 
             ExpressionPtr returnArgs;
             if (returnValues.size() == 1) {
@@ -3371,9 +3336,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto body =
                 this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName).translate(classNode->body);
 
-            if (!hasExpr(receiver, body)) {
-                return make_unique<parser::SClass>(location, declLoc, move(receiver), move(body));
-            }
+            enforceHasExpr(receiver, body);
 
             if (!PM_NODE_TYPE_P(classNode->expression, PM_SELF_NODE)) {
                 if (auto e = ctx.beginIndexerError(receiver->loc, core::errors::Desugar::InvalidSingletonDef)) {
@@ -3417,13 +3380,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto expr = translate(splatNode->expression);
 
-            if (!hasExpr(expr)) {
-                if (expr == nullptr) { // An anonymous splat like `f(*)`
-                    return make_unique<parser::ForwardedRestArg>(location);
-                } else { // Splatting an expression like `f(*a)`
-                    return make_unique<parser::Splat>(location, move(expr));
-                }
-            }
+            enforceHasExpr(expr);
 
             if (expr == nullptr) { // An anonymous splat like `f(*)`
                 auto var = MK::Local(location, core::Names::star());
@@ -3476,9 +3433,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto names = translateMulti(undefNode->names);
             auto numPosArgs = names.size();
 
-            if (!hasExpr(names)) {
-                return make_unique<parser::Undef>(location, move(names));
-            }
+            enforceHasExpr(names);
 
             auto args = nodeVecToStore<ast::Send::ARGS_store>(names);
             auto expr = MK::Send(location, MK::Constant(location, core::Symbols::Kernel()), core::Names::undef(),
@@ -3507,29 +3462,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // When the until loop is placed after a `begin` block, like `begin; end until false`,
             bool beginModifier = PM_NODE_FLAG_P(untilNode, PM_LOOP_FLAGS_BEGIN_MODIFIER);
 
-            if (!hasExpr(predicate, statements)) {
-                if (beginModifier) {
-                    return make_unique<parser::UntilPost>(location, move(predicate), move(statements));
-                } else {
-                    return make_unique<parser::Until>(location, move(predicate), move(statements));
-                }
+            enforceHasExpr(predicate, statements);
+
+            auto cond = predicate->takeDesugaredExpr();
+            auto body = statements ? statements->takeDesugaredExpr() : MK::EmptyTree();
+
+            if (beginModifier) {
+                auto breaker = MK::If(location, std::move(cond), MK::Break(location, MK::EmptyTree()), MK::EmptyTree());
+                auto breakWithBody = MK::InsSeq1(location, std::move(body), std::move(breaker));
+                ast::ExpressionPtr expr = MK::While(location, MK::True(location), std::move(breakWithBody));
+                return make_node_with_expr<parser::UntilPost>(move(expr), location, move(predicate), move(statements));
             } else {
-                auto cond = predicate->takeDesugaredExpr();
-                auto body = takeDesugaredExprOrEmptyTree(statements);
-                if (beginModifier) {
-                    auto breaker =
-                        MK::If(location, std::move(cond), MK::Break(location, MK::EmptyTree()), MK::EmptyTree());
-                    auto breakWithBody = MK::InsSeq1(location, std::move(body), std::move(breaker));
-                    ast::ExpressionPtr expr = MK::While(location, MK::True(location), std::move(breakWithBody));
-                    return make_node_with_expr<parser::UntilPost>(move(expr), location, move(predicate),
-                                                                  move(statements));
-                } else {
-                    // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
-                    auto negatedCond =
-                        MK::Send0(location, std::move(cond), core::Names::bang(), location.copyWithZeroLength());
-                    auto expr = MK::While(location, std::move(negatedCond), std::move(body));
-                    return make_node_with_expr<parser::Until>(move(expr), location, move(predicate), move(statements));
-                }
+                // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
+                auto negatedCond =
+                    MK::Send0(location, std::move(cond), core::Names::bang(), location.copyWithZeroLength());
+                auto expr = MK::While(location, std::move(negatedCond), std::move(body));
+                return make_node_with_expr<parser::Until>(move(expr), location, move(predicate), move(statements));
             }
         }
         case PM_WHEN_NODE: { // A `when` clause, as part of a `case` statement
@@ -3549,29 +3497,23 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // When the while loop is placed after a `begin` block, like `begin; end while false`,
             bool beginModifier = PM_NODE_FLAG_P(whileNode, PM_LOOP_FLAGS_BEGIN_MODIFIER);
 
-            if (!hasExpr(predicate, statements)) {
-                if (beginModifier) {
-                    return make_unique<parser::WhilePost>(location, move(predicate), move(statements));
-                } else {
-                    return make_unique<parser::While>(location, move(predicate), move(statements));
-                }
+            enforceHasExpr(predicate, statements);
+
+            auto cond = predicate->takeDesugaredExpr();
+            auto body = statements ? statements->takeDesugaredExpr() : MK::EmptyTree();
+
+            if (beginModifier) {
+                // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
+                auto negatedCond =
+                    MK::Send0(location, std::move(cond), core::Names::bang(), location.copyWithZeroLength());
+                auto breaker =
+                    MK::If(location, std::move(negatedCond), MK::Break(location, MK::EmptyTree()), MK::EmptyTree());
+                auto breakWithBody = MK::InsSeq1(location, std::move(body), std::move(breaker));
+                ast::ExpressionPtr expr = MK::While(location, MK::True(location), std::move(breakWithBody));
+                return make_node_with_expr<parser::WhilePost>(move(expr), location, move(predicate), move(statements));
             } else {
-                auto cond = predicate->takeDesugaredExpr();
-                auto body = takeDesugaredExprOrEmptyTree(statements);
-                if (beginModifier) {
-                    // TODO using bang (aka !) is not semantically correct because it can be overridden by the user.
-                    auto negatedCond =
-                        MK::Send0(location, std::move(cond), core::Names::bang(), location.copyWithZeroLength());
-                    auto breaker =
-                        MK::If(location, std::move(negatedCond), MK::Break(location, MK::EmptyTree()), MK::EmptyTree());
-                    auto breakWithBody = MK::InsSeq1(location, std::move(body), std::move(breaker));
-                    ast::ExpressionPtr expr = MK::While(location, MK::True(location), std::move(breakWithBody));
-                    return make_node_with_expr<parser::WhilePost>(move(expr), location, move(predicate),
-                                                                  move(statements));
-                } else {
-                    auto expr = MK::While(location, std::move(cond), std::move(body));
-                    return make_node_with_expr<parser::While>(move(expr), location, move(predicate), move(statements));
-                }
+                auto expr = MK::While(location, std::move(cond), std::move(body));
+                return make_node_with_expr<parser::While>(move(expr), location, move(predicate), move(statements));
             }
         }
         case PM_X_STRING_NODE: { // A non-interpolated x-string, like `/usr/bin/env ls`
@@ -3596,9 +3538,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto yieldArgs = translateArguments(yieldNode->arguments);
 
-            if (!hasExpr(yieldArgs)) {
-                return make_unique<parser::Yield>(location, move(yieldArgs));
-            }
+            enforceHasExpr(yieldArgs);
 
             ExpressionPtr recv;
             if (this->enclosingBlockParamName.exists()) {
@@ -3728,9 +3668,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto left = patternTranslate(alternationPatternNode->left);
             auto right = patternTranslate(alternationPatternNode->right);
 
-            if (!hasExpr(left, right)) {
-                return make_unique<parser::MatchAlt>(location, move(left), move(right));
-            }
+            enforceHasExpr(left, right);
 
             // Like array/hash patterns, MatchAlt is a structural pattern that doesn't have
             // a simple desugared expression - it's handled specially during pattern matching desugaring
@@ -3764,9 +3702,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 return value;
             }
 
-            if (!hasExpr(key, value)) {
-                return make_unique<parser::Pair>(location, move(key), move(value));
-            }
+            enforceHasExpr(key, value);
 
             // Pair is a structural component of hash patterns with no simple desugared expression
             return make_node_with_expr<parser::Pair>(MK::Nil(location), location, move(key), move(value));
@@ -3807,23 +3743,17 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             unique_ptr<parser::Node> arrayPattern = nullptr;
 
+            enforceHasExpr(sorbetElements);
+
             // When the pattern ends with an implicit rest node, we need to return an `ArrayPatternWithTail` instead
             if (prismRestNode != nullptr && PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
-                if (!hasExpr(sorbetElements)) {
-                    arrayPattern = make_unique<parser::ArrayPatternWithTail>(patternLoc, move(sorbetElements));
-                } else {
-                    // ArrayPatternWithTail is a structural pattern with no direct desugared expression
-                    arrayPattern = make_node_with_expr<parser::ArrayPatternWithTail>(MK::Nil(patternLoc), patternLoc,
-                                                                                     move(sorbetElements));
-                }
+                // ArrayPatternWithTail is a structural pattern with no direct desugared expression
+                arrayPattern = make_node_with_expr<parser::ArrayPatternWithTail>(MK::Nil(patternLoc), patternLoc,
+                                                                                 move(sorbetElements));
             } else {
-                if (!hasExpr(sorbetElements)) {
-                    arrayPattern = make_unique<parser::ArrayPattern>(patternLoc, move(sorbetElements));
-                } else {
-                    // ArrayPattern is a structural pattern with no direct desugared expression
-                    arrayPattern = make_node_with_expr<parser::ArrayPattern>(MK::Nil(patternLoc), patternLoc,
-                                                                             move(sorbetElements));
-                }
+                // ArrayPattern is a structural pattern with no direct desugared expression
+                arrayPattern =
+                    make_node_with_expr<parser::ArrayPattern>(MK::Nil(patternLoc), patternLoc, move(sorbetElements));
             }
 
             if (auto *prismConstant = arrayPatternNode->constant) {
@@ -3832,9 +3762,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 // E.g. the `Point` in `in Point[1, 2]`
                 auto sorbetConstant = translate(prismConstant);
 
-                if (!hasExpr(sorbetConstant, arrayPattern)) {
-                    return make_unique<parser::ConstPattern>(location, move(sorbetConstant), move(arrayPattern));
-                }
+                enforceHasExpr(sorbetConstant, arrayPattern);
 
                 // ConstPattern wrapping the array pattern - the desugared expression is Nil as it's structural
                 auto constPatternExpr = MK::Nil(location);
@@ -3867,12 +3795,10 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 auto expr = patternTranslate(prismSplatNode->expression);
                 auto splatLoc = translateLoc(prismSplatNode->base.location);
 
-                if (!hasExpr(expr)) {
-                    sorbetElements.emplace_back(make_unique<MatchRest>(splatLoc, move(expr)));
-                } else {
-                    sorbetElements.emplace_back(
-                        make_node_with_expr<parser::MatchRest>(MK::Nil(splatLoc), splatLoc, move(expr)));
-                }
+                enforceHasExpr(expr);
+
+                sorbetElements.emplace_back(
+                    make_node_with_expr<parser::MatchRest>(MK::Nil(splatLoc), splatLoc, move(expr)));
             }
 
             patternTranslateMultiInto(sorbetElements, prismMiddleNodes);
@@ -3883,17 +3809,13 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 auto expr = patternTranslate(prismSplatNode->expression);
                 auto splatLoc = translateLoc(prismSplatNode->base.location);
 
-                if (!hasExpr(expr)) {
-                    sorbetElements.emplace_back(make_unique<MatchRest>(splatLoc, move(expr)));
-                } else {
-                    sorbetElements.emplace_back(
-                        make_node_with_expr<parser::MatchRest>(MK::Nil(splatLoc), splatLoc, move(expr)));
-                }
+                enforceHasExpr(expr);
+
+                sorbetElements.emplace_back(
+                    make_node_with_expr<parser::MatchRest>(MK::Nil(splatLoc), splatLoc, move(expr)));
             }
 
-            if (!hasExpr(sorbetElements)) {
-                return make_unique<parser::FindPattern>(location, move(sorbetElements));
-            }
+            enforceHasExpr(sorbetElements);
 
             // FindPattern is a structural pattern with no simple desugared expression
             return make_node_with_expr<parser::FindPattern>(MK::Nil(location), location, move(sorbetElements));
@@ -3916,12 +3838,11 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                         auto assocSplatNode = down_cast<pm_assoc_splat_node>(prismRestNode);
                         auto value = patternTranslate(assocSplatNode->value);
 
-                        if (!hasExpr(value)) {
-                            sorbetElements.emplace_back(make_unique<parser::MatchRest>(loc, move(value)));
-                        } else {
-                            sorbetElements.emplace_back(
-                                make_node_with_expr<parser::MatchRest>(MK::Nil(loc), loc, move(value)));
-                        }
+                        enforceHasExpr(value);
+
+                        sorbetElements.emplace_back(
+                            make_node_with_expr<parser::MatchRest>(MK::Nil(loc), loc, move(value)));
+
                         break;
                     }
                     case PM_NO_KEYWORDS_PARAMETER_NODE: {
@@ -3949,13 +3870,11 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             unique_ptr<parser::Node> hashPattern = nullptr;
 
-            if (!hasExpr(sorbetElements)) {
-                hashPattern = make_unique<parser::HashPattern>(patternLoc, move(sorbetElements));
-            } else {
-                // HashPattern is a structural pattern with no direct desugared expression
-                hashPattern =
-                    make_node_with_expr<parser::HashPattern>(MK::Nil(patternLoc), patternLoc, move(sorbetElements));
-            }
+            enforceHasExpr(sorbetElements);
+
+            // HashPattern is a structural pattern with no direct desugared expression
+            hashPattern =
+                make_node_with_expr<parser::HashPattern>(MK::Nil(patternLoc), patternLoc, move(sorbetElements));
 
             if (auto *prismConstant = hashPatternNode->constant) {
                 // A hash pattern can start with a constant that matches against a specific type,
@@ -3963,9 +3882,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 // E.g. the `Point` in `in Point[x: Integer => 1, y: Integer => 2]`
                 auto sorbetConstant = translate(prismConstant);
 
-                if (!hasExpr(sorbetConstant, hashPattern)) {
-                    return make_unique<parser::ConstPattern>(location, move(sorbetConstant), move(hashPattern));
-                }
+                enforceHasExpr(sorbetConstant, hashPattern);
 
                 // ConstPattern wrapping the hash pattern - the desugared expression is Nil as it's structural
                 auto constPatternExpr = MK::Nil(location);
@@ -4013,10 +3930,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 sorbetPattern = patternTranslate(prismPattern);
             }
 
-            if (!hasExpr(sorbetPattern) || !hasExpr(statements)) {
-                return make_unique<parser::InPattern>(location, move(sorbetPattern), move(sorbetGuard),
-                                                      move(statements));
-            }
+            enforceHasExpr(sorbetPattern, statements);
 
             // A single `in` clause does not desugar into a standalone Ruby expression; it only
             // becomes meaningful when the enclosing `case` stitches together all clauses. Wrapping it
@@ -4046,9 +3960,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto beginNode =
                 make_node_with_expr<parser::Begin>(MK::Nil(beginNodeLocation), beginNodeLocation, move(statements));
 
-            if (!hasExpr(beginNode)) {
-                return make_unique<Pin>(location, move(beginNode));
-            }
+            enforceHasExpr(beginNode);
 
             // For pinned expressions, the desugared expression comes from the begin node
             auto pinExpr = beginNode->takeDesugaredExpr();
@@ -4059,9 +3971,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             auto variable = translate(pinnedVarNode->variable);
 
-            if (!hasExpr(variable)) {
-                return make_unique<Pin>(location, move(variable));
-            }
+            enforceHasExpr(variable);
 
             // For pinned variables, the desugared expression is just the variable's expression
             auto expr = variable->takeDesugaredExpr();
@@ -4071,9 +3981,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto prismSplatNode = down_cast<pm_splat_node>(node);
             auto expr = patternTranslate(prismSplatNode->expression);
 
-            if (!hasExpr(expr)) {
-                return make_unique<MatchRest>(location, move(expr));
-            }
+            enforceHasExpr(expr);
 
             // MatchRest is a structural pattern component with no simple desugared expression
             return make_node_with_expr<parser::MatchRest>(MK::Nil(location), location, move(expr));
@@ -4900,7 +4808,6 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
     ENFORCE(prismRescueNode, "translateRescue() should only be called if there's a `rescue` clause.")
 
     NodeVec rescueBodies;
-    bool allRescueBodiesHaveExpr = true;
 
     // Each `rescue` clause generates a `Resbody` node, which is a child of the `Rescue` node.
     for (pm_rescue_node *currentRescueNode = prismRescueNode; currentRescueNode != nullptr;
@@ -4919,27 +4826,24 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
         if (!exceptionsNodes.empty()) {
             auto arrayLoc = translateLoc(exceptionsNodes.front()->location.start, exceptionsNodes.back()->location.end);
 
-            if (!hasExpr(exceptions)) {
-                exceptionsArray = make_unique<parser::Array>(arrayLoc, move(exceptions));
+            enforceHasExpr(exceptions);
+
+            // Check if there are any splats in the exceptions
+            bool hasSplat = absl::c_any_of(exceptionsNodes, [](auto *ex) { return PM_NODE_TYPE_P(ex, PM_SPLAT_NODE); });
+
+            // Build ast::Array expression from exceptions
+            auto exceptionStore = nodeVecToStore<ast::Array::ENTRY_store>(exceptions);
+
+            ast::ExpressionPtr arrayExpr;
+            if (hasSplat) {
+                // Use desugarArray to properly handle splats with concat() calls
+                arrayExpr = desugarArray(arrayLoc, exceptionsNodes, move(exceptionStore));
             } else {
-                // Check if there are any splats in the exceptions
-                bool hasSplat =
-                    absl::c_any_of(exceptionsNodes, [](auto *ex) { return PM_NODE_TYPE_P(ex, PM_SPLAT_NODE); });
-
-                // Build ast::Array expression from exceptions
-                auto exceptionStore = nodeVecToStore<ast::Array::ENTRY_store>(exceptions);
-
-                ast::ExpressionPtr arrayExpr;
-                if (hasSplat) {
-                    // Use desugarArray to properly handle splats with concat() calls
-                    arrayExpr = desugarArray(arrayLoc, exceptionsNodes, move(exceptionStore));
-                } else {
-                    // Simple case: just create an array without desugaring splats
-                    arrayExpr = ast::make_expression<ast::Array>(arrayLoc, move(exceptionStore));
-                }
-
-                exceptionsArray = make_node_with_expr<parser::Array>(move(arrayExpr), arrayLoc, move(exceptions));
+                // Simple case: just create an array without desugaring splats
+                arrayExpr = ast::make_expression<ast::Array>(arrayLoc, move(exceptionStore));
             }
+
+            exceptionsArray = make_node_with_expr<parser::Array>(move(arrayExpr), arrayLoc, move(exceptions));
         }
 
         auto resbodyLoc = translateLoc(currentRescueNode->base.location);
@@ -4974,78 +4878,78 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
             resbodyLoc = core::LocOffsets{resbodyLoc.beginPos(), endPos};
         }
 
-        if (!hasExpr(var, rescueBody, exceptionsArray)) {
-            auto body = make_unique<parser::Resbody>(resbodyLoc, move(exceptionsArray), move(var), move(rescueBody));
-            allRescueBodiesHaveExpr = false;
-            rescueBodies.emplace_back(move(body));
-        } else {
-            // Build ast::RescueCase expression
-            ast::RescueCase::EXCEPTION_store astExceptions;
-            if (exceptionsArray != nullptr) {
-                auto exceptionsExpr = exceptionsArray->takeDesugaredExpr();
-                if (auto exceptionsArrayExpr = ast::cast_tree<ast::Array>(exceptionsExpr)) {
-                    astExceptions.insert(astExceptions.end(), make_move_iterator(exceptionsArrayExpr->elems.begin()),
-                                         make_move_iterator(exceptionsArrayExpr->elems.end()));
-                } else if (!ast::isa_tree<ast::EmptyTree>(exceptionsExpr)) {
-                    astExceptions.emplace_back(move(exceptionsExpr));
-                }
+        enforceHasExpr(var, rescueBody, exceptionsArray);
+
+        // Build ast::RescueCase expression
+        ast::RescueCase::EXCEPTION_store astExceptions;
+        if (exceptionsArray != nullptr) {
+            auto exceptionsExpr = exceptionsArray->takeDesugaredExpr();
+            if (auto exceptionsArrayExpr = ast::cast_tree<ast::Array>(exceptionsExpr)) {
+                astExceptions.insert(astExceptions.end(), make_move_iterator(exceptionsArrayExpr->elems.begin()),
+                                     make_move_iterator(exceptionsArrayExpr->elems.end()));
+            } else if (!ast::isa_tree<ast::EmptyTree>(exceptionsExpr)) {
+                astExceptions.emplace_back(move(exceptionsExpr));
             }
-
-            ast::ExpressionPtr varExpr;
-            ast::ExpressionPtr rescueBodyExpr;
-
-            // Check what kind of variable we have
-            bool isReference = var != nullptr && ast::isa_reference(var->peekDesugaredExpr());
-            bool isLocal = var != nullptr && ast::isa_tree<ast::Local>(var->peekDesugaredExpr());
-
-            if (isReference && !isLocal) {
-                auto &expr = var->peekDesugaredExpr();
-                if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(expr)) {
-                    isLocal = ident->kind == ast::UnresolvedIdent::Kind::Local;
-                }
-            }
-
-            if (isLocal) {
-                // Regular local variable
-                varExpr = var->takeDesugaredExpr();
-
-                rescueBodyExpr = takeDesugaredExprOrEmptyTree(rescueBody);
-            } else if (isReference) {
-                // Non-local reference (lvalue exception variables like @ex, @@ex, $ex)
-                // Create a temp variable and wrap the body
-                auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
-                auto varLoc = var->loc;
-                varExpr = ast::MK::Local(varLoc, rescueTemp);
-
-                // Create InsSeq: { @ex = <rescueTemp>; <rescue body> }
-                auto lhsExpr = var->takeDesugaredExpr();
-                auto assignExpr = ast::MK::Assign(varLoc, move(lhsExpr), ast::MK::Local(varLoc, rescueTemp));
-
-                ast::InsSeq::STATS_store stats;
-                stats.emplace_back(move(assignExpr));
-
-                auto bodyExpr = takeDesugaredExprOrEmptyTree(rescueBody);
-                rescueBodyExpr = ast::MK::InsSeq(varLoc, move(stats), move(bodyExpr));
-            } else {
-                // For bare rescue clauses with no variable, create a <rescueTemp> variable
-                // Legacy parser uses zero-length location only when there are no exceptions AND no body,
-                // otherwise uses full keyword location
-                auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
-                auto syntheticVarLoc = (exceptionsArray == nullptr && rescueBody == nullptr)
-                                           ? rescueKeywordLoc.copyWithZeroLength()
-                                           : rescueKeywordLoc;
-                varExpr = ast::MK::Local(syntheticVarLoc, rescueTemp);
-
-                rescueBodyExpr = takeDesugaredExprOrEmptyTree(rescueBody);
-            }
-
-            auto rescueCaseExpr = ast::make_expression<ast::RescueCase>(resbodyLoc, move(astExceptions), move(varExpr),
-                                                                        move(rescueBodyExpr));
-
-            auto body = make_node_with_expr<parser::Resbody>(move(rescueCaseExpr), resbodyLoc, move(exceptionsArray),
-                                                             move(var), move(rescueBody));
-            rescueBodies.emplace_back(move(body));
         }
+
+        ast::ExpressionPtr varExpr;
+        ast::ExpressionPtr rescueBodyExpr;
+
+        // Check what kind of variable we have
+        bool isReference = var != nullptr && ast::isa_reference(var->peekDesugaredExpr());
+        bool isLocal = var != nullptr && ast::isa_tree<ast::Local>(var->peekDesugaredExpr());
+
+        if (isReference && !isLocal) {
+            auto &expr = var->peekDesugaredExpr();
+            if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(expr)) {
+                isLocal = ident->kind == ast::UnresolvedIdent::Kind::Local;
+            }
+        }
+
+        if (isLocal) {
+            // Regular local variable
+            varExpr = var->takeDesugaredExpr();
+
+            if (rescueBody != nullptr) {
+                rescueBodyExpr = rescueBody->takeDesugaredExpr();
+            } else {
+                rescueBodyExpr = ast::MK::EmptyTree();
+            }
+        } else if (isReference) {
+            // Non-local reference (lvalue exception variables like @ex, @@ex, $ex)
+            // Create a temp variable and wrap the body
+            auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+            auto varLoc = var->loc;
+            varExpr = ast::MK::Local(varLoc, rescueTemp);
+
+            // Create InsSeq: { @ex = <rescueTemp>; <rescue body> }
+            auto lhsExpr = var->takeDesugaredExpr();
+            auto assignExpr = ast::MK::Assign(varLoc, move(lhsExpr), ast::MK::Local(varLoc, rescueTemp));
+
+            ast::InsSeq::STATS_store stats;
+            stats.emplace_back(move(assignExpr));
+
+            auto bodyExpr = rescueBody != nullptr ? rescueBody->takeDesugaredExpr() : ast::MK::EmptyTree();
+            rescueBodyExpr = ast::MK::InsSeq(varLoc, move(stats), move(bodyExpr));
+        } else {
+            // For bare rescue clauses with no variable, create a <rescueTemp> variable
+            // Legacy parser uses zero-length location only when there are no exceptions AND no body,
+            // otherwise uses full keyword location
+            auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+            auto syntheticVarLoc = (exceptionsArray == nullptr && rescueBody == nullptr)
+                                       ? rescueKeywordLoc.copyWithZeroLength()
+                                       : rescueKeywordLoc;
+            varExpr = ast::MK::Local(syntheticVarLoc, rescueTemp);
+
+            rescueBodyExpr = rescueBody != nullptr ? rescueBody->takeDesugaredExpr() : ast::MK::EmptyTree();
+        }
+
+        auto rescueCaseExpr =
+            ast::make_expression<ast::RescueCase>(resbodyLoc, move(astExceptions), move(varExpr), move(rescueBodyExpr));
+
+        auto body = make_node_with_expr<parser::Resbody>(move(rescueCaseExpr), resbodyLoc, move(exceptionsArray),
+                                                         move(var), move(rescueBody));
+        rescueBodies.emplace_back(move(body));
     }
 
     auto bodyNode = translateStatements(parentBeginNode->statements);
@@ -5098,13 +5002,7 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_begin_node *parentBeginN
 
     core::LocOffsets rescueLoc = translateLoc(rescueStart, rescueEnd);
 
-    // Check if all nodes have expressions
-    bool hasExpressions = hasExpr(bodyNode) && allRescueBodiesHaveExpr;
-
-    // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
-    if (!hasExpressions) {
-        return make_unique<parser::Rescue>(rescueLoc, move(bodyNode), move(rescueBodies), move(elseNode));
-    }
+    enforceHasExpr(bodyNode);
 
     // Build the ast::Rescue expression
     auto bodyExpr = takeDesugaredExprOrEmptyTree(bodyNode);
@@ -5190,21 +5088,19 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
 
             auto loc = translateLoc(start, end);
 
-            if (!hasExpr(translatedRescue, ensureBody)) {
-                translatedEnsure = make_unique<parser::Ensure>(loc, move(translatedRescue), move(ensureBody));
-            } else {
-                // Build ast::Rescue expression with ensure field set
-                // When we have both rescue and ensure, the translatedRescue is already an ast::Rescue,
-                // so we just need to set its ensure field
-                auto bodyExpr = translatedRescue->takeDesugaredExpr();
-                auto rescue = ast::cast_tree<ast::Rescue>(bodyExpr);
-                ENFORCE(rescue != nullptr, "translatedRescue should be a Rescue node");
+            enforceHasExpr(translatedRescue, ensureBody);
 
-                rescue->ensure = takeDesugaredExprOrEmptyTree(ensureBody);
+            // Build ast::Rescue expression with ensure field set
+            // When we have both rescue and ensure, the translatedRescue is already an ast::Rescue,
+            // so we just need to set its ensure field
+            auto bodyExpr = translatedRescue->takeDesugaredExpr();
+            auto rescue = ast::cast_tree<ast::Rescue>(bodyExpr);
+            ENFORCE(rescue != nullptr, "translatedRescue should be a Rescue node");
 
-                translatedEnsure =
-                    make_node_with_expr<parser::Ensure>(move(bodyExpr), loc, move(translatedRescue), move(ensureBody));
-            }
+            rescue->ensure = ensureBody != nullptr ? ensureBody->takeDesugaredExpr() : ast::MK::EmptyTree();
+
+            translatedEnsure =
+                make_node_with_expr<parser::Ensure>(move(bodyExpr), loc, move(translatedRescue), move(ensureBody));
         } else {
             // When there's no rescue clause, the Ensure node location depends on whether there are begin statements:
             // - If there are begin statements: span from start of begin statements to end of ensure statements
@@ -5226,22 +5122,20 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
 
             auto loc = translateLoc(start, end);
 
-            if (!hasExpr(bodyNode, ensureBody)) {
-                translatedEnsure = make_unique<parser::Ensure>(loc, move(bodyNode), move(ensureBody));
-            } else {
-                // Build ast::Rescue expression with ensure field set
-                // When there's no rescue clause, create a new Rescue with empty rescue cases
-                auto bodyExpr = takeDesugaredExprOrEmptyTree(bodyNode);
-                auto ensureExpr = takeDesugaredExprOrEmptyTree(ensureBody);
+            enforceHasExpr(bodyNode, ensureBody);
 
-                // Create ast::Rescue with empty rescue cases
-                ast::Rescue::RESCUE_CASE_store emptyCases;
-                auto emptyElseClause = ast::MK::EmptyTree();
-                auto rescueExpr = ast::make_expression<ast::Rescue>(loc, move(bodyExpr), move(emptyCases),
-                                                                    move(emptyElseClause), move(ensureExpr));
-                translatedEnsure =
-                    make_node_with_expr<parser::Ensure>(move(rescueExpr), loc, move(bodyNode), move(ensureBody));
-            }
+            // Build ast::Rescue expression with ensure field set
+            // When there's no rescue clause, create a new Rescue with empty rescue cases
+            auto bodyExpr = takeDesugaredExprOrEmptyTree(bodyNode);
+            auto ensureExpr = takeDesugaredExprOrEmptyTree(ensureBody);
+
+            // Create ast::Rescue with empty rescue cases
+            ast::Rescue::RESCUE_CASE_store emptyCases;
+            auto emptyElseClause = ast::MK::EmptyTree();
+            auto rescueExpr = ast::make_expression<ast::Rescue>(loc, move(bodyExpr), move(emptyCases),
+                                                                move(emptyElseClause), move(ensureExpr));
+            translatedEnsure =
+                make_node_with_expr<parser::Ensure>(move(rescueExpr), loc, move(bodyNode), move(ensureBody));
         }
 
         statements.emplace_back(move(translatedEnsure));
@@ -5257,7 +5151,8 @@ NodeVec Translator::translateEnsure(pm_begin_node *beginNode) {
 }
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
-// @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
+// @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one
+// `parser::Node`
 // @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
 unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
                                                          core::LocOffsets overrideLocation) {
@@ -5292,9 +5187,7 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
         return make_node_with_expr<parser::Begin>(MK::Nil(beginNodeLoc), beginNodeLoc, NodeVec{});
     }
 
-    if (!hasExpr(sorbetStmts)) {
-        return make_unique<parser::Begin>(beginNodeLoc, move(sorbetStmts));
-    }
+    enforceHasExpr(sorbetStmts);
 
     ast::InsSeq::STATS_store statements;
     statements.reserve(sorbetStmts.size() - 1); // -1 because the `Begin` node stores the last element separately.
@@ -5315,9 +5208,7 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
 unique_ptr<parser::Node> Translator::translateIfNode(core::LocOffsets location, unique_ptr<parser::Node> predicate,
                                                      unique_ptr<parser::Node> ifTrue,
                                                      unique_ptr<parser::Node> ifFalse) {
-    if (!hasExpr(predicate, ifTrue, ifFalse)) {
-        return make_unique<parser::If>(location, move(predicate), move(ifTrue), move(ifFalse));
-    }
+    enforceHasExpr(predicate, ifTrue, ifFalse);
 
     auto condExpr = predicate->takeDesugaredExpr();
     auto thenExpr = takeDesugaredExprOrEmptyTree(ifTrue);
@@ -5336,7 +5227,8 @@ unique_ptr<parser::Node> Translator::translateIfNode(core::LocOffsets location, 
 // The only exception is that dynamic constant path *operator* assignments inside of a method definition
 // do not raise a SyntaxError at runtime, so we want to skip the workaround in that case.
 // However, within this method, both regular constant path assignments and constant path operator assignments
-// are passed in as `pm_constant_path_node` types, so we need an extra boolean flag to know when to skip the workaround.
+// are passed in as `pm_constant_path_node` types, so we need an extra boolean flag to know when to skip the
+// workaround.
 //
 // Usually returns the `SorbetLHSNode`, but for constant writes and targets,
 // it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
@@ -5391,7 +5283,8 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
         if (auto *prismParentNode = node->parent) {
             // This constant reference is chained onto another constant reference.
-            // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the `name`.
+            // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the
+            // `name`.
             //   A::B::C
             //    /    \
             //  A::B   ::C
@@ -5580,7 +5473,8 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
 // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
 // The body can be a Begin node comprising multiple statements, or a single statement.
 // Return nullopt if the body does not have all of its expressions desugared.
-// TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
+// TODO: make the return non-optional after direct desugaring is complete.
+// https://github.com/Shopify/sorbet/issues/671
 optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode,
                                                                           unique_ptr<parser::Node> &scopeBody) {
     if (scopeBody == nullptr) { // Empty body
@@ -5589,13 +5483,11 @@ optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_nod
         return result;
     }
 
+    enforceHasExpr(scopeBody);
+
     ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
 
     if (1 < down_cast<pm_statements_node>(prismBodyNode)->body.size) { // Handle multi-statement body
-        if (!hasExpr(scopeBody)) {
-            return nullopt;
-        }
-
         auto beginExpr = scopeBody->takeDesugaredExpr();
 
         auto insSeqExpr = ast::cast_tree<ast::InsSeq>(beginExpr);
@@ -5610,10 +5502,6 @@ optional<ast::ClassDef::RHS_store> Translator::desugarScopeBodyToRHSStore(pm_nod
         result.emplace_back(move(insSeqExpr->expr));
         return result;
     } else { // Handle single-statement body
-        if (!hasExpr(scopeBody)) {
-            return nullopt;
-        }
-
         ast::ClassDef::RHS_store result;
         result.emplace_back(scopeBody->takeDesugaredExpr());
         return result;
