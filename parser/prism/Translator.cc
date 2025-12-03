@@ -2851,9 +2851,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto variable = translate(forNode->index);
             auto collection = translate(forNode->collection);
-            auto body = translateStatements(forNode->statements);
+            auto body = desugarStatements(forNode->statements);
 
-            enforceHasExpr(variable, collection, body);
+            enforceHasExpr(variable, collection);
 
             // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
             bool canProvideNiceDesugar = true;
@@ -2870,7 +2870,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 canProvideNiceDesugar = parser::NodeWithExpr::isa_node<parser::LVarLhs>(variable.get());
             }
 
-            auto bodyExpr = takeDesugaredExprOrEmptyTree(body);
             auto collectionExpr = collection->takeDesugaredExpr();
             auto locZeroLen = location.copyWithZeroLength();
             ast::MethodDef::PARAMS_store params;
@@ -2899,13 +2898,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     masgnExpr = MK::Assign(location, variable->takeDesugaredExpr(), move(tempLocal));
                 }
 
-                bodyExpr = MK::InsSeq1(location, move(masgnExpr), move(bodyExpr));
+                body = MK::InsSeq1(location, move(masgnExpr), move(body));
             }
 
-            auto block = MK::Block(location, move(bodyExpr), move(params));
+            auto block = MK::Block(location, move(body), move(params));
             auto expr = MK::Send0Block(location, move(collectionExpr), core::Names::each(), locZeroLen, move(block));
 
-            return make_node_with_expr<parser::For>(move(expr), location, move(variable), move(collection), move(body));
+            return expr_only(move(expr));
         }
         case PM_FORWARDING_ARGUMENTS_NODE: { // The `...` argument in a method call, like `foo(...)`
             return make_unique<parser::ForwardedArgs>(location);
