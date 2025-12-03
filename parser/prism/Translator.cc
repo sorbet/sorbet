@@ -30,6 +30,15 @@ bool hasExpr(const std::unique_ptr<parser::Node> &node) {
     return true;
 }
 
+bool hasExpr(const std::unique_ptr<NodeWithExpr> &node) {
+    if (node && !node->hasDesugaredExpr()) {
+        categoryCounterInc("Prism fallback", "hasExpr(NodeWithExpr) was false");
+        throw PrismFallback{};
+    }
+
+    return true;
+}
+
 bool hasExpr(const parser::NodeVec &nodes) {
     return absl::c_all_of(nodes, [](const auto &node) { return hasExpr(node); });
 }
@@ -111,7 +120,7 @@ static ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, parser::No
 
 // Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
 template <typename SorbetNode, typename... TArgs>
-unique_ptr<parser::Node> Translator::make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const {
+unique_ptr<NodeWithExpr> Translator::make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const {
     auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
     if (directlyDesugar) {
         return make_unique<NodeWithExpr>(move(whiteQuarkNode), move(desugaredExpr));

@@ -83,7 +83,7 @@ private:
           isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
 
     template <typename SorbetNode, typename... TArgs>
-    std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const;
+    std::unique_ptr<NodeWithExpr> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const;
 
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_unsupported_node(TArgs &&...args) const;
