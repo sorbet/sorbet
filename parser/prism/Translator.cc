@@ -22,7 +22,12 @@ using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
 bool hasExpr(const std::unique_ptr<parser::Node> &node) {
-    return node == nullptr || node->hasDesugaredExpr();
+    if (node && !node->hasDesugaredExpr()) {
+        categoryCounterInc("Prism fallback", "hasExpr was false");
+        throw PrismFallback{};
+    }
+
+    return true;
 }
 
 bool hasExpr(const parser::NodeVec &nodes) {
@@ -111,7 +116,8 @@ unique_ptr<parser::Node> Translator::make_node_with_expr(ast::ExpressionPtr desu
     if (directlyDesugar) {
         return make_unique<NodeWithExpr>(move(whiteQuarkNode), move(desugaredExpr));
     } else {
-        return whiteQuarkNode;
+        categoryCounterInc("Prism fallback", "make_node_with_expr");
+        throw PrismFallback{};
     }
 }
 
@@ -126,7 +132,8 @@ std::unique_ptr<parser::Node> Translator::make_unsupported_node(TArgs &&...args)
 
         return make_unique<NodeWithExpr>(move(whiteQuarkNode), MK::EmptyTree());
     } else {
-        return whiteQuarkNode;
+        categoryCounterInc("Prism fallback", "make_unsupported_node");
+        throw PrismFallback{};
     }
 }
 

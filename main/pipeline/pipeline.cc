@@ -338,16 +338,16 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
-                              const options::Printers &print, bool preserveConcreteSyntax = false) {
+                              const options::Printers &print, bool preserveConcreteSyntax = false,
+                              bool usePrismDesugar = false) {
+    ENFORCE(parseTree);
+
     Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
     ast::ExpressionPtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
-        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
-        auto directlyDesugar = gs.parseWithPrism && !gs.cacheSensitiveOptions.rbsEnabled;
-        ast = directlyDesugar ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
+        ast = usePrismDesugar ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
                               : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
     if (print.DesugarTree.enabled) {
@@ -421,6 +421,8 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 return emptyParsedFile(file);
             }
 
+            bool usePrismDesugar = false;
+
             unique_ptr<parser::Node> parseTree;
             switch (parser) {
                 case options::Parser::ORIGINAL: {
@@ -434,7 +436,18 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     break;
                 }
                 case options::Parser::PRISM: {
-                    auto parseResult = runPrismParser(lgs, file, print, opts);
+                    parser::ParseResult parseResult;
+                    try {
+                        parseResult = runPrismParser(lgs, file, print, opts);
+
+                        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
+                        // in `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+                        usePrismDesugar = !lgs.cacheSensitiveOptions.rbsEnabled;
+                        categoryCounterInc("Prism parse kind", "direct");
+                    } catch (parser::Prism::PrismFallback &) {
+                        parseResult = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+                        categoryCounterInc("Prism parse kind", "fallback");
+                    }
 
                     // parseResult is null if runPrismParser stopped after an intermediate phase
                     if (parseResult.tree == nullptr) {
@@ -449,7 +462,8 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 }
             }
 
-            tree = runDesugar(lgs, file, move(parseTree), print);
+            tree = runDesugar(lgs, file, move(parseTree), print, false, usePrismDesugar);
+
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
