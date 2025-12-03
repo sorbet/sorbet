@@ -27,8 +27,8 @@ class ParentValidator
     T.reveal_type(other) # error: `T.anything`
     case other
     when @mod_parent
-      T.reveal_type(other) # error: `T.anything`
-      return other # error: Expected `T.nilable(Parent)` but found `T.anything` for method result type
+      T.reveal_type(other) # error: `Parent`
+      return other
     else
       T.reveal_type(other) # error: `T.anything`
       return nil
@@ -40,8 +40,8 @@ class ParentValidator
     T.reveal_type(other) # error: `T.anything`
     case other
     when @class_of_final
-      T.reveal_type(other) # error: `T.anything`
-      return other # error: Expected `T.nilable(FinalClass)` but found `T.anything` for method result type
+      T.reveal_type(other) # error: `FinalClass`
+      return other
     else
       T.reveal_type(other) # error: `T.anything`
       return nil
@@ -53,11 +53,11 @@ class ParentValidator
     T.reveal_type(x) # error: `T.any(FinalClass, Integer)`
     case x
     when @class_of_final
-      T.reveal_type(x) # error: `T.any(FinalClass, Integer)`
+      T.reveal_type(x) # error: `FinalClass`
     when Integer
       T.reveal_type(x) # error: `Integer`
     else
-      T.absurd(x) # error: Control flow could reach `T.absurd` because the type `FinalClass` wasn't handled
+      T.absurd(x)
     end
   end
 end
