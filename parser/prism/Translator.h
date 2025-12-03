@@ -263,8 +263,8 @@ private:
     // Multi-assignment desugaring
     ast::ExpressionPtr desugarMlhs(core::LocOffsets loc, parser::Mlhs *lhs, ast::ExpressionPtr rhs);
 
-    // Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
-    ast::ClassDef::RHS_store desugarScopeBodyToRHSStore(pm_node *prismBodyNode);
+    // Desugar a class, singleton class or module body.
+    ast::ClassDef::RHS_store desugarClassOrModule(pm_node *prismBodyNode);
 
     void reportError(core::LocOffsets loc, const std::string &message) const;
 

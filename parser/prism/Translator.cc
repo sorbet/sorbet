@@ -2502,7 +2502,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             enforceHasExpr(name, superclass);
 
             auto body = this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName)
-                            .desugarScopeBodyToRHSStore(classNode->body);
+                            .desugarClassOrModule(classNode->body);
 
             ast::ClassDef::ANCESTORS_store ancestors;
             if (superclass == nullptr) {
@@ -3336,7 +3336,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             enforceHasExpr(name);
 
             auto body = this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName)
-                            .desugarScopeBodyToRHSStore(moduleNode->body);
+                            .desugarClassOrModule(moduleNode->body);
 
             auto nameExpr = name->takeDesugaredExpr();
             auto moduleDef = MK::Module(location, declLoc, move(nameExpr), move(body));
@@ -3652,7 +3652,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             auto body = this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName)
-                            .desugarScopeBodyToRHSStore(classNode->body);
+                            .desugarClassOrModule(classNode->body);
 
             // Singleton classes are modelled as a class with a special name `<singleton>`
             auto singletonClassName = ast::make_expression<ast::UnresolvedIdent>(
@@ -5612,11 +5612,9 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
 }
 
-// Extracts the desugared expressions out of a "scope" (class/sclass/module) body.
+// Desugar a class, singleton class or module body.
 // The body can be a Begin node comprising multiple statements, or a single statement.
-// Return nullopt if the body does not have all of its expressions desugared.
-// TODO: make the return non-optional after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
-ast::ClassDef::RHS_store Translator::desugarScopeBodyToRHSStore(pm_node *prismBodyNode) {
+ast::ClassDef::RHS_store Translator::desugarClassOrModule(pm_node *prismBodyNode) {
     if (prismBodyNode == nullptr) { // Empty body
         ast::ClassDef::RHS_store result;
         result.emplace_back(MK::EmptyTree());
