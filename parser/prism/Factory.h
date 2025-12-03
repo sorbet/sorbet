@@ -27,6 +27,14 @@ public:
         return new (memory) T{};
     }
 
+    template <typename T> T *calloc(size_t count) const {
+        void *p = ::xcalloc(count, sizeof(T));
+        if (!p) {
+            throw std::bad_alloc{};
+        }
+        return static_cast<T *>(p);
+    }
+
     pm_node_t initializeBaseNode(pm_node_type_t type, const pm_location_t loc) const;
 
     // Basic node creators
@@ -105,7 +113,6 @@ public:
     // Wrappers around Prism's allocator functions, which raise `std::bad_alloc` instead of returning `nullptr`.
     // Use these to allocate memory that will be owned by Prism.
     void *malloc(size_t size) const;
-    void *calloc(size_t count, size_t size) const;
     void *realloc(void *ptr, size_t size) const;
     void free(void *ptr) const;
 

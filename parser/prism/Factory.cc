@@ -29,7 +29,7 @@ pm_node_list_t Factory::copyNodesToList(const absl::Span<pm_node_t *> nodes) con
         return (pm_node_list_t){.size = 0, .capacity = 0, .nodes = nullptr};
     }
 
-    auto result = static_cast<pm_node_t **>(this->calloc(size, sizeof(pm_node_t *)));
+    auto result = this->calloc<pm_node_t *>(size);
     for (size_t i = 0; i < size; i++) {
         result[i] = nodes[i];
     }
@@ -146,7 +146,7 @@ pm_node_t *Factory::Nil(core::LocOffsets loc) const {
 pm_constant_id_t Factory::addConstantToPool(string_view name) const {
     pm_parser_t *prismParser = parser.getRawParserPointer();
     size_t nameLen = name.size();
-    PrismUniquePtr<uint8_t> stable{reinterpret_cast<uint8_t *>(this->calloc(nameLen, sizeof(uint8_t))), prismFree};
+    PrismUniquePtr<uint8_t> stable{this->calloc<uint8_t>(nameLen), prismFree};
 
     memcpy(stable.get(), name.data(), nameLen);
     pm_constant_id_t id = pm_constant_pool_insert_owned(&prismParser->constant_pool, stable.release(), nameLen);
@@ -196,7 +196,7 @@ pm_node_t *Factory::String(core::LocOffsets nameLoc, string_view name) const {
 
     size_t nameSize = name.size();
 
-    PrismUniquePtr<uint8_t> stable{reinterpret_cast<uint8_t *>(this->calloc(nameSize, sizeof(uint8_t))), prismFree};
+    PrismUniquePtr<uint8_t> stable{this->calloc<uint8_t>(nameSize), prismFree};
     memcpy(stable.get(), name.data(), nameSize);
 
     pm_string_node_t *stringNode = allocateNode<pm_string_node_t>();
@@ -527,14 +527,6 @@ pm_node_t *Factory::StatementsNode(core::LocOffsets loc, const absl::Span<pm_nod
 
 void *Factory::malloc(size_t size) const {
     void *p = ::xmalloc(size); // see Prism's `include/prism/defines.h`
-    if (!p) {
-        throw std::bad_alloc{};
-    };
-    return p;
-}
-
-void *Factory::calloc(size_t count, size_t size) const {
-    void *p = ::xcalloc(count, size); // see Prism's `include/prism/defines.h`
     if (!p) {
         throw std::bad_alloc{};
     };
