@@ -3181,10 +3181,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
             auto multiTargetNode = down_cast<pm_multi_target_node>(node);
-
             auto lhsLoc = translateLoc(mlhsLocation(multiTargetNode));
-
-            return translateMultiTargetLhs(multiTargetNode, lhsLoc);
+            auto expr = desugarMlhs(lhsLoc, multiTargetNode, MK::EmptyTree());
+            return expr_only(move(expr));
         }
         case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
             auto multiWriteNode = down_cast<pm_multi_write_node>(node);
