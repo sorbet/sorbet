@@ -132,7 +132,7 @@ unique_ptr<NodeWithExpr> Translator::make_node_with_expr(ast::ExpressionPtr desu
 
 // Like `make_node_with_expr`, but specifically for unsupported nodes.
 template <typename SorbetNode, typename... TArgs>
-std::unique_ptr<parser::Node> Translator::make_unsupported_node(TArgs &&...args) const {
+std::unique_ptr<NodeWithExpr> Translator::make_unsupported_node(TArgs &&...args) const {
     auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
     if (directlyDesugar) {
         if (auto e = ctx.beginIndexerError(whiteQuarkNode->loc, core::errors::Desugar::UnsupportedNode)) {
