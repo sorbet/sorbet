@@ -1710,7 +1710,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*)`
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             unique_ptr<parser::Hash> kwargsHash;
-            auto kwargsHashHasExpr = true; // true if we can directly desugar the kwargs Hash, if any.
             if (!prismArgs.empty()) {
                 // Pop the Kwargs Hash off the end of the arguments, if there is one.
                 if (PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
@@ -1724,19 +1723,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         // Remove the kwargsHash from the arguments Span, so it's not revisited by the `for` loop below.
                         prismArgs.remove_suffix(1);
 
-                        kwargsHashHasExpr = absl::c_all_of(kwargsHash->pairs, [](auto &node) {
+                        for (auto &node : kwargsHash->pairs) {
                             // Only support kwarg Hashes that only contain pairs for now.
-                            // TODO: Add support for Kwsplat and ForwardedKwrestArg
 
-                            auto pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get());
-                            if (pair == nullptr) {
-                                return false;
+                            if (auto pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get())) {
+                                enforceHasExpr(pair->key, pair->value);
+                                continue;
+                            } else { // TODO: Add support for Kwsplat and ForwardedKwrestArg
+                                enforceHasExpr(node);
                             }
-
-                            enforceHasExpr(pair->key, pair->value);
-
-                            return true;
-                        });
+                        };
                     }
                 }
 
@@ -1788,7 +1784,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             });
 
             enforceHasExpr(receiver);
-            auto supportedCallType = constantNameString != "block_given?" && kwargsHashHasExpr && supportedArgs;
+            auto supportedCallType = constantNameString != "block_given?" && supportedArgs;
 
             unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
             unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
