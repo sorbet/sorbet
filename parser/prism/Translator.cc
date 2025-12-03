@@ -2849,25 +2849,24 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FOR_NODE: { // `for x in a; ...; end`
             auto forNode = down_cast<pm_for_node>(node);
 
-            auto variable = translate(forNode->index);
+            auto variable = desugar(forNode->index);
             auto collection = desugar(forNode->collection);
             auto body = desugarStatements(forNode->statements);
 
-            enforceHasExpr(variable);
-
             // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
             bool canProvideNiceDesugar = true;
-            auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(variable.get());
+            bool isMultiTarget = PM_NODE_TYPE_P(forNode->index, PM_MULTI_TARGET_NODE);
 
             // Check if the variable is a simple local variable or a multi-target with only local variables
-            if (mlhs) {
-                // Multi-target: check if all are local variables (no nested Mlhs or other complex targets)
-                canProvideNiceDesugar = absl::c_all_of(mlhs->exprs, [](const auto &c) {
-                    return parser::NodeWithExpr::isa_node<parser::LVarLhs>(c.get());
-                });
+            if (isMultiTarget) {
+                // Multi-target: check if all are local variables (no nested multi-targets or other complex targets)
+                auto multiTargetNode = down_cast<pm_multi_target_node>(forNode->index);
+                auto targets = absl::MakeSpan(multiTargetNode->lefts.nodes, multiTargetNode->lefts.size);
+                canProvideNiceDesugar = absl::c_all_of(
+                    targets, [](pm_node_t *target) { return PM_NODE_TYPE_P(target, PM_LOCAL_VARIABLE_TARGET_NODE); });
             } else {
                 // Single variable: check if it's a local variable
-                canProvideNiceDesugar = parser::NodeWithExpr::isa_node<parser::LVarLhs>(variable.get());
+                canProvideNiceDesugar = PM_NODE_TYPE_P(forNode->index, PM_LOCAL_VARIABLE_TARGET_NODE);
             }
 
             auto locZeroLen = location.copyWithZeroLength();
@@ -2875,12 +2874,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             if (canProvideNiceDesugar) {
                 // Simple case: `for x in a; body; end` -> `a.each { |x| body }`
-                if (mlhs) {
-                    for (auto &c : mlhs->exprs) {
-                        params.emplace_back(c->takeDesugaredExpr());
+                if (isMultiTarget) {
+                    auto multiTargetNode = down_cast<pm_multi_target_node>(forNode->index);
+                    auto targets = absl::MakeSpan(multiTargetNode->lefts.nodes, multiTargetNode->lefts.size);
+                    for (auto *target : targets) {
+                        auto targetNode = desugar(target);
+                        params.emplace_back(move(targetNode));
                     }
                 } else {
-                    params.emplace_back(variable->takeDesugaredExpr());
+                    params.emplace_back(move(variable));
                 }
             } else {
                 // Complex case: `for @x in a; body; end` -> `a.each { || @x = <temp>; body }`
@@ -2889,12 +2891,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                 // Desugar the assignment
                 ExpressionPtr masgnExpr;
-                if (mlhs) {
+                if (isMultiTarget) {
                     // Multi-target: use desugarMlhs for complex expansion
+                    // TODO: simplify this once we have desugarMlhs that accepts a prism node
+                    auto mlhsNode = translate(forNode->index);
+                    auto *mlhs = parser::NodeWithExpr::cast_node<parser::Mlhs>(mlhsNode.get());
                     masgnExpr = desugarMlhs(location, mlhs, move(tempLocal));
                 } else {
                     // Single variable: simple assignment
-                    masgnExpr = MK::Assign(location, variable->takeDesugaredExpr(), move(tempLocal));
+                    masgnExpr = MK::Assign(location, move(variable), move(tempLocal));
                 }
 
                 body = MK::InsSeq1(location, move(masgnExpr), move(body));
