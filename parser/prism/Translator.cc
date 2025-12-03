@@ -87,6 +87,23 @@ static void collectPatternMatchingVars(ast::InsSeq::STATS_store &vars, parser::N
     }
 }
 
+// Desugar `in` and `=>` oneline pattern matching (mirrors desugarOnelinePattern in PrismDesugar.cc)
+static ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, parser::Node *match) {
+    auto matchExpr = MK::RaiseUnimplemented(loc);
+    auto bodyExpr = MK::RaiseUnimplemented(loc);
+    auto elseExpr = MK::EmptyTree();
+
+    ast::InsSeq::STATS_store vars;
+    collectPatternMatchingVars(vars, match);
+
+    if (!vars.empty()) {
+        auto matchLoc = match != nullptr ? match->loc : loc;
+        bodyExpr = MK::InsSeq(matchLoc, move(vars), move(bodyExpr));
+    }
+
+    return MK::If(loc, move(matchExpr), move(bodyExpr), move(elseExpr));
+}
+
 // Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
 template <typename SorbetNode, typename... TArgs>
 unique_ptr<parser::Node> Translator::make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const {
@@ -2912,7 +2929,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto value = patternTranslate(matchRequiredNode->value);
             auto pattern = patternTranslate(matchRequiredNode->pattern);
 
-            return make_unique<parser::MatchPattern>(location, move(value), move(pattern));
+            if (!directlyDesugar || !hasExpr(value, pattern)) {
+                return make_unique<parser::MatchPattern>(location, move(value), move(pattern));
+            }
+
+            auto expr = desugarOnelinePattern(location, pattern.get());
+            return make_node_with_expr<parser::MatchPattern>(move(expr), location, move(value), move(pattern));
         }
         case PM_MATCH_PREDICATE_NODE: {
             auto matchPredicateNode = down_cast<pm_match_predicate_node>(node);
@@ -2920,7 +2942,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto value = patternTranslate(matchPredicateNode->value);
             auto pattern = patternTranslate(matchPredicateNode->pattern);
 
-            return make_unique<parser::MatchPatternP>(location, move(value), move(pattern));
+            if (!directlyDesugar || !hasExpr(value, pattern)) {
+                return make_unique<parser::MatchPatternP>(location, move(value), move(pattern));
+            }
+
+            auto expr = desugarOnelinePattern(location, pattern.get());
+            return make_node_with_expr<parser::MatchPatternP>(move(expr), location, move(value), move(pattern));
         }
         case PM_MATCH_WRITE_NODE: { // A regex match that assigns to a local variable, like `a =~ /wat/`
             auto matchWriteNode = down_cast<pm_match_write_node>(node);
