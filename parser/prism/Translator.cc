@@ -151,6 +151,7 @@ template <typename StoreType> StoreType Translator::nodeListToStore(const pm_nod
 }
 
 // Collect pattern variable assignments from a pattern node (similar to desugarPatternMatchingVars in PrismDesugar.cc)
+// TODO: Remove this function once collectPatternMatchingVarsPrism is fully tested
 static void collectPatternMatchingVars(ast::InsSeq::STATS_store &vars, parser::Node *node) {
     if (auto *var = parser::NodeWithExpr::cast_node<parser::MatchVar>(node)) {
         auto loc = var->loc;
@@ -181,6 +182,56 @@ static void collectPatternMatchingVars(ast::InsSeq::STATS_store &vars, parser::N
     } else if (auto *alt_pattern = parser::NodeWithExpr::cast_node<parser::MatchAlt>(node)) {
         collectPatternMatchingVars(vars, alt_pattern->left.get());
         collectPatternMatchingVars(vars, alt_pattern->right.get());
+    }
+}
+
+// Collect pattern variable assignments from a pattern node (similar to desugarPatternMatchingVars in PrismDesugar.cc)
+void Translator::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, pm_node_t *node) {
+    if (node == nullptr) {
+        return;
+    }
+
+    if (PM_NODE_TYPE_P(node, PM_LOCAL_VARIABLE_TARGET_NODE)) {
+        auto localVarTargetNode = down_cast<pm_local_variable_target_node>(node);
+        auto loc = translateLoc(localVarTargetNode->base.location);
+        auto val = MK::RaiseUnimplemented(loc);
+        auto name = translateConstantName(localVarTargetNode->name);
+        vars.emplace_back(MK::Assign(loc, name, move(val)));
+    } else if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) {
+        auto assocSplatNode = down_cast<pm_assoc_splat_node>(node);
+        collectPatternMatchingVarsPrism(vars, assocSplatNode->value);
+    } else if (PM_NODE_TYPE_P(node, PM_ASSOC_NODE)) {
+        auto assocNode = down_cast<pm_assoc_node>(node);
+        collectPatternMatchingVarsPrism(vars, assocNode->key);
+        collectPatternMatchingVarsPrism(vars, assocNode->value);
+    } else if (PM_NODE_TYPE_P(node, PM_CAPTURE_PATTERN_NODE)) {
+        auto matchAsNode = down_cast<pm_capture_pattern_node>(node);
+        auto loc = translateLoc(matchAsNode->base.location);
+        auto name = translateConstantName(matchAsNode->target->name);
+        auto val = MK::RaiseUnimplemented(loc);
+        vars.emplace_back(MK::Assign(loc, name, move(val)));
+        collectPatternMatchingVarsPrism(vars, matchAsNode->value);
+    } else if (PM_NODE_TYPE_P(node, PM_ARRAY_PATTERN_NODE)) {
+        auto arrayPatternNode = down_cast<pm_array_pattern_node>(node);
+        auto requireds = absl::MakeSpan(arrayPatternNode->requireds.nodes, arrayPatternNode->requireds.size);
+        for (auto &elt : requireds) {
+            collectPatternMatchingVarsPrism(vars, elt);
+        }
+        collectPatternMatchingVarsPrism(vars, arrayPatternNode->rest);
+        auto posts = absl::MakeSpan(arrayPatternNode->posts.nodes, arrayPatternNode->posts.size);
+        for (auto &elt : posts) {
+            collectPatternMatchingVarsPrism(vars, elt);
+        }
+    } else if (PM_NODE_TYPE_P(node, PM_HASH_PATTERN_NODE)) {
+        auto hashPatternNode = down_cast<pm_hash_pattern_node>(node);
+        auto elements = absl::MakeSpan(hashPatternNode->elements.nodes, hashPatternNode->elements.size);
+        for (auto &elt : elements) {
+            collectPatternMatchingVarsPrism(vars, elt);
+        }
+    } else if (PM_NODE_TYPE_P(node, PM_ALTERNATION_PATTERN_NODE)) {
+        auto alternationPatternNode = down_cast<pm_alternation_pattern_node>(node);
+        collectPatternMatchingVarsPrism(vars, alternationPatternNode->left);
+        collectPatternMatchingVarsPrism(vars, alternationPatternNode->right);
     }
 }
 
@@ -2206,7 +2257,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto caseMatchNode = down_cast<pm_case_match_node>(node);
 
             auto predicate = translate(caseMatchNode->predicate);
-            auto inNodes = patternTranslateMulti(caseMatchNode->conditions);
+            auto inNodes = absl::MakeSpan(caseMatchNode->conditions.nodes, caseMatchNode->conditions.size);
             auto elseClause = translate(up_cast(caseMatchNode->else_clause));
 
             // Build an if ladder similar to CASE_NODE
@@ -2225,24 +2276,27 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             // Build the if ladder backwards from the last "in" to the first
             for (auto it = inNodes.rbegin(); it != inNodes.rend(); ++it) {
-                auto inPattern = parser::NodeWithExpr::cast_node<parser::InPattern>(it->get());
-                ENFORCE(inPattern != nullptr, "case pattern without an in?");
+                ENFORCE(PM_NODE_TYPE_P(*it, PM_IN_NODE));
+                auto inPattern = down_cast<pm_in_node>(*it);
 
                 // Use RaiseUnimplemented as the condition (like desugarOnelinePattern)
-                auto patternLoc = inPattern->pattern != nullptr ? inPattern->pattern->loc : inPattern->loc;
-                auto matchExpr = MK::RaiseUnimplemented(patternLoc);
+                auto patternLoc =
+                    inPattern->pattern != nullptr ? inPattern->pattern->location : inPattern->base.location;
+                auto matchExpr = MK::RaiseUnimplemented(translateLoc(patternLoc));
 
                 // The body is the statements from the "in" clause
-                auto thenExpr = takeDesugaredExprOrEmptyTree(inPattern->body);
+                auto thenExpr = desugarStatements(inPattern->statements);
 
                 // Collect pattern variable assignments from the pattern
                 ast::InsSeq::STATS_store vars;
-                collectPatternMatchingVars(vars, inPattern->pattern.get());
+                collectPatternMatchingVarsPrism(vars, inPattern->pattern);
                 if (!vars.empty()) {
-                    thenExpr = MK::InsSeq(patternLoc, move(vars), move(thenExpr));
+                    auto loc = translateLoc(patternLoc);
+                    thenExpr = MK::InsSeq(loc, move(vars), move(thenExpr));
                 }
 
-                resultExpr = MK::If(inPattern->loc, move(matchExpr), move(thenExpr), move(resultExpr));
+                resultExpr =
+                    MK::If(translateLoc(inPattern->base.location), move(matchExpr), move(thenExpr), move(resultExpr));
             }
 
             // Wrap in an InsSeq with the predicate assignment (if there is a predicate)
@@ -2250,9 +2304,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto assignExpr = MK::Assign(predicateLoc, tempName, predicate->takeDesugaredExpr());
                 resultExpr = MK::InsSeq1(location, move(assignExpr), move(resultExpr));
             }
-
-            return make_node_with_expr<parser::CaseMatch>(move(resultExpr), location, move(predicate), move(inNodes),
-                                                          move(elseClause));
+            return expr_only(move(resultExpr));
         }
         case PM_CASE_NODE: { // A classic `case` statement that only uses `when` (and not pattern matching with `in`)
             auto caseNode = down_cast<pm_case_node>(node);
@@ -4087,7 +4139,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto prismPattern = inNode->pattern;
             unique_ptr<parser::Node> sorbetPattern;
             unique_ptr<parser::Node> sorbetGuard;
-            auto statements = translateStatements(inNode->statements);
+            auto statements = desugarStatements(inNode->statements);
 
             if (prismPattern != nullptr &&
                 (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE) || PM_NODE_TYPE_P(prismPattern, PM_UNLESS_NODE))) {
@@ -4115,15 +4167,14 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 sorbetPattern = patternTranslate(prismPattern);
             }
 
-            enforceHasExpr(sorbetPattern, statements);
+            enforceHasExpr(sorbetPattern);
 
             // A single `in` clause does not desugar into a standalone Ruby expression; it only
             // becomes meaningful when the enclosing `case` stitches together all clauses. Wrapping it
             // in a NodeWithExpr seeded with `EmptyTree` satisfies the API contract so that
             // `hasExpr(inNodes)` can succeed. The enclosing `case` later consumes the real
             // expressions from the pattern and body when it assembles the final AST.
-            return make_node_with_expr<parser::InPattern>(MK::EmptyTree(), location, move(sorbetPattern),
-                                                          move(sorbetGuard), move(statements));
+            return empty_expr();
         }
         case PM_LOCAL_VARIABLE_TARGET_NODE: { // A variable binding in a pattern, like the `head` in `[head, *tail]`
             auto localVarTargetNode = down_cast<pm_local_variable_target_node>(node);

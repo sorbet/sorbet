@@ -95,6 +95,9 @@ private:
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
+    // Collect pattern variable assignments from a prism pattern node
+    void collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, pm_node_t *node);
+    
     std::tuple<std::unique_ptr<parser::Params>, core::LocOffsets, core::NameRef /* enclosingBlockParamName */>
     translateParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location, bool isDef);
 
