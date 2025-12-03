@@ -514,7 +514,9 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *l
     bool didSplat = false;
     auto zloc = loc.copyWithZeroLength();
 
-    for (auto &c : lhs->exprs) {
+    size_t totalSize = lhs->exprs.size();
+
+    auto processTarget = [&](unique_ptr<parser::Node> &c) {
         if (auto *splat = parser::NodeWithExpr::cast_node<parser::SplatLhs>(c.get())) {
             ENFORCE(!didSplat, "did splat already");
             didSplat = true;
@@ -522,7 +524,7 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *l
             ast::ExpressionPtr lh = splat->takeDesugaredExpr();
 
             int left = i;
-            int right = lhs->exprs.size() - left - 1;
+            int right = totalSize - left - 1;
 
             if (!ast::isa_tree<ast::EmptyTree>(lh)) {
                 if (right == 0) {
@@ -565,6 +567,10 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *l
 
             i++;
         }
+    };
+
+    for (auto &c : lhs->exprs) {
+        processTarget(c);
     }
 
     auto expanded = MK::Send3(loc, MK::Magic(loc), core::Names::expandSplat(), zloc, MK::Local(loc, tempRhs),
