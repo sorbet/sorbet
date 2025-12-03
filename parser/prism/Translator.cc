@@ -3189,14 +3189,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
             auto multiWriteNode = down_cast<pm_multi_write_node>(node);
 
-            auto rhsValue = translate(multiWriteNode->value);
+            auto rhsExpr = desugar(multiWriteNode->value);
 
             // Sorbet's legacy parser doesn't include the opening `(` (see `startLoc()` for details),
             // so we can't just use the entire Prism location for the Masgn node.
             location = translateLoc(startLoc(up_cast(multiWriteNode)), endLoc(multiWriteNode->value));
 
-            auto rhs = rhsValue->takeDesugaredExpr();
-            auto expr = desugarMlhs(location, multiWriteNode, move(rhs));
+            auto expr = desugarMlhs(location, multiWriteNode, move(rhsExpr));
             return expr_only(move(expr));
         }
         case PM_NEXT_NODE: { // A `next` statement, e.g. `next`, `next 1, 2, 3`
