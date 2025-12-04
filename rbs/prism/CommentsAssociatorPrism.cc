@@ -9,6 +9,8 @@ CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, const
     : ctx(ctx), parser(parser), commentLocations(commentLocations) {}
 
 CommentMapPrism CommentsAssociatorPrism::run(pm_node_t *node) {
+    [[maybe_unused]] auto &_parser = this->parser;
+    [[maybe_unused]] auto &_commentLocations = this->commentLocations;
     return CommentMapPrism{};
 }
 

@@ -30,8 +30,8 @@ public:
 
 private:
     core::MutableContext ctx;
-    [[maybe_unused]] const parser::Prism::Parser &parser;
-    [[maybe_unused]] const std::vector<core::LocOffsets> &commentLocations;
+    const parser::Prism::Parser &parser;
+    const std::vector<core::LocOffsets> &commentLocations;
 };
 
 } // namespace sorbet::rbs

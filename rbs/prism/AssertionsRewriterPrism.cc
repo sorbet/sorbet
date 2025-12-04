@@ -9,6 +9,7 @@ AssertionsRewriterPrism::AssertionsRewriterPrism(core::MutableContext ctx,
     : ctx(ctx), commentsByNode(&commentsByNode) {}
 
 pm_node_t *AssertionsRewriterPrism::run(pm_node_t *node) {
+    [[maybe_unused]] auto *_commentsByNode = this->commentsByNode;
     return node;
 }
 

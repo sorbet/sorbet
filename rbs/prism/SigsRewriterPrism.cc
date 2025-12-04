@@ -9,6 +9,8 @@ SigsRewriterPrism::SigsRewriterPrism(core::MutableContext ctx, const parser::Pri
     : ctx(ctx), parser(parser), commentsByNode(&commentsByNode) {}
 
 pm_node_t *SigsRewriterPrism::run(pm_node_t *node) {
+    [[maybe_unused]] auto &_parser = this->parser;
+    [[maybe_unused]] auto *_commentsByNode = this->commentsByNode;
     return node;
 }
 

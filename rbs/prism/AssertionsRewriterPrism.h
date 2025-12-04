@@ -19,7 +19,7 @@ public:
 
 private:
     core::MutableContext ctx;
-    [[maybe_unused]] std::map<pm_node_t *, std::vector<CommentNodePrism>> *commentsByNode;
+    std::map<pm_node_t *, std::vector<CommentNodePrism>> *commentsByNode;
 };
 
 } // namespace sorbet::rbs
