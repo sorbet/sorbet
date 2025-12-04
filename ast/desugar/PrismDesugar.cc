@@ -673,6 +673,11 @@ template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargs
     return;
 }
 
+// Detects calls to `block_given?`
+bool isCallToBlockGivenP(parser::Send *sendNode) {
+    return sendNode->method == core::Names::blockGiven_p();
+};
+
 [[noreturn]] void desugaredByPrismTranslator(parser::Node *node) {
     Exception::raise("The {} node should have already been desugared by the Prism Translator.", node->nodeName());
 }
@@ -926,7 +931,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         }
                     }
 
-                    if (send->method == core::Names::blockGiven_p() && dctx.enclosingBlockParamName.exists()) {
+                    if (isCallToBlockGivenP(send) && dctx.enclosingBlockParamName.exists()) {
                         auto if_ = MK::If(loc, MK::Local(loc, dctx.enclosingBlockParamName), move(res), MK::False(loc));
                         result = move(if_);
                     } else {

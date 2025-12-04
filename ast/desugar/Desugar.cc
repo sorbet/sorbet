@@ -693,6 +693,11 @@ template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargs
     return;
 }
 
+// Detects calls to `block_given?`
+bool isCallToBlockGivenP(parser::Send *sendNode) {
+    return sendNode->method == core::Names::blockGiven_p();
+};
+
 // Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
 ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
     try {
@@ -943,7 +948,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         }
                     }
 
-                    if (send->method == core::Names::blockGiven_p() && dctx.enclosingBlockParamName.exists()) {
+                    if (isCallToBlockGivenP(send) && dctx.enclosingBlockParamName.exists()) {
                         auto if_ = MK::If(loc, MK::Local(loc, dctx.enclosingBlockParamName), move(res), MK::False(loc));
                         result = move(if_);
                     } else {
