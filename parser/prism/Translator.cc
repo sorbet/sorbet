@@ -4749,6 +4749,8 @@ ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPair
 // or `pm_lambda_node *`, and wrapping it around the given `Send` node.
 unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                             unique_ptr<parser::Node> sendNode) {
+    ENFORCE(parser::NodeWithExpr::isa_node<parser::Send>(sendNode.get()));
+
     pm_node_t *prismParametersNode;
     pm_node_t *prismBodyNode;
     auto blockLoc = translateLoc(prismBlockOrLambdaNode->location);
