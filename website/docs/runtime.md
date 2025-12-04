@@ -17,6 +17,8 @@ In this doc we'll answer:
 
 Adding a method signature opts that method into runtime typechecks (in addition to opting it into [more static checks](static.md)). In this sense, `sorbet-runtime` is similar to libraries for adding runtime contracts.
 
+Sigils are for static analysis only: they have no effect on runtime behavior. For example, methods with signatures have their calls checked at runtime, even if defined in files with `# typed: ignore`. (See [Enabling Static Checks](static.md) for more on sigils.)
+
 Concretely, adding a `sig` wraps the method defined beneath it in a new method that:
 
 - validates the types of arguments passed in against the types in the `sig`
