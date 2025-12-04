@@ -141,9 +141,6 @@ private:
     ast::ExpressionPtr desugarRegexp(core::LocOffsets location, core::LocOffsets contentLoc, pm_string_t content,
                                      pm_location_t closingLoc);
 
-    template <typename PrismNode>
-    std::unique_ptr<parser::Mlhs> translateMultiTargetLhs(PrismNode *node, core::LocOffsets location);
-
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
     ast::ExpressionPtr translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
                                                 ast::ExpressionPtr lhs);

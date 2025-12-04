@@ -5225,60 +5225,6 @@ string_view Translator::sliceLocation(pm_location_t loc) const {
     return cast_prism_string(loc.start, loc.end - loc.start);
 }
 
-// Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.
-template <typename PrismNode>
-unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, core::LocOffsets location) {
-    static_assert(
-        is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>,
-        "Translator::translateMultiTarget can only be used for PM_MULTI_TARGET_NODE and PM_MULTI_WRITE_NODE.");
-
-    // Left-hand side of the assignment
-    auto prismLefts = absl::MakeSpan(node->lefts.nodes, node->lefts.size);
-    auto prismRights = absl::MakeSpan(node->rights.nodes, node->rights.size);
-    auto prismSplat = node->rest;
-
-    NodeVec sorbetLhs{};
-    sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
-
-    for (auto &prismLeft : prismLefts) {
-        sorbetLhs.emplace_back(translate(prismLeft));
-    }
-
-    if (prismSplat != nullptr) {
-        switch (PM_NODE_TYPE(prismSplat)) {
-            case PM_SPLAT_NODE: {
-                // This requires separate handling from the `PM_SPLAT_NODE` because it
-                // has a different Sorbet node type, `parser::SplatLhs`
-                auto splatNode = down_cast<pm_splat_node>(prismSplat);
-                auto location = translateLoc(splatNode->base.location);
-                auto expression = splatNode->expression;
-
-                if (expression != nullptr && PM_NODE_TYPE_P(expression, PM_REQUIRED_PARAMETER_NODE)) {
-                    auto requiredParamNode = down_cast<pm_required_parameter_node>(expression);
-                    auto name = translateConstantName(requiredParamNode->name);
-                    sorbetLhs.emplace_back(
-                        make_unique<parser::RestParam>(location, name, translateLoc(requiredParamNode->base.location)));
-                } else {
-                    sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(translate(expression))));
-                }
-
-                break;
-            }
-            case PM_IMPLICIT_REST_NODE:
-                // No-op, because Sorbet's parser infers this from just having an `Mlhs`.
-                break;
-            default:
-                unreachable("Unexpected rest node type. Expected only PM_SPLAT_NODE or PM_IMPLICIT_REST_NODE.");
-        }
-    }
-
-    for (auto &prismRight : prismRights) {
-        sorbetLhs.emplace_back(translate(prismRight));
-    }
-
-    return make_unique<parser::Mlhs>(location, move(sorbetLhs));
-}
-
 // Desugar a class, singleton class or module body.
 // The body can be a Begin node comprising multiple statements, or a single statement.
 ast::ClassDef::RHS_store Translator::desugarClassOrModule(pm_node *prismBodyNode) {
