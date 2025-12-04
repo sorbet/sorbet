@@ -5,7 +5,7 @@ parent/__package.rb:6: Invalid expression in package: Arguments to functions mus
 parent/__package.rb:6: Method `export_for_test` does not exist on `T.class_of(Parent)` https://srb.help/7003
      6 |  export_for_test Parent
           ^^^^^^^^^^^^^^^
-  Got `T.class_of(Parent)` originating from:
+  Got `T.self_type (of T.class_of(Parent))` originating from:
     parent/__package.rb:3:
      3 |class Parent < PackageSpec
         ^

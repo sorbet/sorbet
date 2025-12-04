@@ -48,7 +48,7 @@ test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Cannot i
 test/cli/incremental-resolver/expect-failures/constant_override.rb:110: Method `e` does not exist on `T.class_of(<root>)` https://srb.help/7003
      110 |B = e
               ^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     test/cli/incremental-resolver/expect-failures/constant_override.rb:110:
      110 |B = e
           ^
@@ -120,7 +120,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:70: Malformed `si
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
     68 |  sig {void}
           ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
     67 |def z
         ^
@@ -132,7 +132,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `sig` 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
     68 |  sig {void}
                ^^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
     67 |def z
         ^
@@ -147,7 +147,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:68: Method `void`
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
     69 |  sig {void}
           ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
     67 |def z
         ^
@@ -159,7 +159,7 @@ test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `sig` 
 test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:69: Method `void` does not exist on `T.class_of(<root>)` https://srb.help/7003
     69 |  sig {void}
                ^^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     test/cli/incremental-resolver/expect-failures/multiple_sigs.rb:67:
     67 |def z
         ^

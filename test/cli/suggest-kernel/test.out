@@ -12,7 +12,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:14: Method `is_a?` does not exist on `
 test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://srb.help/7003
      .. |    raise "hi"
             ^^^^^
-  Got `Foo` originating from:
+  Got `T.self_type (of Foo)` originating from:
     test/cli/suggest-kernel/suggest-kernel.rb:3:
      .. |  def foo
           ^
@@ -28,7 +28,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `F
 test/cli/suggest-kernel/suggest-kernel.rb:5: Method `Integer` does not exist on `Foo` https://srb.help/7003
      .. |    Integer(0)
             ^^^^^^^
-  Got `Foo` originating from:
+  Got `T.self_type (of Foo)` originating from:
     test/cli/suggest-kernel/suggest-kernel.rb:3:
      .. |  def foo
           ^
@@ -50,7 +50,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:5: Method `Integer` does not exist on 
 test/cli/suggest-kernel/suggest-kernel.rb:6: Method `Array` does not exist on `Foo` https://srb.help/7003
      .. |    Array(0)
             ^^^^^
-  Got `Foo` originating from:
+  Got `T.self_type (of Foo)` originating from:
     test/cli/suggest-kernel/suggest-kernel.rb:3:
      .. |  def foo
           ^
