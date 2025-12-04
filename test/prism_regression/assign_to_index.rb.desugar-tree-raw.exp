@@ -3638,33 +3638,19 @@ ClassDef{
         }
         Send{
           flags = {}
-          recv = ConstantLit{
-            symbol = (class ::<Magic>)
-            orig = nullptr
+          recv = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U target>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
           }
-          fun = <U <call-with-block-pass>>
+          fun = <U []=>
           block = nullptr
-          pos_args = 4
+          pos_args = 1
           args = [
-            Send{
-              flags = {privateOk}
-              recv = Self
-              fun = <U target>
-              block = nullptr
-              pos_args = 0
-              args = [
-              ]
-            }
-            Literal{ value = :[]= }
-            Send{
-              flags = {privateOk}
-              recv = Self
-              fun = <U blk>
-              block = nullptr
-              pos_args = 0
-              args = [
-              ]
-            }
             Send{
               flags = {}
               recv = UnresolvedIdent{
