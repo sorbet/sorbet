@@ -148,17 +148,17 @@ private:
     std::unique_ptr<parser::Mlhs> translateMultiTargetLhs(PrismNode *node, core::LocOffsets location);
 
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-    std::unique_ptr<ExprOnly> translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                       ast::ExpressionPtr lhs);
+    ast::ExpressionPtr translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                ast::ExpressionPtr lhs);
 
     // Translate operator assignment targeting an indexed expression (e.g., `a[0] += 1`).
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
-    std::unique_ptr<ExprOnly> translateIndexAssignment(pm_node_t *node, core::LocOffsets location);
+    ast::ExpressionPtr translateIndexAssignment(pm_node_t *node, core::LocOffsets location);
 
     // Translate AndAsgn/OrAsgn operator assignments (e.g., `x &&= y`, `x ||= y`).
     template <typename SorbetAssignmentNode>
-    std::unique_ptr<ExprOnly> translateAndOrAssignment(core::LocOffsets location, ast::ExpressionPtr lhs,
-                                                       ast::ExpressionPtr rhs);
+    ast::ExpressionPtr translateAndOrAssignment(core::LocOffsets location, ast::ExpressionPtr lhs,
+                                                ast::ExpressionPtr rhs);
 
     template <typename PrismLhsNode, bool checkForDynamicConstAssign = false>
     ast::ExpressionPtr translateConst(pm_node_t *node);
@@ -184,8 +184,8 @@ private:
 
     // Translate OpAsgn operator assignments
     template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
-    std::unique_ptr<ExprOnly> translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                    ast::ExpressionPtr lhs, ast::ExpressionPtr rhs);
+    ast::ExpressionPtr translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                             ast::ExpressionPtr lhs, ast::ExpressionPtr rhs);
 
     // ========================================================================
     // Direct Desugaring Functions for Op-Assignment Nodes
