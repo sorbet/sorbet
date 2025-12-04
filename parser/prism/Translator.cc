@@ -599,6 +599,15 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
     return MK::InsSeq(loc, move(stats), MK::Local(loc, tempRhs));
 }
 
+std::pair</* param */ ast::ExpressionPtr, /* multi-assign statement */ ast::ExpressionPtr>
+Translator::desugarMlhsParam(core::LocOffsets loc, pm_multi_target_node *lhs) {
+    core::NameRef destructureParam = nextUniqueDesugarName(core::Names::destructureArg());
+    auto param = MK::Local(loc, destructureParam);
+    auto destructuringExpr = desugarMlhs(loc, lhs, MK::Local(loc, destructureParam));
+
+    return {move(param), move(destructuringExpr)};
+}
+
 // Helper to check if an ExpressionPtr represents a T.let call
 ast::Send *asTLet(ExpressionPtr &arg) {
     auto send = ast::cast_tree<ast::Send>(arg);
@@ -2044,6 +2053,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         } else {
                             auto blockLoc = translateLoc(prismBlock->location);
                             auto blockBodyExpr = takeDesugaredExprOrEmptyTree(blockBody);
+
+                            if (!blockStatsStore.empty()) {
+                                blockBodyExpr = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBodyExpr));
+                            }
+
                             blockExpr = MK::Block(blockLoc, move(blockBodyExpr), move(blockParamsStore));
                         }
 
@@ -2146,6 +2160,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     } else {
                         auto blockLoc = translateLoc(prismBlock->location);
                         auto blockBodyExpr = takeDesugaredExprOrEmptyTree(blockBody);
+
+                        if (!blockStatsStore.empty()) {
+                            blockBodyExpr = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBodyExpr));
+                        }
+
                         blockExpr = MK::Block(blockLoc, move(blockBodyExpr), move(blockParamsStore));
                     }
 
