@@ -559,6 +559,8 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
         if (const auto lambdaParam = core::cast_type<core::LambdaParam>(selfTypeParam.definition.resultType(ctx))) {
             return updateKnowledgeKindOf(ctx, local, loc, lambdaParam->upperBound, ref, knowledgeFilter, fun);
         }
+    } else if (auto freshSelfType = core::cast_type<core::FreshSelfType>(klassType)) {
+        return updateKnowledgeKindOf(ctx, local, loc, freshSelfType->upperBound, ref, knowledgeFilter, fun);
     }
 }
 
