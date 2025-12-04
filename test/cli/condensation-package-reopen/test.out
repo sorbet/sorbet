@@ -1,0 +1,24 @@
+root/root.rb:17: `type_member` may not be used in a package root https://srb.help/4016
+    17 |  X = type_member
+              ^^^^^^^^^^^
+
+root/root.rb:19: `type_template` may not be used in a package root https://srb.help/4016
+    19 |  Y = type_template
+              ^^^^^^^^^^^^^
+
+root/root.rb:15: Package namespace `Root` may not have mixins applied https://srb.help/5082
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+
+root/root.rb:12: Package namespace `T.class_of(Root)` may not have mixins applied https://srb.help/5082
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+
+root/root.rbi:4: `type_member` may not be used in a package root https://srb.help/4016
+     4 |  X = type_member
+              ^^^^^^^^^^^
+
+root/root.rbi:5: `type_template` may not be used in a package root https://srb.help/4016
+     5 |  Y = type_template
+              ^^^^^^^^^^^^^
+Errors: 6
