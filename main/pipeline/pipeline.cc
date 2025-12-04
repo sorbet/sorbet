@@ -451,10 +451,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
                     parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
 
-                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
-                        return emptyParsedFile(file);
-                    }
-
                     break;
                 }
                 case options::Parser::PRISM: {
@@ -468,12 +464,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     // TODO: Remove this check once runPrismRBSRewrite is no longer no-oped inside of runPrismParser
                     // https://github.com/sorbet/sorbet/issues/9065
                     parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
-
-                    // TODO: Move into runPrismParser once runPrismRBSRewrite is no longer no-oped
-                    // https://github.com/sorbet/sorbet/issues/9065
-                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
-                        return emptyParsedFile(file);
-                    }
 
                     break;
                 }
