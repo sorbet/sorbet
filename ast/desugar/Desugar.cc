@@ -732,6 +732,26 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     flags.isPrivateOk = true;
                 }
 
+                if (isCallToBlockGivenP(send) && dctx.enclosingBlockParamName.exists()) {
+                    // Desugar:
+                    //     def foo(&my_block)
+                    //       x = block_given?
+                    //     end
+                    //
+                    // to:
+                    //     def foo(&my_block)
+                    //       x = (my_block ? ::Kernel.block_given?() : false)
+                    //     end
+                    //
+                    // Later stages of the pipeline have special handling for this,
+                    // based on the nilability of the block (if specified)
+
+                    auto sendExpr = MK::Send0(loc, move(rec), core::Names::blockGiven_p(), send->methodLoc);
+                    result = MK::If(loc, MK::Local(loc, dctx.enclosingBlockParamName), move(sendExpr), MK::False(loc));
+
+                    return;
+                }
+
                 auto methodName = MK::Symbol(locZeroLen, send->method);
 
                 // Pop the BlockPass off the end of the arguments, if there is one. (e.g. the `&:b` in `foo(&:b)`)
@@ -948,12 +968,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         }
                     }
 
-                    if (isCallToBlockGivenP(send) && dctx.enclosingBlockParamName.exists()) {
-                        auto if_ = MK::If(loc, MK::Local(loc, dctx.enclosingBlockParamName), move(res), MK::False(loc));
-                        result = move(if_);
-                    } else {
-                        result = move(res);
-                    }
+                    result = move(res);
                 }
             },
             [&](parser::String *string) {
