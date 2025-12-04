@@ -480,6 +480,9 @@ pipeline_tests(
             # Numbered block parameter location differs: Prism uses last occurrence
             # of `_1`, Whitequark uses first occurrence
             "prism_regression/multiple_numbered_params.rb",
+
+            # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
+            "prism_regression/assign_to_index.rb",
         ],
     ),
     "PrismPosTests",

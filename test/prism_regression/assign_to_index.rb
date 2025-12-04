@@ -54,25 +54,23 @@ target[] = 17 # Yes, this is valid. You can have `def []=(only_one_param)`.
 
 
 
-# ### Using a block as an index
-# # This is not valid Ruby, but Prism allows it.
-# TODO: Uncomment once this is implemented
-# 
-# bitwise_and[&blk]     &= 202
-# bitwise_or[&blk]      |= 203
-# bitwise_xor[&blk]     ^= 204
-# shift_right[&blk]    >>= 205
-# shift_left[&blk]     <<= 206
-# add_assign[&blk]      += 207
-# subtract_assign[&blk] -= 208
-# modulo_assign[&blk]   %= 209
-# divide_assign[&blk]   /= 200
-# multiply_assign[&blk] *= 201
-# exponentiate_assign[&blk] **= 202
-# 
-# # Special cases
-# lazy_and_assign[&blk] &&= 203
-# lazy_or_assign[&blk]  ||= 204
-# 
-# # Multi-target assignment
-# target[&blk], target[1] = 205
+### Error case: using a block as an index
+
+bitwise_and[&blk]     &= 202
+bitwise_or[&blk]      |= 203
+bitwise_xor[&blk]     ^= 204
+shift_right[&blk]    >>= 205
+shift_left[&blk]     <<= 206
+add_assign[&blk]      += 207
+subtract_assign[&blk] -= 208
+modulo_assign[&blk]   %= 209
+divide_assign[&blk]   /= 200
+multiply_assign[&blk] *= 201
+exponentiate_assign[&blk] **= 202
+
+# Special cases
+lazy_and_assign[&blk] &&= 203
+lazy_or_assign[&blk]  ||= 204
+
+# Multi-target assignment
+target[&blk], target[1] = 205

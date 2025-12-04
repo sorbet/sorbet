@@ -628,7 +628,7 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
     auto openingLoc = translateLoc(node->opening_loc);
     auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
 
-    auto args = desugarArguments<ast::Send::ARGS_store>(node->arguments, up_cast(node->block));
+    auto args = desugarArguments<ast::Send::ARGS_store>(node->arguments);
     auto argsSize = args.size(); // Grab the size before moving out of `args`
 
     // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
@@ -2889,8 +2889,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             enforceHasExpr(receiver);
 
-            auto argExprs = desugarArguments<ast::Send::ARGS_store>(indexedTargetNode->arguments,
-                                                                    up_cast(indexedTargetNode->block));
+            auto argExprs = desugarArguments<ast::Send::ARGS_store>(indexedTargetNode->arguments);
 
             auto expr = MK::Send(location, receiver->takeDesugaredExpr(), core::Names::squareBracketsEq(), lBracketLoc,
                                  argExprs.size(), move(argExprs));
