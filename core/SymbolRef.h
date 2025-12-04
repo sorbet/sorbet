@@ -1103,6 +1103,10 @@ public:
         return ClassOrModuleRef::fromRaw(96);
     }
 
+    static FieldRef ErrorNode() {
+        return FieldRef::fromRaw(3);
+    }
+
     static FieldRef Magic_UntypedSource_super() {
         return FieldRef::fromRaw(4);
     }

@@ -2368,7 +2368,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = make_expression<ConstantLit>(resolvedConst->loc, move(resolvedConst->symbol));
             },
 
-            [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
+            [&](parser::BlockPass *blockPass) {
+                if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::UnsupportedNode)) {
+                    e.setHeader("Unsupported block pass node in non-final argument");
+                }
+                result = MK::Constant(loc, core::Symbols::ErrorNode());
+            },
             [&](parser::Node *node) { Exception::raise("Unimplemented Parser Node: {}", node->nodeName()); });
         ENFORCE(result.get() != nullptr, "desugar result unset");
         return result;

@@ -675,6 +675,7 @@ void GlobalState::initEmpty() {
 
     // ::<ErrorNode>
     field = enterStaticFieldSymbol(Loc::none(), Symbols::root(), Names::Constants::ErrorNode());
+    ENFORCE_NO_TIMER(field == Symbols::ErrorNode());
 
     // Synthesize <Magic>.<build-hash>(*vs : T.untyped) => Hash
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildHash())

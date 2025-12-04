@@ -1,0 +1,15 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def a<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    <emptyTree>
+  end
+
+  <self>.a().[]=(::<ErrorNode>, 1)
+
+  <self>.a().[]=(::<ErrorNode>, 1)
+
+  <self>.a(::<ErrorNode>, 1)
+
+  <self>.a().[]=(0, ::<ErrorNode>, 1)
+
+  <self>.a(0, ::<ErrorNode>, 1)
+end
