@@ -161,6 +161,9 @@ public:
 
     core::FileRef file;
 
+    // List of the non __package.rb files in this package
+    std::vector<core::FileRef> nonPackageFiles;
+
     core::NameRef layer;
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
@@ -266,7 +269,7 @@ public:
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
 };
-CheckSize(PackageInfo, 240, 8);
+CheckSize(PackageInfo, 264, 8);
 
 } // namespace sorbet::core::packages
 #endif

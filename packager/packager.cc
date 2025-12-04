@@ -1239,6 +1239,9 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
         }
 
         gs.packageDB().setPackageNameForFile(fref, pkg);
+
+        auto *pkgInfo = gs.packageDB().getPackageInfoNonConst(pkg);
+        pkgInfo->nonPackageFiles.push_back(fref);
     }
 }
 
