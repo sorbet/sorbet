@@ -590,6 +590,15 @@ public:
         return root != nullptr && root->symbol() == core::Symbols::root();
     }
 
+    // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional
+    // scope.
+    static bool isKernel(const ast::ExpressionPtr &expr) {
+        if (auto constRecv = cast_tree<ast::UnresolvedConstantLit>(expr)) {
+            return isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
+        }
+        return false;
+    }
+
     static bool isMagicClass(const ExpressionPtr &expr) {
         if (auto recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol() == core::Symbols::Magic();
