@@ -2979,15 +2979,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE: { // A regular expression with interpolation, like `/a #{b} c/`
             auto interpolatedRegexNode = down_cast<pm_interpolated_regular_expression_node>(node);
 
-            auto options = translateRegexpOptions(interpolatedRegexNode->closing_loc);
+            auto options = desugarRegexpOptions(interpolatedRegexNode->closing_loc);
 
             // Desugar interpolated regexp to Regexp.new(pattern, options)
             auto pattern = desugarDString(location, interpolatedRegexNode->parts);
-            auto optsExpr = options->takeDesugaredExpr();
 
             auto cnst = MK::Constant(location, core::Symbols::Regexp());
             auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(),
-                                  move(pattern), move(optsExpr));
+                                  move(pattern), move(options));
 
             return expr_only(move(expr));
         }
@@ -3370,7 +3369,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto contentLoc = translateLoc(regexNode->content_loc);
 
-            return translateRegexp(location, contentLoc, regexNode->unescaped, regexNode->closing_loc);
+            return expr_only(desugarRegexp(location, contentLoc, regexNode->unescaped, regexNode->closing_loc));
         }
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE: { // A required keyword parameter, like `def foo(a:)`
             auto requiredKeywordParamNode = down_cast<pm_required_keyword_parameter_node>(node);
@@ -5163,7 +5162,7 @@ core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
-unique_ptr<ExprOnly> Translator::translateRegexpOptions(pm_location_t closingLoc) {
+ast::ExpressionPtr Translator::desugarRegexpOptions(pm_location_t closingLoc) {
     ENFORCE(closingLoc.start && closingLoc.end);
 
     auto prismLoc = closingLoc;
@@ -5203,12 +5202,12 @@ unique_ptr<ExprOnly> Translator::translateRegexpOptions(pm_location_t closingLoc
                 break;
         }
     }
-    return expr_only(MK::Int(location, flags));
+    return MK::Int(location, flags);
 }
 
 // Translate an unescaped string from a Regexp literal
-unique_ptr<ExprOnly> Translator::translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
-                                                 pm_string_t content, pm_location_t closingLoc) {
+ast::ExpressionPtr Translator::desugarRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
+                                             pm_string_t content, pm_location_t closingLoc) {
     auto source = parser.extractString(&content);
 
     auto stringContent = source.empty() ? core::Names::empty() : ctx.state.enterNameUTF8(source);
@@ -5216,16 +5215,13 @@ unique_ptr<ExprOnly> Translator::translateRegexp(core::LocOffsets location, core
     auto patternLoc = contentLoc.empty() ? location : contentLoc;
     auto pattern = MK::String(patternLoc, stringContent);
 
-    auto options = translateRegexpOptions(closingLoc);
-    auto optsExpr = options->takeDesugaredExpr();
+    auto options = desugarRegexpOptions(closingLoc);
 
     auto cnst = MK::Constant(location, core::Symbols::Regexp());
 
     // Desugar `/ foo / i` to `::Regexp.new("foo", option_flags_int)`
-    auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(), move(pattern),
-                          move(optsExpr));
-
-    return expr_only(move(expr));
+    return MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(), move(pattern),
+                     move(options));
 }
 
 string_view Translator::sliceLocation(pm_location_t loc) const {
