@@ -492,11 +492,12 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
         lhs = make_unique<parser::Send>(lhsLoc, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
     } else {
         auto receiverExpr = receiver->takeDesugaredExpr();
-        auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
+
+        auto argExprs = nodeVecToStore<ast::Send::ARGS_store>(args);
 
         // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
-        auto send =
-            MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
+        auto send = MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, argExprs.size(),
+                             move(argExprs));
         lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), core::Names::squareBrackets(),
                                                 lBracketLoc, move(args));
     }
