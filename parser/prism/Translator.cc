@@ -3737,26 +3737,6 @@ const uint8_t *endLoc(pm_node_t *anyNode) {
     }
 }
 
-// Translates a Prism node list into a new `NodeVec` of legacy parser nodes.
-parser::NodeVec Translator::translateMulti(pm_node_list nodeList) {
-    auto prismNodes = absl::MakeSpan(nodeList.nodes, nodeList.size);
-
-    parser::NodeVec result;
-
-    // Pre-allocate the exactly capacity we're going to need, to prevent growth reallocations.
-    result.reserve(prismNodes.size());
-
-    translateMultiInto(result, prismNodes);
-
-    return result;
-}
-
-// Translates the given Prism nodes, and appends them to the given `NodeVec` of Sorbet nodes.
-void Translator::translateMultiInto(NodeVec &outSorbetNodes, absl::Span<pm_node_t *> prismNodes) {
-    for (auto &prismNode : prismNodes)
-        outSorbetNodes.emplace_back(translate(prismNode));
-}
-
 // Similar to `translate()`, but it's used for pattern-matching nodes.
 //
 // This is necessary because some Prism nodes get translated differently depending on whether they're part of "regular"
@@ -4198,7 +4178,9 @@ Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffse
         }
     }
 
-    translateMultiInto(params, optionals);
+    for (auto &optional : optionals) {
+        params.emplace_back(translate(optional));
+    }
 
     if (paramsNode->rest != nullptr) {
         params.emplace_back(translate(paramsNode->rest));
@@ -4215,7 +4197,9 @@ Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffse
         }
     }
 
-    translateMultiInto(params, keywords);
+    for (auto &keyword : keywords) {
+        params.emplace_back(translate(keyword));
+    }
 
     bool hasForwardingParameter = false;
     if (auto *prismKwRestNode = paramsNode->keyword_rest) {
@@ -5243,7 +5227,9 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
     NodeVec sorbetLhs{};
     sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
 
-    translateMultiInto(sorbetLhs, prismLefts);
+    for (auto &prismLeft : prismLefts) {
+        sorbetLhs.emplace_back(translate(prismLeft));
+    }
 
     if (prismSplat != nullptr) {
         switch (PM_NODE_TYPE(prismSplat)) {
@@ -5273,7 +5259,9 @@ unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node, co
         }
     }
 
-    translateMultiInto(sorbetLhs, prismRights);
+    for (auto &prismRight : prismRights) {
+        sorbetLhs.emplace_back(translate(prismRight));
+    }
 
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
 }
