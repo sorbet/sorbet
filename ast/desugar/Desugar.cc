@@ -694,8 +694,24 @@ template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargs
 }
 
 // Detects calls to `block_given?`
-bool isCallToBlockGivenP(parser::Send *sendNode) {
-    return sendNode->method == core::Names::blockGiven_p();
+// Accepts:
+// - `block_given?()`
+// - `self.block_given?()`
+// - `Kernel.block_given?()`
+// - `::Kernel.block_given?()`
+// Rejects:
+// - `foo.block_given?(1)`
+// - `Object.block_given?` (it's private)
+bool isCallToBlockGivenP(parser::Send *sendNode, ast::ExpressionPtr &receiverExpr) {
+    if (sendNode->method != core::Names::blockGiven_p() || !sendNode->args.empty()) {
+        return false;
+    }
+
+    if (sendNode->receiver == nullptr || parser::isa_node<parser::Self>(sendNode->receiver.get())) {
+        return true;
+    }
+
+    return MK::isKernel(receiverExpr);
 };
 
 // Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
@@ -732,7 +748,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     flags.isPrivateOk = true;
                 }
 
-                if (isCallToBlockGivenP(send) && dctx.enclosingBlockParamName.exists()) {
+                if (isCallToBlockGivenP(send, rec) && dctx.enclosingBlockParamName.exists()) {
                     // Desugar:
                     //     def foo(&my_block)
                     //       x = block_given?
