@@ -280,7 +280,9 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
 
         auto node = prismResult.getRawNodePointer();
 
-        if (gs.cacheSensitiveOptions.rbsEnabled) {
+        // TODO: Remove `&& false` once RBS rewriter with Prism AST migration is complete
+        // https://github.com/sorbet/sorbet/issues/9065
+        if (gs.cacheSensitiveOptions.rbsEnabled && false) {
             node = runPrismRBSRewrite(gs, file, node, prismResult.getCommentLocations(), print, ctx, parser);
         }
 
