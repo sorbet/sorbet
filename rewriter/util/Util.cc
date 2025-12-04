@@ -304,18 +304,6 @@ ast::ExpressionPtr ASTUtil::mkNilable(core::LocOffsets loc, ast::ExpressionPtr t
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), loc.copyWithZeroLength(), move(type));
 }
 
-namespace {
-
-// Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
-bool isKernel(const ast::ExpressionPtr &expr) {
-    if (auto constRecv = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
-        return ast::isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
-    }
-    return false;
-}
-
-} // namespace
-
 ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionPtr &node) {
     auto send = ast::cast_tree<ast::Send>(node);
     if (send == nullptr) {
@@ -325,7 +313,7 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
         return nullptr;
     }
     // Valid receivers for lambda/proc are either a self reference or `Kernel`
-    if (!send->recv.isSelfReference() && !isKernel(send->recv)) {
+    if (!send->recv.isSelfReference() && !ast::MK::isKernel(send->recv)) {
         return nullptr;
     }
     if (!send->hasBlock()) {

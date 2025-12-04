@@ -693,6 +693,27 @@ template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargs
     return;
 }
 
+// Detects calls to `block_given?`
+// Accepts:
+// - `block_given?()`
+// - `self.block_given?()`
+// - `Kernel.block_given?()`
+// - `::Kernel.block_given?()`
+// Rejects:
+// - `foo.block_given?(1)`
+// - `Object.block_given?` (it's private)
+bool isCallToBlockGivenP(parser::Send *sendNode, ast::ExpressionPtr &receiverExpr) {
+    if (sendNode->method != core::Names::blockGiven_p() || !sendNode->args.empty()) {
+        return false;
+    }
+
+    if (sendNode->receiver == nullptr || parser::isa_node<parser::Self>(sendNode->receiver.get())) {
+        return true;
+    }
+
+    return MK::isKernel(receiverExpr);
+};
+
 // Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
 ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
     try {
@@ -725,6 +746,26 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // In Ruby 2.7 `self.foo()` is also allowed for private method calls,
                     // not only `foo()`. This pre-emptively allow the new syntax.
                     flags.isPrivateOk = true;
+                }
+
+                if (isCallToBlockGivenP(send, rec) && dctx.enclosingBlockParamName.exists()) {
+                    // Desugar:
+                    //     def foo(&my_block)
+                    //       x = block_given?
+                    //     end
+                    //
+                    // to:
+                    //     def foo(&my_block)
+                    //       x = (my_block ? ::Kernel.block_given?() : false)
+                    //     end
+                    //
+                    // Later stages of the pipeline have special handling for this,
+                    // based on the nilability of the block (if specified)
+
+                    auto sendExpr = MK::Send0(loc, move(rec), core::Names::blockGiven_p(), send->methodLoc);
+                    result = MK::If(loc, MK::Local(loc, dctx.enclosingBlockParamName), move(sendExpr), MK::False(loc));
+
+                    return;
                 }
 
                 auto methodName = MK::Symbol(locZeroLen, send->method);
@@ -943,12 +984,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         }
                     }
 
-                    if (send->method == core::Names::blockGiven_p() && dctx.enclosingBlockParamName.exists()) {
-                        auto if_ = MK::If(loc, MK::Local(loc, dctx.enclosingBlockParamName), move(res), MK::False(loc));
-                        result = move(if_);
-                    } else {
-                        result = move(res);
-                    }
+                    result = move(res);
                 }
             },
             [&](parser::String *string) {
