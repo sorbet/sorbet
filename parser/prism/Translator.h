@@ -235,7 +235,7 @@ private:
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
-    std::unique_ptr<parser::Node> patternTranslate(pm_node_t *node);
+    std::unique_ptr<ExprOnly> patternTranslate(pm_node_t *node);
     parser::NodeVec patternTranslateMulti(pm_node_list prismNodes);
     void patternTranslateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
