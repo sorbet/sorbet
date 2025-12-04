@@ -5,11 +5,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <self>.a().[]=(::<ErrorNode>, 1)
 
-  <self>.a().[]=(<emptyTree>::<C <ErrorNode>>, 1)
+  <self>.a().[]=(::<ErrorNode>, 1)
 
-  <self>.a(<emptyTree>::<C <ErrorNode>>, 1)
+  <self>.a(::<ErrorNode>, 1)
 
-  <self>.a().[]=(<emptyTree>::<C <ErrorNode>>, 1)
+  <self>.a().[]=(0, ::<ErrorNode>, 1)
 
-  <self>.a(<emptyTree>::<C <ErrorNode>>, 1)
+  <self>.a(0, ::<ErrorNode>, 1)
 end
