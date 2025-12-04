@@ -2646,11 +2646,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             // Build the arguments for the Send expression
-            ast::Send::ARGS_store argExprs;
-            argExprs.reserve(arguments.size());
-            for (auto &arg : arguments) {
-                argExprs.emplace_back(arg->takeDesugaredExpr());
-            }
+            auto argExprs = nodeVecToStore<ast::Send::ARGS_store>(arguments);
 
             auto expr = MK::Send(location, receiver->takeDesugaredExpr(), core::Names::squareBracketsEq(), lBracketLoc,
                                  argExprs.size(), move(argExprs));
