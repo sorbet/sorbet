@@ -4,4 +4,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <self>.a().[]=(::<ErrorNode>, 1)
+
+  <self>.a().[]=(<emptyTree>::<C <ErrorNode>>, 1)
+
+  <self>.a(<emptyTree>::<C <ErrorNode>>, 1)
+
+  <self>.a().[]=(<emptyTree>::<C <ErrorNode>>, 1)
+
+  <self>.a(<emptyTree>::<C <ErrorNode>>, 1)
 end
