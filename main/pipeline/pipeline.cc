@@ -206,6 +206,10 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 
 namespace {
 
+pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
+                              const vector<core::LocOffsets> &commentLocations, const options::Printers &print,
+                              core::MutableContext &ctx, const parser::Prism::Parser &parser);
+
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
@@ -375,8 +379,6 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
 
-} // namespace
-
 pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
                               const vector<core::LocOffsets> &commentLocations, const options::Printers &print,
                               core::MutableContext &ctx, const parser::Prism::Parser &parser) {
@@ -397,6 +399,8 @@ pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node
 
     return node;
 }
+
+} // namespace
 
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
                               bool preserveConcreteSyntax) {
