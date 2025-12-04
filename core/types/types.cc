@@ -842,7 +842,7 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) c
 }
 
 bool FreshSelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    return false;
+    return this->upperBound.derivesFrom(gs, klass);
 }
 
 void LambdaParam::_sanityCheck(const GlobalState &gs) const {}

@@ -12,16 +12,16 @@ class AbstractTreeNode
   def self.get_leaf_nodes
     if self <= AbstractBranchNode
       res = self.left.get_leaf_nodes + self.right.get_leaf_nodes
-      #          ^^^^ error: Method `left` does not exist on `T.class_of(AbstractTreeNode)`
-      #                                     ^^^^^ error: Method `right` does not exist on `T.class_of(AbstractTreeNode)`
-      T.reveal_type(res) # error: `T.untyped`
+      T.reveal_type(res) # error: `T::Array[String]`
       return res
     elsif self <= AbstractLeafNode
       res =  Array[self.value]
-      #                 ^^^^^ error: Method `value` does not exist
-      T.reveal_type(res) # error: `T::Array[T.untyped]`
+      T.reveal_type(res) # error: `T::Array[String]`
       return res
     else
+      # There must be an error here, because we have not handled the singleton
+      # class object itself, which necessarily exists, despite the class being
+      # abstract (e.g., abstract singleton classes are an abomination)
       T.absurd(self) # error: Control flow could reach `T.absurd` because the type `T.self_type (of T.class_of(AbstractTreeNode))` wasn't handled
     end
   end
