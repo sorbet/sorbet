@@ -20,22 +20,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       else
         false
       end
-      if the_block_name
-        ::<root>::<C Kernel>.block_given?()
-      else
-        false
-      end
+      ::<root>::<C Kernel>.block_given?()
       <emptyTree>
-      if the_block_name
-        <emptyTree>::<C Object>.block_given?()
-      else
-        false
-      end
-      if the_block_name
-        <emptyTree>::<C SomethingElse>.block_given?()
-      else
-        false
-      end
+      <emptyTree>::<C Object>.block_given?()
+      <emptyTree>::<C SomethingElse>.block_given?()
       <self>.block_given?("with parameter")
     end
   end
@@ -57,22 +45,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       else
         false
       end
-      if &$2
-        ::<root>::<C Kernel>.block_given?()
-      else
-        false
-      end
+      ::<root>::<C Kernel>.block_given?()
       <emptyTree>
-      if &$2
-        <emptyTree>::<C Object>.block_given?()
-      else
-        false
-      end
-      if &$2
-        <emptyTree>::<C SomethingElse>.block_given?()
-      else
-        false
-      end
+      <emptyTree>::<C Object>.block_given?()
+      <emptyTree>::<C SomethingElse>.block_given?()
       <self>.block_given?("with parameter")
     end
   end
@@ -94,22 +70,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       else
         false
       end
-      if <blk>
-        ::<root>::<C Kernel>.block_given?()
-      else
-        false
-      end
+      ::<root>::<C Kernel>.block_given?()
       <emptyTree>
-      if <blk>
-        <emptyTree>::<C Object>.block_given?()
-      else
-        false
-      end
-      if <blk>
-        <emptyTree>::<C SomethingElse>.block_given?()
-      else
-        false
-      end
+      <emptyTree>::<C Object>.block_given?()
+      <emptyTree>::<C SomethingElse>.block_given?()
       <self>.block_given?("with parameter")
     end
   end
