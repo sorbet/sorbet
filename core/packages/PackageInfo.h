@@ -159,6 +159,11 @@ public:
         core::LocOffsets exportAll;
     } locs;
 
+    core::StrictLevel minTypedLevel = core::StrictLevel::None;
+    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
+
+    StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
+
     core::FileRef file;
 
     core::NameRef layer;
@@ -176,11 +181,6 @@ public:
     bool visibleToTests_ = false;
 
     bool isPreludePackage_ = false;
-
-    core::StrictLevel minTypedLevel = core::StrictLevel::None;
-    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
-
-    StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
     // Map from file -> [{a package referenced by file, whether the import is missing, and whether importing it would be
     // a modularity error}]
