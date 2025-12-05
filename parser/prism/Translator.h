@@ -235,7 +235,7 @@ private:
 
     // Pattern-matching
     // ... variation of the main translation functions for pattern-matching related node.
-    std::unique_ptr<ExprOnly> patternTranslate(pm_node_t *node);
+    ast::ExpressionPtr patternTranslate(pm_node_t *node);
     ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match);
 
     std::string_view sliceLocation(pm_location_t loc) const;

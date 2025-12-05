@@ -3742,7 +3742,7 @@ const uint8_t *endLoc(pm_node_t *anyNode) {
 //
 // E.g. `PM_LOCAL_VARIABLE_TARGET_NODE` normally translates to `parser::LVarLhs`, but `parser::MatchVar` in the context
 // of a pattern.
-unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
+ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
 
@@ -3757,7 +3757,7 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
 
             // Like array/hash patterns, MatchAlt is a structural pattern that doesn't have
             // a simple desugared expression - it's handled specially during pattern matching desugaring
-            return expr_only(MK::Nil(location));
+            return MK::Nil(location);
         }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash pattern, e.g. the `k: v` in `h in { k: v }
             auto assocNode = down_cast<pm_assoc_node>(node);
@@ -3771,7 +3771,7 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
             auto value = patternTranslate(assocNode->value);
 
             // Pair is a structural component of hash patterns with no simple desugared expression
-            return expr_only(MK::Nil(location));
+            return MK::Nil(location);
         }
         case PM_ARRAY_PATTERN_NODE: { // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
             auto arrayPatternNode = down_cast<pm_array_pattern_node>(node);
@@ -3814,10 +3814,10 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
                 auto sorbetConstant = desugar(prismConstant);
 
                 // ConstPattern wrapping the array pattern - the desugared expression is Nil as it's structural
-                return expr_only(MK::Nil(location));
+                return MK::Nil(location);
             }
 
-            return expr_only(MK::Nil(patternLoc));
+            return MK::Nil(patternLoc);
         }
         case PM_CAPTURE_PATTERN_NODE: { // A variable capture such as the `Integer => i` in `in Integer => i`
             auto capturePatternNode = down_cast<pm_capture_pattern_node>(node);
@@ -3825,7 +3825,7 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
             auto pattern = patternTranslate(capturePatternNode->value);
             auto target = patternTranslate(up_cast(capturePatternNode->target));
 
-            return expr_only(MK::Nil(location));
+            return MK::Nil(location);
         }
         case PM_FIND_PATTERN_NODE: { // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
             auto findPatternNode = down_cast<pm_find_pattern_node>(node);
@@ -3848,7 +3848,7 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
             }
 
             // FindPattern is a structural pattern with no simple desugared expression
-            return expr_only(MK::Nil(location));
+            return MK::Nil(location);
         }
         case PM_HASH_PATTERN_NODE: { // An hash pattern such as the `{ k: Integer }` in the `h in { k: Integer }`
             auto hashPatternNode = down_cast<pm_hash_pattern_node>(node);
@@ -3894,10 +3894,10 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
                 auto sorbetConstant = desugar(prismConstant);
 
                 // ConstPattern wrapping the hash pattern - the desugared expression is Nil as it's structural
-                return expr_only(MK::Nil(location));
+                return MK::Nil(location);
             }
 
-            return expr_only(MK::Nil(patternLoc));
+            return MK::Nil(patternLoc);
         }
         case PM_IMPLICIT_NODE: {
             auto implicitNode = down_cast<pm_implicit_node>(node);
@@ -3907,7 +3907,6 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
             auto inNode = down_cast<pm_in_node>(node);
 
             auto prismPattern = inNode->pattern;
-            unique_ptr<ExprOnly> sorbetPattern;
             ast::ExpressionPtr sorbetGuard;
             auto statements = desugarStatements(inNode->statements);
 
@@ -3930,9 +3929,9 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
                     conditionalStatements->body.size == 1,
                     "In pattern-matching's `in` clause, a conditional (if/unless) guard must have a single statement.");
 
-                sorbetPattern = patternTranslate(conditionalStatements->body.nodes[0]);
+                patternTranslate(conditionalStatements->body.nodes[0]);
             } else {
-                sorbetPattern = patternTranslate(prismPattern);
+                patternTranslate(prismPattern);
             }
 
             // A single `in` clause does not desugar into a standalone Ruby expression; it only
@@ -3940,7 +3939,7 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
             // in a NodeWithExpr seeded with `EmptyTree` satisfies the API contract so that
             // `hasExpr(inNodes)` can succeed. The enclosing `case` later consumes the real
             // expressions from the pattern and body when it assembles the final AST.
-            return empty_expr();
+            return MK::EmptyTree();
         }
         case PM_LOCAL_VARIABLE_TARGET_NODE: { // A variable binding in a pattern, like the `head` in `[head, *tail]`
             auto localVarTargetNode = down_cast<pm_local_variable_target_node>(node);
@@ -3948,29 +3947,28 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
 
             // For a match variable, the desugared expression is a local variable reference
             // This represents what the variable will be bound to when the pattern matches
-            auto expr = MK::Local(location, name);
-            return expr_only(move(expr));
+            return MK::Local(location, name);
         }
         case PM_PINNED_EXPRESSION_NODE: { // A "pinned" expression, like `^(1 + 2)` in `in ^(1 + 2)`
             auto pinnedExprNode = down_cast<pm_pinned_expression_node>(node);
 
             auto expr = desugar(pinnedExprNode->expression);
 
-            return expr_only(MK::Nil(location));
+            return MK::Nil(location);
         }
         case PM_PINNED_VARIABLE_NODE: { // A "pinned" variable, like `^x` in `in ^x`
             auto pinnedVarNode = down_cast<pm_pinned_variable_node>(node);
 
             auto variable = desugar(pinnedVarNode->variable);
 
-            return expr_only(MK::Nil(location));
+            return MK::Nil(location);
         }
         case PM_SPLAT_NODE: { // A splat, like `*a` in an array pattern
             auto prismSplatNode = down_cast<pm_splat_node>(node);
             auto expr = desugar(prismSplatNode->expression);
 
             // MatchRest is a structural pattern component with no simple desugared expression
-            return expr_only(MK::Nil(location));
+            return MK::Nil(location);
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
             auto symNode = down_cast<pm_symbol_node>(node);
@@ -3990,10 +3988,10 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
                 // no-op: leave the whole location as-is.
             }
 
-            return expr_only(MK::Symbol(location, content));
+            return MK::Symbol(location, content);
         }
         default: {
-            return expr_only(desugar(node));
+            return desugar(node);
         }
     }
 }
