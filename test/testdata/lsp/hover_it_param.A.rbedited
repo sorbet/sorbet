@@ -43,7 +43,7 @@ class TestLocalScope
 
   # In a different method, 'it' refers to block param
   def test2
-    result = [1, 2, 3].map { it * it }
+    result = [1, 2, 3].map { something_else * something_else }
     #                        ^^ def: test2_it
     #                             ^^ usage: test2_it
     #                             ^ apply-rename: [A] newName: something_else placeholderText: it
