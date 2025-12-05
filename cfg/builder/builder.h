@@ -51,7 +51,7 @@ public:
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
-    std::shared_ptr<core::SendAndBlockLink> link;
+    std::shared_ptr<core::SendAndBlockLink> *link = nullptr;
     UnorderedMap<core::SymbolRef, LocalRef> &aliases;
     UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields;
 
@@ -61,7 +61,7 @@ public:
     CFGContext withBlockBreakTarget(LocalRef blockBreakTarget);
     CFGContext withLoopBreakTarget(LocalRef blockBreakTarget);
     CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock = false);
-    CFGContext withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> link);
+    CFGContext withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> &link);
 
     LocalRef newTemporary(core::NameRef name);
 
