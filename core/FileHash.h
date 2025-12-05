@@ -220,6 +220,9 @@ struct FoundDefHashes {
     FoundTypeMemberHashes typeMemberHashes;
     FoundMethodHashes methodHashes;
     FoundFieldHashes fieldHashes;
+    // For classes, we're only sensitive to the order of classes, but we don't actually care what
+    // the individual classes are (because we don't currently attempt to delete and re-enter classes)
+    uint32_t foundClassesHash = 0;
 };
 
 // When a file is edited, we run index and resolve it using an local (empty) GlobalState.

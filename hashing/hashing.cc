@@ -82,7 +82,8 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, core::G
     core::FoundDefHashes foundHashes; // out parameter
     realmain::pipeline::nameAndResolve(lgs, move(single), opts(), *workers, &foundHashes);
 
-    return make_unique<core::FileHash>(move(*lgs.hash()), move(usageHash), move(foundHashes));
+    return make_unique<core::FileHash>(move(*lgs.hash(foundHashes.foundClassesHash)), move(usageHash),
+                                       move(foundHashes));
 }
 
 // Note: lgs is an outparameter.

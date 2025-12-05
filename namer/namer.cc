@@ -18,6 +18,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/namer.h"
+#include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
 
 using namespace std;
@@ -1807,7 +1808,16 @@ public:
         }
     }
 
-    void populateFoundDefHashes(core::Context ctx, core::FoundDefHashes &foundHashesOut) {
+    void populateFoundDefHashes(core::Context ctx, const State &state, core::FoundDefHashes &foundHashesOut) {
+        ENFORCE(foundHashesOut.foundClassesHash == 0);
+        auto &foundClassesHash = foundHashesOut.foundClassesHash;
+        foundClassesHash = foundDefs.klasses().size();
+        for (uint32_t idx = 0; idx < foundDefs.klasses().size(); idx++) {
+            auto sym = state.definedClasses[idx];
+            foundClassesHash = core::mix(foundClassesHash, idx);
+            foundClassesHash = core::mix(foundClassesHash, sym.id());
+        }
+
         ENFORCE(foundHashesOut.staticFieldHashes.empty());
         foundHashesOut.staticFieldHashes.reserve(foundDefs.staticFields().size());
         for (const auto &staticField : foundDefs.staticFields()) {
@@ -2342,10 +2352,10 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
                 symbolDefiner.deleteOldDefinitions(ctx, state, frefIt->second->foundHashes);
             }
         }
-        incrementalDefinitions[fref] = move(state);
         if (foundHashesOut != nullptr) {
-            symbolDefiner.populateFoundDefHashes(ctx, *foundHashesOut);
+            symbolDefiner.populateFoundDefHashes(ctx, state, *foundHashesOut);
         }
+        incrementalDefinitions[fref] = move(state);
     }
 
     findConflictingClassDefs(gs, classBehaviorLocs);
