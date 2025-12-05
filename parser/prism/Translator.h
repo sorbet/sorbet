@@ -250,8 +250,7 @@ private:
     template <typename PrismNode>
     ast::ExpressionPtr desugarMlhs(core::LocOffsets loc, PrismNode *lhs, ast::ExpressionPtr rhs);
 
-    std::pair<ast::ExpressionPtr, ast::ExpressionPtr> desugarMlhsParam(core::LocOffsets loc,
-                                                                       pm_multi_target_node *lhs);
+    std::pair<ast::ExpressionPtr, ast::ExpressionPtr> desugarMlhsParam(core::LocOffsets loc, pm_multi_target_node *lhs);
 
     // Desugar a class, singleton class or module body.
     ast::ClassDef::RHS_store desugarClassOrModule(pm_node *prismBodyNode);
