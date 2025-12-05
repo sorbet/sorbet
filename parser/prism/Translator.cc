@@ -100,12 +100,6 @@ void enforceHasExpr(const std::unique_ptr<NodeWithExpr> &node) {
     }
 }
 
-void enforceHasExpr(const parser::NodeVec &nodes) {
-    for (const auto &node : nodes) {
-        enforceHasExpr(node);
-    }
-}
-
 template <typename... Tail> void enforceHasExpr(const std::unique_ptr<parser::Node> &head, const Tail &...tail) {
     enforceHasExpr(head);
     enforceHasExpr(tail...);
