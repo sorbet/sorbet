@@ -637,18 +637,18 @@ public:
      * scope (i.e. `::T`). This might not actually refer to the `T` that we define for users, but we don't know that
      * information at the AST level.
      */
-    static bool isT(const ast::ExpressionPtr &expr) {
+    static bool isTApproximate(const ast::ExpressionPtr &expr) {
         return isRootConstantLitApproximate(expr, core::Names::Constants::T(), core::Symbols::T());
     }
 
     static bool isTNilable(const ast::ExpressionPtr &expr) {
         auto nilable = ast::cast_tree<ast::Send>(expr);
-        return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
+        return nilable != nullptr && nilable->fun == core::Names::nilable() && isTApproximate(nilable->recv);
     }
 
     static bool isTUntyped(const ast::ExpressionPtr &expr) {
         auto send = ast::cast_tree<ast::Send>(expr);
-        return send != nullptr && send->fun == core::Names::untyped() && isT(send->recv);
+        return send != nullptr && send->fun == core::Names::untyped() && isTApproximate(send->recv);
     }
 
     static core::NameRef arg2Name(const ExpressionPtr &arg) {

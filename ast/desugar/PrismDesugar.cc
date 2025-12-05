@@ -583,7 +583,7 @@ Send *asTLet(ExpressionPtr &arg) {
         return nullptr;
     }
 
-    if (!ast::MK::isT(send->recv)) {
+    if (!ast::MK::isTApproximate(send->recv)) {
         return nullptr;
     }
 
