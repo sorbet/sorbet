@@ -1,3 +1,5 @@
+# Load the macro that creates a test for every file in the prism_regression folder
+load("//test:prism_location_test.bzl", "prism_location_test_suite")
 load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
 load(":pipeline_test.bzl", "pipeline_tests")
 
@@ -121,9 +123,6 @@ sh_test(
         ":print_document_symbols",
     ],
 )
-
-# Load the macro that creates a test for every file in the prism_regression folder
-load("//test:prism_location_test.bzl", "prism_location_test_suite")
 
 # Run the macro
 prism_location_test_suite(
@@ -356,6 +355,9 @@ pipeline_tests(
             #   "Override the begin node location to be the parentheses location instead of the statements location"
             # However, undoing that override leads to issues with nested parentheses handling.
             "testdata/infer/control_flow/complex_implication_1.rb",
+
+            # Prism doesn't have enough context to reject f(&b, 1), and attempts to treat it equivalently to f(1, &b)
+            "testdata/desugar/bad_block_pass.rb",
         ],
     ),
     "PrismPosTests",
