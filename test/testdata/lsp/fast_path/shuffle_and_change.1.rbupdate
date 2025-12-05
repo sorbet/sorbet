@@ -1,0 +1,11 @@
+# typed: true
+# assert-slow-path: true
+
+class A
+  def on_a; end
+end
+class A
+end
+class B
+  def on_b(x); end
+end

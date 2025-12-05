@@ -527,7 +527,7 @@ public:
 
     void trace(std::string_view msg) const;
 
-    std::unique_ptr<LocalSymbolTableHashes> hash() const;
+    std::unique_ptr<LocalSymbolTableHashes> hash(uint32_t foundClassesHash) const;
     absl::Span<const std::shared_ptr<File>> getFiles() const {
         return this->files->span();
     }
