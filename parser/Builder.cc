@@ -203,7 +203,7 @@ public:
                 error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
             }
 
-            bool isItParam = isItParameterName(id->name);
+            bool isItParam = id->name == core::Names::it();
 
             // For 'it' parameter: check if already declared FIRST (soft keyword behavior)
             // If 'it' is a local variable OR parameter in current scope, use it
