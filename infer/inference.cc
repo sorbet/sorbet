@@ -220,9 +220,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                 auto send = cfg::cast_instruction<cfg::Send>(expr.value);
                 if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
-                    ENFORCE(send->args.size() == 1, "Broken invariant from desugar");
+                    ENFORCE(send->argRefs().size() == 1, "Broken invariant from desugar");
                     unreachableInstruction = &expr.value;
-                    locForUnreachable = core::Loc(ctx.file, send->argLocs[0]);
+                    locForUnreachable = core::Loc(ctx.file, send->argLocs()[0]);
 
                     // The arg loc for the synthetic variable created for the purpose of this safe navigation
                     // check is a bit of a hack. It's intentionally one character too short so that for
@@ -249,7 +249,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             auto send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
             if (dueToSafeNavigation && send != nullptr) {
                 if (auto e = ctx.state.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
-                    const auto &ty = current.getAndFillTypeAndOrigin(send->args[0]);
+                    const auto &ty = current.getAndFillTypeAndOrigin(send->argRefs()[0], send->argTypes()[0]);
 
                     e.setHeader("Used `{}` operator on `{}`, which can never be nil", "&.", ty.type.show(ctx));
                     e.addErrorSection(ty.explainGot(ctx, current.locForUninitialized()));
