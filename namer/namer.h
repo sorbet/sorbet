@@ -14,7 +14,7 @@ class Namer final {
     [[nodiscard]] static bool
     runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                 UnorderedMap<core::FileRef, std::shared_ptr<const core::FileHash>> &&oldFoundDefHashesForFiles,
-                core::FoundDefHashes *foundHashesOut, std::vector<core::ClassOrModuleRef> &updatedSymbols);
+                core::FoundDefHashesResult *foundHashesOut, std::vector<core::ClassOrModuleRef> &updatedSymbols);
 
 public:
     // Note: foundHashes is an optional out parameter.
@@ -23,7 +23,7 @@ public:
     // it found while running. (Thus, it's usually nullptr except when pipeline::nameAndResolve is called
     // for the purpose of computing a FileHash.)
     [[nodiscard]] static bool run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
-                                  core::FoundDefHashes *foundHashesOut);
+                                  core::FoundDefHashesResult *foundHashesOut);
 
     // Version of Namer that accepts the old FoundDefHashes for each file to run Namer, which
     // it uses to figure out how to mutate the already-populated GlobalState into the right shape

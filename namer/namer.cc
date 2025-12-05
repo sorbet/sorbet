@@ -1808,7 +1808,7 @@ public:
         }
     }
 
-    void populateFoundDefHashes(core::Context ctx, const State &state, core::FoundDefHashes &foundHashesOut) {
+    void populateFoundDefHashes(core::Context ctx, const State &state, core::FoundDefHashesResult &foundHashesOut) {
         ENFORCE(foundHashesOut.foundClassesHash == 0);
         auto &foundClassesHash = foundHashesOut.foundClassesHash;
         foundClassesHash = foundDefs.klasses().size();
@@ -2327,7 +2327,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
+                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2391,7 +2391,7 @@ void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> tre
 [[nodiscard]] bool
 Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
+                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     auto foundDefs = findSymbols(gs, trees, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
@@ -2410,7 +2410,7 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
 }
 
 [[nodiscard]] bool Namer::run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
-                              core::FoundDefHashes *foundHashesOut) {
+                              core::FoundDefHashesResult *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
     vector<core::ClassOrModuleRef> updatedSymbols;
     return runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);

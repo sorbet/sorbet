@@ -79,11 +79,12 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, core::G
     // We run computeFileHashForAST with the empty set of options which means we can skip running packager
 
     auto workers = WorkerPool::create(0, lgs.tracer());
-    core::FoundDefHashes foundHashes; // out parameter
-    realmain::pipeline::nameAndResolve(lgs, move(single), opts(), *workers, &foundHashes);
+    core::FoundDefHashesResult foundHashesResult; // out parameter
+    realmain::pipeline::nameAndResolve(lgs, move(single), opts(), *workers, &foundHashesResult);
 
-    return make_unique<core::FileHash>(move(*lgs.hash(foundHashes.foundClassesHash)), move(usageHash),
-                                       move(foundHashes));
+    auto foundClassesHash = foundHashesResult.foundClassesHash;
+    core::FoundDefHashes foundHashes = move(foundHashesResult);
+    return make_unique<core::FileHash>(move(*lgs.hash(foundClassesHash)), move(usageHash), move(foundHashes));
 }
 
 // Note: lgs is an outparameter.

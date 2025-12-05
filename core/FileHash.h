@@ -220,6 +220,13 @@ struct FoundDefHashes {
     FoundTypeMemberHashes typeMemberHashes;
     FoundMethodHashes methodHashes;
     FoundFieldHashes fieldHashes;
+};
+
+// There are some extra fields that we need to compute, but which are only used as out parameters to
+// feed into other places. By contrast, the entire FoundDefHashes struct is embedded in the FileHash
+// structure (one per file in the project), so for these extra properties that we don't need to
+// persist, we want a quick way to drop them later, thus the inheritance.
+struct FoundDefHashesResult : public FoundDefHashes {
     // For classes, we're only sensitive to the order of classes, but we don't actually care what
     // the individual classes are (because we don't currently attempt to delete and re-enter classes)
     uint32_t foundClassesHash = 0;
