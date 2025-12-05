@@ -255,8 +255,9 @@ BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, a
     auto afterNext = walk(cctx.withTarget(exprSym), expr, current);
     if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
         LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
-        ENFORCE(cctx.link.get() != nullptr);
-        afterNext->exprs.emplace_back(dead, loc, make_insn<BlockReturn>(cctx.link, exprSym));
+        ENFORCE(cctx.link != nullptr);
+        ENFORCE(cctx.link->get() != nullptr);
+        afterNext->exprs.emplace_back(dead, loc, make_insn<BlockReturn>(*cctx.link, exprSym));
     }
 
     if (cctx.nextScope == nullptr) {
