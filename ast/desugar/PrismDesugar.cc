@@ -732,7 +732,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     flags.isPrivateOk = true;
                 }
 
-                if (isCallToBlockGivenP(send, rec) && dctx.enclosingBlockParamName.exists()) {
+                if (isCallToBlockGivenP(send, rec) && dctx.enclosingMethodLoc.exists()) {
                     // Desugar:
                     //     def foo(&my_block)
                     //       x = block_given?

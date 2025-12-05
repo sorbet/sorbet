@@ -52,3 +52,13 @@ def method_with_implicit_block_param()
   SomethingElse.block_given?
   block_given?("with parameter")
 end
+
+# Outside of a method, none of these shuold desugar to special calls to `block_given?`
+block_given?
+self.block_given?
+Kernel.block_given?
+::Kernel.block_given?
+block_given? { "with a block?!" }
+Object.block_given? # Normally not allowed: private method `block_given?' called for Object:Class
+SomethingElse.block_given?
+block_given?("with parameter")

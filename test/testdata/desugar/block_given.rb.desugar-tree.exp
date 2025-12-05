@@ -77,4 +77,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.block_given?("with parameter")
     end
   end
+
+  <self>.block_given?()
+
+  <self>.block_given?()
+
+  <emptyTree>::<C Kernel>.block_given?()
+
+  ::<root>::<C Kernel>.block_given?()
+
+  <self>.block_given?() do ||
+    "with a block?!"
+  end
+
+  <emptyTree>::<C Object>.block_given?()
+
+  <emptyTree>::<C SomethingElse>.block_given?()
+
+  <self>.block_given?("with parameter")
 end
