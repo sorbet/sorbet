@@ -234,10 +234,8 @@ private:
     ast::ExpressionPtr desugarAssignment(pm_node_t *node);
 
     // Pattern-matching
-    // ... variations of the main translation functions for pattern-matching related nodes.
+    // ... variation of the main translation functions for pattern-matching related node.
     std::unique_ptr<ExprOnly> patternTranslate(pm_node_t *node);
-    parser::NodeVec patternTranslateMulti(pm_node_list prismNodes);
-    void patternTranslateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
     ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match);
 
     std::string_view sliceLocation(pm_location_t loc) const;

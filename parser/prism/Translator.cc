@@ -3998,30 +3998,6 @@ unique_ptr<ExprOnly> Translator::patternTranslate(pm_node_t *node) {
     }
 }
 
-// Translates a Prism node list into a new `NodeVec` of legacy parser nodes.
-// This is like `translateMulti()`, but calls `patternTranslateMultiInto()` instead of `translateMultiInto()`.
-parser::NodeVec Translator::patternTranslateMulti(pm_node_list nodeList) {
-    auto prismNodes = absl::MakeSpan(nodeList.nodes, nodeList.size);
-
-    parser::NodeVec result;
-
-    // Pre-allocate the exactly capacity we're going to need, to prevent growth reallocations.
-    result.reserve(prismNodes.size());
-
-    patternTranslateMultiInto(result, prismNodes);
-
-    return result;
-}
-
-// Translates the given Prism pattern-matching nodes, and appends them to the given `NodeVec` of Sorbet nodes.
-// This is like `translateMultiInto()`, but calls `patternTranslate()` instead of `translate()`.
-void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<pm_node_t *> prismNodes) {
-    for (auto &prismNode : prismNodes) {
-        unique_ptr<parser::Node> sorbetNode = patternTranslate(prismNode);
-        outSorbetNodes.emplace_back(move(sorbetNode));
-    }
-}
-
 tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, core::LocOffsets /* enclosingBlockParamLoc */,
       core::NameRef /* enclosingBlockParamName */>
 Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location,
