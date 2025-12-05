@@ -229,6 +229,7 @@ struct FoundDefHashes {
 struct FoundDefHashesResult : public FoundDefHashes {
     // For classes, we're only sensitive to the order of classes, but we don't actually care what
     // the individual classes are (because we don't currently attempt to delete and re-enter classes)
+    // so we don't need to store a whole vector like we do for other fields in FoundDefHashes.
     uint32_t foundClassesHash = 0;
 };
 
