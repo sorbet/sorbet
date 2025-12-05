@@ -2214,7 +2214,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
 
-            [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
+            [&](parser::BlockPass *blockPass) {
+                if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::UnsupportedNode)) {
+                    e.setHeader("Unsupported block pass node in non-final argument");
+                }
+                result = MK::Constant(loc, core::Symbols::ErrorNode());
+            },
             [&](parser::Node *node) {
                 Exception::raise("Unimplemented Parser Node: PrismDesugar: {} (class: {})", node->nodeName(),
                                  demangle(typeid(*node).name()));

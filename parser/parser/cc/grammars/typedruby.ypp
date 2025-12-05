@@ -1882,6 +1882,12 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.alloc.node_list($1);
                     }
+                | block_arg tCOMMA args
+                    {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $2, driver.token_name($2->type()));
+                      $$ = $3;
+                      $$->push_front($1);
+                    }
 
     command_args:   {
                       ruby_parser::token_type last_token = driver.last_token->type();
@@ -1927,6 +1933,12 @@ lbrace_cmd_block_start:
    opt_block_arg: tCOMMA block_arg
                     {
                       $$ = driver.alloc.node_list($2);
+                    }
+                | tCOMMA block_arg tCOMMA args
+                    {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnexpectedToken, $3, driver.token_name($3->type()));
+                      $$ = $4;
+                      $$->push_front($2);
                     }
                 | // nothing
                     {
