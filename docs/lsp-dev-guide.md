@@ -42,7 +42,7 @@ There are two main kinds of LSP tests you're likely to interact with:
     flag. If the test fails, you'll be see a line that looks like
 
     ```
-    + exec test/lsp_test_runner --single_test=test/testdata/lsp/completion/alias_method.rb
+    + exec test/lsp_test_runner --single_test test/testdata/lsp/completion/alias_method.rb
     ```
 
     somewhere in the output. This is the actual binary that Bazel built and ran
@@ -50,7 +50,7 @@ There are two main kinds of LSP tests you're likely to interact with:
     exec` part and add `lldb -- bazel-bin/` in front:
 
     ```
-    lldb -- bazel-bin/test/lsp_test_runner --single_test=test/testdata/lsp/completion/alias_method.rb
+    lldb -- bazel-bin/test/lsp_test_runner --single_test test/testdata/lsp/completion/alias_method.rb
     ```
 
     This is the easiest way to debug LSP things, because you can set breakpoints
