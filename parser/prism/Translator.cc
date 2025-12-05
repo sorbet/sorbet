@@ -120,17 +120,6 @@ ExpressionPtr takeDesugaredExprOrEmptyTree(const std::unique_ptr<parser::Node> &
     return node->takeDesugaredExpr();
 }
 
-// Helper template to convert nodes to any store type with takeDesugaredExpr or EmptyTree for nulls.
-// This is used to convert a NodeVec to the store type argument for nodes including `Send`, `InsSeq`.
-template <typename StoreType> StoreType nodeVecToStore(const sorbet::parser::NodeVec &nodes) {
-    StoreType store;
-    store.reserve(nodes.size());
-    for (const auto &node : nodes) {
-        store.emplace_back(takeDesugaredExprOrEmptyTree(node));
-    }
-    return store;
-}
-
 // Helper template to convert a pm_node_list to any store type.
 // This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
 // ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
