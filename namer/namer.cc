@@ -1814,7 +1814,6 @@ public:
         foundClassesHash = foundDefs.klasses().size();
         for (uint32_t idx = 0; idx < foundDefs.klasses().size(); idx++) {
             auto sym = state.definedClasses[idx];
-            foundClassesHash = core::mix(foundClassesHash, idx);
             foundClassesHash = core::mix(foundClassesHash, sym.id());
         }
 
