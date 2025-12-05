@@ -144,7 +144,7 @@ void maybeSupplyGenericTypeArguments(core::MutableContext ctx, unique_ptr<parser
 } // namespace
 
 /**
- * Mark the given comment location as "consumed" so it won't be picked up by subsequent calls to `commentForPos`.
+ * Mark the given comment location as "consumed" so it won't be picked up by subsequent calls to `commentForNode`.
  */
 void AssertionsRewriter::consumeComment(core::LocOffsets loc) {
     consumedComments.emplace(make_pair(loc.beginPos(), loc.endPos()));
@@ -384,6 +384,11 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteBody(unique_ptr<parser::Node
  */
 unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node> node) {
     if (node == nullptr) {
+        return node;
+    }
+
+    // If all comments have been consumed, we can skip the rest of the tree.
+    if (consumedComments.size() >= totalComments) {
         return node;
     }
 
@@ -676,6 +681,17 @@ unique_ptr<parser::Node> AssertionsRewriter::rewriteNode(unique_ptr<parser::Node
 unique_ptr<parser::Node> AssertionsRewriter::run(unique_ptr<parser::Node> node) {
     if (node == nullptr) {
         return node;
+    }
+
+    // If there are no assertion comments to process we can skip the entire tree walk.
+    if (commentsByNode.empty()) {
+        return node;
+    }
+
+    // Calculate total number of comments so we can skip the rest of the tree when all comments have been consumed.
+    totalComments = 0;
+    for (const auto &[_, comments] : commentsByNode) {
+        totalComments += comments.size();
     }
 
     return rewriteBody(move(node));

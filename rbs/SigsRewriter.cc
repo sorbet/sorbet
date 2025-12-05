@@ -590,6 +590,10 @@ unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node
 }
 
 unique_ptr<parser::Node> SigsRewriter::run(unique_ptr<parser::Node> node) {
+    // If there are no signature comments to process, we can skip the entire tree walk.
+    if (commentsByNode.empty()) {
+        return node;
+    }
     return rewriteBody(move(node));
 }
 

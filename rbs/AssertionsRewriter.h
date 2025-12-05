@@ -33,6 +33,7 @@ private:
     std::map<parser::Node *, std::vector<CommentNode>> &commentsByNode;
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams = {};
     std::set<std::pair<uint32_t, uint32_t>> consumedComments = {};
+    size_t totalComments = 0;
 
     void consumeComment(core::LocOffsets loc);
     bool hasConsumedComment(core::LocOffsets loc);
