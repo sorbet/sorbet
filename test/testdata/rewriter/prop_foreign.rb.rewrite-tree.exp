@@ -71,6 +71,70 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
+    def foreign_proc<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc=<<todo method>>(arg0, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc=<<todo method>>(arg0, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+    end
+
+    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
+    end
+
+    def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
     def foreign_invalid<<todo method>>(&<blk>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
@@ -99,6 +163,70 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc=<<todo method>>(arg0, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
+    end
+
+    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
+    end
+
+    def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foreign_proc=<<todo method>>(arg0, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
+    end
+
+    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
+    end
+
+    def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
     <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
@@ -117,6 +245,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of foreign_proc=>
 
+    <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.proc() do ||
+        <emptyTree>::<C ForeignClass>
+      end)
+
+    <runtime method definition of foreign_proc>
+
+    <runtime method definition of foreign_proc=>
+
+    <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, ::<root>::<C Kernel>.proc() do ||
+        <emptyTree>::<C ForeignClass>
+      end)
+
+    <runtime method definition of foreign_proc>
+
+    <runtime method definition of foreign_proc=>
+
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end)
@@ -124,5 +268,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of foreign_invalid>
 
     <runtime method definition of foreign_invalid=>
+
+    <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.proc() do ||
+        :not_a_type
+      end)
+
+    <runtime method definition of foreign_proc>
+
+    <runtime method definition of foreign_proc=>
+
+    <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, ::<root>::<C Kernel>.proc() do ||
+        :not_a_type
+      end)
+
+    <runtime method definition of foreign_proc>
+
+    <runtime method definition of foreign_proc=>
   end
 end

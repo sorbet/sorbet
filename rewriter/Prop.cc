@@ -23,19 +23,20 @@ bool isTNilableTUntyped(const ast::ExpressionPtr &expr) {
 
 bool isTStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && ast::MK::isT(struct_->scope);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() &&
+           ast::MK::isTApproximate(struct_->scope);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() &&
-           ast::MK::isT(struct_->scope);
+           ast::MK::isTApproximate(struct_->scope);
 }
 
 bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::ImmutableStruct() &&
-           ast::MK::isT(struct_->scope);
+           ast::MK::isTApproximate(struct_->scope);
 }
 
 enum class SyntacticSuperClass {

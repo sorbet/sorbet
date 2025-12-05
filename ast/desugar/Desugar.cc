@@ -604,7 +604,7 @@ Send *asTLet(ExpressionPtr &arg) {
         return nullptr;
     }
 
-    if (!ast::MK::isT(send->recv)) {
+    if (!ast::MK::isTApproximate(send->recv)) {
         return nullptr;
     }
 
@@ -726,7 +726,7 @@ bool isCallToBlockGivenP(parser::Send *sendNode, ast::ExpressionPtr &receiverExp
         return true;
     }
 
-    return MK::isKernel(receiverExpr);
+    return MK::isKernelApproximate(receiverExpr);
 };
 
 // Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.

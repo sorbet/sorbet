@@ -6,7 +6,7 @@
 namespace sorbet::rewriter {
 
 ast::ExpressionPtr TypeAssertion::run(core::MutableContext ctx, ast::Send *send) {
-    if (!ast::MK::isT(send->recv)) {
+    if (!ast::MK::isTApproximate(send->recv)) {
         return nullptr;
     }
 

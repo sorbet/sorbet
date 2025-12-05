@@ -20,7 +20,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       else
         false
       end
-      ::<root>::<C Kernel>.block_given?()
+      if the_block_name
+        ::<root>::<C Kernel>.block_given?()
+      else
+        false
+      end
       <emptyTree>
       <emptyTree>::<C Object>.block_given?()
       <emptyTree>::<C SomethingElse>.block_given?()
@@ -45,7 +49,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       else
         false
       end
-      ::<root>::<C Kernel>.block_given?()
+      if &$2
+        ::<root>::<C Kernel>.block_given?()
+      else
+        false
+      end
       <emptyTree>
       <emptyTree>::<C Object>.block_given?()
       <emptyTree>::<C SomethingElse>.block_given?()
@@ -70,7 +78,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       else
         false
       end
-      ::<root>::<C Kernel>.block_given?()
+      if <blk>
+        ::<root>::<C Kernel>.block_given?()
+      else
+        false
+      end
       <emptyTree>
       <emptyTree>::<C Object>.block_given?()
       <emptyTree>::<C SomethingElse>.block_given?()
