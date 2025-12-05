@@ -238,6 +238,7 @@ private:
     std::unique_ptr<ExprOnly> patternTranslate(pm_node_t *node);
     parser::NodeVec patternTranslateMulti(pm_node_list prismNodes);
     void patternTranslateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
+    ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match);
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
