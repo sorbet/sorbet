@@ -112,8 +112,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 blockReads.add(v->what.id());
             } else if (auto v = cast_instruction<Send>(bind.value)) {
                 blockReads.add(v->recv.variable.id());
-                for (auto &arg : v->args) {
-                    blockReads.add(arg.variable.id());
+                for (auto &arg : v->argRefs()) {
+                    blockReads.add(arg.id());
                 }
             } else if (auto v = cast_instruction<TAbsurd>(bind.value)) {
                 blockReads.add(v->what.variable.id());
