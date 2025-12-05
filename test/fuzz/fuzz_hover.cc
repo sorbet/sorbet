@@ -17,7 +17,7 @@ extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
     auto res = options.parse(*argc, *argv);
 
     if (res.count("single_test") != 1) {
-        printf("--single_test=<filename> argument expected\n");
+        printf("--single_test <filename> argument expected\n");
         return 1;
     }
 

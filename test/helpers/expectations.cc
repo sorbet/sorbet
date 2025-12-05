@@ -170,7 +170,7 @@ Expectations getExpectationsForTest(string_view parentDir, string_view testName)
 
 Expectations Expectations::getExpectations(string singleTest) {
     if (singleTest.empty()) {
-        Exception::raise("No test specified. Pass one with --single_test=<test_path>");
+        Exception::raise("No test specified. Pass one with --single_test <test_path>");
     }
 
     if (FileOps::dirExists(singleTest)) {
