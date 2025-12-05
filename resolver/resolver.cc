@@ -773,12 +773,19 @@ private:
                 }
             }
         } else {
-            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
-                    e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolvedClass.show(ctx));
-                    e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolvedClass.show(ctx));
+            if (ctx.state.newSymbols().includes(job.klass)) {
+                if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
+                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
+                        e.setHeader("Only modules can be `{}`d, but `{}` is a class",
+                                    job.isInclude ? "include" : "extend", resolvedClass.show(ctx));
+                        e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
+                                       resolvedClass.show(ctx));
+                    }
+                }
+            } else {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ReopeningOlderStratum)) {
+                    e.setHeader("`{}` may not be reopened, as its package has already been processed",
+                                job.klass.show(ctx));
                 }
             }
         }
@@ -2549,8 +2556,8 @@ class ResolveTypeMembersAndFieldsWalk {
     static void computeExternalTypes(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "resolver.computeExternalType");
         // Ensure all symbols have `externalType` computed.
-        for (uint32_t i = 1; i < gs.classAndModulesUsed(); i++) {
-            core::ClassOrModuleRef(gs, i).data(gs)->unsafeComputeExternalType(gs);
+        for (auto ref : gs.newSymbols().classOrModuleRefs(gs)) {
+            ref.data(gs)->unsafeComputeExternalType(gs);
         }
     }
 
