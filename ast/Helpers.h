@@ -619,6 +619,17 @@ public:
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
     }
 
+    // Detects unresolved references to `name`, or resolved references to `symbol`.
+    static bool isRootConstantLitApproximate(const ast::ExpressionPtr &expr, const core::NameRef name,
+                                             const core::ClassOrModuleRef symbol) {
+        if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
+            return c->cnst == name && ast::MK::isRootScope(c->scope);
+        } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
+            return c->symbol() == symbol;
+        }
+
+        return false;
+    }
     /*
      * Is this an expression that refers to resolved or unresolved `::T` constant?
      *
@@ -627,21 +638,7 @@ public:
      * information at the AST level.
      */
     static bool isT(const ast::ExpressionPtr &expr) {
-        bool result = false;
-
-        typecase(
-            expr,
-            [&](const ast::UnresolvedConstantLit &t) {
-                // When the `T` was written by the user, we get an UnresolvedConstantLit.
-                result = t.cnst == core::Names::Constants::T() && ast::MK::isRootScope(t.scope);
-            },
-            [&](const ast::ConstantLit &c) {
-                // When the `T` was inserted by `ast::MK::T()`, we get a ConstantLit.
-                result = c.symbol() == core::Symbols::T();
-            },
-            [&](const ast::ExpressionPtr &e) { result = false; });
-
-        return result;
+        return isRootConstantLitApproximate(expr, core::Names::Constants::T(), core::Symbols::T());
     }
 
     static bool isTNilable(const ast::ExpressionPtr &expr) {
