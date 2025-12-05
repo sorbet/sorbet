@@ -687,7 +687,7 @@ bool isCallToBlockGivenP(parser::Send *sendNode, ast::ExpressionPtr &receiverExp
         return false;
     }
 
-    if (sendNode->receiver == nullptr || parser::isa_node<parser::Self>(sendNode->receiver.get())) {
+    if (receiverExpr == nullptr || receiverExpr.isSelfReference()) {
         return true;
     }
 
