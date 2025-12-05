@@ -171,6 +171,9 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
             result = std::make_unique<IRange>(iRange->loc, deepCopy(iRange->from.get()), deepCopy(iRange->to.get()));
         },
         [&](const parser::Integer *integer) { result = std::make_unique<Integer>(integer->loc, integer->val); },
+        [&](const parser::ItParam *itParam) {
+            result = std::make_unique<ItParam>(itParam->loc, deepCopy(itParam->decl.get()));
+        },
         [&](const parser::IVar *iVar) { result = std::make_unique<IVar>(iVar->loc, iVar->name); },
         [&](const parser::IVarLhs *iVarLhs) { result = std::make_unique<IVarLhs>(iVarLhs->loc, iVarLhs->name); },
         [&](const parser::Kwarg *kwarg) { result = std::make_unique<Kwarg>(kwarg->loc, kwarg->name); },

@@ -1,0 +1,6 @@
+s(:begin,
+  s(:def, :it, nil,
+    s(:str, "method_value")),
+  s(:assign,
+    s(:lvasgn, :x),
+    s(:send, nil, :it)))

@@ -1,0 +1,83 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U it>
+      params = NULL
+      body = String {
+        val = <U method_value>
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U result>
+      }
+      rhs = Block {
+        send = Send {
+          receiver = Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          method = <U map>
+          args = [
+          ]
+        }
+        params = ItParam {
+          decl = LVar {
+            name = <U it>
+          }
+        }
+        body = Send {
+          receiver = LVar {
+            name = <U it>
+          }
+          method = <U *>
+          args = [
+            Integer {
+              val = "2"
+            }
+          ]
+        }
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U tap>
+        args = [
+        ]
+      }
+      params = NULL
+      body = Send {
+        receiver = Self {
+        }
+        method = <U it>
+        args = [
+        ]
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U tap>
+        args = [
+        ]
+      }
+      params = NULL
+      body = Send {
+        receiver = NULL
+        method = <U it>
+        args = [
+        ]
+      }
+    }
+  ]
+}

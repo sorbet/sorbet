@@ -10,12 +10,13 @@ Begin {
         args = [
         ]
       }
-      params = NULL
-      body = Send {
-        receiver = NULL
-        method = <U it>
-        args = [
-        ]
+      params = ItParam {
+        decl = LVar {
+          name = <U it>
+        }
+      }
+      body = LVar {
+        name = <U it>
       }
     }
     Block {

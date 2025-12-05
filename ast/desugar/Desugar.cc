@@ -120,6 +120,21 @@ pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext 
                 params.emplace_back(node2TreeImpl(dctx, arg));
             }
         }
+    } else if (auto *itParamNode = parser::cast_node<parser::ItParam>(anyParamsNode)) {
+        // The block uses the 'it' parameter (Ruby 3.4+)
+        auto *lvar = parser::cast_node<parser::LVar>(itParamNode->decl.get());
+        if (lvar && lvar->name == core::Names::it()) {
+            // Single 'it' parameter - use the original name (not a unique one)
+            // Unlike numbered parameters, 'it' uses the actual name "it" so that
+            // local variables named 'it' in the same scope can shadow it
+            params.emplace_back(MK::Local(lvar->loc, lvar->name));
+        } else {
+            // In error cases (e.g., mixing 'it' with numbered params), we might have a numbered param here
+            // Just use it as-is to allow the error to be reported elsewhere
+            if (lvar) {
+                params.emplace_back(MK::Local(lvar->loc, lvar->name));
+            }
+        }
     } else if (auto *numParamsNode = parser::cast_node<parser::NumParams>(anyParamsNode)) {
         // The parse tree only contains declarations for numbered parameters that were actually used in the block or
         // lambda body, listed in the order they were encountered in the body. The desugar tree always contains all

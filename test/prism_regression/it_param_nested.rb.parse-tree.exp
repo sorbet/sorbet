@@ -1,0 +1,59 @@
+Block {
+  send = Send {
+    receiver = Array {
+      elts = [
+        Array {
+          elts = [
+            String {
+              val = <U a>
+            }
+            String {
+              val = <U b>
+            }
+          ]
+        }
+        Array {
+          elts = [
+            String {
+              val = <U c>
+            }
+            String {
+              val = <U d>
+            }
+          ]
+        }
+      ]
+    }
+    method = <U map>
+    args = [
+    ]
+  }
+  params = ItParam {
+    decl = LVar {
+      name = <U it>
+    }
+  }
+  body = Block {
+    send = Send {
+      receiver = LVar {
+        name = <U it>
+      }
+      method = <U map>
+      args = [
+      ]
+    }
+    params = ItParam {
+      decl = LVar {
+        name = <U it>
+      }
+    }
+    body = Send {
+      receiver = LVar {
+        name = <U it>
+      }
+      method = <U upcase>
+      args = [
+      ]
+    }
+  }
+}

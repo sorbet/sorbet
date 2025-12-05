@@ -1,0 +1,62 @@
+Block {
+  send = Send {
+    receiver = Array {
+      elts = [
+        Integer {
+          val = "1"
+        }
+        Integer {
+          val = "2"
+        }
+        Integer {
+          val = "3"
+        }
+      ]
+    }
+    method = <U each>
+    args = [
+    ]
+  }
+  params = ItParam {
+    decl = LVar {
+      name = <U it>
+    }
+  }
+  body = Begin {
+    stmts = [
+      Assign {
+        lhs = LVarLhs {
+          name = <U x>
+        }
+        rhs = LVar {
+          name = <U it>
+        }
+      }
+      Assign {
+        lhs = LVarLhs {
+          name = <U it>
+        }
+        rhs = Send {
+          receiver = LVar {
+            name = <U x>
+          }
+          method = <U +>
+          args = [
+            Integer {
+              val = "1"
+            }
+          ]
+        }
+      }
+      Send {
+        receiver = NULL
+        method = <U puts>
+        args = [
+          LVar {
+            name = <U it>
+          }
+        ]
+      }
+    ]
+  }
+}

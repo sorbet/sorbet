@@ -1,0 +1,55 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = LVarLhs {
+        name = <U it>
+      }
+      rhs = String {
+        val = <U string>
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U result>
+      }
+      rhs = Block {
+        send = Send {
+          receiver = Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          method = <U map>
+          args = [
+          ]
+        }
+        params = NULL
+        body = Send {
+          receiver = LVar {
+            name = <U it>
+          }
+          method = <U upcase>
+          args = [
+          ]
+        }
+      }
+    }
+    Send {
+      receiver = NULL
+      method = <U puts>
+      args = [
+        LVar {
+          name = <U it>
+        }
+      ]
+    }
+  ]
+}

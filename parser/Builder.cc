@@ -196,9 +196,43 @@ public:
             ENFORCE(id->name.kind() == core::NameKind::UTF8);
             // Because of the above enforce, we can use shortName here instead of show.
             auto name_str = id->name.shortName(gs_);
+
+            // Check for special identifier characters first
+            auto last_char = name_str.back();
+            if (last_char == '?' || last_char == '!') {
+                error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
+            }
+
+            bool isItParam = id->name == core::Names::it();
+
+            // For 'it' parameter: check if already declared FIRST (soft keyword behavior)
+            // If 'it' is a local variable OR parameter in current scope, use it
+            // But if it's only from an outer block parameter, allow creating new parameter
+            if (isItParam && driver_->lex.is_declared(name_str)) {
+                // Check if 'it' is from current scope (parameter or local var) vs outer block parameter
+                bool isFromCurrentScope = driver_->numparam_stack.seen_it_param();
+                bool isFromOuterBlockParam = driver_->numparam_stack.seen_it_param_in_outer_scope();
+
+                // Use existing variable if it's from current scope OR if it's a local variable (not just outer block
+                // param)
+                if (isFromCurrentScope || !isFromOuterBlockParam) {
+                    if (!hasCircularArgumentReferences(node.get(), name_str)) {
+                        return make_unique<LVar>(node->loc, id->name);
+                    } else {
+                        return error_node(node->loc.beginPos(), node->loc.endPos());
+                    }
+                }
+                // Otherwise, fall through to create new parameter (nested block shadowing)
+            }
+
             if (isNumberedParameterName(name_str) && driver_->lex.context.allowNumparams) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {
                     error(ruby_parser::dclass::NumberedParamWithOrdinaryParam, id->loc);
+                }
+
+                // Check if 'it' parameter is already used
+                if (driver_->numparam_stack.seen_it_param()) {
+                    error(ruby_parser::dclass::NumberedParamWithItParam, id->loc);
                 }
 
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
@@ -230,11 +264,27 @@ public:
                 auto decls = driver_->alloc.node_list();
                 decls->emplace_back(toForeign(std::move(intro)));
                 driver_->numparam_stack.regis(name_str[1] - '0', std::move(decls));
-            }
+            } else if (isItParam && driver_->lex.context.allowNumparams && !driver_->numparam_stack.seen_it_param()) {
+                // Handle 'it' parameter (Ruby 3.4+) - allow in nested blocks, but not duplicate in same scope
+                if (driver_->numparam_stack.seen_ordinary_params()) {
+                    error(ruby_parser::dclass::ItParamWithOrdinaryParam, id->loc);
+                }
 
-            auto last_char = name_str.back();
-            if (last_char == '?' || last_char == '!') {
-                error(ruby_parser::dclass::InvalidIdToGet, id->loc, std::string(name_str));
+                // Check if numbered parameters (_1, _2, etc.) are already used
+                if (driver_->numparam_stack.seen_numparams() && !driver_->numparam_stack.seen_it_param()) {
+                    error(ruby_parser::dclass::ItParamWithNumberedParam, id->loc);
+                }
+
+                // Unlike _1, 'it' is allowed in nested blocks - don't check outer scopes
+
+                driver_->lex.declare(name_str);
+                auto intro = make_unique<LVar>(node->loc, id->name);
+                auto decls = driver_->alloc.node_list();
+                decls->emplace_back(toForeign(std::move(intro)));
+                // Register 'it' as implicit parameter 1
+                driver_->numparam_stack.regis(1, std::move(decls));
+                // Mark that 'it' is being used in this scope
+                driver_->numparam_stack.set_it_param();
             }
 
             if (driver_->lex.is_declared(name_str)) {
@@ -1035,6 +1085,17 @@ public:
 
     unique_ptr<Node> integer(const token *tok) {
         return make_unique<Integer>(tokLoc(tok), tok->view());
+    }
+
+    unique_ptr<Node> itparams(const token *tok, sorbet::parser::NodeVec declaringNodes) {
+        ENFORCE(!declaringNodes.empty(), "ItParam node created without declaring node.");
+        // The 'it' parameter is a single implicit parameter for blocks.
+        // In error cases (mixing 'it' with numbered params), there may be multiple nodes,
+        // but we only use the first one (which should be the 'it' LVar).
+
+        auto loc = tokLoc(tok).copyEndWithZeroLength();
+
+        return make_unique<ItParam>(loc, std::move(declaringNodes[0]));
     }
 
     unique_ptr<Node> ivar(const token *tok) {
@@ -2293,6 +2354,11 @@ ForeignPtr integer(SelfPtr builder, const token *tok) {
     return build->toForeign(build->integer(tok));
 }
 
+ForeignPtr itparams(SelfPtr builder, const token *tok, const node_list *declaringNodes) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->itparams(tok, build->convertNodeList(declaringNodes)));
+}
+
 ForeignPtr ivar(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->ivar(tok));
@@ -2798,6 +2864,7 @@ struct ruby_parser::builder Builder::interface = {
     index,
     indexAsgn,
     integer,
+    itparams,
     ivar,
     keywordBreak,
     keywordDefined,

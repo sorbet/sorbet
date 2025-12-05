@@ -1395,8 +1395,23 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                 break;
                             }
 
-                            case PM_IT_PARAMETERS_NODE: {
-                                unreachable("PM_IT_PARAMETERS_NODE is not implemented yet");
+                            case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
+                                // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
+                                auto itParamLoc = translateLoc(blockNode->opening_loc.end, blockNode->opening_loc.end);
+
+                                // Find the actual usage location of 'it' in the block body by walking the AST
+                                auto itUsageLoc = itParamLoc;
+                                if (blockNode->body != nullptr) {
+                                    auto statements = down_cast<pm_statements_node>(blockNode->body);
+                                    auto foundLoc = findItParamUsageLoc(statements);
+                                    if (foundLoc.exists()) {
+                                        itUsageLoc = foundLoc;
+                                    }
+                                }
+
+                                auto itDecl = make_unique<parser::LVar>(itUsageLoc, core::Names::it());
+                                blockParameters = make_unique<parser::ItParam>(itParamLoc, move(itDecl));
+                                break;
                             }
 
                             default: {
@@ -2814,12 +2829,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                  move(desugared));
             return make_node_with_expr<parser::XString>(move(res), location, move(sorbetParts));
         }
-        case PM_IT_LOCAL_VARIABLE_READ_NODE: { // The `it` implicit parameter added in Ruby 3.4, e.g. `a.map { it + 1 }`
-            [[fallthrough]];
+        case PM_IT_LOCAL_VARIABLE_READ_NODE: { // Reading the `it` default param in a block, e.g. `a.map { it + 1 }`
+            return make_unique<parser::LVar>(location, core::Names::it());
         }
-        case PM_IT_PARAMETERS_NODE: { // Used in a parameter list for lambdas that the `it` implicit parameter.
-            // See Prism::ParserStorage::ParsedRubyVersion
-            unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
+        case PM_IT_PARAMETERS_NODE: { // An invisible node that models the 'it' parameter in a block/lambda
+            // ... for a block like `proc { it + 1 }` or lambda like `-> { it + 1 }`, which has no explicitly declared
+            // parameters. When translating this node directly (not through the translateCallWithBlock handler), we
+            // don't have access to the block body to find actual usage locations via AST walking.
+            auto itParamLoc = location.copyWithZeroLength();
+            auto itDecl = make_unique<parser::LVar>(itParamLoc, core::Names::it());
+            return make_unique<parser::ItParam>(itParamLoc, move(itDecl));
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
@@ -4310,6 +4329,39 @@ Translator::desugarParametersNode(NodeVec &params, bool attemptToDesugarParams) 
     return make_tuple(move(paramsStore), move(statsStore), true);
 }
 
+core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements) {
+    ENFORCE(statements != nullptr);
+    ENFORCE(0 < statements->body.size, "Can never have an ItParam node on a block with no statements.");
+
+    core::LocOffsets result;
+
+    walkPrismAST(up_cast(statements), [this, &result](const pm_node_t *node) -> bool {
+        if (PM_NODE_TYPE_P(node, PM_IT_LOCAL_VARIABLE_READ_NODE)) {
+            result = this->translateLoc(node->location);
+            // Found the first usage, stop walking
+            return false;
+        }
+        // Don't descend into nested blocks/lambdas that have their own 'it' parameter
+        if (PM_NODE_TYPE_P(node, PM_BLOCK_NODE)) {
+            auto blockNode = down_cast<pm_block_node>(const_cast<pm_node_t *>(node));
+            if (blockNode->parameters != nullptr && PM_NODE_TYPE_P(blockNode->parameters, PM_IT_PARAMETERS_NODE)) {
+                // This nested block has its own 'it', don't descend into it
+                return false;
+            }
+        }
+        if (PM_NODE_TYPE_P(node, PM_LAMBDA_NODE)) {
+            auto lambdaNode = down_cast<pm_lambda_node>(const_cast<pm_node_t *>(node));
+            if (lambdaNode->parameters != nullptr && PM_NODE_TYPE_P(lambdaNode->parameters, PM_IT_PARAMETERS_NODE)) {
+                // This nested lambda has its own 'it', don't descend into it
+                return false;
+            }
+        }
+        return true;
+    });
+
+    return result;
+}
+
 std::array<core::LocOffsets, 9>
 Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node *statements, uint8_t maxParamNumber) {
     ENFORCE(statements != nullptr);
@@ -4794,6 +4846,32 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
             auto params = translateNumberedParametersNode(numberedParamsNode,
                                                           down_cast<pm_statements_node>(prismBodyNode), nullptr);
             parametersNode = make_unique<parser::NumParams>(numParamsLoc, move(params));
+        } else if (PM_NODE_TYPE_P(prismParametersNode, PM_IT_PARAMETERS_NODE)) {
+            // Handle 'it' parameter
+            core::LocOffsets itParamLoc;
+            if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
+                auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
+                // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
+                itParamLoc = translateLoc(prismBlockNode->opening_loc.end, prismBlockNode->opening_loc.end);
+            } else {
+                ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE));
+                auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
+                // Use a 0-length loc just after the `->` token
+                itParamLoc = translateLoc(prismLambdaNode->operator_loc.end, prismLambdaNode->operator_loc.end);
+            }
+
+            // Find the actual usage location of 'it' in the block body by walking the AST
+            auto itUsageLoc = itParamLoc;
+            if (prismBodyNode != nullptr) {
+                auto statements = down_cast<pm_statements_node>(prismBodyNode);
+                auto foundLoc = findItParamUsageLoc(statements);
+                if (foundLoc.exists()) {
+                    itUsageLoc = foundLoc;
+                }
+            }
+
+            auto itDecl = make_unique<parser::LVar>(itUsageLoc, core::Names::it());
+            parametersNode = make_unique<parser::ItParam>(itParamLoc, move(itDecl));
         } else {
             parametersNode = translate(prismParametersNode);
         }

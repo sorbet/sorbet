@@ -544,6 +544,12 @@ NodeDef nodes[] = {
         "numparams",
         vector<FieldDef>({{"decls", FieldType::NodeVec}}),
     },
+    // it parameter
+    {
+        "ItParam",
+        "itparam",
+        vector<FieldDef>({{"decl", FieldType::Node}}),
+    },
     // foo += 6 for += and other ops
     {
         "OpAsgn",
