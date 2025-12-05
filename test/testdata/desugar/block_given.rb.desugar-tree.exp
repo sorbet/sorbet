@@ -1,0 +1,116 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C SomethingElse><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>
+  end
+
+  def method_with_block_param<<todo method>>(&the_block_name)
+    begin
+      if the_block_name
+        <self>.block_given?()
+      else
+        false
+      end
+      if the_block_name
+        <self>.block_given?()
+      else
+        false
+      end
+      if the_block_name
+        <emptyTree>::<C Kernel>.block_given?()
+      else
+        false
+      end
+      if the_block_name
+        ::<root>::<C Kernel>.block_given?()
+      else
+        false
+      end
+      <emptyTree>
+      if the_block_name
+        <emptyTree>::<C Object>.block_given?()
+      else
+        false
+      end
+      if the_block_name
+        <emptyTree>::<C SomethingElse>.block_given?()
+      else
+        false
+      end
+      <self>.block_given?("with parameter")
+    end
+  end
+
+  def method_with_anonymous_block_param<<todo method>>(&&$2)
+    begin
+      if &$2
+        <self>.block_given?()
+      else
+        false
+      end
+      if &$2
+        <self>.block_given?()
+      else
+        false
+      end
+      if &$2
+        <emptyTree>::<C Kernel>.block_given?()
+      else
+        false
+      end
+      if &$2
+        ::<root>::<C Kernel>.block_given?()
+      else
+        false
+      end
+      <emptyTree>
+      if &$2
+        <emptyTree>::<C Object>.block_given?()
+      else
+        false
+      end
+      if &$2
+        <emptyTree>::<C SomethingElse>.block_given?()
+      else
+        false
+      end
+      <self>.block_given?("with parameter")
+    end
+  end
+
+  def method_with_implicit_block_param<<todo method>>(&<blk>)
+    begin
+      if <blk>
+        <self>.block_given?()
+      else
+        false
+      end
+      if <blk>
+        <self>.block_given?()
+      else
+        false
+      end
+      if <blk>
+        <emptyTree>::<C Kernel>.block_given?()
+      else
+        false
+      end
+      if <blk>
+        ::<root>::<C Kernel>.block_given?()
+      else
+        false
+      end
+      <emptyTree>
+      if <blk>
+        <emptyTree>::<C Object>.block_given?()
+      else
+        false
+      end
+      if <blk>
+        <emptyTree>::<C SomethingElse>.block_given?()
+      else
+        false
+      end
+      <self>.block_given?("with parameter")
+    end
+  end
+end
