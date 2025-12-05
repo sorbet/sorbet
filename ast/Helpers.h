@@ -585,19 +585,25 @@ public:
     static bool isRootScope(const ast::ExpressionPtr &scope) {
         if (ast::isa_tree<ast::EmptyTree>(scope)) {
             return true;
+        } else if (auto root = ast::cast_tree<ast::ConstantLit>(scope)) {
+            return root->symbol() == core::Symbols::root();
         }
-        auto root = ast::cast_tree<ast::ConstantLit>(scope);
-        return root != nullptr && root->symbol() == core::Symbols::root();
+
+        return false;
     }
 
+    // Detects references to the `::<Magic>` class. Since they're all created from `MK::Magic()`,
+    // they should only ever be resolved `ConstantLit`s, and never `UnresolvedConstantLit`.
     static bool isMagicClass(const ExpressionPtr &expr) {
         if (auto recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol() == core::Symbols::Magic();
-        } else {
-            return false;
         }
+
+        return false;
     }
 
+    // Detects references to the `Sorbet::Private::Static` class.  Since they're all created from
+    // `MK::SorbetPrivateStatic()`, they should only ever be resolved `ConstantLit`s, and never `UnresolvedConstantLit`.
     static bool isSorbetPrivateStatic(const ast::ExpressionPtr &expr) {
         if (auto recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol() == core::Symbols::Sorbet_Private_Static();
@@ -606,6 +612,7 @@ public:
         return false;
     }
 
+    // Detects calls to `self.new`
     static bool isSelfNew(ast::Send *send) {
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
     }
@@ -639,13 +646,19 @@ public:
     }
 
     static bool isTNilable(const ast::ExpressionPtr &expr) {
-        auto nilable = ast::cast_tree<ast::Send>(expr);
-        return nilable != nullptr && nilable->fun == core::Names::nilable() && isTApproximate(nilable->recv);
+        if (auto nilable = ast::cast_tree<ast::Send>(expr)) {
+            return nilable->fun == core::Names::nilable() && isTApproximate(nilable->recv);
+        }
+
+        return false;
     }
 
     static bool isTUntyped(const ast::ExpressionPtr &expr) {
-        auto send = ast::cast_tree<ast::Send>(expr);
-        return send != nullptr && send->fun == core::Names::untyped() && isTApproximate(send->recv);
+        if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            return send->fun == core::Names::untyped() && isTApproximate(send->recv);
+        }
+
+        return false;
     }
 
     static core::NameRef arg2Name(const ExpressionPtr &arg) {
