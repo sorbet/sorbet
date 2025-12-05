@@ -60,11 +60,12 @@ public:
     static parser::ParseResult run(core::MutableContext ctx, bool directlyDesugar = true,
                                    bool preserveConcreteSyntax = false);
 
-    ParseResult parse(bool collectComments = false);
+    ParseResult parseWithoutTranslation(bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
     core::LocOffsets translateLocation(const uint8_t *start, const uint8_t *end) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
     std::string_view extractString(pm_string_t *string) const;
+    std::string prettyPrint(pm_node_t *node) const;
 
     pm_location_t getZeroWidthLocation() const;
     pm_location_t convertLocOffsets(core::LocOffsets loc) const;
@@ -92,6 +93,7 @@ class ParseResult final {
     const std::vector<ParseError> parseErrors;
     std::vector<core::LocOffsets> commentLocations;
 
+public:
     ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors,
                 std::vector<core::LocOffsets> commentLocations)
         : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors}, commentLocations{
@@ -104,6 +106,14 @@ class ParseResult final {
 
     pm_node_t *getRawNodePointer() const {
         return node.get();
+    }
+
+    const std::vector<core::LocOffsets> &getCommentLocations() const {
+        return commentLocations;
+    }
+
+    const std::vector<ParseError> &getParseErrors() const {
+        return parseErrors;
     }
 };
 
