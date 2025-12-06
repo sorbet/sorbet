@@ -161,7 +161,7 @@ private:
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     ClassFlattenWalk flatten;
-    ast::TreeWalk::apply(ctx, flatten, tree.tree);
+    ast::ShallowWalk::apply(ctx, flatten, tree.tree);
     tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
 
     return tree;
