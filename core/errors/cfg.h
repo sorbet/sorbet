@@ -9,5 +9,6 @@ constexpr ErrorClass UndeclaredVariable{6002, StrictLevel::Strict};
 constexpr ErrorClass MalformedTAbsurd{6004, StrictLevel::True};
 constexpr ErrorClass MalformedTBind{6005, StrictLevel::False};
 constexpr ErrorClass UnknownTypeParameter{6006, StrictLevel::True};
+constexpr ErrorClass AbstractClassInstantiated{6007, StrictLevel::True};
 } // namespace sorbet::core::errors::CFG
 #endif
