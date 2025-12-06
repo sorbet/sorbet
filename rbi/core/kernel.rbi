@@ -3125,7 +3125,7 @@ module Kernel
   # ```
   sig do
     type_parameters(:X)
-      .params(blk: T.proc.params(arg: T.untyped).returns(T.type_parameter(:X)))
+      .params(blk: T.proc.params(arg: T.self_type).returns(T.type_parameter(:X)))
       .returns(T.type_parameter(:X))
   end
   def yield_self(&blk); end
