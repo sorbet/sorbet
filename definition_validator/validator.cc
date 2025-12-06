@@ -1352,9 +1352,6 @@ public:
 
         validateOverriding(ctx, this->topTree, methodDef);
     }
-
-    void postTransformSend(core::Context ctx, const ast::Send &send) {
-    }
 };
 } // namespace
 
@@ -1362,7 +1359,7 @@ void runOne(core::Context ctx, const ast::ParsedFile &tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols", {{"file", string(tree.file.data(ctx).path())}});
 
     ValidateWalk validate(tree.tree);
-    ast::ConstTreeWalk::apply(ctx, validate, tree.tree);
+    ast::ConstShallowWalk::apply(ctx, validate, tree.tree);
 }
 
 } // namespace sorbet::definition_validator
