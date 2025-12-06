@@ -1391,12 +1391,11 @@ public:
 };
 } // namespace
 
-ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
+void runOne(core::Context ctx, const ast::ParsedFile &tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols", {{"file", string(tree.file.data(ctx).path())}});
 
     ValidateWalk validate(tree.tree);
-    ast::TreeWalk::apply(ctx, validate, tree.tree);
-    return tree;
+    ast::ConstTreeWalk::apply(ctx, validate, tree.tree);
 }
 
 } // namespace sorbet::definition_validator

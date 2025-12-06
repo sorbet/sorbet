@@ -560,7 +560,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::Context ctx(*gs, core::Symbols::root(), file);
         resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
 
-        resolvedTree = definition_validator::runOne(ctx, move(resolvedTree));
+        definition_validator::runOne(ctx, resolvedTree);
         handler.drainErrors(*gs);
 
         handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree.toString(*gs); });
