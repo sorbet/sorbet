@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,9 +15,9 @@ bb1[firstDead=-1]():
 method ::Foo#baz {
 
 bb0[firstDead=4]():
-    <self>: Foo = cast(<self>: NilClass, Foo);
+    <self>: T.self_type (of Foo) = cast(<self>: NilClass, T.self_type (of Foo));
     a: T.untyped = load_arg(a)
-    <returnMethodTemp>$2: NilClass = <self>: Foo.puts(a: T.untyped)
+    <returnMethodTemp>$2: NilClass = <self>: T.self_type (of Foo).puts(a: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -31,7 +31,7 @@ bb1[firstDead=-1]():
 method ::<Class:Foo>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(Foo) = cast(<self>: NilClass, T.class_of(Foo));
+    <self>: T.self_type (of T.class_of(Foo)) = cast(<self>: NilClass, T.self_type (of T.class_of(Foo)));
     <returnMethodTemp>$2: Symbol(:baz) = :baz
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:baz)
     <unconditional> -> bb1
@@ -46,10 +46,10 @@ bb1[firstDead=-1]():
 method ::Bar#baz {
 
 bb0[firstDead=-1]():
-    <self>: Bar = cast(<self>: NilClass, Bar);
+    <self>: T.self_type (of Bar) = cast(<self>: NilClass, T.self_type (of Bar));
     b: T.untyped = load_arg(b)
-    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: Bar.<super>(b: T.untyped)
-    <selfRestore>$6: Bar = <self>
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.self_type (of Bar).<super>(b: T.untyped)
+    <selfRestore>$6: T.self_type (of Bar) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -60,25 +60,25 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: Bar, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Bar):
+bb2[firstDead=-1](<self>: T.self_type (of Bar), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of Bar)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Bar):
+bb3[firstDead=2](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of Bar)):
     <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$5, <super>>
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=5](<self>: Bar, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Bar):
+bb5[firstDead=5](<self>: T.self_type (of Bar), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of Bar)):
     # outerLoops: 1
-    <self>: Bar = loadSelf(<super>)
+    <self>: T.self_type (of Bar) = loadSelf(<super>)
     <blk>$7: T.untyped = load_yield_params(<super>)
     a$1: T.untyped = yield_load_arg(0, <blk>$7: T.untyped)
-    <blockReturnTemp>$8: NilClass = <self>: Bar.puts(a$1: T.untyped)
+    <blockReturnTemp>$8: NilClass = <self>: T.self_type (of Bar).puts(a$1: T.untyped)
     <blockReturnTemp>$11: T.noreturn = blockreturn<<super>> <blockReturnTemp>$8: NilClass
     <unconditional> -> bb2
 
@@ -87,7 +87,7 @@ bb5[firstDead=5](<self>: Bar, <block-pre-call-temp>$5: Sorbet::Private::Static::
 method ::<Class:Bar>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(Bar) = cast(<self>: NilClass, T.class_of(Bar));
+    <self>: T.self_type (of T.class_of(Bar)) = cast(<self>: NilClass, T.self_type (of T.class_of(Bar)));
     <returnMethodTemp>$2: Symbol(:baz) = :baz
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:baz)
     <unconditional> -> bb1

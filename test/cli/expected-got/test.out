@@ -121,7 +121,7 @@ test/cli/expected-got/expected-got.rb:57: Used `&.` operator on `Integer(1)`, wh
 test/cli/expected-got/expected-got.rb:59: Method `top_level_does_not_exist` does not exist on `T.class_of(<root>)` https://srb.help/7003
     59 |top_level_does_not_exist
         ^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     test/cli/expected-got/expected-got.rb:2:
      2 |extend T::Sig
         ^

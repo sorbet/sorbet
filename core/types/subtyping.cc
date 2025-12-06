@@ -550,13 +550,20 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
-            // NOTE: SelfType is an inlined type, so TypePtr equality is type equality.
-            if (t1 != t2) {
-                return OrType::make_shared(t1, t2);
-            } else {
-                return t1;
+        auto freshSelfTypeT1 = cast_type<FreshSelfType>(t1);
+        auto freshSelfTypeT2 = cast_type<FreshSelfType>(t2);
+
+        if (freshSelfTypeT1 != nullptr && freshSelfTypeT2 != nullptr) {
+            // If they're both T.self_type, we can pick either.
+            return t1;
+        } else if (freshSelfTypeT2 != nullptr) {
+            // FreshSelfType is like a SelfTypeParam with a lower bound of T.noreturn
+            if (isSubType(gs, t1, Types::bottom())) {
+                return t2;
             }
+            return OrType::make_shared(t1, t2);
+        } else if (freshSelfTypeT1 != nullptr) {
+            return OrType::make_shared(t1, t2);
         }
     }
 
@@ -892,7 +899,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return t2;
         }
 
-        if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1) || isa_type<SelfTypeParam>(t1)) {
+        if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1) || isa_type<SelfTypeParam>(t1) ||
+            isa_type<FreshSelfType>(t1)) {
             auto lft = Types::all(gs, t1, o2->left);
             if (Types::isAsSpecificAs(gs, lft, o2->right) && !lft.isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
@@ -1063,17 +1071,25 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return AndType::make_shared(t1, t2);
         }
     }
-
     {
-        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
-            // NOTE: SelfType is an ilined type, so TypePtr equality is type equality.
-            if (t1 != t2) {
-                return AndType::make_shared(t1, t2);
-            } else {
-                return t1;
+        auto freshSelfTypeT1 = cast_type<FreshSelfType>(t1);
+        auto freshSelfTypeT2 = cast_type<FreshSelfType>(t2);
+
+        if (freshSelfTypeT1 != nullptr && freshSelfTypeT2 != nullptr) {
+            // If they're both T.self_type, we can pick either.
+            return t1;
+        } else if (freshSelfTypeT2 != nullptr) {
+            if (!freshSelfTypeT2->upperBound.isUntyped() && isSubType(gs, freshSelfTypeT2->upperBound, t1)) {
+                return t2;
+            } else if (glb(gs, t1, freshSelfTypeT2->upperBound).isBottom()) {
+                return bottom();
             }
+            return AndType::make_shared(t1, t2);
+        } else if (freshSelfTypeT1 != nullptr) {
+            return AndType::make_shared(t1, t2);
         }
     }
+
     return glbGround(gs, t1, t2);
 }
 
@@ -1268,12 +1284,19 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 
     {
-        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
-            // NOTE: SelfType is an inlined type, so TypePtr equality is type equality.
-            if (t1 != t2) {
+        auto self1 = cast_type<FreshSelfType>(t1);
+        auto self2 = cast_type<FreshSelfType>(t2);
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr) {
+                // Only T.self_type is a subtype of T.self_type
                 return false;
+            } else if (self2 == nullptr) {
+                // T.self_type can be a subtype of other types, if the upper bound is low enough
+                return Types::isSubTypeUnderConstraint(gs, constr, self1->upperBound, t2, mode, errorDetailsCollector);
+            } else {
+                // T.self_type is compatible with itself if we've already instantiated the LambdaParam to FreshSelfType
+                return true;
             }
-            return true;
         }
     }
 

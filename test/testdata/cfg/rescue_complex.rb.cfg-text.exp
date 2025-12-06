@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#meth {
 
 bb0[firstDead=3]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <returnMethodTemp>$2: Integer(0) = 0
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)
     <unconditional> -> bb1
@@ -30,7 +30,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#foo {
 
 bb0[firstDead=3]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <returnMethodTemp>$2: Integer(1) = 1
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
     <unconditional> -> bb1
@@ -45,7 +45,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#bar {
 
 bb0[firstDead=3]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <returnMethodTemp>$2: Integer(2) = 2
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(2)
     <unconditional> -> bb1
@@ -60,7 +60,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#baz {
 
 bb0[firstDead=3]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <returnMethodTemp>$2: Integer(3) = 3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)
     <unconditional> -> bb1
@@ -75,7 +75,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#take_arg {
 
 bb0[firstDead=4]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     x: T.untyped = load_arg(x)
     <returnMethodTemp>$2: T.untyped = x
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
@@ -91,7 +91,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#untyped_exceptions {
 
 bb0[firstDead=5]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <cfgAlias>$5: T.class_of(Exception) = alias <C Exception>
     <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
     <returnMethodTemp>$2: [T.class_of(Exception)] = <magic>$3: T.class_of(<Magic>).<build-array>(<cfgAlias>$5: T.class_of(Exception))
@@ -108,7 +108,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#typed_exceptions {
 
 bb0[firstDead=5]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <cfgAlias>$5: T.class_of(Exception) = alias <C Exception>
     <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
     <returnMethodTemp>$2: [T.class_of(Exception)] = <magic>$3: T.class_of(<Magic>).<build-array>(<cfgAlias>$5: T.class_of(Exception))
@@ -125,7 +125,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#tuple_exceptions {
 
 bb0[firstDead=6]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <cfgAlias>$5: T.class_of(TypeError) = alias <C TypeError>
     <cfgAlias>$7: T.class_of(ArgumentError) = alias <C ArgumentError>
     <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
@@ -144,7 +144,7 @@ method ::TestRescue#initialize {
 
 bb0[firstDead=10]():
     @ex$3: T.nilable(StandardError) = alias @ex
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <cfgAlias>$6: T.class_of(T) = alias <C T>
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
     keep_for_ide$4: Runtime object representing type: T.nilable(StandardError) = <cfgAlias>$6: T.class_of(T).nilable(<cfgAlias>$8: T.class_of(StandardError))
@@ -165,7 +165,7 @@ bb1[firstDead=-1]():
 method ::TestRescue#multiple_rescue {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -181,15 +181,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -200,25 +200,25 @@ bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$15: NilClass):
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).baz()
     <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb11)
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb8[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$13 -> (T::Boolean ? bb9 : bb10)
 
 # backedges
 # - bb8
-bb9[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+bb9[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$10: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$15 -> (NilClass ? bb1 : bb11)
 
 # backedges
@@ -241,7 +241,7 @@ bb11[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#multiple_rescue_classes {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -263,8 +263,8 @@ bb3[firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -309,7 +309,7 @@ bb10[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#multiple_rescue_classes_varuse {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -331,8 +331,8 @@ bb3[firstDead=-1](<exceptionValue>$4: Exception):
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <statTemp>$3: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <statTemp>$3: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -378,15 +378,15 @@ bb10[firstDead=3](baz: T.nilable(T.any(LoadError, SocketError))):
 method ::TestRescue#rescue_loop {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <cfgAlias>$6: T.class_of(T) = alias <C T>
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
     keep_for_ide$4: Runtime object representing type: T.nilable(StandardError) = <cfgAlias>$6: T.class_of(T).nilable(<cfgAlias>$8: T.class_of(StandardError))
     keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
     <castTemp>$9: NilClass = nil
     ex: T.nilable(StandardError) = cast(<castTemp>$9: NilClass, T.nilable(StandardError));
-    <block-pre-call-temp>$11: Sorbet::Private::Static::Void = <self>: TestRescue.loop()
-    <selfRestore>$12: TestRescue = <self>
+    <block-pre-call-temp>$11: Sorbet::Private::Static::Void = <self>: T.self_type (of TestRescue).loop()
+    <selfRestore>$12: T.self_type (of TestRescue) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -400,22 +400,22 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb13
-bb2[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$21: NilClass):
+bb2[firstDead=-1](<self>: T.self_type (of TestRescue), ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=1](<block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue):
+bb3[firstDead=1](<block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue)):
     <returnMethodTemp>$2: T.noreturn = Solve<<block-pre-call-temp>$11, loop>
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$21: NilClass):
+bb5[firstDead=-1](<self>: T.self_type (of TestRescue), ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <blockReturnTemp>$13: NilClass, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
-    <self>: TestRescue = loadSelf(loop)
+    <self>: T.self_type (of TestRescue) = loadSelf(loop)
     ex: NilClass = nil
     <exceptionValue>$15: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$15 -> (T.nilable(Exception) ? bb7 : bb8)
@@ -423,7 +423,7 @@ bb5[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-c
 # backedges
 # - bb5
 # - bb8
-bb7[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: Exception, <gotoDeadTemp>$21: NilClass):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: Exception, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     <cfgAlias>$19: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$20: T::Boolean = <cfgAlias>$19: T.class_of(StandardError).===(<exceptionValue>$15: Exception)
@@ -431,21 +431,21 @@ bb7[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: So
 
 # backedges
 # - bb5
-bb8[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <gotoDeadTemp>$21: NilClass):
+bb8[firstDead=-1](<self>: T.self_type (of TestRescue), ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
-    <blockReturnTemp>$13: T.untyped = <self>: TestRescue.meth()
+    <blockReturnTemp>$13: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$15: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$15 -> (T.nilable(Exception) ? bb7 : bb10)
 
 # backedges
 # - bb8
-bb10[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$21: NilClass):
+bb10[firstDead=-1](<self>: T.self_type (of TestRescue), ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     <gotoDeadTemp>$21 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
-bb11[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: StandardError, <gotoDeadTemp>$21: NilClass):
+bb11[firstDead=-1](<self>: T.self_type (of TestRescue), ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <blockReturnTemp>$13: T.untyped, <exceptionValue>$15: StandardError, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     ex: StandardError = <exceptionValue>$15
     <exceptionValue>$15: NilClass = nil
@@ -454,7 +454,7 @@ bb11[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: S
 
 # backedges
 # - bb7
-bb12[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped):
+bb12[firstDead=-1](<self>: T.self_type (of TestRescue), ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <blockReturnTemp>$13: T.untyped):
     # outerLoops: 1
     <gotoDeadTemp>$21: TrueClass = true
     <gotoDeadTemp>$21 -> (TrueClass ? bb1 : bb13)
@@ -463,7 +463,7 @@ bb12[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: S
 # - bb10
 # - bb11
 # - bb12
-bb13[firstDead=1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$21: NilClass):
+bb13[firstDead=1](<self>: T.self_type (of TestRescue), ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.self_type (of TestRescue), <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$21: NilClass):
     # outerLoops: 1
     <blockReturnTemp>$23: T.noreturn = blockreturn<loop> <blockReturnTemp>$13: T.untyped
     <unconditional> -> bb2
@@ -473,7 +473,7 @@ bb13[firstDead=1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-c
 method ::TestRescue#rescue_untyped_splat {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -488,17 +488,17 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$8: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$9: T.untyped = <self>: TestRescue.untyped_exceptions()
+    <statTemp>$9: T.untyped = <self>: T.self_type (of TestRescue).untyped_exceptions()
     <exceptionClassTemp>$6: T.untyped = <cfgAlias>$8: T.class_of(<Magic>).<splat>(<statTemp>$9: T.untyped)
     <isaCheckTemp>$11: T.untyped = <exceptionClassTemp>$6: T.untyped.===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$11 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -536,7 +536,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#rescue_typed_splat {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -551,17 +551,17 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$8: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$9: T::Array[T.class_of(Exception)] = <self>: TestRescue.typed_exceptions()
+    <statTemp>$9: T::Array[T.class_of(Exception)] = <self>: T.self_type (of TestRescue).typed_exceptions()
     <exceptionClassTemp>$6: T::Array[T.class_of(Exception)] = <cfgAlias>$8: T.class_of(<Magic>).<splat>(<statTemp>$9: T::Array[T.class_of(Exception)])
     <isaCheckTemp>$11: T::Boolean = <exceptionClassTemp>$6: T::Array[T.class_of(Exception)].===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -599,7 +599,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#rescue_typed_splat {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -614,17 +614,17 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$8: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$9: [T.class_of(TypeError), T.class_of(ArgumentError)] = <self>: TestRescue.tuple_exceptions()
+    <statTemp>$9: [T.class_of(TypeError), T.class_of(ArgumentError)] = <self>: T.self_type (of TestRescue).tuple_exceptions()
     <exceptionClassTemp>$6: [T.class_of(TypeError), T.class_of(ArgumentError)] = <cfgAlias>$8: T.class_of(<Magic>).<splat>(<statTemp>$9: [T.class_of(TypeError), T.class_of(ArgumentError)])
     <isaCheckTemp>$11: T::Boolean = <exceptionClassTemp>$6: [T.class_of(TypeError), T.class_of(ArgumentError)].===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -662,7 +662,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_rescue_ensure {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -675,15 +675,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -691,23 +691,23 @@ bb4[firstDead=-1](<self>: TestRescue):
 # - bb4
 # - bb7
 # - bb8
-bb6[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$13: T.nilable(TrueClass)):
+bb6[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$13: T.nilable(TrueClass)):
     <cfgAlias>$6: T.class_of(T) = alias <C T>
     <rescueTemp>$2: T.untyped = <cfgAlias>$6: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
-    <throwAwayTemp>$14: T.untyped = <self>: TestRescue.bar()
+    <throwAwayTemp>$14: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$13 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$8: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).baz()
     <unconditional> -> bb6
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb8[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <gotoDeadTemp>$13: TrueClass = true
     <unconditional> -> bb6
 
@@ -722,7 +722,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_bug_rescue_empty_else {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -779,7 +779,7 @@ bb9[firstDead=1]():
 method ::TestRescue#parse_ruby_bug_12686 {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -794,26 +794,26 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <statTemp>$4: T.untyped, <exceptionValue>$5: Exception):
     <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
     <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <statTemp>$4: T.untyped = <self>: TestRescue.bar()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <statTemp>$4: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <gotoDeadTemp>$11: NilClass):
+bb6[firstDead=-1](<self>: T.self_type (of TestRescue), <statTemp>$4: T.untyped, <gotoDeadTemp>$11: NilClass):
     <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$5: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$5: StandardError):
     <exceptionValue>$5: NilClass = nil
     <keepForCfgTemp>$7: T.untyped = <keep-alive> <exceptionValue>$5
     <statTemp>$4: NilClass = nil
@@ -821,7 +821,7 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$5: StandardError):
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped):
+bb8[firstDead=-1](<self>: T.self_type (of TestRescue), <statTemp>$4: T.untyped):
     <gotoDeadTemp>$11: TrueClass = true
     <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
@@ -829,8 +829,8 @@ bb8[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped):
 # - bb6
 # - bb7
 # - bb8
-bb9[firstDead=2](<self>: TestRescue, <statTemp>$4: T.untyped):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.take_arg(<statTemp>$4: T.untyped)
+bb9[firstDead=2](<self>: T.self_type (of TestRescue), <statTemp>$4: T.untyped):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).take_arg(<statTemp>$4: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
@@ -839,7 +839,7 @@ bb9[firstDead=2](<self>: TestRescue, <statTemp>$4: T.untyped):
 method ::TestRescue#parse_rescue_mod {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -854,15 +854,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -873,10 +873,10 @@ bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
@@ -898,7 +898,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_resbody_list_var {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -913,15 +913,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
-    <exceptionClassTemp>$6: T.untyped = <self>: TestRescue.foo()
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    <exceptionClassTemp>$6: T.untyped = <self>: T.self_type (of TestRescue).foo()
     <isaCheckTemp>$8: T.untyped = <exceptionClassTemp>$6: T.untyped.===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$8 -> (T.untyped ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -932,10 +932,10 @@ bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: Exception):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: Exception):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
@@ -957,7 +957,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_rescue_else_ensure {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -970,45 +970,45 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$12: T::Boolean = <cfgAlias>$11: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: NilClass):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()
+bb5[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: NilClass):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).foo()
     <unconditional> -> bb6
 
 # backedges
 # - bb5
 # - bb7
 # - bb8
-bb6[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$14: T.nilable(TrueClass)):
+bb6[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$14: T.nilable(TrueClass)):
     <cfgAlias>$7: T.class_of(T) = alias <C T>
     <rescueTemp>$2: T.untyped = <cfgAlias>$7: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
-    <throwAwayTemp>$15: T.untyped = <self>: TestRescue.bar()
+    <throwAwayTemp>$15: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$14 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$9: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).baz()
     <unconditional> -> bb6
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb8[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <gotoDeadTemp>$14: TrueClass = true
     <unconditional> -> bb6
 
@@ -1023,7 +1023,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_rescue {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1038,15 +1038,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -1057,10 +1057,10 @@ bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).foo()
     <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
@@ -1082,7 +1082,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_resbody_var {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1097,15 +1097,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -1116,10 +1116,10 @@ bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$10: NilClass):
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
 
 # backedges
@@ -1142,7 +1142,7 @@ method ::TestRescue#parse_resbody_var_1 {
 
 bb0[firstDead=-1]():
     @ex$10: T.nilable(StandardError) = alias @ex
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1157,15 +1157,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, @ex$10: T.nilable(StandardError)):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, @ex$10: T.nilable(StandardError)):
     <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, @ex$10: T.nilable(StandardError)):
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue), @ex$10: T.nilable(StandardError)):
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -1176,12 +1176,12 @@ bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$12: NilClass):
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, @ex$10: T.nilable(StandardError)):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <exceptionValue>$3: StandardError, @ex$10: T.nilable(StandardError)):
     <rescueTemp>$2: StandardError = <exceptionValue>$3
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
     @ex$10: StandardError = <rescueTemp>$2
-    <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
+    <returnMethodTemp>$2: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
@@ -1203,7 +1203,7 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::TestRescue#parse_rescue_mod_op_assign {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <statTemp>$3: NilClass = foo
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb4)
@@ -1219,15 +1219,15 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of TestRescue), <statTemp>$3: NilClass, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception):
     <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
     <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass):
-    <statTemp>$4: T.untyped = <self>: TestRescue.meth()
+bb4[firstDead=-1](<self>: T.self_type (of TestRescue), <statTemp>$3: NilClass):
+    <statTemp>$4: T.untyped = <self>: T.self_type (of TestRescue).meth()
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb6)
 
@@ -1238,10 +1238,10 @@ bb6[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped, <gotoDeadTemp
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <exceptionValue>$5: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of TestRescue), <statTemp>$3: NilClass, <exceptionValue>$5: StandardError):
     <exceptionValue>$5: NilClass = nil
     <keepForCfgTemp>$7: T.untyped = <keep-alive> <exceptionValue>$5
-    <statTemp>$4: T.untyped = <self>: TestRescue.bar()
+    <statTemp>$4: T.untyped = <self>: T.self_type (of TestRescue).bar()
     <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
@@ -1265,7 +1265,7 @@ bb9[firstDead=3](<statTemp>$3: NilClass, <statTemp>$4: T.untyped):
 method ::TestRescue#parse_ruby_bug_12402 {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -1287,9 +1287,9 @@ bb3[firstDead=-1](foo: NilClass, <exceptionValue>$3: Exception):
 
 # backedges
 # - bb0
-bb4[firstDead=2](<self>: TestRescue):
-    <statTemp>$5: T.untyped = <self>: TestRescue.bar()
-    foo: T.noreturn = <self>: TestRescue.raise(<statTemp>$5: T.untyped)
+bb4[firstDead=2](<self>: T.self_type (of TestRescue)):
+    <statTemp>$5: T.untyped = <self>: T.self_type (of TestRescue).bar()
+    foo: T.noreturn = <self>: T.self_type (of TestRescue).raise(<statTemp>$5: T.untyped)
     <exceptionValue>$3 = <get-current-exception>
     <exceptionValue>$3 -> (<nullptr> ? bb3 : bb6)
 
@@ -1326,7 +1326,7 @@ bb9[firstDead=2](foo: NilClass):
 method ::TestRescue#parse_ruby_bug_12402_1 {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
     <statTemp>$3: NilClass = foo
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb4)
@@ -1349,9 +1349,9 @@ bb3[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <exceptionValu
 
 # backedges
 # - bb0
-bb4[firstDead=2](<self>: TestRescue, <statTemp>$3: NilClass):
-    <statTemp>$7: T.untyped = <self>: TestRescue.bar()
-    <statTemp>$4: T.noreturn = <self>: TestRescue.raise(<statTemp>$7: T.untyped)
+bb4[firstDead=2](<self>: T.self_type (of TestRescue), <statTemp>$3: NilClass):
+    <statTemp>$7: T.untyped = <self>: T.self_type (of TestRescue).bar()
+    <statTemp>$4: T.noreturn = <self>: T.self_type (of TestRescue).raise(<statTemp>$7: T.untyped)
     <exceptionValue>$5 = <get-current-exception>
     <exceptionValue>$5 -> (<nullptr> ? bb3 : bb6)
 
@@ -1389,8 +1389,8 @@ bb9[firstDead=3](<statTemp>$3: NilClass, <statTemp>$4: NilClass):
 method ::TestRescue#parse_ruby_bug_12402_2 {
 
 bb0[firstDead=-1]():
-    <self>: TestRescue = cast(<self>: NilClass, TestRescue);
-    []$3: T.untyped = <self>: TestRescue.foo()
+    <self>: T.self_type (of TestRescue) = cast(<self>: NilClass, T.self_type (of TestRescue));
+    []$3: T.untyped = <self>: T.self_type (of TestRescue).foo()
     []$4: Integer(0) = 0
     <statTemp>$9: T.untyped = []$3: T.untyped.[]([]$4: Integer(0))
     <exceptionValue>$13: T.nilable(Exception) = <get-current-exception>
@@ -1414,9 +1414,9 @@ bb3[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <s
 
 # backedges
 # - bb0
-bb4[firstDead=2](<self>: TestRescue, []$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped):
-    <statTemp>$15: T.untyped = <self>: TestRescue.bar()
-    <statTemp>$12: T.noreturn = <self>: TestRescue.raise(<statTemp>$15: T.untyped)
+bb4[firstDead=2](<self>: T.self_type (of TestRescue), []$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped):
+    <statTemp>$15: T.untyped = <self>: T.self_type (of TestRescue).bar()
+    <statTemp>$12: T.noreturn = <self>: T.self_type (of TestRescue).raise(<statTemp>$15: T.untyped)
     <exceptionValue>$13 = <get-current-exception>
     <exceptionValue>$13 -> (<nullptr> ? bb3 : bb6)
 
@@ -1454,9 +1454,9 @@ bb9[firstDead=3]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <st
 method ::<Class:TestRescue>#<static-init> {
 
 bb0[firstDead=-1]():
-    <self>: T.class_of(TestRescue) = cast(<self>: NilClass, T.class_of(TestRescue));
-    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(TestRescue).sig()
-    <selfRestore>$6: T.class_of(TestRescue) = <self>
+    <self>: T.self_type (of T.class_of(TestRescue)) = cast(<self>: NilClass, T.self_type (of T.class_of(TestRescue)));
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(TestRescue)).sig()
+    <selfRestore>$6: T.self_type (of T.class_of(TestRescue)) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -1467,22 +1467,22 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(TestRescue), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(TestRescue)):
+bb2[firstDead=-1](<self>: T.self_type (of T.class_of(TestRescue)), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(TestRescue))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(TestRescue)):
+bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(TestRescue))):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
-    <self>: T.class_of(TestRescue) = <selfRestore>$6
-    <block-pre-call-temp>$22: Sorbet::Private::Static::Void = <self>: T.class_of(TestRescue).sig()
-    <selfRestore>$23: T.class_of(TestRescue) = <self>
+    <self>: T.self_type (of T.class_of(TestRescue)) = <selfRestore>$6
+    <block-pre-call-temp>$22: Sorbet::Private::Static::Void = <self>: T.self_type (of T.class_of(TestRescue)).sig()
+    <selfRestore>$23: T.self_type (of T.class_of(TestRescue)) = <self>
     <unconditional> -> bb6
 
 # backedges
 # - bb2
-bb5[firstDead=9](<self>: T.class_of(TestRescue), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(TestRescue)):
+bb5[firstDead=9](<self>: T.self_type (of T.class_of(TestRescue)), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of T.class_of(TestRescue))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <cfgAlias>$11: T.class_of(T::Array) = alias <C Array>
@@ -1498,24 +1498,24 @@ bb5[firstDead=9](<self>: T.class_of(TestRescue), <block-pre-call-temp>$5: Sorbet
 # backedges
 # - bb3
 # - bb9
-bb6[firstDead=-1](<self>: T.class_of(TestRescue), <block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.class_of(TestRescue)):
+bb6[firstDead=-1](<self>: T.self_type (of T.class_of(TestRescue)), <block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.self_type (of T.class_of(TestRescue))):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6
-bb7[firstDead=6](<block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.class_of(TestRescue)):
+bb7[firstDead=6](<block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.self_type (of T.class_of(TestRescue))):
     <statTemp>$20: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$22, sig>
-    <self>: T.class_of(TestRescue) = <selfRestore>$23
+    <self>: T.self_type (of T.class_of(TestRescue)) = <selfRestore>$23
     <cfgAlias>$42: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$44: T.class_of(T) = alias <C T>
-    <statTemp>$39: T.class_of(TestRescue) = <self>: T.class_of(TestRescue).extend(<cfgAlias>$42: T.class_of(T::Sig))
+    <statTemp>$39: T.self_type (of T.class_of(TestRescue)) = <self>: T.self_type (of T.class_of(TestRescue)).extend(<cfgAlias>$42: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb6
-bb9[firstDead=11](<self>: T.class_of(TestRescue), <block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.class_of(TestRescue)):
+bb9[firstDead=11](<self>: T.self_type (of T.class_of(TestRescue)), <block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.self_type (of T.class_of(TestRescue))):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <cfgAlias>$30: T.class_of(T) = alias <C T>

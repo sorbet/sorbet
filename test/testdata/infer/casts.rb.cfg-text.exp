@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::TestCasts#untyped {
 
 bb0[firstDead=2]():
-    <self>: TestCasts = cast(<self>: NilClass, TestCasts);
+    <self>: T.self_type (of TestCasts) = cast(<self>: NilClass, T.self_type (of TestCasts));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -29,11 +29,11 @@ bb1[firstDead=-1]():
 method ::TestCasts#test_casts {
 
 bb0[firstDead=63]():
-    <self>: TestCasts = cast(<self>: NilClass, TestCasts);
+    <self>: T.self_type (of TestCasts) = cast(<self>: NilClass, T.self_type (of TestCasts));
     <cfgAlias>$5: T.class_of(Integer) = alias <C Integer>
     keep_for_ide$4: T.class_of(Integer) = <cfgAlias>$5
     keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
-    <castTemp>$6: T.untyped = <self>: TestCasts.untyped()
+    <castTemp>$6: T.untyped = <self>: T.self_type (of TestCasts).untyped()
     t: Integer = cast(<castTemp>$6: T.untyped, Integer);
     <statTemp>$10: Integer(4) = 4
     <statTemp>$8: Integer = t: Integer.+(<statTemp>$10: Integer(4))
@@ -47,7 +47,7 @@ bb0[firstDead=63]():
     <cfgAlias>$20: T.class_of(String) = alias <C String>
     keep_for_ide$19: T.class_of(String) = <cfgAlias>$20
     keep_for_ide$19: T.untyped = <keep-alive> keep_for_ide$19
-    <castTemp>$21: T.untyped = <self>: TestCasts.untyped()
+    <castTemp>$21: T.untyped = <self>: T.self_type (of TestCasts).untyped()
     s: String = cast(<castTemp>$21: T.untyped, String);
     <statTemp>$25: String("hi") = "hi"
     <statTemp>$23: String = s: String.+(<statTemp>$25: String("hi"))
@@ -104,7 +104,7 @@ bb1[firstDead=-1]():
 method ::<Class:TestCasts>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(TestCasts) = cast(<self>: NilClass, T.class_of(TestCasts));
+    <self>: T.self_type (of T.class_of(TestCasts)) = cast(<self>: NilClass, T.self_type (of T.class_of(TestCasts)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

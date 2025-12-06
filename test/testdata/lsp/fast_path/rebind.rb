@@ -9,5 +9,5 @@ class A
 end
 
 A.new.example do
-  T.reveal_type(self) # error: `T.class_of(<root>)`
+  T.reveal_type(self) # error: `T.self_type (of T.class_of(<root>))`
 end

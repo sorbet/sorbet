@@ -1,8 +1,12 @@
 test/cli/suggest-object/suggest-object.rb:4: Method `class` does not exist on `M` https://srb.help/7003
      4 |    self.class
                  ^^^^^
-  Got `M` originating from:
+  Got `T.self_type (of M)` originating from:
     test/cli/suggest-object/suggest-object.rb:3:
      3 |  def foo
           ^
+  Note:
+    `class` is actually defined as a method on `Kernel`. To call it,
+    `include Kernel` in this module to ensure the method is always there, or
+    call the method using `Kernel.class` instead.
 Errors: 1

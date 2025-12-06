@@ -1,10 +1,10 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=-1]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$6: T.class_of(T::Sig))
+    <statTemp>$3: T.self_type (of T.class_of(<root>)) = <self>: T.self_type (of T.class_of(<root>)).extend(<cfgAlias>$6: T.class_of(T::Sig))
     <statTemp>$10: Integer(0) = 0
     xyz: Integer = <statTemp>$10: Integer(0).to_i()
     <cfgAlias>$13: Runtime object representing type: T::Boolean = alias <C Boolean>

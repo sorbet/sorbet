@@ -9,7 +9,7 @@ __package.rb:3: Unable to resolve constant `PackageSpec` https://srb.help/5002
 __package.rb:4: Method `strict_dependencies` does not exist on `T.class_of(Project::Root)` https://srb.help/7003
      4 |  strict_dependencies 'false'
           ^^^^^^^^^^^^^^^^^^^
-  Got `T.class_of(Project::Root)` originating from:
+  Got `T.self_type (of T.class_of(Project::Root))` originating from:
     __package.rb:3:
      3 |class Project::Root < PackageSpec
         ^
@@ -17,7 +17,7 @@ __package.rb:4: Method `strict_dependencies` does not exist on `T.class_of(Proje
 __package.rb:5: Method `layer` does not exist on `T.class_of(Project::Root)` https://srb.help/7003
      5 |  layer 'fake'
           ^^^^^
-  Got `T.class_of(Project::Root)` originating from:
+  Got `T.self_type (of T.class_of(Project::Root))` originating from:
     __package.rb:3:
      3 |class Project::Root < PackageSpec
         ^

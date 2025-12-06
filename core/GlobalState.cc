@@ -318,6 +318,15 @@ void GlobalState::initEmpty() {
     TypeMemberRef typeMember =
         enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
     ENFORCE_NO_TIMER(typeMember == Symbols::noTypeMember());
+    typeMember =
+        enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::T_SelfType(), Variance::CoVariant);
+    ENFORCE_NO_TIMER(typeMember == Symbols::T_SelfType());
+    // This is kind of a lie: `T.self_type` is not truly a type member: every class is not "generic"
+    // in its self type, in the way that `::Class` is generic in the attached class. You cannot
+    // apply a type argument to this `T.self_type` type member. Instead, it's a way to hijack things
+    // like _instantiateLambdaParams so that we don't have to implement type substitution for
+    // separate kinds of type variables.
+    typeMember.data(*this)->resultType = make_type<LambdaParam>(typeMember, Types::bottom(), Types::top());
 
     klass = synthesizeClass(core::Names::Constants::Top(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::top());
@@ -740,6 +749,11 @@ void GlobalState::initEmpty() {
     // Synthesize <Magic>.attachedClass(arg: *T.untyped) => T.untyped
     // (accept any args to avoid repeating errors that would otherwise be reported by type syntax parsing)
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::attachedClass())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+    // Synthesize <Magic>.attachedClass(arg: *T.untyped) => T.untyped
+    // (accept any args to avoid repeating errors that would otherwise be reported by type syntax parsing)
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfType())
                  .repeatedUntypedArg(Names::arg0())
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<check-and-and>(arg0: T.untyped, arg1: Symbol, arg2: T.untyped, arg: *T.untyped) => T.untyped
@@ -1226,7 +1240,8 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     TypeParameter::Flags flags;
-    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeMember());
+    ENFORCE_NO_TIMER(owner.exists() || name == Names::Constants::NoTypeMember() ||
+                     name == Names::Constants::T_SelfType());
     ENFORCE_NO_TIMER(name.exists());
     if (variance == Variance::Invariant) {
         flags.isInvariant = true;

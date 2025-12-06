@@ -13,6 +13,7 @@ namespace sorbet::core {
 class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
+struct InstantiationContext;
 
 class NonRefcounted {};
 
@@ -51,7 +52,7 @@ public:
         LambdaParam,
         SelfTypeParam,
         AliasType,
-        SelfType,
+        FreshSelfType,
         IntegerLiteralType,
         FloatLiteralType,
         NamedLiteralType,
@@ -274,6 +275,8 @@ public:
 
     bool isFullyDefined() const;
 
+    bool mentionsSelfType() const;
+
     bool hasUntyped() const;
 
     // This is a hacky, unprincipled method that simply looks for void inside the type at the top
@@ -303,45 +306,15 @@ public:
     // into this:
     //   [Integer, Integer]
     // for use with LoadYieldParams
-    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+    //
+    // The `selfType` is weird, it shouldn't matter, because we only call this on `T.proc` types,
+    // and none of the `Proc` classes have `T.self_type` in their arguments. But we thread a
+    // `selfType` anyways just in case.
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const;
 
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
 
-    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
-
-    struct InstantiationContext {
-    private:
-        ClassOrModuleRef originalOwner;
-        ClassOrModuleRef inWhat;
-
-    public:
-        InlinedVector<TypeMemberRef, 4> currentAlignment;
-
-    private:
-        std::vector<TypePtr> targsOwned;
-
-    public:
-        // Points to either:
-        // - a vector owned by the caller (the "seen from external type application" case)
-        // - `targsOwned`, which might have been lazily populated (the "seen from self" case)
-        std::optional<absl::Span<const TypePtr>> targs;
-
-        // Seen from self version
-        InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat)
-            : originalOwner(originalOwner), inWhat(inWhat) {}
-
-        // Seen from external type application version
-        InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs)
-            : originalOwner(originalOwner), inWhat(inWhat), targs(absl::MakeSpan(targs)) {}
-
-        // Lazily populate `targsOwned` with the "seen from self" type args
-        void computeSelfTypeArgs(const GlobalState &gs);
-
-        // Lazily populate `currentAlignment`
-        void computeAlignment(const GlobalState &gs);
-    };
 
     TypePtr _instantiateLambdaParams(const GlobalState &gs, InstantiationContext &ictx) const;
 
@@ -375,6 +348,45 @@ public:
     friend class TypePtrTestHelper;
 };
 CheckSize(TypePtr, 8, 8);
+
+struct InstantiationContext {
+private:
+    ClassOrModuleRef originalOwner;
+    ClassOrModuleRef inWhat;
+
+public:
+    InlinedVector<TypeMemberRef, 4> currentAlignment;
+
+private:
+    std::vector<TypePtr> targsOwned;
+
+public:
+    // Points to either:
+    // - a vector owned by the caller (the "seen from external type application" case)
+    // - `targsOwned`, which might have been lazily populated (the "seen from self" case)
+    std::optional<absl::Span<const TypePtr>> targs;
+
+    // Points to either:
+    // - a type created by the caller (the "seen from external" case)
+    // - a type created lazily representing the "seen from self" case
+    TypePtr selfType;
+
+    // Seen from self version
+    InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat)
+        : originalOwner(originalOwner), inWhat(inWhat) {}
+
+    // Seen from external type application version
+    InstantiationContext(ClassOrModuleRef originalOwner, ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs,
+                         TypePtr selfType)
+        : originalOwner(originalOwner), inWhat(inWhat), targs(absl::MakeSpan(targs)), selfType(selfType) {}
+
+    // Lazily populate `targsOwned` and `selfType` with the "seen from self" type args
+    void computeSelfType(const GlobalState &gs);
+
+    // Lazily populate `currentAlignment`
+    void computeAlignment(const GlobalState &gs);
+};
+
 } // namespace sorbet::core
 
 #endif

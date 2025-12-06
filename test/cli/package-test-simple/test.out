@@ -21,7 +21,7 @@ main_lib/__package.rb:8: Invalid expression in package: Arguments to functions m
 main_lib/__package.rb:8: Method `export_for_test` does not exist on `T.class_of(Project::MainLib)` https://srb.help/7003
      8 |  export_for_test Project::MainLib::Lib
           ^^^^^^^^^^^^^^^
-  Got `T.class_of(Project::MainLib)` originating from:
+  Got `T.self_type (of T.class_of(Project::MainLib))` originating from:
     main_lib/__package.rb:5:
      5 |class Project::MainLib < PackageSpec
         ^

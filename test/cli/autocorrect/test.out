@@ -1,7 +1,7 @@
 autocorrect.rb:8: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
      8 |sig {params(a: String).void}
         ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
         ^
@@ -13,7 +13,7 @@ autocorrect.rb:8: Method `sig` does not exist on `T.class_of(<root>)` https://sr
 autocorrect.rb:8: Method `params` does not exist on `T.class_of(<root>)` https://srb.help/7003
      8 |sig {params(a: String).void}
              ^^^^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
         ^
@@ -21,7 +21,7 @@ autocorrect.rb:8: Method `params` does not exist on `T.class_of(<root>)` https:/
 autocorrect.rb:19: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
     19 |sig {params(a: T.nilable(Integer)).void}
         ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
         ^
@@ -33,7 +33,7 @@ autocorrect.rb:19: Method `sig` does not exist on `T.class_of(<root>)` https://s
 autocorrect.rb:19: Method `params` does not exist on `T.class_of(<root>)` https://srb.help/7003
     19 |sig {params(a: T.nilable(Integer)).void}
              ^^^^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
         ^

@@ -1,7 +1,7 @@
 method ::Object#main {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     try: Integer(0) = 0
     <unconditional> -> bb2
 
@@ -17,79 +17,79 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb21
-bb2[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb2[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
 # - bb2
 # - bb18
-bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: Exception, <gotoDeadTemp>$39: NilClass):
+bb3[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: Exception, <gotoDeadTemp>$39: NilClass):
     <cfgAlias>$43: T.class_of(B) = alias <C B>
     <isaCheckTemp>$44: T::Boolean = <cfgAlias>$43: T.class_of(B).===(<exceptionValue>$4: Exception)
     <isaCheckTemp>$44 -> (T::Boolean ? bb21 : bb22)
 
 # backedges
 # - bb2
-bb4[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb4[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <statTemp>$7: String("top") = "top"
-    <statTemp>$5: NilClass = <self>: Object.puts(<statTemp>$7: String("top"))
+    <statTemp>$5: NilClass = <self>: T.self_type (of Object).puts(<statTemp>$7: String("top"))
     <unconditional> -> bb5
 
 # backedges
 # - bb4
 # - bb16
-bb5[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb5[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <exceptionValue>$8: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$8 -> (T.nilable(Exception) ? bb6 : bb7)
 
 # backedges
 # - bb5
 # - bb13
-bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: Exception, <gotoDeadTemp>$39: NilClass):
+bb6[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: Exception, <gotoDeadTemp>$39: NilClass):
     <cfgAlias>$31: T.class_of(A) = alias <C A>
     <isaCheckTemp>$32: T::Boolean = <cfgAlias>$31: T.class_of(A).===(<exceptionValue>$8: Exception)
     <isaCheckTemp>$32 -> (T::Boolean ? bb16 : bb17)
 
 # backedges
 # - bb5
-bb7[firstDead=-1](<self>: Object, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb7[firstDead=-1](<self>: T.self_type (of Object), try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <statTemp>$11: Integer(3) = 3
     <ifTemp>$9: T::Boolean = try: Integer(0).<(<statTemp>$11: Integer(3))
     <ifTemp>$9 -> (T::Boolean ? bb8 : bb9)
 
 # backedges
 # - bb7
-bb8[firstDead=6](<self>: Object, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb8[firstDead=6](<self>: T.self_type (of Object), try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <statTemp>$13: Integer(0) = try
     <statTemp>$14: Integer(1) = 1
     try: Integer = <statTemp>$13: Integer(0).+(<statTemp>$14: Integer(1))
     <cfgAlias>$18: T.class_of(A) = alias <C A>
     <statTemp>$16: A = <cfgAlias>$18: T.class_of(A).new()
-    <returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$16: A)
+    <returnMethodTemp>$2: T.noreturn = <self>: T.self_type (of Object).raise(<statTemp>$16: A)
     <unconditional> -> bb13
 
 # backedges
 # - bb7
-bb9[firstDead=-1](<self>: Object, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb9[firstDead=-1](<self>: T.self_type (of Object), try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <statTemp>$21: Integer(6) = 6
     <ifTemp>$19: T::Boolean = try: Integer(0).<(<statTemp>$21: Integer(6))
     <ifTemp>$19 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
 # - bb9
-bb10[firstDead=6](<self>: Object, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb10[firstDead=6](<self>: T.self_type (of Object), try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <statTemp>$23: Integer(0) = try
     <statTemp>$24: Integer(1) = 1
     try: Integer = <statTemp>$23: Integer(0).+(<statTemp>$24: Integer(1))
     <cfgAlias>$28: T.class_of(B) = alias <C B>
     <statTemp>$26: B = <cfgAlias>$28: T.class_of(B).new()
-    <returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$26: B)
+    <returnMethodTemp>$2: T.noreturn = <self>: T.self_type (of Object).raise(<statTemp>$26: B)
     <unconditional> -> bb13
 
 # backedges
 # - bb9
-bb11[firstDead=-1](<self>: Object, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb11[firstDead=-1](<self>: T.self_type (of Object), try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <returnMethodTemp>$2: NilClass = nil
     <unconditional> -> bb13
 
@@ -97,36 +97,36 @@ bb11[firstDead=-1](<self>: Object, try: Integer(0), <gotoDeadTemp>$39: NilClass)
 # - bb8
 # - bb10
 # - bb11
-bb13[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb13[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <exceptionValue>$8: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$8 -> (T.nilable(Exception) ? bb6 : bb15)
 
 # backedges
 # - bb13
-bb15[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb15[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <gotoDeadTemp>$39 -> (NilClass ? bb1 : bb18)
 
 # backedges
 # - bb6
-bb16[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: A, <gotoDeadTemp>$39: NilClass):
+bb16[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: A, <gotoDeadTemp>$39: NilClass):
     <exceptionValue>$8: NilClass = nil
     <keepForCfgTemp>$29: T.untyped = <keep-alive> <exceptionValue>$8
     <statTemp>$35: String("rescue A") = "rescue A"
-    <statTemp>$33: NilClass = <self>: Object.puts(<statTemp>$35: String("rescue A"))
+    <statTemp>$33: NilClass = <self>: T.self_type (of Object).puts(<statTemp>$35: String("rescue A"))
     <magic>$37: T.class_of(<Magic>) = alias <C <Magic>>
     <retryTemp>$38: Sorbet::Private::Static::Void = <magic>$37: T.class_of(<Magic>).<retry>()
     <unconditional> -> bb5
 
 # backedges
 # - bb6
-bb17[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0)):
+bb17[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0)):
     <gotoDeadTemp>$39: TrueClass = true
     <gotoDeadTemp>$39 -> (TrueClass ? bb1 : bb18)
 
 # backedges
 # - bb15
 # - bb17
-bb18[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+bb18[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb20)
 
@@ -137,11 +137,11 @@ bb20[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$51: NilClass):
 
 # backedges
 # - bb3
-bb21[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: B, <gotoDeadTemp>$39: NilClass):
+bb21[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: B, <gotoDeadTemp>$39: NilClass):
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$41: T.untyped = <keep-alive> <exceptionValue>$4
     <statTemp>$47: String("rescue B ") = "rescue B "
-    <statTemp>$45: NilClass = <self>: Object.puts(<statTemp>$47: String("rescue B "))
+    <statTemp>$45: NilClass = <self>: T.self_type (of Object).puts(<statTemp>$47: String("rescue B "))
     <magic>$49: T.class_of(<Magic>) = alias <C <Magic>>
     <retryTemp>$50: Sorbet::Private::Static::Void = <magic>$49: T.class_of(<Magic>).<retry>()
     <unconditional> -> bb2
@@ -164,8 +164,8 @@ bb23[firstDead=1](<returnMethodTemp>$2: NilClass):
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$4: T.untyped = <self>: T.class_of(<root>).main()
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
+    <statTemp>$4: T.untyped = <self>: T.self_type (of T.class_of(<root>)).main()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -179,7 +179,7 @@ bb1[firstDead=-1]():
 method ::<Class:A>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <self>: T.self_type (of T.class_of(A)) = cast(<self>: NilClass, T.self_type (of T.class_of(A)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -193,7 +193,7 @@ bb1[firstDead=-1]():
 method ::<Class:B>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
+    <self>: T.self_type (of T.class_of(B)) = cast(<self>: NilClass, T.self_type (of T.class_of(B)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

@@ -140,14 +140,14 @@ suggest_unsafe_dead.rb:19: This code is unreachable https://srb.help/7006
 suggest_unsafe_dead.rb:81: This code is unreachable https://srb.help/7006
     81 |      do_something
               ^^^^^^^^^^^^
-    suggest_unsafe_dead.rb:80: This condition was always `truthy` (`A`)
+    suggest_unsafe_dead.rb:80: This condition was always `truthy` (`T.self_type (of A)`)
     80 |    unless self
                    ^^^^
   Autocorrect: Done
     suggest_unsafe_dead.rb:80: Replaced with `T.unsafe(self)`
     80 |    unless self
                    ^^^^
-  Got `A` originating from:
+  Got `T.self_type (of A)` originating from:
     suggest_unsafe_dead.rb:79:
     79 |  def test7_self
           ^
@@ -155,14 +155,14 @@ suggest_unsafe_dead.rb:81: This code is unreachable https://srb.help/7006
 suggest_unsafe_dead.rb:89: This code is unreachable https://srb.help/7006
     89 |      do_something
               ^^^^^^^^^^^^
-    suggest_unsafe_dead.rb:88: This condition was always `truthy` (`A`)
+    suggest_unsafe_dead.rb:88: This condition was always `truthy` (`T.self_type (of A)`)
     88 |    unless this
                    ^^^^
   Autocorrect: Done
     suggest_unsafe_dead.rb:88: Replaced with `T.unsafe(this)`
     88 |    unless this
                    ^^^^
-  Got `A` originating from:
+  Got `T.self_type (of A)` originating from:
     suggest_unsafe_dead.rb:87:
     87 |    this = self
                    ^^^^
