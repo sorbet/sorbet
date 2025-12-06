@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::TestHash#something {
 
 bb0[firstDead=3]():
-    <self>: TestHash = cast(<self>: NilClass, TestHash);
+    <self>: T.self_type (of TestHash) = cast(<self>: NilClass, T.self_type (of TestHash));
     <returnMethodTemp>$2: Integer(17) = 17
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(17)
     <unconditional> -> bb1
@@ -30,8 +30,8 @@ bb1[firstDead=-1]():
 method ::TestHash#test {
 
 bb0[firstDead=10]():
-    <self>: TestHash = cast(<self>: NilClass, TestHash);
-    <hashTemp>$4: T.untyped = <self>: TestHash.something()
+    <self>: T.self_type (of TestHash) = cast(<self>: NilClass, T.self_type (of TestHash));
+    <hashTemp>$4: T.untyped = <self>: T.self_type (of TestHash).something()
     <hashTemp>$5: Symbol(:bar) = :bar
     <statTemp>$9: Integer(1) = 1
     <statTemp>$10: Integer(2) = 2
@@ -52,7 +52,7 @@ bb1[firstDead=-1]():
 method ::TestHash#test_shaped {
 
 bb0[firstDead=12]():
-    <self>: TestHash = cast(<self>: NilClass, TestHash);
+    <self>: T.self_type (of TestHash) = cast(<self>: NilClass, T.self_type (of TestHash));
     <hashTemp>$4: Integer(1) = 1
     <hashTemp>$5: Integer(2) = 2
     <hashTemp>$6: Integer(2) = 2
@@ -60,7 +60,7 @@ bb0[firstDead=12]():
     <hashTemp>$8: Symbol(:foo) = :foo
     <hashTemp>$9: Symbol(:bar) = :bar
     <hashTemp>$10: Symbol(:baz) = :baz
-    <hashTemp>$11: T.untyped = <self>: TestHash.something()
+    <hashTemp>$11: T.untyped = <self>: T.self_type (of TestHash).something()
     <magic>$3: T.class_of(<Magic>) = alias <C <Magic>>
     <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped} = <magic>$3: T.class_of(<Magic>).<build-hash>(<hashTemp>$4: Integer(1), <hashTemp>$5: Integer(2), <hashTemp>$6: Integer(2), <hashTemp>$7: Integer(3), <hashTemp>$8: Symbol(:foo), <hashTemp>$9: Symbol(:bar), <hashTemp>$10: Symbol(:baz), <hashTemp>$11: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: {Integer(1) => Integer(2), Integer(2) => Integer(3), foo: Symbol(:bar), baz: T.untyped}
@@ -76,7 +76,7 @@ bb1[firstDead=-1]():
 method ::<Class:TestHash>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(TestHash) = cast(<self>: NilClass, T.class_of(TestHash));
+    <self>: T.self_type (of T.class_of(TestHash)) = cast(<self>: NilClass, T.self_type (of T.class_of(TestHash)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

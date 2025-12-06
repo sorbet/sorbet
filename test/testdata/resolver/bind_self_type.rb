@@ -14,7 +14,7 @@ class IncludesMixin
 
   def bar
     foo do
-      T.reveal_type(self) # error: Revealed type: `IncludesMixin`
+      T.reveal_type(self) # error: Revealed type: `T.self_type (of IncludesMixin)`
 
       does_exist
       does_not_exist # error: Method `does_not_exist` does not exist on `IncludesMixin`
@@ -44,7 +44,7 @@ class Model < Base
   def does_exist; end
 
   foo do
-    T.reveal_type(self) # error: Revealed type: `T.class_of(Model)`
+    T.reveal_type(self) # error: Revealed type: `T.self_type (of T.class_of(Model))`
 
     does_exist
     does_not_exist # error: Method `does_not_exist` does not exist on `T.class_of(Model)`
@@ -52,7 +52,7 @@ class Model < Base
 
   def bar
     instance_foo do
-      T.reveal_type(self) # error: Revealed type: `Model`
+      T.reveal_type(self) # error: Revealed type: `T.self_type (of Model)`
 
       does_exist
       does_not_exist # error: Method `does_not_exist` does not exist on `Model`

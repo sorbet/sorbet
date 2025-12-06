@@ -30,8 +30,9 @@ private:
             case core::TypePtr::Tag::NamedLiteralType:
                 break;
 
-            case core::TypePtr::Tag::SelfTypeParam:
-            case core::TypePtr::Tag::TypeVar:
+            case core::TypePtr::Tag::SelfTypeParam: // Does not appear in the symbol table
+            case core::TypePtr::Tag::FreshSelfType: // Does not appear in the symbol table
+            case core::TypePtr::Tag::TypeVar:       // Can appear in any position for variance checking
                 break;
 
             case core::TypePtr::Tag::OrType: {
@@ -112,6 +113,32 @@ private:
                                         ":out", "returns");
                             e.addErrorNote("Methods marked `{}` are not subject to this constraint", "private");
                         }
+                    } else if (param.definition == core::Symbols::T_SelfType()) {
+                        if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
+                            e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.self_type", ":out",
+                                        "returns");
+
+                            string eqeqNote;
+                            if (owningMethod.data(ctx)->name == core::Names::eqeq()) {
+                                eqeqNote = core::ErrorColors::format(
+                                    ",\n    but equality methods should accept `{}` or `{}` instead.", "T.anything",
+                                    "BasicObject");
+                            }
+                            e.addErrorNote("Methods marked `{}` are not subject to this constraint{}", "private",
+                                           eqeqNote);
+
+                            auto selfTypeStr = "T.self_type"sv;
+                            auto replaceLoc =
+                                this->loc.copyEndWithZeroLength().adjustLen(ctx, ": "sv.size(), selfTypeStr.size());
+                            if (replaceLoc.source(ctx) == selfTypeStr) {
+                                if (eqeqNote.empty()) {
+                                    e.replaceWith("Use enclosing class name directly", replaceLoc, "{}",
+                                                  owningMethod.data(ctx)->owner.show(ctx));
+                                } else {
+                                    e.replaceWith("Use `T.anything` instead", replaceLoc, "T.anything");
+                                }
+                            }
+                        }
                     } else {
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
                             auto flavor = paramData->owner.isClassOrModule() &&
@@ -128,36 +155,6 @@ private:
                             e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
                                            core::Polarities::showVariance(paramVariance));
                             e.addErrorNote("Methods marked `{}` are not subject to this constraint", "private");
-                        }
-                    }
-                }
-                break;
-            }
-
-            case core::TypePtr::Tag::SelfType: {
-                if (!core::Polarities::hasCompatibleVariance(polarity, core::Variance::CoVariant)) {
-                    if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
-                        e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.self_type", ":out",
-                                    "returns");
-
-                        string eqeqNote;
-                        if (owningMethod.data(ctx)->name == core::Names::eqeq()) {
-                            eqeqNote = core::ErrorColors::format(
-                                ",\n    but equality methods should accept `{}` or `{}` instead.", "T.anything",
-                                "BasicObject");
-                        }
-                        e.addErrorNote("Methods marked `{}` are not subject to this constraint{}", "private", eqeqNote);
-
-                        auto selfTypeStr = "T.self_type"sv;
-                        auto replaceLoc =
-                            this->loc.copyEndWithZeroLength().adjustLen(ctx, ": "sv.size(), selfTypeStr.size());
-                        if (replaceLoc.source(ctx) == selfTypeStr) {
-                            if (eqeqNote.empty()) {
-                                e.replaceWith("Use enclosing class name directly", replaceLoc, "{}",
-                                              owningMethod.data(ctx)->owner.show(ctx));
-                            } else {
-                                e.replaceWith("Use `T.anything` instead", replaceLoc, "T.anything");
-                            }
                         }
                     }
                 }

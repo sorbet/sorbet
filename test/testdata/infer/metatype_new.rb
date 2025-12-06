@@ -33,7 +33,7 @@ T.all(Kernel, Comparable).new      # error: Call to method `new` on `T.all(Kerne
 T.nilable(String).new              # error: Call to method `new` on `T.nilable(String)` mistakes a type for a value
 
 T.untyped.new                      # error: Call to method `new` on `T.untyped` mistakes a type for a value
-T.self_type.new                    # error: Call to method `new` on `T.untyped` mistakes a type for a value
+T.self_type.new                    # error: Call to method `new` on `T.self_type (of T.class_of(<root>))` mistakes a type for a value
 
 T.class_of(String).new             # error: Call to method `new` on `T.class_of(String)` mistakes a type for a value
 T.class_of(MyGeneric).new          # error: Call to method `new` on `T.class_of(MyGeneric)` mistakes a type for a value

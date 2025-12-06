@@ -266,6 +266,18 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = AndType::make_shared(from, droppedFromUpper);
             }
         },
+        [&](const FreshSelfType &s) {
+            auto droppedFromUpper = dropSubtypesOf(gs, s.upperBound, klasses);
+            if (droppedFromUpper.isBottom()) {
+                result = Types::bottom();
+            } else if (droppedFromUpper == s.upperBound) {
+                result = from;
+            } else if (droppedFromUpper.kind() <= from.kind()) {
+                result = AndType::make_shared(droppedFromUpper, from);
+            } else {
+                result = AndType::make_shared(from, droppedFromUpper);
+            }
+        },
         [&](const TypePtr &) {
             if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(gs), klasses).isBottom()) {
                 result = Types::bottom();
@@ -689,9 +701,12 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
 /**
  * fromWhat - where the generic type was written
  * inWhat   - where the generic type is observed
+ *
+ * selfType - Every class has an "implicit" type member corresponding to itself.
+ *            This parameter is the recursion: we pass ourself down once we know what ourself is.
  */
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
-                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
+                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs, TypePtr selfType) {
     // requires_ancestor leads to dispatches that target some other symbol entirely.
     // There is no guarantee that we have redeclared the other method's type members.
     // This is yet another case where requires ancestor is just broken.
@@ -701,11 +716,13 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     auto originalOwner = fromWhat;
 
-    if (originalOwner.data(gs)->typeMembers().empty() || (what == nullptr)) {
+    // TODO(jez) Need to drop the typeMembers().empty() call to ensure that any T.self_type get replaced
+    // TODO(jez) Dropping the guard has performance implications, we should measure.
+    if (what == nullptr) {
         return what;
     }
 
-    TypePtr::InstantiationContext ictx(originalOwner, inWhat, targs);
+    InstantiationContext ictx(originalOwner, inWhat, targs, selfType);
     auto result = what._instantiateLambdaParams(gs, ictx);
     if (result != nullptr) {
         return result;
@@ -714,11 +731,13 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 }
 
 TypePtr Types::resultTypeAsSeenFromSelf(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef self) {
-    if (self.data(gs)->typeMembers().empty() || (what == nullptr)) {
+    // TODO(jez) Need to drop the typeMembers().empty() call to ensure that any T.self_type get replaced
+    // TODO(jez) Dropping the guard has performance implications, we should measure.
+    if (what == nullptr) {
         return what;
     }
 
-    TypePtr::InstantiationContext ictx(self, self);
+    InstantiationContext ictx(self, self);
     auto result = what._instantiateLambdaParams(gs, ictx);
     if (result != nullptr) {
         return result;
@@ -805,6 +824,10 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
     recordAllocatedType("selftypeparam");
 }
 
+FreshSelfType::FreshSelfType(const TypePtr &upperBound) : upperBound(move(upperBound)) {
+    recordAllocatedType("selftype");
+}
+
 bool LambdaParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise(
         "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
@@ -818,9 +841,19 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) c
     }
 }
 
+bool FreshSelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    return this->upperBound.derivesFrom(gs, klass);
+}
+
 void LambdaParam::_sanityCheck(const GlobalState &gs) const {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(definition.isTypeMember() || definition.isTypeParameter());
+}
+
+void FreshSelfType::_sanityCheck(const GlobalState &gs) const {
+    ENFORCE(this->upperBound != nullptr);
+    ENFORCE(!this->upperBound.isUntyped());
+    ENFORCE(this->upperBound.isFullyDefined());
 }
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
@@ -857,19 +890,10 @@ TypePtr TupleType::elementType(const GlobalState &gs) const {
     return ap->targs.front();
 }
 
-SelfType::SelfType() {
-    recordAllocatedType("selftype");
-};
 AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     recordAllocatedType("appliedtype");
     histogramInc("appliedtype.targs", this->targs.size());
 }
-
-bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    Exception::raise("Should never call `derivesFrom` on a SelfType");
-}
-
-void SelfType::_sanityCheck(const GlobalState &gs) const {}
 
 TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
     ENFORCE(type != nullptr);
@@ -907,15 +931,19 @@ vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
 }
 } // namespace
 
+// This helper is only used in type_syntax.cc after wrapping up types.
+//
+// (Type syntax parsing wraps up what would normally be LambdaParam with SelfTypeParam so that it
+// can use `Types::any` and `Types::all` to minimize types during parsing, but that requires
+// fully-defined types.)
 TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     ENFORCE(type != nullptr);
 
     TypePtr ret;
     typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
-        [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
-        [&](const NamedLiteralType &lit) { ret = type; }, [&](const IntegerLiteralType &i) { ret = type; },
-        [&](const FloatLiteralType &i) { ret = type; },
+        [&](const LambdaParam &tv) { ret = type; }, [&](const NamedLiteralType &lit) { ret = type; },
+        [&](const IntegerLiteralType &i) { ret = type; }, [&](const FloatLiteralType &i) { ret = type; },
         [&](const AndType &andType) {
             ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
         },
@@ -937,6 +965,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
                 ret = type;
             }
         },
+        [&](const FreshSelfType &self) { ret = core::Symbols::T_SelfType().data(ctx)->resultType; },
         [&](const TypePtr &tp) {
             if (type != nullptr) {
                 Exception::raise("unwrapSelfTypeParam: unhandled case type={}", type.toString(ctx));

@@ -89,7 +89,7 @@ module Option
         .returns(None)
     end
     def map(&blk)
-      T.reveal_type(self) # error: `Option::None`
+      T.reveal_type(self) # error: `T.self_type (of Option::None)`
     end
 
     sig do
@@ -99,7 +99,7 @@ module Option
         .returns(Option[T.type_parameter(:U)])
     end
     def and_then(&blk)
-      T.reveal_type(self) # error: `Option::None`
+      T.reveal_type(self) # error: `T.self_type (of Option::None)`
     end
 
     sig {override.returns(T.noreturn)}

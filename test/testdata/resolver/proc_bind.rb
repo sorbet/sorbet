@@ -40,11 +40,11 @@ TestProcBind.new.bind do
 end
 
 TestProcBind.new.nilable do
-  T.reveal_type(self) # error: Revealed type: `T.class_of(<root>)`
+  T.reveal_type(self) # error: Revealed type: `T.self_type (of T.class_of(<root>))`
 end
 
 TestProcBind.new.double_nilable do
-  T.reveal_type(self) # error: Revealed type: `T.class_of(<root>)`
+  T.reveal_type(self) # error: Revealed type: `T.self_type (of T.class_of(<root>))`
 end
 
 TestProcBind.new.double_nilable_bind do

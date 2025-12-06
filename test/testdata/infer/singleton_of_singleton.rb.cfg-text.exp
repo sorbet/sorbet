@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -15,7 +15,7 @@ bb1[firstDead=-1]():
 method ::<Class:A>#foo {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <self>: T.self_type (of T.class_of(A)) = cast(<self>: NilClass, T.self_type (of T.class_of(A)));
     <returnMethodTemp>$2: Symbol(:bar) = :bar
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:bar)
     <unconditional> -> bb1
@@ -30,9 +30,9 @@ bb1[firstDead=-1]():
 method ::<Class:A>#bar {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <returnMethodTemp>$2: T.class_of(A) = <self>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.class_of(A)
+    <self>: T.self_type (of T.class_of(A)) = cast(<self>: NilClass, T.self_type (of T.class_of(A)));
+    <returnMethodTemp>$2: T.self_type (of T.class_of(A)) = <self>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.self_type (of T.class_of(A))
     <unconditional> -> bb1
 
 # backedges
@@ -45,7 +45,7 @@ bb1[firstDead=-1]():
 method ::<Class:A>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <self>: T.self_type (of T.class_of(A)) = cast(<self>: NilClass, T.self_type (of T.class_of(A)));
     <returnMethodTemp>$2: Symbol(:foo) = :foo
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1

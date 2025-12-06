@@ -7,7 +7,7 @@ or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.
 -e:1: Method `x` does not exist on `T.class_of(<root>)` https://srb.help/7003
      1 |x
         ^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     -e:1:
      1 |x
         ^
@@ -16,7 +16,7 @@ Errors: 1
 -e:1: Method `x` does not exist on `T.class_of(<root>)` https://srb.help/7003
      1 |x
         ^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     -e:1:
      1 |x
         ^
@@ -25,7 +25,7 @@ Errors: 1
 -e:1: Method `x` does not exist on `T.class_of(<root>)` https://srb.help/7003
      1 |x
         ^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     -e:1:
      1 |x
         ^

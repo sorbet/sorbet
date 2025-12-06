@@ -83,7 +83,7 @@ T.reveal_type(optional_type1) # error: Revealed type: `T.nilable(Foo)`
 
 #: -> self
 def base_type1; T.unsafe(nil); end
-T.reveal_type(base_type1) # error: Revealed type: `T.class_of(<root>)`
+T.reveal_type(base_type1) # error: Revealed type: `T.self_type (of T.class_of(<root>))`
 
 class BaseType2
   #: -> instance
