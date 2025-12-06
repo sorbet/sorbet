@@ -308,16 +308,14 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
             if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                 e.setHeader("`{}` does not accept keyword arguments", "T.absurd");
             }
-            ret = current;
-            return;
+            return current;
         }
 
         if (s.numPosArgs() != 1) {
             if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                 e.setHeader("`{}` expects exactly one argument but got `{}`", "T.absurd", s.numPosArgs());
             }
-            ret = current;
-            return;
+            return current;
         }
 
         auto &posArg0 = s.getPosArg(0);
@@ -336,20 +334,17 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
                                "conditional and the `{}` call",
                                "T.absurd");
             }
-            ret = current;
-            return;
+            return current;
         }
 
         auto temp = cctx.newTemporary(core::Names::statTemp());
         current = walk(cctx.withTarget(temp), posArg0, current);
         current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
-        ret = current;
-        return;
+        return current;
     } else if (s.fun == core::Names::typeParameter() && sendRecvIsT(s)) {
         if (auto insn = maybeMakeTypeParameterAlias(cctx, s)) {
             current->exprs.emplace_back(cctx.target, s.loc, move(insn));
-            ret = current;
-            return;
+            return current;
         }
     }
 }
@@ -622,6 +617,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = walk(cctx, a.expr, current);
             },
             [&](ast::Send &s) {
+                if (auto special = handleSpecialMethods(cctx, current, s)) {
+                    ret = special;
+                    return;
+                }
+
                 LocalRef recv;
 
                 recv = cctx.newTemporary(core::Names::statTemp());
