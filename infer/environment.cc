@@ -554,6 +554,11 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
                 // https://github.com/sorbet/sorbet/issues/4358
             }
         }
+    } else if (core::isa_type<core::SelfTypeParam>(klassType)) {
+        auto selfTypeParam = core::cast_type_nonnull<core::SelfTypeParam>(klassType);
+        if (const auto lambdaParam = core::cast_type<core::LambdaParam>(selfTypeParam.definition.resultType(ctx))) {
+            return updateKnowledgeKindOf(ctx, local, loc, lambdaParam->upperBound, ref, knowledgeFilter, fun);
+        }
     }
 }
 
