@@ -99,11 +99,12 @@ public:
         ast::MethodDef::PARAMS_store params;
         params.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
 
+        ast::MethodDef::Flags flags;
+        flags.isRewriterSynthesized = false;
+        flags.isSelfMethod = true;
         auto init =
             ast::make_expression<ast::MethodDef>(classDef->declLoc, classDef->declLoc, sym, core::Names::staticInit(),
-                                                 std::move(params), std::move(inits), ast::MethodDef::Flags());
-        ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
-        ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
+                                                 std::move(params), std::move(inits), flags);
 
         classDef->rhs.emplace_back(std::move(init));
 
