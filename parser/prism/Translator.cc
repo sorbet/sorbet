@@ -123,9 +123,8 @@ template <typename StoreType> StoreType Translator::nodeListToStore(const pm_nod
     StoreType store;
     store.reserve(span.size());
     for (auto &element : span) {
-        auto expr = translate(element);
-        enforceHasExpr(expr);
-        store.emplace_back(expr->takeDesugaredExpr());
+        auto expr = desugar(element);
+        store.emplace_back(move(expr));
     }
     return store;
 }
@@ -1399,13 +1398,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALIAS_GLOBAL_VARIABLE_NODE: { // The `alias` keyword used for global vars, like `alias $new $old`
             auto aliasGlobalVariableNode = down_cast<pm_alias_global_variable_node>(node);
 
-            auto newName = translate(aliasGlobalVariableNode->new_name);
-            auto oldName = translate(aliasGlobalVariableNode->old_name);
-
-            enforceHasExpr(newName, oldName);
-
-            auto toExpr = newName->takeDesugaredExpr();
-            auto fromExpr = oldName->takeDesugaredExpr();
+            auto toExpr = desugar(aliasGlobalVariableNode->new_name);
+            auto fromExpr = desugar(aliasGlobalVariableNode->old_name);
 
             // Desugar `alias $new $old` to `self.alias_method($new, $old)`
             auto expr = MK::Send2(location, MK::Self(location), core::Names::aliasMethod(),
@@ -1416,13 +1410,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALIAS_METHOD_NODE: { // The `alias` keyword, like `alias new_method old_method`
             auto aliasMethodNode = down_cast<pm_alias_method_node>(node);
 
-            auto newName = translate(aliasMethodNode->new_name);
-            auto oldName = translate(aliasMethodNode->old_name);
-
-            enforceHasExpr(newName, oldName);
-
-            auto toExpr = newName->takeDesugaredExpr();
-            auto fromExpr = oldName->takeDesugaredExpr();
+            auto toExpr = desugar(aliasMethodNode->new_name);
+            auto fromExpr = desugar(aliasMethodNode->old_name);
 
             // Desugar methods: `alias new old` to `self.alias_method(new, old)`
             auto expr = MK::Send2(location, MK::Self(location), core::Names::aliasMethod(),
@@ -1433,16 +1422,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_AND_NODE: { // operator `&&` and `and`
             auto andNode = down_cast<pm_and_node>(node);
 
-            auto left = translate(andNode->left);
-            auto right = translate(andNode->right);
-
-            enforceHasExpr(left, right);
-
-            auto lhs = left->takeDesugaredExpr();
-            auto rhs = right->takeDesugaredExpr();
+            auto lhs = desugarNullable(andNode->left);
+            auto rhs = desugarNullable(andNode->right);
 
             if (preserveConcreteSyntax) {
-                auto andAndLoc = core::LocOffsets{left->loc.endPos(), right->loc.beginPos()};
+                auto andAndLoc = core::LocOffsets{lhs.loc().endPos(), rhs.loc().beginPos()};
                 auto magicSend = MK::Send2(location, MK::Magic(location.copyWithZeroLength()), core::Names::andAnd(),
                                            andAndLoc, move(lhs), move(rhs));
                 return expr_only(move(magicSend));
@@ -1457,6 +1441,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
             // E.g. `x = 1 && 2` becomes `x = (temp = 1; temp ? temp : 2)`
             core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::andAnd());
+
+            // Capture locations before any moves
+            auto lhsLoc = lhs.loc();
+            auto rhsLoc = rhs.loc();
 
             bool checkAndAnd = ast::isa_tree<ast::Send>(lhs) && ast::isa_tree<ast::Send>(rhs);
             ExpressionPtr thenp;
@@ -1482,9 +1470,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             } else {
                 thenp = move(rhs);
             }
-
-            auto lhsLoc = left->loc;
-            auto rhsLoc = right->loc;
             auto condLoc =
                 lhsLoc.exists() && rhsLoc.exists() ? core::LocOffsets{lhsLoc.endPos(), rhsLoc.beginPos()} : lhsLoc;
             auto temp = MK::Assign(location, tempLocalName, move(lhs));
@@ -2438,10 +2423,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 declLoc = declLoc.join(translateLoc(defNode->rparen_loc));
             }
 
-            auto receiver = translate(defNode->receiver); // The singleton receiver, like `self` in `self.foo()`
+            auto receiver = desugarNullable(defNode->receiver); // The singleton receiver, like `self` in `self.foo()`
             auto name = translateConstantName(defNode->name);
 
-            auto isSingletonMethod = receiver != nullptr;
+            auto isSingletonMethod = !ast::isa_tree<ast::EmptyTree>(receiver);
 
             core::LocOffsets enclosingBlockParamLoc;
             core::NameRef enclosingBlockParamName;
@@ -2478,7 +2463,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             Translator methodContext =
                 this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamLoc, enclosingBlockParamName);
 
-            unique_ptr<parser::Node> body;
+            ast::ExpressionPtr body;
             if (defNode->body != nullptr) {
                 if (PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                     // Prism uses a PM_BEGIN_NODE to model the body of a method that has a top level rescue/ensure, e.g.
@@ -2491,20 +2476,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     //
                     // desugarBegin handles this directly, returning the desugared expression.
                     auto beginNode = down_cast<pm_begin_node>(defNode->body);
-                    auto beginExpr = methodContext.desugarBegin(beginNode);
-                    body = expr_only(move(beginExpr));
+                    body = methodContext.desugarBegin(beginNode);
                 } else {
                     // Side effect: If method has no explicit block parameter and contains a `yield`, translating it
                     // will change the `methodContext.enclosingBlockParamName` from `<blk>` to `<implicit yield>`.
                     // This will modify the local `enclosingBlockParamName` that it references.
                     // The `methodContext.enclosingBlockParamLoc`/`enclosingBlockParamLoc` are similarly modified.
-                    body = methodContext.translate(defNode->body);
+                    body = methodContext.desugarNullable(defNode->body);
                 }
+            } else {
+                body = MK::EmptyTree();
             }
 
-            // Method defs are complex, and we're building support for different kinds of arguments bit by
-            // bit. This bool is true when this particular method def is supported by our desugar logic.
-            enforceHasExpr(receiver, body);
+            if (!statsStore.empty()) {
+                auto bodyLoc = body.loc();
+                if (!bodyLoc.exists()) {
+                    bodyLoc = location;
+                }
+                body = MK::InsSeq(bodyLoc, move(statsStore), move(body));
+            }
 
             // Add an implicit block parameter, if no explicit one was declared in the parameter list.
             if (paramsStore.empty() || !ast::isa_tree<ast::BlockParam>(paramsStore.back())) {
@@ -2513,17 +2503,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     blkLoc, MK::Local(methodContext.enclosingBlockParamLoc, methodContext.enclosingBlockParamName)));
             }
 
-            auto methodBody = takeDesugaredExprOrEmptyTree(body);
-
-            if (!statsStore.empty()) {
-                auto bodyLoc = body->loc;
-                if (!bodyLoc.exists()) {
-                    bodyLoc = location;
-                }
-                methodBody = MK::InsSeq(bodyLoc, move(statsStore), move(methodBody));
-            }
-
-            auto methodExpr = MK::Method(location, declLoc, name, move(paramsStore), move(methodBody));
+            auto methodExpr = MK::Method(location, declLoc, name, move(paramsStore), move(body));
 
             if (isSingletonMethod) {
                 ast::cast_tree<ast::MethodDef>(methodExpr)->flags.isSelfMethod = true;
@@ -2866,13 +2846,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto openingLoc = translateLoc(indexedTargetNode->opening_loc);                  // The location of `[]=`
             auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1}; // Drop the `=`
-            auto receiver = translate(indexedTargetNode->receiver);
-
-            enforceHasExpr(receiver);
+            auto receiver = desugar(indexedTargetNode->receiver);
 
             auto argExprs = desugarArguments<ast::Send::ARGS_store>(indexedTargetNode->arguments);
 
-            auto expr = MK::Send(location, receiver->takeDesugaredExpr(), core::Names::squareBracketsEq(), lBracketLoc,
+            auto expr = MK::Send(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
                                  argExprs.size(), move(argExprs));
             return expr_only(move(expr));
         }
@@ -3198,11 +3176,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto nameLoc = translateLoc(optionalKeywordParamNode->name_loc);
 
             auto name = translateConstantName(optionalKeywordParamNode->name);
-            auto value = translate(optionalKeywordParamNode->value);
+            auto value = desugar(optionalKeywordParamNode->value);
 
-            enforceHasExpr(value);
-
-            auto expr = MK::OptionalParam(location, MK::KeywordArg(nameLoc, name), value->takeDesugaredExpr());
+            auto expr = MK::OptionalParam(location, MK::KeywordArg(nameLoc, name), move(value));
             return expr_only(move(expr));
         }
         case PM_OPTIONAL_PARAMETER_NODE: { // An optional positional parameter, like `def foo(a = 1)`
@@ -3210,26 +3186,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto nameLoc = translateLoc(optionalParamNode->name_loc);
 
             auto name = translateConstantName(optionalParamNode->name);
-            auto value = translate(optionalParamNode->value);
+            auto value = desugar(optionalParamNode->value);
 
-            enforceHasExpr(value);
-
-            auto expr = MK::OptionalParam(location, MK::Local(nameLoc, name), value->takeDesugaredExpr());
+            auto expr = MK::OptionalParam(location, MK::Local(nameLoc, name), move(value));
             return expr_only(move(expr));
         }
         case PM_OR_NODE: { // operator `||` and `or`
             auto orNode = down_cast<pm_or_node>(node);
 
-            auto left = translate(orNode->left);
-            auto right = translate(orNode->right);
-
-            enforceHasExpr(left, right);
-
-            auto lhs = left->takeDesugaredExpr();
-            auto rhs = right->takeDesugaredExpr();
+            auto lhs = desugarNullable(orNode->left);
+            auto rhs = desugarNullable(orNode->right);
 
             if (preserveConcreteSyntax) {
-                auto orOrLoc = core::LocOffsets{left->loc.endPos(), right->loc.beginPos()};
+                auto orOrLoc = core::LocOffsets{lhs.loc().endPos(), rhs.loc().beginPos()};
                 auto magicSend = MK::Send2(location, MK::Magic(location.copyWithZeroLength()), core::Names::orOr(),
                                            orOrLoc, move(lhs), move(rhs));
                 return expr_only(move(magicSend));
@@ -3244,8 +3213,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
             // E.g. `x = 1 || 2` becomes `x = (temp = 1; temp ? temp : 2)`
             core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::orOr());
-            auto lhsLoc = left->loc;
-            auto rhsLoc = right->loc;
+            auto lhsLoc = lhs.loc();
+            auto rhsLoc = rhs.loc();
             auto condLoc =
                 lhsLoc.exists() && rhsLoc.exists() ? core::LocOffsets{lhsLoc.endPos(), rhsLoc.beginPos()} : lhsLoc;
             auto tempAssign = MK::Assign(location, tempLocalName, move(lhs));
@@ -3302,18 +3271,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a..`, `..b`, `a...b`, `a...`, `...b`
             auto rangeNode = down_cast<pm_range_node>(node);
 
-            auto left = translate(rangeNode->left);
-            auto right = translate(rangeNode->right);
-
             bool isExclusive = PM_NODE_FLAG_P(rangeNode, PM_RANGE_FLAGS_EXCLUDE_END);
-
-            enforceHasExpr(left, right);
 
             auto recv = MK::Magic(location);
             auto locZeroLen = core::LocOffsets{location.beginPos(), location.beginPos()};
 
-            auto fromExpr = takeDesugaredExprOrEmptyTree(left);
-            auto toExpr = takeDesugaredExprOrEmptyTree(right);
+            auto fromExpr = desugarNullable(rangeNode->left);
+            auto toExpr = desugarNullable(rangeNode->right);
 
             auto excludeEndExpr = isExclusive ? MK::True(location) : MK::False(location);
 
@@ -3374,15 +3338,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             ast::RescueCase::EXCEPTION_store exceptions;
             auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
 
-            auto body = translate(rescueModifierNode->expression);
-            auto rescue = translate(rescueModifierNode->rescue_expression);
-
             auto resbodyLoc = core::LocOffsets{keywordLoc.beginPos(), location.endPos()};
 
-            enforceHasExpr(body, rescue);
-
-            auto bodyExpr = body->takeDesugaredExpr();
-            auto rescueExpr = rescue->takeDesugaredExpr();
+            auto bodyExpr = desugar(rescueModifierNode->expression);
+            auto rescueExpr = desugar(rescueModifierNode->rescue_expression);
 
             auto rescueCaseLoc =
                 translateLoc(rescueModifierNode->keyword_loc.start, rescueModifierNode->base.location.end);
@@ -3480,11 +3439,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SPLAT_NODE: { // A splat, like `*a` in an array literal or method call
             auto splatNode = down_cast<pm_splat_node>(node);
 
-            auto expr = translate(splatNode->expression);
+            auto expr = desugarNullable(splatNode->expression);
 
-            enforceHasExpr(expr);
-
-            if (expr == nullptr) { // An anonymous splat like `f(*)`
+            if (ast::isa_tree<ast::EmptyTree>(expr)) { // An anonymous splat like `f(*)`
                 auto var = MK::Local(location, core::Names::star());
                 auto splatExpr = MK::Splat(location, move(var));
                 return expr_only(move(splatExpr));
@@ -3498,8 +3455,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 //
                 // It's really hard to know that ahead of time, so for now, just deepCopy the tree, instead of taking
                 // it out of the splatted expressions's `NodeWithExpr`.
-                auto childExpr = expr->peekDesugaredExpr().deepCopy();
-                auto splatExpr = MK::Splat(location, move(childExpr));
+                auto splatExpr = MK::Splat(location, move(expr));
                 return expr_only(move(splatExpr));
             }
         }
@@ -3558,16 +3514,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_UNTIL_NODE: { // A `until` loop, like `until stop_condition; ...; end`
             auto untilNode = down_cast<pm_until_node>(node);
 
-            auto predicate = translate(untilNode->predicate);
-            auto statements = translate(up_cast(untilNode->statements));
-
             // When the until loop is placed after a `begin` block, like `begin; end until false`,
             bool beginModifier = PM_NODE_FLAG_P(untilNode, PM_LOOP_FLAGS_BEGIN_MODIFIER);
 
-            enforceHasExpr(predicate, statements);
-
-            auto cond = predicate->takeDesugaredExpr();
-            auto body = takeDesugaredExprOrEmptyTree(statements);
+            auto cond = desugar(untilNode->predicate);
+            auto body = desugarStatements(untilNode->statements);
 
             ast::ExpressionPtr expr;
             if (beginModifier) {
@@ -3588,16 +3539,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_WHILE_NODE: { // A `while` loop, like `while condition; ...; end`
             auto whileNode = down_cast<pm_while_node>(node);
 
-            auto predicate = translate(whileNode->predicate);
-            auto statements = translate(up_cast(whileNode->statements));
-
             // When the while loop is placed after a `begin` block, like `begin; end while false`,
             bool beginModifier = PM_NODE_FLAG_P(whileNode, PM_LOOP_FLAGS_BEGIN_MODIFIER);
 
-            enforceHasExpr(predicate, statements);
-
-            auto cond = predicate->takeDesugaredExpr();
-            auto body = takeDesugaredExprOrEmptyTree(statements);
+            auto cond = desugar(whileNode->predicate);
+            auto body = desugarStatements(whileNode->statements);
 
             ast::ExpressionPtr expr;
             if (beginModifier) {
