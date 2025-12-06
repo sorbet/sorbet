@@ -30,6 +30,7 @@ private:
     static BasicBlock *walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets loc, BasicBlock *current);
     static BasicBlock *walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
                                        BasicBlock *current);
+    static BasicBlock *handleSpecialMethods(CFGContext cctx, BasicBlock *current, ast::Send &s);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
     walkDefault(CFGContext cctx, int paramIndex, const core::ParamInfo &paramInfo, LocalRef paramLocal,
                 core::LocOffsets paramLoc, ast::ExpressionPtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
