@@ -1192,7 +1192,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (mayBeSpecial1.symbol == Symbols::bottom()) {
             return true;
         }
-        if (mayBeSpecial1.symbol == Symbols::top()) {
+        if (mayBeSpecial1.symbol == Symbols::top() || mayBeSpecial1.symbol == Symbols::void_()) {
             if (isa_type<ClassType>(t2)) {
                 auto mayBeSpecial2 = cast_type_nonnull<ClassType>(t2);
                 return mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::void_() ||
