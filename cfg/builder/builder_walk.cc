@@ -344,7 +344,7 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
             // If the .new method we find is owned by Class, that means
             // there was no user defined .new method, which warrants an error.
             if (method_new.data(cctx.ctx)->owner == core::Symbols::Class()) {
-                if (auto e = cctx.ctx.beginError(s.loc, core::errors::Resolver::AbstractClassInstantiated)) {
+                if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::AbstractClassInstantiated)) {
                     auto symbolName = id->symbol().show(cctx.ctx);
                     e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
                     e.addErrorLine(id->symbol().loc(cctx.ctx), "`{}` defined here", symbolName);

@@ -2675,25 +2675,9 @@ For more information on why type members are not type aliases and vice versa, se
 
 ## 5073
 
-Abstract classes cannot be instantiated by definition. See [Abstract Classes and Interfaces](abstract.md) for more information.
+This error code is from an old Sorbet version. It's equivalent to error 6007:
 
-```ruby
-class Abstract
-  extend T::Sig
-  extend T::Helpers
-  abstract!
-
-  sig { abstract.void }
-  def foo; end
-end
-
-Abstract.new # error: Attempt to instantiate abstract class `Abstract`
-```
-
-To fix this error, there are some options:
-
-- If the class which is marked `abstract!` does not actually have any `abstract` methods, simply remove `abstract!` from the class definition to fix the error.
-- If the class _does_ have `abstract` methods, find some concrete subclass to call `new` on instead. If the call to `new` is in a test file, you may wish to make a new, test-only subclass of the abstract class. (Depending on the specifics of the test, it may even be possible to simply define all the abstract methods to simply `raise`, so that other aspects of the parent class can be tested.)
+[→ 6007](#6007)
 
 ## 5074
 
@@ -2919,6 +2903,28 @@ See [Type Assertions](type-assertions.md) for more.
 The program attempted to use `T.type_parameter` in a method body, but there was no such `T.type_parameter` in scope.
 
 For more information, see the docs for [Generic methods](generics.md#generic-methods).
+
+## 6007
+
+Abstract classes cannot be instantiated by definition. See [Abstract Classes and Interfaces](abstract.md) for more information.
+
+```ruby
+class Abstract
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig { abstract.void }
+  def foo; end
+end
+
+Abstract.new # error: Attempt to instantiate abstract class `Abstract`
+```
+
+To fix this error, there are some options:
+
+- If the class which is marked `abstract!` does not actually have any `abstract` methods, simply remove `abstract!` from the class definition to fix the error.
+- If the class _does_ have `abstract` methods, find some concrete subclass to call `new` on instead. If the call to `new` is in a test file, you may wish to make a new, test-only subclass of the abstract class. (Depending on the specifics of the test, it may even be possible to simply define all the abstract methods to simply `raise`, so that other aspects of the parent class can be tested.)
 
 ## 7001
 
