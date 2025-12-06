@@ -354,6 +354,8 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
             return nullptr;
         }
     }
+
+    return nullptr;
 }
 
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
