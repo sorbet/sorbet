@@ -133,5 +133,10 @@ optional<SigFinder::Result> SigFinder::findSignature(core::Context ctx, const as
     ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
     return move(sigFinder.result_);
 }
+optional<SigFinder::Result> SigFinder::findSignature(core::Context ctx, const ast::ClassDef &tree, core::Loc queryLoc) {
+    SigFinder sigFinder(queryLoc);
+    ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
+    return move(sigFinder.result_);
+}
 
 } // namespace sorbet::sig_finder

@@ -773,7 +773,7 @@ void validateFinalAncestorHelper(core::Context ctx, const core::ClassOrModuleRef
     }
 }
 
-void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ExpressionPtr &tree,
+void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef,
                                const core::ClassOrModuleRef errMsgClass) {
     if (!klass.data(ctx)->flags.isFinal) {
         return;
@@ -795,7 +795,7 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
                         errMsgClass.show(ctx), sym.name(ctx).show(ctx));
             auto queryLoc = defLoc.copyWithZeroLength();
-            auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, queryLoc);
+            auto parsedSig = sig_finder::SigFinder::findSignature(ctx, classDef, queryLoc);
 
             if (parsedSig.has_value() && parsedSig->origSend.funLoc.exists()) {
                 auto funLoc = ctx.locAt(parsedSig->origSend.funLoc);
@@ -805,8 +805,7 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
     }
 }
 
-void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ExpressionPtr &tree) {
-    const ast::ClassDef &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists()) {
         auto superClassData = superClass.data(ctx);
@@ -831,10 +830,10 @@ void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const 
         }
     }
     validateFinalAncestorHelper(ctx, klass, classDef, klass, "included");
-    validateFinalMethodHelper(ctx, klass, tree, klass);
+    validateFinalMethodHelper(ctx, klass, classDef, klass);
     const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
     validateFinalAncestorHelper(ctx, singleton, classDef, klass, "extended");
-    validateFinalMethodHelper(ctx, singleton, tree, klass);
+    validateFinalMethodHelper(ctx, singleton, classDef, klass);
 }
 
 // Ignore RBI files for the purpose of checking sealed (unless there are no other files).
@@ -1304,8 +1303,7 @@ private:
     }
 
 public:
-    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
         auto sym = classDef.symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateTStructNotGrandparent(ctx, sym);
@@ -1319,7 +1317,7 @@ public:
             }
         }
         validateAbstract(ctx, singleton, classDef);
-        validateFinal(ctx, sym, tree);
+        validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
         validateSuperClass(ctx, sym, classDef);
 
@@ -1328,8 +1326,7 @@ public:
         }
     }
 
-    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
         auto methodData = methodDef.symbol.data(ctx);
 
         if (methodData->locs().empty()) {
@@ -1356,8 +1353,7 @@ public:
         validateOverriding(ctx, this->tree, methodDef);
     }
 
-    void postTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+    void postTransformSend(core::Context ctx, const ast::Send &send) {
         if (send.fun != core::Names::new_()) {
             return;
         }
