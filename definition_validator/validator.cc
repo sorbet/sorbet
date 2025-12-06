@@ -1071,7 +1071,7 @@ void validateRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef s
 
 class ValidateWalk {
 public:
-    ValidateWalk(const ast::ExpressionPtr &tree) : tree(tree) {}
+    ValidateWalk(const ast::ExpressionPtr &topTree) : topTree(topTree) {}
 
 private:
     // NOTE: A better representation for our AST might be to store a method's signature(s) within
@@ -1087,7 +1087,7 @@ private:
     // find the signature for a given method (incurring a full walk of the tree) every time we want
     // to find a single method. That means instead of ValidateWalk only doing one walk of the tree,
     // it does `num_errors + 1` walks, which can be slow in the case of many errors.
-    const ast::ExpressionPtr &tree;
+    const ast::ExpressionPtr &topTree;
 
     UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
 
@@ -1350,7 +1350,7 @@ public:
         // See the comment in `VarianceValidator::validateMethod` for an explanation of why we don't
         // need to check types on instance variables.
 
-        validateOverriding(ctx, this->tree, methodDef);
+        validateOverriding(ctx, this->topTree, methodDef);
     }
 
     void postTransformSend(core::Context ctx, const ast::Send &send) {
