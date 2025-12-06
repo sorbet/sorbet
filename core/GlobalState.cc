@@ -426,7 +426,6 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
     ENFORCE_NO_TIMER(klass == Symbols::T_Set());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
-    klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::void_());
     klass = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::typeAliasTemp());
