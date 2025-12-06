@@ -301,9 +301,12 @@ BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, a
 }
 
 BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *current, ast::Send &s) {
-    // For performance, we do the name check first (single integer comparison in the
-    // common case)
-    if (s.fun == core::Names::absurd() && sendRecvIsT(s)) {
+    switch (s.fun.rawId()) {
+    case core::Names::absurd().rawId(): {
+        if (!sendRecvIsT(s)) {
+            return nullptr;
+        }
+
         if (s.hasKwArgs()) {
             if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::MalformedTAbsurd)) {
                 e.setHeader("`{}` does not accept keyword arguments", "T.absurd");
@@ -341,11 +344,18 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
         current = walk(cctx.withTarget(temp), posArg0, current);
         current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
         return current;
-    } else if (s.fun == core::Names::typeParameter() && sendRecvIsT(s)) {
+    }
+    case core::Names::typeParameter().rawId(): {
+        if (!sendRecvIsT(s)) {
+            return nullptr;
+        }
+
         if (auto insn = maybeMakeTypeParameterAlias(cctx, s)) {
             current->exprs.emplace_back(cctx.target, s.loc, move(insn));
             return current;
         }
+        break;
+    }
     }
 }
 
