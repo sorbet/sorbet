@@ -32,6 +32,24 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             selfClaz = md.symbol.data(ctx)->owner;
         }
         auto selfType = selfClaz.data(ctx)->selfType(ctx, selfClaz.data(ctx)->selfTypeArgs(ctx));
+
+        if (!md.symbol.data(ctx)->resultType.mentionsSelfType() &&
+            !absl::c_any_of(md.symbol.data(ctx)->parameters,
+                            [](auto &paramInfo) { return paramInfo.type.mentionsSelfType(); })) {
+            // Performance optimization. FreshSelfType is incredibly slow, compared to the extremely
+            // optimized cases of ClassType and AppliedType.
+            //
+            // There are no cases where a method would fail to type check because we assumed a
+            // concrete type for the `<self>` variable, except in cases where we're inside a method
+            // whose types mention `T.self_type`.
+            //
+            // This has the unfortunate side effect that the inferred types change based on the
+            // enclosing context, but that's the price we pay for performance in this case. Thus,
+            // when it can't matter, let's choose to equate `<self>` with it's upper bound.
+            auto &freshSelfType = core::cast_type_nonnull<core::FreshSelfType>(selfType);
+            selfType = freshSelfType.upperBound;
+        }
+
         synthesizeExpr(
             entry, LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(),
             make_insn<Cast>(LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(), selfType, core::Names::cast()));

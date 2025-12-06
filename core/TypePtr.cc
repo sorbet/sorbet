@@ -180,6 +180,53 @@ bool TypePtr::isFullyDefined() const {
     }
 }
 
+bool TypePtr::mentionsSelfType() const {
+    switch (tag()) {
+        case Tag::FreshSelfType:
+            return true;
+
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::BlamedUntyped:
+        case Tag::ClassType:
+        case Tag::NamedLiteralType:
+        case Tag::IntegerLiteralType:
+        case Tag::FloatLiteralType:
+        case Tag::AliasType:
+        case Tag::MetaType:
+        case Tag::TypeVar:
+        case Tag::SelfTypeParam:
+            return false;
+
+        case Tag::LambdaParam: {
+            auto &lambdaParam = cast_type_nonnull<LambdaParam>(*this);
+            return lambdaParam.definition == core::Symbols::T_SelfType();
+        }
+
+        // Composite types
+        case Tag::ShapeType: {
+            auto &shape = cast_type_nonnull<ShapeType>(*this);
+            return absl::c_all_of(shape.values, [](const TypePtr &t) { return t.mentionsSelfType(); });
+        }
+        case Tag::TupleType: {
+            auto &tuple = cast_type_nonnull<TupleType>(*this);
+            return absl::c_all_of(tuple.elems, [](const TypePtr &t) { return t.mentionsSelfType(); });
+        }
+        case Tag::AndType: {
+            auto &andType = cast_type_nonnull<AndType>(*this);
+            return andType.left.mentionsSelfType() && andType.right.mentionsSelfType();
+        }
+        case Tag::OrType: {
+            auto &orType = cast_type_nonnull<OrType>(*this);
+            return orType.left.mentionsSelfType() && orType.right.mentionsSelfType();
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return absl::c_all_of(app.targs, [](const TypePtr &t) { return t.mentionsSelfType(); });
+        }
+    }
+}
+
 bool TypePtr::hasUntyped() const {
     switch (tag()) {
         case Tag::TypeVar:

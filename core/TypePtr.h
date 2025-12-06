@@ -275,6 +275,8 @@ public:
 
     bool isFullyDefined() const;
 
+    bool mentionsSelfType() const;
+
     bool hasUntyped() const;
 
     // This is a hacky, unprincipled method that simply looks for void inside the type at the top
