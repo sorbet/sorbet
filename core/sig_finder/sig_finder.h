@@ -39,6 +39,7 @@ public:
     void preTransformSend(core::Context ctx, const ast::Send &tree);
 
     static std::optional<Result> findSignature(core::Context ctx, const ast::ExpressionPtr &tree, core::Loc queryLoc);
+    static std::optional<Result> findSignature(core::Context ctx, const ast::ClassDef &tree, core::Loc queryLoc);
 };
 
 } // namespace sorbet::sig_finder

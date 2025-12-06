@@ -6,7 +6,7 @@
 
 namespace sorbet::definition_validator {
 
-ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree);
+void runOne(core::Context ctx, const ast::ParsedFile &tree);
 
 } // namespace sorbet::definition_validator
 
