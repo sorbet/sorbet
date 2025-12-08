@@ -80,12 +80,6 @@ unique_ptr<ExprOnly> expr_only(ast::ExpressionPtr expr) {
     auto loc = expr.loc(); // Grab the loc before moving out of `expr`
     return expr_only(move(expr), loc);
 }
-
-unique_ptr<ExprOnly> empty_expr() {
-    auto fakeLoc = core::LocOffsets{0, 0};
-    return expr_only(MK::EmptyTree(), fakeLoc);
-}
-
 // Helper template to convert a pm_node_list to any store type.
 // This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
 // ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
@@ -217,7 +211,7 @@ std::unique_ptr<ExprOnly> Translator::make_unsupported_node(core::LocOffsets loc
         e.setHeader("Unsupported node type `{}`", nodeName);
     }
 
-    return empty_expr();
+    return MK::EmptyTree();
 }
 
 // Indicates that a particular code path should never be reached, with an explanation of why.
@@ -3146,7 +3140,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 if (auto e = ctx.beginIndexerError(receiverLoc, core::errors::Desugar::InvalidSingletonDef)) {
                     e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                 }
-                return empty_expr();
+                return MK::EmptyTree();
             }
 
             auto body = this->enterClassContext(enclosingBlockParamLoc, enclosingBlockParamName)
