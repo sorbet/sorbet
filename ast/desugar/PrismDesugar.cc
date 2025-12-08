@@ -29,21 +29,6 @@ ExpressionPtr node2TreeImplBody(parser::Node *what) {
     ENFORCE(what != nullptr);
     ENFORCE(what->hasDesugaredExpr(), "Node has no desugared expression");
 
-    if (auto *nodeWithExpr = parser::NodeWithExpr::cast_node<parser::NodeWithExpr>(what)) {
-        if (parser::NodeWithExpr::isa_node<parser::Splat>(nodeWithExpr->wrappedNode.get())) {
-            // Special case for Splats in method calls where we want zero-length locations
-            // The `parser::Send` case makes a fake parser::Array with locZeroLen to hide callWithSplat
-            // methods from hover.`
-            auto splat = parser::NodeWithExpr::cast_node<parser::Splat>(nodeWithExpr->wrappedNode.get());
-
-            if (!splat->var->hasDesugaredExpr()) {
-                throw parser::Prism::PrismFallback{};
-            }
-
-            return MK::Splat(what->loc, splat->var->takeDesugaredExpr());
-        }
-    }
-
     auto expr = what->takeDesugaredExpr();
     ENFORCE(expr != nullptr, "Node has null desugared expr");
 

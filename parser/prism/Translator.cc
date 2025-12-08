@@ -212,13 +212,6 @@ ast::ExpressionPtr Translator::desugarOnelinePattern(core::LocOffsets loc, pm_no
     return MK::If(loc, move(matchExpr), move(bodyExpr), move(elseExpr));
 }
 
-// Allocates a new `NodeWithExpr` with a pre-computed `ExpressionPtr` AST.
-template <typename SorbetNode, typename... TArgs>
-static unique_ptr<NodeWithExpr> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) {
-    auto whiteQuarkNode = make_unique<SorbetNode>(std::forward<TArgs>(args)...);
-    return make_unique<NodeWithExpr>(move(whiteQuarkNode), move(desugaredExpr));
-}
-
 std::unique_ptr<ExprOnly> Translator::make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const {
     if (auto e = ctx.beginIndexerError(loc, core::errors::Desugar::UnsupportedNode)) {
         e.setHeader("Unsupported node type `{}`", nodeName);
