@@ -86,25 +86,6 @@ unique_ptr<ExprOnly> empty_expr() {
     return expr_only(MK::EmptyTree(), fakeLoc);
 }
 
-void enforceHasExpr(const std::unique_ptr<parser::Node> &node) {
-    if (node && !node->hasDesugaredExpr()) {
-        categoryCounterInc("Prism fallback", "enforceHasExpr(parser::Node) was false");
-        throw PrismFallback{};
-    }
-}
-
-void enforceHasExpr(const std::unique_ptr<NodeWithExpr> &node) {
-    if (node && !node->hasDesugaredExpr()) {
-        categoryCounterInc("Prism fallback", "enforceHasExpr(NodeWithExpr) was false");
-        throw PrismFallback{};
-    }
-}
-
-template <typename... Tail> void enforceHasExpr(const std::unique_ptr<parser::Node> &head, const Tail &...tail) {
-    enforceHasExpr(head);
-    enforceHasExpr(tail...);
-}
-
 // Helper template to convert a pm_node_list to any store type.
 // This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
 // ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
@@ -1370,11 +1351,12 @@ Translator::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receive
 
 ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
     auto legacyNode = translate(node);
-
     ENFORCE(legacyNode != nullptr);
-    enforceHasExpr(legacyNode);
 
-    return legacyNode->takeDesugaredExpr();
+    auto expr = legacyNode->takeDesugaredExpr();
+    ENFORCE(expr != nullptr, "Node has no desugared expression");
+
+    return expr;
 }
 
 ast::ExpressionPtr Translator::desugarNullable(pm_node_t *node) {
