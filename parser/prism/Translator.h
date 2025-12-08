@@ -282,6 +282,11 @@ private:
                                      pm_location_t blockNodeOpeningLoc);
 
     DesugaredBlockArgument desugarBlockPassArgument(pm_block_argument_node *bp);
+
+    ast::ExpressionPtr desugarMethodCall(ast::ExpressionPtr receiver, core::NameRef methodName,
+                                         core::LocOffsets methodNameLoc, pm_arguments_node *argumentsNode,
+                                         pm_location_t closingLoc, DesugaredBlockArgument block,
+                                         core::LocOffsets location, bool isPrivateOk);
 };
 
 } // namespace sorbet::parser::Prism
