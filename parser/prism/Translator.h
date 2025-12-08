@@ -120,6 +120,11 @@ private:
 
     ast::ExpressionPtr desugarSymbolProc(pm_symbol_node *symbol);
 
+    ast::ExpressionPtr desugarMethodCall(ast::ExpressionPtr receiver, core::NameRef methodName,
+                                         core::LocOffsets methodNameLoc, pm_arguments_node *argumentsNode,
+                                         pm_location_t closingLoc, DesugaredBlockArgument block,
+                                         core::LocOffsets location, bool isPrivateOk);
+
     template <typename StoreType>
     StoreType desugarArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
 
