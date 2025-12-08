@@ -10,4 +10,6 @@ def foo(&blk)
 end
 
 puts(foo)
+#    ^^^ error: Expected `Object` but found `Sorbet::Private::Static::Void` for argument `arg0`
 puts(foo {puts 1})
+#    ^^^^^^^^^^^^ error: Expected `Object` but found `Sorbet::Private::Static::Void` for argument `arg0`
