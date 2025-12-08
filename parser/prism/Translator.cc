@@ -271,39 +271,45 @@ bool isStringLit(const ast::ExpressionPtr &expr) {
 }
 
 // Flattens the key/value pairs from the Kwargs Hash into the destination container.
-// If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
-template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> &kwargsHash, Container &destination) {
-    ENFORCE(kwargsHash != nullptr);
+// If Kwargs Hash contains any splats, we skip the flattening and desugar the hash as-is.
+template <typename Container>
+void Translator::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination) {
+    ENFORCE(kwargsHashNode != nullptr);
 
-    // Skip inlining the kwargs if there are any kwsplat nodes present
-    if (absl::c_any_of(kwargsHash->pairs, [](auto &node) {
-            // the parser guarantees that if we see a kwargs hash it only contains pair,
-            // kwsplat, or forwarded kwrest arg nodes
-            ENFORCE(parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
-                    parser::NodeWithExpr::isa_node<parser::Pair>(node.get()) ||
-                    parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get()));
+    auto elements = absl::MakeSpan(kwargsHashNode->elements.nodes, kwargsHashNode->elements.size);
 
-            return parser::NodeWithExpr::isa_node<parser::Kwsplat>(node.get()) ||
-                   parser::NodeWithExpr::isa_node<parser::ForwardedKwrestArg>(node.get());
-        })) {
-        ENFORCE(kwargsHash->hasDesugaredExpr());
-        destination.emplace_back(kwargsHash->takeDesugaredExpr());
+    // Check if there are any splats - if so, can't flatten
+    bool hasKwsplat = absl::c_any_of(elements, [](auto *node) { return PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE); });
+
+    if (hasKwsplat) {
+        // Desugar the whole hash using desugarKeyValuePairs which handles kwsplats properly
+        auto loc = translateLoc(kwargsHashNode->base.location);
+        destination.emplace_back(desugarKeyValuePairs(loc, kwargsHashNode->elements));
         return;
     }
 
-    // Flatten the key/value pairs into the destination
-    for (auto &entry : kwargsHash->pairs) {
-        if (auto *pair = parser::NodeWithExpr::cast_node<parser::Pair>(entry.get())) {
-            ENFORCE(pair->key->hasDesugaredExpr());
-            ENFORCE(pair->value->hasDesugaredExpr());
-            destination.emplace_back(pair->key->takeDesugaredExpr());
-            destination.emplace_back(pair->value->takeDesugaredExpr());
-        } else {
-            Exception::raise("Unhandled case");
-        }
-    }
+    // Flatten each key/value pair directly
+    for (auto *element : elements) {
+        ENFORCE(PM_NODE_TYPE_P(element, PM_ASSOC_NODE));
+        auto *assoc = down_cast<pm_assoc_node>(element);
 
-    return;
+        // Special handling for symbol keys with trailing colon (like `a: 1` instead of `:a => 1`)
+        if (PM_NODE_TYPE_P(assoc->key, PM_SYMBOL_NODE)) {
+            auto *symbolNode = down_cast<pm_symbol_node>(assoc->key);
+
+            // If opening_loc is null, the symbol has a trailing colon - drop it from the location
+            if (symbolNode->opening_loc.start == nullptr) {
+                auto symbolLoc = translateLoc(symbolNode->base.location.start, symbolNode->base.location.end - 1);
+                auto [symbolContent, _] = translateSymbol(symbolNode);
+                destination.emplace_back(MK::Symbol(symbolLoc, symbolContent));
+                destination.emplace_back(desugar(assoc->value));
+                continue;
+            }
+        }
+
+        destination.emplace_back(desugar(assoc->key));
+        destination.emplace_back(desugar(assoc->value));
+    }
 }
 
 // Helper function to merge multiple string literals into one
@@ -1609,30 +1615,30 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                               PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
             auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*)`
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
-            unique_ptr<parser::Hash> kwargsHash;
+            pm_keyword_hash_node *kwargsHashNode = nullptr;
             if (!prismArgs.empty()) {
                 // Pop the Kwargs Hash off the end of the arguments, if there is one.
                 if (PM_NODE_TYPE_P(prismArgs.back(), PM_KEYWORD_HASH_NODE)) {
-                    auto h = translate(prismArgs.back());
-                    auto hash = unique_ptr<parser::Hash>(reinterpret_cast<parser::Hash *>(h.release()));
-                    ENFORCE(hash != nullptr);
+                    auto keywordHashNode = down_cast<pm_keyword_hash_node>(prismArgs.back());
+                    auto elements = absl::MakeSpan(keywordHashNode->elements.nodes, keywordHashNode->elements.size);
 
-                    if (hash->kwargs) {
-                        kwargsHash = move(hash);
+                    auto isKwargs = PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
+                                    absl::c_all_of(elements, [](auto *node) {
+                                        if (PM_NODE_TYPE_P(node, PM_ASSOC_NODE)) {
+                                            auto pair = down_cast<pm_assoc_node>(node);
+                                            return pair->key && PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE);
+                                        }
+                                        if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) {
+                                            return true;
+                                        }
+                                        return false;
+                                    });
+
+                    if (isKwargs) {
+                        kwargsHashNode = keywordHashNode;
 
                         // Remove the kwargsHash from the arguments Span, so it's not revisited by the `for` loop below.
                         prismArgs.remove_suffix(1);
-
-                        for (auto &node : kwargsHash->pairs) {
-                            // Only support kwarg Hashes that only contain pairs for now.
-
-                            if (auto pair = parser::NodeWithExpr::cast_node<parser::Pair>(node.get())) {
-                                enforceHasExpr(pair->key, pair->value);
-                                continue;
-                            } else { // TODO: Add support for Kwsplat and ForwardedKwrestArg
-                                enforceHasExpr(node);
-                            }
-                        };
                     }
                 }
 
@@ -1878,9 +1884,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // This will be used in the implementation of the intrinsic to tell the difference between keyword
                 // args, keyword args with kw splats, and no keyword args at all.
                 ExpressionPtr kwargsExpr;
-                if (kwargsHash != nullptr) {
+                if (kwargsHashNode != nullptr) {
                     ast::Array::ENTRY_store kwargElements;
-                    flattenKwargs(kwargsHash, kwargElements);
+                    flattenKwargs(kwargsHashNode, kwargElements);
                     ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, 0, kwargElements);
 
                     kwargsExpr = MK::Array(sendWithBlockLoc, move(kwargElements));
@@ -1980,8 +1986,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     magicSendArgs.emplace_back(desugar(arg));
                 }
 
-                if (kwargsHash) {
-                    flattenKwargs(kwargsHash, magicSendArgs);
+                if (kwargsHashNode) {
+                    flattenKwargs(kwargsHashNode, magicSendArgs);
                     ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, magicSendArgs);
                 }
 
@@ -1999,8 +2005,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 sendArgs.emplace_back(desugar(arg));
             }
 
-            if (kwargsHash) {
-                flattenKwargs(kwargsHash, sendArgs);
+            if (kwargsHashNode) {
+                flattenKwargs(kwargsHashNode, sendArgs);
                 ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, sendArgs);
             }
 

@@ -116,6 +116,9 @@ private:
     // Helper to convert a pm_node_list to any store type (e.g., ast::Array::ENTRY_store, ast::Send::ARGS_store, etc.)
     template <typename StoreType> StoreType nodeListToStore(const pm_node_list &nodeList);
 
+    // Flattens key/value pairs from a keyword hash into the destination, or desugars the whole hash if there are splats
+    template <typename Container> void flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination);
+
     // Helper for Break/Next/Return nodes that take optional arguments
     ast::ExpressionPtr desugarBreakNextReturn(pm_arguments_node *argsNode);
 
