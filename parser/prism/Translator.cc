@@ -1409,8 +1409,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                     }
                                 }
 
-                                auto itDecl = make_unique<parser::LVar>(itUsageLoc, core::Names::it());
-                                blockParameters = make_unique<parser::ItParam>(itParamLoc, move(itDecl));
+                                auto name = core::Names::it();
+                                auto it = MK::Local(itUsageLoc, name);
+                                auto itDecl = make_node_with_expr<parser::LVar>(move(it), itUsageLoc, name);
+
+                                didDesugarBlockParams = true;
+
+                                // Single 'it' parameter - use the original name (not a unique one)
+                                // Unlike numbered parameters, 'it' uses the actual name "it" so that
+                                // local variables named 'it' in the same scope can shadow it
+                                blockParameters = make_node_with_expr<parser::ItParam>(itDecl->takeDesugaredExpr(),
+                                                                                       itParamLoc, move(itDecl));
+
+                                blockParamsStore.emplace_back(blockParameters->takeDesugaredExpr());
                                 break;
                             }
 
@@ -2830,15 +2841,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_node_with_expr<parser::XString>(move(res), location, move(sorbetParts));
         }
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // Reading the `it` default param in a block, e.g. `a.map { it + 1 }`
-            return make_unique<parser::LVar>(location, core::Names::it());
+            auto name = core::Names::it();
+            return make_node_with_expr<parser::LVar>(MK::Local(location, name), location, name);
         }
         case PM_IT_PARAMETERS_NODE: { // An invisible node that models the 'it' parameter in a block/lambda
             // ... for a block like `proc { it + 1 }` or lambda like `-> { it + 1 }`, which has no explicitly declared
             // parameters. When translating this node directly (not through the translateCallWithBlock handler), we
             // don't have access to the block body to find actual usage locations via AST walking.
             auto itParamLoc = location.copyWithZeroLength();
-            auto itDecl = make_unique<parser::LVar>(itParamLoc, core::Names::it());
-            return make_unique<parser::ItParam>(itParamLoc, move(itDecl));
+            auto name = core::Names::it();
+            auto it = MK::Local(location, name);
+            auto itDecl = make_node_with_expr<parser::LVar>(move(it), itParamLoc, name);
+
+            // Single 'it' parameter - use the original name (not a unique one)
+            // Unlike numbered parameters, 'it' uses the actual name "it" so that
+            // local variables named 'it' in the same scope can shadow it
+            return make_node_with_expr<parser::ItParam>(itDecl->takeDesugaredExpr(), itParamLoc, move(itDecl));
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
@@ -4870,8 +4888,11 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                 }
             }
 
-            auto itDecl = make_unique<parser::LVar>(itUsageLoc, core::Names::it());
-            parametersNode = make_unique<parser::ItParam>(itParamLoc, move(itDecl));
+            auto name = core::Names::it();
+            auto it = MK::Local(itUsageLoc, name);
+            auto itDecl = make_node_with_expr<parser::LVar>(move(it), itUsageLoc, name);
+            parametersNode =
+                make_node_with_expr<parser::ItParam>(itDecl->takeDesugaredExpr(), itParamLoc, move(itDecl));
         } else {
             parametersNode = translate(prismParametersNode);
         }
