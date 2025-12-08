@@ -105,15 +105,6 @@ template <typename... Tail> void enforceHasExpr(const std::unique_ptr<parser::No
     enforceHasExpr(tail...);
 }
 
-// Helper to extract desugared expression or return EmptyTree if node is null.
-ExpressionPtr takeDesugaredExprOrEmptyTree(const std::unique_ptr<parser::Node> &node) {
-    if (node == nullptr) {
-        return MK::EmptyTree();
-    }
-    ENFORCE(node->hasDesugaredExpr(), "Node has no desugared expression");
-    return node->takeDesugaredExpr();
-}
-
 // Helper template to convert a pm_node_list to any store type.
 // This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
 // ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
@@ -2059,7 +2050,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto predicate = translate(caseMatchNode->predicate);
             auto inNodes = absl::MakeSpan(caseMatchNode->conditions.nodes, caseMatchNode->conditions.size);
-            auto elseClause = translate(up_cast(caseMatchNode->else_clause));
+            auto elseClause = desugarNullable(up_cast(caseMatchNode->else_clause));
 
             // Build an if ladder similar to CASE_NODE
             core::NameRef tempName;
@@ -2073,7 +2064,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             // Start with the else clause as the final else
-            ExpressionPtr resultExpr = takeDesugaredExprOrEmptyTree(elseClause);
+            ExpressionPtr resultExpr = move(elseClause);
 
             // Build the if ladder backwards from the last "in" to the first
             for (auto it = inNodes.rbegin(); it != inNodes.rend(); ++it) {
@@ -4120,12 +4111,12 @@ StoreType Translator::desugarArguments(pm_arguments_node *argsNode, pm_node *blo
     results.reserve(prismArgs.size() + (blockArgumentNode == nullptr ? 0 : 1));
 
     for (auto *prismArg : prismArgs) {
-        auto node = translate(prismArg);
-        results.emplace_back(takeDesugaredExprOrEmptyTree(node));
+        auto expr = desugarNullable(prismArg);
+        results.emplace_back(move(expr));
     }
     if (blockArgumentNode != nullptr) {
-        auto node = translate(blockArgumentNode);
-        results.emplace_back(takeDesugaredExprOrEmptyTree(node));
+        auto expr = desugarNullable(blockArgumentNode);
+        results.emplace_back(move(expr));
     }
 
     return results;
@@ -4595,8 +4586,7 @@ ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, 
 
     // For a single statement, do not create a `Begin` node and just return the statement, if that's enabled.
     if (inlineIfSingle && stmtsNode->body.size == 1) {
-        auto node = translate(stmtsNode->body.nodes[0]);
-        return takeDesugaredExprOrEmptyTree(node);
+        return desugarNullable(stmtsNode->body.nodes[0]);
     }
 
     core::LocOffsets beginNodeLoc;
@@ -4689,7 +4679,7 @@ ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
             //  A::B   ::C
             //  /  \
             // A   ::B
-            parentExpr = takeDesugaredExprOrEmptyTree(translate(prismParentNode));
+            parentExpr = desugarNullable(prismParentNode);
         } else { // This is the root of a fully qualified constant reference, like `::A`.
             auto delimiterLoc = translateLoc(node->delimiter_loc); // The location of the `::`
             parentExpr = MK::Constant(delimiterLoc, core::Symbols::root());
