@@ -72,14 +72,6 @@ public:
     }
 };
 
-unique_ptr<ExprOnly> expr_only(ast::ExpressionPtr expr, core::LocOffsets loc) {
-    return make_unique<ExprOnly>(move(expr), loc);
-}
-
-unique_ptr<ExprOnly> expr_only(ast::ExpressionPtr expr) {
-    auto loc = expr.loc(); // Grab the loc before moving out of `expr`
-    return expr_only(move(expr), loc);
-}
 // Helper template to convert a pm_node_list to any store type.
 // This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
 // ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
