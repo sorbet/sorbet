@@ -2799,14 +2799,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // parameters. When translating this node directly (not through the translateCallWithBlock handler), we
             // don't have access to the block body to find actual usage locations via AST walking.
             auto itParamLoc = location.copyWithZeroLength();
-            auto name = core::Names::it();
-            auto it = MK::Local(location, name);
-            auto itDecl = make_node_with_expr<parser::LVar>(move(it), itParamLoc, name);
 
             // Single 'it' parameter - use the original name (not a unique one)
             // Unlike numbered parameters, 'it' uses the actual name "it" so that
             // local variables named 'it' in the same scope can shadow it
-            return make_node_with_expr<parser::ItParam>(itDecl->takeDesugaredExpr(), itParamLoc, move(itDecl));
+            return expr_only(MK::Local(itParamLoc, core::Names::it()));
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
