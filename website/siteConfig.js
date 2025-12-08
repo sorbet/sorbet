@@ -107,6 +107,11 @@ const users = [
     infoLink: 'https://www.vonage.com/',
   },
   {
+    caption: 'Workato',
+    image: 'img/workato-logo.png',
+    infoLink: 'https://www.workato.com/',
+  },
+  {
     caption: 'Workforce.com',
     image: 'img/workforce-logo.png',
     infoLink: 'https://www.workforce.com/',
