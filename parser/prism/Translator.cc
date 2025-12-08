@@ -1474,12 +1474,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(move(expr));
         }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash literal, e.g. the `a: 1` in `{ a: 1 }
-            auto assocNode = down_cast<pm_assoc_node>(node);
-
-            auto key = translate(assocNode->key);
-            auto value = translate(assocNode->value);
-
-            return make_unique<parser::Pair>(location, move(key), move(value));
+            unreachable("PM_ASSOC_NODE is handled specially in every context where it might appear.");
         }
         case PM_ASSOC_SPLAT_NODE: { // A Hash splat, e.g. `**h` in `f(a: 1, **h)` and `{ k: v, **h }`
             unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `desugarKeyValuePairs()` and "
@@ -1505,11 +1500,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return expr_only(move(expr));
         }
         case PM_BLOCK_ARGUMENT_NODE: { // A block arg passed into a method call, e.g. the `&b` in `a.map(&b)`
-            auto blockArg = down_cast<pm_block_argument_node>(node);
-
-            auto expr = translate(blockArg->expression);
-
-            return make_unique<parser::BlockPass>(location, move(expr));
+            unreachable("PM_BLOCK_ARGUMENT_NODE is handled specially in `desugarArguments()`, see it for details.");
         }
         case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end`
             unreachable("PM_BLOCK_NODE has special handling in PM_CALL_NODE, see it for details.");
