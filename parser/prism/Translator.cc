@@ -2393,13 +2393,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_DEFINED_NODE: {
             auto definedNode = down_cast<pm_defined_node>(node);
 
-            auto valueNode = definedNode->value;
+            auto argument = definedNode->value;
 
-            switch (PM_NODE_TYPE(valueNode)) {
+            switch (PM_NODE_TYPE(argument)) {
                 // Desugar `defined?(@ivar)` to `::Magic.defined_instance_var(:@ivar)`
                 case PM_INSTANCE_VARIABLE_READ_NODE: {
-                    auto ivarNode = down_cast<pm_instance_variable_read_node>(valueNode);
-                    auto loc = translateLoc(valueNode->location);
+                    auto ivarNode = down_cast<pm_instance_variable_read_node>(argument);
+                    auto loc = translateLoc(argument->location);
                     auto name = translateConstantName(ivarNode->name);
                     auto sym = MK::Symbol(loc, name);
 
@@ -2411,8 +2411,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                 // Desugar `defined?(@@cvar)` to `::Magic.defined_instance_var(:@@cvar)`
                 case PM_CLASS_VARIABLE_READ_NODE: {
-                    auto cvarNode = down_cast<pm_class_variable_read_node>(valueNode);
-                    auto loc = translateLoc(valueNode->location);
+                    auto cvarNode = down_cast<pm_class_variable_read_node>(argument);
+                    auto loc = translateLoc(argument->location);
                     auto name = translateConstantName(cvarNode->name);
                     auto sym = MK::Symbol(loc, name);
 
@@ -2427,7 +2427,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 case PM_CONSTANT_READ_NODE:
                 case PM_CONSTANT_PATH_NODE: {
                     ast::Send::ARGS_store args;
-                    auto current = valueNode;
+                    auto current = argument;
 
                     while (true) {
                         if (PM_NODE_TYPE_P(current, PM_CONSTANT_PATH_NODE)) {
