@@ -3143,8 +3143,15 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         }
         case PM_SUPER_NODE: { // A `super` call with explicit args, like `super()`, `super(a, b)`
             // If there's no arguments (except a literal block argument), then it's a `PM_FORWARDING_SUPER_NODE`.
-            categoryCounterInc("Prism fallback", "PM_SUPER_NODE");
-            throw PrismFallback{};
+            auto superNode = down_cast<pm_super_node>(node);
+
+            auto receiver = MK::Self(location);
+            auto methodName = maybeTypedSuper();
+            auto methodNameLoc = translateLoc(superNode->keyword_loc);
+            auto block = desugarBlock(superNode->block, superNode->arguments, superNode->base.location);
+            auto isPrivateOk = true; // Matches previous parser+desugar behaviour
+            return desugarMethodCall(move(receiver), methodName, methodNameLoc, superNode->arguments,
+                                     superNode->rparen_loc, move(block), location, isPrivateOk);
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
             auto symNode = down_cast<pm_symbol_node>(node);
