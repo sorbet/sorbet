@@ -1509,7 +1509,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Pair>(location, move(key), move(value));
         }
         case PM_ASSOC_SPLAT_NODE: { // A Hash splat, e.g. `**h` in `f(a: 1, **h)` and `{ k: v, **h }`
-            unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `Translator::translateKeyValuePairs()` and "
+            unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `desugarKeyValuePairs()` and "
                         "`PM_HASH_PATTERN_NODE`, because its translation depends on whether its used in a "
                         "Hash literal, Hash pattern, or method call.");
         }
@@ -2925,32 +2925,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_KEYWORD_HASH_NODE: { // A hash of keyword arguments, like `foo(a: 1, b: 2)`
             auto keywordHashNode = down_cast<pm_keyword_hash_node>(node);
-
-            auto kvPairs = translateKeyValuePairs(keywordHashNode->elements);
-
-            auto elements = absl::MakeSpan(keywordHashNode->elements.nodes, keywordHashNode->elements.size);
-            ENFORCE(!elements.empty());
-
-            auto isKwargs =
-                PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
-                absl::c_all_of(absl::MakeSpan(keywordHashNode->elements.nodes, keywordHashNode->elements.size),
-                               [](auto *node) {
-                                   // Checks if the given node is a keyword hash element based on the standards of
-                                   // Sorbet's legacy parser. Based on `Builder::isKeywordHashElement()`
-
-                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_NODE)) { // A regular key/value pair
-                                       auto pair = down_cast<pm_assoc_node>(node);
-                                       return pair->key && PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE);
-                                   }
-
-                                   if (PM_NODE_TYPE_P(node, PM_ASSOC_SPLAT_NODE)) { // A `**h` or `**` kwarg splat
-                                       return true;
-                                   };
-
-                                   return false;
-                               });
-
-            return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
+            auto hashExpr = desugarKeyValuePairs(location, keywordHashNode->elements);
+            return expr_only(move(hashExpr));
         }
         case PM_KEYWORD_REST_PARAMETER_NODE: { // A keyword rest parameter, like `def foo(**kwargs)`
             // This doesn't include `**nil`, which is a `PM_NO_KEYWORDS_PARAMETER_NODE`.
@@ -4256,105 +4232,6 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
     }
 
     return res;
-}
-
-// Translates the given Prism elements into a `NodeVec` of legacy parser nodes.
-// The elements are are usually key/value pairs, but can also be Hash splats (`**`).
-//
-// This method is used by:
-//   * PM_HASH_NODE (Hash literals)
-//   * PM_KEYWORD_HASH_NODE (keyword arguments to a method call)
-//
-// @param elements The Prism key/value pairs to be translated
-parser::NodeVec Translator::translateKeyValuePairs(pm_node_list_t elements) {
-    auto prismElements = absl::MakeSpan(elements.nodes, elements.size);
-
-    parser::NodeVec sorbetElements{};
-    sorbetElements.reserve(prismElements.size());
-
-    for (auto &element : prismElements) {
-        if (PM_NODE_TYPE_P(element, PM_ASSOC_SPLAT_NODE)) {
-            auto prismSplatNode = down_cast<pm_assoc_splat_node>(element);
-            auto splatLoc = translateLoc(prismSplatNode->base.location);
-            auto value = translate(prismSplatNode->value);
-
-            unique_ptr<parser::Node> sorbetSplatNode;
-            if (value == nullptr) { // An anonymous splat like `f(**)`
-                sorbetSplatNode = make_unique<parser::ForwardedKwrestArg>(splatLoc);
-            } else { // Splatting an expression like `f(**h)`
-                sorbetSplatNode = make_unique<parser::Kwsplat>(splatLoc, move(value));
-            }
-
-            sorbetElements.emplace_back(move(sorbetSplatNode));
-        } else {
-            ENFORCE(PM_NODE_TYPE_P(element, PM_ASSOC_NODE))
-            auto pair = down_cast<pm_assoc_node>(element);
-
-            unique_ptr<parser::Node> sorbetKVPair;
-            if (PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE)) { // Special case to modify Symbol locations
-                auto symbolNode = down_cast<pm_symbol_node>(pair->key);
-
-                auto [symbolContent, _] = translateSymbol(symbolNode);
-
-                // If the opening location is null, the symbol is used as a key with a colon postfix, like `{ a: 1 }`
-                // The legacy parser sometimes includes symbol's colons, othertimes not:
-                //
-                //     k3 = nil    # The implicit lvar accessed by k3 below
-                //     def k4; end # The implicit method called by k4 below
-                //
-                //             :k1        #  9-12 Regular symbol
-                //             ^^^
-                //            { k2: 1 }   # 10-12 Key with explicit value
-                //              ^^
-                //            { k3:   }   # 10-13 Key with implicit lvar value access
-                //              ^^^         key symbol loc
-                //            { k4:   }   # 10-13 Key with implicit method call
-                //              ^^^         key symbol loc
-                //              ^^^         Sorbet send node loc
-                //              ^^^         Sorbet send node methodLoc (Prism excludes the ':' here)
-                //     def demo(k5:); end # 10-13 Keyword parameter
-                //              ^^^
-                //         call(k6:)      # 10-13 Keyword argument
-                //              ^^
-                if (symbolNode->opening_loc.start == nullptr) {
-                    core::LocOffsets symbolLoc;
-                    if (PM_NODE_TYPE_P(pair->value, PM_IMPLICIT_NODE)) {
-                        auto implicitNode = down_cast<pm_implicit_node>(pair->value);
-
-                        if (PM_NODE_TYPE_P(implicitNode->value, PM_CALL_NODE)) {
-                            auto callNode = down_cast<pm_call_node>(implicitNode->value);
-
-                            // Prism's method_loc excludes the ':' here, but Sorbet's legacy parser includes it.
-                            // Not a fan of modifying the Prism tree in-place, but the alternative is much trickier.
-                            // TODO: revisit this when we extract a helper function for translating call nodes.
-                            ENFORCE(symbolNode->base.location.end[-1] == ':');
-                            callNode->message_loc.end = symbolNode->base.location.end;
-                        }
-
-                        symbolLoc = translateLoc(symbolNode->base.location);
-                    } else {
-                        // Drop the trailing colon in the key's location
-                        symbolLoc = translateLoc(symbolNode->base.location.start, symbolNode->base.location.end - 1);
-                    }
-
-                    auto key = make_node_with_expr<parser::Symbol>(MK::Symbol(symbolLoc, symbolContent), symbolLoc,
-                                                                   symbolContent);
-                    auto value = translate(pair->value);
-                    sorbetKVPair =
-                        make_unique<parser::Pair>(translateLoc(pair->base.location), move(key), translate(pair->value));
-
-                } else {
-                    sorbetKVPair = translate(element);
-                }
-            } else {
-                sorbetKVPair = translate(element);
-            }
-
-            sorbetElements.emplace_back(move(sorbetKVPair));
-        }
-    }
-
-    return sorbetElements;
 }
 
 ast::ExpressionPtr Translator::desugarKeyValuePairs(core::LocOffsets loc, pm_node_list_t elements) {

@@ -122,9 +122,6 @@ private:
     // Helper for Break/Next/Return nodes that take optional arguments
     ast::ExpressionPtr desugarBreakNextReturn(pm_arguments_node *argsNode);
 
-    parser::NodeVec translateKeyValuePairs(pm_node_list_t elements);
-
-    // translateKeyValuePairs + desugarHash in one
     ast::ExpressionPtr desugarKeyValuePairs(core::LocOffsets loc, pm_node_list_t elements);
 
     ast::ExpressionPtr desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
