@@ -3715,11 +3715,6 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
                 patternTranslate(prismPattern);
             }
 
-            // A single `in` clause does not desugar into a standalone Ruby expression; it only
-            // becomes meaningful when the enclosing `case` stitches together all clauses. Wrapping it
-            // in a NodeWithExpr seeded with `EmptyTree` satisfies the API contract so that
-            // `hasExpr(inNodes)` can succeed. The enclosing `case` later consumes the real
-            // expressions from the pattern and body when it assembles the final AST.
             return MK::EmptyTree();
         }
         case PM_LOCAL_VARIABLE_TARGET_NODE: { // A variable binding in a pattern, like the `head` in `[head, *tail]`
