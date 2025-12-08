@@ -2021,13 +2021,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CASE_MATCH_NODE: { // A pattern-matching `case` statement that only uses `in` (and not `when`)
             auto caseMatchNode = down_cast<pm_case_match_node>(node);
 
-            auto predicate = desugar(caseMatchNode->predicate);
             auto inNodes = absl::MakeSpan(caseMatchNode->conditions.nodes, caseMatchNode->conditions.size);
             auto elseClause = desugarNullable(up_cast(caseMatchNode->else_clause));
 
             // Build an if ladder similar to CASE_NODE
-            auto tempName = nextUniqueDesugarName(core::Names::assignTemp());
-            auto predicateLoc = predicate.loc();
 
             // Start with the else clause as the final else
             ExpressionPtr resultExpr = move(elseClause);
@@ -2075,7 +2072,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             // Wrap in an InsSeq with the predicate assignment (if there is a predicate)
-            auto assignExpr = MK::Assign(predicateLoc, tempName, move(predicate));
+            auto predicate = desugar(caseMatchNode->predicate);
+            auto tempName = nextUniqueDesugarName(core::Names::assignTemp());
+            auto assignExpr = MK::Assign(predicate.loc(), tempName, move(predicate));
 
             resultExpr = MK::InsSeq1(location, move(assignExpr), move(resultExpr));
             return expr_only(move(resultExpr));
