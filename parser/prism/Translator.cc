@@ -1769,8 +1769,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             enforceHasExpr(receiver);
 
-            unique_ptr<parser::Node> blockBody;       // e.g. `123` in `foo { |x| 123 }`
-            unique_ptr<parser::Node> blockParameters; // e.g. `|x|` in `foo { |x| 123 }`
+            unique_ptr<parser::Node> blockBody; // e.g. `123` in `foo { |x| 123 }`
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
             unique_ptr<parser::Node> blockPassNode;
@@ -1794,21 +1793,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                                 auto paramsLoc = translateLoc(paramsNode->base.location);
 
-                                if (paramsNode->parameters == nullptr) {
-                                    // This can happen if the block declares block-local variables, but no parameters.
-                                    // e.g. `foo { |; block_local_var| ... }`
-
-                                    // TODO: future follow up, ensure we add the block local variables ("shadowargs"),
-                                    // if any.
-                                    blockParameters = make_unique<parser::Params>(paramsLoc, NodeVec{});
-                                } else {
-                                    unique_ptr<parser::Params> params;
+                                if (paramsNode->parameters) {
                                     auto blockLocalVariables =
                                         absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
                                     std::tie(blockParamsStore, blockStatsStore, std::ignore, std::ignore) =
                                         desugarParametersNode(paramsNode->parameters, paramsLoc, blockLocalVariables);
-
-                                    blockParameters = move(params);
                                 }
 
                                 break;
@@ -1823,14 +1812,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                 //       ^
                                 //     {|_1, _2| ... }`
                                 //      ^
-                                auto numParamsLoc =
-                                    translateLoc(blockNode->opening_loc.end, blockNode->opening_loc.end);
 
                                 auto params = translateNumberedParametersNode(
                                     numberedParamsNode, down_cast<pm_statements_node>(blockNode->body),
                                     &blockParamsStore);
-
-                                blockParameters = make_unique<parser::NumParams>(numParamsLoc, move(params));
 
                                 break;
                             }
