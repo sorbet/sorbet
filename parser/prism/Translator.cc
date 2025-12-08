@@ -382,10 +382,7 @@ ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list
 
     auto prismNodes = absl::MakeSpan(prismNodeList.nodes, prismNodeList.size);
     for (pm_node *prismNode : prismNodes) {
-        auto parserNode = translate(prismNode);
-        auto expr = parserNode->takeDesugaredExpr();
-        ENFORCE(expr != nullptr, "All arguments must have a desugared expression by now, failed on {}",
-                ctx.file.data(ctx).path());
+        auto expr = desugar(prismNode);
 
         if (allStringsSoFar && isStringLit(expr)) {
             stringsAccumulated.emplace_back(move(expr));
@@ -2397,10 +2394,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto definedNode = down_cast<pm_defined_node>(node);
 
             auto arg = translate(definedNode->value);
-
-            ENFORCE(arg != nullptr);
-            ENFORCE(arg->hasDesugaredExpr());
-
             auto valueNode = definedNode->value;
 
             switch (PM_NODE_TYPE(valueNode)) {
