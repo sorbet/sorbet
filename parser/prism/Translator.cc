@@ -2847,16 +2847,16 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         case PM_MATCH_REQUIRED_NODE: {
             auto matchRequiredNode = down_cast<pm_match_required_node>(node);
 
-            auto value = patternTranslate(matchRequiredNode->value);
-            auto pattern = patternTranslate(matchRequiredNode->pattern);
+            auto value = desugarPattern(matchRequiredNode->value);
+            auto pattern = desugarPattern(matchRequiredNode->pattern);
 
             return desugarOnelinePattern(location, matchRequiredNode->pattern);
         }
         case PM_MATCH_PREDICATE_NODE: {
             auto matchPredicateNode = down_cast<pm_match_predicate_node>(node);
 
-            auto value = patternTranslate(matchPredicateNode->value);
-            auto pattern = patternTranslate(matchPredicateNode->pattern);
+            auto value = desugarPattern(matchPredicateNode->value);
+            auto pattern = desugarPattern(matchPredicateNode->pattern);
 
             return desugarOnelinePattern(location, matchPredicateNode->pattern);
         }
@@ -3301,8 +3301,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         case PM_IN_NODE:                // An `in` pattern such as in a `case` statement, or as a standalone expression.
         case PM_PINNED_EXPRESSION_NODE: // A "pinned" expression, like `^(1 + 2)` in `in ^(1 + 2)`
         case PM_PINNED_VARIABLE_NODE:   // A "pinned" variable, like `^x` in `in ^x`
-            unreachable(
-                "These pattern-match related nodes are handled separately in `Translator::patternTranslate()`.");
+            unreachable("These pattern-match related nodes are handled separately in `Translator::desugarPattern()`.");
 
         case PM_SCOPE_NODE: // An internal node type only created by the MRI's Ruby compiler, and not Prism itself.
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
@@ -3368,7 +3367,7 @@ const uint8_t *endLoc(pm_node_t *anyNode) {
 //
 // E.g. `PM_LOCAL_VARIABLE_TARGET_NODE` normally translates to `parser::LVarLhs`, but `parser::MatchVar` in the context
 // of a pattern.
-ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
+ast::ExpressionPtr Translator::desugarPattern(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
 
@@ -3378,8 +3377,8 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
         case PM_ALTERNATION_PATTERN_NODE: { // A pattern like `1 | 2`
             auto alternationPatternNode = down_cast<pm_alternation_pattern_node>(node);
 
-            auto left = patternTranslate(alternationPatternNode->left);
-            auto right = patternTranslate(alternationPatternNode->right);
+            auto left = desugarPattern(alternationPatternNode->left);
+            auto right = desugarPattern(alternationPatternNode->right);
 
             // Like array/hash patterns, MatchAlt is a structural pattern that doesn't have
             // a simple desugared expression - it's handled specially during pattern matching desugaring
@@ -3390,11 +3389,11 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
 
             // If the value is an implicit node, skip creating the pair, and return that value directly.
             if (PM_NODE_TYPE_P(assocNode->value, PM_IMPLICIT_NODE)) {
-                return patternTranslate(assocNode->value);
+                return desugarPattern(assocNode->value);
             }
 
             auto key = desugar(assocNode->key);
-            auto value = patternTranslate(assocNode->value);
+            auto value = desugarPattern(assocNode->value);
 
             // Pair is a structural component of hash patterns with no simple desugared expression
             return MK::Nil(location);
@@ -3407,16 +3406,16 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
             auto prismSuffixNodes = absl::MakeSpan(arrayPatternNode->posts.nodes, arrayPatternNode->posts.size);
 
             for (auto *prismNode : prismPrefixNodes) {
-                patternTranslate(prismNode);
+                desugarPattern(prismNode);
             }
 
             // Implicit rest nodes in array patterns don't need to be translated
             if (prismRestNode != nullptr && !PM_NODE_TYPE_P(prismRestNode, PM_IMPLICIT_REST_NODE)) {
-                patternTranslate(prismRestNode);
+                desugarPattern(prismRestNode);
             }
 
             for (auto *prismNode : prismSuffixNodes) {
-                patternTranslate(prismNode);
+                desugarPattern(prismNode);
             }
 
             // Determine the correct location for the pattern
@@ -3448,8 +3447,8 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
         case PM_CAPTURE_PATTERN_NODE: { // A variable capture such as the `Integer => i` in `in Integer => i`
             auto capturePatternNode = down_cast<pm_capture_pattern_node>(node);
 
-            auto pattern = patternTranslate(capturePatternNode->value);
-            auto target = patternTranslate(up_cast(capturePatternNode->target));
+            auto pattern = desugarPattern(capturePatternNode->value);
+            auto target = desugarPattern(up_cast(capturePatternNode->target));
 
             return MK::Nil(location);
         }
@@ -3461,16 +3460,16 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
             auto prismTrailingSplat = findPatternNode->right;
 
             if (prismLeadingSplat != nullptr) {
-                patternTranslate(up_cast(prismLeadingSplat));
+                desugarPattern(up_cast(prismLeadingSplat));
             }
 
             for (auto *prismNode : prismMiddleNodes) {
-                patternTranslate(prismNode);
+                desugarPattern(prismNode);
             }
 
             if (prismTrailingSplat != nullptr && PM_NODE_TYPE_P(prismTrailingSplat, PM_SPLAT_NODE)) {
                 // TODO: handle PM_NODE_TYPE_P(prismTrailingSplat, PM_MISSING_NODE)
-                patternTranslate(prismTrailingSplat);
+                desugarPattern(prismTrailingSplat);
             }
 
             // FindPattern is a structural pattern with no simple desugared expression
@@ -3483,7 +3482,7 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
             auto prismRestNode = hashPatternNode->rest;
 
             for (auto *prismNode : prismElements) {
-                patternTranslate(prismNode);
+                desugarPattern(prismNode);
             }
             if (prismRestNode != nullptr) {
                 switch (PM_NODE_TYPE(prismRestNode)) {
@@ -3495,7 +3494,7 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
                         break;
                     }
                     default:
-                        patternTranslate(prismRestNode);
+                        desugarPattern(prismRestNode);
                 }
             }
 
@@ -3527,7 +3526,7 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
         }
         case PM_IMPLICIT_NODE: {
             auto implicitNode = down_cast<pm_implicit_node>(node);
-            return patternTranslate(implicitNode->value);
+            return desugarPattern(implicitNode->value);
         }
         case PM_IN_NODE: { // An `in` pattern such as in a `case` statement, or as a standalone expression.
             auto inNode = down_cast<pm_in_node>(node);
@@ -3555,9 +3554,9 @@ ast::ExpressionPtr Translator::patternTranslate(pm_node_t *node) {
                     conditionalStatements->body.size == 1,
                     "In pattern-matching's `in` clause, a conditional (if/unless) guard must have a single statement.");
 
-                patternTranslate(conditionalStatements->body.nodes[0]);
+                desugarPattern(conditionalStatements->body.nodes[0]);
             } else {
-                patternTranslate(prismPattern);
+                desugarPattern(prismPattern);
             }
 
             return MK::EmptyTree();

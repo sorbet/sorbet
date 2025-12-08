@@ -234,8 +234,8 @@ private:
     ast::ExpressionPtr desugarAssignment(pm_node_t *node);
 
     // Pattern-matching
-    // ... variation of the main translation functions for pattern-matching related node.
-    ast::ExpressionPtr patternTranslate(pm_node_t *node);
+    // ... variation of the main desugaring functions for pattern-matching related node.
+    ast::ExpressionPtr desugarPattern(pm_node_t *node);
     ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match);
 
     std::string_view sliceLocation(pm_location_t loc) const;
