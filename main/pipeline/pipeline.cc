@@ -287,7 +287,7 @@ parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, co
         auto translatedTree =
             parser::Prism::Translator(parser, ctx, prismResult.getParseErrors(), preserveConcreteSyntax,
                                       enclosingBlockParamLoc, enclosingBlockParamName)
-                .translate(node);
+                .translate_TODO(node);
 
         parseResult = parser::ParseResult{move(translatedTree), prismResult.getCommentLocations()};
     }

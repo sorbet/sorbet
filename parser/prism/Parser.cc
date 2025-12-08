@@ -20,7 +20,8 @@ parser::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteS
     auto enclosingBlockParamName = core::NameRef::noName();
     auto translatedTree = Prism::Translator(parser, ctx, parseResult.parseErrors, preserveConcreteSyntax,
                                             enclosingBlockParamLoc, enclosingBlockParamName)
-                              .translate(parseResult.getRawNodePointer());
+                              .translate_TODO(parseResult.getRawNodePointer());
+
     return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
 }
 

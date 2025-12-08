@@ -69,7 +69,9 @@ public:
     ast::ExpressionPtr desugarNullable(pm_node_t *node);
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
-    std::unique_ptr<parser::Node> translate(pm_node_t *node);
+    ast::ExpressionPtr translate(pm_node_t *node);
+
+    std::unique_ptr<parser::Node> translate_TODO(pm_node_t *node);
 
 private:
     // This private constructor is used for creating child translators with modified context.
@@ -87,7 +89,7 @@ private:
           enclosingBlockParamLoc(enclosingBlockParamLoc), enclosingBlockParamName(enclosingBlockParamName),
           isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
 
-    std::unique_ptr<ExprOnly> make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const;
+    ast::ExpressionPtr make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const;
 
     core::LocOffsets translateLoc(pm_location_t loc) const;
     core::LocOffsets translateLoc(const uint8_t *start, const uint8_t *end) const;
