@@ -2416,7 +2416,7 @@ ast::ExpressionPtr Translator::translate(pm_node_t *node) {
         }
         case PM_ELSE_NODE: { // An `else` clauses, which can pertain to an `if`, `begin`, `case`, etc.
             auto elseNode = down_cast<pm_else_node>(node);
-            return desugarNullable(up_cast(elseNode->statements));
+            return desugarStatements(elseNode->statements);
         }
         case PM_EMBEDDED_STATEMENTS_NODE: { // Statements interpolated into a string.
             // e.g. the `#{bar}` in `"foo #{bar} baz"`
@@ -3007,7 +3007,7 @@ ast::ExpressionPtr Translator::translate(pm_node_t *node) {
                 }
             }
 
-            return translate(up_cast(programNode->statements));
+            return desugarStatements(programNode->statements);
         }
         case PM_POST_EXECUTION_NODE: { // The END keyword and body, like `END { ... }`
             return make_unsupported_node(location, "Postexe");
