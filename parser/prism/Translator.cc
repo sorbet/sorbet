@@ -1664,8 +1664,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             pm_node_t *prismBlock = callNode->block;
 
-            unique_ptr<parser::Node> sendNode;
-
             auto name = ctx.state.enterNameUTF8(constantNameString);
             auto methodName = MK::Symbol(sendLoc0, name);
 
@@ -1676,7 +1674,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             ast::ExpressionPtr blockBody; // e.g. `123` in `foo { |x| 123 }`
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
-            unique_ptr<parser::Node> blockPassNode;
             ast::ExpressionPtr blockPassArg;
             core::LocOffsets blockPassLoc;
             bool blockPassArgIsSymbol = false;
@@ -1753,8 +1750,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
-                    blockPassNode = translate(prismBlock);
-                    blockPassLoc = blockPassNode->loc;
+                    blockPassLoc = translateLoc(prismBlock->location);
 
                     if (bp->expression) {
                         blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
