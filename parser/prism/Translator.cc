@@ -1604,7 +1604,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             //   We can skip the `hasFwdRestArg`/`hasSplat` logic below if it's false.
             //   However, we still need the loop if it's true, to be able to tell the two cases apart.
 
-            NodeVec args;
             // true if the call contains a forwarded argument like `foo(...)`
             auto hasFwdArgs = callNode->arguments != nullptr &&
                               PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
@@ -1637,10 +1636,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     }
                 }
 
-                // TODO: reserve size for kwargs Hash keys and values, if needed.
-                // TODO: reserve size for block, if needed.
-                args.reserve(prismArgs.size());
-
                 for (auto &arg : prismArgs) {
                     switch (PM_NODE_TYPE(arg)) {
                         case PM_SPLAT_NODE: {
@@ -1651,13 +1646,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                 hasSplat = true;
                             }
 
-                            args.emplace_back(translate(arg));
-
                             break;
                         }
 
                         default:
-                            args.emplace_back(translate(arg));
 
                             break;
                     }
@@ -1674,17 +1666,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (name == core::Names::blockGiven_p()) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
-
-            // Method defs are really complex, and we're building support for different kinds of arguments bit
-            // by bit. This loop throws if any of the arguments are not supported by our desugar logic.
-            for (auto &arg : args) {
-                if (parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get()) ||
-                    parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get())) {
-                    continue; // These don't have a desugared representation, but we do support them.
-                } else {
-                    enforceHasExpr(arg);
-                }
-            };
 
             ast::ExpressionPtr blockBody; // e.g. `123` in `foo { |x| 123 }`
             ast::MethodDef::PARAMS_store blockParamsStore;
@@ -1825,16 +1806,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
                 ast::Array::ENTRY_store argExprs;
                 argExprs.reserve(prismArgs.size());
-                for (auto &arg : args) {
-                    if (parser::NodeWithExpr::isa_node<parser::ForwardedRestArg>(arg.get())) {
+                for (auto *arg : prismArgs) {
+                    if (PM_NODE_TYPE_P(arg, PM_SPLAT_NODE) && down_cast<pm_splat_node>(arg)->expression == nullptr) {
                         continue; // Skip anonymous splats (like `f(*)`), which are handled separately in `PM_CALL_NODE`
-                    } else if (parser::NodeWithExpr::isa_node<parser::ForwardedArgs>(arg.get())) {
+                    } else if (PM_NODE_TYPE_P(arg, PM_FORWARDING_ARGUMENTS_NODE)) {
                         continue; // Skip forwarded args (like `f(...)`), which are handled separately in `PM_CALL_NODE`
                     }
 
-                    auto expr = arg->takeDesugaredExpr();
-                    ENFORCE(expr != nullptr);
-                    argExprs.emplace_back(move(expr));
+                    argExprs.emplace_back(desugar(arg));
                 }
                 auto argsEmpty = argExprs.empty();
                 auto argsArrayExpr = desugarArray(sendLoc0, prismArgs, move(argExprs));
@@ -1904,18 +1883,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     flattenKwargs(kwargsHash, kwargElements);
                     ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, 0, kwargElements);
 
-                    // Add the kwargs Hash back into parse tree, so that it's correct, too.
-                    // This doesn't effect the desugared expression.
-                    args.emplace_back(move(kwargsHash));
-
                     kwargsExpr = MK::Array(sendWithBlockLoc, move(kwargElements));
                 } else {
                     kwargsExpr = MK::Nil(sendWithBlockLoc);
-                }
-
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                    // Add the parser node back into the wq tree, to pass the parser tests.
-                    args.emplace_back(move(blockPassNode));
                 }
 
                 auto numPosArgs = 4;
@@ -1988,7 +1958,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
-            int numPosArgs = args.size();
+            int numPosArgs = prismArgs.size();
 
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) && !blockPassArgIsSymbol) {
                 // Special handling for non-Symbol block pass args, like `a.map(&block)`
@@ -1999,32 +1969,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // E.g. `a.each(&block)`
 
                 ast::Send::ARGS_store magicSendArgs;
-                magicSendArgs.reserve(3 + args.size());
+                magicSendArgs.reserve(3 + prismArgs.size());
                 magicSendArgs.emplace_back(move(receiver));
                 magicSendArgs.emplace_back(move(methodName));
                 magicSendArgs.emplace_back(move(blockPassArg));
 
                 numPosArgs += 3;
 
-                for (auto &arg : args) {
-                    auto x = arg->takeDesugaredExpr();
-                    ENFORCE(x != nullptr);
-                    magicSendArgs.emplace_back(move(x));
+                for (auto *arg : prismArgs) {
+                    magicSendArgs.emplace_back(desugar(arg));
                 }
 
                 if (kwargsHash) {
                     flattenKwargs(kwargsHash, magicSendArgs);
                     ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, magicSendArgs);
-
-                    // Add the kwargs Hash back into parse tree, so that it's correct, too.
-                    // This doesn't effect the desugared expression.
-                    args.emplace_back(move(kwargsHash));
-                }
-
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                    // Add the parser node back into the wq tree, to pass the parser tests.
-
-                    args.emplace_back(move(blockPassNode));
                 }
 
                 auto sendExpr = MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(),
@@ -2036,18 +1994,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             ast::Send::ARGS_store sendArgs{};
             // TODO: reserve size for kwargs Hash keys and values, if needed.
             // TODO: reserve size for the block, if needed.
-            sendArgs.reserve(args.size());
-            for (auto &arg : args) {
-                sendArgs.emplace_back(arg->takeDesugaredExpr());
+            sendArgs.reserve(prismArgs.size());
+            for (auto *arg : prismArgs) {
+                sendArgs.emplace_back(desugar(arg));
             }
 
             if (kwargsHash) {
                 flattenKwargs(kwargsHash, sendArgs);
                 ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, sendArgs);
-
-                // Add the kwargs Hash back into parse tree, so that it's correct, too.
-                // This doesn't effect the desugared expression.
-                args.emplace_back(move(kwargsHash));
             }
 
             if (prismBlock != nullptr) {
