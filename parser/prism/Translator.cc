@@ -1849,17 +1849,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                     }
                                 }
 
-                                auto name = core::Names::it();
-                                auto it = MK::Local(itUsageLoc, name);
-                                auto itDecl = make_node_with_expr<parser::LVar>(move(it), itUsageLoc, name);
-
                                 // Single 'it' parameter - use the original name (not a unique one)
                                 // Unlike numbered parameters, 'it' uses the actual name "it" so that
                                 // local variables named 'it' in the same scope can shadow it
-                                blockParameters = make_node_with_expr<parser::ItParam>(itDecl->takeDesugaredExpr(),
-                                                                                       itParamLoc, move(itDecl));
-
-                                blockParamsStore.emplace_back(blockParameters->takeDesugaredExpr());
+                                blockParamsStore.emplace_back(MK::Local(itUsageLoc, core::Names::it()));
                                 break;
                             }
 
