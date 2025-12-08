@@ -3298,15 +3298,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto splatExpr = MK::Splat(location, move(var));
                 return expr_only(move(splatExpr));
             } else { // Splatting an expression like `f(*a)`
-                // Directly desugaring a splat node is a destructive operation, which can leave the "expr" in an invalid
-                // state (because it would have a null desugared expr), which is incompatible with the "fallback" path
-                // (desugaring it as a Whitequark tree in `PrismDesugar.cc").
-                //
-                // It's only safe to do if we can be sure all adjacent elements (in an the same Array literal,
-                // or arguments to the same method call) can also directly desugared.
-                //
-                // It's really hard to know that ahead of time, so for now, just deepCopy the tree, instead of taking
-                // it out of the splatted expressions's `NodeWithExpr`.
                 auto splatExpr = MK::Splat(location, move(expr));
                 return expr_only(move(splatExpr));
             }
