@@ -69,8 +69,6 @@ public:
     ast::ExpressionPtr desugarNullable(pm_node_t *node);
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
-    ast::ExpressionPtr translate(pm_node_t *node);
-
     std::unique_ptr<parser::Node> translate_TODO(pm_node_t *node);
 
 private:
