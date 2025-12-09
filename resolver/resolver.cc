@@ -2763,6 +2763,11 @@ public:
                     ENFORCE(false, "should have converted these to cast nodes");
                     return;
                 }
+                case core::Names::attachedClass().rawId(): {
+                    send.recv = ast::MK::Magic(send.recv.loc());
+                    send.addPosArg(ast::MK::Self(send.recv.loc()));
+                    return;
+                }
                 case core::Names::revealType().rawId():
                 case core::Names::absurd().rawId(): {
                     // These errors do not match up with our "upper error levels are super sets
