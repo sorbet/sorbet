@@ -1584,9 +1584,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
             pm_node_t *prismBlock = callNode->block;
 
-            auto name = ctx.state.enterNameUTF8(constantNameString);
+            auto methodName = ctx.state.enterNameUTF8(constantNameString);
 
-            if (name == core::Names::blockGiven_p()) {
+            if (methodName == core::Names::blockGiven_p()) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
 
@@ -1820,7 +1820,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 ast::Send::ARGS_store magicSendArgs;
                 magicSendArgs.reserve(numPosArgs); // TODO: reserve room for a block pass arg
                 magicSendArgs.emplace_back(move(receiver));
-                magicSendArgs.emplace_back(MK::Symbol(sendLoc0, name));
+                magicSendArgs.emplace_back(MK::Symbol(sendLoc0, methodName));
                 magicSendArgs.emplace_back(move(argsArrayExpr));
                 magicSendArgs.emplace_back(move(kwargsExpr));
 
@@ -1866,7 +1866,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 ast::Send::ARGS_store magicSendArgs;
                 magicSendArgs.reserve(3 + prismArgs.size());
                 magicSendArgs.emplace_back(move(receiver));
-                magicSendArgs.emplace_back(MK::Symbol(sendLoc0, name));
+                magicSendArgs.emplace_back(MK::Symbol(sendLoc0, methodName));
                 magicSendArgs.emplace_back(move(blockPassArg));
 
                 numPosArgs += 3;
@@ -1902,7 +1902,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 flags.hasBlock = true;
             }
 
-            return MK::Send(sendWithBlockLoc, move(receiver), name, messageLoc, numPosArgs, move(sendArgs), flags);
+            return MK::Send(sendWithBlockLoc, move(receiver), methodName, messageLoc, numPosArgs, move(sendArgs),
+                            flags);
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
             return desugarSendOpAssign<pm_call_operator_write_node, OpAssignKind::Operator>(node);
