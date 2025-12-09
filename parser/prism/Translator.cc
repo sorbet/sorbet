@@ -1852,6 +1852,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             int numPosArgs = prismArgs.size();
 
             if (blockPassArg) {
+                // FIXME: move this comment
                 // Special handling for non-Symbol block pass args, like `a.map(&block)`
                 // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
                 // and handled separately below.
