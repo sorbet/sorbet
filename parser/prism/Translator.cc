@@ -1598,10 +1598,11 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
                     auto blockNode = down_cast<pm_block_node>(prismBlock);
 
+                    auto blockLoc = translateLoc(prismBlock->location);
+
                     auto blockBody = this->enterBlockContext().desugarNullable(blockNode->body);
 
                     ast::MethodDef::PARAMS_store blockParamsStore;
-                    ast::InsSeq::STATS_store blockStatsStore;
                     if (blockNode->parameters != nullptr) {
                         switch (PM_NODE_TYPE(blockNode->parameters)) {
                             case PM_BLOCK_PARAMETERS_NODE: { // The params declared at the top of a PM_BLOCK_NODE
@@ -1613,8 +1614,15 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                                 if (paramsNode->parameters) {
                                     auto blockLocalVariables =
                                         absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
+
+                                    ast::InsSeq::STATS_store blockStatsStore;
+
                                     std::tie(blockParamsStore, blockStatsStore, std::ignore, std::ignore) =
                                         desugarParametersNode(paramsNode->parameters, paramsLoc, blockLocalVariables);
+
+                                    if (!blockStatsStore.empty()) {
+                                        blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
+                                    }
                                 }
 
                                 break;
@@ -1662,12 +1670,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                                             pm_node_type_to_str(PM_NODE_TYPE(blockNode->parameters)));
                             }
                         }
-                    }
-
-                    auto blockLoc = translateLoc(prismBlock->location);
-
-                    if (!blockStatsStore.empty()) {
-                        blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
                     }
 
                     blockExpr = MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
