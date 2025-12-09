@@ -1592,6 +1592,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             ast::ExpressionPtr blockBody; // e.g. `123` in `foo { |x| 123 }`
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
+            ast::ExpressionPtr blockExpr;
             ast::ExpressionPtr blockPassArg;
             bool blockPassArgIsSymbol = false;
             if (prismBlock != nullptr) {
@@ -1663,6 +1664,14 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                             }
                         }
                     }
+
+                    auto blockLoc = translateLoc(prismBlock->location);
+
+                    if (!blockStatsStore.empty()) {
+                        blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
+                    }
+
+                    blockExpr = MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
                 } else {
                     ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
 
@@ -1838,7 +1847,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                         // A literal block arg (like `foo { ... }` or `foo do ... end`),
                         // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
 
-                        ast::ExpressionPtr blockExpr;
                         if (blockPassArgIsSymbol) {
                             ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
                             auto *bp = down_cast<pm_block_argument_node>(prismBlock);
@@ -1846,14 +1854,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
                             auto symbol = down_cast<pm_symbol_node>(bp->expression);
                             blockExpr = desugarSymbolProc(symbol);
-                        } else {
-                            auto blockLoc = translateLoc(prismBlock->location);
-
-                            if (!blockStatsStore.empty()) {
-                                blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
-                            }
-
-                            blockExpr = MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
                         }
 
                         magicSendArgs.emplace_back(move(blockExpr));
@@ -1926,7 +1926,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     // A literal block arg (like `foo { ... }` or `foo do ... end`),
                     // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
 
-                    ast::ExpressionPtr blockExpr;
                     if (blockPassArgIsSymbol) {
                         ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
                         auto *bp = down_cast<pm_block_argument_node>(prismBlock);
@@ -1934,14 +1933,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
                         auto symbol = down_cast<pm_symbol_node>(bp->expression);
                         blockExpr = desugarSymbolProc(symbol);
-                    } else {
-                        auto blockLoc = translateLoc(prismBlock->location);
-
-                        if (!blockStatsStore.empty()) {
-                            blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
-                        }
-
-                        blockExpr = MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
                     }
 
                     sendArgs.emplace_back(move(blockExpr));
