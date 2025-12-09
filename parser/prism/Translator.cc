@@ -1596,7 +1596,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             ast::InsSeq::STATS_store blockStatsStore;
             ast::ExpressionPtr blockExpr;
             ast::ExpressionPtr blockPassArg;
-            bool blockPassArgIsSymbol = false;
             if (prismBlock != nullptr) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
 
@@ -1679,9 +1678,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
                     if (bp->expression) {
-                        blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
-
-                        if (!blockPassArgIsSymbol) {
+                        if (!PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
                             blockPassArg = desugar(bp->expression);
                         } else {
                             auto symbol = down_cast<pm_symbol_node>(bp->expression);
