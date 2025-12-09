@@ -804,6 +804,10 @@ void checkTNilableArity(core::Context ctx, const ast::Send &send) {
 
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                       TypeSyntaxArgs args) {
+    ENFORCE(ast::isa_tree<ast::ConstantLit>(send.recv), "Should always be `::T`!");
+    auto &recvRef = ast::cast_tree_nonnull<ast::ConstantLit>(send.recv);
+    (void)recvRef;
+    auto recv = ast::cast_tree_nonnull<ast::ConstantLit>(send.recv);
     switch (send.fun.rawId()) {
         case core::Names::nilable().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
