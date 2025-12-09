@@ -313,7 +313,7 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
         return nullptr;
     }
     // Valid receivers for lambda/proc are either a self reference or `Kernel`
-    if (!send->recv.isSelfReference() && !ast::MK::isKernel(send->recv)) {
+    if (!send->recv.isSelfReference() && !ast::MK::isKernelApproximate(send->recv)) {
         return nullptr;
     }
     if (!send->hasBlock()) {

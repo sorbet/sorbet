@@ -15,7 +15,7 @@ namespace {
 bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
     auto send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
-           ast::MK::isT(send->recv);
+           ast::MK::isTApproximate(send->recv);
 }
 
 ast::Send *findReturnSpecSend(ast::Send *sharedSig) {

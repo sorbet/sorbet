@@ -585,28 +585,25 @@ public:
     static bool isRootScope(const ast::ExpressionPtr &scope) {
         if (ast::isa_tree<ast::EmptyTree>(scope)) {
             return true;
+        } else if (auto root = ast::cast_tree<ast::ConstantLit>(scope)) {
+            return root->symbol() == core::Symbols::root();
         }
-        auto root = ast::cast_tree<ast::ConstantLit>(scope);
-        return root != nullptr && root->symbol() == core::Symbols::root();
-    }
 
-    // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional
-    // scope.
-    static bool isKernel(const ast::ExpressionPtr &expr) {
-        if (auto constRecv = cast_tree<ast::UnresolvedConstantLit>(expr)) {
-            return isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
-        }
         return false;
     }
 
+    // Detects references to the `::<Magic>` class. Since they're all created from `MK::Magic()`,
+    // they should only ever be resolved `ConstantLit`s, and never `UnresolvedConstantLit`.
     static bool isMagicClass(const ExpressionPtr &expr) {
         if (auto recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol() == core::Symbols::Magic();
-        } else {
-            return false;
         }
+
+        return false;
     }
 
+    // Detects references to the `Sorbet::Private::Static` class.  Since they're all created from
+    // `MK::SorbetPrivateStatic()`, they should only ever be resolved `ConstantLit`s, and never `UnresolvedConstantLit`.
     static bool isSorbetPrivateStatic(const ast::ExpressionPtr &expr) {
         if (auto recv = cast_tree<ConstantLit>(expr)) {
             return recv->symbol() == core::Symbols::Sorbet_Private_Static();
@@ -615,8 +612,26 @@ public:
         return false;
     }
 
+    // Detects calls to `self.new`
     static bool isSelfNew(ast::Send *send) {
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
+    }
+
+    // Detects unresolved references to `name`, or resolved references to `symbol`.
+    static bool isRootConstantLitApproximate(const ast::ExpressionPtr &expr, const core::NameRef name,
+                                             const core::ClassOrModuleRef symbol) {
+        if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
+            return c->cnst == name && ast::MK::isRootScope(c->scope);
+        } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
+            return c->symbol() == symbol;
+        }
+
+        return false;
+    }
+
+    // Detects references to `Kernel` and `::Kernel`
+    static bool isKernelApproximate(const ast::ExpressionPtr &expr) {
+        return isRootConstantLitApproximate(expr, core::Names::Constants::Kernel(), core::Symbols::Kernel());
     }
 
     /*
@@ -626,32 +641,24 @@ public:
      * scope (i.e. `::T`). This might not actually refer to the `T` that we define for users, but we don't know that
      * information at the AST level.
      */
-    static bool isT(const ast::ExpressionPtr &expr) {
-        bool result = false;
-
-        typecase(
-            expr,
-            [&](const ast::UnresolvedConstantLit &t) {
-                // When the `T` was written by the user, we get an UnresolvedConstantLit.
-                result = t.cnst == core::Names::Constants::T() && ast::MK::isRootScope(t.scope);
-            },
-            [&](const ast::ConstantLit &c) {
-                // When the `T` was inserted by `ast::MK::T()`, we get a ConstantLit.
-                result = c.symbol() == core::Symbols::T();
-            },
-            [&](const ast::ExpressionPtr &e) { result = false; });
-
-        return result;
+    static bool isTApproximate(const ast::ExpressionPtr &expr) {
+        return isRootConstantLitApproximate(expr, core::Names::Constants::T(), core::Symbols::T());
     }
 
     static bool isTNilable(const ast::ExpressionPtr &expr) {
-        auto nilable = ast::cast_tree<ast::Send>(expr);
-        return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
+        if (auto nilable = ast::cast_tree<ast::Send>(expr)) {
+            return nilable->fun == core::Names::nilable() && isTApproximate(nilable->recv);
+        }
+
+        return false;
     }
 
     static bool isTUntyped(const ast::ExpressionPtr &expr) {
-        auto send = ast::cast_tree<ast::Send>(expr);
-        return send != nullptr && send->fun == core::Names::untyped() && isT(send->recv);
+        if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            return send->fun == core::Names::untyped() && isTApproximate(send->recv);
+        }
+
+        return false;
     }
 
     static core::NameRef arg2Name(const ExpressionPtr &arg) {
