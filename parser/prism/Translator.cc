@@ -1586,6 +1586,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
 
+            // These are mutually exclusive, either we have a literal block argument, or a block pass argument
             ast::ExpressionPtr blockExpr;
             ast::ExpressionPtr blockPassArg;
             if (auto *prismBlock = callNode->block) {
