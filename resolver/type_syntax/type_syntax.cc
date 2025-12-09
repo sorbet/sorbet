@@ -1373,11 +1373,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         core::SymbolRef appliedKlass;
         if (auto recvi = ast::cast_tree<ast::ConstantLit>(s.recv)) {
             if (recvi->symbol() == core::Symbols::T()) {
-                if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
-                    return move(res.value());
-                } else {
-                    return nullopt;
-                }
+                return interpretTCombinator(ctx, s, sigBeingParsed, args);
             }
 
             if (recvi->symbol() == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
