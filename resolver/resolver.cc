@@ -2745,7 +2745,7 @@ public:
         }
 
         if (auto id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
-            if (id->symbol() != core::Symbols::T() && id->symbol() != core::Symbols::T_NonForcingConstants()) {
+            if (id->symbol() != core::Symbols::T()) {
                 return;
             }
 
