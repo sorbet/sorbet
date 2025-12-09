@@ -1568,22 +1568,17 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     }
                 }
 
-                for (auto &arg : prismArgs) {
-                    switch (PM_NODE_TYPE(arg)) {
-                        case PM_SPLAT_NODE: {
+                // Detect splats in the argument list
+                if (PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_SPLAT)) {
+                    for (auto &arg : prismArgs) {
+                        if (PM_NODE_TYPE_P(arg, PM_SPLAT_NODE)) {
                             auto splatNode = down_cast<pm_splat_node>(arg);
                             if (splatNode->expression == nullptr) { // An anonymous splat like `f(*)`
                                 hasFwdRestArg = true;
                             } else { // Splatting an expression like `f(*a)`
                                 hasSplat = true;
                             }
-
-                            break;
                         }
-
-                        default:
-
-                            break;
                     }
                 }
             }
