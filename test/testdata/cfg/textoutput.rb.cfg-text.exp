@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=-1]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -14,14 +14,14 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <cfgAlias>$19: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$20: T::Boolean = <cfgAlias>$19: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$20 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0
-bb4[firstDead=-1](<self>: T.class_of(<root>)):
+bb4[firstDead=-1](<self>: T.self_type (of T.class_of(<root>))):
     <cfgAlias>$6: T.class_of(A) = alias <C A>
     <statTemp>$4: A = <cfgAlias>$6: T.class_of(A).new()
     <hashTemp>$9: Symbol(:z) = :z
@@ -39,25 +39,25 @@ bb4[firstDead=-1](<self>: T.class_of(<root>)):
 # - bb4
 # - bb7
 # - bb8
-bb6[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$23: T.nilable(TrueClass)):
+bb6[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$23: T.nilable(TrueClass)):
     <cfgAlias>$15: T.class_of(T) = alias <C T>
     e: T.untyped = <cfgAlias>$15: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
     <statTemp>$26: String("done") = "done"
-    <throwAwayTemp>$24: String = <self>: T.class_of(<root>).p(<statTemp>$26: String("done"))
+    <throwAwayTemp>$24: String = <self>: T.self_type (of T.class_of(<root>)).p(<statTemp>$26: String("done"))
     <gotoDeadTemp>$23 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3
-bb7[firstDead=-1](<self>: T.class_of(<root>), <exceptionValue>$3: StandardError):
+bb7[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$17: T.untyped = <keep-alive> <exceptionValue>$3
     <statTemp>$22: String("whoops") = "whoops"
-    <returnMethodTemp>$2: String = <self>: T.class_of(<root>).p(<statTemp>$22: String("whoops"))
+    <returnMethodTemp>$2: String = <self>: T.self_type (of T.class_of(<root>)).p(<statTemp>$22: String("whoops"))
     <unconditional> -> bb6
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+bb8[firstDead=-1](<self>: T.self_type (of T.class_of(<root>)), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
     <gotoDeadTemp>$23: TrueClass = true
     <unconditional> -> bb6
 
@@ -72,11 +72,11 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 method ::A#f {
 
 bb0[firstDead=-1]():
-    <self>: A = cast(<self>: NilClass, A);
+    <self>: T.self_type (of A) = cast(<self>: NilClass, T.self_type (of A));
     x: T.untyped = load_arg(x)
     y: T.untyped = load_arg(y)
     <block-pre-call-temp>$4: Sorbet::Private::Static::Void = x: T.untyped.map()
-    <selfRestore>$5: A = <self>
+    <selfRestore>$5: T.self_type (of A) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -87,25 +87,25 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: A, y: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: A):
+bb2[firstDead=-1](<self>: T.self_type (of A), y: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.self_type (of A)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: A):
+bb3[firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.self_type (of A)):
     <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$4, map>
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=5](<self>: A, y: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: A):
+bb5[firstDead=5](<self>: T.self_type (of A), y: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.self_type (of A)):
     # outerLoops: 1
-    <self>: A = loadSelf(map)
+    <self>: T.self_type (of A) = loadSelf(map)
     <blk>$6: T.untyped = load_yield_params(map)
     e$1: T.untyped = yield_load_arg(0, <blk>$6: T.untyped)
-    <blockReturnTemp>$7: T.untyped = <self>: A.g(e$1: T.untyped, y: T.untyped)
+    <blockReturnTemp>$7: T.untyped = <self>: T.self_type (of A).g(e$1: T.untyped, y: T.untyped)
     <blockReturnTemp>$11: T.noreturn = blockreturn<map> <blockReturnTemp>$7: T.untyped
     <unconditional> -> bb2
 
@@ -114,7 +114,7 @@ bb5[firstDead=5](<self>: A, y: T.untyped, <block-pre-call-temp>$4: Sorbet::Priva
 method ::A#g {
 
 bb0[firstDead=10]():
-    <self>: A = cast(<self>: NilClass, A);
+    <self>: T.self_type (of A) = cast(<self>: NilClass, T.self_type (of A));
     x: T.untyped = load_arg(x)
     y: T.untyped = load_arg(y)
     <cfgAlias>$5: T.class_of(String) = alias <C String>
@@ -136,7 +136,7 @@ bb1[firstDead=-1]():
 method ::<Class:A>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <self>: T.self_type (of T.class_of(A)) = cast(<self>: NilClass, T.self_type (of T.class_of(A)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

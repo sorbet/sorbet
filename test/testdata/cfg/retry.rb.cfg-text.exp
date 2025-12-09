@@ -1,7 +1,7 @@
 method ::Object#main {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     try: Integer(0) = 0
     <unconditional> -> bb2
 
@@ -15,45 +15,45 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb10
-bb2[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0)):
+bb2[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0)):
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
 # - bb2
 # - bb7
-bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: Exception):
     <cfgAlias>$15: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$16: T::Boolean = <cfgAlias>$15: T.class_of(StandardError).===(<exceptionValue>$4: Exception)
     <isaCheckTemp>$16 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
 # - bb2
-bb4[firstDead=-1](<self>: Object, try: Integer(0)):
+bb4[firstDead=-1](<self>: T.self_type (of Object), try: Integer(0)):
     <statTemp>$7: Integer(3) = 3
     <ifTemp>$5: T::Boolean = try: Integer(0).<(<statTemp>$7: Integer(3))
     <ifTemp>$5 -> (T::Boolean ? bb5 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=5](<self>: Object, try: Integer(0)):
+bb5[firstDead=5](<self>: T.self_type (of Object), try: Integer(0)):
     <statTemp>$9: Integer(0) = try
     <statTemp>$10: Integer(1) = 1
     try: Integer = <statTemp>$9: Integer(0).+(<statTemp>$10: Integer(1))
     <statTemp>$12: String("e") = "e"
-    <returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$12: String("e"))
+    <returnMethodTemp>$2: T.noreturn = <self>: T.self_type (of Object).raise(<statTemp>$12: String("e"))
     <unconditional> -> bb7
 
 # backedges
 # - bb4
-bb6[firstDead=-1](<self>: Object, try: Integer(0)):
+bb6[firstDead=-1](<self>: T.self_type (of Object), try: Integer(0)):
     <returnMethodTemp>$2: NilClass = nil
     <unconditional> -> bb7
 
 # backedges
 # - bb5
 # - bb6
-bb7[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0)):
+bb7[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0)):
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb9)
 
@@ -64,11 +64,11 @@ bb9[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$23: NilClass):
 
 # backedges
 # - bb3
-bb10[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: StandardError):
+bb10[firstDead=-1](<self>: T.self_type (of Object), <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: StandardError):
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$13: T.untyped = <keep-alive> <exceptionValue>$4
     <statTemp>$19: String("rescue") = "rescue"
-    <statTemp>$17: NilClass = <self>: Object.puts(<statTemp>$19: String("rescue"))
+    <statTemp>$17: NilClass = <self>: T.self_type (of Object).puts(<statTemp>$19: String("rescue"))
     <magic>$21: T.class_of(<Magic>) = alias <C <Magic>>
     <retryTemp>$22: Sorbet::Private::Static::Void = <magic>$21: T.class_of(<Magic>).<retry>()
     <unconditional> -> bb2
@@ -91,8 +91,8 @@ bb12[firstDead=1](<returnMethodTemp>$2: NilClass):
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$4: T.untyped = <self>: T.class_of(<root>).main()
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
+    <statTemp>$4: T.untyped = <self>: T.self_type (of T.class_of(<root>)).main()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

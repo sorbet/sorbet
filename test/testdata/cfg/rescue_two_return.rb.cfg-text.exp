@@ -1,7 +1,7 @@
 method ::Object#foo {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
@@ -16,7 +16,7 @@ bb1[firstDead=-1]():
 
 # backedges
 # - bb0
-bb3[firstDead=-1](<self>: Object, <exceptionValue>$4: Exception):
+bb3[firstDead=-1](<self>: T.self_type (of Object), <exceptionValue>$4: Exception):
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$4: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
@@ -39,13 +39,13 @@ bb7[firstDead=4](<exceptionValue>$4: StandardError):
 
 # backedges
 # - bb3
-bb8[firstDead=-1](<self>: Object):
+bb8[firstDead=-1](<self>: T.self_type (of Object)):
     <gotoDeadTemp>$11: TrueClass = true
     <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb8
-bb9[firstDead=0](<self>: Object):
+bb9[firstDead=0](<self>: T.self_type (of Object)):
     <returnMethodTemp>$2 = <self>.deadcode()
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
@@ -55,7 +55,7 @@ bb9[firstDead=0](<self>: Object):
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <returnMethodTemp>$2: Symbol(:foo) = :foo
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1

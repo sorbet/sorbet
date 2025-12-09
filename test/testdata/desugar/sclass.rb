@@ -61,7 +61,7 @@ class G
     def wrapper
         class << self
             def inner
-                T.reveal_type(self) # error: type: `T.class_of(G)`
+                T.reveal_type(self) # error: type: `T.self_type (of T.class_of(G))`
             end
         end
         inner # error: Method `inner` does not exist on

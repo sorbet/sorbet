@@ -1,7 +1,7 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=5]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
     <cfgAlias>$5: T.class_of(Main) = alias <C Main>
     <statTemp>$3: Main = <cfgAlias>$5: T.class_of(Main).new()
     <returnMethodTemp>$2: T.untyped = <statTemp>$3: Main.main()
@@ -18,7 +18,7 @@ bb1[firstDead=-1]():
 method ::Main#yielder {
 
 bb0[firstDead=6]():
-    <self>: Main = cast(<self>: NilClass, Main);
+    <self>: T.self_type (of Main) = cast(<self>: NilClass, T.self_type (of Main));
     <blk>: T.untyped = load_arg(<blk>)
     <statTemp>$5: Integer(1) = 1
     a: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1))
@@ -36,7 +36,7 @@ bb1[firstDead=-1]():
 method ::Main#blockpass {
 
 bb0[firstDead=6]():
-    <self>: Main = cast(<self>: NilClass, Main);
+    <self>: T.self_type (of Main) = cast(<self>: NilClass, T.self_type (of Main));
     blk: T.untyped = load_arg(blk)
     <statTemp>$5: Integer(1) = 1
     a: T.untyped = blk: T.untyped.call(<statTemp>$5: Integer(1))
@@ -54,7 +54,7 @@ bb1[firstDead=-1]():
 method ::Main#mixed {
 
 bb0[firstDead=6]():
-    <self>: Main = cast(<self>: NilClass, Main);
+    <self>: T.self_type (of Main) = cast(<self>: NilClass, T.self_type (of Main));
     blk: T.untyped = load_arg(blk)
     <statTemp>$5: Integer(1) = 1
     a: T.untyped = blk: T.untyped.call(<statTemp>$5: Integer(1))
@@ -72,10 +72,10 @@ bb1[firstDead=-1]():
 method ::Main#blockyield {
 
 bb0[firstDead=-1]():
-    <self>: Main = cast(<self>: NilClass, Main);
+    <self>: T.self_type (of Main) = cast(<self>: NilClass, T.self_type (of Main));
     <blk>: T.untyped = load_arg(<blk>)
-    <block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Main.yielder()
-    <selfRestore>$5: Main = <self>
+    <block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: T.self_type (of Main).yielder()
+    <selfRestore>$5: T.self_type (of Main) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -86,22 +86,22 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main):
+bb2[firstDead=-1](<self>: T.self_type (of Main), <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.self_type (of Main)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main):
+bb3[firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.self_type (of Main)):
     <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$4, yielder>
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=5](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main):
+bb5[firstDead=5](<self>: T.self_type (of Main), <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.self_type (of Main)):
     # outerLoops: 1
-    <self>: Main = loadSelf(yielder)
+    <self>: T.self_type (of Main) = loadSelf(yielder)
     <blk>$6: T.untyped = load_yield_params(yielder)
     i$1: T.untyped = yield_load_arg(0, <blk>$6: T.untyped)
     <blockReturnTemp>$7: T.untyped = <blk>: T.untyped.call(i$1: T.untyped)
@@ -113,9 +113,9 @@ bb5[firstDead=5](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet
 method ::Main#main {
 
 bb0[firstDead=-1]():
-    <self>: Main = cast(<self>: NilClass, Main);
-    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: Main.lambda()
-    <selfRestore>$6: Main = <self>
+    <self>: T.self_type (of Main) = cast(<self>: NilClass, T.self_type (of Main));
+    <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.self_type (of Main).lambda()
+    <selfRestore>$6: T.self_type (of Main) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -126,38 +126,38 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main):
+bb2[firstDead=-1](<self>: T.self_type (of Main), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of Main)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=15](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main):
+bb3[firstDead=15](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of Main)):
     l: T.proc.params(arg0: T.untyped).returns(Integer) = Solve<<block-pre-call-temp>$5, lambda>
-    <self>: Main = <selfRestore>$6
+    <self>: T.self_type (of Main) = <selfRestore>$6
     <cfgAlias>$15: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$17: Symbol(:yielder) = :yielder
-    <statTemp>$13: T.untyped = <cfgAlias>$15: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$17: Symbol(:yielder), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <statTemp>$13: T.untyped = <cfgAlias>$15: T.class_of(<Magic>).<call-with-block-pass>(<self>: T.self_type (of Main), <statTemp>$17: Symbol(:yielder), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <cfgAlias>$21: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$23: Symbol(:blockpass) = :blockpass
-    <statTemp>$19: T.untyped = <cfgAlias>$21: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$23: Symbol(:blockpass), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <statTemp>$19: T.untyped = <cfgAlias>$21: T.class_of(<Magic>).<call-with-block-pass>(<self>: T.self_type (of Main), <statTemp>$23: Symbol(:blockpass), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <cfgAlias>$27: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$29: Symbol(:mixed) = :mixed
-    <statTemp>$25: T.untyped = <cfgAlias>$27: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$29: Symbol(:mixed), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <statTemp>$25: T.untyped = <cfgAlias>$27: T.class_of(<Magic>).<call-with-block-pass>(<self>: T.self_type (of Main), <statTemp>$29: Symbol(:mixed), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <cfgAlias>$32: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$34: Symbol(:blockyield) = :blockyield
-    <returnMethodTemp>$2: T.untyped = <cfgAlias>$32: T.class_of(<Magic>).<call-with-block-pass>(<self>: Main, <statTemp>$34: Symbol(:blockyield), l: T.proc.params(arg0: T.untyped).returns(Integer))
+    <returnMethodTemp>$2: T.untyped = <cfgAlias>$32: T.class_of(<Magic>).<call-with-block-pass>(<self>: T.self_type (of Main), <statTemp>$34: Symbol(:blockyield), l: T.proc.params(arg0: T.untyped).returns(Integer))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=6](<self>: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main):
+bb5[firstDead=6](<self>: T.self_type (of Main), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.self_type (of Main)):
     # outerLoops: 1
-    <self>: Main = loadSelf(lambda)
+    <self>: T.self_type (of Main) = loadSelf(lambda)
     <blk>$7: [T.untyped] = load_yield_params(lambda)
     x$1: T.untyped = yield_load_arg(0, <blk>$7: [T.untyped])
-    <statTemp>$9: NilClass = <self>: Main.puts(x$1: T.untyped)
+    <statTemp>$9: NilClass = <self>: T.self_type (of Main).puts(x$1: T.untyped)
     <blockReturnTemp>$8: Integer(3) = 3
     <blockReturnTemp>$12: T.noreturn = blockreturn<lambda> <blockReturnTemp>$8: Integer(3)
     <unconditional> -> bb2
@@ -167,7 +167,7 @@ bb5[firstDead=6](<self>: Main, <block-pre-call-temp>$5: Sorbet::Private::Static:
 method ::<Class:Main>#<static-init> {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(Main) = cast(<self>: NilClass, T.class_of(Main));
+    <self>: T.self_type (of T.class_of(Main)) = cast(<self>: NilClass, T.self_type (of T.class_of(Main)));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

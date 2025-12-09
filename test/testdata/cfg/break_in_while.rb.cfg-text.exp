@@ -1,7 +1,7 @@
 method ::Object#foo {
 
 bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
+    <self>: T.self_type (of Object) = cast(<self>: NilClass, T.self_type (of Object));
     <unconditional> -> bb2
 
 # backedges
@@ -45,9 +45,9 @@ bb5[firstDead=-1]():
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=4]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$6: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$4: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$6: T.untyped)
+    <self>: T.self_type (of T.class_of(<root>)) = cast(<self>: NilClass, T.self_type (of T.class_of(<root>)));
+    <statTemp>$6: T.untyped = <self>: T.self_type (of T.class_of(<root>)).foo()
+    <statTemp>$4: NilClass = <self>: T.self_type (of T.class_of(<root>)).puts(<statTemp>$6: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

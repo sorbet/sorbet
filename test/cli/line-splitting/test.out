@@ -1,7 +1,7 @@
 -e:2: Method `foo` does not exist on `T.class_of(<root>)` https://srb.help/7003
      2 | foo(1 +
          ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     -e:2:
      2 | foo(1 +
          ^
@@ -9,7 +9,7 @@
 -e:17: Method `foo` does not exist on `T.class_of(<root>)` https://srb.help/7003
     17 | foo(1 +
          ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     -e:2:
      2 | foo(1 +
          ^
@@ -17,7 +17,7 @@
 -e:27: Method `foo` does not exist on `T.class_of(<root>)` https://srb.help/7003
     27 | foo(1 +
          ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     -e:2:
      2 | foo(1 +
          ^
@@ -25,7 +25,7 @@
 -e:38: Method `foo` does not exist on `T.class_of(<root>)` https://srb.help/7003
     38 | foo(1 +
          ^^^
-  Got `T.class_of(<root>)` originating from:
+  Got `T.self_type (of T.class_of(<root>))` originating from:
     -e:2:
      2 | foo(1 +
          ^

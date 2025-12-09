@@ -80,7 +80,7 @@ class A
     self.instance_helper
   end
 
-  T.reveal_type(self) # error: type: `T.class_of(A)`
+  T.reveal_type(self) # error: type: `T.self_type (of T.class_of(A))`
 
   puts f
 end
@@ -102,7 +102,7 @@ B.class_helper {
   self.instance_helper
 }
 
-T.reveal_type(self) # error: type: `T.class_of(<root>)`
+T.reveal_type(self) # error: type: `T.self_type (of T.class_of(<root>))`
 
 module N
   def helper_from_N; end
@@ -165,7 +165,7 @@ class Rescues
   end
 
   def baz
-    T.reveal_type(self) # error: type: `Rescues`
+    T.reveal_type(self) # error: type: `T.self_type (of Rescues)`
 
     begin
       T.bind(self, String)
@@ -178,7 +178,7 @@ end
 
 class UntypedBind
   def foo
-    T.reveal_type(self) # error: type: `UntypedBind`
+    T.reveal_type(self) # error: type: `T.self_type (of UntypedBind)`
     T.bind(self, T.untyped)
     T.reveal_type(self) # error: type: `T.untyped`
     T.bind(self, UntypedBind)

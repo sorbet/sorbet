@@ -26,7 +26,6 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
 
 ParsedSig TypeSyntax::parseSigTop(core::Context ctx, const ast::Send &sigSend, core::SymbolRef blameSymbol) {
     auto args = TypeSyntaxArgs{
-        /* allowSelfType */ true,
         /* allowRebind */ false,
         TypeSyntaxArgs::TypeMember::Allowed,
         /* allowUnspecifiedTypeParameter */ false,
@@ -983,7 +982,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             }
             return TypeSyntax::ResultType{core::Types::untyped(args.untypedBlame), core::Symbols::noClassOrModule()};
         }
-        case core::Names::selfType().rawId():
+        case core::Names::selfType().rawId(): {
             if (send.numPosArgs() != 0 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 0, 0);
                 checkUnexpectedKwargs(ctx, send);
@@ -1013,14 +1012,12 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                     return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
-            if (!args.allowSelfType) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Only top-level `{}` is supported", "T.self_type");
-                }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-            }
-
-            return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
+            // The upper bound doesn't actually matter here, because it will be unwrapped by
+            // unwrapSelfTypeParam to the LambdaParam after type syntax parsing (this mimics the
+            // type member case, because T.self_type acts mostly like a type member).
+            auto selfType = core::make_type<core::FreshSelfType>(core::Types::top());
+            return TypeSyntax::ResultType{move(selfType), core::Symbols::noClassOrModule()};
+        }
         case core::Names::experimentalAttachedClass().rawId():
         case core::Names::attachedClass().rawId(): {
             if (send.fun == core::Names::experimentalAttachedClass()) {
@@ -1119,7 +1116,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         const auto &arr = ast::cast_tree_nonnull<ast::Array>(expr);
         vector<core::TypePtr> elems;
         for (auto &el : arr.elems) {
-            auto maybeElem = getResultTypeWithSelfTypeParams(ctx, el, sigBeingParsed, args.withoutSelfType());
+            auto maybeElem = getResultTypeWithSelfTypeParams(ctx, el, sigBeingParsed, args);
             if (!maybeElem.has_value()) {
                 return nullopt;
             }
@@ -1132,7 +1129,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         vector<core::TypePtr> values;
 
         for (auto [ktree, vtree] : hash.kviter()) {
-            auto maybeVal = getResultTypeWithSelfTypeParams(ctx, vtree, sigBeingParsed, args.withoutSelfType());
+            auto maybeVal = getResultTypeWithSelfTypeParams(ctx, vtree, sigBeingParsed, args);
             if (!maybeVal.has_value()) {
                 return nullopt;
             }
@@ -1326,7 +1323,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
     } else if (ast::isa_tree<ast::Send>(expr)) {
         const auto &s = ast::cast_tree_nonnull<ast::Send>(expr);
         if (isTProc(ctx, &s)) {
-            auto maybeSig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
+            auto maybeSig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
             if (!maybeSig.has_value()) {
                 return nullopt;
             }
@@ -1423,7 +1420,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         holders.reserve(argSize);
 
         for (auto &arg : s.posArgs()) {
-            auto maybeType = getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType());
+            auto maybeType = getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args);
             if (!maybeType.has_value()) {
                 return nullopt;
             }

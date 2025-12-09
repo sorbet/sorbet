@@ -15,9 +15,18 @@ class Box
   sig {params(new_val: Elem).returns(T.self_type)}
   def copy_with(new_val)
     klass = self.class
-    T.reveal_type(klass) # error: `T.class_of(Box)[Box[Box::Elem]]`
+    T.reveal_type(klass) # error: `T.class_of(Box)[T.self_type (of Box[Box::Elem])]`
     new_box = self.class.new(new_val)
-    T.reveal_type(new_box) # error: `Box[Box::Elem]`
+    T.reveal_type(new_box) # error: `T.self_type (of Box[Box::Elem])`
+
+    self.class.new('')
+    #              ^^ error: Expected `Box::Elem` but found `String("")` for argument `val`
+    #
+
+    if T.unsafe(false)
+      return new_box
+    end
+
 
     box_elem_class = self.class[Elem]
     T.reveal_type(box_elem_class) # error: Runtime object representing type: Box[Box::Elem]
@@ -28,6 +37,7 @@ class Box
     #                    ^^ error: Expected `Box::Elem` but found `String("")` for argument `val`
 
     box_elem
+  # ^^^^^^^^ error: Expected `T.self_type (of Box[Box::Elem])` but found `Box[Box::Elem]` for method result type
   end
 
   sig do

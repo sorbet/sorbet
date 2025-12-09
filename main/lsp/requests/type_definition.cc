@@ -48,6 +48,12 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
                 result.emplace_back(loc);
             }
         },
+        [&](const core::FreshSelfType &s) {
+            // TODO(jez) Probably want a test for this
+            for (auto loc : locsForType(gs, s.upperBound)) {
+                result.emplace_back(loc);
+            }
+        },
         [&](const core::LambdaParam &l) {
             for (auto loc : l.definition.data(gs)->locs()) {
                 result.emplace_back(loc);
@@ -67,9 +73,6 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
             for (auto loc : a.symbol.locs(gs)) {
                 result.emplace_back(loc);
             }
-        },
-        [&](const core::SelfType &_) {
-            ENFORCE(false, "Please add a test case for this test, and delete this enforce.");
         },
         [&](const core::TypeVar &s) {
             ENFORCE(false, "Please add a test case for this test, and delete this enforce.");

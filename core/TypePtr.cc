@@ -17,8 +17,8 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, ClassType)             \
         CASE_STATEMENT(CASE_BODY, LambdaParam)           \
         CASE_STATEMENT(CASE_BODY, SelfTypeParam)         \
+        CASE_STATEMENT(CASE_BODY, FreshSelfType)         \
         CASE_STATEMENT(CASE_BODY, AliasType)             \
-        CASE_STATEMENT(CASE_BODY, SelfType)              \
         CASE_STATEMENT(CASE_BODY, NamedLiteralType)      \
         CASE_STATEMENT(CASE_BODY, IntegerLiteralType)    \
         CASE_STATEMENT(CASE_BODY, FloatLiteralType)      \
@@ -47,8 +47,6 @@ GENERATE_CALL_MEMBER(dispatchCall,
 
 GENERATE_CALL_MEMBER(_instantiateTypeVars, return nullptr, std::declval<const GlobalState &>(),
                      std::declval<const TypeConstraint &>())
-
-GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState &>(), declval<const TypePtr &>())
 
 GENERATE_CALL_MEMBER(_approximateTypeVars, return nullptr, declval<const GlobalState &>(),
                      declval<const TypeConstraint &>(), declval<core::Polarity>())
@@ -112,6 +110,7 @@ int TypePtr::kind() const {
             return 7;
         case Tag::LambdaParam:
         case Tag::SelfTypeParam:
+        case Tag::FreshSelfType:
             return 8;
         case Tag::MetaType:
             return 9;
@@ -123,8 +122,6 @@ int TypePtr::kind() const {
             return 12;
         case Tag::AndType:
             return 13;
-        case Tag::SelfType:
-            return 14;
     }
 }
 
@@ -150,13 +147,13 @@ bool TypePtr::isFullyDefined() const {
         case Tag::FloatLiteralType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::FreshSelfType:
         case Tag::MetaType: // MetaType: this is kinda true but kinda false. it's false for subtyping but true for
                             // inferencer.
             return true;
 
         case Tag::TypeVar:
         case Tag::LambdaParam:
-        case Tag::SelfType:
             return false;
 
         // Composite types
@@ -183,15 +180,62 @@ bool TypePtr::isFullyDefined() const {
     }
 }
 
+bool TypePtr::mentionsSelfType() const {
+    switch (tag()) {
+        case Tag::FreshSelfType:
+            return true;
+
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::BlamedUntyped:
+        case Tag::ClassType:
+        case Tag::NamedLiteralType:
+        case Tag::IntegerLiteralType:
+        case Tag::FloatLiteralType:
+        case Tag::AliasType:
+        case Tag::MetaType:
+        case Tag::TypeVar:
+        case Tag::SelfTypeParam:
+            return false;
+
+        case Tag::LambdaParam: {
+            auto &lambdaParam = cast_type_nonnull<LambdaParam>(*this);
+            return lambdaParam.definition == core::Symbols::T_SelfType();
+        }
+
+        // Composite types
+        case Tag::ShapeType: {
+            auto &shape = cast_type_nonnull<ShapeType>(*this);
+            return absl::c_all_of(shape.values, [](const TypePtr &t) { return t.mentionsSelfType(); });
+        }
+        case Tag::TupleType: {
+            auto &tuple = cast_type_nonnull<TupleType>(*this);
+            return absl::c_all_of(tuple.elems, [](const TypePtr &t) { return t.mentionsSelfType(); });
+        }
+        case Tag::AndType: {
+            auto &andType = cast_type_nonnull<AndType>(*this);
+            return andType.left.mentionsSelfType() && andType.right.mentionsSelfType();
+        }
+        case Tag::OrType: {
+            auto &orType = cast_type_nonnull<OrType>(*this);
+            return orType.left.mentionsSelfType() && orType.right.mentionsSelfType();
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return absl::c_all_of(app.targs, [](const TypePtr &t) { return t.mentionsSelfType(); });
+        }
+    }
+}
+
 bool TypePtr::hasUntyped() const {
     switch (tag()) {
         case Tag::TypeVar:
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::FreshSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
             // These cannot have untyped.
@@ -233,9 +277,9 @@ bool TypePtr::hasTopLevelVoid() const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
-        case Tag::SelfType:
         case Tag::AliasType:
         case Tag::SelfTypeParam:
+        case Tag::FreshSelfType:
         case Tag::LambdaParam:
         case Tag::MetaType:
         case Tag::BlamedUntyped:
@@ -281,7 +325,7 @@ core::SymbolRef TypePtr::untypedBlame() const {
 //
 // Currently, this method is never called with `name` set to anything other than `Names::call()`,
 // which is where the `getCallArguments` comes from.
-TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
+TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name, TypePtr selfType) const {
     switch (tag()) {
         case Tag::MetaType:
         case Tag::TupleType:
@@ -289,32 +333,32 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::NamedLiteralType:
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType: {
-            return this->underlying(gs).getCallArguments(gs, name);
+            return this->underlying(gs).getCallArguments(gs, name, selfType);
         }
         case Tag::OrType: {
             auto &orType = cast_type_nonnull<OrType>(*this);
-            return orType.getCallArguments(gs, name);
+            return orType.getCallArguments(gs, name, selfType);
         }
         case Tag::AndType: {
             auto &andType = cast_type_nonnull<AndType>(*this);
-            return andType.getCallArguments(gs, name);
+            return andType.getCallArguments(gs, name, selfType);
         }
         case Tag::BlamedUntyped: {
             auto c = cast_type_nonnull<BlamedUntyped>(*this);
-            return c.getCallArguments(gs, name);
+            return c.getCallArguments(gs, name, selfType);
         }
         case Tag::UnresolvedClassType:
         case Tag::UnresolvedAppliedType:
         case Tag::ClassType: {
             auto c = cast_type_nonnull<ClassType>(*this);
-            return c.getCallArguments(gs, name);
+            return c.getCallArguments(gs, name, selfType);
         }
         case Tag::AppliedType: {
             auto &app = cast_type_nonnull<AppliedType>(*this);
-            return app.getCallArguments(gs, name);
+            return app.getCallArguments(gs, name, selfType);
         }
-        case Tag::SelfType:
         case Tag::SelfTypeParam:
+        case Tag::FreshSelfType:
         case Tag::LambdaParam:
         case Tag::TypeVar:
         case Tag::AliasType: {
@@ -330,28 +374,23 @@ TypePtr TypePtr::_approximateTypeVars(const GlobalState &gs, const TypeConstrain
 #undef _APPROXIMATE
 }
 
-TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
-#define _REPLACE_SELF_TYPE(T) \
-    return CALL_MEMBER__replaceSelfType<const T>::call(cast_type_nonnull<T>(*this), gs, receiver);
-    GENERATE_TAG_SWITCH(tag(), _REPLACE_SELF_TYPE)
-#undef _REPLACE_SELF_TYPE
-}
-
 TypePtr TypePtr::_instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const {
 #define _INSTANTIATE(T) return CALL_MEMBER__instantiateTypeVars<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
     GENERATE_TAG_SWITCH(tag(), _INSTANTIATE)
 #undef _INSTANTIATE
 }
 
-void TypePtr::InstantiationContext::computeSelfTypeArgs(const GlobalState &gs) {
+void InstantiationContext::computeSelfType(const GlobalState &gs) {
     ENFORCE_NO_TIMER(this->originalOwner.exists() && this->inWhat == this->originalOwner && !this->targs.has_value() &&
                      this->currentAlignment.empty());
 
-    this->targsOwned = this->originalOwner.data(gs)->selfTypeArgs(gs);
+    auto ownerData = this->originalOwner.data(gs);
+    this->targsOwned = ownerData->selfTypeArgs(gs);
     this->targs = absl::MakeSpan(this->targsOwned);
+    this->selfType = ownerData->selfType(gs, this->targsOwned);
 }
 
-void TypePtr::InstantiationContext::computeAlignment(const GlobalState &gs) {
+void InstantiationContext::computeAlignment(const GlobalState &gs) {
     ENFORCE_NO_TIMER(this->targs.has_value());
     this->currentAlignment = Types::alignBaseTypeArgs(gs, originalOwner, this->targs.value(), inWhat);
 }
@@ -368,7 +407,7 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, InstantiationCo
         case Tag::IntegerLiteralType:
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
-        case Tag::SelfType:
+        case Tag::FreshSelfType:
             // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
             // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
             // have to allocate another type.

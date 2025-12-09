@@ -84,9 +84,11 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const v
     // Another approach might be to create the constr right here, instead of threading it around
     // everywhere. We've taken the aprpopach of only constructing the constraint once as an optimization.
 
-    auto subType = core::Types::resultTypeAsSeenFrom(ctx, sub, subOwner, subOwner, subSelfTypeArgs);
+    auto subSelfType = subOwner.data(ctx)->selfType(ctx, subSelfTypeArgs);
+
+    auto subType = core::Types::resultTypeAsSeenFrom(ctx, sub, subOwner, subOwner, subSelfTypeArgs, subSelfType);
     subType = core::Types::approximateTypeVars(ctx, subType, constr);
-    auto superType = core::Types::resultTypeAsSeenFrom(ctx, super, superOwner, subOwner, subSelfTypeArgs);
+    auto superType = core::Types::resultTypeAsSeenFrom(ctx, super, superOwner, subOwner, subSelfTypeArgs, subSelfType);
     superType = core::Types::approximateTypeVars(ctx, superType, constr);
 
     switch (polarity) {

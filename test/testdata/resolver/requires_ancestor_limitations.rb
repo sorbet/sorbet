@@ -44,9 +44,9 @@ module DoesNotSupportTAttachedClass2
     def example2
       cond = self.===(0)
       if cond
-        T.reveal_type(self) # error: Revealed type: `DoesNotSupportTAttachedClass2::Foo`
+        T.reveal_type(self) # error: Revealed type: `T.self_type (of DoesNotSupportTAttachedClass2::Foo)`
       else
-        T.reveal_type(self) # error: Revealed type: `DoesNotSupportTAttachedClass2::Foo`
+        T.reveal_type(self) # error: Revealed type: `T.self_type (of DoesNotSupportTAttachedClass2::Foo)`
       end
     end
   end

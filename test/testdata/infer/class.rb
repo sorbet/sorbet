@@ -10,9 +10,9 @@ class TestCase
     # Test that Class's methods work
     self.class.allocate
 
-    T.reveal_type(self.class.new) # error: `TestCase`
-    T.reveal_type(self.class) # error: `T.class_of(TestCase)`
-    T.reveal_type(self.class.class) # error: `T::Class[T.class_of(TestCase)]`
+    T.reveal_type(self.class.new) # error: `T.self_type (of TestCase)`
+    T.reveal_type(self.class) # error: `T.class_of(TestCase)[T.self_type (of TestCase)]`
+    T.reveal_type(self.class.class) # error: `T::Class[T.class_of(TestCase)[T.self_type (of TestCase)]]`
   end
 end
 

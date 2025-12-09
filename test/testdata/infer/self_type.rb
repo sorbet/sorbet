@@ -14,9 +14,14 @@ class Generic < Parent
   extend T::Generic
   TM = type_member()
 
-  sig {returns(Generic[T.self_type])} # error: Only top-level `T.self_type` is supported
-  def bad
-   Generic[T.untyped].new
+  sig {returns(Generic[T.self_type])}
+  def good
+    if [true, false].sample
+      return Generic[T.self_type].new
+    else
+      return Generic[Parent].new
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `Generic[T.self_type (of Generic[Generic::TM])]` but found `Generic[Parent]` for method result type
+    end
   end
 end
 
@@ -56,34 +61,32 @@ module B
   sig { params(x: T.self_type).void }
   #            ^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def takes_self_public(x)
-    #                   ^ error: Expression does not have a fully-defined type
     x
   end
 
   sig { params(x: T.self_type).void }
   private def takes_self_private(x)
-    T.reveal_type(x) # error: `B`
+    T.reveal_type(x) # error: `T.self_type (of B)`
     x
   end
 
   sig { params(blk: T.proc.params(arg0: T.self_type).void).void }
-  #                                     ^^^^^^^^^^^ error: Only top-level `T.self_type` is supported
   def yield_self_void(&blk)
     yield self
   end
 
   sig { params(x: T.any(T.self_type, Integer)).void }
   private def takes_self_or_integer(x)
-    T.reveal_type(x) # error: `T.any(Integer, B)`
+    T.reveal_type(x) # error: `T.any(Integer, T.self_type (of B))`
     x
   end
 
   sig { params(other: T.self_type).void }
   #            ^^^^^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def ==(other)
-    #    ^^^^^ error: Expression does not have a fully-defined type
     return self.class == other.class
     #           ^^^^^ error: Method `class` does not exist on `B`
+    #                          ^^^^^ error: Method `class` does not exist on `B`
   end
 end
 
