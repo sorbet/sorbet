@@ -1683,6 +1683,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
                         if (!blockPassArgIsSymbol) {
                             blockPassArg = desugar(bp->expression);
+                        } else {
+                            auto symbol = down_cast<pm_symbol_node>(bp->expression);
+                            blockExpr = desugarSymbolProc(symbol);
                         }
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable
@@ -1827,10 +1830,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 if ((prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) &&
                      !blockPassArgIsSymbol) ||
                     hasFwdArgs) {
-                    // Special handling for non-Symbol block pass args, like `a.map(&block)`
-                    // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
-                    // and handled separately below.
-
                     // Desugar a call with a splat, and any other expression as a block pass argument.
                     // E.g. `foo(*splat, &block)`
 
@@ -1848,15 +1847,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
                         // A literal block arg (like `foo { ... }` or `foo do ... end`),
                         // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
-
-                        if (blockPassArgIsSymbol) {
-                            ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
-                            auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-                            ENFORCE(bp->expression && PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE));
-
-                            auto symbol = down_cast<pm_symbol_node>(bp->expression);
-                            blockExpr = desugarSymbolProc(symbol);
-                        }
 
                         magicSendArgs.emplace_back(move(blockExpr));
                         flags.hasBlock = true;
@@ -1927,15 +1917,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
                     // A literal block arg (like `foo { ... }` or `foo do ... end`),
                     // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
-
-                    if (blockPassArgIsSymbol) {
-                        ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE));
-                        auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-                        ENFORCE(bp->expression && PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE));
-
-                        auto symbol = down_cast<pm_symbol_node>(bp->expression);
-                        blockExpr = desugarSymbolProc(symbol);
-                    }
 
                     sendArgs.emplace_back(move(blockExpr));
                     flags.hasBlock = true;
