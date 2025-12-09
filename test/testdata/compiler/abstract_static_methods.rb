@@ -20,4 +20,4 @@ class Foo < IFoo
   end
 end
 
-p Foo.foo
+Foo.foo

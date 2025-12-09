@@ -15,7 +15,7 @@
 class Main
   extend T::Sig
 
-  # TODO(jez) Drop the .checked(:never) once we change sorbet-runtime to not do element type tests.
+  # Drop the .checked(:never) once we change sorbet-runtime to not do element type tests.
   sig {params(xs: T::Array[Integer]).void.checked(:never)}
   def self.main(xs)
     x = xs[0]
@@ -29,7 +29,7 @@ class Main
 end
 
 begin
-  p Main.main(T.unsafe(['nope']))
+  Main.main(T.unsafe(['nope']))
 rescue TypeError => exn
   p exn.message
 end
