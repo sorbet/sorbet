@@ -600,7 +600,6 @@ NameDef names[] = {
     {"WithoutRuntime", "WithoutRuntime", true},
     {"Singleton", "Singleton", true},
     {"AttachedClass", "<AttachedClass>", true},
-    {"NonForcingConstants", "NonForcingConstants", true},
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},

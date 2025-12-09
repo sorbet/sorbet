@@ -1007,24 +1007,20 @@ public:
         return MethodRef::fromRaw(8);
     }
 
-    static ClassOrModuleRef T_NonForcingConstants() {
+    static ClassOrModuleRef PackageSpecRegistry() {
         return ClassOrModuleRef::fromRaw(84);
     }
 
-    static ClassOrModuleRef PackageSpecRegistry() {
+    static ClassOrModuleRef PackageSpec() {
         return ClassOrModuleRef::fromRaw(85);
     }
 
-    static ClassOrModuleRef PackageSpec() {
+    static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(86);
     }
 
-    static ClassOrModuleRef Encoding() {
-        return ClassOrModuleRef::fromRaw(87);
-    }
-
     static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(88);
+        return ClassOrModuleRef::fromRaw(87);
     }
 
     static MethodRef Class_new() {
@@ -1040,31 +1036,31 @@ public:
     }
 
     static ClassOrModuleRef MagicBindToAttachedClass() {
-        return ClassOrModuleRef::fromRaw(89);
+        return ClassOrModuleRef::fromRaw(88);
     }
 
     static ClassOrModuleRef MagicBindToSelfType() {
-        return ClassOrModuleRef::fromRaw(90);
+        return ClassOrModuleRef::fromRaw(89);
     }
 
     static ClassOrModuleRef T_Types() {
-        return ClassOrModuleRef::fromRaw(91);
+        return ClassOrModuleRef::fromRaw(90);
     }
 
     static ClassOrModuleRef T_Types_Base() {
-        return ClassOrModuleRef::fromRaw(92);
+        return ClassOrModuleRef::fromRaw(91);
     }
 
     static ClassOrModuleRef Data() {
-        return ClassOrModuleRef::fromRaw(93);
+        return ClassOrModuleRef::fromRaw(92);
     }
 
     static ClassOrModuleRef T_Class() {
-        return ClassOrModuleRef::fromRaw(94);
+        return ClassOrModuleRef::fromRaw(93);
     }
 
     static ClassOrModuleRef T_Module() {
-        return ClassOrModuleRef::fromRaw(95);
+        return ClassOrModuleRef::fromRaw(94);
     }
 
     static MethodRef T_Generic_squareBrackets() {
@@ -1100,7 +1096,7 @@ public:
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
-        return ClassOrModuleRef::fromRaw(96);
+        return ClassOrModuleRef::fromRaw(95);
     }
 
     static FieldRef ErrorNode() {
