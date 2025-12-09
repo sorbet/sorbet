@@ -1418,6 +1418,22 @@ Translator::LiteralBlock Translator::desugarLiteralBlock(pm_node *blockBodyNode,
     return LiteralBlock{MK::Block(blockLoc, move(blockBody), move(blockParamsStore))};
 }
 
+Translator::DesugaredBlockArgument Translator::desugarBlockPassArgument(pm_block_argument_node *bp) {
+    if (bp->expression) {
+        if (PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
+            auto symbol = down_cast<pm_symbol_node>(bp->expression);
+            return LiteralBlock{desugarSymbolProc(symbol)};
+        } else {
+            return BlockPassArg{desugar(bp->expression)};
+        }
+    } else {
+        // Replace an anonymous block pass like `f(&)` with a local variable
+        // reference, like `f(&<&>)`.
+        auto loc = translateLoc(bp->base.location).copyEndWithZeroLength();
+        return BlockPassArg{MK::Local(loc, core::Names::ampersand())};
+    }
+}
+
 ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
@@ -1673,22 +1689,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                                                 blockNode->opening_loc);
                 } else {
                     ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
-
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
-                    if (bp->expression) {
-                        if (PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
-                            auto symbol = down_cast<pm_symbol_node>(bp->expression);
-                            block = LiteralBlock{desugarSymbolProc(symbol)};
-                        } else {
-                            block = BlockPassArg{desugar(bp->expression)};
-                        }
-                    } else {
-                        // Replace an anonymous block pass like `f(&)` with a local variable
-                        // reference, like `f(&<&>)`.
-                        block = BlockPassArg{MK::Local(translateLoc(prismBlock->location).copyEndWithZeroLength(),
-                                                       core::Names::ampersand())};
-                    }
+                    block = desugarBlockPassArgument(bp);
                 }
             }
 

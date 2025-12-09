@@ -277,6 +277,8 @@ private:
 
     LiteralBlock desugarLiteralBlock(pm_node *blockBody, pm_node *blockParameters, pm_location_t blockLoc,
                                      pm_location_t blockNodeOpeningLoc);
+
+    DesugaredBlockArgument desugarBlockPassArgument(pm_block_argument_node *bp);
 };
 
 } // namespace sorbet::parser::Prism
