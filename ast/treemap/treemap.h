@@ -340,6 +340,29 @@ private:
         CALL_POST(ClassDef);
     }
 
+    template <TreeMapKind K = Kind>
+    typename std::enable_if_t<K == TreeMapKind::ConstWalk, return_type> mapClassDefDirect(const ClassDef &v, CTX ctx) {
+        Funcs::template CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, v);
+
+        // We intentionally do not walk v->ancestors nor v->singletonAncestors.
+        //
+        // These lists used to be guaranteed to be simple trees (only constant literals) by desugar,
+        // but that was later relaxed. In places where walking ancestors is required, instead define
+        // your `preTransformClassDef` method to contain this:
+        //
+        //   for (auto &ancestor : klass.ancestors) {
+        //       ancestor = ast::TreeMap::apply(ctx, *this, std::move(ancestor))
+        //   }
+        //
+        // and that will have the same effect, without having to retroactively change all TreeMaps.
+
+        for (auto &def : v.rhs) {
+            CALL_MAP(def, ctx.withOwner(v.symbol).withFile(ctx.file));
+        }
+
+        Funcs::template CALL_MEMBER_postTransformClassDef<FUNC>::call(func, ctx, v);
+    }
+
     return_type mapMethodDef(arg_type v, CTX ctx) {
         CALL_PRE(MethodDef);
 
@@ -748,6 +771,18 @@ public:
         TreeMapper<FUNC, CTX, TreeMapKind::ConstWalk, TreeMapDepthKind::Full> walker(func);
         try {
             walker.mapIt(to, ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    }
+    template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, const ClassDef &to) {
+        TreeMapper<FUNC, CTX, TreeMapKind::ConstWalk, TreeMapDepthKind::Full> walker(func);
+        try {
+            walker.mapClassDefDirect(to, ctx);
         } catch (ReportedRubyException &exception) {
             Exception::failInFuzzer();
             if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
