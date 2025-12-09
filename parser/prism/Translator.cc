@@ -1587,9 +1587,74 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
             auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
 
+            // Conditional send handling
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
-                throw PrismFallback{};
+                if (this->preserveConcreteSyntax) {
+                    // Desugaring to a InsSeq + If causes a problem for Extract to Variable; the fake If will be where
+                    // the new variable is inserted, which is incorrect. Instead, desugar to a regular send, so that the
+                    // insertion happens in the correct place (what the csend is inside);
+
+                    // Replace the original method name with a new special one that conveys that this is a CSend, so
+                    // that a&.foo is treated as different from a.foo when checking for structural equality.
+                    auto receiver = desugar(callNode->receiver);
+                    auto newFun = ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, methodName, 1);
+                    return desugarMethodCall(move(receiver), newFun, methodNameLoc, callNode->arguments,
+                                             callNode->closing_loc, move(block), location, isPrivateOk);
+                }
+
+                // Desugar:
+                //     result = receiver&.method()
+                // to:
+                //     result = begin
+                //       $temp = receiver
+                //       if ::NilClass === $temp
+                //         ::<Magic>.<nil-for-safe-navigation>($temp)
+                //       else
+                //         $temp.method()
+                //       end
+                //     end
+
+                core::NameRef tempRecvName = nextUniqueDesugarName(core::Names::assignTemp());
+                auto recvLoc = translateLoc(callNode->receiver->location);
+                // // Assign some desugar-produced nodes with zero-length Locs so IDE ignores them when mapping text
+                // // location to node.
+                auto loc = location;
+                auto zeroLengthLoc = loc.copyWithZeroLength();
+                auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
+                auto csendLoc = recvLoc.copyEndWithZeroLength();
+                if (recvLoc.endPos() + 1 <= ctx.file.data(ctx).source().size()) {
+                    auto ampersandLoc = core::LocOffsets{recvLoc.endPos(), recvLoc.endPos() + 1};
+                    // The arg loc for the synthetic variable created for the purpose of this safe navigation
+                    // check is a bit of a hack. It's intentionally one character too short so that for
+                    // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
+                    if (ctx.locAt(ampersandLoc).source(ctx) == "&") {
+                        csendLoc = ampersandLoc;
+                    }
+                }
+
+                ENFORCE(callNode->receiver != nullptr, "Conditional sends should always have a receiver.");
+
+                // $temp = receiver
+                auto receiver = desugar(callNode->receiver);
+                auto assignment = MK::Assign(zeroLengthRecvLoc, tempRecvName, desugar(callNode->receiver));
+
+                // Just compare with `NilClass` to avoid potentially calling into a class-defined `==`
+                auto cond =
+                    MK::Send1(zeroLengthLoc, ast::MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
+                              core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecvName));
+
+                // Workaround to match legacy desugar https://github.com/sorbet/sorbet/issues/9756
+                auto isPrivateOk = false;
+
+                auto tempRecv = MK::Local(zeroLengthRecvLoc, tempRecvName);
+                auto send = desugarMethodCall(move(tempRecv), methodName, methodNameLoc, callNode->arguments,
+                                              callNode->closing_loc, move(block), location, isPrivateOk);
+
+                ExpressionPtr nil =
+                    MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
+                              core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(csendLoc, tempRecvName));
+                auto if_ = MK::If(zeroLengthLoc, move(cond), move(nil), move(send));
+                return MK::InsSeq1(location, move(assignment), move(if_));
             }
 
             return desugarMethodCall(move(receiver), methodName, methodNameLoc, callNode->arguments,
