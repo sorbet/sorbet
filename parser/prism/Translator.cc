@@ -1593,7 +1593,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             ast::MethodDef::PARAMS_store blockParamsStore;
             ast::InsSeq::STATS_store blockStatsStore;
             ast::ExpressionPtr blockPassArg;
-            core::LocOffsets blockPassLoc;
             bool blockPassArgIsSymbol = false;
             if (prismBlock != nullptr) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
@@ -1669,8 +1668,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
-                    blockPassLoc = translateLoc(prismBlock->location);
-
                     if (bp->expression) {
                         blockPassArgIsSymbol = PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE);
 
@@ -1680,7 +1677,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable
                         // reference, like `f(&<&>)`.
-                        blockPassArg = MK::Local(blockPassLoc.copyEndWithZeroLength(), core::Names::ampersand());
+                        blockPassArg = MK::Local(translateLoc(prismBlock->location).copyEndWithZeroLength(),
+                                                 core::Names::ampersand());
                     }
                 }
             }
@@ -1690,7 +1688,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                                                  "argument and forwarded args (e.g. `foo(&b, ...)`)");
 
                 blockPassArg = MK::Local(sendWithBlockLoc, core::Names::fwdBlock());
-                blockPassLoc = sendLoc.copyEndWithZeroLength();
             }
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
@@ -1827,6 +1824,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     // Desugar a call with a splat, and any other expression as a block pass argument.
                     // E.g. `foo(*splat, &block)`
 
+                    auto blockPassLoc = blockPassArg.loc();
+
                     magicSendArgs.emplace_back(move(blockPassArg));
                     numPosArgs++;
 
@@ -1885,6 +1884,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
                 // Desugar a call without a splat, and any other expression as a block pass argument.
                 // E.g. `a.each(&block)`
+
+                auto blockPassLoc = blockPassArg.loc();
 
                 ast::Send::ARGS_store magicSendArgs;
                 magicSendArgs.reserve(3 + prismArgs.size());
