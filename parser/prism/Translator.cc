@@ -1494,10 +1494,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             auto constantNameString = parser.resolveConstant(callNode->name);
             auto receiverNode = callNode->receiver;
 
-            core::LocOffsets messageLoc;
-
             // When the message is empty, like `foo.()`, the message location is the
             // same as the call operator location
+            core::LocOffsets messageLoc;
             if (callNode->message_loc.start == nullptr && callNode->message_loc.end == nullptr) {
                 messageLoc = translateLoc(callNode->call_operator_loc);
             } else {
