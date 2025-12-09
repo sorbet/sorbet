@@ -124,6 +124,21 @@ const UnorderedMap<core::NameRef, string> COMMON_TYPOS = {
     {core::Names::Constants::Boolean(), "T::Boolean"s},
 };
 
+ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
+    auto send = ast::cast_tree<ast::Send>(expr);
+    if (send == nullptr || send->hasNonBlockArgs() ||
+        (send->fun != core::Names::lambda() && send->fun != core::Names::proc())) {
+        return nullptr;
+    }
+
+    auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
+    if (recv == nullptr || recv->symbol() != core::Symbols::Kernel()) {
+        return nullptr;
+    }
+
+    return send;
+}
+
 class ResolveConstantsWalk {
     friend class ResolveSanityCheckWalk;
 
@@ -2695,6 +2710,12 @@ public:
 
     void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
         auto cast = ast::cast_tree<ast::Cast>(tree);
+
+        if (auto *kernelLambda = isKernelProcOrLambda(cast->arg)) {
+            kernelLambda->fun = core::Names::lambdaTLet();
+            kernelLambda->addPosArg(move(cast->typeExpr));
+        }
+
         if (cast->cast == core::Names::assumeType()) {
             // This cast was not written by the user. Before we attempt to parse it as a type, let's
             // make sure that it's even possible to be valid.
