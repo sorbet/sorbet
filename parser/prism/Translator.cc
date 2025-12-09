@@ -1678,11 +1678,11 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
                     if (bp->expression) {
-                        if (!PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
-                            blockPassArg = desugar(bp->expression);
-                        } else {
+                        if (PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
                             auto symbol = down_cast<pm_symbol_node>(bp->expression);
                             blockExpr = desugarSymbolProc(symbol);
+                        } else {
+                            blockPassArg = desugar(bp->expression);
                         }
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable
