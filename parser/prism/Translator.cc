@@ -1827,9 +1827,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 magicSendArgs.emplace_back(move(argsArrayExpr));
                 magicSendArgs.emplace_back(move(kwargsExpr));
 
-                if ((prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) &&
-                     !blockPassArgIsSymbol) ||
-                    hasFwdArgs) {
+                if (blockPassArg) {
                     // Desugar a call with a splat, and any other expression as a block pass argument.
                     // E.g. `foo(*splat, &block)`
 
@@ -1869,7 +1867,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
             int numPosArgs = prismArgs.size();
 
-            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE) && !blockPassArgIsSymbol) {
+            if (blockPassArg) {
                 // Special handling for non-Symbol block pass args, like `a.map(&block)`
                 // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
                 // and handled separately below.
