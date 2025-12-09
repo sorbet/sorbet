@@ -2764,8 +2764,10 @@ public:
                     return;
                 }
                 case core::Names::attachedClass().rawId(): {
-                    send.recv = ast::MK::Magic(send.recv.loc());
-                    send.addPosArg(ast::MK::Self(send.recv.loc()));
+                    if (send.numPosArgs() == 0 && !send.hasKwArgs()) {
+                        send.recv = ast::MK::Magic(send.recv.loc());
+                        send.addPosArg(ast::MK::Self(send.recv.loc()));
+                    }
                     return;
                 }
                 case core::Names::revealType().rawId():
