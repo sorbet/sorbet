@@ -1841,20 +1841,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                                     messageLoc, numPosArgs, move(magicSendArgs), flags);
                 }
 
-                if (prismBlock != nullptr) {
-                    if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
-                        // A literal block arg (like `foo { ... }` or `foo do ... end`),
-                        // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
-
-                        magicSendArgs.emplace_back(move(blockExpr));
-                        flags.hasBlock = true;
-                    } else if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                        // A forwarded block like the `&b` in `a.map(&b)`
-                        unreachable("This should have already been desugared to `Magic.callWithBlockPass()` above.");
-                    } else {
-                        unreachable("Found an unexpected block of type {}",
-                                    pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
-                    }
+                if (blockExpr) {
+                    magicSendArgs.emplace_back(move(blockExpr));
+                    flags.hasBlock = true;
                 }
 
                 // Desugar any call with a splat and without a block pass argument.
@@ -1911,19 +1900,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, sendArgs);
             }
 
-            if (prismBlock != nullptr) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE) || blockPassArgIsSymbol) {
-                    // A literal block arg (like `foo { ... }` or `foo do ... end`),
-                    // or a Symbol proc like `&:b` (which we'll desugar into a literal block)
-
-                    sendArgs.emplace_back(move(blockExpr));
-                    flags.hasBlock = true;
-                } else if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                    // A forwarded block like the `&b` in `a.map(&b)`
-                    unreachable("This should be desugar to `Magic.callWithBlockPass()` above.");
-                } else {
-                    unreachable("Found an unexpected block of type {}", pm_node_type_to_str(PM_NODE_TYPE(prismBlock)));
-                }
+            if (blockExpr) {
+                sendArgs.emplace_back(move(blockExpr));
+                flags.hasBlock = true;
             }
 
             return MK::Send(sendWithBlockLoc, move(receiver), name, messageLoc, numPosArgs, move(sendArgs), flags);
