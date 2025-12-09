@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def test3<<todo method>>(&<blk>)
       begin
         <self>.puts("before")
-        <emptyTree>::<C Kernel>.lambda() do ||
+        ::Kernel.lambda() do ||
           <self>.puts("after")
         end
       end

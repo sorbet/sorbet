@@ -292,7 +292,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:p, ::<root>::<C T>.proc().returns(<emptyTree>::<C Integer>), :block, ::<root>::<C T>.nilable(::<root>::<C T>.proc().params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>).bind(<emptyTree>::<C FooProc>))).void()
     end
 
-    def initialize<<todo method>>(p: = <emptyTree>::<C Kernel>.lambda() do ||
+    def initialize<<todo method>>(p: = ::Kernel.lambda() do ||
         42
       end, &block)
       begin

@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         while x
           while x.!()
             1.times() do ||
-              <emptyTree>::<C Kernel>.lambda() do ||
+              ::Kernel.lambda() do ||
                 <self>.x(y) do ||
                   <emptyTree>
                 end

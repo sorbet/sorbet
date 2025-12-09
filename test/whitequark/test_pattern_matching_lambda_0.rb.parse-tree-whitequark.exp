@@ -3,6 +3,6 @@ s(:case_match,
   s(:in_pattern,
     s(:block,
       s(:send,
-        s(:const, nil, :Kernel), :lambda), nil,
+        s(:resolved_const, "Kernel"), :lambda), nil,
       s(:int, "42")), nil,
     s(:true)), nil)
