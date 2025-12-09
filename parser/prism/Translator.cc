@@ -1583,7 +1583,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             pm_node_t *prismBlock = callNode->block;
 
             auto name = ctx.state.enterNameUTF8(constantNameString);
-            auto methodName = MK::Symbol(sendLoc0, name);
 
             if (name == core::Names::blockGiven_p()) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
@@ -1819,7 +1818,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 ast::Send::ARGS_store magicSendArgs;
                 magicSendArgs.reserve(numPosArgs); // TODO: reserve room for a block pass arg
                 magicSendArgs.emplace_back(move(receiver));
-                magicSendArgs.emplace_back(move(methodName));
+                magicSendArgs.emplace_back(MK::Symbol(sendLoc0, name));
                 magicSendArgs.emplace_back(move(argsArrayExpr));
                 magicSendArgs.emplace_back(move(kwargsExpr));
 
@@ -1864,7 +1863,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 ast::Send::ARGS_store magicSendArgs;
                 magicSendArgs.reserve(3 + prismArgs.size());
                 magicSendArgs.emplace_back(move(receiver));
-                magicSendArgs.emplace_back(move(methodName));
+                magicSendArgs.emplace_back(MK::Symbol(sendLoc0, name));
                 magicSendArgs.emplace_back(move(blockPassArg));
 
                 numPosArgs += 3;
