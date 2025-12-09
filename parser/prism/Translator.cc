@@ -1591,9 +1591,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
 
-            ast::ExpressionPtr blockBody; // e.g. `123` in `foo { |x| 123 }`
-            ast::MethodDef::PARAMS_store blockParamsStore;
-            ast::InsSeq::STATS_store blockStatsStore;
             ast::ExpressionPtr blockExpr;
             ast::ExpressionPtr blockPassArg;
             if (prismBlock != nullptr) {
@@ -1601,8 +1598,10 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
                     auto blockNode = down_cast<pm_block_node>(prismBlock);
 
-                    blockBody = this->enterBlockContext().desugarNullable(blockNode->body);
+                    auto blockBody = this->enterBlockContext().desugarNullable(blockNode->body);
 
+                    ast::MethodDef::PARAMS_store blockParamsStore;
+                    ast::InsSeq::STATS_store blockStatsStore;
                     if (blockNode->parameters != nullptr) {
                         switch (PM_NODE_TYPE(blockNode->parameters)) {
                             case PM_BLOCK_PARAMETERS_NODE: { // The params declared at the top of a PM_BLOCK_NODE
