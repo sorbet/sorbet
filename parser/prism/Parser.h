@@ -14,6 +14,10 @@ extern "C" {
 #include "parser/ParseResult.h"
 
 namespace sorbet::parser::Prism {
+class Parser;
+} // namespace sorbet::parser::Prism
+
+namespace sorbet::parser::Prism {
 
 class Factory;
 class ParseResult;
@@ -27,6 +31,14 @@ public:
     std::string message;
     pm_location_t location;
     pm_error_level_t level;
+};
+
+struct SimpleParseResult {
+    std::vector<ParseError> parseErrors;
+    std::vector<core::LocOffsets> commentLocations;
+
+    SimpleParseResult(std::vector<ParseError> parseErrors, std::vector<core::LocOffsets> commentLocations)
+        : parseErrors(std::move(parseErrors)), commentLocations(std::move(commentLocations)) {}
 };
 
 class Parser final {
@@ -70,6 +82,13 @@ public:
     pm_location_t getZeroWidthLocation() const;
     pm_location_t convertLocOffsets(core::LocOffsets loc) const;
 
+    bool isTUntyped(pm_node_t *node) const;
+    bool isT(pm_node_t *node) const;
+    bool isSetterCall(pm_node_t *node) const;
+    bool isSafeNavigationCall(pm_node_t *node) const;
+    bool isVisibilityCall(pm_node_t *node) const;
+    bool isAttrAccessorCall(pm_node_t *node) const;
+
 private:
     std::vector<ParseError> collectErrors();
     std::vector<core::LocOffsets> collectCommentLocations();
@@ -96,8 +115,8 @@ class ParseResult final {
 public:
     ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors,
                 std::vector<core::LocOffsets> commentLocations)
-        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors}, commentLocations{
-                                                                                         commentLocations} {}
+        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors},
+          commentLocations{commentLocations} {}
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
@@ -114,6 +133,10 @@ public:
 
     const std::vector<ParseError> &getParseErrors() const {
         return parseErrors;
+    }
+
+    const Parser &getParser() const {
+        return parser;
     }
 };
 
