@@ -1549,6 +1549,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             auto callNode = down_cast<pm_call_node>(node);
 
             auto constantNameString = parser.resolveConstant(callNode->name);
+            auto methodName = ctx.state.enterNameUTF8(constantNameString);
+
             auto receiverNode = callNode->receiver;
 
             // When the message is empty, like `foo.()`, the message location is the
@@ -1579,7 +1581,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             }
             auto sendLoc0 = sendLoc.copyWithZeroLength();
 
-            if (constantNameString == "[]" || constantNameString == "[]=") {
+            if (methodName == core::Names::squareBrackets() || methodName == core::Names::squareBracketsEq()) {
                 // Empty funLoc implies that errors should use the callLoc
                 messageLoc.endLoc = messageLoc.beginLoc;
             }
@@ -1638,8 +1640,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     }
                 }
             }
-
-            auto methodName = ctx.state.enterNameUTF8(constantNameString);
 
             if (methodName == core::Names::blockGiven_p()) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
