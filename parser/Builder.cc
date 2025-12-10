@@ -636,7 +636,7 @@ public:
 
     unique_ptr<Node> callLambda(const token *lambda) {
         auto loc = tokLoc(lambda);
-        auto kernel = make_unique<Const>(loc, nullptr, core::Names::Constants::Kernel());
+        auto kernel = make_unique<ResolvedConst>(loc, core::Symbols::Kernel());
         return make_unique<Send>(loc, std::move(kernel), core::Names::lambda(), loc, NodeVec());
     }
 

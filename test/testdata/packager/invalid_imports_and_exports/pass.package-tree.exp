@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, "something else")
 
-    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, <emptyTree>::<C Kernel>.lambda() do ||
+    <self>.test_import(::<PackageSpecRegistry>::<C C>, :only, ::Kernel.lambda() do ||
         "naught"
       end)
 

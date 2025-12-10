@@ -654,9 +654,8 @@ Begin {
         params = NULL
         body = Block {
           send = Send {
-            receiver = Const {
-              scope = NULL
-              name = <C <U Kernel>>
+            receiver = ResolvedConst {
+              symbol = (module ::Kernel)
             }
             method = <U lambda>
             args = [

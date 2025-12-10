@@ -903,8 +903,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     << ".showRaw(gs));" << '\n';
                 break;
             case FieldType::Symbol:
-                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
-                    << ".showRaw(gs));" << '\n';
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = ({} {})\\n\", " << arg.name
+                    << ".showKind(gs), " << arg.name << ".showFullName(gs));" << '\n';
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = \");\n";
@@ -1123,7 +1123,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 }
                 break;
             case FieldType::Symbol:
-                out << "    fmt::format_to(std::back_inserter(buf), \", :{}\", JSON::escape(" << arg.name
+                out << "    fmt::format_to(std::back_inserter(buf), \", \\\"{}\\\"\", JSON::escape(" << arg.name
                     << ".show(gs)));\n";
                 break;
             case FieldType::Node:

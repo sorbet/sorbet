@@ -227,7 +227,7 @@ rescue <emptyTree>::<C E> => x
 
   module <emptyTree>::<C Foo><<C <todo sym>>> < ()
     def foo<<todo method>>(&<blk>)
-      <emptyTree>::<C Kernel>.lambda() do |a, b|
+      ::Kernel.lambda() do |a, b|
         a.+(b)
       end
     end

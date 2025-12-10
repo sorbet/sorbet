@@ -229,7 +229,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
+    <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, ::Kernel.lambda() do ||
         <emptyTree>::<C ForeignClass>
       end)
 

@@ -1,5 +1,5 @@
 s(:block,
   s(:send,
-    s(:const, nil, :Kernel), :lambda),
+    s(:resolved_const, "Kernel"), :lambda),
   s(:params,
     s(:param, :a)), nil)

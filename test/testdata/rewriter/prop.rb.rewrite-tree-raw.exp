@@ -4591,9 +4591,9 @@ ClassDef{
             Literal{ value = :foreign }
             Send{
               flags = {}
-              recv = UnresolvedConstantLit{
-                cnst = <C <U Kernel>>
-                scope = EmptyTree
+              recv = ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
               }
               fun = <U lambda>
               block = Block {

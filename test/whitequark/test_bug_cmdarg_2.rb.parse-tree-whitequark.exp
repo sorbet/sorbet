@@ -4,6 +4,6 @@ s(:send, nil, :f,
       s(:sym, :x),
       s(:block,
         s(:send,
-          s(:const, nil, :Kernel), :lambda), nil,
+          s(:resolved_const, "Kernel"), :lambda), nil,
         s(:block,
           s(:send, nil, :meth), nil, nil)))))
