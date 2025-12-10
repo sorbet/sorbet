@@ -1667,29 +1667,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
 
-            auto block = DesugaredBlockArgument::none();
-            if (auto *prismBlock = callNode->block) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
-                    auto blockNode = down_cast<pm_block_node>(prismBlock);
-
-                    block = DesugaredBlockArgument::literalBlock(desugarLiteralBlock(
-                        blockNode->body, blockNode->parameters, blockNode->base.location, blockNode->opening_loc));
-                } else {
-                    ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
-
-                    auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-
-                    block = desugarBlockPassArgument(bp);
-                }
-            }
-
-            if (hasFwdArgs) { // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &b)`.
-                ENFORCE(!block.exists(), "The parser should have rejected a call with both a block pass "
-                                         "argument and forwarded args (e.g. `foo(&b, ...)`)");
-
-                block = DesugaredBlockArgument::blockPass(MK::Local(sendWithBlockLoc, core::Names::fwdBlock()),
-                                                          core::LocOffsets::none());
-            }
+            auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
@@ -3768,6 +3746,38 @@ Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numbere
         auto name = ctx.state.enterNameUTF8("_" + to_string(i));
 
         result.emplace_back(MK::Local(usageLoc, name));
+    }
+
+    return result;
+}
+
+Translator::DesugaredBlockArgument Translator::desugarBlock(pm_node_t *block, pm_arguments_node *otherArgs,
+                                                            pm_location_t parentLoc) {
+    auto result = DesugaredBlockArgument::none();
+
+    if (block) {
+        if (PM_NODE_TYPE_P(block, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
+            auto blockNode = down_cast<pm_block_node>(block);
+
+            result = DesugaredBlockArgument::literalBlock(desugarLiteralBlock(
+                blockNode->body, blockNode->parameters, blockNode->base.location, blockNode->opening_loc));
+        } else {
+            ENFORCE(PM_NODE_TYPE_P(block, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
+
+            auto *bp = down_cast<pm_block_argument_node>(block);
+
+            result = desugarBlockPassArgument(bp);
+        }
+    }
+
+    auto hasFwdArgs = otherArgs != nullptr && PM_NODE_FLAG_P(otherArgs, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
+
+    if (hasFwdArgs) { // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &b)`.
+        ENFORCE(!result.exists(), "The parser should have rejected a call with both a block pass "
+                                  "argument and forwarded args (e.g. `foo(&b, ...)`)");
+
+        result = DesugaredBlockArgument::blockPass(MK::Local(translateLoc(parentLoc), core::Names::fwdBlock()),
+                                                   core::LocOffsets::none());
     }
 
     return result;

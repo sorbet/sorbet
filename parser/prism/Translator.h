@@ -111,6 +111,8 @@ private:
     // Method call helpers
     class DesugaredBlockArgument;
 
+    DesugaredBlockArgument desugarBlock(pm_node_t *block, pm_arguments_node *otherArgs, pm_location_t parentLoc);
+
     ast::ExpressionPtr desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
                                            pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc);
 
