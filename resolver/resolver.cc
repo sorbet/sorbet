@@ -117,6 +117,18 @@ bool isGenericType(ast::ExpressionPtr &expr) {
     return send && send->fun == core::Names::squareBrackets() && ast::isa_tree<ast::ConstantLit>(send->recv);
 }
 
+bool isPackageRoot(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
+    auto klassPackage = sym.data(gs)->package;
+    if (klassPackage.exists()) {
+        // When the immediate owner of this symbol has a different package, we know that we have found the root of
+        // `klassPackage`.
+        auto klassOwner = sym.data(gs)->owner;
+        return klassOwner.data(gs)->package != klassPackage;
+    }
+
+    return false;
+}
+
 const UnorderedMap<core::NameRef, string> COMMON_TYPOS = {
     {core::Names::Constants::Int(), "Integer"s},
     {core::Names::Constants::Timestamp(), "Time"s},
@@ -167,7 +179,7 @@ private:
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
     struct AncestorResolutionItem {
@@ -773,12 +785,19 @@ private:
                 }
             }
         } else {
-            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
-                    e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolvedClass.show(ctx));
-                    e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolvedClass.show(ctx));
+            if (!isPackageRoot(ctx, job.klass)) {
+                if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
+                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
+                        e.setHeader("Only modules can be `{}`d, but `{}` is a class",
+                                    job.isInclude ? "include" : "extend", resolvedClass.show(ctx));
+                        e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
+                                       resolvedClass.show(ctx));
+                    }
+                }
+            } else {
+                if (auto e =
+                        ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMutation)) {
+                    e.setHeader("Package namespace `{}` may not have mixins applied", job.klass.show(ctx));
                 }
             }
         }
