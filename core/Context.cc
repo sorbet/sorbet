@@ -16,6 +16,13 @@ ClassOrModuleRef MutableContext::selfClass() {
     return this->owner.enclosingClass(this->state);
 }
 
+ClassOrModuleRef MutableContext::lookupSelfClass() const {
+    if (this->owner.isClassOrModule()) {
+        return this->owner.asClassOrModuleRef().data(this->state)->lookupSingletonClass(this->state);
+    }
+    return this->owner.enclosingClass(this->state);
+}
+
 Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner), file(other.file) {}
 
 void Context::trace(string_view msg) const {

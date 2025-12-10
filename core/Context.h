@@ -58,11 +58,17 @@ public:
         : state(state), owner(owner), file(file) {}
     MutableContext(const MutableContext &other) noexcept : state(other.state), owner(other.owner), file(other.file) {}
 
-    // Returns a ClassOrModuleRef corresponding to the class `self.class` for code
-    // executed in this MutableContext, or, if `self` is a class,
-    // `self.singleton_class` (We model classes as being normal instances of
-    // their singleton classes for most purposes)
+    // If we're in a method, returns the owner of that method.
+    // So for an instance method, gets the instance class, and for a singleton class method, gets the singleton class.
+    // If we're in a class (i.e., at the class-top-level), gets the singleton class of the current class.
+    //
+    // If the singleton class does not exist, creates it.
+    //
+    // In general, `ctx.selfClass()->selfType()` is the type of `self` at any point in a tree traversal.
     ClassOrModuleRef selfClass();
+
+    // Like `selfClass`, but does not create singleton classes (returns a non-existent symbol).
+    ClassOrModuleRef lookupSelfClass() const;
 
     MutableContext withOwner(SymbolRef sym) const;
     MutableContext withFile(FileRef file) const;
