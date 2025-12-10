@@ -1463,16 +1463,21 @@ private:
         return sym;
     }
 
+    core::SymbolRef insertTypeMemberAsStaticField(core::MutableContext ctx, const State &state,
+                                                  const core::FoundTypeMember &typeMember) {
+        core::FoundStaticField staticField;
+        staticField.owner = typeMember.owner;
+        staticField.name = typeMember.name;
+        staticField.asgnLoc = typeMember.asgnLoc;
+        staticField.lhsLoc = typeMember.asgnLoc;
+        staticField.isTypeAlias = true;
+        return insertStaticField(ctx, state, staticField);
+    }
+
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
                                      const core::FoundTypeMember &typeMember) {
         if (ctx.owner == core::Symbols::root()) {
-            core::FoundStaticField staticField;
-            staticField.owner = typeMember.owner;
-            staticField.name = typeMember.name;
-            staticField.asgnLoc = typeMember.asgnLoc;
-            staticField.lhsLoc = typeMember.asgnLoc;
-            staticField.isTypeAlias = true;
-            return insertStaticField(ctx, state, staticField);
+            return insertTypeMemberAsStaticField(ctx, state, typeMember);
         }
 
         core::Variance variance = core::Variance::Invariant;
@@ -1480,6 +1485,13 @@ private:
 
         auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx)
                                        : ctx.owner.asClassOrModuleRef();
+
+        if (onSymbol.data(ctx)->isPackageNamespace()) {
+            auto package = onSymbol.data(ctx)->package;
+            if (ctx.state.packageDB().getPackageInfo(package).hasSubPackages()) {
+                return insertTypeMemberAsStaticField(ctx, state, typeMember);
+            }
+        }
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -2165,6 +2177,18 @@ public:
         auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx)
                                        : ctx.owner.asClassOrModuleRef();
         ENFORCE(onSymbol.exists());
+
+        if (onSymbol.data(ctx)->isPackageNamespace()) {
+            auto package = onSymbol.data(ctx)->package;
+            if (ctx.state.packageDB().getPackageInfo(package).hasSubPackages()) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                    e.setHeader("`{}` may not be used in a package root",
+                                isTypeTemplate ? "type_template" : "type_member");
+                }
+                return ignoreBadTypeMember(ctx, move(tree));
+            }
+        }
+
         core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
         ENFORCE(sym.exists());
 

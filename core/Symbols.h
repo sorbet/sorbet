@@ -648,6 +648,16 @@ public:
     // TODO(jez) Ban defining a package called `Test`
     packages::MangledName package;
 
+    // Returns true if this class or module corresponds to the root of a package namespace. For example, for the package
+    // named `::A::B`, this method returns true when called on the `B` symbol.
+    bool isPackageNamespace() const {
+        if (!this->package.exists()) {
+            return false;
+        }
+
+        return this->package.owner == this->packageRegistryOwner;
+    }
+
     // The class or module that this class or module is nested inside of.
     //
     // Given `::A::B`, the owner is `::A`
