@@ -1582,6 +1582,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 methodNameLoc = translateLoc(callNode->message_loc);
             }
 
+            auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
+
             auto argumentsNode = callNode->arguments;
 
             absl::Span<pm_node_t *> prismArgs;
@@ -1666,8 +1668,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             if (methodName == core::Names::blockGiven_p()) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
-
-            auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
