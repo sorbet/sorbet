@@ -1942,6 +1942,12 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         job.cast->type = move(type);
+
+        if (auto *kernelLambda = isKernelProcOrLambda(job.cast->arg)) {
+            kernelLambda->fun = core::Names::lambdaTLet();
+            kernelLambda->addPosArg(move(job.cast->typeExpr));
+        }
+
         return true;
     }
 
@@ -2710,12 +2716,6 @@ public:
 
     void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
         auto cast = ast::cast_tree<ast::Cast>(tree);
-
-        if (auto *kernelLambda = isKernelProcOrLambda(cast->arg)) {
-            kernelLambda->fun = core::Names::lambdaTLet();
-            kernelLambda->addPosArg(move(cast->typeExpr));
-        }
-
         if (cast->cast == core::Names::assumeType()) {
             // This cast was not written by the user. Before we attempt to parse it as a type, let's
             // make sure that it's even possible to be valid.
