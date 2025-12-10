@@ -804,6 +804,8 @@ void checkTNilableArity(core::Context ctx, const ast::Send &send) {
 
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                       TypeSyntaxArgs args) {
+    auto &recvi = ast::cast_tree_nonnull<ast::ConstantLit>(send.recv);
+
     switch (send.fun.rawId()) {
         case core::Names::nilable().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
@@ -1030,7 +1032,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                     e.replaceWith("Replace with `T.attached_class`", ctx.locAt(send.loc), "T.attached_class");
                 }
             }
-            if (send.numPosArgs() != 0 || send.hasKwArgs()) {
+            if (recvi.symbol() != core::Symbols::Magic()) {
+                // Resolver would have written syntactically-valid `T.attached_class` calls to a call on `<Magic>`
                 checkTypeFunArity(ctx, send, 0, 0);
                 checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
@@ -1373,19 +1376,23 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         core::SymbolRef appliedKlass;
         if (auto recvi = ast::cast_tree<ast::ConstantLit>(s.recv)) {
             if (recvi->symbol() == core::Symbols::T()) {
-                if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
-                    return move(res.value());
-                } else {
-                    return nullopt;
-                }
+                return interpretTCombinator(ctx, s, sigBeingParsed, args);
             }
 
-            if (recvi->symbol() == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
-                if (auto e = ctx.beginError(s.recv.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Malformed type declaration: splats cannot be used in types");
+            if (recvi->symbol() == core::Symbols::Magic()) {
+                switch (s.fun.rawId()) {
+                    case core::Names::callWithSplat().rawId(): {
+                        if (auto e = ctx.beginError(s.recv.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+                            e.setHeader("Malformed type declaration: splats cannot be used in types");
+                        }
+                        result.type = core::Types::untypedUntracked();
+                        return result;
+                    }
+
+                    case core::Names::attachedClass().rawId(): {
+                        return interpretTCombinator(ctx, s, sigBeingParsed, args);
+                    }
                 }
-                result.type = core::Types::untypedUntracked();
-                return result;
             }
 
             appliedKlass = recvi->symbol();

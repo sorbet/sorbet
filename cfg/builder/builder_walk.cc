@@ -587,9 +587,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     current->exprs.emplace_back(cctx.target, s.loc, make_insn<TAbsurd>(temp));
                     ret = current;
                     return;
-                } else if (s.fun == core::Names::attachedClass() && sendRecvIsT(s)) {
-                    s.recv = ast::MK::Magic(s.recv.loc());
-                    s.addPosArg(ast::MK::Self(s.recv.loc()));
                 } else if (s.fun == core::Names::typeParameter() && sendRecvIsT(s)) {
                     if (auto insn = maybeMakeTypeParameterAlias(cctx, s)) {
                         current->exprs.emplace_back(cctx.target, s.loc, move(insn));
