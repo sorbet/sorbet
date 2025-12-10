@@ -1344,7 +1344,7 @@ ast::ExpressionPtr Translator::desugarAssignment(pm_node_t *untypedNode) {
 
 pair<core::LocOffsets, core::LocOffsets>
 Translator::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver, absl::Span<pm_node_t *> prismArgs,
-                                 pm_location_t closingLoc, pm_node_t *blockNode) {
+                                 pm_location_t closingLoc, const Translator::DesugaredBlockArgument &block) {
     auto result = initialLoc;
 
     if (receiver) {
@@ -1367,14 +1367,12 @@ Translator::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receive
     }
 
     core::LocOffsets blockLoc;
-    if (blockNode) {
-        blockLoc = translateLoc(blockNode->location);
+    if (block.hasBlockPass()) {
+        result = result.join(block.blockPassExpr.loc());
 
-        // The block pass argument is not stored with the other arguments, so we handle it separately here.
-        if (PM_NODE_TYPE_P(blockNode, PM_BLOCK_ARGUMENT_NODE)) {
-            auto blockPassArgLoc = translateLoc(blockNode->location);
-            result = result.join(blockPassArgLoc);
-        }
+        blockLoc = block.blockPassExpr.loc();
+    } else if (block.hasLiteralBlock()) {
+        blockLoc = block.literalBlockExpr.loc();
     }
 
     return {result, blockLoc};
@@ -1600,8 +1598,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             if (callNode->block == nullptr) { // There's no block, so the `sendLoc` and `sendWithBlockLoc` are the same.
                 sendLoc = sendWithBlockLoc;
             } else { // There's a block, so we need to calculate the location of the "send" node, excluding it.
-                std::tie(sendLoc, blockLoc) = computeMethodCallLoc(methodNameLoc, receiverNode, prismArgs,
-                                                                   callNode->closing_loc, callNode->block);
+                std::tie(sendLoc, blockLoc) =
+                    computeMethodCallLoc(methodNameLoc, receiverNode, prismArgs, callNode->closing_loc, block);
             }
             auto sendLoc0 = sendLoc.copyWithZeroLength();
 

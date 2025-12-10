@@ -281,7 +281,8 @@ private:
 
     std::pair<core::LocOffsets, core::LocOffsets> computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver,
                                                                        absl::Span<pm_node_t *> prismArgs,
-                                                                       pm_location_t closing_loc, pm_node_t *blockNode);
+                                                                       pm_location_t closing_loc,
+                                                                       const Translator::DesugaredBlockArgument &block);
 };
 
 } // namespace sorbet::parser::Prism
