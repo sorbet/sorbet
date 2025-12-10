@@ -5591,28 +5591,14 @@ unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closin
 }
 
 // Translate an unescaped string from a Regexp literal
-unique_ptr<parser::Node> Translator::translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
-                                                     pm_string_t content, pm_location_t closingLoc) {
-    // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
-    // but we'll only have up to one String node here for this non-interpolated Regexp.
-    parser::NodeVec parts;
+unique_ptr<ExprOnly> Translator::translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
+                                                 pm_string_t content, pm_location_t closingLoc) {
     auto source = parser.extractString(&content);
-    if (!source.empty()) {
-        // Create a String node with its desugared expression
-        auto name = ctx.state.enterNameUTF8(source);
-        auto expr = MK::String(location, name);
-        auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), contentLoc, name);
-        parts.emplace_back(move(sourceStringNode));
-    }
+
+    auto stringContent = source.empty() ? core::Names::empty() : ctx.state.enterNameUTF8(source);
+    auto pattern = MK::String(contentLoc, stringContent);
 
     auto options = translateRegexpOptions(closingLoc);
-
-    ast::ExpressionPtr pattern;
-    if (parts.empty()) {
-        pattern = MK::String(location, core::Names::empty());
-    } else {
-        pattern = parts[0]->takeDesugaredExpr();
-    }
     auto optsExpr = options->takeDesugaredExpr();
 
     auto cnst = MK::Constant(location, core::Symbols::Regexp());
@@ -5621,7 +5607,7 @@ unique_ptr<parser::Node> Translator::translateRegexp(core::LocOffsets location, 
     auto expr = MK::Send2(location, move(cnst), core::Names::new_(), location.copyWithZeroLength(), move(pattern),
                           move(optsExpr));
 
-    return make_node_with_expr<parser::Regexp>(move(expr), location, move(parts), move(options));
+    return expr_only(move(expr));
 }
 
 string_view Translator::sliceLocation(pm_location_t loc) const {

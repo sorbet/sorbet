@@ -128,8 +128,8 @@ private:
                                                       core::LocOffsets overrideLocation = core::LocOffsets::none());
 
     std::unique_ptr<parser::Node> translateRegexpOptions(pm_location_t closingLoc);
-    std::unique_ptr<parser::Node> translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
-                                                  pm_string_t content, pm_location_t closingLoc);
+    std::unique_ptr<ExprOnly> translateRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
+                                              pm_string_t content, pm_location_t closingLoc);
 
     template <typename PrismNode>
     std::unique_ptr<parser::Mlhs> translateMultiTargetLhs(PrismNode *node, core::LocOffsets location);
