@@ -290,7 +290,6 @@ pipeline_tests(
             # Tests having to do with tree differences in invalid Ruby code; will address later
             "testdata/parser/error_recovery/assign.rb",
             "testdata/parser/error_recovery/begin_1.rb",
-            "testdata/parser/error_recovery/block_arg_and_block.rb",
             "testdata/parser/error_recovery/block_do_1.rb",
             "testdata/parser/error_recovery/case_1.rb",
             "testdata/parser/error_recovery/case_2.rb",
@@ -327,7 +326,6 @@ pipeline_tests(
             "testdata/parser/error_recovery/eof_7.rb",
             "testdata/parser/error_recovery/eof_9.rb",
             "testdata/parser/error_recovery/forward_args.rb",
-            "testdata/parser/error_recovery/forward_args_with_block.rb",
             "testdata/parser/error_recovery/if_do_1.rb",
             "testdata/parser/error_recovery/if_do_2.rb",
             "testdata/parser/error_recovery/if_indent_1.rb",
@@ -375,6 +373,7 @@ pipeline_tests(
             "testdata/parser/error_recovery/unterminated_array.rb",
             "testdata/parser/error_recovery/unterminated_array_bad_1.rb",
             "testdata/parser/error_recovery/unterminated_array_bad_2.rb",
+            "testdata/parser/block_forwarding_permutations.rb",
             "testdata/parser/crash_block_pass_suggestion.rb",
             "testdata/parser/invalid_fatal.rb",
             "testdata/parser/invalid_syntax_error.rb",
