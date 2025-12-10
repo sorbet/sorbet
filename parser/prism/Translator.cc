@@ -1582,9 +1582,11 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 messageLoc = translateLoc(callNode->message_loc);
             }
 
+            auto argumentsNode = callNode->arguments;
+
             absl::Span<pm_node_t *> prismArgs;
-            if (auto *prismArgsNode = callNode->arguments) {
-                prismArgs = absl::MakeSpan(prismArgsNode->arguments.nodes, prismArgsNode->arguments.size);
+            if (argumentsNode != nullptr) {
+                prismArgs = absl::MakeSpan(argumentsNode->arguments.nodes, argumentsNode->arguments.size);
             }
 
             // The legacy parser nodes don't include the literal block argument (if any), but the desugar nodes do
@@ -1615,8 +1617,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             //   However, we still need the loop if it's true, to be able to tell the two cases apart.
 
             // true if the call contains a forwarded argument like `foo(...)`
-            auto hasFwdArgs = callNode->arguments != nullptr &&
-                              PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
+            auto hasFwdArgs =
+                argumentsNode != nullptr && PM_NODE_FLAG_P(argumentsNode, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
             auto hasFwdRestArg = false; // true if the call contains an anonymous forwarded rest arg like `foo(*)`
             auto hasSplat = false;      // true if the call contains a splatted expression like `foo(*a)`
             pm_keyword_hash_node *kwargsHashNode = nullptr;
@@ -1647,7 +1649,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 }
 
                 // Detect splats in the argument list
-                if (PM_NODE_FLAG_P(callNode->arguments, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_SPLAT)) {
+                if (PM_NODE_FLAG_P(argumentsNode, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_SPLAT)) {
                     for (auto &arg : prismArgs) {
                         if (PM_NODE_TYPE_P(arg, PM_SPLAT_NODE)) {
                             auto splatNode = down_cast<pm_splat_node>(arg);
