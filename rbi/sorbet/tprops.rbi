@@ -177,9 +177,12 @@ module T::Props::Serializable::DecoratorMethods
 end
 
 module T::Props::Serializable::ClassMethods
+  has_attached_class!(:out) { { upper: T::Struct } }
+
+  sig { params(hash: T::Hash[String, T.untyped]).returns(T.attached_class) }
   def from_hash!(hash); end
-  def from_hash(hash, strict = nil); end
-  def prop_by_serialized_forms; end
+  sig { params(hash: T::Hash[String, T.untyped], strict: T::Boolean).returns(T.attached_class) }
+  def from_hash(hash, strict = false); end
 end
 
 module T::Props::TypeValidation
