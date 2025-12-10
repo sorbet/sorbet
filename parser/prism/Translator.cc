@@ -1575,11 +1575,11 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
             // When the message is empty, like `foo.()`, the message location is the
             // same as the call operator location
-            core::LocOffsets messageLoc;
+            core::LocOffsets methodNameLoc;
             if (callNode->message_loc.start == nullptr && callNode->message_loc.end == nullptr) {
-                messageLoc = translateLoc(callNode->call_operator_loc);
+                methodNameLoc = translateLoc(callNode->call_operator_loc);
             } else {
-                messageLoc = translateLoc(callNode->message_loc);
+                methodNameLoc = translateLoc(callNode->message_loc);
             }
 
             auto argumentsNode = callNode->arguments;
@@ -1598,14 +1598,14 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             if (callNode->block == nullptr) { // There's no block, so the `sendLoc` and `sendWithBlockLoc` are the same.
                 sendLoc = sendWithBlockLoc;
             } else { // There's a block, so we need to calculate the location of the "send" node, excluding it.
-                std::tie(sendLoc, blockLoc) =
-                    computeMethodCallLoc(messageLoc, receiverNode, prismArgs, callNode->closing_loc, callNode->block);
+                std::tie(sendLoc, blockLoc) = computeMethodCallLoc(methodNameLoc, receiverNode, prismArgs,
+                                                                   callNode->closing_loc, callNode->block);
             }
             auto sendLoc0 = sendLoc.copyWithZeroLength();
 
             if (methodName == core::Names::squareBrackets() || methodName == core::Names::squareBracketsEq()) {
                 // Empty funLoc implies that errors should use the callLoc
-                messageLoc.endLoc = messageLoc.beginLoc;
+                methodNameLoc.endLoc = methodNameLoc.beginLoc;
             }
 
             // Translate the args, detecting special cases along the way,
@@ -1804,7 +1804,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     numPosArgs++;
 
                     return MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
-                                    messageLoc, numPosArgs, move(magicSendArgs), flags);
+                                    methodNameLoc, numPosArgs, move(magicSendArgs), flags);
                 }
 
                 if (block.hasLiteralBlock()) {
@@ -1815,8 +1815,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 // Desugar any call with a splat and without a block pass argument.
                 // If there's a literal block argument, that's handled here, too.
                 // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
-                return MK::Send(sendWithBlockLoc, MK::Magic(sendWithBlockLoc), core::Names::callWithSplat(), messageLoc,
-                                numPosArgs, move(magicSendArgs), flags);
+                return MK::Send(sendWithBlockLoc, MK::Magic(sendWithBlockLoc), core::Names::callWithSplat(),
+                                methodNameLoc, numPosArgs, move(magicSendArgs), flags);
             }
 
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
@@ -1850,8 +1850,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, magicSendArgs);
                 }
 
-                return MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(), messageLoc,
-                                numPosArgs, move(magicSendArgs), flags);
+                return MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithBlockPass(),
+                                methodNameLoc, numPosArgs, move(magicSendArgs), flags);
             }
 
             ast::Send::ARGS_store sendArgs{};
@@ -1872,7 +1872,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 flags.hasBlock = true;
             }
 
-            return MK::Send(sendWithBlockLoc, move(receiver), methodName, messageLoc, numPosArgs, move(sendArgs),
+            return MK::Send(sendWithBlockLoc, move(receiver), methodName, methodNameLoc, numPosArgs, move(sendArgs),
                             flags);
         }
         case PM_CALL_OPERATOR_WRITE_NODE: { // Compound assignment to a method call, e.g. `a.b += 1`
