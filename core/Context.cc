@@ -1,8 +1,5 @@
 #include "core/Context.h"
 #include "core/GlobalState.h"
-#include "main/pipeline/semantic_extension/SemanticExtension.h"
-#include <algorithm>
-#include <string>
 
 template class std::vector<sorbet::core::NameRef>;
 template class std::vector<sorbet::core::FileRef>;
