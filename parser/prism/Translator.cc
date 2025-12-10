@@ -1553,6 +1553,26 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
             auto receiverNode = callNode->receiver;
 
+            ast::ExpressionPtr receiver;
+            if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
+                // 0-sized Loc, since `self.` doesn't appear in the original file.
+                receiver = MK::Self(location.copyWithZeroLength());
+            } else {
+                receiver = desugar(receiverNode);
+            }
+
+            // Unsupported nodes are desugared to an empty tree.
+            // Treat them as if they were `self` to match `Desugar.cc`.
+            // TODO: Clean up after direct desugaring is complete.
+            // https://github.com/Shopify/sorbet/issues/671
+            ast::Send::Flags flags;
+            if (ast::isa_tree<ast::EmptyTree>(receiver)) {
+                receiver = MK::Self(location.copyWithZeroLength());
+                flags.isPrivateOk = true;
+            } else {
+                flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+            }
+
             // When the message is empty, like `foo.()`, the message location is the
             // same as the call operator location
             core::LocOffsets messageLoc;
@@ -1672,27 +1692,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
                 throw PrismFallback{};
-            }
-
-            ast::Send::Flags flags;
-
-            ast::ExpressionPtr receiver;
-            if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
-                // 0-sized Loc, since `self.` doesn't appear in the original file.
-                receiver = MK::Self(sendLoc0);
-            } else {
-                receiver = desugar(receiverNode);
-            }
-
-            // Unsupported nodes are desugared to an empty tree.
-            // Treat them as if they were `self` to match `Desugar.cc`.
-            // TODO: Clean up after direct desugaring is complete.
-            // https://github.com/Shopify/sorbet/issues/671
-            if (ast::isa_tree<ast::EmptyTree>(receiver)) {
-                receiver = MK::Self(sendLoc0);
-                flags.isPrivateOk = true;
-            } else {
-                flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
             if (hasSplat || hasFwdRestArg || hasFwdArgs) { // f(*a) || f(*) || f(...)
