@@ -20,10 +20,10 @@ def example2(mod)
   end
 
   if mod < T::Props::Serializable && mod.is_a?(T::Props::Serializable::ClassMethods)
-    T.reveal_type(mod) # error: `T.all(T::Module[T::Props::Serializable], T::Props::Serializable::ClassMethods)`
+    T.reveal_type(mod) # error: `T.all(T::Module[T::Props::Serializable], T::Props::Serializable::ClassMethods[T::Struct])`
 
     if mod.is_a?(Class)
-      T.reveal_type(mod) # error: `T.all(T::Class[T::Props::Serializable], T::Props::Serializable::ClassMethods)`
+      T.reveal_type(mod) # error: `T.all(T::Class[T::Props::Serializable], T::Props::Serializable::ClassMethods[T::Struct])`
       inst = mod.new
       T.reveal_type(inst) # error: `T::Props::Serializable`
     end

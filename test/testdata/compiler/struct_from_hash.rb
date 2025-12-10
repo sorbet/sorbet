@@ -9,8 +9,8 @@ class MyStruct < T::Struct
   const :percent, Float
   const :hash_by, Symbol
 
-  sig {override.params(struct: T::Hash[String, T.untyped]).returns(MyStruct)}
-  def self.from_hash(struct)
+  sig {override.params(struct: T::Hash[String, T.untyped], strict: T::Boolean).returns(T.attached_class)}
+  def self.from_hash(struct, strict = false)
     if struct.key?('hash_by')
       struct = struct.merge({'hash_by' => struct['hash_by'].to_sym})
     end

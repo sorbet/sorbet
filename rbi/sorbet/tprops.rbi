@@ -177,6 +177,8 @@ module T::Props::Serializable::DecoratorMethods
 end
 
 module T::Props::Serializable::ClassMethods
+  extend T::Generic
+
   has_attached_class!(:out) { { upper: T::Struct } }
 
   sig { params(hash: T::Hash[String, T.untyped]).returns(T.attached_class) }
