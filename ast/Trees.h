@@ -1305,6 +1305,13 @@ private:
             : ptr1(tagSymbol(Tag::ResolvedSymbol, symbol)), ptr2(reinterpret_cast<tagged_storage>(original.release())) {
         }
 
+        // We have to explicitly delete these, because otherwise making a copy of a `Storage`
+        // (including indirectly, via a `ConstantLit`) would have the effect of making two "owners"
+        // of the `UnresolvedConstantLit` held inside the `Storage`, which would then cause a double
+        // `delete` of `original` in the `~Storage()` destructor (one for each copy).
+        Storage(const Storage &) = delete;
+        Storage &operator=(const Storage &) = delete;
+
         ~Storage() {
             switch (tag()) {
                 case Tag::KnownSymbol: {
