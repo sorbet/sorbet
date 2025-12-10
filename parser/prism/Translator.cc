@@ -1563,12 +1563,12 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             // Treat them as if they were `self` to match `Desugar.cc`.
             // TODO: Clean up after direct desugaring is complete.
             // https://github.com/Shopify/sorbet/issues/671
-            ast::Send::Flags flags;
+            bool isPrivateOk;
             if (ast::isa_tree<ast::EmptyTree>(receiver)) {
                 receiver = MK::Self(location.copyWithZeroLength());
-                flags.isPrivateOk = true;
+                isPrivateOk = true;
             } else {
-                flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+                isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
             if (methodName == core::Names::blockGiven_p()) {
@@ -1587,6 +1587,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
 
             auto argumentsNode = callNode->arguments;
+
+            ast::Send::Flags flags;
+            flags.isPrivateOk = isPrivateOk;
 
             absl::Span<pm_node_t *> prismArgs;
             if (argumentsNode != nullptr) {
