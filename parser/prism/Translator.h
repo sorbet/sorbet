@@ -133,9 +133,6 @@ private:
     ast::ExpressionPtr desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
                                     ast::Array::ENTRY_store elements);
 
-    std::unique_ptr<parser::Node> translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
-                                                         std::unique_ptr<parser::Node> sendNode);
-
     ast::ExpressionPtr desugarBegin(pm_begin_node *beginNode);
     ast::Rescue::RESCUE_CASE_store desugarRescueCases(pm_rescue_node *firstRescueNode);
     uint32_t rescueCaseEndPos(const pm_rescue_node &rescueNode);
