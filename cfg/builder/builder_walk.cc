@@ -966,7 +966,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Cast &c) {
                 // c.typeExpr will be nullptr in the lambdaTLet case (i.e., T.let(->(){}, ...)).
                 // It's moved into the `Kernel#<lambda T.let>`
-                if (c.typeExpr != nullptr) {
+                if (!ast::isa_tree<ast::EmptyTree>(c.typeExpr)) {
                     // This is kind of gross, but it is the only way to ensure that the bits in the
                     // type expression make it into the CFG for LSP to hit on their locations.
                     LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());

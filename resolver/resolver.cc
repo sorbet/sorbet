@@ -1946,6 +1946,7 @@ class ResolveTypeMembersAndFieldsWalk {
         if (auto *kernelLambda = isKernelProcOrLambda(job.cast->arg)) {
             kernelLambda->fun = core::Names::lambdaTLet();
             kernelLambda->addPosArg(move(job.cast->typeExpr));
+            job.cast->typeExpr = ast::MK::EmptyTree();
         }
 
         return true;
