@@ -895,6 +895,42 @@ unique_ptr<parser::Node> Translator::translateSendAssignment(pm_node_t *node, co
                                                                                              move(lhs));
 }
 
+pair<core::LocOffsets, core::LocOffsets>
+Translator::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver, absl::Span<pm_node_t *> prismArgs,
+                                 pm_location_t closingLoc, pm_node_t *blockNode) {
+    auto result = initialLoc;
+
+    if (receiver) {
+        result = translateLoc(receiver->location).join(result);
+    }
+
+    if (closingLoc.start && closingLoc.end) { // explicit `( )` or `[ ]` around the params
+        result = result.join(translateLoc(closingLoc));
+    }
+
+    if (!prismArgs.empty()) { // Extend to last argument's location, if any.
+        // For index expressions, the closing_loc can come before the last
+        // argument's location:
+        //     a[1, 2] = 3
+        //           ^     closing loc
+        //               ^ last arg loc
+        result = result.join(translateLoc(prismArgs.back()->location));
+    }
+
+    core::LocOffsets blockLoc;
+    if (blockNode) {
+        blockLoc = translateLoc(blockNode->location);
+
+        // The block pass argument is not stored with the other arguments, so we handle it separately here.
+        if (PM_NODE_TYPE_P(blockNode, PM_BLOCK_ARGUMENT_NODE)) {
+            auto blockPassArgLoc = translateLoc(blockNode->location);
+            result = result.join(blockPassArgLoc);
+        }
+    }
+
+    return {result, blockLoc};
+}
+
 unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
@@ -1178,32 +1214,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (callNode->block == nullptr) { // There's no block, so the `sendLoc` and `sendWithBlockLoc` are the same.
                 sendLoc = sendWithBlockLoc;
             } else { // There's a block, so we need to calculate the location of the "send" node, excluding it.
-                sendLoc = messageLoc;
-                blockLoc = translateLoc(callNode->block->location);
-
-                if (callNode->receiver) {
-                    sendLoc = translateLoc(callNode->receiver->location).join(sendLoc);
-                }
-
-                if (callNode->closing_loc.start &&
-                    callNode->closing_loc.end) { // explicit `( )` or `[ ]` around the params
-                    sendLoc = sendLoc.join(translateLoc(callNode->closing_loc));
-                }
-
-                if (!prismArgs.empty()) { // Extend to last argument's location, if any.
-                    // For index expressions, the closing_loc can come before the last
-                    // argument's location:
-                    //     a[1, 2] = 3
-                    //           ^     closing loc
-                    //               ^ last arg loc
-                    sendLoc = sendLoc.join(translateLoc(prismArgs.back()->location));
-                }
-
-                // The block pass arugment is not stored with the other arguments, so we handle it separately here.
-                if (PM_NODE_TYPE_P(callNode->block, PM_BLOCK_ARGUMENT_NODE)) {
-                    auto blockPassArgLoc = translateLoc(callNode->block->location);
-                    sendLoc = sendLoc.join(blockPassArgLoc);
-                }
+                std::tie(sendLoc, blockLoc) = computeMethodCallLoc(messageLoc, callNode->receiver, prismArgs,
+                                                                   callNode->closing_loc, callNode->block);
             }
             auto sendLoc0 = sendLoc.copyWithZeroLength();
 
@@ -2916,8 +2928,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto receiverExpr = MK::Constant(location, core::Symbols::Kernel());
             auto receiver =
                 make_node_with_expr<parser::ResolvedConst>(move(receiverExpr), location, core::Symbols::Kernel());
-            auto sendNode = make_unique<parser::Send>(location, move(receiver), core::Names::lambda(),
-                                                      translateLoc(lambdaNode->operator_loc), NodeVec{});
+
+            absl::Span<pm_node_t *> prismArgs; // TODO: set this.
+            auto operatorLoc = translateLoc(lambdaNode->operator_loc);
+            auto [sendLoc, blockLoc] =
+                computeMethodCallLoc(operatorLoc, nullptr, prismArgs, lambdaNode->closing_loc, lambdaNode->body);
+            auto sendNode =
+                make_unique<parser::Send>(sendLoc, move(receiver), core::Names::lambda(), operatorLoc, NodeVec{});
 
             return translateCallWithBlock(node, move(sendNode));
         }
