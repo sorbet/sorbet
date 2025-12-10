@@ -1305,6 +1305,17 @@ private:
             : ptr1(tagSymbol(Tag::ResolvedSymbol, symbol)), ptr2(reinterpret_cast<tagged_storage>(original.release())) {
         }
 
+        // We have to explicitly delete these, because otherwise making a copy of a `Storage`
+        // (including indirectly, via a `ConstantLit`) would have the effect of making two "owners"
+        // of the `UnresolvedConstantLit` held inside the `Storage`, which would then cause a double
+        // `delete` of `original` in the `~Storage()` destructor (one for each copy).
+        Storage(const Storage &) = delete;
+        Storage &operator=(const Storage &) = delete;
+        // TODO: We could also consider defining move constructors here?
+        // But it's not clear how you should reasonably get access to a `ConstantLit`, and not a `ConstantLit *` or
+        // `ConstantLit &` such that you would want to be able to move it. We're not using it yet,
+        // so let's just let there be no implicitly defined move constructors until we realize we need it.
+
         ~Storage() {
             switch (tag()) {
                 case Tag::KnownSymbol: {
