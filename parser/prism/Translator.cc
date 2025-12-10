@@ -1571,6 +1571,10 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 flags.isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
             }
 
+            if (methodName == core::Names::blockGiven_p()) {
+                throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
+            }
+
             // When the message is empty, like `foo.()`, the message location is the
             // same as the call operator location
             core::LocOffsets methodNameLoc;
@@ -1661,10 +1665,6 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                         }
                     }
                 }
-            }
-
-            if (methodName == core::Names::blockGiven_p()) {
-                throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
