@@ -31,6 +31,7 @@ Context Context::withFile(FileRef file) const {
 }
 
 Context Context::withOwner(SymbolRef sym) const {
+    ENFORCE(sym.isMethod() || sym.isClassOrModule());
     return Context(state, sym, file);
 }
 
@@ -39,6 +40,7 @@ MutableContext MutableContext::withFile(FileRef file) const {
 }
 
 MutableContext MutableContext::withOwner(SymbolRef sym) const {
+    ENFORCE(sym.isMethod() || sym.isClassOrModule());
     return MutableContext(state, sym, file);
 }
 
