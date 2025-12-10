@@ -1340,6 +1340,39 @@ std::unique_ptr<parser::Node> Translator::translate_TODO(pm_node_t *node) {
     return make_unique<ExprOnly>(move(expr), loc);
 }
 
+// `parentLoc` is the location of the entire parent node, which we need for the `foo(...)` case
+// (as the location used for the `<fwd-block>` argument).
+Translator::DesugaredBlockArgument Translator::desugarBlock(pm_node_t *block, pm_arguments_node *otherArgs,
+                                                            pm_location_t parentLoc) {
+    // TODO: handle combination of both `hasFwdArgs` and block.
+    // https://sorbet.run/?arg=--print=desugar-tree&arg=--parser=original#%23%20typed%3A%20false%0A%0Adef%20forwarding_with_literal_block%28...%29%0A%20%20%20%20%23%20Notice%20this%20passes%20%60%3Cfwd-block%3E%60%20*and*%20a%20%60do%20...%20end%60%20block%0A%20%20%20%20to_s%28...%29%20%7B%20%22my%20big%20beautiful%20block%20literal%22%20%7D%0Aend%0A%0Adef%20forwarding_with_block_pass%28...%29%0A%20%20%20%20%23%20Notice%20this%20passes%20%60%3Cfwd-block%3E%60%20*and*%20an%20%60%3CErrorNode%3E%60%0A%20%20%20%20to_s%28...%2C%20%26%22my%20block%20pass%20arg%22%29%0Aend
+
+    if (block == nullptr) {
+        return std::monostate{}; // This call has no block
+    }
+
+    if (PM_NODE_TYPE_P(block, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
+        auto blockNode = down_cast<pm_block_node>(block);
+
+        return desugarLiteralBlock(blockNode->body, blockNode->parameters, blockNode->base.location,
+                                   blockNode->opening_loc);
+    } else {
+        ENFORCE(PM_NODE_TYPE_P(block, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
+        auto *bp = down_cast<pm_block_argument_node>(block);
+
+        return desugarBlockPassArgument(bp);
+    }
+
+    auto hasFwdArgs = otherArgs != nullptr && PM_NODE_FLAG_P(otherArgs, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
+
+    // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &<fwd-block>)`.
+    if (hasFwdArgs) {
+        return BlockPassArg{MK::Local(translateLoc(parentLoc), core::Names::fwdBlock())};
+    }
+
+    return std::monostate{}; // This call has no block
+}
+
 Translator::LiteralBlock Translator::desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
                                                          pm_location_t blockLocation,
                                                          pm_location_t blockNodeOpeningLoc) {
@@ -1702,28 +1735,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
 
-            DesugaredBlockArgument block;
-            if (auto *prismBlock = callNode->block) {
-                if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
-                    auto blockNode = down_cast<pm_block_node>(prismBlock);
-
-                    block = desugarLiteralBlock(blockNode->body, blockNode->parameters, blockNode->base.location,
-                                                blockNode->opening_loc);
-                } else {
-                    ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
-                    auto *bp = down_cast<pm_block_argument_node>(prismBlock);
-
-                    block = desugarBlockPassArgument(bp);
-                }
-            }
-
-            if (hasFwdArgs) { // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &b)`.
-                ENFORCE(std::holds_alternative<std::monostate>(block),
-                        "The parser should have rejected a call with both a block pass "
-                        "argument and forwarded args (e.g. `foo(&b, ...)`)");
-
-                block = BlockPassArg{MK::Local(sendWithBlockLoc, core::Names::fwdBlock())};
-            }
+            auto block = desugarBlock(callNode->block, callNode->arguments, callNode->closing_loc);
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
