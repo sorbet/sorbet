@@ -261,10 +261,6 @@ private:
     Translator enterModuleContext() const;
     Translator enterClassContext() const;
 
-    std::pair<core::LocOffsets, core::LocOffsets> computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver,
-                                                                       absl::Span<pm_node_t *> prismArgs,
-                                                                       pm_location_t closing_loc, pm_node_t *blockNode);
-
     struct LiteralBlock {
         ast::ExpressionPtr expr;
     };
@@ -274,6 +270,11 @@ private:
     };
 
     using DesugaredBlockArgument = std::variant<std::monostate, LiteralBlock, BlockPassArg>;
+
+    std::pair<core::LocOffsets, core::LocOffsets> computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver,
+                                                                       absl::Span<pm_node_t *> prismArgs,
+                                                                       pm_location_t closing_loc,
+                                                                       const Translator::DesugaredBlockArgument &block);
 
     DesugaredBlockArgument desugarBlock(pm_node_t *block, pm_arguments_node *otherArgs, pm_location_t parentLoc);
 
