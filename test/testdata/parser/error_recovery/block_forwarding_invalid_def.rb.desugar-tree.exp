@@ -1,0 +1,21 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def case7_block_param_and_forwarding<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :bar, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>)
+  end
+
+  def case7a_anonymous_block_param_and_forwarding<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :bar, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>)
+  end
+
+  def case8_all_three<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :foo, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>) do ||
+      "literal block"
+    end
+  end
+
+  def case8a_all_three_anonymous<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :foo, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>) do ||
+      "literal block"
+    end
+  end
+end
