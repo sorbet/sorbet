@@ -426,13 +426,33 @@ module T::Private::Methods
     run_sig_block_for_key(method_to_key(method))
   end
 
-  CONST_WEAK_MAP = ObjectSpace::WeakMap.new
-  private_constant :CONST_WEAK_MAP
+  case ENV["EXPERIMENT_REMOVE_ID2REF"]
+  when nil, "0", "false"
+    CONST_WEAK_MAP = ObjectSpace::WeakMap.new
+    private_constant :CONST_WEAK_MAP
 
-  # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
-  private_class_method def self.method_owner_and_name_to_key(owner, name)
-    CONST_WEAK_MAP[owner.object_id] ||= owner # rubocop:disable Lint/HashCompareByIdentity
-    [owner.object_id, name]
+    # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
+    private_class_method def self.method_owner_and_name_to_key(owner, name)
+      CONST_WEAK_MAP[owner.object_id] ||= owner # rubocop:disable Lint/HashCompareByIdentity
+      [owner.object_id, name]
+    end
+
+    private_class_method def self.key_to_method(key)
+      id, name = key
+      obj = CONST_WEAK_MAP[id]
+      obj.instance_method(name)
+    end
+
+  else
+    private_class_method def self.method_owner_and_name_to_key(owner, name)
+      "#{owner.object_id}##{name}"
+    end
+
+    private_class_method def self.key_to_method(key)
+      id, name = key.split("#")
+      obj = ObjectSpace._id2ref(id.to_i)
+      obj.instance_method(name)
+    end
   end
 
   private_class_method def self.method_to_key(method)
@@ -443,11 +463,6 @@ module T::Private::Methods
     method_owner_and_name_to_key(method.owner, method.name)
   end
 
-  private_class_method def self.key_to_method(key)
-    id, name = key
-    obj = CONST_WEAK_MAP[id]
-    obj.instance_method(name)
-  end
 
   private_class_method def self.run_sig_block_for_key(key, force_type_init: false)
     blk = @sig_wrappers[key]
