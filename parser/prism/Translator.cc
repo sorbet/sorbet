@@ -1598,8 +1598,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             if (callNode->block == nullptr) { // There's no block, so the `sendLoc` and `sendWithBlockLoc` are the same.
                 sendLoc = sendWithBlockLoc;
             } else { // There's a block, so we need to calculate the location of the "send" node, excluding it.
-                std::tie(sendLoc, blockLoc) = computeMethodCallLoc(messageLoc, callNode->receiver, prismArgs,
-                                                                   callNode->closing_loc, callNode->block);
+                std::tie(sendLoc, blockLoc) =
+                    computeMethodCallLoc(messageLoc, receiverNode, prismArgs, callNode->closing_loc, callNode->block);
             }
             auto sendLoc0 = sendLoc.copyWithZeroLength();
 
