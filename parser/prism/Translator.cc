@@ -23,7 +23,7 @@ using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
 bool hasExpr(const std::unique_ptr<parser::Node> &node) {
     if (node && !node->hasDesugaredExpr()) {
-        categoryCounterInc("Prism fallback", "hasExpr was false");
+        categoryCounterInc("Prism fallback", "hasExpr(parser::Node) was false");
         throw PrismFallback{};
     }
 
@@ -1504,39 +1504,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             supportedCallType &= supportedBlock;
 
-            // TODO: Direct desugaring support for conditional sends is not implemented yet.
-            supportedCallType &= !PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION);
+            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+                categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
+                throw PrismFallback{};
+            }
 
             if (!directlyDesugar || !supportedCallType) {
-                // We previously popped the kwargs Hash off, in the hopes that we can directly desugar it.
-                // Turns out we can't, so let's put it back (and in the correct order).
-                if (kwargsHash) {
-                    args.emplace_back(move(kwargsHash));
-                }
-
-                if (prismBlock && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)) {
-                    // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
-                    // but not a literal block with `{ ... }` or `do ... end`
-
-                    args.emplace_back(move(blockPassNode));
-                }
-
-                if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                    sendNode = make_unique<parser::CSend>(sendLoc, move(receiver), name, messageLoc, move(args));
-                } else {
-                    sendNode = make_unique<parser::Send>(sendLoc, move(receiver), name, messageLoc, move(args));
-                }
-
-                if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
-                    // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
-                    // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
-                    // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
-                    // The legacy parser inverts this , with a parent "Block" with a child
-                    // "Send".
-                    return translateCallWithBlock(prismBlock, move(sendNode));
-                }
-
-                return sendNode;
+                categoryCounterInc("Prism fallback", "supportedCallType was false");
+                throw PrismFallback{};
             }
 
             ast::Send::Flags flags;
@@ -1863,19 +1838,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
             // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
-            auto callTargetNode = down_cast<pm_call_target_node>(node);
-
-            auto receiver = translate(callTargetNode->receiver);
-            auto name = translateConstantName(callTargetNode->name);
-            auto messageLoc = translateLoc(callTargetNode->message_loc);
-
-            if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                // Handle conditional send, e.g. `self&.target1, self&.target2 = 1, 2`
-                // It's not valid Ruby, but the parser needs to support it for the diagnostics to work
-                return make_unique<parser::CSend>(location, move(receiver), name, messageLoc, NodeVec{});
-            } else { // Regular send, e.g. `self.target1, self.target2 = 1, 2`
-                return make_unique<parser::Send>(location, move(receiver), name, messageLoc, NodeVec{});
-            }
+            categoryCounterInc("Prism fallback", "PM_CALL_TARGET_NODE");
+            throw PrismFallback{};
         }
         case PM_CASE_MATCH_NODE: { // A pattern-matching `case` statement that only uses `in` (and not `when`)
             auto caseMatchNode = down_cast<pm_case_match_node>(node);
@@ -2566,7 +2530,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto blockArgumentNode = forwardingSuperNode->block;
 
             if (blockArgumentNode != nullptr) { // always a PM_BLOCK_NODE
-                return translateCallWithBlock(up_cast(blockArgumentNode), move(translatedNode));
+                categoryCounterInc("Prism fallback", "PM_FORWARDING_SUPER_NODE with block");
+                throw PrismFallback{}; // TODO: Not implemented yet
             }
 
             return translatedNode;
@@ -2951,22 +2916,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)), kwrestLoc, sorbetName);
         }
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
-            auto lambdaNode = down_cast<pm_lambda_node>(node);
-
-            absl::Span<pm_node_t *> prismArgs; // TODO: set this.
-            auto operatorLoc = translateLoc(lambdaNode->operator_loc);
-
-            auto receiverExpr = MK::Constant(operatorLoc, core::Symbols::Kernel());
-            auto receiver =
-                make_node_with_expr<parser::ResolvedConst>(move(receiverExpr), operatorLoc, core::Symbols::Kernel());
-
-            auto [sendLoc, blockLoc] =
-                computeMethodCallLoc(operatorLoc, nullptr, prismArgs, lambdaNode->closing_loc, lambdaNode->body);
-
-            auto sendNode =
-                make_unique<parser::Send>(sendLoc, move(receiver), core::Names::lambda(), operatorLoc, NodeVec{});
-
-            return translateCallWithBlock(node, move(sendNode));
+            categoryCounterInc("Prism fallback", "PM_LAMBDA_NODE");
+            throw PrismFallback{};
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a local variable, e.g. `local &&= false`
             return translateVariableAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(
@@ -3524,43 +3475,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_SUPER_NODE: { // A `super` call with explicit args, like `super()`, `super(a, b)`
             // If there's no arguments (except a literal block argument), then it's a `PM_FORWARDING_SUPER_NODE`.
-
-            auto superNode = down_cast<pm_super_node>(node);
-
-            auto blockArgumentNode = superNode->block;
-            NodeVec returnValues;
-
-            if (blockArgumentNode) { // Adjust the location to exclude the literal block argument.
-                const uint8_t *start = superNode->base.location.start;
-                const uint8_t *end;
-
-                if (superNode->rparen_loc.end) { // Try to use the location of the `)`, if any
-                    end = superNode->rparen_loc.end;
-                } else { // Otherwise, use the end of the last argument
-                    auto *argP = superNode->arguments;
-
-                    constexpr auto msg =
-                        "`PM_SUPER_NODE` must have arguments if it has no parens. If there's no args and no "
-                        "parens, then you wouldn't even have a `PM_SUPER_NODE` to begin with, but a "
-                        "`PM_FORWARDING_SUPER` instead)";
-                    ENFORCE(argP, msg);
-
-                    auto args = absl::MakeSpan(argP->arguments.nodes, argP->arguments.size);
-                    ENFORCE(!args.empty(), msg);
-                    end = args.back()->location.end;
-                }
-
-                location = translateLoc(start, end);
-            }
-
-            if (blockArgumentNode != nullptr && PM_NODE_TYPE_P(blockArgumentNode, PM_BLOCK_NODE)) {
-                returnValues = translateArguments(superNode->arguments);
-                auto superNode = make_unique<parser::Super>(location, move(returnValues));
-                return translateCallWithBlock(blockArgumentNode, move(superNode));
-            }
-
-            returnValues = translateArguments(superNode->arguments, blockArgumentNode);
-            return make_unique<parser::Super>(location, move(returnValues));
+            categoryCounterInc("Prism fallback", "PM_SUPER_NODE");
+            throw PrismFallback{};
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`, or `a:` in `{a: 1}`
             auto symNode = down_cast<pm_symbol_node>(node);
@@ -4271,6 +4187,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
             auto multiLhsNode = translateMultiTargetLhs(multiTargetNode, mlhsLoc);
 
             params.emplace_back(move(multiLhsNode));
+            throw PrismFallback{};
         } else {
             params.emplace_back(translate(n));
         }
