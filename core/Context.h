@@ -67,7 +67,7 @@ public:
     // In general, `ctx.selfClass()->selfType()` is the type of `self` at any point in a tree traversal.
     ClassOrModuleRef selfClass();
 
-    // Like `selfClass`, but does not create singleton classes (returns a non-existent symbol).
+    // Like `selfClass`, but does not create singleton classes (returns a non-existent symbol if it does not exist).
     ClassOrModuleRef lookupSelfClass() const;
 
     MutableContext withOwner(SymbolRef sym) const;
