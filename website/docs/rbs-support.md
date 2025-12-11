@@ -662,6 +662,8 @@ box = Box.new #: Box[Integer]
 box << 42
 ```
 
+> **Note**: do not name the type member `T` to avoid confusion with the [`T` module from Sorbet](https://github.com/sorbet/sorbet/blob/master/rbi/sorbet/t.rbi).
+
 RBS generics do not use `T::Generic`, thus the `[]` method doesn't exist at runtime and Sorbet will report an error if you try to use it:
 
 ```ruby
