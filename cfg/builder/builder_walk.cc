@@ -183,19 +183,14 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     return make_insn<Alias>(typeParam);
 }
 
-ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
+bool isLambdaTLet(const ast::ExpressionPtr &expr) {
     auto send = ast::cast_tree<ast::Send>(expr);
-    if (send == nullptr || send->hasNonBlockArgs() ||
-        (send->fun != core::Names::lambda() && send->fun != core::Names::proc())) {
-        return nullptr;
+    if (send == nullptr) {
+        return false;
     }
 
     auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
-    if (recv == nullptr || recv->symbol() != core::Symbols::Kernel()) {
-        return nullptr;
-    }
-
-    return send;
+    return recv != nullptr && recv->symbol() == core::Symbols::Kernel() && send->fun == core::Names::lambdaTLet();
 }
 
 } // namespace
@@ -976,16 +971,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Cast &c) {
-                if (auto *kernelLambda = isKernelProcOrLambda(c.arg)) {
-                    kernelLambda->fun = core::Names::lambdaTLet();
-                    kernelLambda->addPosArg(move(c.typeExpr));
-                } else {
+                if (!ast::isa_tree<ast::EmptyTree>(c.typeExpr)) {
                     // This is kind of gross, but it is the only way to ensure that the bits in the
                     // type expression make it into the CFG for LSP to hit on their locations.
                     LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
                     current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
                     // Ensure later passes don't delete the results of the typeExpr.
                     current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
+                } else {
+                    // c.typeExpr will be empty in the lambdaTLet case (i.e., T.let(->(){}, ...)).
+                    // It's moved into the `Kernel#<lambda T.let>`
+                    ENFORCE(isLambdaTLet(c.arg));
                 }
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
                 core::LocOffsets argLoc = c.arg.loc();
