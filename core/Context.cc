@@ -1,8 +1,5 @@
 #include "core/Context.h"
 #include "core/GlobalState.h"
-#include "main/pipeline/semantic_extension/SemanticExtension.h"
-#include <algorithm>
-#include <string>
 
 template class std::vector<sorbet::core::NameRef>;
 template class std::vector<sorbet::core::FileRef>;
@@ -15,6 +12,13 @@ namespace sorbet::core {
 ClassOrModuleRef MutableContext::selfClass() {
     if (this->owner.isClassOrModule()) {
         return this->owner.asClassOrModuleRef().data(this->state)->singletonClass(this->state);
+    }
+    return this->owner.enclosingClass(this->state);
+}
+
+ClassOrModuleRef MutableContext::lookupSelfClass() const {
+    if (this->owner.isClassOrModule()) {
+        return this->owner.asClassOrModuleRef().data(this->state)->lookupSingletonClass(this->state);
     }
     return this->owner.enclosingClass(this->state);
 }
@@ -34,6 +38,7 @@ Context Context::withFile(FileRef file) const {
 }
 
 Context Context::withOwner(SymbolRef sym) const {
+    ENFORCE(sym.isMethod() || sym.isClassOrModule());
     return Context(state, sym, file);
 }
 
@@ -42,6 +47,7 @@ MutableContext MutableContext::withFile(FileRef file) const {
 }
 
 MutableContext MutableContext::withOwner(SymbolRef sym) const {
+    ENFORCE(sym.isMethod() || sym.isClassOrModule());
     return MutableContext(state, sym, file);
 }
 

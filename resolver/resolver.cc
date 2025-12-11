@@ -1988,7 +1988,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
             scope = ctx.owner.enclosingClass(ctx);
         } else {
-            scope = ctx.selfClass();
+            scope = ctx.lookupSelfClass();
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
             if (job.atTopLevel && ctx.owner.isClassOrModule()) {
