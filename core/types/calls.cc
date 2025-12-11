@@ -3034,7 +3034,7 @@ public:
             auto fieldName = fieldNameTy.name.show(gs);
 
             auto suggestType = res.returnType;
-            if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit() &&
+            if (definingMethodName != core::Names::initialize() && !definingMethodName.isAnyStaticInitName(gs) &&
                 definingMethodName != core::Names::beforeAngles()) {
                 suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
             }
