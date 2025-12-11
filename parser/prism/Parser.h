@@ -29,6 +29,14 @@ public:
     pm_error_level_t level;
 };
 
+struct SimpleParseResult {
+    std::vector<ParseError> parseErrors;
+    std::vector<core::LocOffsets> commentLocations;
+
+    SimpleParseResult(std::vector<ParseError> parseErrors, std::vector<core::LocOffsets> commentLocations)
+        : parseErrors(std::move(parseErrors)), commentLocations(std::move(commentLocations)) {}
+};
+
 class Parser final {
     // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
     static constexpr std::string_view ParsedRubyVersion = "3.4.0";
@@ -69,6 +77,13 @@ public:
 
     pm_location_t getZeroWidthLocation() const;
     pm_location_t convertLocOffsets(core::LocOffsets loc) const;
+
+    bool isTUntyped(pm_node_t *node) const;
+    bool isT(pm_node_t *node) const;
+    bool isSetterCall(pm_node_t *node) const;
+    bool isSafeNavigationCall(pm_node_t *node) const;
+    bool isVisibilityCall(pm_node_t *node) const;
+    bool isAttrAccessorCall(pm_node_t *node) const;
 
 private:
     std::vector<ParseError> collectErrors();
@@ -114,6 +129,10 @@ public:
 
     const std::vector<ParseError> &getParseErrors() const {
         return parseErrors;
+    }
+
+    const Parser &getParser() const {
+        return parser;
     }
 };
 
