@@ -84,7 +84,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     if (opts.noErrorSections) {
         gs.includeErrorSections = false;
     }
-    gs.parseWithPrism = opts.parser == options::Parser::PRISM;
+    gs.parseWithPrism = opts.cacheSensitiveOptions.usePrismParser;
     gs.ruby3KeywordArgs = opts.ruby3KeywordArgs;
     gs.suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
     if (!opts.uniquelyDefinedBehavior) {
@@ -430,7 +430,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
-    auto parser = opts.parser;
+    auto parser = opts.cacheSensitiveOptions.usePrismParser ? options::Parser::PRISM : options::Parser::ORIGINAL;
 
     ast::ParsedFile rewritten{nullptr, file};
     rewritten.setCached(tree != nullptr);

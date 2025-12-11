@@ -1044,7 +1044,8 @@ void readOptions(Options &opts,
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
 
-        opts.parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
+        auto parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
+        opts.cacheSensitiveOptions.usePrismParser = (parser == Parser::PRISM);
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
         opts.didYouMean = raw["did-you-mean"].as<bool>();
