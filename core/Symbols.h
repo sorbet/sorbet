@@ -94,8 +94,10 @@ public:
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
+            static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint16_t *>(this);
+            static_assert(sizeof(Flags) == sizeof(rawBits));
 
             // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
             return rawBits & VALID_BITS_MASK;
@@ -244,8 +246,10 @@ public:
 
         uint8_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint8_t));
+            static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            static_assert(sizeof(Flags) == sizeof(rawBits));
             // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
             return rawBits & VALID_BITS_MASK;
         }
@@ -317,8 +321,10 @@ public:
 
         uint8_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint8_t));
+            static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            static_assert(sizeof(Flags) == sizeof(rawBits));
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
@@ -409,8 +415,10 @@ public:
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
+            static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint16_t *>(this);
+            static_assert(sizeof(Flags) == sizeof(rawBits));
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
