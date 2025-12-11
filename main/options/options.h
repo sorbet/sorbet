@@ -218,8 +218,10 @@ struct Options {
 
         uint8_t serialize() const {
             static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
+            static_assert(sizeof(CacheSensitiveOptions) == sizeof(VALID_BITS_MASK));
             // Can replace this with std::bit_cast in C++20
             auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            static_assert(sizeof(CacheSensitiveOptions) == sizeof(rawBits));
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
