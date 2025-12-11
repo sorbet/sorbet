@@ -45,7 +45,7 @@ vector<ast::ParsedFile> runNamer(core::GlobalState &gs, ast::ParsedFile tree) {
     vector<ast::ParsedFile> v;
     v.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
-    core::FoundDefHashes foundHashes; // compute this just for test coverage
+    core::FoundDefHashesResult foundHashes; // compute this just for test coverage
     auto canceled = namer::Namer::run(gs, absl::Span<ast::ParsedFile>(v), *workers, &foundHashes);
     ENFORCE(!canceled);
     return v;

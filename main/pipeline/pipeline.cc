@@ -1131,7 +1131,7 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 } // namespace
 
 [[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                        WorkerPool &workers, core::FoundDefHashes *foundHashes) {
+                        WorkerPool &workers, core::FoundDefHashesResult *foundHashes) {
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
@@ -1327,7 +1327,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 
 ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
-                                           core::FoundDefHashes *foundHashes) {
+                                           core::FoundDefHashesResult *foundHashes) {
     auto canceled = name(gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
     if (canceled) {
         return ast::ParsedFilesOrCancelled::cancel(move(what), workers);

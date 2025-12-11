@@ -222,6 +222,17 @@ struct FoundDefHashes {
     FoundFieldHashes fieldHashes;
 };
 
+// There are some extra fields that we need to compute, but which are only used as out parameters to
+// feed into other places. By contrast, the entire FoundDefHashes struct is embedded in the FileHash
+// structure (one per file in the project), so for these extra properties that we don't need to
+// persist, we want a quick way to drop them later, thus the inheritance.
+struct FoundDefHashesResult : public FoundDefHashes {
+    // For classes, we're only sensitive to the order of classes, but we don't actually care what
+    // the individual classes are (because we don't currently attempt to delete and re-enter classes)
+    // so we don't need to store a whole vector like we do for other fields in FoundDefHashes.
+    uint32_t foundClassesHash = 0;
+};
+
 // When a file is edited, we run index and resolve it using an local (empty) GlobalState.
 // We then hash the symbols defined in that local GlobalState, and use the result to quickly decide
 // whether "something" changed, or whether nothing changed (and thus we can take the fast path).
