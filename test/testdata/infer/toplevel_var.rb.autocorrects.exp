@@ -1,4 +1,4 @@
 # -- test/testdata/infer/toplevel_var.rb --
 # typed: strict
-@foo = T.let(1, T.nilable(Integer)) # error: The singleton class instance variable `@foo` must be declared using `T.let` when specifying `# typed: strict`
+@foo = T.let(1, Integer) # error: The singleton class instance variable `@foo` must be declared using `T.let` when specifying `# typed: strict`
 # ------------------------------
