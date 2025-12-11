@@ -206,13 +206,17 @@ struct Options {
 
         bool sorbetPackages : 1;
 
+        // The two parsers can produce slightly different desugar trees or
+        // error messages, which we don't want to intermix.
+        bool usePrismParser : 1;
+
         // HELLO! adding/removing MUST also change this number!!
-        constexpr static uint8_t NUMBER_OF_FLAGS = 7;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 8;
 
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
             : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
-              rspecRewriterEnabled(false), runningUnderAutogen(false), sorbetPackages(false) {}
+              rspecRewriterEnabled(false), runningUnderAutogen(false), sorbetPackages(false), usePrismParser(false) {}
 
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
