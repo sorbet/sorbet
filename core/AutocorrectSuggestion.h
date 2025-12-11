@@ -18,8 +18,11 @@ struct AutocorrectSuggestion {
 
     bool isDidYouMean;
 
-    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false)
-        : title(title), edits(edits), isDidYouMean(isDidYouMean) {}
+    std::optional<std::string> deDupKey;
+
+    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false,
+                          std::optional<std::string> deDupKey = std::nullopt)
+        : title(title), edits(edits), isDidYouMean(isDidYouMean), deDupKey(deDupKey) {}
 
     // Reads all the files to be edited, and then accumulates all the edits that need to be applied
     // to those files into a resulting string with all edits applied. Does not write those back out

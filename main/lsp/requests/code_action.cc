@@ -134,12 +134,22 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto errors = typechecker.retypecheck({file});
     vector<core::AutocorrectSuggestion::Edit> allEdits;
+    vector<string> seenDeDupKeys;
     for (auto &error : errors) {
         if (!error->isSilenced && !error->autocorrects.empty()) {
             // Collect all autocorrects regardless of range to compile into a "source" autocorrect whose scope is
             // the whole file.
             for (auto &autocorrect : error->autocorrects) {
-                allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+                if (autocorrect.deDupKey.has_value()) {
+                    if (absl::c_find(seenDeDupKeys, autocorrect.deDupKey) == seenDeDupKeys.end()) {
+                        for (auto &edit : autocorrect.edits) {
+                            allEdits.push_back(edit);
+                        }
+                        seenDeDupKeys.push_back(autocorrect.deDupKey.value());
+                    }
+                } else {
+                    allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+                }
             }
 
             // We return code actions corresponding to any error that encloses the request's range. Matching request

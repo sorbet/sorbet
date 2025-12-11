@@ -298,7 +298,8 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         suggestionTitle = fmt::format("Convert existing import to `{}`", importTypeMethod);
     }
 
-    core::AutocorrectSuggestion suggestion(suggestionTitle, edits);
+    string deDupKey = fmt::format("{} {}", importTypeMethod, packageToImport);
+    core::AutocorrectSuggestion suggestion(suggestionTitle, edits, false /* isDidYouMean */, deDupKey);
     return {suggestion};
 }
 
@@ -342,9 +343,10 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     }
     ENFORCE(insertionLoc.exists());
 
+    string deDupKey = exportLine;
     core::AutocorrectSuggestion suggestion(
         fmt::format("Export `{}` in package `{}`", newExportName, mangledName_.owner.show(gs)),
-        {{insertionLoc, fmt::format("\n  {}", exportLine)}});
+        {{insertionLoc, fmt::format("\n  {}", exportLine)}}, false /* isDidYouMean */, deDupKey);
     return {suggestion};
 }
 

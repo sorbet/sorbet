@@ -447,7 +447,15 @@ class VisibilityCheckerPass final {
             importAutocorrect->edits.insert(importAutocorrect->edits.end(),
                                             make_move_iterator(exportAutocorrect->edits.begin()),
                                             make_move_iterator(exportAutocorrect->edits.end()));
-            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits)});
+            ENFORCE(importAutocorrect->deDupKey.has_value());
+            ENFORCE(exportAutocorrect->deDupKey.has_value());
+            // NOTE(neil): this means if there's a seperate autocorrect that just imports, or just exports, we will
+            // insert a duplicate, since the deDupKeys will be different. Inserting a duplicate here isn't a big issue
+            // though and it's a rare case.
+            optional<string> deDupKey =
+                fmt::format("{}{}", importAutocorrect->deDupKey.value(), exportAutocorrect->deDupKey.value());
+            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits),
+                                                         false /* isDidYouMean */, deDupKey});
         } else if (importAutocorrect.has_value()) {
             e.addAutocorrect(std::move(importAutocorrect.value()));
         } else if (exportAutocorrect.has_value()) {
