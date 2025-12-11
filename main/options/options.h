@@ -127,7 +127,6 @@ constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
 struct Options {
     Printers print;
     Phase stopAfterPhase = Phase::INFERENCER;
-    Parser parser = Parser::ORIGINAL;
 
     // Should we monitor STDOUT for HUP and exit if it hangs up. This is a
     // workaround for https://bugzilla.mindrot.org/show_bug.cgi?id=2863

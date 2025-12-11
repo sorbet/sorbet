@@ -416,7 +416,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto opts = RangeAssertion::parseOptions(assertions);
     opts.censorForSnapshotTests = true;
     opts.sorbetPackagesHint = "PACKAGE_ERROR_HINT";
-    opts.parser = sorbet::test::parser;
+    opts.cacheSensitiveOptions.usePrismParser = (sorbet::test::parser == realmain::options::Parser::PRISM);
 
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
     auto workers = WorkerPool::create(0, *logger);
@@ -534,7 +534,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (!test.minimizeRBI.empty()) {
         auto gsForMinimize = emptyGs->deepCopyGlobalState();
         auto opts = realmain::options::Options{};
-        opts.parser = parser;
+        opts.cacheSensitiveOptions.usePrismParser = (parser == realmain::options::Parser::PRISM);
         auto minimizeRBI = test.folder + test.minimizeRBI;
         realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
         auto printerConfig = realmain::options::PrinterConfig{};
