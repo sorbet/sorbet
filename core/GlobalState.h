@@ -232,6 +232,87 @@ public:
     }
 };
 
+template <typename T> class SymbolRange;
+
+template <typename T> class SymbolIterator {
+    friend class SymbolRange<T>;
+
+    uint32_t ix;
+
+    SymbolIterator(uint32_t ix) : ix{ix} {}
+
+public:
+    T operator*() {
+        return T::fromRaw(this->ix);
+    }
+
+    bool operator==(const SymbolIterator other) const {
+        return this->ix == other.ix;
+    }
+
+    bool operator!=(const SymbolIterator other) const {
+        return this->ix != other.ix;
+    }
+
+    SymbolIterator operator++() {
+        ++this->ix;
+        return *this;
+    }
+};
+
+template <typename T> class SymbolRange {
+    friend class SymbolTableOffsets;
+
+    const uint32_t _begin;
+    const uint32_t _end;
+
+    SymbolRange(uint32_t _begin, uint32_t _end) : _begin{_begin}, _end{_end} {}
+
+public:
+    using iterator = SymbolIterator<T>;
+
+    SymbolRange() = delete;
+
+    iterator begin() {
+        return SymbolIterator<T>{this->_begin};
+    }
+
+    iterator end() {
+        return SymbolIterator<T>{this->_end};
+    }
+};
+
+// A snapshot of the size of all of GlobalState's symbol tables at a point in time.
+class SymbolTableOffsets {
+    // The defaults of `1` are because all of our symbol tables reserve index `0` for the invalid entry, so all valid
+    // indices will start at offset `1` into their respective vector.
+    unsigned int classAndModulesOffset = 1;
+    unsigned int methodsOffset = 1;
+    unsigned int fieldsOffset = 1;
+    unsigned int typeMembersOffset = 1;
+    unsigned int typeParametersOffset = 1;
+
+public:
+    SymbolTableOffsets() = default;
+
+    explicit SymbolTableOffsets(const GlobalState &gs);
+
+    SymbolRange<ClassOrModuleRef> classOrModuleRefs(const GlobalState &gs) const;
+
+    // Was this symbol defined in the set defined by these offsets?
+    bool includes(ClassOrModuleRef ref) const {
+        return this->classAndModulesOffset <= ref.id();
+    }
+
+    SymbolRange<MethodRef> methodRefs(const GlobalState &gs) const;
+
+    SymbolRange<FieldRef> fieldRefs(const GlobalState &gs) const;
+
+    SymbolRange<TypeMemberRef> typeMemberRefs(const GlobalState &gs) const;
+
+    SymbolRange<TypeParameterRef> typeParameterRefs(const GlobalState &gs) const;
+};
+
 class GlobalState final {
     friend NameRef;
     friend ClassOrModule;
@@ -588,6 +669,39 @@ public:
 
     bool shouldReportErrorOn(FileRef file, ErrorClass what) const;
 
+    // The set of classes or modules that have been introduced in the current stratum.
+    SymbolRange<ClassOrModuleRef> newClassOrModules() const {
+        return this->symbolOffsets.classOrModuleRefs(*this);
+    }
+
+    // The set of methods that have been introduced in the current stratum.
+    SymbolRange<MethodRef> newMethods() const {
+        return this->symbolOffsets.methodRefs(*this);
+    }
+
+    // The set of fields that have been introduced in the current stratum.
+    SymbolRange<FieldRef> newFields() const {
+        return this->symbolOffsets.fieldRefs(*this);
+    }
+
+    // The set of type members that have been introduced in the current stratum.
+    SymbolRange<TypeMemberRef> newTypeMembers() const {
+        return this->symbolOffsets.typeMemberRefs(*this);
+    }
+
+    // The set of type parameters that have been introduced in the current stratum.
+    SymbolRange<TypeParameterRef> newTypeParameters() const {
+        return this->symbolOffsets.typeParameterRefs(*this);
+    }
+
+    const SymbolTableOffsets &newSymbols() const {
+        return this->symbolOffsets;
+    }
+
+    void updateSymbolTableOffsets() {
+        this->symbolOffsets = SymbolTableOffsets(*this);
+    }
+
 private:
     struct DeepCloneHistoryEntry {
         int globalStateId;
@@ -626,6 +740,8 @@ private:
     bool nameTableFrozen = true;
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
+
+    SymbolTableOffsets symbolOffsets;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.

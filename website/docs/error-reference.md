@@ -2858,6 +2858,12 @@ Sorbet treats the `::Class` and `::Module` classes in the Ruby standard library 
 
 Note that this error is only reported in `# typed: strict` files and above. Downgrading the file that declares an explicit subclass of `Module` to `typed: true` will silence this error. (This also applies to direct subclasses of `Class`, but note that directly subclassing `Class` is rejected by the Ruby VM at runtime.)
 
+## 5082
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+When running in package-directed mode, Sorbet requires that classes and modules not be reopened once their package has been type checked. This error indicates that a class or module has been re-opened for the purpose of adding a mixin.
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside a Ruby block.

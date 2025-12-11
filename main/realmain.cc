@@ -672,6 +672,10 @@ int realmain(int argc, char *argv[]) {
                     }
                 }
             }
+
+            // Update offsets for the next stratum we process. We do this at the end of this loop to ensure that the
+            // first loop iteration includes all of the payload symbols.
+            gs->updateSymbolTableOffsets();
         }
 
         // getAndClearHistogram ensures that we don't accidentally submit a high-cardinality histogram to statsd
