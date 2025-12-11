@@ -497,27 +497,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto shouldReportErrorOn =
                         cctx.ctx.state.shouldReportErrorOn(cctx.ctx.file, core::errors::CFG::UndeclaredVariable);
                     if (foundError && shouldReportErrorOn) {
-                        auto zeroLoc = a.loc.copyWithZeroLength();
-                        auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
-                        core::NameRef fieldKind;
-                        if (ident->kind == ast::UnresolvedIdent::Kind::Class) {
-                            fieldKind = core::Names::class_();
-                        } else {
-                            ENFORCE(cctx.ctx.owner.isMethod());
-                            auto owner = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
-                            if (owner.data(cctx.ctx)->isSingletonClass(cctx.ctx)) {
-                                fieldKind = core::Names::singletonClassInstance();
-                            } else {
-                                fieldKind = core::Names::instance();
-                            }
-                        }
-
-                        // Mutate a.rhs before walking.
-                        a.rhs =
-                            ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
-                                           move(a.rhs), ast::MK::String(zeroLoc, fieldKind),
-                                           ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name),
-                                           ast::MK::Symbol(zeroLoc, ident->name));
                     }
                     ENFORCE(lhs.exists());
                 } else {

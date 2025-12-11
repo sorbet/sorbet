@@ -17,6 +17,10 @@ ClassOrModuleRef MutableContext::selfClass() {
 }
 
 ClassOrModuleRef MutableContext::lookupSelfClass() const {
+    return Context(*this).lookupSelfClass();
+}
+
+ClassOrModuleRef Context::lookupSelfClass() const {
     if (this->owner.isClassOrModule()) {
         return this->owner.asClassOrModuleRef().data(this->state)->lookupSingletonClass(this->state);
     }

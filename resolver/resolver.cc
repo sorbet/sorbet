@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
+#include "core/errors/cfg.h"
 #include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
@@ -2542,6 +2543,32 @@ class ResolveTypeMembersAndFieldsWalk {
 
         auto cast = ast::cast_tree<ast::Cast>(*recur);
         if (cast == nullptr) {
+            auto scope =
+                uid->kind == ast::UnresolvedIdent::Kind::Class ? ctx.owner.enclosingClass(ctx) : ctx.lookupSelfClass();
+            auto prior = scope.data(ctx)->findMember(ctx, uid->name);
+            // Only want to do this transformation if we're going to report an undeclared variable error,
+            // to avoid polluting the tree. Unfortunately, it means we take a forward reference on CFG error classes.
+            if (!prior.exists() && ctx.state.shouldReportErrorOn(ctx.file, core::errors::CFG::UndeclaredVariable)) {
+                // It was not declared with `T.let`
+                auto zeroLoc = asgn.loc.copyWithZeroLength();
+                auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
+                core::NameRef fieldKind;
+                if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
+                    fieldKind = core::Names::class_();
+                } else if (scope.data(ctx)->isSingletonClass(ctx)) {
+                    fieldKind = core::Names::singletonClassInstance();
+                } else {
+                    fieldKind = core::Names::instance();
+                }
+
+                auto definingMethodName =
+                    ctx.owner.isClassOrModule() ? core::Names::staticInit() : ctx.owner.asMethodRef().data(ctx)->name;
+                asgn.rhs =
+                    ast::MK::Send4(asgn.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
+                                   move(asgn.rhs), ast::MK::String(zeroLoc, fieldKind),
+                                   ast::MK::String(zeroLoc, definingMethodName), ast::MK::Symbol(zeroLoc, uid->name));
+            }
+
             return false;
         }
 
