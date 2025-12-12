@@ -2040,6 +2040,16 @@ public:
         });
     }
 
+    ast::ExpressionPtr ignoreBadTypeMember(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+
+        asgn.rhs =
+            ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(), asgn.loc.copyWithZeroLength(),
+                                ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
+
+        return handleAssignment(ctx, move(tree));
+    }
+
     ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
@@ -2057,11 +2067,7 @@ public:
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
                 e.setHeader("`{}` cannot be used at the top-level", "type_member");
             }
-            auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
-                                            asgn.loc.copyWithZeroLength(),
-                                            ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
-
-            return handleAssignment(ctx, ast::MK::Assign(asgn.loc, move(asgn.lhs), move(send)));
+            return ignoreBadTypeMember(ctx, move(tree));
         }
 
         // Prevent a crash by validating the arguments before we do any symbol lookups or manipulations
@@ -2076,10 +2082,7 @@ public:
                     auto replacementRange = core::Loc(ctx.file, firstArgLoc.endPos(), argsLoc.endPos());
                     e.replaceWith("Delete extra args", replacementRange, "");
                 }
-                auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
-                                                asgn.loc.copyWithZeroLength(),
-                                                ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
-                return handleAssignment(ctx, ast::MK::Assign(asgn.loc, move(asgn.lhs), move(send)));
+                return ignoreBadTypeMember(ctx, move(tree));
             }
         }
 
