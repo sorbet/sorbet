@@ -1,4 +1,4 @@
 s(:def, :f,
   s(:params,
-    s(:restparam, :*),
+    s(:restparam, :<restargs>),
     s(:kwrestarg, :**)), nil)
