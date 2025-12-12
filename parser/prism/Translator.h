@@ -169,7 +169,7 @@ private:
     core::NameRef translateConstantName(pm_constant_id_t constantId);
 
     // Generates a unique name for a directly desugared `ast::ExpressionPtr`.
-    core::NameRef nextUniqueDesugarName(core::NameRef original);
+    core::NameRef nextUniqueName(core::NameRef original);
 
     // Structure for holding the scaffolding needed for op-assignment desugaring
     struct OpAsgnScaffolding {
