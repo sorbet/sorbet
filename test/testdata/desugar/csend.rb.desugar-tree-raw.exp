@@ -782,5 +782,63 @@ ClassDef{
         }
       ]
     }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $3>
+          }
+          rhs = Self
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (class ::NilClass)
+            orig = nullptr
+          }
+          fun = <U ===>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $3>
+            }
+          ]
+        }
+        thenp = Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (class ::<Magic>)
+            orig = nullptr
+          }
+          fun = <U <nil-for-safe-navigation>>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $3>
+            }
+          ]
+        }
+        elsep = Send{
+          flags = {}
+          recv = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $3>
+          }
+          fun = <U can_be_private>
+          block = nullptr
+          pos_args = 0
+          args = [
+          ]
+        }
+      }
+    }
   ]
 }
