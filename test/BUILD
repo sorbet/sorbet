@@ -136,6 +136,9 @@ prism_location_test_suite(
             "prism_regression/call_block_param_and_forwarding.rb",
             "prism_regression/constants_invalid.rb",
             "prism_regression/invalid/unterminated_regex.rb",
+            "prism_regression/csend_brackets.rb",
+            "prism_regression/block_symbol.rb",
+            "prism_regression/multiple_numbered_params.rb",
 
             # Sorbet's parser includes the last newline in the `<ErrorNode>`, but Prism doesn't.
             "prism_regression/invalid/missing_node.rb",
