@@ -5,7 +5,7 @@ Begin {
       params = Params {
         params = [
           RestParam {
-            name = <U *>
+            name = <U <restargs>>
           }
         ]
       }
@@ -48,7 +48,7 @@ Begin {
       params = Params {
         params = [
           RestParam {
-            name = <U *>
+            name = <U <restargs>>
           }
           ForwardArg {
           }

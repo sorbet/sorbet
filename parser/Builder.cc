@@ -1559,7 +1559,7 @@ public:
             checkReservedForNumberedParameters(name->view(), nameLoc);
         } else {
             // case like 'def m(*); end'
-            nm = core::Names::star();
+            nm = core::Names::restargs();
         }
 
         return make_unique<RestParam>(loc, nm, nameLoc);

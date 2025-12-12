@@ -176,7 +176,7 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
 
     auto &rest = cast_tree_nonnull<RestParam>(*it);
     if (auto local = cast_tree<UnresolvedIdent>(rest.expr)) {
-        if (local->name != core::Names::star()) {
+        if (local->name != core::Names::restargs()) {
             return;
         }
 
@@ -2121,7 +2121,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::ForwardedRestArg *fra) {
-                auto var = ast::MK::Local(loc, core::Names::star());
+                auto var = ast::MK::Local(loc, core::Names::restargs());
                 result = MK::Splat(loc, move(var));
             },
             [&](parser::Alias *alias) {

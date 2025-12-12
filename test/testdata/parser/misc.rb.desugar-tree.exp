@@ -217,7 +217,7 @@ rescue <emptyTree>::<C E> => x
       <emptyTree>
     end)
 
-  def sfoo<<todo method>>(**, &<blk>)
+  def sfoo<<todo method>>(*<restargs>, &<blk>)
     <emptyTree>
   end
 
