@@ -628,7 +628,7 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(amper);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::blkArg(), ++uniqueCounter_);
         }
 
         return make_unique<BlockParam>(loc, nm);

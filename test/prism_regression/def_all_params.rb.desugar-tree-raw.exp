@@ -52,7 +52,7 @@ ClassDef{
           name = <P <U **> $2>
         } } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <P <U &> $3>
+          name = <P <U <blk>> $3>
         } }]
       rhs = EmptyTree
     }
