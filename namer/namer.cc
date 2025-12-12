@@ -2084,10 +2084,10 @@ public:
         }
 
         bool isTypeTemplate = send->fun == core::Names::typeTemplate();
-        auto onSymbol =
-            isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
+        auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx)
+                                       : ctx.owner.asClassOrModuleRef();
         ENFORCE(onSymbol.exists());
-        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
+        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
         ENFORCE(sym.exists());
 
         // Simulates how squashNames in handleAssignment also creates a ConstantLit
