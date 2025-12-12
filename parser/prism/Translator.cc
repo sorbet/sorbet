@@ -2901,7 +2901,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 constexpr uint32_t length = "**"sv.size();
                 kwrestLoc = core::LocOffsets{location.beginPos() + length, location.endPos()};
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName = nextUniqueParserName(core::Names::starStar());
+                sorbetName = core::Names::starStar();
 
                 // This location *does* include the whole `**`.
                 kwrestLoc = location;
@@ -4279,7 +4279,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
             constexpr uint32_t length = "&"sv.size();
             blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + length, blockParamLoc.endPos()};
         } else { // An anonymous block parameter, like `def foo(&)`
-            enclosingBlockParamName = nextUniqueParserName(core::Names::ampersand());
+            enclosingBlockParamName = core::Names::ampersand();
         }
 
         auto blockParamExpr = MK::BlockParam(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));
@@ -5487,10 +5487,6 @@ unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
 
 core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
     return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
-}
-
-core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
 }
 
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {

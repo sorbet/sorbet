@@ -35,9 +35,7 @@ class Translator final {
     //   or a dummy value.
     // - The pointer variables point to the "active" count for each translator,
     //   which is either pointing to its own storage, or to a parent's storage.
-    uint16_t parserUniqueCounterStorage;  // Minics the `Builder::Impl.uniqueCounter_` in `parser/Builder.cc`
     uint32_t desugarUniqueCounterStorage; // Minics the `DesugarContext.uniqueCounter`  in `ast/desugar/Desugar.cc`
-    uint16_t &parserUniqueCounter;        // Points to the active `parserUniqueCounterStorage`
     uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
@@ -55,8 +53,7 @@ public:
     Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> parseErrors,
                bool directlyDesugar, bool preserveConcreteSyntax)
         : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
-          preserveConcreteSyntax(preserveConcreteSyntax), parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
-          parserUniqueCounter(this->parserUniqueCounterStorage),
+          preserveConcreteSyntax(preserveConcreteSyntax), desugarUniqueCounterStorage(1),
           desugarUniqueCounter(this->desugarUniqueCounterStorage) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
@@ -70,8 +67,7 @@ private:
                bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           directlyDesugar(parent.directlyDesugar), preserveConcreteSyntax(parent.preserveConcreteSyntax),
-          parserUniqueCounterStorage(9999), desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
-          parserUniqueCounter(parent.parserUniqueCounter),
+          desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName),
@@ -168,9 +164,6 @@ private:
     template <typename PrismLhsNode, typename SorbetLHSNode, bool checkForDynamicConstAssign = false>
     std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
-
-    // Generates a unique name for a `parser::Node`.
-    core::NameRef nextUniqueParserName(core::NameRef original);
 
     // Generates a unique name for a directly desugared `ast::ExpressionPtr`.
     core::NameRef nextUniqueDesugarName(core::NameRef original);
