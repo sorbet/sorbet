@@ -106,7 +106,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     if ::NilClass.===(<assignTemp>$3)
       ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
     else
-      <assignTemp>$3.can_be_private()
+      <self>.can_be_private()
     end
   end
 end

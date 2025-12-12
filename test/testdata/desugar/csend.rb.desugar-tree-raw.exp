@@ -827,11 +827,8 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
-          recv = UnresolvedIdent{
-            kind = Local
-            name = <D <U <assignTemp>> $3>
-          }
+          flags = {privateOk}
+          recv = Self
           fun = <U can_be_private>
           block = nullptr
           pos_args = 0
