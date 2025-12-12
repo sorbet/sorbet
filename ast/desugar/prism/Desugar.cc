@@ -179,7 +179,7 @@ private:
     core::NameRef translateConstantName(pm_constant_id_t constantId);
 
     // Generates a unique name for a directly desugared `ast::ExpressionPtr`.
-    core::NameRef nextUniqueDesugarName(core::NameRef original);
+    core::NameRef nextUniqueName(core::NameRef original);
 
     // Structure for holding the scaffolding needed for op-assignment desugaring
     struct OpAsgnScaffolding {
@@ -656,7 +656,7 @@ ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, 
 
     // Create the temporary local variable before desugaring the receiver,
     // so that chained csends get numbered from left to right.
-    auto receiverTempLocalVarName = nextUniqueDesugarName(core::Names::assignTemp());
+    auto receiverTempLocalVarName = nextUniqueName(core::Names::assignTemp());
 
     auto receiverExpr = desugar(receiver);
 
@@ -769,8 +769,8 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
 
     ast::InsSeq::STATS_store stats;
 
-    core::NameRef tempRhs = nextUniqueDesugarName(core::Names::assignTemp());
-    core::NameRef tempExpanded = nextUniqueDesugarName(core::Names::assignTemp());
+    core::NameRef tempRhs = nextUniqueName(core::Names::assignTemp());
+    core::NameRef tempExpanded = nextUniqueName(core::Names::assignTemp());
 
     int i = 0;
     int before = 0, after = 0;
@@ -848,7 +848,7 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
 
 std::pair</* param */ ast::ExpressionPtr, /* multi-assign statement */ ast::ExpressionPtr>
 Desugarer::desugarMlhsParam(core::LocOffsets loc, pm_multi_target_node *lhs) {
-    core::NameRef destructureParam = nextUniqueDesugarName(core::Names::destructureArg());
+    core::NameRef destructureParam = nextUniqueName(core::Names::destructureArg());
     auto param = MK::Local(loc, destructureParam);
     auto destructuringExpr = desugarMlhs(loc, lhs, MK::Local(loc, destructureParam));
 
@@ -937,7 +937,7 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
         assgnArgs.emplace_back(move(rhs));
         auto cond =
             MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
-        auto tempResult = nextUniqueDesugarName(s->fun);
+        auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
         auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
@@ -979,7 +979,7 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
             auto decl = MK::Assign(location, MK::cpRef(lhs), move(rhs));
 
             // Create a temporary variable and assign the original value to it
-            core::NameRef tempName = nextUniqueDesugarName(core::Names::statTemp());
+            core::NameRef tempName = nextUniqueName(core::Names::statTemp());
             auto tempAssign = MK::Assign(location, tempName, move(originalValue));
 
             // Final assignment from temp to LHS
@@ -1026,7 +1026,7 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
         assgnArgs.emplace_back(move(rhs));
         auto cond =
             MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
-        auto tempResult = nextUniqueDesugarName(s->fun);
+        auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
         auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
@@ -1051,7 +1051,7 @@ Desugarer::OpAsgnScaffolding Desugarer::copyArgsForOpAsgn(ast::Send *s) {
     const auto numPosArgs = s->numPosArgs();
     ast::InsSeq::STATS_store stats;
     stats.reserve(numPosArgs + 2);
-    core::NameRef tempRecv = nextUniqueDesugarName(s->fun);
+    core::NameRef tempRecv = nextUniqueName(s->fun);
     stats.emplace_back(MK::Assign(s->loc, tempRecv, move(s->recv)));
     ast::Send::ARGS_store readArgs;
     ast::Send::ARGS_store assgnArgs;
@@ -1064,7 +1064,7 @@ Desugarer::OpAsgnScaffolding Desugarer::copyArgsForOpAsgn(ast::Send *s) {
 
     for (auto &arg : s->posArgs()) {
         auto argLoc = arg.loc();
-        core::NameRef name = nextUniqueDesugarName(s->fun);
+        core::NameRef name = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
         readArgs.emplace_back(MK::Local(argLoc, name));
         assgnArgs.emplace_back(MK::Local(argLoc, name));
@@ -1189,7 +1189,7 @@ ast::ExpressionPtr Desugarer::desugarAndOrReference(core::LocOffsets location, a
             auto decl = MK::Assign(location, MK::cpRef(lhs), move(rhs));
 
             // Create a temporary variable and assign the original value to it
-            core::NameRef tempName = nextUniqueDesugarName(core::Names::statTemp());
+            core::NameRef tempName = nextUniqueName(core::Names::statTemp());
             auto tempAssign = MK::Assign(location, tempName, move(originalValue));
 
             // Final assignment from temp to LHS
@@ -1240,7 +1240,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast
         assgnArgs.emplace_back(move(rhs));
         auto cond =
             MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
-        auto tempResult = nextUniqueDesugarName(s->fun);
+        auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
         auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
@@ -1298,7 +1298,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignCSend(core::LocOffsets location, as
         assgnArgs.emplace_back(move(rhs));
         auto cond =
             MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
-        auto tempResult = nextUniqueDesugarName(s->fun);
+        auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
         auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
@@ -1733,7 +1733,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
             // E.g. `x = 1 && 2` becomes `x = (temp = 1; temp ? temp : 2)`
-            core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::andAnd());
+            core::NameRef tempLocalName = nextUniqueName(core::Names::andAnd());
 
             // Capture locations before any moves
             auto lhsLoc = lhs.loc();
@@ -2011,7 +2011,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             }
 
             auto predicate = desugar(caseMatchNode->predicate);
-            auto tempName = nextUniqueDesugarName(core::Names::assignTemp());
+            auto tempName = nextUniqueName(core::Names::assignTemp());
             auto assignExpr = MK::Assign(predicate.loc(), tempName, move(predicate));
 
             return MK::InsSeq1(location, move(assignExpr), move(resultExpr));
@@ -2096,7 +2096,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 predicateLoc = translateLoc(caseNode->predicate->location);
 
                 if (needsTempLocal) {
-                    tempName = nextUniqueDesugarName(core::Names::assignTemp());
+                    tempName = nextUniqueName(core::Names::assignTemp());
                 }
             }
 
@@ -2546,7 +2546,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             } else {
                 // Create a temporary local variable, and use it as the block parameter.
                 // We'll later assign it to the actual loop variable(s) in the block body
-                core::NameRef forLoopTempVarName = nextUniqueDesugarName(core::Names::forTemp());
+                core::NameRef forLoopTempVarName = nextUniqueName(core::Names::forTemp());
                 ast::MethodDef::PARAMS_store params;
                 params.emplace_back(MK::Local(location, forLoopTempVarName));
 
@@ -3073,7 +3073,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             // For non-reference expressions, create a temporary variable so we don't evaluate the LHS twice.
             // E.g. `x = 1 || 2` becomes `x = (temp = 1; temp ? temp : 2)`
-            core::NameRef tempLocalName = nextUniqueDesugarName(core::Names::orOr());
+            core::NameRef tempLocalName = nextUniqueName(core::Names::orOr());
             auto lhsLoc = lhs.loc();
             auto rhsLoc = rhs.loc();
             auto condLoc =
@@ -3209,7 +3209,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             // Create a RescueCase with empty exceptions and a <rescueTemp> variable
             ast::RescueCase::EXCEPTION_store exceptions;
-            auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+            auto rescueTemp = nextUniqueName(core::Names::rescueTemp());
 
             auto resbodyLoc = core::LocOffsets{keywordLoc.beginPos(), location.endPos()};
 
@@ -4275,7 +4275,7 @@ ast::ExpressionPtr Desugarer::desugarSymbolProc(pm_symbol_node *symbol) {
     auto loc0 = loc.copyWithZeroLength(); // TODO: shorten name
 
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
-    core::NameRef tempName = nextUniqueDesugarName(core::Names::blockPassTemp());
+    core::NameRef tempName = nextUniqueName(core::Names::blockPassTemp());
 
     // `temp[0]`
     auto recv = MK::Send1(loc0, MK::Local(loc0, tempName), core::Names::squareBrackets(), loc0, MK::Int(loc0, 0));
@@ -4731,7 +4731,7 @@ ast::ExpressionPtr Desugarer::desugarKeyValuePairs(core::LocOffsets loc, pm_node
     ast::InsSeq::STATS_store updateStmts;
     updateStmts.reserve(kvPairs.size());
 
-    auto acc = nextUniqueDesugarName(core::Names::hashTemp());
+    auto acc = nextUniqueName(core::Names::hashTemp());
 
     ast::desugar::DuplicateHashKeyCheck hashKeyDupes(ctx);
     ast::Send::ARGS_store mergeValues;
@@ -4971,7 +4971,7 @@ ast::Rescue::RESCUE_CASE_store Desugarer::desugarRescueCases(pm_rescue_node *fir
                 // variable.
                 varExpr = desugar(rescueNode->reference);
             } else { // Handle cases that require a synthetic temporary variable, like `rescue => <rescueTemp>$123`
-                auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+                auto rescueTemp = nextUniqueName(core::Names::rescueTemp());
                 auto referenceLoc = translateLoc(rescueNode->reference->location);
                 varExpr = ast::MK::Local(referenceLoc, rescueTemp);
 
@@ -5025,7 +5025,7 @@ ast::Rescue::RESCUE_CASE_store Desugarer::desugarRescueCases(pm_rescue_node *fir
             }
         } else {
             // Bare rescue clause with no variable - create synthetic temp variable
-            auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
+            auto rescueTemp = nextUniqueName(core::Names::rescueTemp());
             auto syntheticVarLoc = (exceptionsNodes.empty() && ast::isa_tree<ast::EmptyTree>(rescueBodyExpr))
                                        ? rescueKeywordLoc.copyWithZeroLength()
                                        : rescueKeywordLoc;
@@ -5267,7 +5267,7 @@ core::NameRef Desugarer::translateConstantName(pm_constant_id_t constant_id) {
     return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
 }
 
-core::NameRef Desugarer::nextUniqueDesugarName(core::NameRef original) {
+core::NameRef Desugarer::nextUniqueName(core::NameRef original) {
     return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++uniqueCounter);
 }
 
