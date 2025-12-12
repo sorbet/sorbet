@@ -561,37 +561,49 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
             auto callTargetNode = down_cast<pm_call_target_node>(c);
             auto receiverNode = callTargetNode->receiver;
 
-            if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                categoryCounterInc("Prism fallback", "PM_CALL_TARGET_NODE with PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
-                throw PrismFallback{};
-            }
-
-            ast::ExpressionPtr receiver;
-            if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
-                receiver = MK::Self(zcloc);
-            } else {
-                receiver = desugar(receiverNode);
-            }
-
-            // Unsupported nodes are desugared to an empty tree.
-            // Treat them as if they were `self` to match `Desugar.cc`.
-            // TODO: Clean up after direct desugaring is complete.
-            // https://github.com/Shopify/sorbet/issues/671
-            ast::Send::Flags flags;
-            if (ast::isa_tree<ast::EmptyTree>(receiver)) {
-                receiver = MK::Self(zcloc);
-                flags.isPrivateOk = true;
-            } else {
-                flags.isPrivateOk = PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-            }
-
             auto methodName = translateConstantName(callTargetNode->name);
             auto methodNameLoc = translateLoc(callTargetNode->message_loc);
 
-            ast::Send::ARGS_store arguments;
-            arguments.emplace_back(move(val));
+            if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+                auto body = [&val](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc,
+                                   core::NameRef methodName, core::LocOffsets methodNameLoc) {
+                    ast::Send::ARGS_store arguments;
+                    arguments.emplace_back(move(val));
 
-            stats.emplace_back(MK::Send(cloc, move(receiver), methodName, methodNameLoc, 1, move(arguments), flags));
+                    return MK::Send(parentLoc, move(receiverTempLocal), methodName, methodNameLoc, 1, move(arguments));
+                };
+
+                auto recvLoc = translateLoc(receiverNode->location);
+                auto csendRecvExpr = desugar(receiverNode);
+                auto expr = desugarConditionalSend(cloc, move(csendRecvExpr), recvLoc, callTargetNode->name,
+                                                   callTargetNode->message_loc, body);
+                stats.emplace_back(move(expr));
+            } else {
+                ast::ExpressionPtr receiver;
+                if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
+                    receiver = MK::Self(zcloc);
+                } else {
+                    receiver = desugar(receiverNode);
+                }
+
+                // Unsupported nodes are desugared to an empty tree.
+                // Treat them as if they were `self` to match `Desugar.cc`.
+                // TODO: Clean up after direct desugaring is complete.
+                // https://github.com/Shopify/sorbet/issues/671
+                ast::Send::Flags flags;
+                if (ast::isa_tree<ast::EmptyTree>(receiver)) {
+                    receiver = MK::Self(zcloc);
+                    flags.isPrivateOk = true;
+                } else {
+                    flags.isPrivateOk = PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+                }
+
+                ast::Send::ARGS_store arguments;
+                arguments.emplace_back(move(val));
+
+                stats.emplace_back(
+                    MK::Send(cloc, move(receiver), methodName, methodNameLoc, 1, move(arguments), flags));
+            }
         } else {
             ast::ExpressionPtr lh = desugar(c);
             if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
