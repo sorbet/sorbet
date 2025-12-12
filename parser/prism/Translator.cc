@@ -1461,8 +1461,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         }
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable
-                        // reference, like `f(&<&>)`.
-                        blockPassArg = MK::Local(blockPassLoc.copyEndWithZeroLength(), core::Names::ampersand());
+                        // reference, like `f(&<blk>)`.
+                        blockPassArg = MK::Local(blockPassLoc.copyEndWithZeroLength(), core::Names::blkArg());
                         supportedBlock = true;
                     }
                 }
@@ -4279,7 +4279,7 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
             constexpr uint32_t length = "&"sv.size();
             blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + length, blockParamLoc.endPos()};
         } else { // An anonymous block parameter, like `def foo(&)`
-            enclosingBlockParamName = nextUniqueParserName(core::Names::ampersand());
+            enclosingBlockParamName = nextUniqueParserName(core::Names::blkArg());
         }
 
         auto blockParamExpr = MK::BlockParam(blockParamLoc, MK::Local(blockParamLoc, enclosingBlockParamName));

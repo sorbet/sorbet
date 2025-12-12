@@ -46,7 +46,7 @@ Begin {
             name = <P <U <kwargs>> $2>
           }
           BlockParam {
-            name = <P <U &> $3>
+            name = <P <U <blk>> $3>
           }
         ]
       }
