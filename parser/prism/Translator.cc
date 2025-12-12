@@ -4691,7 +4691,7 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
 }
 
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++desugarUniqueCounter);
+    return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++uniqueCounter);
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
