@@ -790,11 +790,8 @@ ClassDef{
               ]
             }
             elsep = Send{
-              flags = {}
-              recv = UnresolvedIdent{
-                kind = Local
-                name = <D <U <assignTemp>> $21>
-              }
+              flags = {privateOk}
+              recv = Self
               fun = <U target1=>
               block = nullptr
               pos_args = 1
@@ -860,11 +857,8 @@ ClassDef{
               ]
             }
             elsep = Send{
-              flags = {}
-              recv = UnresolvedIdent{
-                kind = Local
-                name = <D <U <assignTemp>> $22>
-              }
+              flags = {privateOk}
+              recv = Self
               fun = <U target2=>
               block = nullptr
               pos_args = 1
