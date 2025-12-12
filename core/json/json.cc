@@ -119,8 +119,6 @@ string_view nameKindToJSONString(NameKind kind) {
 // Maps UniqueNameKind to the proto enum name strings from proto/Name.proto.
 string_view uniqueNameKindToJSONString(UniqueNameKind kind) {
     switch (kind) {
-        case UniqueNameKind::Parser:
-            return "PARSER"sv;
         case UniqueNameKind::Desugar:
             return "DESUGAR"sv;
         case UniqueNameKind::Namer:
