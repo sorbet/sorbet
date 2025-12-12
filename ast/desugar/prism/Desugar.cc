@@ -46,9 +46,7 @@ class Desugarer final {
     //   or a dummy value.
     // - The pointer variables point to the "active" count for each translator,
     //   which is either pointing to its own storage, or to a parent's storage.
-    uint16_t parserUniqueCounterStorage;  // Minics the `Builder::Impl.uniqueCounter_` in `parser/Builder.cc`
     uint32_t desugarUniqueCounterStorage; // Minics the `DesugarContext.uniqueCounter`  in `ast/desugar/Desugar.cc`
-    uint16_t &parserUniqueCounter;        // Points to the active `parserUniqueCounterStorage`
     uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
@@ -66,8 +64,7 @@ class Desugarer final {
 public:
     Desugarer(const Parser &parser, core::MutableContext ctx, bool preserveConcreteSyntax,
               core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName)
-        : parser(parser), ctx(ctx), preserveConcreteSyntax(preserveConcreteSyntax), parserUniqueCounterStorage(1),
-          desugarUniqueCounterStorage(1), parserUniqueCounter(this->parserUniqueCounterStorage),
+        : parser(parser), ctx(ctx), preserveConcreteSyntax(preserveConcreteSyntax), desugarUniqueCounterStorage(1),
           desugarUniqueCounter(this->desugarUniqueCounterStorage), enclosingBlockParamLoc(enclosingBlockParamLoc),
           enclosingBlockParamName(enclosingBlockParamName) {}
 
@@ -81,8 +78,7 @@ private:
               core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName, bool isInModule,
               bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), preserveConcreteSyntax(parent.preserveConcreteSyntax),
-          parserUniqueCounterStorage(9999), desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
-          parserUniqueCounter(parent.parserUniqueCounter),
+          desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
           enclosingMethodName(enclosingMethodName), enclosingBlockParamLoc(enclosingBlockParamLoc),
@@ -181,9 +177,6 @@ private:
     template <typename PrismLhsNode, bool checkForDynamicConstAssign = false>
     ast::ExpressionPtr translateConst(pm_node_t *node);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
-
-    // Generates a unique name for a `parser::Node`.
-    core::NameRef nextUniqueParserName(core::NameRef original);
 
     // Generates a unique name for a directly desugared `ast::ExpressionPtr`.
     core::NameRef nextUniqueDesugarName(core::NameRef original);
@@ -5284,10 +5277,6 @@ ast::ExpressionPtr Desugarer::translateConst(pm_node_t *anyNode) {
 
 core::NameRef Desugarer::translateConstantName(pm_constant_id_t constant_id) {
     return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
-}
-
-core::NameRef Desugarer::nextUniqueParserName(core::NameRef original) {
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
 }
 
 core::NameRef Desugarer::nextUniqueDesugarName(core::NameRef original) {
