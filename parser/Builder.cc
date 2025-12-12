@@ -108,7 +108,6 @@ public:
 
     GlobalState &gs_;
     core::FileRef file_;
-    uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
     ruby_parser::base_driver *driver_;
 
@@ -631,12 +630,7 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else { // An anonymous block parameter, like `def foo(&)`
             loc = tokLoc(amper);
-            const auto &ctx = driver_->lex.context;
-            nm = ctx.inDef && !ctx.inLambda && !ctx.inBlock
-                     ? core::Names::ampersand()
-                     // We still want a unique name for anonymous block params in block parameter lists (vs
-                     // method def parameter lists) so that they don't shadow the method parameter list.
-                     : gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
+            nm = core::Names::ampersand();
         }
 
         return make_unique<BlockParam>(loc, nm);

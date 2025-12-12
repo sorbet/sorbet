@@ -4690,10 +4690,6 @@ core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
     return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
 }
 
-core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
-    return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
-}
-
 core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
     return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++desugarUniqueCounter);
 }
