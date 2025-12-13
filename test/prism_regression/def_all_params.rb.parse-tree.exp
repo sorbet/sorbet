@@ -40,7 +40,7 @@ Begin {
       params = Params {
         params = [
           RestParam {
-            name = <U *>
+            name = <U <restargs>>
           }
           Kwrestarg {
             name = <P <U **> $2>

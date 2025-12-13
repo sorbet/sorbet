@@ -112,7 +112,7 @@ ClassDef{
       name = <U has_anonymous_rest_args><<U <todo method>>>
       params = [RestParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <U *>
+          name = <U <restargs>>
         } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -143,7 +143,7 @@ ClassDef{
               args = [
                 UnresolvedIdent{
                   kind = Local
-                  name = <U *>
+                  name = <U <restargs>>
                 }
               ]
             }
