@@ -360,7 +360,7 @@ public:
 
         auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
         // sorbet_get_sp returns VALUE** (pointer to stack pointer), loading gives VALUE* (i64*)
-        auto *spElemTy = llvm::PointerType::get(module.getContext(), 0);
+        auto *spElemTy = llvm::Type::getInt64PtrTy(module.getContext());
         llvm::Value *sp = builder.CreateLoad(spElemTy, spPtr);
         for (auto iter = std::next(instr->arg_begin(), recvArgOffset); iter < instr->arg_end(); ++iter) {
             sp = builder.CreateCall(module.getFunction("sorbet_pushValueStack"), {sp, iter->get()});

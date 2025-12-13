@@ -448,7 +448,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
 
 llvm::Value *KnownFunction::getFunction(CompilerState &cs, llvm::IRBuilderBase &builder) const {
     auto *fun = cs.getFunction(this->name);
-    auto *type = llvm::PointerType::get(cs, 0);
+    auto *type = llvm::Type::getInt8PtrTy(cs);
 
     switch (this->type) {
         case KnownFunction::Type::Symbol:

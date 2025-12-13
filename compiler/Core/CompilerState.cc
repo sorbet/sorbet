@@ -70,7 +70,7 @@ StringTable::Entry CompilerState::insertIntoStringTable(std::string_view str) {
 
     auto offset = this->stringTable.size;
     auto globalName = fmt::format("addr_str_{}", str);
-    auto *type = llvm::PointerType::get(this->lctx, 0);
+    auto *type = llvm::Type::getInt8PtrTy(this->lctx);
     auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
     auto &entry = this->stringTable.map[str];
     entry = StringTable::Entry{offset, global};
@@ -96,7 +96,7 @@ llvm::Value *CompilerState::idTableRef(std::string_view str) {
     auto offset = static_cast<uint32_t>(this->idTable.map.size());
     auto globalName = fmt::format("addr_id_{}", str);
     // TODO(froydnj): IDs are 32 bits, but Payload.cc was declaring them as 64?
-    auto *type = llvm::PointerType::get(this->lctx, 0);
+    auto *type = llvm::Type::getInt64PtrTy(this->lctx);
     auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
     auto strSize = static_cast<uint32_t>(str.size());
     this->idTable.map[str] = IDTable::Entry{offset, entry.offset, strSize, global};
@@ -114,7 +114,7 @@ llvm::Value *CompilerState::rubyStringTableRef(std::string_view str) {
     auto entry = this->insertIntoStringTable(str);
     auto offset = static_cast<uint32_t>(this->rubyStringTable.map.size());
     auto globalName = fmt::format("addr_rubystr_{}", str);
-    auto *type = llvm::PointerType::get(this->lctx, 0);
+    auto *type = llvm::Type::getInt64PtrTy(this->lctx);
     auto *global = declareNullptrPlaceholder(*this->module, type, globalName);
     auto strSize = static_cast<uint32_t>(str.size());
     this->rubyStringTable.map[str] = RubyStringTable::Entry{offset, entry.offset, strSize, global};
@@ -289,48 +289,51 @@ void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Modul
 }
 
 llvm::FunctionType *CompilerState::getRubyFFIType() {
-    // In LLVM 15 with opaque pointers, all pointer types are just 'ptr'
-    auto *ptrTy = llvm::PointerType::get(lctx, 0);
+    // In typed pointer mode, we use i64* for VALUE* arrays and i8* for struct pointers
+    auto *valuePtrTy = llvm::Type::getInt64PtrTy(lctx);
+    auto *voidPtrTy = llvm::Type::getInt8PtrTy(lctx);
     llvm::Type *args[] = {
         llvm::Type::getInt32Ty(lctx), // arg count
-        ptrTy,                        // argArray (VALUE*)
+        valuePtrTy,                   // argArray (VALUE*)
         llvm::Type::getInt64Ty(lctx), // self
-        ptrTy,                        // struct.rb_control_frame_struct*
-        ptrTy,                        // void* (struct rb_calling_info)
-        ptrTy,                        // void* (struct rb_call_data / struct rb_kwarg_call_data)
+        voidPtrTy,                    // struct.rb_control_frame_struct*
+        voidPtrTy,                    // void* (struct rb_calling_info)
+        voidPtrTy,                    // void* (struct rb_call_data / struct rb_kwarg_call_data)
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
 llvm::FunctionType *CompilerState::getDirectWrapperFunctionType() {
-    auto *ptrTy = llvm::PointerType::get(lctx, 0);
+    auto *voidPtrTy = llvm::Type::getInt8PtrTy(lctx);
+    auto *valuePtrTy = llvm::Type::getInt64PtrTy(lctx);
     llvm::Type *args[] = {
-        ptrTy,                        // struct.FunctionInlineCache*
+        voidPtrTy,                    // struct.FunctionInlineCache*
         llvm::Type::getInt32Ty(lctx), // arg count
-        ptrTy,                        // argArray (VALUE*)
+        valuePtrTy,                   // argArray (VALUE*)
         llvm::Type::getInt64Ty(lctx), // self
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
 llvm::FunctionType *CompilerState::getRubyBlockFFIType() {
-    auto *ptrTy = llvm::PointerType::get(lctx, 0);
+    auto *valuePtrTy = llvm::Type::getInt64PtrTy(lctx);
     llvm::Type *args[] = {
         llvm::Type::getInt64Ty(lctx), // first yielded argument(first argument is both here and in argArray
         llvm::Type::getInt64Ty(lctx), // data
         llvm::Type::getInt32Ty(lctx), // arg count
-        ptrTy,                        // argArray (VALUE*)
+        valuePtrTy,                   // argArray (VALUE*)
         llvm::Type::getInt64Ty(lctx), // blockArg
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
 llvm::FunctionType *CompilerState::getRubyExceptionFFIType() {
-    auto *ptrTy = llvm::PointerType::get(lctx, 0);
+    auto *valuePtrPtrTy = llvm::Type::getInt64PtrTy(lctx)->getPointerTo();
+    auto *voidPtrTy = llvm::Type::getInt8PtrTy(lctx);
     llvm::Type *args[] = {
-        ptrTy,                        // VALUE **pc
+        valuePtrPtrTy,                // VALUE **pc
         llvm::Type::getInt64Ty(lctx), // VALUE captures
-        ptrTy,                        // struct.rb_control_frame_struct*
+        voidPtrTy,                    // struct.rb_control_frame_struct*
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }

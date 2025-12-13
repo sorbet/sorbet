@@ -101,7 +101,7 @@ public:
         builder.CreateCall(cs.getFunction("sorbet_callStaticInitDirect"),
                            {IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
                             llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                            llvm::ConstantPointerNull::get(llvm::PointerType::get(cs, 0)), module});
+                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)), module});
         return Payload::rubyNil(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -226,7 +226,7 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     if (auto *blk = mcctx.blkAsFunction()) {
         blkPtr = blk;
     } else {
-        blkPtr = llvm::ConstantPointerNull::get(llvm::PointerType::get(cs, 0));
+        blkPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(cs));
     }
 
     llvm::Value *offset = Payload::buildLocalsOffset(cs);

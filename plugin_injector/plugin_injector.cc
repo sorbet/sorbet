@@ -96,7 +96,14 @@ public:
 
     const unique_ptr<const llvm::Module> codegenPayload;
 
-    TypecheckThreadState() : codegenPayload(compiler::PayloadLoader::readDefaultModule(lctx)) {}
+    TypecheckThreadState() : codegenPayload(initPayload()) {}
+
+private:
+    unique_ptr<llvm::Module> initPayload() {
+        // Disable opaque pointers for compatibility with the payload which uses typed pointers
+        lctx.setOpaquePointers(false);
+        return compiler::PayloadLoader::readDefaultModule(lctx);
+    }
 };
 
 class LLVMSemanticExtension : public SemanticExtension {

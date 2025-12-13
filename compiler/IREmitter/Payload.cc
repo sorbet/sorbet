@@ -435,7 +435,7 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &builder, const 
 }
 
 llvm::PointerType *iseqType(CompilerState &cs) {
-    return llvm::PointerType::get(cs, 0);
+    return llvm::Type::getInt8PtrTy(cs);
 }
 
 // Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
@@ -539,7 +539,7 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
     llvm::Value *locals = nullptr;
     llvm::Value *numLocals = nullptr;
     auto *idType = llvm::Type::getInt64Ty(cs);
-    auto *idPtrType = llvm::PointerType::get(cs, 0);
+    auto *idPtrType = llvm::Type::getInt64PtrTy(cs);
 
     auto storageKind = classifyStorageFor(cs, irctx, md, rubyRegionId);
     switch (storageKind) {
@@ -747,7 +747,7 @@ llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBa
     // struct SorbetLineNumberInfo { int iseq_size; struct* insns_info; VALUE* iseq_encoded; }
     auto *globalTy = llvm::StructType::getTypeByName(cs, "struct.SorbetLineNumberInfo");
     if (globalTy == nullptr) {
-        auto *ptrTy = llvm::PointerType::get(cs, 0);
+        auto *ptrTy = llvm::Type::getInt8PtrTy(cs);
         globalTy = llvm::StructType::create(cs, {llvm::Type::getInt32Ty(cs), ptrTy, ptrTy}, "struct.SorbetLineNumberInfo");
     }
 
@@ -1016,7 +1016,7 @@ void Payload::pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &builde
 
     auto *spPtr = builder.CreateCall(cs.getFunction("sorbet_get_sp"), {cfp});
     // sorbet_get_sp returns VALUE** (pointer to stack pointer), loading gives VALUE* (i64*)
-    auto *spElemTy = llvm::PointerType::get(cs, 0);
+    auto *spElemTy = llvm::Type::getInt64PtrTy(cs);
     llvm::Value *sp = builder.CreateLoad(spElemTy, spPtr);
     sp = builder.CreateCall(sorbetPush, {sp, recv});
     for (auto *arg : stack) {
