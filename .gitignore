@@ -57,3 +57,6 @@ doc/
 test/sandbox/*/*.log
 test/sandbox/*/*.rb
 test/sandbox/*/*.rbi
+
+# Claude Code local settings
+.claude/
