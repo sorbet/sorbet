@@ -91,7 +91,7 @@ cp "$llvm_ir_file" "$input_file"
 
 # We could use bazel run here, but it's more convenient to use whatever happens
 # to have been built last, so that we don't have to potentially rebuild LLVM.
-llvm_opt="$project_root/bazel-sorbet/external/llvm_toolchain_12_0_0/bin/opt"
+llvm_opt="$project_root/bazel-sorbet/external/llvm_toolchain_15_0_7_llvm/bin/opt"
 
 if ! [ -x "$llvm_opt" ]; then
   # ... but if nothing was built yet, at least build something.

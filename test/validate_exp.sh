@@ -48,7 +48,7 @@ rb=( "$@" )
 
 root=$PWD
 
-llvm_diff_path="$root/external/llvm_toolchain_12_0_0/bin/llvm-diff"
+llvm_diff_path="$root/external/llvm_toolchain_15_0_7_llvm/bin/llvm-diff"
 
 ruby="$(rlocation sorbet_ruby_2_7_for_compiler/ruby)"
 diff_diff="$(rlocation com_stripe_ruby_typer/test/diff-diff.rb)"

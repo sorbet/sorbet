@@ -62,7 +62,7 @@ $ bazel build //compiler:sorbet --config=release-linux
 > (like we did when building `sorbet_ruby`), as we want sorbet to us the version
 > of Clang that we pin in the sandbox.
 
-This will take quite a while, as it will build Sorbet and LLVM 12. If you've
+This will take quite a while, as it will build Sorbet and LLVM 15. If you've
 ever been looking for an excuse to upgrade your development machine, this is it.
 Once it's complete, you will find a binary in `bazel-bin/compiler/sorbet` that
 behaves exactly like Sorbet the type checker, but has a few additional

@@ -35,22 +35,6 @@ bazel_toolchain_dependencies()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
-# LLVM 12.0.0 toolchain (for the compiler - has macOS builds with llvm-link, etc.)
-load("@com_grail_bazel_toolchain//toolchain:deps.bzl", grail_bazel_toolchain_dependencies = "bazel_toolchain_dependencies")
-
-grail_bazel_toolchain_dependencies()
-
-load("@com_grail_bazel_toolchain//toolchain:rules.bzl", grail_llvm_toolchain = "llvm_toolchain")
-
-grail_llvm_toolchain(
-    name = "llvm_toolchain_12_0_0",
-    absolute_paths = True,
-    llvm_mirror_prefixes = [
-        "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
-    ],
-    llvm_version = "12.0.0",
-)
-
 llvm_toolchain(
     name = "llvm_toolchain_15_0_7",
     absolute_paths = True,

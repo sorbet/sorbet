@@ -68,14 +68,6 @@ def register_sorbet_dependencies():
         strip_prefix = "zlib-1.3.1",
     )
 
-    # Grail bazel toolchain for LLVM 12.0.0 (needed for the compiler)
-    http_archive(
-        name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("sorbet/bazel-toolchain/archive/5c23c6f550bc2a1db0d5d0b9cf83669a1f91d46e.zip"),
-        sha256 = "53c76d48dfa63c00961293fb73843fe7d9bee647e39f98c7d6a04e256eb40514",
-        strip_prefix = "bazel-toolchain-5c23c6f550bc2a1db0d5d0b9cf83669a1f91d46e",
-    )
-
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
     # depend on @com_google_protobuf for protoc and proto runtimes.
     # This statement defines the @com_google_protobuf repo.

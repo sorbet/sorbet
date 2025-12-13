@@ -6,7 +6,7 @@
 # added in the diff, indicating incorrectly that two lines differ. As an
 # example, you can run the following command (on osx):
 #
-# > /usr/local/opt/llvm@12/bin/llvm-diff \
+# > /usr/local/opt/llvm@15/bin/llvm-diff \
 # >   test/testdata/compiler/hello.llo.exp \
 # >   test/testdata/compiler/hello.llo.exp
 #
