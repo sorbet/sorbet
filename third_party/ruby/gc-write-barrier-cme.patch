@@ -1,0 +1,65 @@
+diff --git vm_eval.c vm_eval.c
+index 0abb4644f9..98db7f166c 100644
+--- vm_eval.c
++++ vm_eval.c
+@@ -395,8 +395,7 @@ cc_new(VALUE klass, ID mid, int argc, const rb_callable_method_entry_t *cme)
+             ccs = (struct rb_class_cc_entries *)ccs_data;
+         }
+         else {
+-            ccs = vm_ccs_create(klass, cme);
+-            rb_id_table_insert(cc_tbl, mid, (VALUE)ccs);
++            ccs = vm_ccs_create(klass, cc_tbl, mid, cme);
+         }
+ 
+         for (int i=0; i<ccs->len; i++) {
+diff --git vm_insnhelper.c vm_insnhelper.c
+index e01d39de77..aff6baa340 100644
+--- vm_insnhelper.c
++++ vm_insnhelper.c
+@@ -1689,7 +1689,7 @@ static VALUE vm_call_general(rb_execution_context_t *ec, rb_control_frame_t *reg
+ static VALUE vm_mtbl_dump(VALUE klass, ID target_mid);
+ 
+ static struct rb_class_cc_entries *
+-vm_ccs_create(VALUE klass, const rb_callable_method_entry_t *cme)
++vm_ccs_create(VALUE klass, struct rb_id_table *cc_tbl, ID mid, const rb_callable_method_entry_t *cme)
+ {
+     struct rb_class_cc_entries *ccs = ALLOC(struct rb_class_cc_entries);
+ #if VM_CHECK_MODE > 0
+@@ -1697,9 +1697,12 @@ vm_ccs_create(VALUE klass, const rb_callable_method_entry_t *cme)
+ #endif
+     ccs->capa = 0;
+     ccs->len = 0;
+-    RB_OBJ_WRITE(klass, &ccs->cme, cme);
++    ccs->cme = cme;
+     METHOD_ENTRY_CACHED_SET((rb_callable_method_entry_t *)cme);
+     ccs->entries = NULL;
++
++    rb_id_table_insert(cc_tbl, mid, (VALUE)ccs);
++    RB_OBJ_WRITTEN(klass, Qundef, cme);
+     return ccs;
+ }
+ 
+@@ -1850,8 +1853,7 @@ vm_search_cc(const VALUE klass, const struct rb_callinfo * const ci)
+         }
+         else {
+             // TODO: required?
+-            ccs = vm_ccs_create(klass, cme);
+-            rb_id_table_insert(cc_tbl, mid, (VALUE)ccs);
++            ccs = vm_ccs_create(klass, cc_tbl, mid, cme);
+         }
+     }
+ 
+diff --git vm_method.c vm_method.c
+index 94c3f978dc..7cebd2e3bc 100644
+--- vm_method.c
++++ vm_method.c
+@@ -1288,8 +1288,7 @@ cache_callable_method_entry(VALUE klass, ID mid, const rb_callable_method_entry_
+         VM_ASSERT(ccs->cme == cme);
+     }
+     else {
+-        ccs = vm_ccs_create(klass, cme);
+-        rb_id_table_insert(cc_tbl, mid, (VALUE)ccs);
++        ccs = vm_ccs_create(klass, cc_tbl, mid, cme);
+     }
+ }
+ 

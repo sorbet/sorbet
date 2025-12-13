@@ -1,0 +1,39 @@
+diff --git gc.c gc.c
+index 346a77ec63..6e025cb200 100644
+--- gc.c
++++ gc.c
+@@ -2935,7 +2935,33 @@ cc_table_mark_i(ID id, VALUE ccs_ptr, void *data_ptr)
+         return ID_TABLE_DELETE;
+     }
+     else {
+-        gc_mark(data->objspace, (VALUE)ccs->cme);
++        VALUE cme_obj = (VALUE)ccs->cme;
++
++        if (UNLIKELY(RB_TYPE_P(cme_obj, T_NONE))) {
++            VALUE class_path = rb_class_path_cached(data->klass);
++            if (!NIL_P(class_path)) {
++                char *objname = rb_id2name(id);
++                if (objname) {
++                    fprintf(
++                        stdout,
++                        "ERROR (cc_table_mark_i): will fail shortly with try to mark T_NONE object -- obj:%s, P:%s\n",
++                        objname,
++                        RSTRING_PTR(class_path)
++                    );
++                }
++            } else {
++                char *objname = rb_id2name(id);
++                if (objname) {
++                    fprintf(
++                        stdout,
++                        "ERROR (cc_table_mark_i): will fail shortly with try to mark T_NONE object -- obj:%s\n",
++                        objname
++                    );
++                }
++            }
++        }
++
++        gc_mark(data->objspace, cme_obj);
+ 
+         for (int i=0; i<ccs->len; i++) {
+             VM_ASSERT(data->klass == ccs->entries[i].cc->klass);

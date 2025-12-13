@@ -38,11 +38,11 @@ def register_ruby_dependencies():
         sha256 = "41d4c93a79426a7e034080cc367c696ee0ae5c26fcfef20bb58f950031c95924",
     )
 
-    # Pre Ruby 3.0 needs an older rubygems
+    # Pre Ruby 3.0 needs an older rubygems (3.2.x works better with Ruby 2.7's bundled RubyGems 3.1.4)
     http_file(
         name = "rubygems_update_stripe_ruby2",
-        urls = _rubygems_urls("rubygems-update-3.3.3.gem"),
-        sha256 = "610aef544e0c15ff3cd5492dff3f5f46bd2062896f4f62c7191432c6f1d681c9",
+        urls = _rubygems_urls("rubygems-update-3.2.33.gem"),
+        sha256 = "46862bd39dd078789d1cc7e2359772e50b33880a28b3eb83f80d42eec7e5a7e2",
     )
 
     ruby_build = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD"

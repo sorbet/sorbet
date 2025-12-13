@@ -1,0 +1,13 @@
+diff --git ext/fiddle/extconf.rb ext/fiddle/extconf.rb
+index 2d85b3eea5..eb03d3bfa6 100644
+--- a/ext/fiddle/extconf.rb
++++ b/ext/fiddle/extconf.rb
+@@ -96,7 +96,7 @@ def enable_debug_build_flag(flags)
+
+   FileUtils.mkdir_p(libffi.dir)
+   libffi.opt = CONFIG['configure_args'][/'(-C)'/, 1]
+-  libffi.ldflags = RbConfig.expand("$(LDFLAGS) #{libpathflag([relative_from($topdir, "..")])} #{$LIBRUBYARG}".dup)
++  libffi.ldflags = RbConfig.expand("$(LDFLAGS) #{libpathflag([relative_from($topdir, "..")])}".dup)
+   libffi.arch = RbConfig::CONFIG['host']
+   if $mswin
+     unless find_executable(as = /x64/ =~ libffi.arch ? "ml64" : "ml")
