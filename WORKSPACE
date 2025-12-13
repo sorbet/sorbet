@@ -35,6 +35,22 @@ bazel_toolchain_dependencies()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
+# LLVM 12.0.0 toolchain (for the compiler - has macOS builds with llvm-link, etc.)
+load("@com_grail_bazel_toolchain//toolchain:deps.bzl", grail_bazel_toolchain_dependencies = "bazel_toolchain_dependencies")
+
+grail_bazel_toolchain_dependencies()
+
+load("@com_grail_bazel_toolchain//toolchain:rules.bzl", grail_llvm_toolchain = "llvm_toolchain")
+
+grail_llvm_toolchain(
+    name = "llvm_toolchain_12_0_0",
+    absolute_paths = True,
+    llvm_mirror_prefixes = [
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
+    ],
+    llvm_version = "12.0.0",
+)
+
 llvm_toolchain(
     name = "llvm_toolchain_15_0_7",
     absolute_paths = True,
@@ -86,6 +102,17 @@ bison_register_toolchains(
     # Clang 12+ introduced this flag. All versions of Bison at time of writing
     # (up to 3.7.6) include code flagged by this warning.
     extra_copts = ["-Wno-implicit-const-int-float-conversion"],
+)
+
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+
+rules_rust_dependencies()
+
+rust_register_toolchains(
+    edition = "2021",
+    versions = [
+        "1.58.1",
+    ],
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
