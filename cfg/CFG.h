@@ -202,6 +202,7 @@ public:
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops);
+    BasicBlock *freshBlockWithRegion(int outerLoops, int rubyRegionId);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;

@@ -39,6 +39,15 @@ BasicBlock *CFG::freshBlock(int outerLoops) {
     return r.get();
 }
 
+BasicBlock *CFG::freshBlockWithRegion(int outerLoops, int rubyRegionId) {
+    int id = this->maxBasicBlockId++;
+    auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
+    r->id = id;
+    r->outerLoops = outerLoops;
+    r->rubyRegionId = rubyRegionId;
+    return r.get();
+}
+
 void CFG::enterLocalInternal(core::LocalVariable variable, LocalRef &ref) {
     ENFORCE_NO_TIMER(!this->localVariablesFrozen);
     int id = this->localVariables.size();
