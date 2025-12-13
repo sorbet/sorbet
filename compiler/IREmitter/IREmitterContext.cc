@@ -433,7 +433,8 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
                 [&](cfg::LoadArg &i) { trackBinding = false; }, [&](cfg::LoadYieldParams &i) { /*nothing*/ },
                 [&](cfg::YieldParamPresent &i) { /* nothing */ }, [&](cfg::YieldLoadArg &i) { /* nothing */ },
                 [&](cfg::Cast &i) { usage.trackBlockRead(bb.get(), i.value.variable); },
-                [&](cfg::TAbsurd &i) { usage.trackBlockRead(bb.get(), i.what.variable); });
+                [&](cfg::TAbsurd &i) { usage.trackBlockRead(bb.get(), i.what.variable); },
+                [&](cfg::KeepAlive &i) { usage.trackBlockRead(bb.get(), i.what); });
             if (trackBinding) {
                 usage.trackBlockWrite(bb.get(), bind.bind.variable);
             }

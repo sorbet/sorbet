@@ -801,6 +801,11 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                 [&](cfg::TAbsurd &i) {
                     auto val = Payload::varGet(cs, i.what.variable, builder, irctx, bb->rubyRegionId);
                     builder.CreateCall(cs.getFunction("sorbet_t_absurd"), {val});
+                },
+                [&](cfg::KeepAlive &i) {
+                    // KeepAlive is used to prevent the optimizer from removing a variable.
+                    // We just load the variable to ensure it stays alive.
+                    Payload::varGet(cs, i.what, builder, irctx, bb->rubyRegionId);
                 });
             if (isTerminated) {
                 break;
