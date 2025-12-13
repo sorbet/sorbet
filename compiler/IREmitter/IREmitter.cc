@@ -945,7 +945,8 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     }
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
-    func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
+    // In LLVM 15, UWTable is now an IntAttr that takes a UWTableKind parameter
+    func->setUWTableKind(llvm::UWTableKind::Async);
     llvm::IRBuilder<> builder(cs);
 
     const IREmitterContext irctx = IREmitterContext::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, func);

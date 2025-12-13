@@ -12,20 +12,21 @@ using namespace std;
 namespace sorbet::compiler {
 string_view getDefaultModuleBitcode();
 
-// If possible, plesase write attributes in C code. Unfortunately, not all attributes have C function equivalent
-const vector<std::pair<string, llvm::Attribute::AttrKind>> additionalFunctionAttributes = {
-    {"ruby_stack_check", llvm::Attribute::InaccessibleMemOnly},
-};
-
 std::unique_ptr<llvm::Module> PayloadLoader::readDefaultModule(llvm::LLVMContext &lctx) {
     auto bitCode = getDefaultModuleBitcode();
     llvm::StringRef bitcodeAsStringRef(bitCode.data(), bitCode.size());
     auto memoryBuffer = llvm::MemoryBuffer::getMemBuffer(bitcodeAsStringRef, "payload", false);
     auto ret = llvm::parseBitcodeFile(*memoryBuffer, lctx);
-    for (const auto &[funName, attr] : additionalFunctionAttributes) {
-        ret.get()->getFunction(funName)->addFnAttr(attr);
+
+    if (!ret) {
+        // Log the error and abort
+        auto err = ret.takeError();
+        llvm::errs() << "Failed to parse payload bitcode: " << err << "\n";
+        llvm::consumeError(std::move(err));
+        return nullptr;
     }
-    return move(ret.get());
+
+    return std::move(*ret);
 }
 
 } // namespace sorbet::compiler
