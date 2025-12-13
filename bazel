@@ -21,8 +21,10 @@ patch_ccache_if_needed() {
     [[ -z "${DISABLE_CCACHE:-}" ]] || return 0
     command -v ccache &> /dev/null || return 0
     [[ -n "${HOME:-}" ]] || return 0
-    local cache_base="${HOME}/.cache/bazel"
-    for base_dir in "$cache_base"/_bazel_*/*/external/llvm_toolchain_*/bin; do
+    # Check both common bazel output locations
+    local user="${USER:-$(id -un)}"
+    for cache_base in "/var/tmp/_bazel_${user}" "${HOME}/.cache/bazel/_bazel_${user}"; do
+    for base_dir in "$cache_base"/*/external/llvm_toolchain_*/bin; do
         [[ -f "$base_dir/cc_wrapper.sh" ]] || continue
         grep -q "USE_CCACHE" "$base_dir/cc_wrapper.sh" 2>/dev/null && continue
 
@@ -77,6 +79,7 @@ if [[ "\$USE_CCACHE" == "1" ]]; then exec ccache "\${cmd[@]}"; else exec "\${cmd
 CCACHE_WRAPPER
         chmod +x "$tmp_wrapper"
         mv "$tmp_wrapper" "$base_dir/cc_wrapper.sh"
+    done
     done
 }
 
