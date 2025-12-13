@@ -133,7 +133,9 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
     bool isCompiledTrue(const core::GlobalState &gs, const core::FileRef &f) const {
-        return f.data(gs).compiledLevel == core::CompiledLevel::True;
+        // compiledLevel was removed from core::File - always return true for now
+        // when compiling is enabled via forceCompiled or compiled: sigil
+        return forceCompiled;
     }
 
     // There are a certain class of method calls that sorbet generates for auxiliary
@@ -146,19 +148,23 @@ class LLVMSemanticExtension : public SemanticExtension {
             UnorderedSet<cfg::LocalRef> refsToDelete;
             for (auto i = block->exprs.rbegin(), e = block->exprs.rend(); i != e; ++i) {
                 auto &binding = *i;
-                if (auto *send = cfg::cast_instruction<cfg::Send>(binding.value)) {
+                auto sendPtr = cfg::cast_instruction<cfg::Send>(binding.value);
+                if (sendPtr) {
                     if (!refsToDelete.contains(binding.bind.variable)) {
                         continue;
                     }
 
                     // We're binding a ref that is unneeded, so anything that this
                     // instruction requires must be unneeded as well.
-                    for (auto &arg : send->args) {
+                    for (auto &arg : sendPtr->args) {
                         refsToDelete.emplace(arg.variable);
                     }
-                    refsToDelete.emplace(send->recv.variable);
-                } else if (auto *read = cfg::cast_instruction<cfg::KeepAlive>(binding.value)) {
-                    refsToDelete.emplace(read->what);
+                    refsToDelete.emplace(sendPtr->recv.variable);
+                } else {
+                    auto readPtr = cfg::cast_instruction<cfg::KeepAlive>(binding.value);
+                    if (readPtr) {
+                        refsToDelete.emplace(readPtr->what);
+                    }
                 }
             }
 
@@ -183,11 +189,10 @@ public:
             return;
         }
 
-        // This method will be handled as a VM_METHOD_TYPE_IVAR method by the
-        // standard VM mechanisms, so we don't need to generate code for it.
-        if (md.flags.isAttrReader && !md.symbol.data(gs)->flags.isFinal) {
-            return;
-        }
+        // NOTE: isAttrReader flag was removed from MethodDef::Flags
+        // Previously, attr_reader methods were skipped since they're handled
+        // as VM_METHOD_TYPE_IVAR by the standard VM mechanisms.
+        // For now, we compile all methods including attr_readers.
 
         if (md.symbol.data(gs)->name == core::Names::staticInit()) {
             auto attachedClass = md.symbol.data(gs)->owner.data(gs)->attachedClass(gs);
