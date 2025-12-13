@@ -16,25 +16,29 @@ fi
 
 # ccache integration for ~4x faster incremental builds
 # This patches the LLVM toolchain's cc_wrapper.sh to use ccache.
+# Set DISABLE_CCACHE=1 to disable.
 patch_ccache_if_needed() {
+    [[ -z "${DISABLE_CCACHE:-}" ]] || return 0
     command -v ccache &> /dev/null || return 0
     [[ -n "${HOME:-}" ]] || return 0
     local cache_base="${HOME}/.cache/bazel"
-    for base_dir in "$cache_base"/_bazel_*/*/external/llvm_toolchain_15_0_7/bin; do
+    for base_dir in "$cache_base"/_bazel_*/*/external/llvm_toolchain_*/bin; do
         [[ -f "$base_dir/cc_wrapper.sh" ]] || continue
         grep -q "USE_CCACHE" "$base_dir/cc_wrapper.sh" 2>/dev/null && continue
 
-        # Extract clang path from original wrapper (works on both BSD and GNU grep)
+        # Extract clang path from original wrapper (works on both BSD and GNU sed)
         local clang_path
         clang_path=$(sed -n 's/^if \[\[ -f \([^]]*\) \]\].*/\1/p' "$base_dir/cc_wrapper.sh" 2>/dev/null | head -1 | tr -d '[:space:]') || continue
         [[ -n "$clang_path" ]] || continue
 
-        cp "$base_dir/cc_wrapper.sh" "$base_dir/cc_wrapper.sh.orig"
-        cat > "$base_dir/cc_wrapper.sh" << CCACHE_WRAPPER
+        # Atomic write to avoid races with parallel builds
+        local tmp_wrapper
+        tmp_wrapper=$(mktemp "$base_dir/cc_wrapper.sh.XXXXXX")
+        cat > "$tmp_wrapper" << CCACHE_WRAPPER
 #!/bin/bash
 set -euo pipefail
 
-if command -v ccache &> /dev/null && [[ -n "\${HOME:-}" ]]; then
+if [[ -z "\${DISABLE_CCACHE:-}" ]] && command -v ccache &> /dev/null && [[ -n "\${HOME:-}" ]]; then
   export CCACHE_DIR="\${CCACHE_DIR:-\$HOME/.ccache}"
   export CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros,file_stat_matches,pch_defines
   export CCACHE_MAXSIZE="\${CCACHE_MAXSIZE:-10G}"
@@ -71,8 +75,17 @@ done
 
 if [[ "\$USE_CCACHE" == "1" ]]; then exec ccache "\${cmd[@]}"; else exec "\${cmd[@]}"; fi
 CCACHE_WRAPPER
-        chmod +x "$base_dir/cc_wrapper.sh"
+        chmod +x "$tmp_wrapper"
+        mv "$tmp_wrapper" "$base_dir/cc_wrapper.sh"
     done
+}
+
+run_bazel() {
+    case "${1:-}" in
+      build|test|run|coverage|cquery|aquery)
+        patch_ccache_if_needed;;
+    esac
+    exec "$bazel_exec_path" "$@"
 }
 
 old_pwd="$PWD"
@@ -108,16 +121,7 @@ if [ "$expected_sha" != "" ]; then
   bazel_exec_path="$bazel_bin_loc/$expected_sha/bin/bazel-real"
 
   if [ -f "$bazel_exec_path" ]; then
-    # For build commands, use ccache integration
-    case "${1:-}" in
-      build|test|run|coverage|cquery|aquery)
-        patch_ccache_if_needed
-        exec "$bazel_exec_path" "$@"
-        ;;
-      *)
-        exec "$bazel_exec_path" "$@"
-        ;;
-    esac
+    run_bazel "$@"
   fi
 else
   echo >&2 "$expected_sha_file was empty. Falling back to downloading bazel"
@@ -180,13 +184,4 @@ mkdir -p "$BUILD_DIR"
 )
 rm -rf "$BUILD_DIR"
 
-# For build commands, use ccache integration
-case "${1:-}" in
-  build|test|run|coverage|cquery|aquery)
-    patch_ccache_if_needed
-    exec "$bazel_exec_path" "$@"
-    ;;
-  *)
-    exec "$bazel_exec_path" "$@"
-    ;;
-esac
+run_bazel "$@"
