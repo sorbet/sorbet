@@ -226,7 +226,9 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     if (auto *blk = mcctx.blkAsFunction()) {
         blkPtr = blk;
     } else {
-        blkPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(cs));
+        // Use the correct function pointer type for the block parameter
+        auto *blkPtrType = cs.getRubyBlockFFIType()->getPointerTo();
+        blkPtr = llvm::ConstantPointerNull::get(blkPtrType);
     }
 
     llvm::Value *offset = Payload::buildLocalsOffset(cs);

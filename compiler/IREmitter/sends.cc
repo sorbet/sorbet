@@ -427,6 +427,10 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
     vector<llvm::Value *> args;
     args.emplace_back(cache);
 
+    // Get the expected block pointer type from sorbet_i_send function declaration
+    auto *sendFn = cs.getFunction("sorbet_i_send");
+    auto *blkPtrType = llvm::cast<llvm::PointerType>(sendFn->getFunctionType()->getParamType(2));
+
     if (auto *blk = mcctx.blkAsFunction()) {
         auto blkId = mcctx.blk.value();
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
@@ -434,7 +438,7 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
         args.emplace_back(blkIfunc);
     } else {
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));
-        args.emplace_back(llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(cs)));
+        args.emplace_back(llvm::ConstantPointerNull::get(blkPtrType));
     }
     auto *searchSuper =
         llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super() ||

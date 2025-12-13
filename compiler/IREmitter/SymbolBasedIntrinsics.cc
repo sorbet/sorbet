@@ -60,11 +60,16 @@ public:
         if (resultType.exists()) {
             auto intrinsicResultType = resultType.data(gs)->externalType();
 
-            // We can only reasonably add type assertions for methods that have signatures
-            ENFORCE(primaryMethod.data(gs)->hasSig());
+            // We can only reasonably add type assertions for methods that have signatures.
+            // For overloaded methods, the primary method might not have hasSig() return true,
+            // but the overloads do. So we only check hasSig() for non-overloaded methods.
+            if (!primaryMethod.data(gs)->flags.isOverloaded) {
+                ENFORCE(primaryMethod.data(gs)->hasSig());
+            }
 
             // test all overloads to see if we can find a sig that produces this type
-            if (core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType)) {
+            if (primaryMethod.data(gs)->hasSig() &&
+                core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType)) {
                 return;
             }
 
@@ -201,7 +206,9 @@ public:
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
         } else {
-            auto *blkPtr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(cs));
+            // Use the correct function pointer type for the block parameter
+            auto *blkPtrType = cs.getRubyBlockFFIType()->getPointerTo();
+            auto *blkPtr = llvm::ConstantPointerNull::get(blkPtrType);
             res = builder.CreateCall(cMethod.getFunction(cs), {recv, id, args.argc, args.argv, blkPtr, offset},
                                      "rawSendResult");
             cMethod.assertResultType(cs, builder, res);
@@ -266,8 +273,13 @@ protected:
             ENFORCE(current.exists());
         }
 
-        ENFORCE(!acceptsBlock || call.cMethodWithBlock.has_value(),
-                "the intrinsic for `{}` needs to have a block variant added", primaryMethod.show(gs));
+        // Only require a block variant if the intrinsic declares a result type.
+        // Wrapped intrinsics (from WrappedIntrinsics.h) don't specify result types and
+        // just forward to the Ruby C function which handles blocks internally.
+        if (call.cMethod.resultType.exists()) {
+            ENFORCE(!acceptsBlock || call.cMethodWithBlock.has_value(),
+                    "the intrinsic for `{}` needs to have a block variant added", primaryMethod.show(gs));
+        }
     }
 };
 
