@@ -28,8 +28,9 @@ _clang_tool = rule(
 )
 
 def clang_tool(name):
+    # Use LLVM 15.0.7 toolchain to match the compiler version
     _clang_tool(
         name = name,
-        tool = "@llvm_toolchain_15_0_7//:bin/" + name,
+        tool = "@llvm_toolchain_15_0_7_llvm//:bin/" + name,
         visibility = ["//visibility:public"],
     )
