@@ -289,14 +289,17 @@ void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Modul
 }
 
 llvm::FunctionType *CompilerState::getRubyFFIType() {
-    // In typed pointer mode, we use i64* for VALUE* arrays and i8* for struct pointers
+    // In typed pointer mode, use the actual struct types from the payload
     auto *valuePtrTy = llvm::Type::getInt64PtrTy(lctx);
+    auto *cfpStructTy = llvm::StructType::getTypeByName(lctx, "struct.rb_control_frame_struct");
+    ENFORCE(cfpStructTy != nullptr, "struct.rb_control_frame_struct not found in payload");
+    auto *cfpPtrTy = cfpStructTy->getPointerTo();
     auto *voidPtrTy = llvm::Type::getInt8PtrTy(lctx);
     llvm::Type *args[] = {
         llvm::Type::getInt32Ty(lctx), // arg count
         valuePtrTy,                   // argArray (VALUE*)
         llvm::Type::getInt64Ty(lctx), // self
-        voidPtrTy,                    // struct.rb_control_frame_struct*
+        cfpPtrTy,                     // struct.rb_control_frame_struct*
         voidPtrTy,                    // void* (struct rb_calling_info)
         voidPtrTy,                    // void* (struct rb_call_data / struct rb_kwarg_call_data)
     };
@@ -329,11 +332,13 @@ llvm::FunctionType *CompilerState::getRubyBlockFFIType() {
 
 llvm::FunctionType *CompilerState::getRubyExceptionFFIType() {
     auto *valuePtrPtrTy = llvm::Type::getInt64PtrTy(lctx)->getPointerTo();
-    auto *voidPtrTy = llvm::Type::getInt8PtrTy(lctx);
+    auto *cfpStructTy = llvm::StructType::getTypeByName(lctx, "struct.rb_control_frame_struct");
+    ENFORCE(cfpStructTy != nullptr, "struct.rb_control_frame_struct not found in payload");
+    auto *cfpPtrTy = cfpStructTy->getPointerTo();
     llvm::Type *args[] = {
         valuePtrPtrTy,                // VALUE **pc
         llvm::Type::getInt64Ty(lctx), // VALUE captures
-        voidPtrTy,                    // struct.rb_control_frame_struct*
+        cfpPtrTy,                     // struct.rb_control_frame_struct*
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }

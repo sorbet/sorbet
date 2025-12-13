@@ -140,9 +140,13 @@ class LLVMSemanticExtension : public SemanticExtension {
     }
 
     bool isCompiledTrue(const core::GlobalState &gs, const core::FileRef &f) const {
-        // compiledLevel was removed from core::File - always return true for now
-        // when compiling is enabled via forceCompiled or compiled: sigil
-        return forceCompiled;
+        // Check if the file has a "# compiled: true" sigil in its source
+        auto source = f.data(gs).source();
+        // Look for "compiled: true" in the first few lines (like typed: sigil)
+        // The sigil should be within the first 1024 characters of the file
+        auto searchEnd = std::min(source.size(), static_cast<size_t>(1024));
+        auto searchRegion = source.substr(0, searchEnd);
+        return searchRegion.find("compiled: true") != std::string_view::npos;
     }
 
     // There are a certain class of method calls that sorbet generates for auxiliary
