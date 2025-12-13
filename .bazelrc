@@ -304,7 +304,7 @@ common:ci --color yes
 
 ## ccache: install ccache for ~4x faster incremental builds
 build --action_env=HOME
-build --sandbox_writable_path=/home
+build --sandbox_writable_path=${HOME}/.ccache
 
 # enables a lot of features in mac instruments profiler
 build:instruments --linkopt=-framework --linkopt=CoreFoundation
