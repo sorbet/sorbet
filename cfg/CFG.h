@@ -57,6 +57,8 @@ class BasicBlock final {
 public:
     std::vector<VariableUseSite> args;
     int id = 0;
+    int fwdId = -1;
+    int bwdId = -1;
     struct Flags {
         bool isLoopHeader : 1;
         bool wasJumpDestination : 1;
@@ -65,6 +67,14 @@ public:
     };
     Flags flags;
     int outerLoops = 0;
+    // Tracks which Ruby block (do ... end) or Ruby exception-handling region
+    // (in begin ... rescue ... else ... ensure ... end, each `...` is its own
+    // region) this BasicBlock was generated from.  We call it a "region" to
+    // avoid confusion between BasicBlocks and Ruby blocks.
+    //
+    // Incremented every time builder_walk sees a new Ruby block while traversing a Ruby method.
+    // rubyRegionId == 0 means code at the top-level of this method (outside any Ruby block).
+    int rubyRegionId = 0;
     int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
     BlockExit bexit;
@@ -144,6 +154,9 @@ public:
      * typechecking: the reversed post-order traversal ensures that we visit all nodes in data flow order.
      */
     std::vector<BasicBlock *> forwardsTopoSort;
+    // Maximum ruby region id used by any block in this CFG.
+    // Used by the compiler to allocate data structures.
+    int maxRubyRegionId = 0;
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }

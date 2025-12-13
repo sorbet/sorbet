@@ -1107,6 +1107,15 @@ public:
         return ClassOrModuleRef::fromRaw(97);
     }
 
+    // Compiler-specific symbol for sig resolution
+    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
+        return ClassOrModuleRef::fromRaw(98);
+    }
+
+    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSigSingleton() {
+        return ClassOrModuleRef::fromRaw(99);
+    }
+
     static FieldRef ErrorNode() {
         return FieldRef::fromRaw(3);
     }

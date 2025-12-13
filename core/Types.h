@@ -999,6 +999,8 @@ public:
     std::shared_ptr<DispatchResult> result;
     LocOffsets loc;
     core::NameRef fun;
+    // Used by the compiler to track Ruby block regions
+    int rubyRegionId = 0;
 
     SendAndBlockLink(NameRef fun, LocOffsets loc, std::vector<ParamInfo::Flags> &&paramFlags);
     std::optional<int> fixedArity() const;

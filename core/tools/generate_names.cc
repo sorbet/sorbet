@@ -421,6 +421,11 @@ NameDef names[] = {
     {"args"},
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
+    {"keepDef", "<keep-def>"},                   // Used by compiler
+    {"keepSelfDef", "<keep-self-def>"},           // Used by compiler
+    {"keepForCfg", "<keep-for-cfg>"},             // Used by compiler
+    {"callWithBlock", "<call-with-block>"},       // Used by compiler
+    {"callWithSplatAndBlock", "<call-with-splat-and-block>"}, // Used by compiler
     {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
