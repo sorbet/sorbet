@@ -18,14 +18,15 @@ fi
 # This patches the LLVM toolchain's cc_wrapper.sh to use ccache.
 patch_ccache_if_needed() {
     command -v ccache &> /dev/null || return 0
+    [[ -n "${HOME:-}" ]] || return 0
     local cache_base="${HOME}/.cache/bazel"
     for base_dir in "$cache_base"/_bazel_*/*/external/llvm_toolchain_15_0_7/bin; do
         [[ -f "$base_dir/cc_wrapper.sh" ]] || continue
         grep -q "USE_CCACHE" "$base_dir/cc_wrapper.sh" 2>/dev/null && continue
 
-        # Extract clang path from original wrapper (it uses absolute paths)
+        # Extract clang path from original wrapper (works on both BSD and GNU grep)
         local clang_path
-        clang_path=$(grep -oP '(?<=if \[\[ -f )[^\]]+(?= \]\])' "$base_dir/cc_wrapper.sh" 2>/dev/null | head -1 | tr -d '[:space:]') || continue
+        clang_path=$(sed -n 's/^if \[\[ -f \([^]]*\) \]\].*/\1/p' "$base_dir/cc_wrapper.sh" 2>/dev/null | head -1 | tr -d '[:space:]') || continue
         [[ -n "$clang_path" ]] || continue
 
         cp "$base_dir/cc_wrapper.sh" "$base_dir/cc_wrapper.sh.orig"
@@ -74,11 +75,6 @@ CCACHE_WRAPPER
     done
 }
 
-run_with_ccache_patch() {
-    patch_ccache_if_needed
-    "$bazel_exec_path" "$@"
-}
-
 old_pwd="$PWD"
 cd "$(dirname "${BASH_SOURCE[0]}")"
 if [[ "$PWD" = */tools ]]; then
@@ -115,8 +111,8 @@ if [ "$expected_sha" != "" ]; then
     # For build commands, use ccache integration
     case "${1:-}" in
       build|test|run|coverage|cquery|aquery)
-        run_with_ccache_patch "$@"
-        exit $?
+        patch_ccache_if_needed
+        exec "$bazel_exec_path" "$@"
         ;;
       *)
         exec "$bazel_exec_path" "$@"
@@ -187,8 +183,8 @@ rm -rf "$BUILD_DIR"
 # For build commands, use ccache integration
 case "${1:-}" in
   build|test|run|coverage|cquery|aquery)
-    run_with_ccache_patch "$@"
-    exit $?
+    patch_ccache_if_needed
+    exec "$bazel_exec_path" "$@"
     ;;
   *)
     exec "$bazel_exec_path" "$@"
