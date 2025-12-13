@@ -14,6 +14,74 @@ if [ "${LOCAL_BAZEL_OVERRIDE:-}" != "" ]; then
   exec "$LOCAL_BAZEL_OVERRIDE" "$@"
 fi
 
+# ccache integration for ~4x faster incremental builds
+# This patches the LLVM toolchain's cc_wrapper.sh to use ccache.
+patch_ccache_if_needed() {
+    command -v ccache &> /dev/null || return 0
+    local cache_base="${HOME:-/root}/.cache/bazel"
+    for base_dir in "$cache_base"/_bazel_*/*/external/llvm_toolchain_15_0_7/bin; do
+        [[ -f "$base_dir/cc_wrapper.sh" ]] || continue
+        grep -q "USE_CCACHE" "$base_dir/cc_wrapper.sh" 2>/dev/null && continue
+
+        # Extract clang path from original wrapper (it uses absolute paths)
+        local clang_path
+        clang_path=$(grep -oP '(?<=if \[\[ -f )[^\]]+(?= \]\])' "$base_dir/cc_wrapper.sh" 2>/dev/null | head -1 | tr -d '[:space:]') || continue
+        [[ -n "$clang_path" ]] || continue
+
+        cp "$base_dir/cc_wrapper.sh" "$base_dir/cc_wrapper.sh.orig"
+        cat > "$base_dir/cc_wrapper.sh" << CCACHE_WRAPPER
+#!/bin/bash
+set -euo pipefail
+
+if command -v ccache &> /dev/null; then
+  export CCACHE_DIR="\${CCACHE_DIR:-\${HOME:-/root}/.ccache}"
+  export CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros,file_stat_matches,pch_defines
+  export CCACHE_MAXSIZE="\${CCACHE_MAXSIZE:-10G}"
+  export CCACHE_COMPILERCHECK=content CCACHE_NOHASHDIR=1
+  USE_CCACHE=1
+else USE_CCACHE=0; fi
+
+if [[ -f $clang_path ]]; then
+  execroot_path=""
+elif [[ \${BASH_SOURCE[0]} == "/"* ]]; then
+  execroot_path="\${BASH_SOURCE[0]%/*/*/*/*}/"
+else
+  echo >&2 "ERROR: could not find clang; PWD=\"\${PWD}\"."
+  exit 5
+fi
+
+sanitize_option() {
+  local -r opt=\$1
+  if [[ \${opt} == */cc_wrapper.sh ]]; then
+    printf "%s" "\${execroot_path}$clang_path"
+  elif [[ \${opt} =~ ^-fsanitize-(ignore|black)list=[^/] ]]; then
+    parts=(\${opt/=/ }); printf "%s" "\${parts[0]}=\${execroot_path}\${parts[1]}"
+  else
+    printf "%s" "\${opt}"
+  fi
+}
+
+cmd=()
+for ((i = 0; i <= \$#; i++)); do
+  if [[ \${!i} == @* ]]; then
+    while IFS= read -r opt; do cmd+=("\$(set -e; sanitize_option "\${opt}")"); done <"\${!i:1}"
+  else cmd+=("\$(set -e; sanitize_option "\${!i}")"); fi
+done
+
+if [[ "\$USE_CCACHE" == "1" ]]; then exec ccache "\${cmd[@]}"; else exec "\${cmd[@]}"; fi
+CCACHE_WRAPPER
+        chmod +x "$base_dir/cc_wrapper.sh"
+    done
+}
+
+run_with_ccache_patch() {
+    patch_ccache_if_needed
+    "$bazel_exec_path" "$@"
+    local exit_code=$?
+    patch_ccache_if_needed
+    return $exit_code
+}
+
 old_pwd="$PWD"
 cd "$(dirname "${BASH_SOURCE[0]}")"
 if [[ "$PWD" = */tools ]]; then
@@ -47,7 +115,16 @@ if [ "$expected_sha" != "" ]; then
   bazel_exec_path="$bazel_bin_loc/$expected_sha/bin/bazel-real"
 
   if [ -f "$bazel_exec_path" ]; then
-    exec "$bazel_exec_path" "$@"
+    # For build commands, use ccache integration
+    case "${1:-}" in
+      build|test|run|coverage|cquery|aquery)
+        run_with_ccache_patch "$@"
+        exit $?
+        ;;
+      *)
+        exec "$bazel_exec_path" "$@"
+        ;;
+    esac
   fi
 else
   echo >&2 "$expected_sha_file was empty. Falling back to downloading bazel"
@@ -110,4 +187,13 @@ mkdir -p "$BUILD_DIR"
 )
 rm -rf "$BUILD_DIR"
 
-exec "$bazel_exec_path" "$@"
+# For build commands, use ccache integration
+case "${1:-}" in
+  build|test|run|coverage|cquery|aquery)
+    run_with_ccache_patch "$@"
+    exit $?
+    ;;
+  *)
+    exec "$bazel_exec_path" "$@"
+    ;;
+esac
