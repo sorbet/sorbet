@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
+# run_filecheck: OPT
 
 def test_int_to_f
   puts(-128.to_f)
@@ -13,5 +14,13 @@ def test_int_to_f
   puts(9_007_199_254_740_992.to_f.to_i)
 end
 
+# OPT-LABEL: define internal i64 @"func_Object#13test_int_to_f"
+# OPT: tail call i64 @sorbet_int_to_f(
+# OPT: tail call i64 @sorbet_int_to_f(
+# OPT: tail call i64 @sorbet_int_to_f(
+# OPT: tail call i64 @sorbet_int_to_f(
+# OPT: tail call i64 @sorbet_int_to_f(
+# OPT: tail call i64 @sorbet_int_to_f(
+# OPT{LITERAL}: }
 
 test_int_to_f

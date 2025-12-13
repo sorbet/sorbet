@@ -1,6 +1,7 @@
 # typed: true
 # compiled: true
 # frozen_string_literal: true
+# run_filecheck: INITIAL
 
 class Parent
   extend T::Sig
@@ -19,3 +20,6 @@ class Child < Parent; end
 # won't end up being a direct call in the generated llvm.
 Child.new.final_method
 
+# INITIAL-LABEL: define internal i64 @"func_<root>.13<static-init>
+# INITIAL: call i64{{.*}}@sorbet_i_send(%struct.FunctionInlineCache* @ic_final_method
+# INITIAL{LITERAL}: }

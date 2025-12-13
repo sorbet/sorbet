@@ -1043,24 +1043,32 @@ public:
         return ClassOrModuleRef::fromRaw(89);
     }
 
-    static ClassOrModuleRef T_Types() {
+    static ClassOrModuleRef T_Private_Compiler() {
         return ClassOrModuleRef::fromRaw(90);
     }
 
-    static ClassOrModuleRef T_Types_Base() {
+    static ClassOrModuleRef T_Private_CompilerSingleton() {
         return ClassOrModuleRef::fromRaw(91);
     }
 
-    static ClassOrModuleRef Data() {
+    static ClassOrModuleRef T_Types() {
         return ClassOrModuleRef::fromRaw(92);
     }
 
-    static ClassOrModuleRef T_Class() {
+    static ClassOrModuleRef T_Types_Base() {
         return ClassOrModuleRef::fromRaw(93);
     }
 
-    static ClassOrModuleRef T_Module() {
+    static ClassOrModuleRef Data() {
         return ClassOrModuleRef::fromRaw(94);
+    }
+
+    static ClassOrModuleRef T_Class() {
+        return ClassOrModuleRef::fromRaw(95);
+    }
+
+    static ClassOrModuleRef T_Module() {
+        return ClassOrModuleRef::fromRaw(96);
     }
 
     static MethodRef T_Generic_squareBrackets() {
@@ -1096,7 +1104,7 @@ public:
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
-        return ClassOrModuleRef::fromRaw(95);
+        return ClassOrModuleRef::fromRaw(97);
     }
 
     static FieldRef ErrorNode() {

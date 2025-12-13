@@ -14,3 +14,4 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
   //test/cli:update //test/lsp:update -c opt "$@"
 
 tools/scripts/update_testdata_exp.sh
+test/cli/compiler/update_cli_exp_files.sh

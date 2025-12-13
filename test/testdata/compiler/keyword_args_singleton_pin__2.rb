@@ -9,7 +9,7 @@
 # to this Hash otherwise because the Ruby GC does not look for pointers into
 # its heap in shared objects' memory spaces.
 #
-# So once this compiled file loads (i.e., the require finishes), there will be
+# So: once this compiled file loads (i.e., the require finishes), there will be
 # no reference to the keywordArgsSingleton, unless we mark it for the GC.
 
 class Main

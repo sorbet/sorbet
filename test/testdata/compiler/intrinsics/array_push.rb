@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
+# run_filecheck: INITIAL
 
 def test_array_push
   p ([1, 2, 3].push)
@@ -17,3 +18,11 @@ end
 
 test_array_push
 
+# INITIAL-LABEL: define internal i64 @"func_Object#15test_array_push"
+# INITIAL: call i64 @sorbet_int_rb_ary_push_m(
+# INITIAL: call i64 @sorbet_int_rb_ary_push_m(
+# INITIAL: call i64 @sorbet_int_rb_ary_push_m(
+# INITIAL: call i64 @sorbet_int_rb_ary_push_m(
+# INITIAL: call i64 @sorbet_int_rb_ary_push_m(
+# INITIAL: call i64 @sorbet_int_rb_ary_push_m(
+# INITIAL{LITERAL}: }

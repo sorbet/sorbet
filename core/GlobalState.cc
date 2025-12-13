@@ -604,6 +604,12 @@ void GlobalState::initEmpty() {
     method = this->staticInitForClass(core::Symbols::root(), Loc::none());
     ENFORCE_NO_TIMER(method == Symbols::rootStaticInit());
 
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
+    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
+    ENFORCE(klass == Symbols::T_Private_Compiler());
+    klass = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
+    ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
+
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToAttachedClass());

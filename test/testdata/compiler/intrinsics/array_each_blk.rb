@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
+# run_filecheck: INITIAL
 
 result = [1, 2, 3].each do |x|
   puts "-- #{x} --"
@@ -14,3 +15,6 @@ result = [1, 2, 3, 4, 5, 6, 7, 8].each do |x|
 end
 
 p result
+
+# INITIAL-COUNT-2: call i64 @sorbet_callIntrinsicInlineBlock
+# INITIAL-NOT: call i64 @sorbet_callIntrinsicInlineBlock
