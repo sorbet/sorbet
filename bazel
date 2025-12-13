@@ -30,7 +30,7 @@ patch_ccache_if_needed() {
 
         # Extract clang path from original wrapper (works on both BSD and GNU sed)
         local clang_path
-        clang_path=$(sed -n 's/^if \[\[ -f \([^]]*\) \]\].*/\1/p' "$base_dir/cc_wrapper.sh" 2>/dev/null | head -1 | tr -d '[:space:]') || continue
+        clang_path=$(sed -n 's/^if \[\[ -f \(.*\) \]\].*/\1/p' "$base_dir/cc_wrapper.sh" 2>/dev/null | head -1 | tr -d '[:space:]') || continue
         [[ -n "$clang_path" ]] || continue
 
         # Atomic write to avoid races with parallel builds
