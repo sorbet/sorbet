@@ -77,9 +77,6 @@ CCACHE_WRAPPER
 run_with_ccache_patch() {
     patch_ccache_if_needed
     "$bazel_exec_path" "$@"
-    local exit_code=$?
-    patch_ccache_if_needed
-    return $exit_code
 }
 
 old_pwd="$PWD"
