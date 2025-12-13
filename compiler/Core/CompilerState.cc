@@ -190,8 +190,8 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
     ENFORCE(func != nullptr);
     auto *descOffsetTy = llvm::Type::getInt32Ty(lctx);
     auto *descLengthTy = descOffsetTy;
-    auto *structType = llvm::dyn_cast<llvm::StructType>(
-        func->getType()->getElementType()->getFunctionParamType(1)->getPointerElementType());
+    // IDDescriptor struct: {uint32_t offset, uint32_t length}
+    auto *structType = llvm::StructType::get(lctx, {descOffsetTy, descLengthTy}, /*isPacked=*/false);
     ENFORCE(structType != nullptr);
     auto *arrayType = llvm::ArrayType::get(structType, this->map.size());
     const auto isConstant = true;
@@ -257,8 +257,8 @@ void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Modul
     ENFORCE(func != nullptr);
     auto *descOffsetTy = llvm::Type::getInt32Ty(lctx);
     auto *descLengthTy = descOffsetTy;
-    auto *structType = llvm::dyn_cast<llvm::StructType>(
-        func->getType()->getElementType()->getFunctionParamType(1)->getPointerElementType());
+    // RubyStringDescriptor struct: {uint32_t offset, uint32_t length}
+    auto *structType = llvm::StructType::get(lctx, {descOffsetTy, descLengthTy}, /*isPacked=*/false);
     ENFORCE(structType != nullptr);
     auto *arrayType = llvm::ArrayType::get(structType, this->map.size());
     const auto isConstant = true;

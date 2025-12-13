@@ -22,11 +22,12 @@ llvm::Value *Payload::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &bu
 
 void Payload::boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target,
                           llvm::Value *rawData) {
-    builder.CreateStore(rawData, builder.CreateStructGEP(target, 0));
+    builder.CreateStore(rawData, builder.CreateStructGEP(target->getAllocatedType(), target, 0));
 }
 
 llvm::Value *Payload::unboxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target) {
-    return builder.CreateLoad(builder.CreateStructGEP(target, 0), "rawRubyValue");
+    auto *structGEP = builder.CreateStructGEP(target->getAllocatedType(), target, 0);
+    return builder.CreateLoad(llvm::Type::getInt64Ty(cs), structGEP, "rawRubyValue");
 }
 
 llvm::Value *Payload::rubyUndef(CompilerState &cs, llvm::IRBuilderBase &builder) {
@@ -108,7 +109,7 @@ llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &b
     auto oldInsertPoint = builder.saveIP();
     builder.SetInsertPoint(cs.functionEntryInitializers);
     auto name = llvm::StringRef(str.data(), str.length());
-    auto global = builder.CreateLoad(globalDeclaration, {"rubyRegexp_", name});
+    auto global = builder.CreateLoad(globalDeclaration->getValueType(), globalDeclaration, {"rubyRegexp_", name});
     builder.restoreIP(oldInsertPoint);
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
@@ -123,10 +124,11 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
                                   {rawCString, llvm::ConstantInt::get(cs, llvm::APInt(64, str.length(), true))},
                                   "rawRubyStr");
     }
-    auto *loadAddr = builder.CreateLoad(cs.rubyStringTableRef(str));
+    auto *globalRef = llvm::cast<llvm::GlobalVariable>(cs.rubyStringTableRef(str));
+    auto *loadAddr = builder.CreateLoad(globalRef->getValueType(), globalRef);
     auto *MD = llvm::MDNode::get(cs, llvm::None);
     loadAddr->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
-    auto *load = builder.CreateLoad(loadAddr, {"rubyStr_", str});
+    auto *load = builder.CreateLoad(llvm::Type::getInt64Ty(cs), loadAddr, {"rubyStr_", str});
     load->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
     return load;
 }
@@ -145,10 +147,11 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &builder, 
     // later (see the code in CompilerState for why).  But we want LLVM to know
     // that the load always returns the same thing.  So mark the load as
     //`!invariant.load`.
-    auto *loadAddr = builder.CreateLoad(cs.idTableRef(idName));
+    auto *globalRef = llvm::cast<llvm::GlobalVariable>(cs.idTableRef(idName));
+    auto *loadAddr = builder.CreateLoad(globalRef->getValueType(), globalRef);
     auto *MD = llvm::MDNode::get(cs, llvm::None);
     loadAddr->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
-    auto *load = builder.CreateLoad(loadAddr, {"rubyId_", idName});
+    auto *load = builder.CreateLoad(llvm::Type::getInt64Ty(cs), loadAddr, {"rubyId_", idName});
     load->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
     return load;
 }
@@ -181,7 +184,8 @@ llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuil
     // that the load always returns the same thing: such knowledge is important for
     // transformations involving identical sorbet_i_getRuby{Class,Constant} calls
     // and eliminating unnecessary type tests.  So mark the load as `!invariant.load`.
-    auto *load = builder.CreateLoad(cs.stringTableRef(str));
+    auto *globalRef = llvm::cast<llvm::GlobalVariable>(cs.stringTableRef(str));
+    auto *load = builder.CreateLoad(globalRef->getValueType(), globalRef);
     auto *MD = llvm::MDNode::get(cs, llvm::None);
     load->setMetadata(llvm::LLVMContext::MD_invariant_load, MD);
     return load;
@@ -494,7 +498,7 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitter
 
     for (auto &entry : escapedVariables) {
         auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.shortName(cs));
-        builder.CreateStore(id, builder.CreateConstGEP1_32(locals, baseOffset + entry.second.localIndex));
+        builder.CreateStore(id, builder.CreateConstGEP1_32(llvm::Type::getInt64Ty(cs), locals, baseOffset + entry.second.localIndex));
     }
 }
 
@@ -585,7 +589,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     // Give such methods line numbers of 0.
     unsigned startLine;
     if (loc.exists()) {
-        startLine = loc.position(cs).first.line;
+        startLine = loc.toDetails(cs).first.line;
     } else {
         startLine = 0;
     }
@@ -659,7 +663,7 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
     }
 
     globalInitBuilder.SetInsertPoint(cs.functionEntryInitializers);
-    auto global = globalInitBuilder.CreateLoad(globalDeclaration, "stackFrame");
+    auto global = globalInitBuilder.CreateLoad(globalDeclaration->getValueType(), globalDeclaration, "stackFrame");
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
@@ -705,7 +709,7 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
         return global;
     });
 
-    return builder.CreateLoad(global, rawName);
+    return builder.CreateLoad(tp, global, rawName);
 }
 
 // Ensure that the VOID singleton is present during module initialization, and store it in a module-local global.
@@ -729,17 +733,18 @@ llvm::Value *Payload::voidSingleton(CompilerState &cs, llvm::IRBuilderBase &buil
         return global;
     });
 
-    return builder.CreateLoad(global, rawName);
+    return builder.CreateLoad(tp, global, rawName);
 }
 
 // Lazily initialize a global that contains enough noops to represent all the lines in the file as an iseq_encoded
 // array.
 llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBase &builder, core::FileRef file) {
     auto *iseqEncodedInitFn = cs.module->getFunction("sorbet_initLineNumberInfo");
-    auto *infoPointerTy = iseqEncodedInitFn->getFunctionType()->params()[0];
-    ENFORCE(infoPointerTy != nullptr);
+    ENFORCE(iseqEncodedInitFn != nullptr);
 
-    auto *globalTy = llvm::cast<llvm::PointerType>(infoPointerTy)->getElementType();
+    // The first parameter to sorbet_initLineNumberInfo is struct SorbetLineNumberInfo*
+    auto *globalTy = llvm::StructType::getTypeByName(cs, "struct.SorbetLineNumberInfo");
+    ENFORCE(globalTy != nullptr);
 
     auto *iseqEncoded = getIseqEncodedPointer(cs, builder, file);
     const string rawName = "fileLineNumberInfo";
@@ -755,9 +760,10 @@ llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBa
             globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
 
             auto *numLines = llvm::ConstantInt::get(cs, llvm::APInt(32, file.data(cs).lineCount(), true));
+            auto *iseqGlobal = llvm::cast<llvm::GlobalVariable>(iseqEncoded);
             globalInitBuilder.CreateCall(
                 iseqEncodedInitFn,
-                {fileLineNumberInfo, globalInitBuilder.CreateConstGEP2_32(nullptr, iseqEncoded, 0, 0), numLines});
+                {fileLineNumberInfo, globalInitBuilder.CreateConstGEP2_32(iseqGlobal->getValueType(), iseqEncoded, 0, 0), numLines});
 
             return fileLineNumberInfo;
         });
@@ -790,8 +796,8 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder
     if (!loc.exists()) {
         return lastLoc;
     }
-    auto lineno = loc.position(cs).first.line;
-    if (lastLoc.exists() && lastLoc.position(cs).first.line == lineno) {
+    auto lineno = loc.toDetails(cs).first.line;
+    if (lastLoc.exists() && lastLoc.toDetails(cs).first.line == lineno) {
         return lastLoc;
     }
     if (!methodStart.exists()) {
@@ -801,9 +807,10 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder
     // turn the line number into an offset into the iseq_encoded global array
     auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, lineno - 1));
 
-    auto *encoded = Payload::getIseqEncodedPointer(cs, builder, loc.file());
+    auto *encoded = llvm::cast<llvm::GlobalVariable>(Payload::getIseqEncodedPointer(cs, builder, loc.file()));
     builder.CreateCall(cs.getFunction("sorbet_setLineNumber"),
-                       {offset, builder.CreateConstGEP2_32(nullptr, encoded, 0, 0), builder.CreateLoad(lineNumberPtr)});
+                       {offset, builder.CreateConstGEP2_32(encoded->getValueType(), encoded, 0, 0),
+                        builder.CreateLoad(lineNumberPtr->getAllocatedType(), lineNumberPtr)});
     return loc;
 }
 
@@ -1003,8 +1010,9 @@ void Payload::pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &builde
     auto *sorbetPush = cs.getFunction("sorbet_pushValueStack");
 
     auto *spPtr = builder.CreateCall(cs.getFunction("sorbet_get_sp"), {cfp});
-    auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
-    llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
+    // sorbet_get_sp returns VALUE** (pointer to stack pointer), loading gives VALUE* (i64*)
+    auto *spElemTy = llvm::PointerType::get(cs, 0);
+    llvm::Value *sp = builder.CreateLoad(spElemTy, spPtr);
     sp = builder.CreateCall(sorbetPush, {sp, recv});
     for (auto *arg : stack) {
         sp = builder.CreateCall(sorbetPush, {sp, arg});
@@ -1073,8 +1081,10 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
         case FunctionType::StaticInitModule:
         case FunctionType::StaticInitFile:
             return irctx.rubyBlocks2Functions[rubyRegionId]->arg_begin() + 3;
-        case FunctionType::Block:
-            return builder.CreateLoad(irctx.blockControlFramePtrs.at(rubyRegionId), "cached_cfp");
+        case FunctionType::Block: {
+            auto *alloca = irctx.blockControlFramePtrs.at(rubyRegionId);
+            return builder.CreateLoad(alloca->getAllocatedType(), alloca, "cached_cfp");
+        }
         case FunctionType::ExceptionBegin:
             return irctx.rubyBlocks2Functions[rubyRegionId]->arg_begin() + 2;
         case FunctionType::Rescue:
@@ -1123,7 +1133,7 @@ llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBas
         return global;
     });
 
-    auto *globalIndex = builder.CreateLoad(global);
+    auto *globalIndex = builder.CreateLoad(globalTy, global);
     return builder.CreateCall(cs.getFunction("sorbet_globalConstFetchIfunc"), {globalIndex});
 }
 

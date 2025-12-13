@@ -130,7 +130,7 @@ public:
                                                         initializer, nm);
                     return ret;
                 });
-                return builder.CreateLoad(globalDeclaration);
+                return builder.CreateLoad(tp, globalDeclaration);
             }
         }
         string str(symName);
@@ -154,13 +154,13 @@ public:
         });
 
         auto needTakeSlowPath =
-            builder.CreateICmpNE(builder.CreateLoad(guardEpochDeclaration),
+            builder.CreateICmpNE(builder.CreateLoad(tp, guardEpochDeclaration),
                                  builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "needTakeSlowPath");
 
-        auto splitPoint = builder.CreateLoad(guardedConstDeclaration);
+        auto splitPoint = builder.CreateLoad(tp, guardedConstDeclaration);
         builder.CreateIntrinsic(
             llvm::Intrinsic::IndependentIntrinsics::assume, {},
-            {builder.CreateICmpEQ(builder.CreateLoad(guardEpochDeclaration),
+            {builder.CreateICmpEQ(builder.CreateLoad(tp, guardEpochDeclaration),
                                   builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "guardUpdated")}
 
         );
@@ -359,8 +359,9 @@ public:
         auto *cfp = instr->getArgOperand(4);
 
         auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
-        auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
-        llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
+        // sorbet_get_sp returns VALUE** (pointer to stack pointer), loading gives VALUE* (i64*)
+        auto *spElemTy = llvm::PointerType::get(module.getContext(), 0);
+        llvm::Value *sp = builder.CreateLoad(spElemTy, spPtr);
         for (auto iter = std::next(instr->arg_begin(), recvArgOffset); iter < instr->arg_end(); ++iter) {
             sp = builder.CreateCall(module.getFunction("sorbet_pushValueStack"), {sp, iter->get()});
         }
@@ -626,7 +627,7 @@ public:
         // This is the case for code written as follows:
         //   args = { a: 1 }
         //   foo(**args)
-        ENFORCE(toHashCall->getNumArgOperands() == 1);
+        ENFORCE(toHashCall->arg_size() == 1);
         auto *constDupCall = llvm::dyn_cast<llvm::CallInst>(toHashCall->getOperand(0));
         if (constDupCall == nullptr || constDupCall->getCalledFunction() != sorbetGlobalConstDupHashFn ||
             constDupCall->getParent() != toHashCall->getParent() || !constDupCall->hasOneUser()) {
@@ -666,7 +667,7 @@ public:
                 return false;
             }
 
-            ENFORCE(phiArg->getNumArgOperands() == 1);
+            ENFORCE(phiArg->arg_size() == 1);
             auto *loadInst = llvm::dyn_cast<llvm::LoadInst>(phiArg->getOperand(0));
             if (loadInst == nullptr) {
                 return false;
@@ -716,7 +717,7 @@ public:
                         !hashDupCall->hasOneUser()) {
                         continue;
                     }
-                    ENFORCE(hashDupCall->getNumArgOperands() == 1);
+                    ENFORCE(hashDupCall->arg_size() == 1);
                     auto *toHashCall = llvm::dyn_cast<llvm::CallInst>(hashDupCall->getOperand(0));
                     if (toHashCall == nullptr || toHashCall->getCalledFunction() != rbToHashTypeFn ||
                         toHashCall->getParent() != hashDupCall->getParent() || !toHashCall->hasOneUser()) {

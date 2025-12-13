@@ -28,7 +28,7 @@ namespace sorbet::compiler {
 
 namespace {
 
-vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::MethodRef method,
+vector<core::ParamInfo::Flags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::MethodRef method,
                                                       const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
     ENFORCE(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInitFile ||
@@ -36,11 +36,11 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
 
     if (ty == FunctionType::Block) {
         auto blockLink = irctx.blockLinks[blockId];
-        return blockLink->argFlags;
+        return blockLink->paramFlags;
     }
 
-    vector<core::ArgInfo::ArgFlags> res;
-    for (auto &argInfo : method.data(cs)->arguments) {
+    vector<core::ParamInfo::Flags> res;
+    for (auto &argInfo : method.data(cs)->parameters) {
         res.emplace_back(argInfo.flags);
     }
 
@@ -122,7 +122,7 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
 void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                   cfg::LocalRef kwRestArgName, llvm::Value *argCountRaw, llvm::Value *argArrayRaw,
                                   llvm::Value *hashArgs, int maxPositionalArgCount,
-                                  const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyRegionId) {
+                                  const vector<core::ParamInfo::Flags> &argsFlags, int rubyRegionId) {
     ENFORCE(rubyRegionId == 0);
     auto *func = irctx.rubyBlocks2Functions[rubyRegionId];
     auto &argPresentVariables = irctx.argPresentVariables[rubyRegionId];
@@ -142,7 +142,7 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
     // positional arguments passed; the number of keyword arguments is stored in the
     // call data.  But the keyword arguments are still passed in argv (argument 2).
     llvm::Value *kwargvIndices[] = {argCountRaw};
-    auto *kwargv = builder.CreateGEP(argArrayRaw, kwargvIndices, "kwargv");
+    auto *kwargv = builder.CreateGEP(llvm::Type::getInt64Ty(cs), argArrayRaw, kwargvIndices, "kwargv");
 
     for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
         if (!argsFlags[argId].isKeyword || argsFlags[argId].isRepeated) {
@@ -217,7 +217,7 @@ void parseKeywordArgsFromCallData(CompilerState &cs, llvm::IRBuilderBase &builde
 
 void parseKeywordArgsFromKwSplat(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                  cfg::LocalRef kwRestArgName, llvm::Value *hashArgs, int maxPositionalArgCount,
-                                 const vector<core::ArgInfo::ArgFlags> &argsFlags, int rubyRegionId) {
+                                 const vector<core::ParamInfo::Flags> &argsFlags, int rubyRegionId) {
     auto *func = irctx.rubyBlocks2Functions[rubyRegionId];
     auto &argPresentVariables = irctx.argPresentVariables[rubyRegionId];
     // required arguments remaining to be parsed
@@ -387,8 +387,9 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     builder.CreateCondBr(argSizeForExpansionCheck, arrayTestBlock, afterArgArrayExpandBlock);
                     auto sizeTestEnd = builder.GetInsertBlock();
                     builder.SetInsertPoint(arrayTestBlock);
-                    auto rawArg1Value =
-                        builder.CreateLoad(builder.CreateConstGEP1_32(argArrayRaw, 0), "arg1_maybeExpandToFullArgs");
+                    auto *elemTy = llvm::Type::getInt64Ty(cs);
+                    auto rawArg1Value = builder.CreateLoad(
+                        elemTy, builder.CreateConstGEP1_32(elemTy, argArrayRaw, 0), "arg1_maybeExpandToFullArgs");
                     auto isArray = Payload::typeTest(cs, builder, rawArg1Value, core::Symbols::Array());
                     auto typeTestEnd = builder.GetInsertBlock();
 
@@ -492,8 +493,9 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                     auto name = a.data(cfg)._name.shortName(cs);
                     llvm::StringRef nameRef(name.data(), name.length());
-                    auto rawValue =
-                        builder.CreateLoad(builder.CreateConstGEP1_32(argArrayRaw, i), {"rawArg_", nameRef});
+                    auto *valueTy = llvm::Type::getInt64Ty(cs);
+                    auto rawValue = builder.CreateLoad(
+                        valueTy, builder.CreateConstGEP1_32(valueTy, argArrayRaw, i), {"rawArg_", nameRef});
                     Payload::varSet(cs, a, rawValue, builder, irctx, rubyRegionId);
                     if (i >= minPositionalArgCount) {
                         // check if we need to fill in the next variable from the arg
@@ -635,7 +637,7 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
 void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
     auto startLoc = cfg.symbol.data(base)->loc();
-    auto &arguments = cfg.symbol.data(base)->arguments;
+    auto &arguments = cfg.symbol.data(base)->parameters;
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[bb->rubyRegionId]);
@@ -914,7 +916,8 @@ void emitDirectWrapper(CompilerState &cs, const ast::MethodDef &md, const IREmit
     builder.SetInsertPoint(entry);
 
     auto *target = irctx.rubyBlocks2Functions[0];
-    auto *stackFrame = builder.CreateLoad(Payload::rubyStackFrameVar(cs, builder, irctx, md.symbol));
+    auto *stackFrameVar = llvm::cast<llvm::GlobalVariable>(Payload::rubyStackFrameVar(cs, builder, irctx, md.symbol));
+    auto *stackFrame = builder.CreateLoad(stackFrameVar->getValueType(), stackFrameVar);
     auto *res = Payload::callFuncDirect(cs, builder, cache, target, argc, argv, self, stackFrame);
     builder.CreateRet(res);
 }

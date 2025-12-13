@@ -240,7 +240,7 @@ std::size_t IREmitterHelpers::sendArgCount(cfg::Send *send) {
 
 namespace {
 
-void setSendArgsEntry(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *sendArgs, int index,
+void setSendArgsEntry(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *sendArgs, int index,
                       llvm::Value *val) {
     // the sendArgArray is always a pointer to an array of VALUEs. That is, since the
     // outermost type is a pointer, not an array, the first 0 in the instruction:
@@ -248,11 +248,12 @@ void setSendArgsEntry(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Val
     // just means to offset 0 from the pointer's contents. Then the second index is into the
     // array (so for this type of pointer-to-array, the first index will always be 0,
     // unless you're trying to do something more powerful with GEP, like compute sizeof)
-    builder.CreateStore(val, builder.CreateConstGEP2_64(sendArgs, 0, index, fmt::format("callArgs{}Addr", index)));
+    builder.CreateStore(val, builder.CreateConstGEP2_64(sendArgs->getAllocatedType(), sendArgs, 0, index,
+                                                        fmt::format("callArgs{}Addr", index)));
 }
 
-llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *sendArgs) {
-    return builder.CreateConstGEP2_64(sendArgs, 0, 0);
+llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *sendArgs) {
+    return builder.CreateConstGEP2_64(sendArgs->getAllocatedType(), sendArgs, 0, 0);
 }
 
 } // namespace
@@ -460,12 +461,13 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 
     // If we get here with <Magic> or Sorbet::Private::Static, then something has
     // gone wrong.
-    if (auto *at = core::cast_type<core::AppliedType>(send->recv.type)) {
-        if (at->klass == core::Symbols::MagicSingleton()) {
+    auto atPtr = core::cast_type<core::AppliedType>(send->recv.type);
+    if (atPtr) {
+        if (atPtr->klass == core::Symbols::MagicSingleton()) {
             failCompilation(cs, core::Loc(cs.file, send->receiverLoc),
                             "No runtime implementation for <Magic> method exists");
         }
-        if (at->klass == core::Symbols::Sorbet_Private_StaticSingleton()) {
+        if (atPtr->klass == core::Symbols::Sorbet_Private_StaticSingleton()) {
             failCompilation(cs, core::Loc(cs.file, send->receiverLoc),
                             "No runtime implementation for Sorbet::Private::Static method exists");
         }
@@ -493,7 +495,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &builder, string methodName,
                                                CallCacheFlags flags, int argc, const vector<string_view> &keywords) {
     auto *setupFn = cs.getFunction("sorbet_setupFunctionInlineCache");
-    auto *cacheTy = static_cast<llvm::PointerType *>(setupFn->arg_begin()->getType())->getElementType();
+    auto *cacheTy = llvm::StructType::getTypeByName(cs, "struct.FunctionInlineCache");
     auto *zero = llvm::ConstantAggregateZero::get(cacheTy);
 
     auto *cache = new llvm::GlobalVariable(*cs.module, cacheTy, false, llvm::GlobalVariable::InternalLinkage, zero,

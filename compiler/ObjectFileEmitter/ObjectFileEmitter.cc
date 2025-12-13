@@ -14,7 +14,7 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Host.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
@@ -31,6 +31,7 @@
 #include "llvm/Transforms/Instrumentation.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Transforms/Scalar/SimpleLoopUnswitch.h"
 #include "llvm/Transforms/Scalar/InstSimplifyPass.h"
 #include "llvm/Transforms/Utils.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
@@ -120,13 +121,13 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     if (unnecessaryForUs) {
         pm.add(llvm::createLibCallsShrinkWrapPass());
     }
-    pm.add(llvm::createPGOMemOPSizeOptLegacyPass());
+    // createPGOMemOPSizeOptLegacyPass removed in LLVM 15
     pm.add(llvm::createTailCallEliminationPass());
     pm.add(llvm::createCFGSimplificationPass());
     pm.add(llvm::createReassociatePass());
     pm.add(llvm::createLoopRotatePass(-1));
-    pm.add(llvm::createLICMPass(100, 250));
-    pm.add(llvm::createLoopUnswitchPass(false, false)); // first bool is true for O2 and lower
+    pm.add(llvm::createLICMPass(100, 250, /*AllowSpeculation=*/false));
+    pm.add(llvm::createSimpleLoopUnswitchLegacyPass(false)); // first bool is for non-trivial unswitching
     pm.add(llvm::createCFGSimplificationPass());
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     pm.add(llvm::createIndVarSimplifyPass());
@@ -143,7 +144,7 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createJumpThreadingPass()); // Thread jumps
     pm.add(llvm::createCorrelatedValuePropagationPass());
     pm.add(llvm::createDeadStoreEliminationPass()); // Delete dead stores
-    pm.add(llvm::createLICMPass(100, 250));
+    pm.add(llvm::createLICMPass(100, 250, /*AllowSpeculation=*/false));
     pm.add(llvm::createAggressiveDCEPass());     // Delete dead instructions
     pm.add(llvm::createCFGSimplificationPass()); // Merge & remove BBs
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
@@ -173,7 +174,7 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createLoopUnrollPass(2, false, false));
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     if (unnecessaryForUs) {
-        pm.add(llvm::createLICMPass(100, 250));
+        pm.add(llvm::createLICMPass(100, 250, /*AllowSpeculation=*/false));
         pm.add(llvm::createAlignmentFromAssumptionsPass());
         pm.add(llvm::createStripDeadPrototypesPass());
     }
@@ -209,7 +210,7 @@ void addLTOPasses(llvm::legacy::PassManager &pm, llvm::ModulePass *printLowered)
         pm.add(llvm::createForceFunctionAttrsLegacyPass());
         pm.add(llvm::createInferFunctionAttrsLegacyPass());
         pm.add(llvm::createCallSiteSplittingPass());
-        pm.add(llvm::createPGOIndirectCallPromotionLegacyPass(true, false));
+        // createPGOIndirectCallPromotionLegacyPass removed in LLVM 15
     }
     pm.add(llvm::createIPSCCPPass());
     pm.add(llvm::createCalledValuePropagationPass()); // should follow IPSCCP
@@ -221,7 +222,7 @@ void addLTOPasses(llvm::legacy::PassManager &pm, llvm::ModulePass *printLowered)
     }
 
     if (unnecessaryForUs) {
-        pm.add(llvm::createWholeProgramDevirtPass(nullptr, nullptr));
+        // createWholeProgramDevirtPass removed in LLVM 15
     }
     pm.add(llvm::createGlobalOptimizerPass());
     pm.add(llvm::createPromoteMemoryToRegisterPass());
@@ -238,7 +239,7 @@ void addLTOPasses(llvm::legacy::PassManager &pm, llvm::ModulePass *printLowered)
         pm.add(llvm::createGlobalOptimizerPass());
         pm.add(llvm::createGlobalDCEPass());
     }
-    pm.add(llvm::createArgumentPromotionPass());
+    // createArgumentPromotionPass removed in LLVM 15
     if (unnecessaryForUs) {
         pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
         pm.add(llvm::createJumpThreadingPass());
@@ -247,7 +248,7 @@ void addLTOPasses(llvm::legacy::PassManager &pm, llvm::ModulePass *printLowered)
         pm.add(llvm::createPostOrderFunctionAttrsLegacyPass());
         pm.add(llvm::createGlobalsAAWrapperPass());
     }
-    pm.add(llvm::createLICMPass(100, 250));
+    pm.add(llvm::createLICMPass(100, 250, /*AllowSpeculation=*/false));
     if (unnecessaryForUs) {
         pm.add(llvm::createMergedLoadStoreMotionPass());
         pm.add(llvm::createGVNPass(false));
@@ -307,7 +308,7 @@ void addLTOPasses(llvm::legacy::PassManager &pm, llvm::ModulePass *printLowered)
         pm.add(llvm::createCrossDSOCFIPass());
     }
     if (unnecessaryForUs) {
-        pm.add(llvm::createLowerTypeTestsPass(nullptr, nullptr));
+        // createLowerTypeTestsPass removed in LLVM 15
     }
 
     if (unnecessaryForUs) {
@@ -373,7 +374,7 @@ void ObjectFileEmitter::init() {
         llvm::legacy::PassManager ppm;
         std::error_code ec;
         auto name = fmt::format("{}/{}.ll", llvmIrDir.value(), objectName);
-        llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::F_Text);
+        llvm::raw_fd_ostream llFile(name, ec, llvm::sys::fs::OF_Text);
         ppm.add(llvm::createPrintModulePass(llFile, ""));
         ppm.run(*module);
     }
@@ -413,7 +414,7 @@ void ObjectFileEmitter::init() {
     std::optional<llvm::raw_fd_ostream> loweredllFile;
     if (llvmIrDir.has_value()) {
         auto nameOptl = fmt::format("{}/{}.lowered.ll", llvmIrDir.value(), objectName);
-        loweredllFile.emplace(nameOptl, ec1, llvm::sys::fs::F_Text);
+        loweredllFile.emplace(nameOptl, ec1, llvm::sys::fs::OF_Text);
         printLowered = llvm::createPrintModulePass(loweredllFile.value(), "");
     }
     // LTO passes
@@ -424,7 +425,7 @@ void ObjectFileEmitter::init() {
     std::optional<llvm::raw_fd_ostream> optllFile;
     if (llvmIrDir.has_value()) {
         auto nameOpt = fmt::format("{}/{}.opt.ll", llvmIrDir.value(), objectName);
-        optllFile.emplace(nameOpt, ec1, llvm::sys::fs::F_Text);
+        optllFile.emplace(nameOpt, ec1, llvm::sys::fs::OF_Text);
         pm.add(llvm::createPrintModulePass(optllFile.value(), ""));
     }
     {

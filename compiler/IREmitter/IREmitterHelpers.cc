@@ -187,7 +187,7 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
         line = 0;
         column = 0;
     } else {
-        auto start = loc.position(cs).first;
+        auto start = loc.toDetails(cs).first;
         line = start.line;
         column = start.column;
     }
@@ -339,16 +339,16 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
     }
 
     auto litType = core::cast_type_nonnull<core::NamedLiteralType>(lit);
-    switch (litType.literalKind) {
-        case core::NamedLiteralType::LiteralTypeKind::Symbol: {
-            auto str = litType.asName().shortName(cs);
+    switch (litType.kind) {
+        case core::NamedLiteralType::Kind::Symbol: {
+            auto str = litType.name.shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
             auto *value = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
             Payload::assumeType(cs, builder, value, core::Symbols::Symbol());
             return value;
         }
-        case core::NamedLiteralType::LiteralTypeKind::String: {
-            auto str = litType.asName().shortName(cs);
+        case core::NamedLiteralType::Kind::String: {
+            auto str = litType.name.shortName(cs);
             auto *value = Payload::cPtrToRubyString(cs, builder, str, true);
             Payload::assumeType(cs, builder, value, core::Symbols::String());
             return value;
@@ -366,14 +366,14 @@ bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::Me
 
     if (ty == FunctionType::Block) {
         auto blockLink = irctx.blockLinks[blockId];
-        if (blockLink->argFlags.empty()) {
+        if (blockLink->paramFlags.empty()) {
             return false;
         }
 
-        return blockLink->argFlags.back().isBlock;
+        return blockLink->paramFlags.back().isBlock;
     }
 
-    auto &args = method.data(cs)->arguments;
+    auto &args = method.data(cs)->parameters;
     if (args.empty()) {
         return false;
     }
@@ -421,7 +421,7 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
     core::ClassOrModuleRef recvSym;
     if (core::isa_type<core::ClassType>(recvType)) {
         recvSym = core::cast_type_nonnull<core::ClassType>(recvType).symbol;
-    } else if (auto *app = core::cast_type<core::AppliedType>(recvType)) {
+    } else if (auto app = core::cast_type<core::AppliedType>(recvType)) {
         recvSym = app->klass;
     }
 
@@ -439,9 +439,9 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
     }
 
     auto file = funSym.data(gs)->loc().file();
-    if (file.data(gs).compiledLevel != core::CompiledLevel::True) {
-        return std::nullopt;
-    }
+    // NOTE: compiledLevel was removed when the compiler was removed.
+    // When the compiler is in use, we assume all files are being compiled.
+    // TODO: Re-add compiledLevel tracking if needed for partial compilation support.
 
     return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, file};
 }
@@ -475,7 +475,7 @@ llvm::Value *KnownFunction::getFunction(CompilerState &cs, llvm::IRBuilderBase &
                     return ret;
                 }));
 
-            return builder.CreateLoad(cache);
+            return builder.CreateLoad(type, cache);
         }
     }
 }

@@ -42,7 +42,8 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
 
     auto *ec = builder.CreateCall(cs.getFunction("sorbet_getEC"), {}, "ec");
 
-    auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyRegionId]);
+    auto *lineNumAlloca = irctx.lineNumberPtrsByFunction[rubyRegionId];
+    auto *pc = builder.CreateLoad(lineNumAlloca->getAllocatedType(), lineNumAlloca);
     auto *closure = Payload::buildLocalsOffset(cs);
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
 

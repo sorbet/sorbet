@@ -23,8 +23,8 @@ namespace sorbet::compiler {
 namespace {
 
 optional<string_view> isSymbol(const core::GlobalState &gs, const cfg::InstructionPtr &insn) {
-    auto *liti = cfg::cast_instruction<cfg::Literal>(insn);
-    if (liti == nullptr) {
+    auto liti = cfg::cast_instruction<cfg::Literal>(insn);
+    if (!liti) {
         return std::nullopt;
     }
 
@@ -33,11 +33,11 @@ optional<string_view> isSymbol(const core::GlobalState &gs, const cfg::Instructi
     }
 
     const auto &lit = core::cast_type_nonnull<core::NamedLiteralType>(liti->value);
-    if (lit.literalKind != core::NamedLiteralType::LiteralTypeKind::Symbol) {
+    if (lit.kind != core::NamedLiteralType::Kind::Symbol) {
         return std::nullopt;
     }
 
-    return lit.asName().shortName(gs);
+    return lit.name.shortName(gs);
 }
 
 struct AliasesAndKeywords {
@@ -51,7 +51,7 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
 
     for (auto &bb : cfg.basicBlocks) {
         for (auto &bind : bb->exprs) {
-            if (auto *i = cfg::cast_instruction<cfg::Alias>(bind.value)) {
+            if (auto i = cfg::cast_instruction<cfg::Alias>(bind.value)) {
                 ENFORCE(res.aliases.find(bind.bind.variable) == res.aliases.end(),
                         "Overwriting an entry in the aliases map");
 
@@ -379,19 +379,19 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
     TrackCaptures usage(aliases, blockLevels);
 
     int argId = -1;
-    auto &methodArguments = cfg.symbol.data(cs)->arguments;
-    for (auto &arg : mdef.args) {
+    auto &methodArguments = cfg.symbol.data(cs)->parameters;
+    for (auto &arg : mdef.params) {
         argId += 1;
-        ast::Local const *local = nullptr;
-        if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
-            local = ast::cast_tree<ast::Local>(opt->expr);
+        const ast::Local *local = nullptr;
+        if (auto opt = ast::cast_tree<ast::OptionalParam>(arg)) {
+            local = ast::cast_tree<ast::Local>(opt->expr).get();
         } else {
-            local = ast::cast_tree<ast::Local>(arg);
+            local = ast::cast_tree<ast::Local>(arg).get();
         }
         ENFORCE(local);
         auto localRef = cfg.enterLocal(local->localVariable);
         auto &argInfo = methodArguments[argId];
-        if (cfg.symbol.data(cs)->arguments[argId].flags.isBlock) {
+        if (cfg.symbol.data(cs)->parameters[argId].flags.isBlock) {
             usage.blkArg = localRef;
         }
         usage.trackBlockArgument(cfg.entry(), localRef, argInfo.type);
@@ -511,7 +511,7 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
     // Line number 0 indicates that the compiler knows the entity came from this
     // particular file, but doesn't have precise location tracking for it.  This
     // can happen with e.g. synthesized packages.
-    auto lineNo = loc.exists() ? loc.position(cs).first.line : 0;
+    auto lineNo = loc.exists() ? loc.toDetails(cs).first.line : 0;
 
     return cs.debug->createFunction(parent, diName, func->getName(), debugFile, lineNo, getDebugFunctionType(cs, func),
                                     lineNo, llvm::DINode::FlagPrototyped, llvm::DISubprogram::SPFlagDefinition);
@@ -737,7 +737,7 @@ tuple<vector<int>, vector<int>> getBlockLevels(vector<int> &blockParents, vector
 
 string locationNameFor(CompilerState &cs, core::MethodRef symbol) {
     if (IREmitterHelpers::isClassStaticInit(cs, symbol)) {
-        auto enclosingClassRef = symbol.enclosingClass(cs);
+        auto enclosingClassRef = symbol.data(cs)->owner;
         ENFORCE(enclosingClassRef.exists());
         enclosingClassRef = enclosingClassRef.data(cs)->attachedClass(cs);
         ENFORCE(enclosingClassRef.exists());
@@ -868,7 +868,7 @@ void collectRubyBlockArgs(const cfg::CFG &cfg, const cfg::BasicBlock *b, vector<
 }
 
 // Given a block's argument list, compute the minimum and maximum arguments that will be present at runtime.
-BlockArity computeBlockArity(const vector<core::ArgInfo::ArgFlags> &argFlags) {
+BlockArity computeBlockArity(const vector<core::ParamInfo::Flags> &argFlags) {
     BlockArity blockArity;
 
     bool seenKwarg = false;
@@ -1019,7 +1019,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     {
         // fill in data about args for main function
-        for (auto &treeArg : md.args) {
+        for (auto &treeArg : md.params) {
             auto *a = ast::MK::arg2Local(treeArg);
             rubyBlockArgs[0].emplace_back(cfg.enterLocal(a->localVariable));
         }
@@ -1030,7 +1030,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     // The method arguments are initialized here, while the block arguments are initialized when the blockCall header is
     // encountered in the loop below.
-    int numArgs = md.symbol.data(cs)->arguments.size();
+    int numArgs = md.symbol.data(cs)->parameters.size();
     argPresentVariables[0].resize(numArgs, cfg::LocalRef::noVariable());
 
     for (auto &b : cfg.basicBlocks) {
@@ -1060,7 +1060,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyRegionId] = expectedSend->link;
 
-            auto &argFlags = expectedSend->link->argFlags;
+            auto &argFlags = expectedSend->link->paramFlags;
             auto numBlockArgs = argFlags.size();
             auto &blockArgs = rubyBlockArgs[b->rubyRegionId];
             blockArgs.resize(numBlockArgs, cfg::LocalRef::noVariable());

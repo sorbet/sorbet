@@ -156,8 +156,8 @@ public:
         // one day
         auto recv = send->args[0].variable;
         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName();
+        ENFORCE(lit.kind == core::NamedLiteralType::Kind::Symbol);
+        auto methodName = lit.name;
 
         llvm::Value *blockHandler = prepareBlockHandler(mcctx, send->args[2]);
 
@@ -329,17 +329,18 @@ public:
                                                                nullptr, "argArray");
 
                 int i = -1;
+                auto *argArrayTy = argArray->getAllocatedType();
                 for (auto &v : mcctx.send->args) {
                     i++;
                     llvm::Value *val = IREmitterHelpers::emitLiteralish(mcctx.cs, globalInitBuilder, v.type);
                     globalInitBuilder.CreateStore(
-                        val, globalInitBuilder.CreateConstGEP2_64(argArray, 0, i, fmt::format("hashArgs{}Addr", i)));
+                        val, globalInitBuilder.CreateConstGEP2_64(argArrayTy, argArray, 0, i, fmt::format("hashArgs{}Addr", i)));
                 }
 
                 auto hashValue = globalInitBuilder.CreateCall(
                     mcctx.cs.getFunction("sorbet_literalHashBuild"),
                     {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, mcctx.send->args.size(), true)),
-                     globalInitBuilder.CreateConstGEP2_64(argArray, 0, 0)},
+                     globalInitBuilder.CreateConstGEP2_64(argArrayTy, argArray, 0, 0)},
                     "builtHash");
 
                 globalInitBuilder.CreateStore(hashValue, ret);
@@ -351,7 +352,7 @@ public:
             }));
         builder.restoreIP(oldInsertPoint);
 
-        auto *index = builder.CreateLoad(globalDeclaration, "hashLiteral");
+        auto *index = builder.CreateLoad(globalDeclaration->getValueType(), globalDeclaration, "hashLiteral");
         auto *copy = builder.CreateCall(mcctx.cs.getFunction("sorbet_globalConstDupHash"), {index}, "duplicatedHash");
         Payload::assumeType(mcctx.cs, builder, copy, core::Symbols::Hash());
         return copy;
@@ -403,7 +404,7 @@ std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mc
 
     if (kwArgsVar.type.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
         flags.args_splat = true;
-    } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsVar.type)) {
+    } else if (auto ptt = core::cast_type<core::TupleType>(kwArgsVar.type)) {
         flags.args_splat = true;
         flags.kw_splat = true;
 
@@ -466,8 +467,8 @@ public:
         auto [flags, splatArray] = prepareSplatArgs(mcctx, send->args[2], send->args[3]);
 
         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName();
+        ENFORCE(lit.kind == core::NamedLiteralType::Kind::Symbol);
+        auto methodName = lit.name;
 
         // setup the inline cache
         // Note that in the case of calling `super`, the VM's search mechanism will
@@ -527,8 +528,8 @@ public:
         auto *blockHandler = prepareBlockHandler(mcctx, send->args[4]);
 
         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
-        auto methodName = lit.asName();
+        ENFORCE(lit.kind == core::NamedLiteralType::Kind::Symbol);
+        auto methodName = lit.name;
 
         // setup the inline cache
         // Note that in the case of calling `super`, the VM's search mechanism will
@@ -673,11 +674,11 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(var);
-        if (lit.literalKind != core::NamedLiteralType::LiteralTypeKind::Symbol) {
+        if (lit.kind != core::NamedLiteralType::Kind::Symbol) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto varName = lit.asName();
+        auto varName = lit.name;
         auto varNameStr = varName.shortName(cs);
 
         auto *callCache = mcctx.getInlineCache();
@@ -711,11 +712,11 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(var);
-        if (lit.literalKind != core::NamedLiteralType::LiteralTypeKind::Symbol) {
+        if (lit.kind != core::NamedLiteralType::Kind::Symbol) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto varName = lit.asName();
+        auto varName = lit.name;
         auto varNameStr = varName.shortName(cs);
 
         auto *callCache = mcctx.getInlineCache();

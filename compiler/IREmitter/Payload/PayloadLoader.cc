@@ -1,5 +1,6 @@
 #include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/IR/Module.h"
+#include "llvm/Support/MemoryBuffer.h"
 // ^^^ violate poisons
 #include "PayloadLoader.h"
 #include "compiler/Core/AbortCompilation.h"

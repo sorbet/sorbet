@@ -123,7 +123,7 @@ private:
         ENFORCE(blk != nullptr);
         ENFORCE(mcctx.blk.has_value());
         int blockRubyBlockId = *mcctx.blk;
-        const auto &argsFlags = mcctx.irctx.blockLinks[blockRubyBlockId]->argFlags;
+        const auto &argsFlags = mcctx.irctx.blockLinks[blockRubyBlockId]->paramFlags;
         int maxPositionalArgs = 0;
         for (auto &flag : argsFlags) {
             if (flag.isKeyword) {
@@ -251,8 +251,8 @@ protected:
         bool acceptsBlock = false;
         auto current = primaryMethod;
         while (current.data(gs)->flags.isOverloaded) {
-            const auto &args = current.data(gs)->arguments;
-            if (!args.empty() && !args.back().isSyntheticBlockArgument()) {
+            const auto &args = current.data(gs)->parameters;
+            if (!args.empty() && !args.back().isSyntheticBlockParameter()) {
                 acceptsBlock = true;
                 break;
             }
@@ -314,11 +314,11 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
     bool hasKwRest = false;
     bool hasBlock = false;
 
-    InlinedVector<const core::ArgInfo *, 4> nonKeywordArgInfo;
-    InlinedVector<const core::ArgInfo *, 4> keywordArgInfo;
+    InlinedVector<const core::ParamInfo *, 4> nonKeywordArgInfo;
+    InlinedVector<const core::ParamInfo *, 4> keywordArgInfo;
 
     int i = -1;
-    for (auto &argInfo : funcSym.data(cs)->arguments) {
+    for (auto &argInfo : funcSym.data(cs)->parameters) {
         ++i;
         auto &flags = argInfo.flags;
         if (flags.isBlock) {
@@ -397,8 +397,8 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
         int i = -1;
         for (auto info : nonKeywordArgInfo) {
             ++i;
-            auto *id = Payload::idIntern(cs, builder, info->argumentName(cs));
-            builder.CreateStore(id, builder.CreateConstGEP1_32(table, i));
+            auto *id = Payload::idIntern(cs, builder, info->parameterName(cs));
+            builder.CreateStore(id, builder.CreateConstGEP1_32(table->getAllocatedType(), table, i));
         }
 
         auto *tableSize = IREmitterHelpers::buildS4(cs, nonKeywordArgInfo.size());
@@ -417,8 +417,8 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
         int i = -1;
         for (auto info : keywordArgInfo) {
             ++i;
-            auto *id = Payload::idIntern(cs, builder, info->argumentName(cs));
-            builder.CreateStore(id, builder.CreateConstGEP1_32(table, i));
+            auto *id = Payload::idIntern(cs, builder, info->parameterName(cs));
+            builder.CreateStore(id, builder.CreateConstGEP1_32(table->getAllocatedType(), table, i));
         }
 
         auto *kw_num = IREmitterHelpers::buildS4(cs, kwNum);
@@ -473,14 +473,14 @@ public:
 
         // Second arg: name of method to define
         auto litName = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);
-        ENFORCE(litName.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
-        auto funcNameRef = litName.asName();
+        ENFORCE(litName.kind == core::NamedLiteralType::Kind::Symbol);
+        auto funcNameRef = litName.name;
         auto name = Payload::toCString(cs, funcNameRef.show(cs), builder);
 
         // Third arg: method kind (normal, attr_reader, or genericPropGetter)
         auto litMethodKind = core::cast_type_nonnull<core::NamedLiteralType>(send->args[2].type);
-        ENFORCE(litMethodKind.literalKind == core::NamedLiteralType::LiteralTypeKind::Symbol);
-        auto methodKind = litMethodKind.asName();
+        ENFORCE(litMethodKind.kind == core::NamedLiteralType::Kind::Symbol);
+        auto methodKind = litMethodKind.name;
 
         auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
         if (ownerSym == core::Symbols::Object() && !isSelf) {
@@ -509,8 +509,8 @@ public:
                 ENFORCE(!isSelf);
             }
             auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
-            auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
-            auto *stackFrame = builder.CreateLoad(stackFrameVar, "stackFrame");
+            auto *stackFrameVar = llvm::cast<llvm::GlobalVariable>(Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym));
+            auto *stackFrame = builder.CreateLoad(stackFrameVar->getValueType(), stackFrameVar, "stackFrame");
 
             // If a prop getter doesn't necessarily need to be typechecked, then we can
             // decide at runtime whether to use the fully-general compiled version of
@@ -701,11 +701,11 @@ public:
         }
 
         auto literal = core::cast_type_nonnull<core::NamedLiteralType>(arg0.type);
-        if (literal.literalKind != core::NamedLiteralType::LiteralTypeKind::String) {
+        if (literal.kind != core::NamedLiteralType::Kind::String) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto &builder = mcctx.builder;
-        auto str = literal.asName().shortName(cs);
+        auto str = literal.name.shortName(cs);
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
 
