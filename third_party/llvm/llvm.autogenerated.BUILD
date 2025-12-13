@@ -109,6 +109,15 @@ template_rule(
     },
 )
 
+template_rule(
+    name = "target_mcas_def_gen",
+    src = "include/llvm/Config/TargetMCAs.def.in",
+    out = "include/llvm/Config/TargetMCAs.def",
+    substitutions = {
+        "@LLVM_ENUM_TARGETMCAS@": "",  # We don't need MCA support
+    },
+)
+
 # A common library that all LLVM targets depend on.
 # TODO(b/113996071): We need to glob all potentially #included files and stage
 # them here because LLVM's build files are not strict headers clean, and remote
@@ -123,6 +132,7 @@ cc_library(
         "include/llvm/Config/AsmParsers.def",
         "include/llvm/Config/AsmPrinters.def",
         "include/llvm/Config/Disassemblers.def",
+        "include/llvm/Config/TargetMCAs.def",
         "include/llvm/Config/Targets.def",
         "include/llvm/Config/config.h",
         "include/llvm/Config/llvm-config.h",
@@ -223,6 +233,20 @@ gentbl(
     tbl_outs = [(
         "-gen-intrinsic-enums -intrinsic-prefix=bpf",
         "include/llvm/IR/IntrinsicsBPF.h",
+    )],
+    tblgen = ":llvm-tblgen",
+    td_file = "include/llvm/IR/Intrinsics.td",
+    td_srcs = glob([
+        "include/llvm/CodeGen/*.td",
+        "include/llvm/IR/Intrinsics*.td",
+    ]),
+)
+
+gentbl(
+    name = "directx_enums_gen",
+    tbl_outs = [(
+        "-gen-intrinsic-enums -intrinsic-prefix=dx",
+        "include/llvm/IR/IntrinsicsDirectX.h",
     )],
     tblgen = ":llvm-tblgen",
     td_file = "include/llvm/IR/Intrinsics.td",
@@ -604,6 +628,7 @@ llvm_target_list = [
             ("-gen-subtarget", "lib/Target/X86/X86GenSubtargetInfo.inc"),
             ("-gen-x86-EVEX2VEX-tables", "lib/Target/X86/X86GenEVEX2VEXTables.inc"),
             ("-gen-exegesis", "lib/Target/X86/X86GenExegesis.inc"),
+            ("-gen-x86-mnemonic-tables -asmwriternum=1", "lib/Target/X86/X86GenMnemonicTables.inc"),
         ],
     },
 ]
@@ -1896,6 +1921,7 @@ cc_library(
         ":attributes_gen",
         ":bpf_enums_gen",
         ":config",
+        ":directx_enums_gen",
         ":hexagon_enums_gen",
         ":intrinsic_enums_gen",
         ":intrinsics_impl_gen",
@@ -3661,7 +3687,9 @@ cc_library(
     copts = llvm_copts,
     deps = [
         ":Core",
+        ":DebugInfoDWARF",
         ":Demangle",
+        ":Object",
         ":Support",
         ":config",
     ],
@@ -4671,6 +4699,7 @@ cc_library(
         ":SelectionDAG",
         ":Support",
         ":Target",
+        ":X86CommonTableGen",
         ":X86Desc",
         ":X86Info",
         ":config",
@@ -4697,8 +4726,12 @@ cc_library(
         ":MC",
         ":MCDisassembler",
         ":Support",
+        ":X86CommonTableGen",
         ":X86Info",
+        ":attributes_gen",
         ":config",
+        ":intrinsic_enums_gen",
+        ":intrinsics_impl_gen",
     ],
 )
 

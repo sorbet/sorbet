@@ -63,6 +63,10 @@ build --cxxopt=-Wno-ambiguous-reversed-operator
 # warning saying _never_ use unqualified `std` calls...
 build --cxxopt=-Wno-unqualified-std-cast-call --host_cxxopt=-Wno-unqualified-std-cast-call
 
+# LLVM 15 code has some warnings that need to be suppressed
+build --copt=-Wno-bitwise-instead-of-logical
+build --copt=-Wno-unused-but-set-variable
+
 ##
 ## debug configuration
 ##
