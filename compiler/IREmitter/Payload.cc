@@ -742,9 +742,14 @@ llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBa
     auto *iseqEncodedInitFn = cs.module->getFunction("sorbet_initLineNumberInfo");
     ENFORCE(iseqEncodedInitFn != nullptr);
 
-    // The first parameter to sorbet_initLineNumberInfo is struct SorbetLineNumberInfo*
+    // In LLVM 15 with opaque pointers, struct types aren't stored in bitcode unless
+    // they're directly used (not just through pointers). Create the type directly.
+    // struct SorbetLineNumberInfo { int iseq_size; struct* insns_info; VALUE* iseq_encoded; }
     auto *globalTy = llvm::StructType::getTypeByName(cs, "struct.SorbetLineNumberInfo");
-    ENFORCE(globalTy != nullptr);
+    if (globalTy == nullptr) {
+        auto *ptrTy = llvm::PointerType::get(cs, 0);
+        globalTy = llvm::StructType::create(cs, {llvm::Type::getInt32Ty(cs), ptrTy, ptrTy}, "struct.SorbetLineNumberInfo");
+    }
 
     auto *iseqEncoded = getIseqEncodedPointer(cs, builder, file);
     const string rawName = "fileLineNumberInfo";
