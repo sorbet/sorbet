@@ -2,4 +2,4 @@ s(:block,
   s(:send,
     s(:resolved_const, "Kernel"), :lambda),
   s(:params,
-    s(:restparam, :*)), nil)
+    s(:restparam, :<restargs>)), nil)

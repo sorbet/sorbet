@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def foo<<todo method>>(**, *<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+  def foo<<todo method>>(*<restargs>, *<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
     [1, 2, 3].each() do |_1|
       _1
     end

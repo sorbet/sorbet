@@ -26,19 +26,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           end], block)
     end
 
-    def foo5<<todo method>>(**, &<blk>)
-      [1, 2, 3].each() do |**|
+    def foo5<<todo method>>(*<restargs>, &<blk>)
+      [1, 2, 3].each() do |*<restargs>|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :p, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       end
     end
 
     def foo6<<todo method>>(*args, &<blk>)
-      [1, 2, 3].each() do |**|
+      [1, 2, 3].each() do |*<restargs>|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :p, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       end
     end
 
-    def foo7<<todo method>>(**, &<blk>)
+    def foo7<<todo method>>(*<restargs>, &<blk>)
       [1, 2, 3].each() do |*args|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :p, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       end

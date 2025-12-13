@@ -25,7 +25,7 @@ ClassDef{
       name = <U foo><<U <todo method>>>
       params = [RestParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <U *>
+          name = <U <restargs>>
         } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>

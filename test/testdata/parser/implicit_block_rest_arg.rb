@@ -7,6 +7,7 @@ def example(opts)
     T.reveal_type(k) # error: `[String, Integer] (2-tuple)`
   end
   opts.each do |k,|
+    #              error: Anonymous rest parameter in block args
     T.reveal_type(k) # error: `String`
   end
   opts.each do |k, _|
