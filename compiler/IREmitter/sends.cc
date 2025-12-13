@@ -296,7 +296,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
 
     auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, length, true));
     if (length == 0) {
-        return SendArgInfo{argc, llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs)), kw_splat,
+        return SendArgInfo{argc, llvm::Constant::getNullValue(llvm::PointerType::get(cs, 0)), kw_splat,
                            std::move(argValues)};
     }
 
@@ -434,8 +434,7 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
         args.emplace_back(blkIfunc);
     } else {
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));
-        auto *vmIfuncType = llvm::StructType::getTypeByName(cs, "struct.vm_ifunc");
-        args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(vmIfuncType)));
+        args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::get(cs, 0)));
     }
     auto *searchSuper =
         llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super() ||

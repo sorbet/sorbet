@@ -201,7 +201,7 @@ public:
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
         } else {
-            auto *blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
+            auto *blkPtr = llvm::ConstantPointerNull::get(llvm::PointerType::get(cs, 0));
             res = builder.CreateCall(cMethod.getFunction(cs), {recv, id, args.argc, args.argv, blkPtr, offset},
                                      "rawSendResult");
             cMethod.assertResultType(cs, builder, res);

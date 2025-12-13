@@ -435,7 +435,7 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &builder, const 
 }
 
 llvm::PointerType *iseqType(CompilerState &cs) {
-    return llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(cs, "struct.rb_iseq_struct"));
+    return llvm::PointerType::get(cs, 0);
 }
 
 // Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
@@ -539,7 +539,7 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
     llvm::Value *locals = nullptr;
     llvm::Value *numLocals = nullptr;
     auto *idType = llvm::Type::getInt64Ty(cs);
-    auto *idPtrType = llvm::PointerType::getUnqual(idType);
+    auto *idPtrType = llvm::PointerType::get(cs, 0);
 
     auto storageKind = classifyStorageFor(cs, irctx, md, rubyRegionId);
     switch (storageKind) {

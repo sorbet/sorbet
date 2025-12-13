@@ -407,7 +407,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     argcPhi->addIncoming(argCountRaw, typeTestEnd);
                     argcPhi->addIncoming(newArgc, expansionEnd);
                     argCountRaw = argcPhi;
-                    auto argArrayPhi = builder.CreatePHI(llvm::Type::getInt64PtrTy(cs), 3, "argArrayPhi");
+                    auto argArrayPhi = builder.CreatePHI(llvm::PointerType::get(cs, 0), 3, "argArrayPhi");
                     argArrayPhi->addIncoming(argArrayRaw, sizeTestEnd);
                     argArrayPhi->addIncoming(argArrayRaw, typeTestEnd);
                     argArrayPhi->addIncoming(newArgArray, expansionEnd);
@@ -1112,14 +1112,15 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::MethodRef &sym, stri
         auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);
         auto staticInitFunc = cs.getFunction(staticInitName);
         ENFORCE(staticInitFunc, "{} does not exist", staticInitName);
+        auto *ptrTy = llvm::PointerType::get(cs, 0);
         builder.CreateCall(staticInitFunc,
                            {
                                llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                               llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
+                               llvm::ConstantPointerNull::get(ptrTy),
                                Payload::rubyTopSelf(cs, builder),
                                builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfpTop"),
-                               llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(cs)),
-                               llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(cs)),
+                               llvm::ConstantPointerNull::get(ptrTy),
+                               llvm::ConstantPointerNull::get(ptrTy),
                            },
                            staticInitName);
     }

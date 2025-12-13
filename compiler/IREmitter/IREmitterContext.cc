@@ -953,10 +953,12 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
     int i = 0;
-    auto lineNumberPtrType = llvm::PointerType::getUnqual(llvm::Type::getInt64PtrTy(cs));
+    // In LLVM 15 with opaque pointers, all pointers are just 'ptr'
+    auto *ptrTy = llvm::PointerType::get(cs, 0);
+    auto *lineNumberPtrType = ptrTy;
     auto *controlFrameStructType = llvm::StructType::getTypeByName(cs, "struct.rb_control_frame_struct");
     ENFORCE(controlFrameStructType != nullptr);
-    auto *controlFramePtrType = controlFrameStructType->getPointerTo();
+    auto *controlFramePtrType = ptrTy;
     for (auto &fun : rubyBlock2Function) {
         auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
             cs, "functionEntryInitializers",
