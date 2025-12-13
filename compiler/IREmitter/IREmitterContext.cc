@@ -954,7 +954,8 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     int i = 0;
     // In typed pointer mode, use specific pointer types
-    auto *lineNumberPtrType = llvm::Type::getInt64PtrTy(cs);
+    // sorbet_getPc returns i64** (pointer to iseq encoded pointer), so alloca must store i64**
+    auto *lineNumberPtrType = llvm::Type::getInt64PtrTy(cs)->getPointerTo();
     auto *controlFrameStructType = llvm::StructType::getTypeByName(cs, "struct.rb_control_frame_struct");
     ENFORCE(controlFrameStructType != nullptr);
     auto *controlFramePtrType = controlFrameStructType->getPointerTo();

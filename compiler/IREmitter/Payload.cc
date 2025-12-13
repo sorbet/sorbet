@@ -435,7 +435,9 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &builder, const 
 }
 
 llvm::PointerType *iseqType(CompilerState &cs) {
-    return llvm::Type::getInt8PtrTy(cs);
+    auto *iseqStructType = llvm::StructType::getTypeByName(cs, "struct.rb_iseq_struct");
+    ENFORCE(iseqStructType != nullptr, "struct.rb_iseq_struct not found in payload");
+    return iseqStructType->getPointerTo();
 }
 
 // Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
@@ -742,14 +744,8 @@ llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBa
     auto *iseqEncodedInitFn = cs.module->getFunction("sorbet_initLineNumberInfo");
     ENFORCE(iseqEncodedInitFn != nullptr);
 
-    // In LLVM 15 with opaque pointers, struct types aren't stored in bitcode unless
-    // they're directly used (not just through pointers). Create the type directly.
-    // struct SorbetLineNumberInfo { int iseq_size; struct* insns_info; VALUE* iseq_encoded; }
     auto *globalTy = llvm::StructType::getTypeByName(cs, "struct.SorbetLineNumberInfo");
-    if (globalTy == nullptr) {
-        auto *ptrTy = llvm::Type::getInt8PtrTy(cs);
-        globalTy = llvm::StructType::create(cs, {llvm::Type::getInt32Ty(cs), ptrTy, ptrTy}, "struct.SorbetLineNumberInfo");
-    }
+    ENFORCE(globalTy != nullptr, "struct.SorbetLineNumberInfo not found in payload");
 
     auto *iseqEncoded = getIseqEncodedPointer(cs, builder, file);
     const string rawName = "fileLineNumberInfo";

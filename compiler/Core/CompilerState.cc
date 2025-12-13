@@ -188,19 +188,18 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
     // These types are known to the runtime.
     auto *func = module.getFunction("sorbet_vm_intern_ids");
     ENFORCE(func != nullptr);
-    auto *descOffsetTy = llvm::Type::getInt32Ty(lctx);
-    auto *descLengthTy = descOffsetTy;
-    // IDDescriptor struct: {uint32_t offset, uint32_t length}
-    auto *structType = llvm::StructType::get(lctx, {descOffsetTy, descLengthTy}, /*isPacked=*/false);
-    ENFORCE(structType != nullptr);
+    // Use the named struct type from the payload to match the function signature
+    auto *structType = llvm::StructType::getTypeByName(lctx, "struct.rb_code_position_struct");
+    ENFORCE(structType != nullptr, "struct.rb_code_position_struct not found in payload");
     auto *arrayType = llvm::ArrayType::get(structType, this->map.size());
     const auto isConstant = true;
     std::vector<llvm::Constant *> descsConstants;
     descsConstants.reserve(this->map.size());
+    auto *int32Ty = llvm::Type::getInt32Ty(lctx);
 
     for (auto &elem : tableElements) {
-        auto *offset = llvm::ConstantInt::get(descOffsetTy, elem.second.stringTableOffset);
-        auto *length = llvm::ConstantInt::get(descLengthTy, elem.second.stringLength);
+        auto *offset = llvm::ConstantInt::get(int32Ty, elem.second.stringTableOffset);
+        auto *length = llvm::ConstantInt::get(int32Ty, elem.second.stringLength);
         auto *desc = llvm::ConstantStruct::get(structType, offset, length);
         descsConstants.push_back(desc);
     }
@@ -215,10 +214,10 @@ void IDTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &modul
     const auto allowInternal = true;
     auto *stringTable = module.getGlobalVariable("sorbet_moduleStringTable", allowInternal);
     ENFORCE(stringTable != nullptr);
-    builder.CreateCall(func, {builder.CreateConstGEP2_32(nullptr, table, 0, 0),
-                              builder.CreateConstGEP2_32(nullptr, descTable, 0, 0),
+    builder.CreateCall(func, {builder.CreateConstGEP2_32(table->getValueType(), table, 0, 0),
+                              builder.CreateConstGEP2_32(descTable->getValueType(), descTable, 0, 0),
                               llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), this->map.size()),
-                              builder.CreateConstGEP2_32(nullptr, stringTable, 0, 0)});
+                              builder.CreateConstGEP2_32(stringTable->getValueType(), stringTable, 0, 0)});
 }
 
 void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Module &module,
@@ -255,19 +254,18 @@ void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Modul
     // These types are known to the runtime.
     auto *func = module.getFunction("sorbet_vm_init_string_table");
     ENFORCE(func != nullptr);
-    auto *descOffsetTy = llvm::Type::getInt32Ty(lctx);
-    auto *descLengthTy = descOffsetTy;
-    // RubyStringDescriptor struct: {uint32_t offset, uint32_t length}
-    auto *structType = llvm::StructType::get(lctx, {descOffsetTy, descLengthTy}, /*isPacked=*/false);
-    ENFORCE(structType != nullptr);
+    // Use the named struct type from the payload to match the function signature
+    auto *structType = llvm::StructType::getTypeByName(lctx, "struct.rb_code_position_struct");
+    ENFORCE(structType != nullptr, "struct.rb_code_position_struct not found in payload");
     auto *arrayType = llvm::ArrayType::get(structType, this->map.size());
     const auto isConstant = true;
     std::vector<llvm::Constant *> descsConstants;
     descsConstants.reserve(this->map.size());
+    auto *int32Ty = llvm::Type::getInt32Ty(lctx);
 
     for (auto &elem : tableElements) {
-        auto *offset = llvm::ConstantInt::get(descOffsetTy, elem.second.stringTableOffset);
-        auto *length = llvm::ConstantInt::get(descLengthTy, elem.second.stringLength);
+        auto *offset = llvm::ConstantInt::get(int32Ty, elem.second.stringTableOffset);
+        auto *length = llvm::ConstantInt::get(int32Ty, elem.second.stringLength);
         auto *desc = llvm::ConstantStruct::get(structType, offset, length);
         descsConstants.push_back(desc);
     }
@@ -282,10 +280,10 @@ void RubyStringTable::defineGlobalVariables(llvm::LLVMContext &lctx, llvm::Modul
     const auto allowInternal = true;
     auto *stringTable = module.getGlobalVariable("sorbet_moduleStringTable", allowInternal);
     ENFORCE(stringTable != nullptr);
-    builder.CreateCall(func, {builder.CreateConstGEP2_32(nullptr, table, 0, 0),
-                              builder.CreateConstGEP2_32(nullptr, descTable, 0, 0),
+    builder.CreateCall(func, {builder.CreateConstGEP2_32(table->getValueType(), table, 0, 0),
+                              builder.CreateConstGEP2_32(descTable->getValueType(), descTable, 0, 0),
                               llvm::ConstantInt::get(llvm::Type::getInt32Ty(lctx), this->map.size()),
-                              builder.CreateConstGEP2_32(nullptr, stringTable, 0, 0)});
+                              builder.CreateConstGEP2_32(stringTable->getValueType(), stringTable, 0, 0)});
 }
 
 llvm::FunctionType *CompilerState::getRubyFFIType() {
