@@ -18,7 +18,7 @@ fi
 # This patches the LLVM toolchain's cc_wrapper.sh to use ccache.
 patch_ccache_if_needed() {
     command -v ccache &> /dev/null || return 0
-    local cache_base="${HOME:-/root}/.cache/bazel"
+    local cache_base="${HOME}/.cache/bazel"
     for base_dir in "$cache_base"/_bazel_*/*/external/llvm_toolchain_15_0_7/bin; do
         [[ -f "$base_dir/cc_wrapper.sh" ]] || continue
         grep -q "USE_CCACHE" "$base_dir/cc_wrapper.sh" 2>/dev/null && continue
@@ -33,8 +33,8 @@ patch_ccache_if_needed() {
 #!/bin/bash
 set -euo pipefail
 
-if command -v ccache &> /dev/null; then
-  export CCACHE_DIR="\${CCACHE_DIR:-\${HOME:-/root}/.ccache}"
+if command -v ccache &> /dev/null && [[ -n "\${HOME:-}" ]]; then
+  export CCACHE_DIR="\${CCACHE_DIR:-\$HOME/.ccache}"
   export CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros,file_stat_matches,pch_defines
   export CCACHE_MAXSIZE="\${CCACHE_MAXSIZE:-10G}"
   export CCACHE_COMPILERCHECK=content CCACHE_NOHASHDIR=1
