@@ -29,10 +29,12 @@ patch_ccache_if_needed() {
         [[ -f "$wrapper" ]] || continue
         grep -q 'exec ccache' "$wrapper" 2>/dev/null && continue
 
-        # Minimal patch: replace final exec with ccache-aware version
+        # Minimal patch: replace compiler invocation with ccache-aware version
         local tmp_wrapper
         tmp_wrapper=$(mktemp "$wrapper.XXXXXX")
-        sed 's/^exec "\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else exec "${cmd[@]}"; fi/' \
+        # Match both 'exec "${cmd[@]}"' (linux) and '"${cmd[@]}"' (macOS)
+        sed -e 's/^exec "\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else exec "${cmd[@]}"; fi/' \
+            -e 's/^"\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else "${cmd[@]}"; fi/' \
             "$wrapper" > "$tmp_wrapper"
         chmod +x "$tmp_wrapper"
         mv "$tmp_wrapper" "$wrapper"
