@@ -46,24 +46,18 @@ patch_ccache_if_needed() {
 }
 
 run_bazel() {
-    local ccache_args=()
     case "${1:-}" in
       build|test|run|coverage|cquery|aquery)
         patch_ccache_if_needed
         # Add sandbox_writable_path for ccache (bash expands $HOME, bazel doesn't)
         if command -v ccache &> /dev/null && [[ -n "${HOME:-}" ]]; then
-            ccache_args+=("--sandbox_writable_path=$HOME/.ccache")
+            local cmd="$1"
+            shift
+            exec "$bazel_exec_path" "$cmd" "--sandbox_writable_path=$HOME/.ccache" "$@"
         fi
         ;;
     esac
-    # Insert ccache_args after the command (e.g., "build") but before other args
-    if [[ ${#ccache_args[@]} -gt 0 && $# -gt 0 ]]; then
-        local cmd="$1"
-        shift
-        exec "$bazel_exec_path" "$cmd" "${ccache_args[@]}" "$@"
-    else
-        exec "$bazel_exec_path" "$@"
-    fi
+    exec "$bazel_exec_path" "$@"
 }
 
 old_pwd="$PWD"
