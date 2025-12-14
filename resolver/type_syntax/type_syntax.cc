@@ -106,12 +106,28 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     auto recv = ast::cast_tree<ast::ConstantLit>(send.recv);
 
     auto nargs = send.numPosArgs();
-    if (!(nargs == 1 || nargs == 2)) {
+    // After SigRewriter, sig calls look like: Sorbet::Private::Static.sig(oldRecv) { ... }
+    // which has 1 or 2 positional args
+    if (!(nargs == 0 || nargs == 1 || nargs == 2)) {
         return false;
     }
 
+    // Rewritten form: Sorbet::Private::Static.sig(...)
     if (recv != nullptr && recv->symbol() == core::Symbols::Sorbet_Private_Static()) {
         return true;
+    }
+
+    // Original form before rewriting
+    if (nargs > 1) {
+        return false;
+    }
+
+    if (send.recv.isSelfReference()) {
+        return true;
+    }
+
+    if (recv != nullptr) {
+        return recv->symbol() == core::Symbols::T_Sig_WithoutRuntime();
     }
 
     return false;
@@ -246,8 +262,16 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
     }
     ENFORCE(send != nullptr);
 
+    // Check for :final argument
+    // After SigRewriter: Sorbet::Private::Static.sig(oldRecv, :final) - 2 args, :final is at index 1
+    // Original form: sig(:final) - 1 arg, :final is at index 0
     if (sigSend.numPosArgs() == 2) {
         auto lit = ast::cast_tree<ast::Literal>(sigSend.getPosArg(1));
+        if (lit != nullptr && lit->isSymbol() && lit->asSymbol() == core::Names::final_()) {
+            sig.seen.final = lit->loc;
+        }
+    } else if (sigSend.numPosArgs() == 1) {
+        auto lit = ast::cast_tree<ast::Literal>(sigSend.getPosArg(0));
         if (lit != nullptr && lit->isSymbol() && lit->asSymbol() == core::Names::final_()) {
             sig.seen.final = lit->loc;
         }

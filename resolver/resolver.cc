@@ -28,6 +28,14 @@ using namespace std;
 namespace sorbet::resolver {
 namespace {
 
+// Check if a file has the "# compiled: true" sigil
+static bool isCompiledFile(core::Context ctx) {
+    auto source = ctx.file.data(ctx).source();
+    // Look in the first 500 characters for the compiled sigil
+    auto searchRegion = source.substr(0, std::min(source.size(), size_t(500)));
+    return searchRegion.find("compiled: true") != std::string_view::npos;
+}
+
 /*
  * Note: There are multiple separate tree walks defined in this file, the main
  * ones being:
@@ -3782,6 +3790,54 @@ public:
                                 "as abstract using `abstract!` or `interface!`");
                 }
             }
+
+            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
+            // behavior of the runtime, but only in compiled files.
+            if (!isCompiledFile(ctx)) {
+                return;
+            }
+
+            ast::Send::ARGS_store args;
+            ast::Hash::ENTRY_store keywordArgKeys;
+            ast::Hash::ENTRY_store keywordArgVals;
+
+            auto argIdx = -1;
+            for (auto &param : mdef.params) {
+                ++argIdx;
+
+                ast::ExpressionPtr *localExpr = &param;
+                if (auto opt = ast::cast_tree<ast::OptionalParam>(param)) {
+                    localExpr = &opt->expr;
+                }
+
+                auto local = ast::cast_tree<ast::Local>(*localExpr);
+                if (local == nullptr) {
+                    continue;
+                }
+
+                auto &info = mdef.symbol.data(ctx)->parameters[argIdx];
+                if (info.flags.isKeyword) {
+                    keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                    keywordArgVals.emplace_back(local->deepCopy());
+                } else if (info.flags.isRepeated || info.flags.isBlock) {
+                    // Explicitly skip for now.
+                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
+                    // callWithSplatAndBlock
+                } else {
+                    ENFORCE(keywordArgKeys.empty());
+                    args.emplace_back(local->deepCopy());
+                }
+            }
+
+            if (!keywordArgKeys.empty()) {
+                args.emplace_back(
+                    ast::MK::Hash(mdef.loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
+            }
+
+            auto self = ast::MK::Self(mdef.loc);
+            auto numPosArgs = args.size();
+            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
+                                     numPosArgs, std::move(args));
         } else if (mdef.symbol.data(ctx)->owner.data(ctx)->flags.isInterface) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");

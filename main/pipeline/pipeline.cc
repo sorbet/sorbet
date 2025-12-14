@@ -1416,6 +1416,13 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 namespace {
 
+// Check if a file has the "# compiled: true" sigil
+static bool isCompiledFile(core::Context ctx) {
+    auto source = ctx.file.data(ctx).source();
+    auto searchRegion = source.substr(0, std::min(source.size(), size_t(500)));
+    return searchRegion.find("compiled: true") != std::string_view::npos;
+}
+
 class CFGCollectorAndTyper {
     const options::Options &opts;
 
@@ -1424,7 +1431,17 @@ public:
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
+        const auto &methodData = m.symbol.data(ctx);
+        bool isAbstract = methodData->flags.isAbstract;
+        bool isCompiled = isCompiledFile(ctx);
+
+        // For abstract methods in compiled files, we build CFG and run semantic extensions
+        // but skip inference (to avoid type errors from the synthetic super call).
+        // For all other cases, use the normal willRun check.
+        if (!isAbstract && !infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
+            return;
+        }
+        if (isAbstract && !isCompiled) {
             return;
         }
 
@@ -1432,7 +1449,10 @@ public:
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
 
         if (opts.stopAfterPhase != options::Phase::CFG) {
-            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            // Skip inference for abstract methods (to avoid type errors from synthetic super call)
+            if (!isAbstract) {
+                cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            }
             if (cfg) {
                 for (auto &extension : ctx.state.semanticExtensions) {
                     extension->typecheck(ctx, ctx.file, *cfg, m);
