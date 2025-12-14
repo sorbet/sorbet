@@ -26,12 +26,15 @@ patch_ccache_if_needed() {
     for base_dir in "$cache_base"/*/external/llvm_toolchain_*/bin; do
         local wrapper="$base_dir/cc_wrapper.sh"
         [[ -f "$wrapper" ]] || continue
-        grep -q 'exec ccache' "$wrapper" 2>/dev/null && continue
+        grep -q 'ccache "\${cmd' "$wrapper" 2>/dev/null && continue
 
         # Minimal patch: replace compiler invocation with ccache-aware version
         local tmp_wrapper
         tmp_wrapper=$(mktemp "$wrapper.XXXXXX")
-        sed 's/^\(exec \)\{0,1\}"\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else \1"${cmd[@]}"; fi/' \
+        # Linux: exec "${cmd[@]}" -> exec ccache ... (exec ok, it's last line)
+        # macOS: "${cmd[@]}" -> ccache ... (no exec, post-processing follows)
+        sed -e 's/^exec "\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else exec "${cmd[@]}"; fi/' \
+            -e 's/^"\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then ccache "${cmd[@]}"; else "${cmd[@]}"; fi/' \
             "$wrapper" > "$tmp_wrapper"
         chmod +x "$tmp_wrapper"
         mv "$tmp_wrapper" "$wrapper"
