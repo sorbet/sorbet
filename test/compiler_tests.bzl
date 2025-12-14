@@ -147,27 +147,32 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
     native.test_suite(
         name = suite_name,
         tests = oracle_tests + validate_tests + filecheck_tests,
+        visibility = ["//visibility:public"],
     )
 
     native.test_suite(
         name = "{}_oracle".format(suite_name),
         tests = oracle_tests,
+        visibility = ["//visibility:public"],
     )
 
     native.test_suite(
         name = "{}_validate_exp".format(suite_name),
         tests = validate_tests,
+        visibility = ["//visibility:public"],
     )
 
     native.test_suite(
         name = "{}_filecheck".format(suite_name),
         tests = filecheck_tests,
+        visibility = ["//visibility:public"],
     )
 
     native.test_suite(
         name = "{}_too_slow".format(suite_name),
         tests = too_slow_tests,
         tags = ["manual"],
+        visibility = ["//visibility:public"],
     )
 
 RubyOracle = provider(

@@ -25,7 +25,7 @@ bool Linker::run(spdlog::logger &log, vector<string> objectFiles, string outputF
         case OS::Darwin:
             commandLineArgs = {
                 "-bundle", "-o", outputFile + ".bundle", "-undefined", "dynamic_lookup", "-platform_version", "macos",
-                "14.0", "14.0"};
+                "15.0", "15.0", "-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib", "-lSystem"};
             break;
         case OS::Lin:
             commandLineArgs = {"-shared", "-o", outputFile + ".so", "--allow-shlib-undefined"};

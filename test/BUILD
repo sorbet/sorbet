@@ -498,38 +498,6 @@ sh_binary(
 )
 
 sh_binary(
-    name = "single_package_runner",
-    srcs = ["test_single_package_runner.sh"],
-    data = [
-        "single_package_runner_cc",
-        "//main:sorbet",
-    ],
-    # This is to get the test to run on the compiler build job,
-    # so we can avoid building ruby on the test-static-sanitized job.
-    tags = ["compiler"],
-    deps = [
-        ":logging",
-        "@bazel_tools//tools/bash/runfiles",
-    ],
-)
-
-cc_binary(
-    name = "single_package_runner_cc",
-    srcs = ["rbi_gen_package_runner.cc"],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    tags = ["manual"],
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//common",
-        "@com_google_absl//absl/strings",
-        "@rapidjson",
-    ],
-)
-
-sh_binary(
     name = "filecheck",
     testonly = 1,
     srcs = ["filecheck.sh"],
