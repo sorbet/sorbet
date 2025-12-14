@@ -56,7 +56,14 @@ run_bazel() {
         fi
         ;;
     esac
-    exec "$bazel_exec_path" "${ccache_args[@]}" "$@"
+    # Insert ccache_args after the command (e.g., "build") but before other args
+    if [[ ${#ccache_args[@]} -gt 0 && $# -gt 0 ]]; then
+        local cmd="$1"
+        shift
+        exec "$bazel_exec_path" "$cmd" "${ccache_args[@]}" "$@"
+    else
+        exec "$bazel_exec_path" "$@"
+    fi
 }
 
 old_pwd="$PWD"
