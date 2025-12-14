@@ -15,76 +15,26 @@ if [ "${LOCAL_BAZEL_OVERRIDE:-}" != "" ]; then
 fi
 
 # ccache integration for ~4x faster incremental builds
-# This patches the LLVM toolchain's cc_wrapper.sh to use ccache.
-# Set DISABLE_CCACHE=1 to disable.
+# Minimal patch: just modifies the final exec line to use ccache.
+# All ccache config is passed via --action_env in .bazelrc
 patch_ccache_if_needed() {
     [[ -z "${DISABLE_CCACHE:-}" ]] || return 0
     command -v ccache &> /dev/null || return 0
-    [[ -n "${HOME:-}" ]] || return 0
-    # Check both common bazel output locations
+
     local user="${USER:-$(id -un)}"
     for cache_base in "/var/tmp/_bazel_${user}" "${HOME}/.cache/bazel/_bazel_${user}"; do
     for base_dir in "$cache_base"/*/external/llvm_toolchain_*/bin; do
-        [[ -f "$base_dir/cc_wrapper.sh" ]] || continue
-        grep -q "USE_CCACHE" "$base_dir/cc_wrapper.sh" 2>/dev/null && continue
+        local wrapper="$base_dir/cc_wrapper.sh"
+        [[ -f "$wrapper" ]] || continue
+        grep -q 'exec ccache' "$wrapper" 2>/dev/null && continue
 
-        # Extract clang path from original wrapper (works on both BSD and GNU sed)
-        local clang_path
-        clang_path=$(sed -n 's/^if \[\[ -f \(.*\) \]\].*/\1/p' "$base_dir/cc_wrapper.sh" 2>/dev/null | head -1 | tr -d '[:space:]') || continue
-        [[ -n "$clang_path" ]] || continue
-
-        # Atomic write to avoid races with parallel builds
+        # Minimal patch: replace final exec with ccache-aware version
         local tmp_wrapper
-        tmp_wrapper=$(mktemp "$base_dir/cc_wrapper.sh.XXXXXX")
-        cat > "$tmp_wrapper" << CCACHE_WRAPPER
-#!/bin/bash
-set -euo pipefail
-
-if [[ -z "\${DISABLE_CCACHE:-}" ]] && command -v ccache &> /dev/null && [[ -n "\${HOME:-}" ]]; then
-  export CCACHE_DIR="\${CCACHE_DIR:-\$HOME/.ccache}"
-  export CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros,file_stat_matches,pch_defines
-  export CCACHE_MAXSIZE="\${CCACHE_MAXSIZE:-10G}"
-  export CCACHE_COMPILERCHECK=content CCACHE_NOHASHDIR=1
-  USE_CCACHE=1
-else USE_CCACHE=0; fi
-
-clang_path="$clang_path"
-llvm_bin_dir="\${clang_path%/*}"
-
-if [[ -f \$clang_path ]]; then
-  execroot_path=""
-elif [[ \${BASH_SOURCE[0]} == "/"* ]]; then
-  execroot_path="\${BASH_SOURCE[0]%/*/*/*/*}/"
-else
-  echo >&2 "ERROR: could not find clang; PWD=\"\${PWD}\"."
-  exit 5
-fi
-
-# Add LLVM bin to PATH so linker (ld64.lld) can be found
-export PATH="\${execroot_path}\${llvm_bin_dir}:\${PATH:-}"
-
-sanitize_option() {
-  local -r opt=\$1
-  if [[ \${opt} == */cc_wrapper.sh ]]; then
-    printf "%s" "\${execroot_path}\${clang_path}"
-  elif [[ \${opt} =~ ^-fsanitize-(ignore|black)list=[^/] ]]; then
-    parts=(\${opt/=/ }); printf "%s" "\${parts[0]}=\${execroot_path}\${parts[1]}"
-  else
-    printf "%s" "\${opt}"
-  fi
-}
-
-cmd=()
-for ((i = 0; i <= \$#; i++)); do
-  if [[ \${!i} == @* ]]; then
-    while IFS= read -r opt; do cmd+=("\$(set -e; sanitize_option "\${opt}")"); done <"\${!i:1}"
-  else cmd+=("\$(set -e; sanitize_option "\${!i}")"); fi
-done
-
-if [[ "\$USE_CCACHE" == "1" ]]; then exec ccache "\${cmd[@]}"; else exec "\${cmd[@]}"; fi
-CCACHE_WRAPPER
+        tmp_wrapper=$(mktemp "$wrapper.XXXXXX")
+        sed 's/^exec "\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else exec "${cmd[@]}"; fi/' \
+            "$wrapper" > "$tmp_wrapper"
         chmod +x "$tmp_wrapper"
-        mv "$tmp_wrapper" "$base_dir/cc_wrapper.sh"
+        mv "$tmp_wrapper" "$wrapper"
     done
     done
 }

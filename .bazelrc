@@ -308,6 +308,11 @@ common:ci --color yes
 
 ## ccache: install ccache for ~4x faster incremental builds
 build --action_env=HOME
+build --action_env=USE_CCACHE=1
+build --action_env=CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros,file_stat_matches,pch_defines
+build --action_env=CCACHE_MAXSIZE=10G
+build --action_env=CCACHE_COMPILERCHECK=content
+build --action_env=CCACHE_NOHASHDIR=1
 build --sandbox_writable_path=${HOME}/.ccache
 
 # enables a lot of features in mac instruments profiler
