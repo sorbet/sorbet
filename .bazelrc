@@ -315,5 +315,8 @@ build --action_env=CCACHE_MAXSIZE=10G
 build --action_env=CCACHE_COMPILERCHECK=content
 build --action_env=CCACHE_NOHASHDIR=1
 
+## Bazel disk cache: speeds up branch switching by caching build outputs
+build --disk_cache=~/.cache/bazel-disk-cache
+
 # enables a lot of features in mac instruments profiler
 build:instruments --linkopt=-framework --linkopt=CoreFoundation
