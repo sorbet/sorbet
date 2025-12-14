@@ -48,9 +48,10 @@ if [[ -z "\${DISABLE_CCACHE:-}" ]] && command -v ccache &> /dev/null && [[ -n "\
   USE_CCACHE=1
 else USE_CCACHE=0; fi
 
+clang_path="$clang_path"
 llvm_bin_dir="\${clang_path%/*}"
 
-if [[ -f $clang_path ]]; then
+if [[ -f \$clang_path ]]; then
   execroot_path=""
 elif [[ \${BASH_SOURCE[0]} == "/"* ]]; then
   execroot_path="\${BASH_SOURCE[0]%/*/*/*/*}/"
@@ -65,7 +66,7 @@ export PATH="\${execroot_path}\${llvm_bin_dir}:\${PATH:-}"
 sanitize_option() {
   local -r opt=\$1
   if [[ \${opt} == */cc_wrapper.sh ]]; then
-    printf "%s" "\${execroot_path}$clang_path"
+    printf "%s" "\${execroot_path}\${clang_path}"
   elif [[ \${opt} =~ ^-fsanitize-(ignore|black)list=[^/] ]]; then
     parts=(\${opt/=/ }); printf "%s" "\${parts[0]}=\${execroot_path}\${parts[1]}"
   else
