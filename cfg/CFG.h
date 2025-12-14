@@ -120,6 +120,7 @@ public:
     };
 
     friend class CFGBuilder;
+    friend class CFGContext;
     friend class LocalRef;
     friend class UnfreezeCFGLocalVariables;
     /**
