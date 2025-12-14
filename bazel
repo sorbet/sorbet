@@ -33,8 +33,9 @@ patch_ccache_if_needed() {
         tmp_wrapper=$(mktemp "$wrapper.XXXXXX")
         # Linux: exec "${cmd[@]}" -> exec ccache ... (exec ok, it's last line)
         # macOS: "${cmd[@]}" -> ccache ... (no exec, post-processing follows)
-        sed -e 's/^exec "\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else exec "${cmd[@]}"; fi/' \
-            -e 's/^"\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then ccache "${cmd[@]}"; else "${cmd[@]}"; fi/' \
+        # Both patterns preserve leading whitespace (indentation)
+        sed -e 's/^\([[:space:]]*\)exec "\${cmd\[@\]}"$/\1if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else exec "${cmd[@]}"; fi/' \
+            -e 's/^\([[:space:]]*\)"\${cmd\[@\]}"$/\1if [[ -n "${USE_CCACHE:-}" ]]; then ccache "${cmd[@]}"; else "${cmd[@]}"; fi/' \
             "$wrapper" > "$tmp_wrapper"
         chmod +x "$tmp_wrapper"
         mv "$tmp_wrapper" "$wrapper"
