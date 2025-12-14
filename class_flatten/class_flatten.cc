@@ -11,6 +11,14 @@ using namespace std;
 
 namespace sorbet::class_flatten {
 
+// Check if a file has the "# compiled: true" sigil
+bool isCompiledFile(core::Context ctx) {
+    auto source = ctx.file.data(ctx).source();
+    // Look in the first 500 characters for the compiled sigil
+    auto searchRegion = source.substr(0, std::min(source.size(), size_t(500)));
+    return searchRegion.find("compiled: true") != std::string_view::npos;
+}
+
 bool shouldExtract(core::Context ctx, const ast::ExpressionPtr &what) {
     if (ast::isa_tree<ast::MethodDef>(what)) {
         return false;
@@ -75,6 +83,7 @@ public:
         auto inits = extractClassInit(ctx, classDef);
 
         core::MethodRef sym;
+        ast::ExpressionPtr replacement;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
@@ -83,8 +92,19 @@ public:
             // pay-server bans that behavior, this should be OK here.
             sym = ctx.state.lookupStaticInitForFile(ctx.file);
 
+            // Skip emitting a place-holder for the root object.
+            replacement = ast::MK::EmptyTree();
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
+
+            // We only need a representation of the runtime definition of the class in the
+            // containing static-init if the file is compiled; such a definition is just
+            // noise otherwise.
+            if (isCompiledFile(ctx)) {
+                replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
+            } else {
+                replacement = ast::MK::EmptyTree();
+            }
         }
         ENFORCE(!sym.data(ctx)->parameters.empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.show(ctx));
@@ -111,7 +131,7 @@ public:
         classes[classStack.back()] = std::move(tree);
         classStack.pop_back();
 
-        tree = ast::MK::EmptyTree();
+        tree = std::move(replacement);
     };
 
     ast::ExpressionPtr addClasses(core::Context ctx, ast::ExpressionPtr tree) {
