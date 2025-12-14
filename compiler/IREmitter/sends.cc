@@ -151,6 +151,10 @@ InlinedVector<ApplicableIntrinsic, NUM_INTRINSICS> applicableIntrinsics(MethodCa
 
         auto potentialClasses = symbolBasedIntrinsic->applicableClasses(mcctx.cs);
         for (auto &c : potentialClasses) {
+            // Skip non-existent classes (e.g., from lookupSingletonClass returning non-existent ref)
+            if (!c.exists()) {
+                continue;
+            }
             auto toDrop = absl::MakeSpan(&c, 1);
             auto leftType = core::Types::dropSubtypesOf(mcctx.cs, remainingType, toDrop);
 
