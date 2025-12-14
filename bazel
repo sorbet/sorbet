@@ -20,6 +20,7 @@ fi
 patch_ccache_if_needed() {
     [[ -z "${DISABLE_CCACHE:-}" ]] || return 0
     command -v ccache &> /dev/null || return 0
+    [[ -n "${HOME:-}" ]] || return 0
 
     local user="${USER:-$(id -un)}"
     for cache_base in "/var/tmp/_bazel_${user}" "${HOME}/.cache/bazel/_bazel_${user}"; do
