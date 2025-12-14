@@ -48,6 +48,8 @@ if [[ -z "\${DISABLE_CCACHE:-}" ]] && command -v ccache &> /dev/null && [[ -n "\
   USE_CCACHE=1
 else USE_CCACHE=0; fi
 
+llvm_bin_dir="\${clang_path%/*}"
+
 if [[ -f $clang_path ]]; then
   execroot_path=""
 elif [[ \${BASH_SOURCE[0]} == "/"* ]]; then
@@ -56,6 +58,9 @@ else
   echo >&2 "ERROR: could not find clang; PWD=\"\${PWD}\"."
   exit 5
 fi
+
+# Add LLVM bin to PATH so linker (ld64.lld) can be found
+export PATH="\${execroot_path}\${llvm_bin_dir}:\${PATH:-}"
 
 sanitize_option() {
   local -r opt=\$1
