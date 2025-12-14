@@ -18,7 +18,6 @@ fi
 # Minimal patch: just modifies the final exec line to use ccache.
 # All ccache config is passed via --action_env in .bazelrc
 patch_ccache_if_needed() {
-    [[ -z "${DISABLE_CCACHE:-}" ]] || return 0
     command -v ccache &> /dev/null || return 0
     [[ -n "${HOME:-}" ]] || return 0
 
@@ -32,9 +31,7 @@ patch_ccache_if_needed() {
         # Minimal patch: replace compiler invocation with ccache-aware version
         local tmp_wrapper
         tmp_wrapper=$(mktemp "$wrapper.XXXXXX")
-        # Match both 'exec "${cmd[@]}"' (linux) and '"${cmd[@]}"' (macOS)
-        sed -e 's/^exec "\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else exec "${cmd[@]}"; fi/' \
-            -e 's/^"\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else "${cmd[@]}"; fi/' \
+        sed 's/^\(exec \)\{0,1\}"\${cmd\[@\]}"$/if [[ -n "${USE_CCACHE:-}" ]]; then exec ccache "${cmd[@]}"; else \1"${cmd[@]}"; fi/' \
             "$wrapper" > "$tmp_wrapper"
         chmod +x "$tmp_wrapper"
         mv "$tmp_wrapper" "$wrapper"
