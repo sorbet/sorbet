@@ -71,7 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C SomeODM><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -79,7 +79,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -95,7 +95,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <cast:cast>(<emptyTree>::<C T>.unsafe(nil), <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -122,7 +122,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -130,7 +130,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -138,7 +138,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -146,7 +146,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -154,7 +154,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C Array>)
     end
 
@@ -162,7 +162,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C Array>).returns(<emptyTree>::<C Array>)
     end
 
@@ -170,7 +170,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
 
@@ -178,7 +178,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)).returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
 
@@ -186,7 +186,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
     end
 
@@ -194,7 +194,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>)).returns(<emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>))
     end
 
@@ -202,7 +202,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -210,7 +210,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -218,7 +218,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -226,7 +226,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -234,7 +234,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -242,7 +242,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -250,7 +250,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
@@ -258,7 +258,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
     end
 
@@ -266,7 +266,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -274,7 +274,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -282,7 +282,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
@@ -290,7 +290,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
     end
 
@@ -298,7 +298,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -306,7 +306,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -314,7 +314,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
@@ -322,7 +322,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
     end
 
@@ -330,7 +330,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -338,7 +338,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -346,7 +346,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
     end
 
@@ -354,7 +354,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
     end
 
@@ -362,7 +362,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -370,7 +370,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -378,7 +378,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -386,7 +386,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -394,7 +394,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -402,7 +402,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -410,7 +410,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -418,7 +418,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -536,7 +536,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::String)
     end
 
@@ -544,7 +544,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, ::String).returns(::String)
     end
 
@@ -552,7 +552,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::Float)
     end
 
@@ -560,7 +560,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, ::Float).returns(::Float)
     end
 
@@ -596,7 +596,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::String)
     end
 
@@ -604,7 +604,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, ::String).returns(::String)
     end
 
@@ -612,7 +612,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::Float)
     end
 
@@ -648,7 +648,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::T.nilable(::String))
     end
 
@@ -656,7 +656,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
     end
 
@@ -664,7 +664,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, ::T.nilable(::String)).returns(::T.nilable(::String))
     end
 
@@ -672,7 +672,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
     end
 
@@ -680,7 +680,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::T.nilable(::String))
     end
 
@@ -688,7 +688,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
     end
 

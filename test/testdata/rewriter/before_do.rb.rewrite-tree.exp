@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTestGrandParent><<C <todo sym>>> < (::<todo sym>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:name, <emptyTree>::<C String>).void()
     end
 
@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTestParent><<C <todo sym>>> < (<emptyTree>::<C MyTestGrandParent>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 
@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTestChild><<C <todo sym>>> < (<emptyTree>::<C MyTestParent>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:name, <emptyTree>::<C String>).void()
     end
 
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of initialize>
 
     class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.void()
       end
 

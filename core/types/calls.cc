@@ -2380,6 +2380,42 @@ public:
     }
 } T_Generic_squareBrackets;
 
+void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, size_t argsToDropOffEnd) {
+    // We should always have the actual receiver plus whatever args we're going
+    // to ignore for dispatching purposes.
+    if (args.args.size() < (argsToDropOffEnd + 1)) {
+        return;
+    }
+
+    const size_t argsOffset = 1;
+    auto callLocsReceiver = args.locs.args[0];
+    auto callLocsArgs = InlinedVector<LocOffsets, 2>{};
+    for (auto loc = args.locs.args.begin() + argsOffset, end = args.locs.args.end() - argsToDropOffEnd; loc != end;
+         ++loc) {
+        callLocsArgs.emplace_back(*loc);
+    }
+    CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, args.locs.fun, callLocsArgs};
+
+    uint16_t numPosArgs = args.numPosArgs - (1 + argsToDropOffEnd);
+    auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
+    for (auto arg = args.args.begin() + argsOffset, end = args.args.end() - argsToDropOffEnd; arg != end; ++arg) {
+        dispatchArgsArgs.emplace_back(*arg);
+    }
+
+    auto recv = *args.args[0];
+    res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
+                                      recv.type, args.block, args.originForUninitialized, args.isPrivateOk,
+                                      args.suppressErrors, args.enclosingMethodForSuper});
+}
+
+class SorbetPrivateStatic_sig : public IntrinsicMethod {
+public:
+    // Forward Sorbet::Private::Static.sig(recv, ...) {...} to recv.sig(...) {...}
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        applySig(gs, args, res, 0);
+    }
+} SorbetPrivateStatic_sig;
+
 class Magic_buildHashOrKeywordArgs : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4659,6 +4695,8 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},
+
+    {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},

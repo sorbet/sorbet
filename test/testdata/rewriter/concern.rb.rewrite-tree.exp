@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
-      <self>.sig() do ||
+      ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.void()
       end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
-      <self>.sig() do ||
+      ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.void()
       end
 
@@ -92,7 +92,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      <self>.sig() do ||
+      ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.void()
       end
 

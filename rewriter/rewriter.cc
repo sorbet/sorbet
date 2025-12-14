@@ -25,6 +25,7 @@
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/Rails.h"
+#include "rewriter/SigRewriter.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TestCase.h"
@@ -189,6 +190,10 @@ public:
 
         if (auto expr = TypeAssertion::run(ctx, send)) {
             tree = std::move(expr);
+            return;
+        }
+
+        if (SigRewriter::run(ctx, send)) {
             return;
         }
     }

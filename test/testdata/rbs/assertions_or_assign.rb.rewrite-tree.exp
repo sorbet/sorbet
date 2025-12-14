@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(let3)
 
   class <emptyTree>::<C DesugaredLetNilable><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 
@@ -69,7 +69,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 

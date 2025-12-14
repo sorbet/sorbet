@@ -25,16 +25,16 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:x, ::String).returns(::String)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:y, ::String).returns(::String)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:z, ::String).returns(::String)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:w, ::String).returns(::String)
         end
         <self>.extend(::T::Sig)

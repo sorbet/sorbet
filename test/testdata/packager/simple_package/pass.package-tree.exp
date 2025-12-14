@@ -21,7 +21,7 @@ end
 # -- test/testdata/packager/simple_package/bar/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::Bar::Bar<<C Bar>> < (::<todo sym>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:value, <emptyTree>::<C Integer>).void()
     end
 
@@ -37,7 +37,7 @@ end
 # -- test/testdata/packager/simple_package/bar/calls_foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Project::Bar::CallsFoo<<C CallsFoo>> < ()
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
     end
 
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Project>::<C Foo>::<C Foo>.new(10)
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
     end
 
@@ -63,7 +63,7 @@ end
 # -- test/testdata/packager/simple_package/foo/calls_bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Project::Foo::CallsBar<<C CallsBar>> < ()
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
     end
 
@@ -79,7 +79,7 @@ end
 # -- test/testdata/packager/simple_package/foo/foo.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Project::Foo::Foo<<C Foo>> < (::<todo sym>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:value, <emptyTree>::<C Integer>).void()
     end
 

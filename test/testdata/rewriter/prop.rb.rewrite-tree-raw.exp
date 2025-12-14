@@ -1327,7 +1327,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -1348,8 +1348,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -1378,7 +1382,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -1412,8 +1416,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -1444,7 +1452,10 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = Self
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
           fun = <U sig>
           block = Block {
             params = [
@@ -1475,8 +1486,9 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            Self
           ]
         }
 
@@ -1525,7 +1537,10 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = Self
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
           fun = <U sig>
           block = Block {
             params = [
@@ -1557,8 +1572,9 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            Self
           ]
         }
 
@@ -1673,7 +1689,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -1694,8 +1710,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -1724,7 +1744,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -1758,8 +1778,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -1791,7 +1815,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -1824,8 +1848,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -1854,7 +1882,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -1912,8 +1940,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -1945,7 +1977,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -1966,8 +1998,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -1996,7 +2032,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2030,8 +2066,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2063,7 +2103,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2099,8 +2139,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2129,7 +2173,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2193,8 +2237,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2226,7 +2274,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2266,8 +2314,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2296,7 +2348,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2368,8 +2420,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2401,7 +2457,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2422,8 +2478,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2452,7 +2512,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2473,8 +2533,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2503,7 +2567,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2524,8 +2588,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2554,7 +2622,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2588,8 +2656,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2621,7 +2693,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2642,8 +2714,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2672,7 +2748,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2706,8 +2782,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2739,7 +2819,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2800,8 +2880,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2836,7 +2920,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2885,8 +2969,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2921,7 +3009,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -2942,8 +3030,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -2972,7 +3064,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3006,8 +3098,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3039,7 +3135,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3100,8 +3196,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3136,7 +3236,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3185,8 +3285,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3221,7 +3325,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3242,8 +3346,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3272,7 +3380,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3306,8 +3414,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3339,7 +3451,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3400,8 +3512,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3436,7 +3552,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3485,8 +3601,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3521,7 +3641,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3542,8 +3662,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3572,7 +3696,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3606,8 +3730,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3639,7 +3767,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3696,8 +3824,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3732,7 +3864,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3789,8 +3921,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3825,7 +3961,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3846,8 +3982,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3876,7 +4016,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3910,8 +4050,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -3943,7 +4087,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -3976,8 +4120,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4006,7 +4154,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4064,8 +4212,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4097,7 +4249,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4118,8 +4270,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4148,7 +4304,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4182,8 +4338,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4215,7 +4375,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4236,8 +4396,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4266,7 +4430,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4300,8 +4464,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4848,7 +5016,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4869,8 +5037,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4899,7 +5071,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4933,8 +5105,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -4966,7 +5142,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -4987,8 +5163,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5017,7 +5197,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5051,8 +5231,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5185,7 +5369,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5206,8 +5390,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5236,7 +5424,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5270,8 +5458,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5303,7 +5495,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5324,8 +5516,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5493,7 +5689,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5526,8 +5722,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5568,7 +5768,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5616,8 +5816,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5658,7 +5862,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5716,8 +5920,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5761,7 +5969,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5849,8 +6057,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5894,7 +6106,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -5927,8 +6139,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 
@@ -5969,7 +6185,7 @@ ClassDef{
         Send{
           flags = {rewriterSynthesized}
           recv = ConstantLit{
-            symbol = (module ::T::Sig::WithoutRuntime)
+            symbol = (module ::Sorbet::Private::Static)
             orig = nullptr
           }
           fun = <U sig>
@@ -6017,8 +6233,12 @@ ClassDef{
               ]
             }
           }
-          pos_args = 0
+          pos_args = 1
           args = [
+            ConstantLit{
+              symbol = (module ::T::Sig::WithoutRuntime)
+              orig = nullptr
+            }
           ]
         }
 

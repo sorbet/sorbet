@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_attr_reader
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_attr_reader_sig_checked
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Integer>).checked(:tests)
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_attr_reader_sig_checked_tests
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Integer>).checked(:never)
     end
 
@@ -40,7 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:using_t_struct_prop, <emptyTree>::<C Integer>, :using_t_struct_const, <emptyTree>::<C Integer>).void()
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_t_struct_prop
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
@@ -68,7 +68,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_t_struct_prop = arg0
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 

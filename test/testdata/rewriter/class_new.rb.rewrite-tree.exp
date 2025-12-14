@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C A>.new().foo()
 
   class <emptyTree>::<C B><<C <todo sym>>> < (::<todo sym>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <cast:let>(<emptyTree>::<C C>.new(), <todo sym>, <emptyTree>::<C M>)
 
   class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.void()
     end
 

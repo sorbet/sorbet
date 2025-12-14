@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -11,7 +11,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
     end
 
@@ -35,7 +35,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -51,7 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
@@ -59,7 +59,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
     end
 
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -139,7 +139,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -147,7 +147,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
     end
 
@@ -155,7 +155,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
     end
 

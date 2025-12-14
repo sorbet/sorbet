@@ -48,8 +48,9 @@ public:
     }
 
     static ExpressionPtr Send0Block(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun,
-                                    core::LocOffsets funLoc, ExpressionPtr blk, Send::Flags flags = {}) {
+                                    core::LocOffsets funLoc, ExpressionPtr blk) {
         Send::ARGS_store nargs;
+        Send::Flags flags;
         if (blk != nullptr) {
             flags.hasBlock = true;
             nargs.emplace_back(std::move(blk));
@@ -371,11 +372,12 @@ public:
         auto recv = recv_ ? std::move(recv_) : Self(loc);
         auto params = Params(loc, std::move(recv), std::move(args));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), loc, std::move(ret));
-
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
-        return Send0Block(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig(), loc,
-                          Block0(loc, std::move(returns)), flags);
+        flags.hasBlock = true;
+        return Send(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc, 1,
+                    SendArgs(Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), Block0(loc, std::move(returns))),
+                    flags);
     }
 
     static ExpressionPtr SigVoid(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr recv_ = nullptr) {
@@ -384,8 +386,10 @@ public:
         auto void_ = Send0(loc, std::move(params), core::Names::void_(), loc);
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
-        return Send0Block(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig(), loc,
-                          Block0(loc, std::move(void_)), flags);
+        flags.hasBlock = true;
+        return Send(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc, 1,
+                    SendArgs(Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), Block0(loc, std::move(void_))),
+                    flags);
     }
 
     static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret, ExpressionPtr recv_ = nullptr) {
@@ -393,8 +397,10 @@ public:
         auto returns = Send1(loc, std::move(recv), core::Names::returns(), loc, std::move(ret));
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
-        return Send0Block(loc, Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), core::Names::sig(), loc,
-                          Block0(loc, std::move(returns)), flags);
+        flags.hasBlock = true;
+        return Send(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(), loc, 1,
+                    SendArgs(Constant(loc, core::Symbols::T_Sig_WithoutRuntime()), Block0(loc, std::move(returns))),
+                    flags);
     }
 
     static ExpressionPtr Sig1(core::LocOffsets loc, ExpressionPtr key, ExpressionPtr value, ExpressionPtr ret,

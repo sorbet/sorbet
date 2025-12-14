@@ -579,6 +579,15 @@ void GlobalState::initEmpty() {
         enterMethod(*this, Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE_NO_TIMER(method == Symbols::sigWithoutRuntime());
 
+    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
+    ENFORCE_NO_TIMER(klass == Symbols::T_NonForcingConstants());
+
+    method = enterMethod(*this, Symbols::Sorbet_Private_StaticSingleton(), Names::sig())
+                 .arg(Names::arg0())
+                 .defaultArg(Names::arg1())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::SorbetPrivateStaticSingleton_sig());
+
     klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 

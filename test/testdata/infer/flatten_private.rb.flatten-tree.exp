@@ -33,10 +33,10 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:arg0, ::Integer).void()
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:arg0, ::Integer).void()
         end
         <self>.extend(::T::Sig)

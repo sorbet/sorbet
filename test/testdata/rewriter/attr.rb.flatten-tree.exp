@@ -64,34 +64,34 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.void()
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::Integer)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:v1, ::Integer).returns(::Integer)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:v2, ::String).returns(::String)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::Float)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:strv8, ::Float).returns(::Float)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::Float)
         end
-        <self>.sig() do ||
+        ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:strv9, ::Float).returns(::Float)
         end
         <self>.extend(::T::Sig)
