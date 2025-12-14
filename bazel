@@ -28,6 +28,7 @@ patch_ccache_if_needed() {
         [[ -f "$wrapper" ]] || continue
         grep -q 'ccache "\${cmd' "$wrapper" 2>/dev/null && continue
 
+        # Minimal patch: replace compiler invocation with ccache-aware version
         local tmp_wrapper
         tmp_wrapper=$(mktemp "$wrapper.XXXXXX")
         # Linux: exec "${cmd[@]}" -> exec ccache ... (exec ok, it's last line)

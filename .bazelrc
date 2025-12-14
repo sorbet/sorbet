@@ -313,6 +313,7 @@ build --action_env=CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_
 build --action_env=CCACHE_MAXSIZE=10G
 build --action_env=CCACHE_COMPILERCHECK=content
 build --action_env=CCACHE_NOHASHDIR=1
+build --sandbox_writable_path=${HOME}/.ccache
 
 # enables a lot of features in mac instruments profiler
 build:instruments --linkopt=-framework --linkopt=CoreFoundation
