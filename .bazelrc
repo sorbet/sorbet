@@ -307,8 +307,7 @@ common:stripeci --config=ci
 common:ci --color yes
 
 ## ccache: install ccache for ~4x faster incremental builds
-## To enable, add to your .bazelrc.local:
-##   build --sandbox_writable_path=/path/to/your/home/.ccache
+## The ./bazel wrapper auto-adds --sandbox_writable_path=$HOME/.ccache
 build --action_env=HOME
 build --action_env=USE_CCACHE=1
 build --action_env=CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros,file_stat_matches,pch_defines
