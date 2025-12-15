@@ -2901,7 +2901,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 constexpr uint32_t length = "**"sv.size();
                 kwrestLoc = core::LocOffsets{location.beginPos() + length, location.endPos()};
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName = nextUniqueParserName(core::Names::starStar());
+                sorbetName = nextUniqueParserName(core::Names::kwargs());
 
                 // This location *does* include the whole `**`.
                 kwrestLoc = location;

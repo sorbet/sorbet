@@ -1192,7 +1192,7 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(dstar);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::kwargs(), ++uniqueCounter_);
         }
 
         return make_unique<Kwrestarg>(loc, nm);
