@@ -386,6 +386,12 @@ void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::
 }
 
 void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val, const core::TypePtr &type) {
+    // Skip type test for void types - they don't exist at runtime and would cause
+    // "uninitialized constant Sorbet::Private::Static::Void" errors
+    if (core::isa_type<core::ClassType>(type) &&
+        core::cast_type_nonnull<core::ClassType>(type).symbol == core::Symbols::void_()) {
+        return;
+    }
     auto *cond = Payload::typeTest(cs, builder, val, type);
     builder.CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
     return;
