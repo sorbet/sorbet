@@ -895,7 +895,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 rescueKeywordLoc);
 
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
-                bodyBlock = walk(cctx, a.body, bodyBlock);
+                // Walk the body with the correct rubyRegionId so that any blocks created
+                // inside the body (for conditionals, loops, etc.) are assigned to the body region.
+                auto bodyCctx = cctx;
+                bodyCctx.rubyRegionId = bodyRegionId;
+                bodyBlock = walk(bodyCctx, a.body, bodyBlock);
 
                 // else is only executed if body didn't raise an exception
                 auto elseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, elseRegionId);
@@ -903,7 +907,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
                                 rescueKeywordLoc);
 
-                elseBody = walk(cctx, a.else_, elseBody);
+                // Walk the else block with the correct rubyRegionId
+                auto elseCctx = cctx;
+                elseCctx.rubyRegionId = elseRegionId;
+                elseBody = walk(elseCctx, a.else_, elseBody);
                 auto ensureBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, ensureRegionId);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a.loc);
 
@@ -925,7 +932,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         auto zloc = rescueCase->var.loc().copyWithZeroLength();
                         auto unsafe = ast::MK::Unsafe(
                             zloc, ast::make_expression<ast::Local>(zloc, exceptionValue.data(cctx.inWhat)));
-                        ensureBody = walk(cctx.withTarget(localVar), unsafe, ensureBody);
+                        // Walk into the ensure body with the correct rubyRegionId
+                        auto ensureUnsafeCctx = cctx.withTarget(localVar);
+                        ensureUnsafeCctx.rubyRegionId = ensureRegionId;
+                        ensureBody = walk(ensureUnsafeCctx, unsafe, ensureBody);
                     }
 
                     // Mark the exception as handled by setting exceptionValue to nil.
@@ -949,7 +959,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         }
                     }
 
-                    caseBody = walk(cctx, rescueCase->body, caseBody);
+                    // Walk the rescue case body with the correct rubyRegionId
+                    auto rescueCaseCctx = cctx;
+                    rescueCaseCctx.rubyRegionId = handlersRegionId;
+                    caseBody = walk(rescueCaseCctx, rescueCase->body, caseBody);
                     unconditionalJump(caseBody, ensureBody, cctx.inWhat, a.loc);
                 }
 
@@ -960,8 +973,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a.loc, make_insn<Literal>(core::Types::trueClass()));
                 unconditionalJump(rescueHandlersBlock, ensureBody, cctx.inWhat, a.loc);
 
-                auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
-                ensureBody = walk(cctx.withTarget(throwAway), a.ensure, ensureBody);
+                // Walk the ensure body with the correct rubyRegionId
+                auto ensureCctx = cctx.withTarget(cctx.newTemporary(core::Names::throwAwayTemp()));
+                ensureCctx.rubyRegionId = ensureRegionId;
+                ensureBody = walk(ensureCctx, a.ensure, ensureBody);
                 ret = cctx.freshBlock();
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a.loc);
             },
