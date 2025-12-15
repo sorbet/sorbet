@@ -676,12 +676,20 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
     return;
 }
 
-bool returnAcrossBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockNestingLevels) {
+bool returnAcrossBlockIsPresent(CompilerState &cs, cfg::CFG &cfg, const vector<int> &blockNestingLevels,
+                                const vector<FunctionType> &blockTypes) {
     for (auto &bb : cfg.basicBlocks) {
         for (auto &bind : bb->exprs) {
             if (cfg::isa_instruction<cfg::Return>(bind.value)) {
                 // This will be non-zero if there was a block in any of our parent blocks.
                 if (blockNestingLevels[bb->rubyRegionId] != 0) {
+                    return true;
+                }
+                // Also check for returns in ensure/rescue blocks - these also need
+                // special handling with sorbet_vm_return_from_block_wrapper because
+                // they execute in a separate stack frame and can override returns/exceptions.
+                auto blockType = blockTypes[bb->rubyRegionId];
+                if (blockType == FunctionType::Ensure || blockType == FunctionType::Rescue) {
                     return true;
                 }
             }
@@ -988,7 +996,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
             //
             // TODO(aprocter): I think this is a little bit more conservative than it needs to be, because it will push
             // a tag even if the a return-from-block comes from a lambda, which is not actually necessary.
-            if (returnAcrossBlockIsPresent(cs, cfg, blockNestingLevels)) {
+            if (returnAcrossBlockIsPresent(cs, cfg, blockNestingLevels, blockTypes)) {
                 hasReturnAcrossBlock = true;
             }
         }

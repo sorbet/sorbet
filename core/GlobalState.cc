@@ -908,6 +908,14 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
 
+    // Compiler-specific: ResolvedSig is used to tag sig calls that have been associated
+    // with their method definitions and have additional args for signature registration
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
+    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
+    ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
+    klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
+    ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

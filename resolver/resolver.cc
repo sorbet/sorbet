@@ -3232,6 +3232,38 @@ private:
         optional<core::ParamInfo> blkArg;
     };
 
+    // Record some information in the sig call itself so that we can reassociate
+    // them later in the compiler for signature registration.
+    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
+                                      const ast::MethodDef &mdef) {
+        // Only rewrite the sig call for compiled files.
+        if (!isCompiledFile(ctx)) {
+            return;
+        }
+
+        // Note that the sig still needs to send to a method called "sig" so that
+        // code completion in LSP works. We change the receiver, below, so that
+        // sigs that don't pass through here still reflect the user's intent.
+        auto *send = sig.origSend;
+        if (send == nullptr) {
+            return;
+        }
+
+        // We distinguish "user-written" sends by checking for self.
+        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
+        // to record later.
+        auto &arg0 = send->getPosArg(0);
+        if (!arg0.isSelfReference()) {
+            return;
+        }
+
+        // Replace the receiver with ResolvedSig instead of Static
+        send->recv = ast::MK::Constant(send->recv.loc(), core::Symbols::Sorbet_Private_Static_ResolvedSig());
+
+        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
+        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
+    }
+
     // This structure serves double duty: it holds information about a single sig and the
     // results of running it through fillInInfoFromSig and it also holds information about
     // merging the results of several such structures together from overloaded methods.
@@ -3485,6 +3517,7 @@ private:
             }
         }
 
+        recordMethodInfoInSig(ctx, method, sig, mdef);
         return info;
     }
 

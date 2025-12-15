@@ -237,6 +237,7 @@ core::TypeMemberRef checkValidAttachedClass(core::Context ctx, core::LocOffsets 
 optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                                TypeSyntaxArgs args) {
     ParsedSig sig;
+    sig.origSend = const_cast<ast::Send *>(&sigSend);
 
     const ast::Send *send = nullptr;
     bool isProc = false;
