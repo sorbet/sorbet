@@ -628,7 +628,12 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(amper);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
+            const auto &ctx = driver_->lex.context;
+            nm = ctx.inDef && !ctx.inLambda && !ctx.inBlock
+                     ? core::Names::ampersand()
+                     // We still want a unique name for anonymous block params in block parameter lists (vs
+                     // method def parameter lists) so that they don't shadow the method parameter list.
+                     : gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
         }
 
         return make_unique<BlockParam>(loc, nm);
