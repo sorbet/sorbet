@@ -1,9 +1,9 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def foo<<todo method>>(args, &&$2)
+  def foo<<todo method>>(args, &&)
     ::<Magic>.<call-with-splat-and-block-pass>(<self>, :bar, ::<Magic>.<splat>(args), nil, &)
   end
 
-  def bar<<todo method>>(args, &&$3)
+  def bar<<todo method>>(args, &&)
     ::<Magic>.<call-with-block-pass>(<self>, :baz, &)
   end
 
