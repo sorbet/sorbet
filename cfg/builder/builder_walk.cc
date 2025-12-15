@@ -214,6 +214,13 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
     inserted.value.setSynthetic();
 }
 
+BasicBlock *CFGBuilder::walkAssign(CFGContext cctx, ast::ExpressionPtr &rhs, core::LocOffsets assignLoc, LocalRef lhs,
+                                   BasicBlock *current) {
+    auto rhsCont = walk(cctx.withTarget(lhs), rhs, current);
+    rhsCont->exprs.emplace_back(cctx.target, assignLoc, make_insn<Ident>(lhs));
+    return rhsCont;
+}
+
 BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
     LocalRef magic = cctx.newTemporary(core::Names::magic());
     InlinedVector<cfg::LocalRef, 2> vars;
@@ -482,15 +489,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](ast::Assign &a) {
-                LocalRef lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
-                    lhs = global2Local(cctx, lhsIdent->symbol());
+                    auto lhs = global2Local(cctx, lhsIdent->symbol());
+                    ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
-                    lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
+                    auto lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
+                    ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
                     auto isAssign = true;
-                    auto [newLhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
-                    lhs = newLhs;
+                    auto [lhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
                     // Detect if we would have reported an error
                     // Only do this transformation if we're sure that it would produce an error, so
                     // that we don't pay the performance cost of inflating the CFG needlessly.
@@ -520,13 +527,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                            ast::MK::Symbol(zeroLoc, ident->name));
                     }
                     ENFORCE(lhs.exists());
+                    ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
                 } else {
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());
                 }
-
-                auto rhsCont = walk(cctx.withTarget(lhs), a.rhs, current);
-                rhsCont->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
-                ret = rhsCont;
             },
             [&](ast::InsSeq &a) {
                 for (auto &exp : a.stats) {
