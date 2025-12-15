@@ -278,6 +278,11 @@ public:
     BuildHash() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
 
     bool isLiteralish(CompilerState &cs, const core::TypePtr &t) const {
+        // Handle null TypePtr - if the type isn't known, we can't assume it's literalish
+        if (!t) {
+            return false;
+        }
+
         // See IREmitterHelpers::emitLiteralish; we put the expected fast test first.
         if (core::isa_type<core::NamedLiteralType>(t)) {
             return true;
