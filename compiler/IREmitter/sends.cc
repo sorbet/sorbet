@@ -103,13 +103,23 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
 
     // this is unfortunate: fillSendArgsArray will allocate a hash when keyword arguments are present.
     auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-    // Cast cache to the expected type for the wrapper (LLVM 15 typed pointers)
-    auto *expectedCacheType = wrapper->getFunctionType()->getParamType(0);
+
+    // Cast parameters to expected types for LLVM 15 typed pointers
+    auto *wrapperFnType = wrapper->getFunctionType();
+
+    // Cast cache (param 0: i8*)
     llvm::Value *cacheCast = cache;
-    if (cache->getType() != expectedCacheType) {
-        cacheCast = builder.CreateBitCast(cache, expectedCacheType, "cache_cast");
+    if (cache->getType() != wrapperFnType->getParamType(0)) {
+        cacheCast = builder.CreateBitCast(cache, wrapperFnType->getParamType(0), "cache_cast");
     }
-    auto *fastPathResult = builder.CreateCall(wrapper, {cacheCast, args.argc, args.argv, recv});
+
+    // Cast argv (param 2: i64*)
+    llvm::Value *argvCast = args.argv;
+    if (args.argv->getType() != wrapperFnType->getParamType(2)) {
+        argvCast = builder.CreateBitCast(args.argv, wrapperFnType->getParamType(2), "argv_cast");
+    }
+
+    auto *fastPathResult = builder.CreateCall(wrapper, {cacheCast, args.argc, argvCast, recv});
 
     Payload::assumeType(cs, builder, fastPathResult, finalInfo->method.data(cs)->resultType);
 
@@ -327,9 +337,14 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
                 setSendArgsEntry(cs, builder, sendArgs, argId, var);
             }
 
-            kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"),
-                                        {llvm::ConstantInt::get(cs, llvm::APInt(32, numKwArgs, true)),
-                                         getSendArgsPointer(cs, builder, sendArgs)},
+            auto *hashBuildFn = cs.getFunction("sorbet_hashBuild");
+            auto *argsPtr = getSendArgsPointer(cs, builder, sendArgs);
+            // Cast pointer to expected type for LLVM 15 typed pointers
+            if (argsPtr->getType() != hashBuildFn->getFunctionType()->getParamType(1)) {
+                argsPtr = builder.CreateBitCast(argsPtr, hashBuildFn->getFunctionType()->getParamType(1), "args_cast");
+            }
+            kwHash = builder.CreateCall(hashBuildFn,
+                                        {llvm::ConstantInt::get(cs, llvm::APInt(32, numKwArgs, true)), argsPtr},
                                         "kwargsHash");
 
             // merge in the splat if it's present (mcctx.send->args.back())
@@ -501,8 +516,14 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
         auto args = IREmitterHelpers::fillSendArgArray(mcctx);
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyRegionId);
 
-        return builder.CreateCall(cs.getFunction("sorbet_vm_callBlock"), {cfp, args.argc, args.argv, args.kw_splat},
-                                  "rawBlockSendResult");
+        // Cast argv to expected type for LLVM 15 typed pointers
+        auto *callBlockFn = cs.getFunction("sorbet_vm_callBlock");
+        llvm::Value *argvCast = args.argv;
+        if (args.argv->getType() != callBlockFn->getFunctionType()->getParamType(2)) {
+            argvCast = builder.CreateBitCast(args.argv, callBlockFn->getFunctionType()->getParamType(2), "argv_cast");
+        }
+
+        return builder.CreateCall(callBlockFn, {cfp, args.argc, argvCast, args.kw_splat}, "rawBlockSendResult");
     }
 
     return callViaRubyVMSimple(mcctx);

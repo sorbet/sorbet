@@ -349,10 +349,15 @@ public:
                         val, globalInitBuilder.CreateConstGEP2_64(argArrayTy, argArray, 0, i, fmt::format("hashArgs{}Addr", i)));
                 }
 
+                auto *literalHashBuildFn = mcctx.cs.getFunction("sorbet_literalHashBuild");
+                auto *argsPtr = globalInitBuilder.CreateConstGEP2_64(argArrayTy, argArray, 0, 0);
+                // Cast pointer to expected type for LLVM 15 typed pointers
+                if (argsPtr->getType() != literalHashBuildFn->getFunctionType()->getParamType(1)) {
+                    argsPtr = globalInitBuilder.CreateBitCast(argsPtr, literalHashBuildFn->getFunctionType()->getParamType(1), "argsPtr_cast");
+                }
                 auto hashValue = globalInitBuilder.CreateCall(
-                    mcctx.cs.getFunction("sorbet_literalHashBuild"),
-                    {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, mcctx.send->args.size(), true)),
-                     globalInitBuilder.CreateConstGEP2_64(argArrayTy, argArray, 0, 0)},
+                    literalHashBuildFn,
+                    {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, mcctx.send->args.size(), true)), argsPtr},
                     "builtHash");
 
                 globalInitBuilder.CreateStore(hashValue, ret);
@@ -424,12 +429,17 @@ std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mc
 
         llvm::Value *kwHash;
 
+        auto *hashBuildFn = cs.getFunction("sorbet_hashBuild");
         if (ptt->elems.size() & 0x1) {
             auto *kwHash1 = builder.CreateCall(cs.getFunction("sorbet_arrayPop"), {kwArgArray}, "kwHash1");
             if (ptt->elems.size() > 1) {
                 auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size() - 1, true));
-                auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
-                kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
+                llvm::Value *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
+                // Cast pointer to expected type for LLVM 15 typed pointers
+                if (innerPtr->getType() != hashBuildFn->getFunctionType()->getParamType(1)) {
+                    innerPtr = builder.CreateBitCast(innerPtr, hashBuildFn->getFunctionType()->getParamType(1), "innerPtr_cast");
+                }
+                kwHash = builder.CreateCall(hashBuildFn, {size, innerPtr}, "kwHash");
                 builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, kwHash1});
 
                 // Failing compilation because as of this writing, this case is not produced by the desugarer, so
@@ -442,8 +452,12 @@ std::tuple<CallCacheFlags, llvm::Value *> prepareSplatArgs(MethodCallContext &mc
             }
         } else {
             auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size(), true));
-            auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
-            kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
+            llvm::Value *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
+            // Cast pointer to expected type for LLVM 15 typed pointers
+            if (innerPtr->getType() != hashBuildFn->getFunctionType()->getParamType(1)) {
+                innerPtr = builder.CreateBitCast(innerPtr, hashBuildFn->getFunctionType()->getParamType(1), "innerPtr_cast");
+            }
+            kwHash = builder.CreateCall(hashBuildFn, {size, innerPtr}, "kwHash");
         }
 
         builder.CreateCall(cs.getFunction("sorbet_arrayPush"), {splatArray, kwHash});

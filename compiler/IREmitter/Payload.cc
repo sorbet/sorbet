@@ -1089,11 +1089,22 @@ llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &bui
                                      llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
                                      llvm::Value *iseq) {
     auto *func = cs.getFunction("sorbet_callFuncDirect");
-    auto *expectedFnType = func->getFunctionType()->getParamType(1);
-    // Cast the function pointer to the expected type if needed (for LLVM 15 typed pointers)
-    if (fn->getType() != expectedFnType) {
-        fn = builder.CreateBitCast(fn, expectedFnType, "fn_cast");
+    auto *funcType = func->getFunctionType();
+
+    // Cast all pointer parameters to expected types for LLVM 15 typed pointers
+    if (cache->getType() != funcType->getParamType(0)) {
+        cache = builder.CreateBitCast(cache, funcType->getParamType(0), "cache_cast");
     }
+    if (fn->getType() != funcType->getParamType(1)) {
+        fn = builder.CreateBitCast(fn, funcType->getParamType(1), "fn_cast");
+    }
+    if (argv->getType() != funcType->getParamType(3)) {
+        argv = builder.CreateBitCast(argv, funcType->getParamType(3), "argv_cast");
+    }
+    if (iseq->getType() != funcType->getParamType(5)) {
+        iseq = builder.CreateBitCast(iseq, funcType->getParamType(5), "iseq_cast");
+    }
+
     return builder.CreateCall(func, {cache, fn, argc, argv, recv, iseq}, "sendDirect");
 }
 

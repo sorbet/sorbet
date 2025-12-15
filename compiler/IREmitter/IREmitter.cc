@@ -395,8 +395,13 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                     builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);
                     builder.SetInsertPoint(argExpandBlock);
-                    auto newArgArray = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {rawArg1Value},
+                    llvm::Value *newArgArray = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {rawArg1Value},
                                                           "expandedArgArray");
+                    // Cast to i64* for LLVM 15 typed pointers (PHI node expects this type)
+                    auto *expectedPtrTy = llvm::Type::getInt64PtrTy(cs);
+                    if (newArgArray->getType() != expectedPtrTy) {
+                        newArgArray = builder.CreateBitCast(newArgArray, expectedPtrTy, "newArgArray_cast");
+                    }
                     auto newArgc =
                         builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {rawArg1Value}, "expandedArgc");
                     auto expansionEnd = builder.GetInsertBlock();
@@ -407,7 +412,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     argcPhi->addIncoming(argCountRaw, typeTestEnd);
                     argcPhi->addIncoming(newArgc, expansionEnd);
                     argCountRaw = argcPhi;
-                    auto argArrayPhi = builder.CreatePHI(llvm::Type::getInt64PtrTy(cs), 3, "argArrayPhi");
+                    auto argArrayPhi = builder.CreatePHI(expectedPtrTy, 3, "argArrayPhi");
                     argArrayPhi->addIncoming(argArrayRaw, sizeTestEnd);
                     argArrayPhi->addIncoming(argArrayRaw, typeTestEnd);
                     argArrayPhi->addIncoming(newArgArray, expansionEnd);
