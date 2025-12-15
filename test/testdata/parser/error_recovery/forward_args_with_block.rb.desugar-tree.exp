@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def test<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+  def test<<todo method>>(*<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
     [1, 2, 3].each() do ||
       ::<Magic>.<call-with-splat-and-block-pass>(<self>, :foo, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>) do ||
         <emptyTree>
