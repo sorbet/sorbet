@@ -492,10 +492,19 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
     // We could initialize result with the first result (because expectedRubyCFunc is
     // non-empty), but this makes the code slightly cleaner, and LLVM will optimize.
     llvm::Value *result = builder.getInt1(false);
+    auto *isCachedFn = cs.getFunction("sorbet_isCachedMethod");
+    auto *isCachedFnType = isCachedFn->getFunctionType();
+    llvm::Value *cacheCast = cache;
+    if (cache->getType() != isCachedFnType->getParamType(0)) {
+        cacheCast = builder.CreateBitCast(cache, isCachedFnType->getParamType(0), "cache_cast");
+    }
     for (const auto &knownFunc : expectedRubyCFuncs) {
         auto *fnPtrAsAnyFn = knownFunc.getFunction(cs, builder);
-        auto current =
-            builder.CreateCall(cs.getFunction("sorbet_isCachedMethod"), {cache, fnPtrAsAnyFn, recv}, "isCached");
+        llvm::Value *fnPtrCast = fnPtrAsAnyFn;
+        if (fnPtrAsAnyFn->getType() != isCachedFnType->getParamType(1)) {
+            fnPtrCast = builder.CreateBitCast(fnPtrAsAnyFn, isCachedFnType->getParamType(1), "fnPtr_cast");
+        }
+        auto current = builder.CreateCall(isCachedFn, {cacheCast, fnPtrCast, recv}, "isCached");
         result = builder.CreateOr(result, current);
     }
 

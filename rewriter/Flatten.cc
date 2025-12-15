@@ -388,9 +388,13 @@ public:
             // For compiled files, generate keepDef/keepSelfDef calls that the compiler
             // will use to emit sorbet_defineMethod calls at runtime.
             auto keepName = methodDef.flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
-            auto kind = methodDef.flags.genericPropGetter       ? core::Names::genericPropGetter()
-                        : methodDef.flags.isAttrBestEffortUIOnly ? core::Names::attrReader()
-                                                                 : core::Names::normal();
+            // Only use attrReader kind for 0-argument methods (actual attr_reader/getters).
+            // attr_writer methods have 1 argument and need to use the normal method definition path
+            // with proper arity information.
+            auto kind = methodDef.flags.genericPropGetter ? core::Names::genericPropGetter()
+                        : (methodDef.flags.isAttrBestEffortUIOnly && methodDef.params.empty())
+                            ? core::Names::attrReader()
+                            : core::Names::normal();
             tree = ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
                                   loc.copyWithZeroLength(), ast::MK::Self(loc), ast::MK::Symbol(loc, name),
                                   ast::MK::Symbol(loc, kind));

@@ -600,8 +600,13 @@ public:
         auto afterNew = llvm::BasicBlock::Create(cs, "afterNew", builder.GetInsertBlock()->getParent());
 
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
-        auto *allocatedObject =
-            builder.CreateCall(cs.getFunction("sorbet_maybeAllocateObjectFastPath"), {klass, newCache});
+        auto *maybeAllocateFn = cs.getFunction("sorbet_maybeAllocateObjectFastPath");
+        auto *maybeAllocateFnType = maybeAllocateFn->getFunctionType();
+        llvm::Value *newCacheCast = newCache;
+        if (newCache->getType() != maybeAllocateFnType->getParamType(1)) {
+            newCacheCast = builder.CreateBitCast(newCache, maybeAllocateFnType->getParamType(1), "newCache_cast");
+        }
+        auto *allocatedObject = builder.CreateCall(maybeAllocateFn, {klass, newCacheCast});
         auto *isUndef = Payload::testIsUndef(cs, builder, allocatedObject);
         builder.CreateCondBr(isUndef, slowCall, fastCall);
 
@@ -612,7 +617,14 @@ public:
         builder.SetInsertPoint(slowCall);
         Payload::pushRubyStackVector(cs, builder, cfp, klass, rubyStackArgs.stack);
         auto *nullBHForNew = Payload::vmBlockHandlerNone(cs, builder);
-        auto *slowValue = builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {newCache, nullBHForNew});
+        auto *callFuncWithCacheFn = cs.getFunction("sorbet_callFuncWithCache");
+        auto *callFuncWithCacheFnType = callFuncWithCacheFn->getFunctionType();
+        llvm::Value *newCacheCastForCall = newCache;
+        if (newCache->getType() != callFuncWithCacheFnType->getParamType(0)) {
+            newCacheCastForCall =
+                builder.CreateBitCast(newCache, callFuncWithCacheFnType->getParamType(0), "newCache_cast");
+        }
+        auto *slowValue = builder.CreateCall(callFuncWithCacheFn, {newCacheCastForCall, nullBHForNew});
         builder.CreateBr(afterNew);
 
         builder.SetInsertPoint(fastCall);
@@ -626,7 +638,12 @@ public:
                                                                   rubyStackArgs.stack.size(), rubyStackArgs.keywords);
         auto *nullBHForInitialize = Payload::vmBlockHandlerNone(cs, builder);
         Payload::pushRubyStackVector(cs, builder, cfp, allocatedObject, rubyStackArgs.stack);
-        builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {initializeCache, nullBHForInitialize});
+        llvm::Value *initializeCacheCast = initializeCache;
+        if (initializeCache->getType() != callFuncWithCacheFnType->getParamType(0)) {
+            initializeCacheCast =
+                builder.CreateBitCast(initializeCache, callFuncWithCacheFnType->getParamType(0), "initCache_cast");
+        }
+        builder.CreateCall(callFuncWithCacheFn, {initializeCacheCast, nullBHForInitialize});
         builder.CreateBr(afterNew);
 
         builder.SetInsertPoint(afterNew);
@@ -713,8 +730,17 @@ public:
         auto *recv = mcctx.varGetRecv();
         auto *ivarID = Payload::idIntern(cs, builder, varNameStr);
 
-        return builder.CreateCall(cs.getFunction("sorbet_vm_instance_variable_get"),
-                                  {callCache, ivarCache, cfp, recv, ivarID});
+        auto *ivarGetFn = cs.getFunction("sorbet_vm_instance_variable_get");
+        auto *ivarGetFnType = ivarGetFn->getFunctionType();
+        llvm::Value *callCacheCast = callCache;
+        if (callCache->getType() != ivarGetFnType->getParamType(0)) {
+            callCacheCast = builder.CreateBitCast(callCache, ivarGetFnType->getParamType(0), "callCache_cast");
+        }
+        llvm::Value *ivarCacheCast = ivarCache;
+        if (ivarCache->getType() != ivarGetFnType->getParamType(1)) {
+            ivarCacheCast = builder.CreateBitCast(ivarCache, ivarGetFnType->getParamType(1), "ivarCache_cast");
+        }
+        return builder.CreateCall(ivarGetFn, {callCacheCast, ivarCacheCast, cfp, recv, ivarID});
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -752,8 +778,17 @@ public:
         auto *ivarID = Payload::idIntern(cs, builder, varNameStr);
         auto *value = Payload::varGet(cs, mcctx.send->args[1].variable, builder, mcctx.irctx, mcctx.rubyRegionId);
 
-        return builder.CreateCall(cs.getFunction("sorbet_vm_instance_variable_set"),
-                                  {callCache, ivarCache, cfp, recv, ivarID, value});
+        auto *ivarSetFn = cs.getFunction("sorbet_vm_instance_variable_set");
+        auto *ivarSetFnType = ivarSetFn->getFunctionType();
+        llvm::Value *callCacheCast = callCache;
+        if (callCache->getType() != ivarSetFnType->getParamType(0)) {
+            callCacheCast = builder.CreateBitCast(callCache, ivarSetFnType->getParamType(0), "callCache_cast");
+        }
+        llvm::Value *ivarCacheCast = ivarCache;
+        if (ivarCache->getType() != ivarSetFnType->getParamType(1)) {
+            ivarCacheCast = builder.CreateBitCast(ivarCache, ivarSetFnType->getParamType(1), "ivarCache_cast");
+        }
+        return builder.CreateCall(ivarSetFn, {callCacheCast, ivarCacheCast, cfp, recv, ivarID, value});
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -775,7 +810,12 @@ public:
         auto *callCache = mcctx.getInlineCache();
         auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
-        return builder.CreateCall(cs.getFunction("sorbet_vm_class"), {callCache, cfp, recv});
+        auto *vmClassFn = cs.getFunction("sorbet_vm_class");
+        llvm::Value *callCacheCast = callCache;
+        if (callCache->getType() != vmClassFn->getFunctionType()->getParamType(0)) {
+            callCacheCast = builder.CreateBitCast(callCache, vmClassFn->getFunctionType()->getParamType(0), "callCache_cast");
+        }
+        return builder.CreateCall(vmClassFn, {callCacheCast, cfp, recv});
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -797,7 +837,12 @@ public:
         auto *callCache = mcctx.getInlineCache();
         auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
-        return builder.CreateCall(cs.getFunction("sorbet_vm_bang"), {callCache, cfp, recv});
+        auto *vmBangFn = cs.getFunction("sorbet_vm_bang");
+        llvm::Value *callCacheCast = callCache;
+        if (callCache->getType() != vmBangFn->getFunctionType()->getParamType(0)) {
+            callCacheCast = builder.CreateBitCast(callCache, vmBangFn->getFunctionType()->getParamType(0), "callCache_cast");
+        }
+        return builder.CreateCall(vmBangFn, {callCacheCast, cfp, recv});
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -819,7 +864,12 @@ public:
         auto *callCache = mcctx.getInlineCache();
         auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
-        return builder.CreateCall(cs.getFunction("sorbet_vm_freeze"), {callCache, cfp, recv});
+        auto *vmFreezeFn = cs.getFunction("sorbet_vm_freeze");
+        llvm::Value *callCacheCast = callCache;
+        if (callCache->getType() != vmFreezeFn->getFunctionType()->getParamType(0)) {
+            callCacheCast = builder.CreateBitCast(callCache, vmFreezeFn->getFunctionType()->getParamType(0), "callCache_cast");
+        }
+        return builder.CreateCall(vmFreezeFn, {callCacheCast, cfp, recv});
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -842,7 +892,12 @@ public:
         auto *cfp = Payload::getCFPForBlock(cs, builder, mcctx.irctx, mcctx.rubyRegionId);
         auto *recv = mcctx.varGetRecv();
         auto *var = Payload::varGet(cs, mcctx.send->args[0].variable, builder, mcctx.irctx, mcctx.rubyRegionId);
-        return builder.CreateCall(cs.getFunction("sorbet_vm_isa_p"), {callCache, cfp, recv, var});
+        auto *vmIsaFn = cs.getFunction("sorbet_vm_isa_p");
+        llvm::Value *callCacheCast = callCache;
+        if (callCache->getType() != vmIsaFn->getFunctionType()->getParamType(0)) {
+            callCacheCast = builder.CreateBitCast(callCache, vmIsaFn->getFunctionType()->getParamType(0), "callCache_cast");
+        }
+        return builder.CreateCall(vmIsaFn, {callCacheCast, cfp, recv, var});
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {

@@ -171,12 +171,10 @@ class LLVMSemanticExtension : public SemanticExtension {
                         refsToDelete.emplace(arg.variable);
                     }
                     refsToDelete.emplace(sendPtr->recv.variable);
-                } else {
-                    auto readPtr = cfg::cast_instruction<cfg::KeepAlive>(binding.value);
-                    if (readPtr) {
-                        refsToDelete.emplace(readPtr->what);
-                    }
                 }
+                // Note: KeepAlive instructions should NOT mark their argument for deletion.
+                // KeepAlive is used for exception handling to keep the exceptionValue variable
+                // alive, and the variable assignment must be preserved.
             }
 
             auto e = std::remove_if(block->exprs.begin(), block->exprs.end(),

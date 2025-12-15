@@ -928,10 +928,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         ensureBody = walk(cctx.withTarget(localVar), unsafe, ensureBody);
                     }
 
-                    // Mark the exception as handled
+                    // Mark the exception as handled by setting exceptionValue to nil.
+                    // This tells the runtime not to re-raise the exception.
                     synthesizeExpr(caseBody, exceptionValue, core::LocOffsets::none(),
                                    make_insn<Literal>(core::Types::nilClass()));
 
+                    // Keep the exceptionValue alive so the writeLocal is not optimized away
                     auto res = cctx.newTemporary(core::Names::keepForCfgTemp());
                     synthesizeExpr(caseBody, res, rescueCase->loc, make_insn<KeepAlive>(exceptionValue));
 

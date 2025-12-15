@@ -94,8 +94,13 @@ void MethodCallContext::emitMethodSearch() {
     ENFORCE(!this->isFinalized);
 
     auto *cache = this->getInlineCache();
-
-    this->builder.CreateCall(cs.getFunction("sorbet_vmMethodSearch"), {cache, recv});
+    auto *func = cs.getFunction("sorbet_vmMethodSearch");
+    auto *funcType = func->getFunctionType();
+    llvm::Value *cacheCast = cache;
+    if (cache->getType() != funcType->getParamType(0)) {
+        cacheCast = this->builder.CreateBitCast(cache, funcType->getParamType(0), "cache_cast");
+    }
+    this->builder.CreateCall(func, {cacheCast, recv});
     this->methodSearchPerformed = true;
 }
 
