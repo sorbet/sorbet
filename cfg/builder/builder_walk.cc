@@ -498,12 +498,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
                     auto isAssign = true;
                     auto [lhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
+                    if (!foundError) {
+                        ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
+                        return;
+                    }
+
                     // Detect if we would have reported an error
                     // Only do this transformation if we're sure that it would produce an error, so
                     // that we don't pay the performance cost of inflating the CFG needlessly.
                     auto shouldReportErrorOn =
                         cctx.ctx.state.shouldReportErrorOn(cctx.ctx.file, core::errors::CFG::UndeclaredVariable);
-                    if (foundError && shouldReportErrorOn) {
+                    if (!shouldReportErrorOn) {
+                        ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
+                        return;
+                    }
+
                         auto zeroLoc = a.loc.copyWithZeroLength();
                         auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
                         core::NameRef fieldKind;
@@ -525,8 +534,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                            move(a.rhs), ast::MK::String(zeroLoc, fieldKind),
                                            ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name),
                                            ast::MK::Symbol(zeroLoc, ident->name));
-                    }
-                    ENFORCE(lhs.exists());
+
                     ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
                 } else {
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());
