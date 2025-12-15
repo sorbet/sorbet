@@ -181,7 +181,7 @@ public:
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::callWithBlock()};
+        return {core::Names::callWithBlockPass()};
     }
 } CallWithBlock;
 
@@ -564,7 +564,7 @@ public:
     }
 
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::callWithSplatAndBlock()};
+        return {core::Names::callWithSplatAndBlockPass()};
     }
 } CallWithSplatAndBlock;
 

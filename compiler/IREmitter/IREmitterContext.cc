@@ -250,11 +250,11 @@ class TrackCaptures final {
             return BlockArgUsage::SameFrameAsTopLevel;
         }
 
-        // If we are the distinguished block argument to <Magic>.<call-with-block>,
+        // If we are the distinguished block argument to <Magic>.<call-with-block-pass>,
         // that does not capture the block.
         //
-        // TODO: handle call-with-splat-and-block.
-        if (context.kind == CaptureContext::Kind::SendArgument && context.send->fun == core::Names::callWithBlock() &&
+        // TODO: handle call-with-splat-and-block-pass.
+        if (context.kind == CaptureContext::Kind::SendArgument && context.send->fun == core::Names::callWithBlockPass() &&
             context.send->args[2].variable == lv && context.send->args[0].variable != lv) {
             return BlockArgUsage::SameFrameAsTopLevel;
         }
