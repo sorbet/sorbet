@@ -1180,6 +1180,15 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
                 }
                 auto &info = PackageInfo::from(gs, pkgName);
                 rewritePackageSpec(gs, file, info);
+
+                auto parentPkgName = gs.packageDB().getParentPackage(gs, pkgName);
+                if (parentPkgName.exists()) {
+                    auto &info = PackageInfo::from(gs, parentPkgName);
+
+                    // As we're iterating over all packages in this pass, it's sufficient to mark only the parent as
+                    // having subpackages.
+                    info.hasSubPackages_ = true;
+                }
             }
         }
 
