@@ -513,8 +513,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         return;
                     }
 
-                    auto zeroLoc = a.loc.copyWithZeroLength();
-                    auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
                     core::NameRef fieldKind;
                     if (ident->kind == ast::UnresolvedIdent::Kind::Class) {
                         fieldKind = core::Names::class_();
@@ -528,13 +526,55 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         }
                     }
 
-                    // Mutate a.rhs before walking.
-                    a.rhs = ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
-                                           move(a.rhs), ast::MK::String(zeroLoc, fieldKind),
-                                           ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name),
-                                           ast::MK::Symbol(zeroLoc, ident->name));
+                    // This inlines the `ast::Send` case of `walk`.
+                    //
+                    // Previously, this code would wrap the RHS in a newly-allocated `Send` node,
+                    // mutably write that wrapped RHS back into the `Assign::rhs`, then walk the RHS
+                    // as normal.
+                    //
+                    // We no longer mutate the tree in builder walk, and thus we approximate that
+                    // logic by emulating what would have happened had we allocated, mutated, and
+                    // walked that new RHS.
 
-                    ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
+                    auto zeroLoc = a.loc.copyWithZeroLength();
+
+                    InlinedVector<LocalRef, 2> args;
+                    InlinedVector<core::LocOffsets, 2> argLocs;
+
+                    auto recvTemp = cctx.newTemporary(core::Names::statTemp());
+                    auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
+                    current = walk(cctx.withTarget(recvTemp), magic, current);
+
+                    auto rhsTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(rhsTemp);
+                    argLocs.emplace_back(a.rhs.loc());
+                    current = walk(cctx.withTarget(rhsTemp), a.rhs, current);
+
+                    auto fieldKindTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(fieldKindTemp);
+                    auto fieldKindStr = ast::MK::String(zeroLoc, fieldKind);
+                    argLocs.emplace_back(fieldKindStr.loc());
+                    current = walk(cctx.withTarget(fieldKindTemp), fieldKindStr, current);
+
+                    auto ownerTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(ownerTemp);
+                    auto ownerStr = ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name);
+                    argLocs.emplace_back(ownerStr.loc());
+                    current = walk(cctx.withTarget(ownerTemp), ownerStr, current);
+
+                    auto identTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(identTemp);
+                    auto identName = ast::MK::Symbol(zeroLoc, ident->name);
+                    argLocs.emplace_back(identName.loc());
+                    current = walk(cctx.withTarget(identTemp), identName, current);
+
+                    current->exprs.emplace_back(lhs, a.lhs.loc(),
+                                                make_insn<Send>(recvTemp, magic.loc(), core::Names::suggestFieldType(),
+                                                                zeroLoc, args.size(), move(args), move(argLocs),
+                                                                /* isPrivateOk */ true));
+
+                    current->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
+                    ret = current;
                 } else {
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());
                 }
