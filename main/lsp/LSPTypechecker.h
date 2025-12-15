@@ -103,13 +103,6 @@ class LSPTypechecker final {
                                            bool isNoopUpdateForRetypecheck) const;
 
     /**
-     * Returns a the indexed tree for the given file ref. The associated tree may be `nullptr` if the file ref given
-     * points to a payload RBI. This function will first consult the `this->indexedFinalGS` cache before falling back on
-     * re-indexing the file on disk.
-     */
-    ast::ParsedFile getIndexed(core::FileRef fref) const;
-
-    /**
      * Open the session-local kvstore.
      */
     std::unique_ptr<OwnedKeyValueStore> getKvStore() const;

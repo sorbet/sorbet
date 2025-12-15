@@ -742,20 +742,6 @@ ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
     return local_vars::LocalVars::run(*gs, {move(afterDesugar), fref}).tree;
 }
 
-ast::ParsedFile LSPTypechecker::getIndexed(core::FileRef fref) const {
-    const auto id = fref.id();
-    auto treeFinalGS = this->indexedFinalGS.find(id);
-    if (treeFinalGS != this->indexedFinalGS.end()) {
-        auto &indexed = treeFinalGS->second;
-        if (indexed.tree) {
-            return ast::ParsedFile{indexed.tree.deepCopy(), indexed.file};
-        }
-    }
-
-    ENFORCE(id < this->gs->filesUsed());
-    return pipeline::indexOne(this->config->opts, *this->gs, fref);
-}
-
 unique_ptr<OwnedKeyValueStore> LSPTypechecker::getKvStore() const {
     if (this->sessionCache == nullptr) {
         return nullptr;
