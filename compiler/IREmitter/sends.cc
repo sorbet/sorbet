@@ -445,6 +445,10 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
         auto blkId = mcctx.blk.value();
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(irctx.blockUsesBreak[blkId]))));
         auto *blkIfunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
+        // Cast blkIfunc to expected type for LLVM 15 typed pointers
+        if (blkIfunc->getType() != blkPtrType) {
+            blkIfunc = builder.CreateBitCast(blkIfunc, blkPtrType, "blk_ifunc_cast");
+        }
         args.emplace_back(blkIfunc);
     } else {
         args.emplace_back(llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(false))));

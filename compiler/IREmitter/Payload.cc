@@ -1041,10 +1041,21 @@ llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &
 llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                              bool usesBreak, llvm::Value *ifunc) {
     if (usesBreak) {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"), {cache, ifunc}, "sendWithBlock");
+        auto *func = cs.getFunction("sorbet_callFuncBlockWithCache");
+        auto *expectedIfuncType = func->getFunctionType()->getParamType(1);
+        llvm::Value *ifuncCast = ifunc;
+        if (ifunc->getType() != expectedIfuncType) {
+            ifuncCast = builder.CreateBitCast(ifunc, expectedIfuncType, "ifunc_cast");
+        }
+        return builder.CreateCall(func, {cache, ifuncCast}, "sendWithBlock");
     } else {
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache_noBreak"), {cache, ifunc},
-                                  "sendWithBlock");
+        auto *func = cs.getFunction("sorbet_callFuncBlockWithCache_noBreak");
+        auto *expectedIfuncType = func->getFunctionType()->getParamType(1);
+        llvm::Value *ifuncCast = ifunc;
+        if (ifunc->getType() != expectedIfuncType) {
+            ifuncCast = builder.CreateBitCast(ifunc, expectedIfuncType, "ifunc_cast");
+        }
+        return builder.CreateCall(func, {cache, ifuncCast}, "sendWithBlock");
     }
 }
 
@@ -1056,11 +1067,21 @@ llvm::Value *Payload::callSuperFuncWithCache(CompilerState &cs, llvm::IRBuilderB
 llvm::Value *Payload::callSuperFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                                   bool usesBreak, llvm::Value *ifunc) {
     if (usesBreak) {
-        return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncBlockWithCache"), {cache, ifunc},
-                                  "sendWithBlock");
+        auto *func = cs.getFunction("sorbet_callSuperFuncBlockWithCache");
+        auto *expectedIfuncType = func->getFunctionType()->getParamType(1);
+        llvm::Value *ifuncCast = ifunc;
+        if (ifunc->getType() != expectedIfuncType) {
+            ifuncCast = builder.CreateBitCast(ifunc, expectedIfuncType, "ifunc_cast");
+        }
+        return builder.CreateCall(func, {cache, ifuncCast}, "sendWithBlock");
     } else {
-        return builder.CreateCall(cs.getFunction("sorbet_callSuperFuncBlockWithCache_noBreak"), {cache, ifunc},
-                                  "sendWithBlock");
+        auto *func = cs.getFunction("sorbet_callSuperFuncBlockWithCache_noBreak");
+        auto *expectedIfuncType = func->getFunctionType()->getParamType(1);
+        llvm::Value *ifuncCast = ifunc;
+        if (ifunc->getType() != expectedIfuncType) {
+            ifuncCast = builder.CreateBitCast(ifunc, expectedIfuncType, "ifunc_cast");
+        }
+        return builder.CreateCall(func, {cache, ifuncCast}, "sendWithBlock");
     }
 }
 

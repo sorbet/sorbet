@@ -146,9 +146,20 @@ private:
             }
             maxPositionalArgs += 1;
         }
+        // Cast function pointers to expected types for LLVM 15 typed pointers
+        auto *applyFunc = cs.module->getFunction("sorbet_inlineIntrinsicEnv_apply");
+        auto *applyFuncType = applyFunc->getFunctionType();
+        llvm::Value *cfuncCast = cfunc;
+        llvm::Value *blkCast = blk;
+        if (cfunc->getType() != applyFuncType->getParamType(1)) {
+            cfuncCast = builder.CreateBitCast(cfunc, applyFuncType->getParamType(1), "cfunc_cast");
+        }
+        if (blk->getType() != applyFuncType->getParamType(2)) {
+            blkCast = builder.CreateBitCast(blk, applyFuncType->getParamType(2), "blk_cast");
+        }
         auto *result =
-            builder.CreateCall(cs.module->getFunction("sorbet_inlineIntrinsicEnv_apply"),
-                               {env, cfunc, blk, IREmitterHelpers::buildS4(cs, maxPositionalArgs)}, "result");
+            builder.CreateCall(applyFunc,
+                               {env, cfuncCast, blkCast, IREmitterHelpers::buildS4(cs, maxPositionalArgs)}, "result");
         builder.CreateRet(result);
         builder.restoreIP(ip);
 
@@ -190,8 +201,19 @@ public:
             bool usesBreak = mcctx.irctx.blockUsesBreak[blkId];
             auto *blkIfunc = Payload::getOrBuildBlockIfunc(cs, builder, mcctx.irctx, blkId);
             if (usesBreak) {
-                res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                         {forwarder, recv, id, args.argc, args.argv, blkIfunc, offset},
+                auto *inlineBlockFunc = cs.module->getFunction("sorbet_callIntrinsicInlineBlock");
+                auto *funcType = inlineBlockFunc->getFunctionType();
+                // Cast function pointers to expected types for LLVM 15 typed pointers
+                llvm::Value *forwarderCast = forwarder;
+                llvm::Value *blkIfuncCast = blkIfunc;
+                if (forwarder->getType() != funcType->getParamType(0)) {
+                    forwarderCast = builder.CreateBitCast(forwarder, funcType->getParamType(0), "forwarder_cast");
+                }
+                if (blkIfunc->getType() != funcType->getParamType(5)) {
+                    blkIfuncCast = builder.CreateBitCast(blkIfunc, funcType->getParamType(5), "blk_ifunc_cast");
+                }
+                res = builder.CreateCall(inlineBlockFunc,
+                                         {forwarderCast, recv, id, args.argc, args.argv, blkIfuncCast, offset},
                                          "rawSendResultWithBlock");
             } else {
                 // Since the block doesn't use break we can make two optimizations:
@@ -200,8 +222,19 @@ public:
                 //    better
                 // 2. Emit a type assertion on the result of the function, as we know that there won't be non-local
                 //    control flow based on the use of `break` that could change the type of the returned value
-                res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak"),
-                                         {forwarder, recv, id, args.argc, args.argv, blkIfunc, offset},
+                auto *inlineBlockNoBreakFunc = cs.module->getFunction("sorbet_callIntrinsicInlineBlock_noBreak");
+                auto *funcType = inlineBlockNoBreakFunc->getFunctionType();
+                // Cast function pointers to expected types for LLVM 15 typed pointers
+                llvm::Value *forwarderCast = forwarder;
+                llvm::Value *blkIfuncCast = blkIfunc;
+                if (forwarder->getType() != funcType->getParamType(0)) {
+                    forwarderCast = builder.CreateBitCast(forwarder, funcType->getParamType(0), "forwarder_cast");
+                }
+                if (blkIfunc->getType() != funcType->getParamType(5)) {
+                    blkIfuncCast = builder.CreateBitCast(blkIfunc, funcType->getParamType(5), "blk_ifunc_cast");
+                }
+                res = builder.CreateCall(inlineBlockNoBreakFunc,
+                                         {forwarderCast, recv, id, args.argc, args.argv, blkIfuncCast, offset},
                                          "rawSendResultWithBlock");
                 cMethodWithBlock->assertResultType(cs, builder, res);
             }
