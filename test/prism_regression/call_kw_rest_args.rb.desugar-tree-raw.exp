@@ -63,7 +63,7 @@ ClassDef{
       name = <U has_anonymous_kwargs><<U <todo method>>>
       params = [RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <P <U <kwargs>> $2>
+          name = <U <kwargs>>
         } } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>

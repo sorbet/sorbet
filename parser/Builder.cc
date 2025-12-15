@@ -628,7 +628,7 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(amper);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::blkArg(), ++uniqueCounter_);
+            nm = core::Names::blkArg();
         }
 
         return make_unique<BlockParam>(loc, nm);
@@ -1192,7 +1192,7 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(dstar);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::kwargs(), ++uniqueCounter_);
+            nm = core::Names::kwargs();
         }
 
         return make_unique<Kwrestarg>(loc, nm);

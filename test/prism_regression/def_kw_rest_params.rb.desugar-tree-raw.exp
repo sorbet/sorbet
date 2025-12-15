@@ -25,7 +25,7 @@ ClassDef{
       name = <U foo><<U <todo method>>>
       params = [RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <P <U <kwargs>> $2>
+          name = <U <kwargs>>
         } } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
