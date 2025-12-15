@@ -43,10 +43,10 @@ Begin {
             name = <U <restargs>>
           }
           Kwrestarg {
-            name = <P <U **> $2>
+            name = <U <kwargs>>
           }
           BlockParam {
-            name = <P <U <blk>> $3>
+            name = <U <blk>>
           }
         ]
       }

@@ -16,7 +16,7 @@ Begin {
       params = Params {
         params = [
           BlockParam {
-            name = <P <U <blk>> $2>
+            name = <U <blk>>
           }
         ]
       }

@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def bar<<todo method>>(***$2:, &<blk>)
+  def bar<<todo method>>(*<kwargs>:, &<blk>)
     begin
       <self>.req_kwargs(begin
           <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
@@ -62,7 +62,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def baz<<todo method>>(*<restargs>, ***$3:, &<blk>$4)
+  def baz<<todo method>>(*<restargs>, *<kwargs>:, &<blk>)
     begin
       ::<Magic>.<call-with-splat-and-block-pass>(<self>, :all_the_args, [].concat(::T.unsafe(<fwd-args>.to_a())), [begin
             <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))

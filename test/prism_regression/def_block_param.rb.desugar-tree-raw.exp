@@ -22,7 +22,7 @@ ClassDef{
       name = <U foo><<U <todo method>>>
       params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <P <U <blk>> $2>
+          name = <U <blk>>
         } }]
       rhs = EmptyTree
     }
