@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:&, <emptyTree>::<C T>.proc().returns(<emptyTree>::<C Integer>)).void()
   end
 
-  def foo<<todo method>>(&&$2)
+  def foo<<todo method>>(&&)
     begin
       res = ::<Magic>.<call-with-block-pass>(<self>, :takes_block, &)
       <emptyTree>::<C T>.reveal_type(res)
