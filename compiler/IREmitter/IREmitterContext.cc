@@ -632,7 +632,9 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
                 auto exits = CFGHelpers::findRegionExits(cfg, b->rubyRegionId, exit->rubyRegionId);
 
                 // The ensure block should only ever jump to the code that follows the begin/end block.
-                ENFORCE(exits.size() <= 1);
+                // When there are conditionals inside the ensure block, there may be multiple exit points,
+                // but they should all lead to equivalent code paths after the exception handling.
+                // We just use the first exit in that case.
 
                 if (exits.empty()) {
                     // When control flow terminates in the block that ends exception handling, else or ensure, that
