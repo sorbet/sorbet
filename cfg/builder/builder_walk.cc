@@ -947,15 +947,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto res = cctx.newTemporary(core::Names::keepForCfgTemp());
                     synthesizeExpr(caseBody, res, rescueCase->loc, make_insn<KeepAlive>(exceptionValue));
 
+                    // Build exception handlers with the correct rubyRegionId so that
+                    // any new blocks created (for chained handlers) are in the handlers region
+                    auto handlersCctx = cctx;
+                    handlersCctx.rubyRegionId = handlersRegionId;
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
                         auto ex = ast::MK::Constant(rescueCase->var.loc(), core::Symbols::StandardError());
                         rescueHandlersBlock =
-                            buildExceptionHandler(cctx, ex, caseBody, exceptionValue, rescueHandlersBlock);
+                            buildExceptionHandler(handlersCctx, ex, caseBody, exceptionValue, rescueHandlersBlock);
                     } else {
                         for (auto &ex : exceptions) {
                             rescueHandlersBlock =
-                                buildExceptionHandler(cctx, ex, caseBody, exceptionValue, rescueHandlersBlock);
+                                buildExceptionHandler(handlersCctx, ex, caseBody, exceptionValue, rescueHandlersBlock);
                         }
                     }
 
