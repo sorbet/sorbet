@@ -520,7 +520,7 @@ public:
             if (isPropGetter) {
                 ENFORCE(!isSelf);
             }
-            auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
+            llvm::Value *funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
             auto *stackFrameVar = llvm::cast<llvm::GlobalVariable>(Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym));
             auto *stackFrame = builder.CreateLoad(stackFrameVar->getValueType(), stackFrameVar, "stackFrame");
 
@@ -531,6 +531,11 @@ public:
                                           : (isPropGetter && !needsTypechecking) ? "sorbet_definePropGetter"
                                                                                  : "sorbet_defineMethod";
             auto rubyFunc = cs.getFunction(payloadFuncName);
+            // Cast the function pointer to the expected type (for LLVM 15 typed pointers)
+            auto *expectedFnType = rubyFunc->getFunctionType()->getParamType(2);
+            if (funcHandle->getType() != expectedFnType) {
+                funcHandle = builder.CreateBitCast(funcHandle, expectedFnType, "fn_cast");
+            }
             auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyRegionId);
             builder.CreateCall(rubyFunc, {klass, name, funcHandle, paramInfo, stackFrame});
 
@@ -590,8 +595,14 @@ public:
         }
         llvm::Value *isSelf = Payload::varGet(cs, remainingArgs[0].variable, builder, irctx, rubyRegionId);
         llvm::Value *methodName = Payload::varGet(cs, remainingArgs[1].variable, builder, irctx, rubyRegionId);
-        builder.CreateCall(cs.getFunction("sorbet_vm_register_sig"),
-                           {isSelf, methodName, originalRecv, sigArg, mcctx.blkAsFunction()});
+        auto *registerSigFunc = cs.getFunction("sorbet_vm_register_sig");
+        llvm::Value *blkFn = mcctx.blkAsFunction();
+        // Cast the function pointer to the expected type (for LLVM 15 typed pointers)
+        auto *expectedFnType = registerSigFunc->getFunctionType()->getParamType(4);
+        if (blkFn->getType() != expectedFnType) {
+            blkFn = builder.CreateBitCast(blkFn, expectedFnType, "blk_fn_cast");
+        }
+        builder.CreateCall(registerSigFunc, {isSelf, methodName, originalRecv, sigArg, blkFn});
         return Payload::rubyNil(mcctx.cs, builder);
     }
 

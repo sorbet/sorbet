@@ -98,9 +98,15 @@ public:
             module = Payload::getRubyConstant(cs, attachedClass, builder);
             module = builder.CreateCall(cs.getFunction("sorbet_singleton_class"), {module}, "singletonClass");
         }
-        builder.CreateCall(cs.getFunction("sorbet_callStaticInitDirect"),
-                           {IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
-                            llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+        auto *staticInitFunc = cs.getFunction("sorbet_callStaticInitDirect");
+        auto *expectedFnType = staticInitFunc->getFunctionType()->getParamType(0);
+        llvm::Value *fn = IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc);
+        // Cast the function pointer to the expected type if needed (for LLVM 15 typed pointers)
+        if (fn->getType() != expectedFnType) {
+            fn = builder.CreateBitCast(fn, expectedFnType, "fn_cast");
+        }
+        builder.CreateCall(staticInitFunc,
+                           {fn, llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)), module});
         return Payload::rubyNil(cs, builder);
     }
@@ -222,20 +228,24 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
         recv = Payload::rubyNil(cs, builder);
     }
 
+    auto *cMethodFunc = cs.getFunction(cMethod);
+    auto *blkPtrExpectedType = cMethodFunc->getFunctionType()->getParamType(4);
     llvm::Value *blkPtr;
     if (auto *blk = mcctx.blkAsFunction()) {
         blkPtr = blk;
+        // Cast the function pointer to the expected type (for LLVM 15 typed pointers)
+        if (blkPtr->getType() != blkPtrExpectedType) {
+            blkPtr = builder.CreateBitCast(blkPtr, blkPtrExpectedType, "blk_ptr_cast");
+        }
     } else {
-        // Use the correct function pointer type for the block parameter
-        auto *blkPtrType = cs.getRubyBlockFFIType()->getPointerTo();
-        blkPtr = llvm::ConstantPointerNull::get(blkPtrType);
+        blkPtr = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(blkPtrExpectedType));
     }
 
     llvm::Value *offset = Payload::buildLocalsOffset(cs);
 
     auto fun = Payload::idIntern(cs, builder, mcctx.send->fun.shortName(cs));
     auto *value =
-        builder.CreateCall(cs.getFunction(cMethod), {recv, fun, args.argc, args.argv, blkPtr, offset}, "rawSendResult");
+        builder.CreateCall(cMethodFunc, {recv, fun, args.argc, args.argv, blkPtr, offset}, "rawSendResult");
     if (klass.exists()) {
         Payload::assumeType(cs, builder, value, klass);
     }

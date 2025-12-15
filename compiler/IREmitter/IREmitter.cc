@@ -1004,12 +1004,18 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     builder.SetInsertPoint(entryBlock);
 
     auto *wrapper = cs.getFunction("sorbet_vm_return_from_block_wrapper");
+    // Cast the function pointer to the expected type (for LLVM 15 typed pointers)
+    auto *expectedFnType = wrapper->getFunctionType()->getParamType(6);
+    llvm::Value *implFn = implementationFunction;
+    if (implFn->getType() != expectedFnType) {
+        implFn = builder.CreateBitCast(implFn, expectedFnType, "impl_fn_cast");
+    }
     // Adding the function argument at the end means that we don't have to perform
     // any register shuffling.
     auto *status =
         builder.CreateCall(wrapper,
                            {func->arg_begin(), func->arg_begin() + 1, func->arg_begin() + 2, func->arg_begin() + 3,
-                            func->arg_begin() + 4, func->arg_begin() + 5, implementationFunction},
+                            func->arg_begin() + 4, func->arg_begin() + 5, implFn},
                            "returnedFromBlock");
 
     // TODO(froydnj): LLVM IR is somewhat machine-specific when it comes to calling

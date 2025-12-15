@@ -48,10 +48,21 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
 
     auto info = Payload::escapedVariableInfo(cs, exceptionValue, irctx, bodyRubyRegionId);
+    auto *exceptionHandlingFunc = cs.getFunction("sorbet_run_exception_handling");
+    auto *funcType = exceptionHandlingFunc->getFunctionType();
+    // Cast function pointers to the expected types (for LLVM 15 typed pointers)
+    auto castFn = [&](llvm::Value *fn, unsigned paramIdx) -> llvm::Value * {
+        auto *expectedType = funcType->getParamType(paramIdx);
+        if (fn->getType() != expectedType) {
+            return builder.CreateBitCast(fn, expectedType);
+        }
+        return fn;
+    };
     auto *v =
-        builder.CreateCall(cs.getFunction("sorbet_run_exception_handling"),
-                           {ec, irctx.rubyBlocks2Functions[bodyRubyRegionId], pc, closure, cfp, handlersFunc, elseFunc,
-                            ensureFunc, Payload::retrySingleton(cs, builder, irctx), info.index, info.level});
+        builder.CreateCall(exceptionHandlingFunc,
+                           {ec, castFn(irctx.rubyBlocks2Functions[bodyRubyRegionId], 1), pc, closure, cfp,
+                            castFn(handlersFunc, 5), castFn(elseFunc, 6), castFn(ensureFunc, 7),
+                            Payload::retrySingleton(cs, builder, irctx), info.index, info.level});
 
     auto *exceptionContinue = llvm::BasicBlock::Create(cs, "exception-continue", currentFunc);
     auto *exceptionReturn = llvm::BasicBlock::Create(cs, "exception-return", currentFunc);

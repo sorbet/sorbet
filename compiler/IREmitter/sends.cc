@@ -103,7 +103,13 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
 
     // this is unfortunate: fillSendArgsArray will allocate a hash when keyword arguments are present.
     auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-    auto *fastPathResult = builder.CreateCall(wrapper, {cache, args.argc, args.argv, recv});
+    // Cast cache to the expected type for the wrapper (LLVM 15 typed pointers)
+    auto *expectedCacheType = wrapper->getFunctionType()->getParamType(0);
+    llvm::Value *cacheCast = cache;
+    if (cache->getType() != expectedCacheType) {
+        cacheCast = builder.CreateBitCast(cache, expectedCacheType, "cache_cast");
+    }
+    auto *fastPathResult = builder.CreateCall(wrapper, {cacheCast, args.argc, args.argv, recv});
 
     Payload::assumeType(cs, builder, fastPathResult, finalInfo->method.data(cs)->resultType);
 

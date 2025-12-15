@@ -1067,8 +1067,13 @@ llvm::Value *Payload::callSuperFuncBlockWithCache(CompilerState &cs, llvm::IRBui
 llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                      llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
                                      llvm::Value *iseq) {
-    return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv, iseq},
-                              "sendDirect");
+    auto *func = cs.getFunction("sorbet_callFuncDirect");
+    auto *expectedFnType = func->getFunctionType()->getParamType(1);
+    // Cast the function pointer to the expected type if needed (for LLVM 15 typed pointers)
+    if (fn->getType() != expectedFnType) {
+        fn = builder.CreateBitCast(fn, expectedFnType, "fn_cast");
+    }
+    return builder.CreateCall(func, {cache, fn, argc, argv, recv, iseq}, "sendDirect");
 }
 
 void Payload::afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder) {
@@ -1125,8 +1130,15 @@ llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBas
         auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
         auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
         auto *offset = buildLocalsOffset(cs);
-        auto *ifunc = globalInitBuilder.CreateCall(cs.getFunction("sorbet_buildBlockIfunc"),
-                                                   {blk, blkMinArgs, blkMaxArgs, offset});
+        auto *buildBlockIfuncFunc = cs.getFunction("sorbet_buildBlockIfunc");
+        auto *expectedBlkType = buildBlockIfuncFunc->getFunctionType()->getParamType(0);
+        llvm::Value *blkCast = blk;
+        // Cast the function pointer to the expected type if needed (for LLVM 15 typed pointers)
+        if (blk->getType() != expectedBlkType) {
+            blkCast = globalInitBuilder.CreateBitCast(blk, expectedBlkType, "blk_cast");
+        }
+        auto *ifunc = globalInitBuilder.CreateCall(buildBlockIfuncFunc,
+                                                   {blkCast, blkMinArgs, blkMaxArgs, offset});
         auto *asValue = globalInitBuilder.CreateBitOrPointerCast(ifunc, globalTy);
         auto *globalIndex = globalInitBuilder.CreateCall(cs.getFunction("sorbet_globalConstRegister"), {asValue});
         globalInitBuilder.CreateStore(globalIndex, global);
