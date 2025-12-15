@@ -6,7 +6,7 @@
 module M
   extend T::Sig
 
-  # OPT-LABEL: define internal i64 @func_M.12array_to_ary
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.12array_to_ary
   # OPT-NOT: sorbet_callFuncWithCache
   # OPT{LITERAL}: }
   sig {params(x: T::Array[Integer]).returns(T::Array[Integer])}
@@ -14,7 +14,7 @@ module M
     x.to_ary
   end
 
-  # OPT-LABEL: define internal i64 @func_M.12hash_to_hash
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.12hash_to_hash
   # OPT-NOT: sorbet_callFuncWithCache
   # OPT{LITERAL}: }
   sig {params(x: T::Hash[T.untyped, T.untyped]).returns(T::Hash[T.untyped, T.untyped])}
@@ -22,7 +22,7 @@ module M
     x.to_hash
   end
 
-  # OPT-LABEL: define internal i64 @func_M.9hash_to_h
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.9hash_to_h
   # OPT: sorbet_rb_hash_to_h
   # OPT: sorbet_callFuncWithCache
   # OPT-NOT: sorbet_callFuncWithCache
@@ -32,7 +32,7 @@ module M
     x.to_h
   end
 
-  # OPT-LABEL: define internal i64 @func_M.19hash_to_h_withBlock
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.19hash_to_h_withBlock
   # OPT: sorbet_callFuncWithCache
   # OPT-NOT: sorbet_callFuncWithCache
   # OPT-CHECK: call void @rb_hash_foreach(i64 %rawArg_x,a.*func_M.19hash_to_h_withBlock\$block_1
@@ -42,7 +42,7 @@ module M
     x.to_h {|k,v| [v,k]}
   end
 
-  # OPT-LABEL: define internal i64 @func_M.12integer_to_i
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.12integer_to_i
   # OPT-NOT: sorbet_callFuncWithCache
   # OPT{LITERAL}: }
   sig {params(x: Integer).returns(Integer)}
@@ -50,7 +50,7 @@ module M
     x.to_i
   end
 
-  # OPT-LABEL: define internal i64 @func_M.14integer_to_int
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.14integer_to_int
   # OPT-NOT: sorbet_callFuncWithCache
   # OPT{LITERAL}: }
   sig {params(x: Integer).returns(Integer)}
@@ -58,7 +58,7 @@ module M
     x.to_int
   end
 
-  # OPT-LABEL: define internal i64 @func_M.13symbol_to_sym
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.13symbol_to_sym
   # OPT-NOT: sorbet_callFuncWithCache
   # OPT{LITERAL}: }
   sig {params(x: Symbol).returns(Symbol)}
@@ -66,7 +66,7 @@ module M
     x.to_sym
   end
 
-  # OPT-LABEL: define internal i64 @func_M.11string_to_s
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.11string_to_s
   # OPT: sorbet_rb_str_to_s
   # OPT: sorbet_callFuncWithCache
   # OPT-NOT: sorbet_callFuncWithCache
@@ -76,7 +76,7 @@ module M
     x.to_s
   end
 
-  # OPT-LABEL: define internal i64 @func_M.10array_to_a
+  # OPT-LABEL: define internal {{.*}}i64 @func_M.10array_to_a
   # OPT: sorbet_rb_ary_to_a
   # OPT: sorbet_callFuncWithCache
   # OPT-NOT: sorbet_callFuncWithCache

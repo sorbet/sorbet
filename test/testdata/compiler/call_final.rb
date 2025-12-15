@@ -21,9 +21,9 @@ end
 # version.
 
 # INITIAL-LABEL: define internal i64 @"func_B#6caller"
-# INITIAL: call i64 @direct_func_A.3foo(%struct.FunctionInlineCache*
+# INITIAL: call i64 @direct_func_A.3foo(i8*
 # INITIAL{LITERAL}: }
 
-# OPT-LABEL: define internal i64 @"func_B#6caller"
-# OPT-NOT: call i64 @direct_func_A.3foo(%struct.FunctionInlineCache*
+# OPT-LABEL: define internal {{.*}}i64 @"func_B#6caller"
+# OPT-NOT: call i64 @direct_func_A.3foo(i8*
 # OPT{LITERAL}: }
