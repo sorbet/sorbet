@@ -171,7 +171,9 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
     typeAliases[sym.id()].emplace_back(parentTypeMember, myTypeMember);
     auto myVariance = myTypeMember.data(gs)->variance();
     auto parentVariance = parentTypeMember.data(gs)->variance();
-    if (myVariance != parentVariance && myVariance != core::Variance::Invariant) {
+    if (myVariance != parentVariance && myVariance != core::Variance::Invariant &&
+        // Silence variance mismatch error for `T.attached_class` if we would have already reported a final error.
+        (name != core::Names::Constants::AttachedClass() || !parent.data(gs)->flags.isFinal)) {
         if (auto e = gs.beginError(myTypeMember.data(gs)->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
             auto orInvariant = parentVariance == core::Variance::Invariant ? "" : " or invariant";
             if (name == core::Names::Constants::AttachedClass()) {
@@ -257,12 +259,17 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
             // with RuntimeProfiled.
             auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             if (attachedClass.exists()) {
-                auto lambdaParam =
-                    core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(gs)->resultType);
+                auto attachedClassTypeMember = attachedClass.asTypeMemberRef().data(gs);
+                bool isFinal = singleton.data(gs)->flags.isFinal;
+                if (isFinal) {
+                    attachedClassTypeMember->flags.isCovariant = false;
+                    attachedClassTypeMember->flags.isInvariant = true;
+                }
+                auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember->resultType);
                 ENFORCE(lambdaParam != nullptr);
 
-                lambdaParam->lowerBound = core::Types::bottom();
                 lambdaParam->upperBound = sym.data(gs)->externalType();
+                lambdaParam->lowerBound = isFinal ? lambdaParam->upperBound : core::Types::bottom();
             }
         }
     }
