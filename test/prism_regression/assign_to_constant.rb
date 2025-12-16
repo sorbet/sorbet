@@ -108,8 +108,7 @@ def method1
   DynamicConstantLazyAndAssign &&= 13
   DynamicConstantLazyOrAssgin  ||= 14
 
-  # Sorbet doesn't do the dynamic constant workaround for multi-target assignments
-  # DynamicConstantTarget1, DynamicConstantTarget2 = 35, 36
+  DynamicConstantTarget1, DynamicConstantTarget2 = 15, 16
 end
 
 def method2
@@ -136,8 +135,7 @@ def method2
   ConstantPath::DynamicConstantLazyAndAssign &&= 13
   ConstantPath::DynamicConstantLazyOrAssgin  ||= 14
 
-  # Sorbet doesn't do the dynamic constant workaround for multi-target assignments
-  # ConstantPath::DynamicConstantTarget1, ConstantPath::DynamicConstantTarget2 = 35, 36
+  ConstantPath::DynamicConstantTarget1, ConstantPath::DynamicConstantTarget2 = 15, 16
 end
 
 
@@ -165,6 +163,5 @@ def method3
   ::FullyQualified::ConstantPath::DynamicConstantLazyAndAssign &&= 13
   ::FullyQualified::ConstantPath::DynamicConstantLazyOrAssgin  ||= 14
 
-  # Sorbet doesn't do the dynamic constant workaround for multi-target assignments
-  # ::FullyQualified::ConstantPath::DynamicConstantTarget1, ::FullyQualified::ConstantPath::DynamicConstantTarget2 = 35, 36
+  ::FullyQualified::ConstantPath::DynamicConstantTarget1, ::FullyQualified::ConstantPath::DynamicConstantTarget2 = 15, 16
 end
