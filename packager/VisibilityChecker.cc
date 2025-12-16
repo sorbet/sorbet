@@ -905,6 +905,75 @@ void exportField(const core::GlobalState &gs,
         break;
     }
 }
+
+void reportMissingImportExportAutocorrect(const core::GlobalState &gs, vector<ast::ParsedFile> &files) {
+    Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
+    UnorderedSet<core::packages::MangledName> packagesInEdit;
+    for (auto &parsedFile : files) {
+        auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
+        if (!pkgName.exists()) {
+            continue;
+        }
+        packagesInEdit.insert(pkgName);
+    }
+
+    UnorderedMap<core::SymbolRef, vector<core::FileRef>> referencingFiles;
+    {
+        Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencingFiles");
+        auto numFiles = gs.getFiles().size();
+        for (auto i = 1; i < numFiles; i++) {
+            core::FileRef fref(i);
+            auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
+            for (auto &symbol : referencedSymbols) {
+                referencingFiles[symbol].push_back(fref);
+            }
+        }
+    }
+
+    UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> toExport;
+    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
+        exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
+    }
+    for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
+        auto fieldRef = core::FieldRef(gs, i);
+        exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
+    }
+
+    for (auto pkgName : gs.packageDB().packages()) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(pkgInfo.exists());
+        auto importsAutocorrect = packagesInEdit.contains(pkgName) ? pkgInfo.aggregateMissingImports(gs) : nullopt;
+        auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
+        if (importsAutocorrect && exportsAutocorrect) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
+                importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
+                                                 make_move_iterator(exportsAutocorrect->edits.begin()),
+                                                 make_move_iterator(exportsAutocorrect->edits.end()));
+                // TODO(neil): for a file with no imports or exports, this will produce something like:
+                //   export MyPkg::Foo
+                //   import OtherPkg
+                // because e < i
+                core::AutocorrectSuggestion::mergeAdjacentEdits(importsAutocorrect->edits);
+                e.addAutocorrect(
+                    core::AutocorrectSuggestion{"Add missing imports and exports", move(importsAutocorrect->edits)});
+                // TODO(neil): we should also delete imports that are unused but have a modularity error here
+            }
+        } else if (importsAutocorrect) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("{} is missing imports", pkgInfo.show(gs));
+                e.addAutocorrect(move(importsAutocorrect.value()));
+                // TODO(neil): we should also delete imports that are unused but have a modularity error here
+            }
+        } else if (exportsAutocorrect) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("{} is missing exports", pkgInfo.show(gs));
+                e.addAutocorrect(move(exportsAutocorrect.value()));
+            }
+        }
+    }
+}
 } // namespace
 
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
@@ -920,72 +989,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
     auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
-        Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
-        UnorderedSet<core::packages::MangledName> packagesInEdit;
-        for (auto &parsedFile : result) {
-            auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
-            if (!pkgName.exists()) {
-                continue;
-            }
-            packagesInEdit.insert(pkgName);
-        }
-
-        UnorderedMap<core::SymbolRef, vector<core::FileRef>> referencingFiles;
-        {
-            Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencingFiles");
-            auto numFiles = gs.getFiles().size();
-            for (auto i = 1; i < numFiles; i++) {
-                core::FileRef fref(i);
-                auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
-                for (auto &symbol : referencedSymbols) {
-                    referencingFiles[symbol].push_back(fref);
-                }
-            }
-        }
-
-        UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> toExport;
-        for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
-            auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
-            exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
-        }
-        for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
-            auto fieldRef = core::FieldRef(gs, i);
-            exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
-        }
-
-        for (auto pkgName : gs.packageDB().packages()) {
-            auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
-            ENFORCE(pkgInfo.exists());
-            auto importsAutocorrect = packagesInEdit.contains(pkgName) ? pkgInfo.aggregateMissingImports(gs) : nullopt;
-            auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
-            if (importsAutocorrect && exportsAutocorrect) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                    e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
-                    importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
-                                                     make_move_iterator(exportsAutocorrect->edits.begin()),
-                                                     make_move_iterator(exportsAutocorrect->edits.end()));
-                    // TODO(neil): for a file with no imports or exports, this will produce something like:
-                    //   export MyPkg::Foo
-                    //   import OtherPkg
-                    // because e < i
-                    core::AutocorrectSuggestion::mergeAdjacentEdits(importsAutocorrect->edits);
-                    e.addAutocorrect(core::AutocorrectSuggestion{"Add missing imports and exports",
-                                                                 move(importsAutocorrect->edits)});
-                    // TODO(neil): we should also delete imports that are unused but have a modularity error here
-                }
-            } else if (importsAutocorrect) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                    e.setHeader("{} is missing imports", pkgInfo.show(gs));
-                    e.addAutocorrect(move(importsAutocorrect.value()));
-                    // TODO(neil): we should also delete imports that are unused but have a modularity error here
-                }
-            } else if (exportsAutocorrect) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                    e.setHeader("{} is missing exports", pkgInfo.show(gs));
-                    e.addAutocorrect(move(exportsAutocorrect.value()));
-                }
-            }
-        }
+        reportMissingImportExportAutocorrect(gs, result);
     }
 
     return result;
