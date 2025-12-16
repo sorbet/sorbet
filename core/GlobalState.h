@@ -534,19 +534,21 @@ public:
 
     // Which symbols does this file reference?
     // NOTE: this is currently only valid in --gen-packages mode
-    const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(size_t ix) const {
+    const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(core::FileRef fref) const {
         ENFORCE(packageDB().genPackages());
         ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
                 "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
                 symbolsReferencedByFile.size());
+        auto ix = fref.id();
         ENFORCE(ix < symbolsReferencedByFile.size());
         return this->symbolsReferencedByFile[ix];
     }
 
-    void setSymbolsReferencedByFile(size_t ix, UnorderedSet<core::SymbolRef> &referencedSymbols) {
+    void setSymbolsReferencedByFile(core::FileRef fref, UnorderedSet<core::SymbolRef> &referencedSymbols) {
         ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
                 "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
                 symbolsReferencedByFile.size());
+        auto ix = fref.id();
         ENFORCE(ix < symbolsReferencedByFile.size());
         this->symbolsReferencedByFile[ix].swap(referencedSymbols);
     }

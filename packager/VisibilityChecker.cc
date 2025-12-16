@@ -822,7 +822,7 @@ public:
                     nonConstPackageInfo->trackPackageReferences(file, references);
 
                     auto referencedSymbols = std::get<2>(threadResult.value());
-                    nonConstGs.setSymbolsReferencedByFile(file.id(), referencedSymbols);
+                    nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
                 }
             }
         }
@@ -932,7 +932,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             auto numFiles = gs.getFiles().size();
             for (auto i = 1; i < numFiles; i++) {
                 core::FileRef fref(i);
-                auto referencedSymbols = gs.getSymbolsReferencedByFile(i);
+                auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
                 for (auto &symbol : referencedSymbols) {
                     referencingFiles[symbol].push_back(fref);
                 }
