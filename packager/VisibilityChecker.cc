@@ -764,9 +764,12 @@ public:
                                        vector<ast::ParsedFile> files) {
         const core::GlobalState &gs = nonConstGs;
         core::packages::PackageDB &nonConstPackageDB = nonConstGs.packageDB();
-        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<
-            std::tuple<core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
-                       UnorderedSet<core::SymbolRef>>>>>(files.size());
+        struct ThreadResult {
+            core::FileRef file;
+            UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
+            UnorderedSet<core::SymbolRef> referencedSymbols;
+        };
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<ThreadResult>>>(files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto filesSpan = absl::MakeSpan(files);
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(filesSpan.size());
@@ -796,22 +799,19 @@ public:
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
-                resultq->push(make_tuple(f.file, std::move(pass.packageReferences), std::move(pass.symbolsReferenced)),
-                              1);
+                resultq->push(
+                    ThreadResult{f.file, std::move(pass.packageReferences), std::move(pass.symbolsReferenced)}, 1);
             }
             barrier.DecrementCount();
         });
 
         if (gs.packageDB().genPackages()) {
-            std::optional<std::tuple<core::FileRef,
-                                     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>,
-                                     UnorderedSet<core::SymbolRef>>>
-                threadResult;
+            std::optional<ThreadResult> threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem() && threadResult.has_value()) {
-                    auto file = std::get<0>(threadResult.value());
+                    auto file = threadResult->file;
                     auto pkgName = gs.packageDB().getPackageNameForFile(file);
                     if (!pkgName.exists()) {
                         continue;
@@ -819,13 +819,13 @@ public:
 
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
                     vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
-                    auto referencedPackages = std::get<1>(threadResult.value());
+                    auto referencedPackages = threadResult->referencedPackages;
                     for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
                         references.emplace_back(make_pair(packageName, packageReferenceInfo));
                     }
                     nonConstPackageInfo->trackPackageReferences(file, references);
 
-                    auto referencedSymbols = std::get<2>(threadResult.value());
+                    auto referencedSymbols = threadResult->referencedSymbols;
                     nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
                 }
             }
