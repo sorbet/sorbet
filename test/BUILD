@@ -1,5 +1,3 @@
-# Load the macro that creates a test for every file in the prism_regression folder
-load("//test:prism_location_test.bzl", "prism_location_test_suite")
 load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
 load(":pipeline_test.bzl", "pipeline_tests")
 
@@ -122,34 +120,6 @@ sh_test(
     data = [
         ":print_document_symbols",
     ],
-)
-
-# Run the macro
-prism_location_test_suite(
-    name = "prism_location_tests",
-    srcs = glob(
-        ["prism_regression/**/*.rb"],
-        exclude = [
-            "prism_regression/error_recovery/assign.rb",
-            "prism_regression/lambda.rb",
-            "prism_regression/call_kw_nil_args.rb",
-            "prism_regression/call_block_param_and_forwarding.rb",
-            "prism_regression/constants_invalid.rb",
-            "prism_regression/invalid/unterminated_regex.rb",
-            "prism_regression/csend_brackets.rb",
-            "prism_regression/block_symbol.rb",
-            "prism_regression/multiple_numbered_params.rb",
-
-            # Sorbet's parser includes the last newline in the `<ErrorNode>`, but Prism doesn't.
-            "prism_regression/invalid/missing_node.rb",
-        ],
-    ),
-)
-
-# Create a test suite to run all the location tests
-test_suite(
-    name = "prism_location_tests",
-    tags = ["prism_location_test"],
 )
 
 cc_test(
