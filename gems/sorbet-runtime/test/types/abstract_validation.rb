@@ -378,6 +378,75 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
           "baz"
         end
       end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("lib/types/private/abstract/hooks.rb"))
+      assert_equal("baz", klass.new.bar)
+      after_new = klass.method(:new)
+      after_location = after_new.source_location
+      assert_nil(after_location)
+      assert_equal(klass.singleton_class, after_new.owner)
+      assert_equal("baz", klass.new.bar)
+    end
+
+    it 'does not redefine .new on a concrete subclass' do
+      klass = Class.new(AbstractClass) do
+        extend T::Sig
+        extend T::Helpers
+        sig { override.returns(Object) }
+        def self.foo; end
+
+        sig { override.returns(Object) }
+        def bar
+          "baz"
+        end
+
+        def self.new
+          super
+        end
+      end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("abstract_validation.rb"))
+      assert_equal("baz", klass.new.bar)
+      after_new = klass.method(:new)
+      after_location = after_new.source_location[0]
+      assert(after_location.end_with?("abstract_validation.rb"))
+      assert_equal(klass.singleton_class, after_new.owner)
+      assert_equal("baz", klass.new.bar)
+    end
+
+    it 'works if .new is inherited from a mixin' do
+      mixin = Module.new do
+        def new
+          super
+        end
+      end
+
+      klass = Class.new(AbstractClass) do
+        extend T::Sig
+        extend T::Helpers
+        extend mixin
+
+        sig { override.returns(Object) }
+        def self.foo; end
+
+        sig { override.returns(Object) }
+        def bar
+          "baz"
+        end
+      end
+
+      before_new = klass.method(:new)
+      before_location = before_new.source_location[0]
+      assert(before_location.end_with?("abstract_validation.rb"), before_location)
+      assert_equal("baz", klass.new.bar)
+      after_new = klass.method(:new)
+      after_location = after_new.source_location[0]
+      assert(after_location.end_with?("abstract_validation.rb"))
+      assert_equal(mixin, after_new.owner)
       assert_equal("baz", klass.new.bar)
     end
 
