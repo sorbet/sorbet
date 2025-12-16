@@ -3367,6 +3367,13 @@ Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node
 
             if (varName.length() == 2 && varName[0] == '_' && '1' <= varName[1] && varName[1] <= '9') {
                 auto number = varName[1] - '0';
+
+                // We've already found the first usage of this numbered parameter.
+                // Skip it, and keep searching for the rest.
+                if (activeRegion[number - 1].exists()) {
+                    return true;
+                }
+
                 activeRegion[number - 1] = this->translateLoc(node->location);
             }
 
