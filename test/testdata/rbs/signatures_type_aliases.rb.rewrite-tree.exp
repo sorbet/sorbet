@@ -238,4 +238,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of bar>
   end
+
+  module <emptyTree>::<C TrailingTypeAlias><<C <todo sym>>> < ()
+    <emptyTree>::<C CONSTANT> = 1
+
+    <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C Integer>
+    end
+  end
+
+  module <emptyTree>::<C EmptyTypeAlias><<C <todo sym>>> < ()
+    <emptyTree>::<C type a> = ::<root>::<C T>.type_alias() do ||
+      <emptyTree>::<C Integer>
+    end
+  end
 end
