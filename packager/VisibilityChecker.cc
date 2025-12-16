@@ -806,29 +806,27 @@ public:
             barrier.DecrementCount();
         });
 
-        if (gs.packageDB().genPackages()) {
-            std::optional<ThreadResult> threadResult;
-            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem() && threadResult.has_value()) {
-                    auto &file = threadResult->file;
-                    auto pkgName = gs.packageDB().getPackageNameForFile(file);
-                    if (!pkgName.exists()) {
-                        continue;
-                    }
-
-                    auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
-                    vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
-                    auto &referencedPackages = threadResult->referencedPackages;
-                    for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
-                        references.emplace_back(make_pair(packageName, packageReferenceInfo));
-                    }
-                    nonConstPackageInfo->trackPackageReferences(file, references);
-
-                    auto &referencedSymbols = threadResult->referencedSymbols;
-                    nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
+        std::optional<ThreadResult> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem() && threadResult.has_value()) {
+                auto &file = threadResult->file;
+                auto pkgName = gs.packageDB().getPackageNameForFile(file);
+                if (!pkgName.exists()) {
+                    continue;
                 }
+
+                auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
+                vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
+                auto &referencedPackages = threadResult->referencedPackages;
+                for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
+                    references.emplace_back(make_pair(packageName, packageReferenceInfo));
+                }
+                nonConstPackageInfo->trackPackageReferences(file, references);
+
+                auto &referencedSymbols = threadResult->referencedSymbols;
+                nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
             }
         }
         barrier.Wait();
