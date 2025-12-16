@@ -2113,8 +2113,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
 
     // Additional options that might be used during indexing are manually copied over here
     result->files = make_shared<FileTable>(*this->files);
-    // TODO: can this be a shallow copy?
-    result->symbolsReferencedByFile = this->symbolsReferencedByFile;
+    result->symbolsReferencedByFile = vector<UnorderedSet<SymbolRef>>{this->files->size(), UnorderedSet<SymbolRef>{}};
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
@@ -2145,8 +2144,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     // We share the file table entries with the original GlobalState, and then copy the content of the name table,
     // string storage, and uuid to ensure that we remain compatible with the session cache.
     result->files = make_shared<FileTable>(*this->files);
-    // TODO: can this be a shallow copy?
-    result->symbolsReferencedByFile = this->symbolsReferencedByFile;
+    result->symbolsReferencedByFile = vector<UnorderedSet<SymbolRef>>{this->files->size(), UnorderedSet<SymbolRef>{}};
     result->kvstoreUuid = this->kvstoreUuid;
     result->strings = this->strings;
     result->utf8Names = this->utf8Names;
