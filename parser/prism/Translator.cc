@@ -2444,8 +2444,17 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             return MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName));
         }
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
-            categoryCounterInc("Prism fallback", "PM_LAMBDA_NODE");
-            throw PrismFallback{};
+            auto lambdaNode = down_cast<pm_lambda_node>(node);
+
+            auto operatorLoc = translateLoc(lambdaNode->operator_loc); // the `->` arrow
+
+            auto receiver = MK::Constant(operatorLoc, core::Symbols::Kernel());
+            pm_arguments_node *args = nullptr;
+            auto block = desugarLiteralBlock(lambdaNode->body, lambdaNode->parameters, lambdaNode->base.location,
+                                             lambdaNode->operator_loc);
+            auto isPrivateOk = true; // Matches previous parser+desugar behaviour
+            return desugarMethodCall(move(receiver), core::Names::lambda(), operatorLoc, args, lambdaNode->closing_loc,
+                                     move(block), location, isPrivateOk);
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a local variable, e.g. `local &&= false`
             return desugarVariableOpAssign<pm_local_variable_and_write_node, OpAssignKind::And,
