@@ -1,0 +1,75 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    If{
+      cond = Send{
+        flags = {rewriterSynthesized}
+        recv = Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (module ::T)
+            orig = nullptr
+          }
+          fun = <U unsafe>
+          block = nullptr
+          pos_args = 1
+          args = [
+            ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
+            }
+          ]
+        }
+        fun = <U raise>
+        block = nullptr
+        pos_args = 1
+        args = [
+          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+        ]
+      }
+      thenp = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <U x>
+            }
+            rhs = Send{
+              flags = {rewriterSynthesized}
+              recv = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (module ::T)
+                  orig = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  ConstantLit{
+                    symbol = (module ::Kernel)
+                    orig = nullptr
+                  }
+                ]
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
+          }
+        ],
+        expr = EmptyTree
+      }
+      elsep = EmptyTree
+    }
+  ]
+}
