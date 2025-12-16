@@ -268,20 +268,31 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
     return inserted;
 }
 
+void CommentsAssociator::processTrailingComments(parser::Node *node, parser::NodeVec &nodes) {
+    if (node == nullptr || contextAllowingTypeAlias.empty()) {
+        return;
+    }
+
+    int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+    maybeInsertStandalonePlaceholders(nodes, nodes.size(), lastLine, endLine);
+    lastLine = endLine;
+}
+
 unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique_ptr<parser::Node> body) {
     if (body == nullptr) {
+        auto nodes = parser::NodeVec();
+        processTrailingComments(node, nodes);
+
+        if (!nodes.empty()) {
+            return make_unique<parser::Begin>(node->loc, move(nodes));
+        }
         return nullptr;
     }
 
     if (auto *begin = parser::cast_node<parser::Begin>(body.get())) {
         // The body is already a Begin node, so we don't need any wrapping
         walkNode(body.get());
-
-        // Visit standalone RBS comments after the last node in the body
-        int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-        maybeInsertStandalonePlaceholders(begin->stmts, 0, lastLine, endLine);
-        lastLine = endLine;
-
+        processTrailingComments(node, begin->stmts);
         return body;
     }
 
@@ -297,9 +308,7 @@ unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique
 
     // Visit standalone RBS comments after the body node
     auto afterNodes = parser::NodeVec();
-    int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-    maybeInsertStandalonePlaceholders(afterNodes, 0, lastLine, endLine);
-    lastLine = endLine;
+    processTrailingComments(node, afterNodes);
 
     if (!beforeNodes.empty() || !afterNodes.empty()) {
         auto nodes = parser::NodeVec();

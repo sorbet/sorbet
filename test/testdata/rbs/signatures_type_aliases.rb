@@ -16,7 +16,7 @@ module Errors
   #: -> void
   def foo
     #: type a = Integer
-  # ^^^^^^^^^^^^^^^^^^^ error: Unexpected RBS assertion comment found in `method`
+  # ^^^^^^^^^^^^^^^^^^^ error: Unexpected RBS type alias comment
   end
 
   #: -> void
@@ -150,4 +150,14 @@ module TypeAliasWithNamespace
   def bar(x)
     T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
   end
+end
+
+module TrailingTypeAlias
+  CONSTANT = 1
+
+  #: type a = Integer
+end
+
+module EmptyTypeAlias
+  #: type a = Integer
 end

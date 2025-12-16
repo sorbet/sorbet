@@ -43,6 +43,7 @@ private:
     void walkNodes(parser::NodeVec &nodes);
     void walkStatements(parser::NodeVec &nodes);
     std::unique_ptr<parser::Node> walkBody(parser::Node *node, std::unique_ptr<parser::Node> body);
+    void processTrailingComments(parser::Node *node, parser::NodeVec &nodes);
     void associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc);
     void associateSignatureCommentsToNode(parser::Node *node);
     void consumeCommentsInsideNode(parser::Node *node, std::string kind);
