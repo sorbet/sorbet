@@ -1,0 +1,66 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U <ConstantNameMissing>>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        EmptyTree
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U <ConstantNameMissing>>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        EmptyTree
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U <ConstantNameMissing>>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        MethodDef{
+          flags = {}
+          name = <U bar><<U <todo method>>>
+          params = [BlockParam{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+      ]
+    }
+  ]
+}
