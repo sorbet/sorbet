@@ -920,6 +920,8 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, vector<as
     UnorderedMap<core::SymbolRef, vector<core::FileRef>> referencingFiles;
     {
         Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencingFiles");
+        // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
+        // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
         auto numFiles = gs.getFiles().size();
         for (auto i = 1; i < numFiles; i++) {
             core::FileRef fref(i);
@@ -944,6 +946,11 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, vector<as
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
         auto importsAutocorrect = packagesInEdit.contains(pkgName) ? pkgInfo.aggregateMissingImports(gs) : nullopt;
+        // It's a bit odd here that for imports, all the logic is in aggregateMissingImports, while for
+        // aggregateMissingExports, we need to do some extra computations outside the method and pass that in.
+        // The difference is that computing what imports are needed is a function only of the files in that package.
+        // However, for exports, we need to look the symbols referenced by other packages, which necessitates a loop
+        // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
         auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
         if (importsAutocorrect && exportsAutocorrect) {
             if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
@@ -989,6 +996,10 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
     auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
+        // TODO(neil): this has to run after VisibilityChecker has been run over all files. With --package-directed,
+        // that will not be the case here, at this point we will only have run it over all the files in this and
+        // previous strata. To handle this, we should add a new phase after the main pipeline has been run over all the
+        // strata and run this logic there.
         reportMissingImportExportAutocorrect(gs, result);
     }
 

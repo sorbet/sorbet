@@ -532,8 +532,6 @@ public:
         return this->files->span();
     }
 
-    // Which symbols does this file reference?
-    // NOTE: this is currently only valid in --gen-packages mode
     const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(core::FileRef fref) const {
         ENFORCE(packageDB().genPackages());
         ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
