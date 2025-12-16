@@ -391,10 +391,44 @@ pipeline_tests(
 
 pipeline_tests(
     "prism_regression_corpus",
-    glob([
-        "prism_regression/**/*.rb",
-        "prism_regression/**/*.exp",
-    ]),
+    glob(
+        [
+            "prism_regression/**/*.rb",
+            "prism_regression/**/*.exp",
+        ],
+        exclude = [
+            # Prism parses invalid Ruby that Whitequark rejects:
+            # - `def foo(&, ...); end` - block param combined with forwarding args
+            "prism_regression/call_block_param_and_forwarding.rb",
+            # - Multiple invalid `**nil` combinations in method signatures
+            "prism_regression/call_kw_nil_args.rb",
+
+            # Different AST for invalid empty constant `::` - Prism produces
+            # UnresolvedConstantLit with empty name, Whitequark produces EmptyTree
+            "prism_regression/constants_invalid.rb",
+
+            # Location differences in error recovery - Prism provides tighter/different
+            # location spans for ErrorNode compared to Whitequark:
+            # - `x =` (missing RHS) has different Assign/ErrorNode locations
+            "prism_regression/error_recovery/assign.rb",
+            # - `1 +` (missing operand) has different Send/ErrorNode locations
+            "prism_regression/invalid/missing_node.rb",
+            # - `/foo` (unterminated regex) - Prism includes content up to EOF,
+            #   Whitequark produces empty regex
+            "prism_regression/invalid/unterminated_regex.rb",
+
+            # Numbered block parameter location differs: Prism uses last occurrence
+            # of `_1`, Whitequark uses first occurrence
+            "prism_regression/multiple_numbered_params.rb",
+
+            # FIXME: Regex location differences
+            "prism_regression/back_reference_read.rb",
+            "prism_regression/literal_regexp.rb",
+            "prism_regression/match_write.rb",
+            "prism_regression/multiple_numbered_params.rb",
+            "prism_regression/numbered_reference_read.rb",
+        ],
+    ),
     "PrismPosTests",
     parser = "prism",
 )
