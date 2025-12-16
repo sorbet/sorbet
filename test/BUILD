@@ -509,9 +509,7 @@ pipeline_tests(
             "testdata/parser/empty.rb",
             "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
             "testdata/rbs/signatures_params_autocorrect.rb",
-            "testdata/desugar/numbered_parameters.rb",
             "testdata/infer/crash_after_parse_errors.rb",
-            "testdata/infer/numbered_parameters.rb",
             "testdata/infer/untyped.rb",
             "testdata/lsp/hover_it_param.rb",
             "testdata/parser/error_recovery/eof_8.rb",
@@ -562,10 +560,6 @@ pipeline_tests(
             # - `/foo` (unterminated regex) - Prism includes content up to EOF,
             #   Whitequark produces empty regex
             "prism_regression/invalid/unterminated_regex.rb",
-
-            # Numbered block parameter location differs: Prism uses last occurrence
-            # of `_1`, Whitequark uses first occurrence
-            "prism_regression/multiple_numbered_params.rb",
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "prism_regression/assign_to_index.rb",
