@@ -908,7 +908,7 @@ void exportField(const core::GlobalState &gs,
 
 void reportMissingImportExportAutocorrect(const core::GlobalState &gs, vector<ast::ParsedFile> &files) {
     Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
-    UnorderedSet<core::packages::MangledName> packagesInEdit;
+    auto packagesInEdit = UnorderedSet<core::packages::MangledName>{};
     for (auto &parsedFile : files) {
         auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
         if (!pkgName.exists()) {
@@ -917,11 +917,11 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, vector<as
         packagesInEdit.insert(pkgName);
     }
 
-    UnorderedMap<core::SymbolRef, vector<core::FileRef>> referencingFiles;
+    auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
     {
-        Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencingFiles");
         // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
         // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
+        Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencing_files");
         auto numFiles = gs.getFiles().size();
         for (auto i = 1; i < numFiles; i++) {
             core::FileRef fref(i);
@@ -932,7 +932,7 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, vector<as
         }
     }
 
-    UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> toExport;
+    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
     for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
         exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
