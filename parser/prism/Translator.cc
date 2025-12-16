@@ -1929,7 +1929,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
             auto classNode = down_cast<pm_class_node>(node);
 
-            auto name = desugar(classNode->constant_path);
+            auto name = desugarClassOrModuleName(classNode->constant_path, classNode->class_keyword_loc);
             auto declLoc = translateLoc(classNode->class_keyword_loc).join(name.loc());
 
             ast::ClassDef::ANCESTORS_store ancestors;
@@ -2681,7 +2681,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         case PM_MODULE_NODE: { // Modules declarations, like `module A::B::C; ...; end`
             auto moduleNode = down_cast<pm_module_node>(node);
 
-            auto name = desugar(moduleNode->constant_path);
+            auto name = desugarClassOrModuleName(moduleNode->constant_path, moduleNode->module_keyword_loc);
             auto declLoc = translateLoc(moduleNode->module_keyword_loc).join(name.loc());
 
             auto body = this->enterModuleContext(enclosingBlockParamLoc, enclosingBlockParamName)
@@ -4877,6 +4877,17 @@ ast::ExpressionPtr Translator::desugarRegexp(core::LocOffsets location, core::Lo
 
 string_view Translator::sliceLocation(pm_location_t loc) const {
     return cast_prism_string(loc.start, loc.end - loc.start);
+}
+
+// Handle invalid or missing constant paths in class/module declarations.
+ast::ExpressionPtr Translator::desugarClassOrModuleName(pm_node_t *constantPath, pm_location_t keywordLoc) {
+    if (constantPath == nullptr || (!PM_NODE_TYPE_P(constantPath, PM_CONSTANT_PATH_NODE) &&
+                                    !PM_NODE_TYPE_P(constantPath, PM_CONSTANT_READ_NODE))) {
+        auto nameLoc = translateLoc(keywordLoc);
+        return MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), core::Names::Constants::ConstantNameMissing());
+    }
+
+    return desugar(constantPath);
 }
 
 // Desugar a class, singleton class or module body.
