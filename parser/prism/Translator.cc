@@ -4845,16 +4845,18 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
                                                             unique_ptr<parser::Node> sendNode) {
     pm_node_t *prismParametersNode;
     pm_node_t *prismBodyNode;
-    auto blockLoc = translateLoc(prismBlockOrLambdaNode->location);
+    core::LocOffsets blockLoc;
     if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
         auto prismBlockNode = down_cast<pm_block_node>(prismBlockOrLambdaNode);
         prismParametersNode = prismBlockNode->parameters;
         prismBodyNode = prismBlockNode->body;
+        blockLoc = translateLoc(prismBlockOrLambdaNode->location);
     } else {
         ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = down_cast<pm_lambda_node>(prismBlockOrLambdaNode);
         prismParametersNode = prismLambdaNode->parameters;
         prismBodyNode = prismLambdaNode->body;
+        blockLoc = translateLoc(prismLambdaNode->opening_loc.start, prismLambdaNode->closing_loc.end);
     }
 
     unique_ptr<parser::Node> parametersNode;
