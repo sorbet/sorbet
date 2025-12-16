@@ -76,31 +76,6 @@ ClassDef{
     }
 
     Send{
-      flags = {}
-      recv = Send{
-        flags = {}
-        recv = ConstantLit{
-          symbol = (module ::Kernel)
-          orig = nullptr
-        }
-        fun = <U lambda>
-        block = Block {
-          params = [
-          ]
-          body = Literal{ value = 456 }
-        }
-        pos_args = 0
-        args = [
-        ]
-      }
-      fun = <U call>
-      block = nullptr
-      pos_args = 0
-      args = [
-      ]
-    }
-
-    Send{
       flags = {privateOk}
       recv = Self
       fun = <U lambda>
