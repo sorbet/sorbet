@@ -11,24 +11,6 @@ using namespace std;
 
 namespace sorbet::class_flatten {
 
-bool shouldExtract(core::Context ctx, const ast::ExpressionPtr &what) {
-    if (ast::isa_tree<ast::MethodDef>(what)) {
-        return false;
-    }
-    if (ast::isa_tree<ast::ClassDef>(what)) {
-        return false;
-    }
-    if (ast::isa_tree<ast::EmptyTree>(what)) {
-        return false;
-    }
-
-    if (auto asgn = ast::cast_tree<ast::Assign>(what)) {
-        return !ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs);
-    }
-
-    return true;
-}
-
 // pull all the non-definitions (i.e. anything that's not a method definition, a class definition, or a constant
 // definition) from a class or file into their own instruction sequence (or, if there is only one, simply move it out of
 // the class body and return it.)
@@ -92,21 +74,6 @@ public:
                 sym.show(ctx));
         ENFORCE(sym.data(ctx)->parameters.back().flags.isBlock, "Last argument symbol is not a block arg: {}",
                 sym.show(ctx));
-
-        // Synthesize a block argument for this <static-init> block. This is rather fiddly,
-        // because we have to know exactly what invariants desugar and namer set up about
-        // methods and block arguments before us.
-        auto blkLoc = core::LocOffsets::none();
-        core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
-        ast::MethodDef::PARAMS_store params;
-        params.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
-
-        ast::MethodDef::Flags flags;
-        flags.isRewriterSynthesized = false;
-        flags.isSelfMethod = true;
-        auto init =
-            ast::make_expression<ast::MethodDef>(classDef->declLoc, classDef->declLoc, sym, core::Names::staticInit(),
-                                                 std::move(params), std::move(inits), flags);
 
         classDef->rhs.emplace_back(std::move(init));
 

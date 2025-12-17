@@ -85,6 +85,23 @@ public:
         }
         cfgs.push_back(move(cfg));
     }
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &c) {
+        auto symbol = c.symbol.lookupStaticInit(ctx);
+
+        if (!infer::Inference::willRun(ctx, c.declLoc, symbol)) {
+            return;
+        }
+
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(symbol), c, symbol);
+        cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
+        if (cfg) {
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->typecheck(ctx, ctx.file, *cfg);
+            }
+        }
+        cfgs.push_back(move(cfg));
+    }
 };
 
 UnorderedSet<string> knownExpectations = {"parse-tree",
@@ -636,7 +653,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             checkTree();
             CFGCollectorAndTyper collector;
             core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            ast::ShallowWalk::apply(ctx, collector, resolvedTree.tree);
+            ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
             }

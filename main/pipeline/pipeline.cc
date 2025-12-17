@@ -1448,6 +1448,35 @@ public:
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
         }
     }
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &c) {
+        auto symbol = c.symbol.lookupStaticInit(ctx);
+
+        if (!infer::Inference::willRun(ctx, c.declLoc, symbol)) {
+            return;
+        }
+
+        auto &print = opts.print;
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(symbol), c, symbol);
+
+        if (opts.stopAfterPhase != options::Phase::CFG) {
+            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            if (cfg) {
+                for (auto &extension : ctx.state.semanticExtensions) {
+                    extension->typecheck(ctx, ctx.file, *cfg);
+                }
+            }
+        }
+        if (print.CFG.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
+        }
+        if (print.CFGText.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toTextualString(ctx));
+        }
+        if (print.CFGRaw.enabled) {
+            print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
+        }
+    }
 };
 
 void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,

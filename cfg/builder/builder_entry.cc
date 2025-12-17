@@ -7,19 +7,73 @@ using namespace std;
 
 namespace sorbet::cfg {
 
+namespace {
+
+bool shouldBuildFor(core::Context ctx, const ast::ExpressionPtr &what) {
+    if (ast::isa_tree<ast::MethodDef>(what)) {
+        return false;
+    }
+    if (ast::isa_tree<ast::ClassDef>(what)) {
+        return false;
+    }
+    if (ast::isa_tree<ast::EmptyTree>(what)) {
+        return false;
+    }
+
+    if (auto asgn = ast::cast_tree<ast::Assign>(what)) {
+        return !ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs);
+    }
+
+    return true;
+}
+
+} // namespace
+
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md) {
-    Timer timeit(ctx.state.tracer(), "cfg");
     ENFORCE(md.symbol.exists());
     ENFORCE(!md.symbol.data(ctx)->flags.isOverloaded);
+
     unique_ptr<CFG> res(new CFG); // private constructor
     res->loc = md.loc;
     res->declLoc = md.declLoc;
     res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
-    uint32_t temporaryCounter = 1;
+
     UnorderedMap<core::SymbolRef, LocalRef> aliases;
     UnorderedMap<core::NameRef, LocalRef> discoveredUndeclaredFields;
+    uint32_t temporaryCounter = 1;
     CFGContext cctx(ctx, *res.get(), LocalRef::noVariable(), 0, nullptr, nullptr, nullptr, aliases,
                     discoveredUndeclaredFields, temporaryCounter);
+
+    return buildFor(cctx, move(res), md.params, {}, md.rhs);
+}
+
+unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::ClassDef &cd, core::MethodRef symbol) {
+    unique_ptr<CFG> res(new CFG); // private constructor
+    res->loc = cd.loc;
+    res->declLoc = cd.declLoc;
+    res->symbol = symbol;
+
+    UnorderedMap<core::SymbolRef, LocalRef> aliases;
+    UnorderedMap<core::NameRef, LocalRef> discoveredUndeclaredFields;
+    uint32_t temporaryCounter = 1;
+    CFGContext cctx(ctx, *res.get(), LocalRef::noVariable(), 0, nullptr, nullptr, nullptr, aliases,
+                    discoveredUndeclaredFields, temporaryCounter);
+
+    // Synthesize a block argument for this <static-init> block. This is rather fiddly,
+    // because we have to know exactly what invariants desugar and namer set up about
+    // methods and block arguments before us.
+    auto blkLoc = core::LocOffsets::none();
+    core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
+    ast::MethodDef::PARAMS_store params;
+    params.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
+
+    return buildFor(cctx, move(res), params, cd.rhs, ast::MK::EmptyTree());
+}
+
+unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl::Span<const ast::ExpressionPtr> params,
+                                     absl::Span<const ast::ExpressionPtr> stats, const ast::ExpressionPtr &expr) {
+    auto ctx = cctx.ctx;
+    Timer timeit(ctx.state.tracer(), "cfg");
 
     LocalRef retSym;
     BasicBlock *entry = res->entry();
@@ -43,7 +97,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
         bool isAbstract = res->symbol.data(ctx)->flags.isAbstract;
         bool seenKeyword = false;
         int i = -1;
-        for (auto &paramExpr : md.params) {
+        for (auto &paramExpr : params) {
             i++;
             auto *p = ast::MK::arg2Local(paramExpr);
             auto local = res->enterLocal(p->localVariable);
@@ -83,7 +137,28 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
             presentCont = joinBlocks(cctx, presentCont, defaultCont);
         }
 
-        cont = walk(cctx.withTarget(retSym), md.rhs, presentCont);
+        cont = presentCont;
+
+        auto shouldBuildForStats = vector<bool>(stats.size(), false);
+        int lastStat = -1;
+        for (int i = 0; i < stats.size(); i++) {
+            auto shouldBuildForStat = shouldBuildFor(cctx.ctx, stats[i]);
+            shouldBuildForStats[i] = shouldBuildForStat;
+            if (shouldBuildForStat) {
+                lastStat = i;
+            }
+        }
+
+        if (lastStat != -1) {
+            for (int i = 0; i < lastStat; i++) {
+                if (shouldBuildForStats[i]) {
+                    cont = walk(cctx.withTarget(cctx.newTemporary(core::Names::statTemp())), stats[i], cont);
+                }
+            }
+            cont = walk(cctx.withTarget(retSym), stats[lastStat], cont);
+        } else {
+            cont = walk(cctx.withTarget(retSym), expr, cont);
+        }
     }
     // Past this point, res->localVariables is a fixed size.
 
