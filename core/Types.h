@@ -652,6 +652,13 @@ inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef &>(ClassOrM
 }
 
 template <>
+inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, const NameRef &>(ClassOrModuleRef &&klass,
+                                                                              const NameRef &val) {
+    NamedLiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.kind));
+}
+
+template <>
 inline TypePtr make_type<NamedLiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
     NamedLiteralType type(klass, val);
     return TypePtr(TypePtr::Tag::NamedLiteralType, (uint64_t(val.rawId()) << 8) | static_cast<uint64_t>(type.kind));

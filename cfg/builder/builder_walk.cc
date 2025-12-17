@@ -106,7 +106,7 @@ pair<LocalRef, bool> unresolvedIdent2Local(CFGContext cctx, const ast::Unresolve
     }
 }
 
-bool sendRecvIsT(ast::Send &s) {
+bool sendRecvIsT(const ast::Send &s) {
     if (auto cnst = ast::cast_tree<ast::ConstantLit>(s.recv)) {
         return cnst->symbol() == core::Symbols::T();
     } else {
@@ -114,7 +114,7 @@ bool sendRecvIsT(ast::Send &s) {
     }
 }
 
-bool isKernelLambda(ast::Send &s) {
+bool isKernelLambda(const ast::Send &s) {
     if (s.fun != core::Names::lambda() && s.fun != core::Names::lambdaTLet()) {
         return false;
     }
@@ -128,7 +128,7 @@ bool isKernelLambda(ast::Send &s) {
     return cnst != nullptr && cnst->symbol() == core::Symbols::Kernel();
 }
 
-InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
+InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, const ast::Send &s) {
     const auto &ctx = cctx.ctx;
     auto method = cctx.inWhat.symbol;
     if (!method.data(ctx)->flags.isGenericMethod) {
@@ -214,14 +214,14 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
     inserted.value.setSynthetic();
 }
 
-BasicBlock *CFGBuilder::walkAssign(CFGContext cctx, ast::ExpressionPtr &rhs, core::LocOffsets assignLoc, LocalRef lhs,
-                                   BasicBlock *current) {
+BasicBlock *CFGBuilder::walkAssign(CFGContext cctx, const ast::ExpressionPtr &rhs, core::LocOffsets assignLoc,
+                                   LocalRef lhs, BasicBlock *current) {
     auto rhsCont = walk(cctx.withTarget(lhs), rhs, current);
     rhsCont->exprs.emplace_back(cctx.target, assignLoc, make_insn<Ident>(lhs));
     return rhsCont;
 }
 
-BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
+BasicBlock *CFGBuilder::walkHash(CFGContext cctx, const ast::Hash &h, BasicBlock *current, core::NameRef method) {
     LocalRef magic = cctx.newTemporary(core::Names::magic());
     InlinedVector<cfg::LocalRef, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
@@ -251,7 +251,7 @@ BasicBlock *CFGBuilder::walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets nilL
     return current;
 }
 
-BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
+BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, const ast::ExpressionPtr &expr,
                                         BasicBlock *current) {
     LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
     auto afterNext = walk(cctx.withTarget(exprSym), expr, current);
@@ -275,7 +275,7 @@ BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, a
     return cctx.inWhat.deadBlock();
 }
 
-BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *current, ast::Send &s) {
+BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *current, const ast::Send &s) {
     switch (s.fun.rawId()) {
         case core::Names::absurd().rawId(): {
             if (!sendRecvIsT(s)) {
@@ -375,8 +375,8 @@ BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b
 tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int paramIndex,
                                                                     const core::ParamInfo &paramInfo,
                                                                     LocalRef paramLocal, core::LocOffsets paramLoc,
-                                                                    ast::ExpressionPtr &def, BasicBlock *presentCont,
-                                                                    BasicBlock *defaultCont) {
+                                                                    const ast::ExpressionPtr &def,
+                                                                    BasicBlock *presentCont, BasicBlock *defaultCont) {
     auto defLoc = def.loc();
 
     auto *presentNext = cctx.inWhat.freshBlock(cctx.loops);
@@ -405,7 +405,7 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
     return {result, presentNext, defaultNext};
 }
 
-BasicBlock *CFGBuilder::buildExceptionHandler(CFGContext cctx, ast::ExpressionPtr &ex, BasicBlock *caseBody,
+BasicBlock *CFGBuilder::buildExceptionHandler(CFGContext cctx, const ast::ExpressionPtr &ex, BasicBlock *caseBody,
                                               cfg::LocalRef exceptionValue, BasicBlock *rescueHandlersBlock) {
     auto loc = ex.loc();
     auto exceptionClass = cctx.newTemporary(core::Names::exceptionClassTemp());
@@ -431,7 +431,7 @@ BasicBlock *CFGBuilder::buildExceptionHandler(CFGContext cctx, ast::ExpressionPt
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlock *current) {
+BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, BasicBlock *current) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
@@ -443,7 +443,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
         BasicBlock *ret = nullptr;
         typecase(
             what,
-            [&](ast::While &a) {
+            [&](const ast::While &a) {
                 auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                 // breakNotCalledBlock is only entered if break is not called in
                 // the loop body
@@ -488,7 +488,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                  *
                  */
             },
-            [&](ast::Return &a) {
+            [&](const ast::Return &a) {
                 if (cctx.isInsideLambda) {
                     ret = walkBlockReturn(cctx, a.loc, a.expr, current);
                     return;
@@ -500,7 +500,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 jumpToDead(cont, cctx.inWhat, a.loc);
                 ret = cctx.inWhat.deadBlock();
             },
-            [&](ast::If &a) {
+            [&](const ast::If &a) {
                 LocalRef ifSym = cctx.newTemporary(core::Names::ifTemp());
                 ENFORCE(ifSym.exists(), "ifSym does not exist");
                 auto cont = walk(cctx.withTarget(ifSym), a.cond, current);
@@ -541,7 +541,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](const ast::UnresolvedConstantLit &a) {
                 Exception::raise("Should have been eliminated by namer/resolver");
             },
-            [&](ast::ConstantLit &a) {
+            [&](const ast::ConstantLit &a) {
                 auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
                 auto loc = a.loc();
 
@@ -578,7 +578,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 current->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(LocalRef::selfVariable()));
                 ret = current;
             },
-            [&](ast::Assign &a) {
+            [&](const ast::Assign &a) {
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
                     auto lhs = global2Local(cctx, lhsIdent->symbol());
                     ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
@@ -669,14 +669,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());
                 }
             },
-            [&](ast::InsSeq &a) {
+            [&](const ast::InsSeq &a) {
                 for (auto &exp : a.stats) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp, current);
                 }
                 ret = walk(cctx, a.expr, current);
             },
-            [&](ast::Send &s) {
+            [&](const ast::Send &s) {
                 if (auto special = handleSpecialMethods(cctx, current, s)) {
                     ret = special;
                     return;
@@ -864,9 +864,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
             [&](const ast::Block &a) { Exception::raise("should never encounter a bare Block"); },
 
-            [&](ast::Next &a) { ret = walkBlockReturn(cctx, a.loc, a.expr, current); },
+            [&](const ast::Next &a) { ret = walkBlockReturn(cctx, a.loc, a.expr, current); },
 
-            [&](ast::Break &a) {
+            [&](const ast::Break &a) {
                 LocalRef exprSym = cctx.newTemporary(core::Names::returnTemp());
                 auto afterBreak = walk(cctx.withTarget(exprSym), a.expr, current);
 
@@ -942,7 +942,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = cctx.inWhat.deadBlock();
             },
 
-            [&](ast::Rescue &a) {
+            [&](const ast::Rescue &a) {
                 auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a.loc);
                 cctx.rescueScope = rescueHeaderBlock;
@@ -1043,9 +1043,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a.loc);
             },
 
-            [&](ast::Hash &h) { ret = walkHash(cctx, h, current, core::Names::buildHash()); },
+            [&](const ast::Hash &h) { ret = walkHash(cctx, h, current, core::Names::buildHash()); },
 
-            [&](ast::Array &a) {
+            [&](const ast::Array &a) {
                 LocalRef magic = cctx.newTemporary(core::Names::magic());
                 InlinedVector<LocalRef, 2> vars;
                 InlinedVector<core::LocOffsets, 2> locs;
@@ -1064,7 +1064,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
-            [&](ast::Cast &c) {
+            [&](const ast::Cast &c) {
                 if (!ast::isa_tree<ast::EmptyTree>(c.typeExpr)) {
                     // This is kind of gross, but it is the only way to ensure that the bits in the
                     // type expression make it into the CFG for LSP to hit on their locations.
@@ -1113,7 +1113,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
-            [&](ast::RuntimeMethodDefinition &rmd) {
+            [&](const ast::RuntimeMethodDefinition &rmd) {
                 current->exprs.emplace_back(
                     cctx.target, rmd.loc.copyWithZeroLength(),
                     make_insn<Literal>(core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), rmd.name)));

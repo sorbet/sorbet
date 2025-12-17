@@ -7,10 +7,10 @@
 namespace sorbet::cfg {
 class CFGBuilder final {
 public:
-    static std::unique_ptr<CFG> buildFor(core::Context ctx, ast::MethodDef &md);
+    static std::unique_ptr<CFG> buildFor(core::Context ctx, const ast::MethodDef &md);
 
 private:
-    static BasicBlock *walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlock *current);
+    static BasicBlock *walk(CFGContext cctx, const ast::ExpressionPtr &what, BasicBlock *current);
     static void fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
@@ -26,18 +26,19 @@ private:
     static void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc);
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, InstructionPtr inst);
-    static BasicBlock *walkAssign(CFGContext cctx, ast::ExpressionPtr &rhs, core::LocOffsets assignLoc, LocalRef lhs,
-                                  BasicBlock *current);
-    static BasicBlock *walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method);
+    static BasicBlock *walkAssign(CFGContext cctx, const ast::ExpressionPtr &rhs, core::LocOffsets assignLoc,
+                                  LocalRef lhs, BasicBlock *current);
+    static BasicBlock *walkHash(CFGContext cctx, const ast::Hash &h, BasicBlock *current, core::NameRef method);
     static BasicBlock *walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets loc, BasicBlock *current);
-    static BasicBlock *walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
+    static BasicBlock *walkBlockReturn(CFGContext cctx, core::LocOffsets loc, const ast::ExpressionPtr &expr,
                                        BasicBlock *current);
-    static BasicBlock *handleSpecialMethods(CFGContext cctx, BasicBlock *current, ast::Send &s);
+    static BasicBlock *handleSpecialMethods(CFGContext cctx, BasicBlock *current, const ast::Send &s);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
     walkDefault(CFGContext cctx, int paramIndex, const core::ParamInfo &paramInfo, LocalRef paramLocal,
-                core::LocOffsets paramLoc, ast::ExpressionPtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
+                core::LocOffsets paramLoc, const ast::ExpressionPtr &def, BasicBlock *presentCont,
+                BasicBlock *defaultCont);
     static BasicBlock *joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b);
-    static BasicBlock *buildExceptionHandler(CFGContext cctx, ast::ExpressionPtr &ex, BasicBlock *caseBody,
+    static BasicBlock *buildExceptionHandler(CFGContext cctx, const ast::ExpressionPtr &ex, BasicBlock *caseBody,
                                              cfg::LocalRef exceptionValue, BasicBlock *rescueHandlersBlock);
 };
 
@@ -69,7 +70,7 @@ public:
     LocalRef newTemporary(core::NameRef name);
 
 private:
-    friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md);
+    friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md);
     CFGContext(core::Context ctx, CFG &inWhat, LocalRef target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)
