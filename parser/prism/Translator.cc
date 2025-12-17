@@ -2037,6 +2037,28 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         case PM_FOR_NODE: { // `for x in a; ...; end`
             auto forNode = down_cast<pm_for_node>(node);
 
+            auto isValidTarget = [](pm_node_t *node) {
+                switch (PM_NODE_TYPE(node)) {
+                    case PM_LOCAL_VARIABLE_TARGET_NODE:
+                    case PM_INSTANCE_VARIABLE_TARGET_NODE:
+                    case PM_CLASS_VARIABLE_TARGET_NODE:
+                    case PM_GLOBAL_VARIABLE_TARGET_NODE:
+                    case PM_CONSTANT_TARGET_NODE:
+                    case PM_CONSTANT_PATH_TARGET_NODE:
+                    case PM_CALL_TARGET_NODE:
+                    case PM_INDEX_TARGET_NODE:
+                    case PM_MULTI_TARGET_NODE:
+                        return true;
+                    default:
+                        return false;
+                }
+            };
+
+            // Index might be invalid in error recovery cases, match original parser behavior.
+            if (!isValidTarget(forNode->index)) {
+                return MK::Nil(location.copyWithZeroLength());
+            }
+
             auto *mlhs = PM_NODE_TYPE_P(forNode->index, PM_MULTI_TARGET_NODE)
                              ? down_cast<pm_multi_target_node>(forNode->index)
                              : nullptr;
