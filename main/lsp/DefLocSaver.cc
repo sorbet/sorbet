@@ -87,11 +87,7 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
     if (ctx.owner.isMethod()) {
         return ctx.owner.asMethodRef();
     } else if (ctx.owner.isClassOrModule()) {
-        if (ctx.owner == core::Symbols::root()) {
-            return ctx.state.lookupStaticInitForFile(ctx.file);
-        } else {
-            return ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
-        }
+        return ctx.owner.asClassOrModuleRef().lookupStaticInit(ctx);
     } else {
         ENFORCE(false, "Unexpected owner in context: {}", ctx.owner.show(ctx));
         return core::MethodRef{};

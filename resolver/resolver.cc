@@ -3804,11 +3804,7 @@ public:
     void postTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 original.toStringWithTabs(ctx));
-        if (original.symbol == core::Symbols::root()) {
-            ENFORCE(ctx.state.lookupStaticInitForFile(ctx.file).exists());
-        } else {
-            ENFORCE(ctx.state.lookupStaticInitForClass(original.symbol).exists());
-        }
+        ENFORCE(original.symbol.lookupStaticInit(ctx).exists());
     }
     void postTransformMethodDef(core::Context ctx, const ast::MethodDef &original) {
         ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
