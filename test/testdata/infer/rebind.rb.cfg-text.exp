@@ -12,20 +12,6 @@ bb1[firstDead=-1]():
 
 }
 
-method ::C#only_on_C {
-
-bb0[firstDead=2]():
-    <self>: C = cast(<self>: NilClass, C);
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:C>#<static-init> {
 
 bb0[firstDead=3]():
@@ -41,10 +27,10 @@ bb1[firstDead=-1]():
 
 }
 
-method ::B#only_on_B {
+method ::C#only_on_C {
 
 bb0[firstDead=2]():
-    <self>: B = cast(<self>: NilClass, B);
+    <self>: C = cast(<self>: NilClass, C);
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -105,10 +91,10 @@ bb5[firstDead=10](<self>: T.class_of(B), <block-pre-call-temp>$5: Sorbet::Privat
 
 }
 
-method ::<Class:A>#mySig {
+method ::B#only_on_B {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <self>: B = cast(<self>: NilClass, B);
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -166,6 +152,38 @@ bb5[firstDead=10](<self>: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Privat
     <blockReturnTemp>$7: T::Private::Methods::DeclBuilder = <statTemp>$8: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$18: T.noreturn = blockreturn<sig> <blockReturnTemp>$7: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
+
+}
+
+method ::<Class:A>#mySig {
+
+bb0[firstDead=2]():
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:Use>#<static-init> {
+
+bb0[firstDead=6]():
+    <self>: T.class_of(Use) = cast(<self>: NilClass, T.class_of(Use));
+    <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$8: T.class_of(T) = alias <C T>
+    <statTemp>$3: T.class_of(Use) = <self>: T.class_of(Use).extend(<cfgAlias>$6: T.class_of(T::Sig))
+    <returnMethodTemp>$2: Symbol(:jumpBetweenClasses) = :jumpBetweenClasses
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:jumpBetweenClasses)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 
@@ -285,24 +303,6 @@ bb9[firstDead=4](<self>: B, <block-pre-call-temp>$5: Sorbet::Private::Static::Vo
     <blockReturnTemp>$15: T.untyped = <self>: C.only_on_C()
     <blockReturnTemp>$19: T.noreturn = blockreturn<only_on_B> <blockReturnTemp>$15: T.untyped
     <unconditional> -> bb6
-
-}
-
-method ::<Class:Use>#<static-init> {
-
-bb0[firstDead=6]():
-    <self>: T.class_of(Use) = cast(<self>: NilClass, T.class_of(Use));
-    <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.class_of(Use) = <self>: T.class_of(Use).extend(<cfgAlias>$6: T.class_of(T::Sig))
-    <returnMethodTemp>$2: Symbol(:jumpBetweenClasses) = :jumpBetweenClasses
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:jumpBetweenClasses)
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 
