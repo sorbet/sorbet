@@ -6,8 +6,8 @@ test/cli/expected-got/expected-got.rb:7: Expected `Integer` but found `NilClass`
     11 |def foo
         ^^^^^^^
   Got `NilClass` originating from:
-    test/cli/expected-got/expected-got.rb:11: Possibly uninitialized (`NilClass`) in:
-    11 |def foo
+    test/cli/expected-got/expected-got.rb:5: Possibly uninitialized (`NilClass`) in:
+     5 |def foo
         ^^^^^^^
 
 test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
