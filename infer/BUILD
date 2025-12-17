@@ -40,7 +40,6 @@ cc_test(
         "infer",
         "//ast/desugar",
         "//cfg",
-        "//class_flatten",
         "//local_vars",
         "//namer",
         "//resolver",

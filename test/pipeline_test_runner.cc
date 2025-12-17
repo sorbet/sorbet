@@ -13,7 +13,6 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
@@ -572,7 +571,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto file = resolvedTree.file;
 
         core::Context ctx(*gs, core::Symbols::root(), file);
-        resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
 
         definition_validator::runOne(ctx, resolvedTree);
         handler.drainErrors(*gs);

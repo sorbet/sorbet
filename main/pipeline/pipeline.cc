@@ -17,7 +17,6 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/sort/sort.h"
@@ -1489,8 +1488,6 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         return;
     }
-
-    resolved = class_flatten::runOne(ctx, move(resolved));
 
     definition_validator::runOne(ctx, resolved);
 
