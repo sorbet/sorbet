@@ -108,7 +108,6 @@ public:
 
     GlobalState &gs_;
     core::FileRef file_;
-    uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
     ruby_parser::base_driver *driver_;
 
@@ -622,13 +621,13 @@ public:
         core::LocOffsets loc;
         core::NameRef nm;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named block parameter, like `def foo(&block)`
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
-        } else {
+        } else { // An anonymous block parameter, like `def foo(&)`
             loc = tokLoc(amper);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
+            nm = core::Names::blkArg();
         }
 
         return make_unique<BlockParam>(loc, nm);
@@ -1186,13 +1185,13 @@ public:
         core::LocOffsets loc;
         core::NameRef nm;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named keyword rest parameter, like `def foo(**kwargs)`
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
-        } else {
+        } else { // An anonymous keyword rest parameter, like `def foo(**)`
             loc = tokLoc(dstar);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
+            nm = core::Names::kwargs();
         }
 
         return make_unique<Kwrestarg>(loc, nm);
@@ -1552,14 +1551,13 @@ public:
         core::NameRef nm;
         core::LocOffsets nameLoc = loc;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named rest parameter, like `def m(*rest)`
             nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), nameLoc);
-        } else {
-            // case like 'def m(*); end'
-            nm = core::Names::star();
+        } else { // Anonymous rest parameter, like `def m(*)`
+            nm = core::Names::restargs();
         }
 
         return make_unique<RestParam>(loc, nm, nameLoc);

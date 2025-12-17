@@ -1,7 +1,7 @@
 s(:def, :foo,
   s(:params,
     s(:param, :argument),
-    s(:kwrestarg, :**)),
+    s(:kwrestarg, :<kwargs>)),
   s(:send, nil, :bar,
     s(:lvar, :argument),
     s(:hash,
