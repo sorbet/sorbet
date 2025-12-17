@@ -1,26 +1,12 @@
-InsSeq{
-  stats = [
-    ClassDef{
-      kind = class
-      name = EmptyTree
-      symbol = <C <U <root>>>
-      ancestors = [ConstantLit{
-          symbol = (class ::<todo sym>)
-          orig = nullptr
-        }]
-      rhs = [
-        EmptyTree
-
-        MethodDef{
-          flags = {self}
-          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-          params = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = EmptyTree
-        }
-      ]
-    }
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
     ClassDef{
       kind = class
       name = ConstantLit{
@@ -167,16 +153,8 @@ InsSeq{
           }
         }
 
-        MethodDef{
-          flags = {self}
-          name = <U <static-init>><<U <static-init>>>
-          params = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = <runtime method definition of take_arguments>
-        }
+        <runtime method definition of take_arguments>
       ]
     }
-  ],
-  expr = EmptyTree
+  ]
 }

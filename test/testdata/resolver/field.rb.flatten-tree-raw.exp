@@ -26,13 +26,6 @@ ClassDef{
       }
     }
 
-    MethodDef{
-      flags = {self}
-      name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-      params = [Local{
-          localVariable = <U <blk>>
-        }]
-      rhs = <runtime method definition of foo>
-    }
+    <runtime method definition of foo>
   ]
 }

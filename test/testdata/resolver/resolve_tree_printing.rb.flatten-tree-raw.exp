@@ -1,26 +1,12 @@
-InsSeq{
-  stats = [
-    ClassDef{
-      kind = class
-      name = EmptyTree
-      symbol = <C <U <root>>>
-      ancestors = [ConstantLit{
-          symbol = (class ::<todo sym>)
-          orig = nullptr
-        }]
-      rhs = [
-        EmptyTree
-
-        MethodDef{
-          flags = {self}
-          name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-          params = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = EmptyTree
-        }
-      ]
-    }
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
     ClassDef{
       kind = class
       name = ConstantLit{
@@ -183,27 +169,22 @@ InsSeq{
 
         }
 
-        MethodDef{
-          flags = {self}
-          name = <U <static-init>><<U <static-init>>>
-          params = [Local{
-              localVariable = <U <blk>>
-            }]
-          rhs = InsSeq{
-            stats = [
-              <runtime method definition of has_while>
-              <runtime method definition of has_constant_with_resolution_scope>
-              <runtime method definition of has_global_field>
-              <runtime method definition of has_class_field>
-              <runtime method definition of has_next>
-              <runtime method definition of has_break>
-              <runtime method definition of has_return>
-            ],
-            expr = <runtime method definition of has_cast>
-          }
-        }
+        <runtime method definition of has_while>
+
+        <runtime method definition of has_constant_with_resolution_scope>
+
+        <runtime method definition of has_global_field>
+
+        <runtime method definition of has_class_field>
+
+        <runtime method definition of has_next>
+
+        <runtime method definition of has_break>
+
+        <runtime method definition of has_return>
+
+        <runtime method definition of has_cast>
       ]
     }
-  ],
-  expr = EmptyTree
+  ]
 }
