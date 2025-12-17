@@ -40,13 +40,13 @@ Begin {
       params = Params {
         params = [
           RestParam {
-            name = <U *>
+            name = <U <restargs>>
           }
           Kwrestarg {
-            name = <P <U **> $2>
+            name = <P <U <kwargs>> $2>
           }
           BlockParam {
-            name = <P <U &> $3>
+            name = <P <U <blk>> $3>
           }
         ]
       }

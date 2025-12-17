@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  def foo<<todo method>>(**, &<blk>)
+  def foo<<todo method>>(*<restargs>, &<blk>)
     begin
       res = ::<Magic>.<call-with-splat>(<self>, :pos_args, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       <emptyTree>::<C T>.reveal_type(res)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def bar<<todo method>>(***$2:, &<blk>)
+  def bar<<todo method>>(*<kwargs>$2:, &<blk>)
     begin
       <self>.req_kwargs(begin
           <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
@@ -62,21 +62,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def baz<<todo method>>(**, ***$3:, &&$4)
+  def baz<<todo method>>(*<restargs>, *<kwargs>$3:, &<blk>$4)
     begin
       ::<Magic>.<call-with-splat-and-block-pass>(<self>, :all_the_args, [].concat(::T.unsafe(<fwd-args>.to_a())), [begin
             <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
             <hashTemp>$2
-          end], &)
+          end], <blk>)
       ::<Magic>.<call-with-splat-and-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :all_the_args, [].concat(::T.unsafe(<fwd-args>.to_a())), [begin
             <hashTemp>$3 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
             <hashTemp>$3
-          end], &)
-      ::<Magic>.<call-with-block-pass>(<self>, :all_the_args, &, 1, begin
+          end], <blk>)
+      ::<Magic>.<call-with-block-pass>(<self>, :all_the_args, <blk>, 1, begin
           <hashTemp>$4 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
           <hashTemp>$4
         end)
-      ::<Magic>.<call-with-block-pass>(<self>, :all_the_args, &, 1, :b, 3)
+      ::<Magic>.<call-with-block-pass>(<self>, :all_the_args, <blk>, 1, :b, 3)
     end
   end
 

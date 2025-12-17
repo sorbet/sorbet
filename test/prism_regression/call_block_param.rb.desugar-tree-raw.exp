@@ -439,7 +439,7 @@ ClassDef{
         Literal{ value = :foo }
         UnresolvedIdent{
           kind = Local
-          name = <U &>
+          name = <U <blk>>
         }
       ]
     }

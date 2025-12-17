@@ -1,6 +1,6 @@
 s(:def, :foo,
   s(:params,
-    s(:kwrestarg, :**)),
+    s(:kwrestarg, :<kwargs>)),
   s(:send, nil, :bar,
     s(:hash,
       s(:forwarded_kwrestarg))))
