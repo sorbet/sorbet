@@ -28,9 +28,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
         CFG::UnfreezeCFGLocalVariables unfreezeVars(*res);
         retSym = cctx.newTemporary(core::Names::returnMethodTemp());
 
-        auto selfClaz = md.symbol.data(ctx)->rebind;
+        auto selfClaz = res->symbol.data(ctx)->rebind;
         if (!selfClaz.exists()) {
-            selfClaz = md.symbol.data(ctx)->owner;
+            selfClaz = res->symbol.data(ctx)->owner;
         }
         synthesizeExpr(entry, LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(),
                        make_insn<Cast>(LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(),
@@ -39,8 +39,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
 
-        auto &paramInfos = md.symbol.data(ctx)->parameters;
-        bool isAbstract = md.symbol.data(ctx)->flags.isAbstract;
+        auto &paramInfos = res->symbol.data(ctx)->parameters;
+        bool isAbstract = res->symbol.data(ctx)->flags.isAbstract;
         bool seenKeyword = false;
         int i = -1;
         for (auto &paramExpr : md.params) {
@@ -75,7 +75,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
                 }
             }
 
-            synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(md.symbol, i));
+            synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(res->symbol, i));
         }
 
         // Join the presentCont and defaultCont paths together
