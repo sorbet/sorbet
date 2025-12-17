@@ -129,6 +129,10 @@ public:
     // Thus, this usually spans the full body of the method def (recall that sometime methods are
     // created synthetically, not from method defs written in the source).
     core::LocOffsets loc;
+
+    // Stores MethodDef::declLoc
+    core::LocOffsets declLoc;
+
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
 
     // Special loc that corresponds to implicit method return.
