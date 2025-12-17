@@ -244,7 +244,7 @@ bb18[firstDead=-1](<self>: T.class_of(Funcs), <block-pre-call-temp>$57: Sorbet::
 
 # backedges
 # - bb18
-bb19[firstDead=12](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Funcs)):
+bb19[firstDead=13](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Funcs)):
     <statTemp>$55: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$57, sig>
     <self>: T.class_of(Funcs) = <selfRestore>$58
     <cfgAlias>$71: T.class_of(T::Sig) = alias <C Sig>
@@ -256,7 +256,8 @@ bb19[firstDead=12](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <sel
     <statTemp>$79: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$81: Symbol(:g))
     <statTemp>$85: Symbol(:h) = :h
     <statTemp>$83: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$85: Symbol(:h))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:h) = :h
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:h)
     <unconditional> -> bb1
 
 # backedges
@@ -307,11 +308,12 @@ bb1[firstDead=-1]():
 
 method ::<Class:C>#<static-init> {
 
-bb0[firstDead=4]():
+bb0[firstDead=5]():
     <self>: T.class_of(C) = cast(<self>: NilClass, T.class_of(C));
     <cfgAlias>$6: T.class_of(Funcs) = alias <C Funcs>
     <statTemp>$3: T.class_of(C) = <self>: T.class_of(C).include(<cfgAlias>$6: T.class_of(Funcs))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:test_calls) = :test_calls
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:test_calls)
     <unconditional> -> bb1
 
 # backedges

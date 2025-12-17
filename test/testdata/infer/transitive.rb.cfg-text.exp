@@ -48,13 +48,14 @@ bb2[firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Privat
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(A)):
+bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(A)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(A) = <selfRestore>$6
     <cfgAlias>$15: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$17: T.class_of(T) = alias <C T>
     <statTemp>$12: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$15: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:foo) = :foo
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1
 
 # backedges
@@ -106,13 +107,14 @@ bb2[firstDead=-1](<self>: T.class_of(Bar), <block-pre-call-temp>$5: Sorbet::Priv
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Bar)):
+bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Bar)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(Bar) = <selfRestore>$6
     <cfgAlias>$19: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$21: T.class_of(T) = alias <C T>
     <statTemp>$16: T.class_of(Bar) = <self>: T.class_of(Bar).extend(<cfgAlias>$19: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:baz) = :baz
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:baz)
     <unconditional> -> bb1
 
 # backedges

@@ -85,11 +85,12 @@ bb6[firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$23: Sorbet::
 
 # backedges
 # - bb6
-bb7[firstDead=4](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(MyEnum)):
+bb7[firstDead=5](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(MyEnum)):
     <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, enums>
     <self>: T.class_of(MyEnum) = <selfRestore>$24
     <statTemp>$52: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).public()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:serialize) = :serialize
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:serialize)
     <unconditional> -> bb1
 
 # backedges
@@ -298,11 +299,12 @@ bb6[firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$23: Sor
 
 # backedges
 # - bb6
-bb7[firstDead=4](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(EnumsDoEnum)):
+bb7[firstDead=5](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(EnumsDoEnum)):
     <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, enums>
     <self>: T.class_of(EnumsDoEnum) = <selfRestore>$24
     <statTemp>$53: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).public()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:serialize) = :serialize
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:serialize)
     <unconditional> -> bb1
 
 # backedges
@@ -461,7 +463,7 @@ bb6[firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call-temp>$32: Sorbe
 
 # backedges
 # - bb6
-bb7[firstDead=16](<block-pre-call-temp>$32: Sorbet::Private::Static::Void, <selfRestore>$33: T.class_of(BadConsts), <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
+bb7[firstDead=17](<block-pre-call-temp>$32: Sorbet::Private::Static::Void, <selfRestore>$33: T.class_of(BadConsts), <C After>$47: BadConsts::After, <C StaticField3>$54: Integer, <C StaticField4>$56: Integer):
     <statTemp>$30: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$32, enums>
     <self>: T.class_of(BadConsts) = <selfRestore>$33
     <cfgAlias>$49: T.class_of(BadConsts::After) = alias <C After$1>
@@ -477,7 +479,8 @@ bb7[firstDead=16](<block-pre-call-temp>$32: Sorbet::Private::Static::Void, <self
     <castTemp>$59: Integer(1) = 1
     <C StaticField4>$56: Integer = cast(<castTemp>$59: Integer(1), Integer);
     <statTemp>$60: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).public()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:serialize) = :serialize
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:serialize)
     <unconditional> -> bb1
 
 # backedges

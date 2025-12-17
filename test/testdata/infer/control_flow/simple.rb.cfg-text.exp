@@ -618,13 +618,14 @@ bb34[firstDead=-1](<self>: T.class_of(ControlFlow), <block-pre-call-temp>$144: S
 
 # backedges
 # - bb34
-bb35[firstDead=6](<block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.class_of(ControlFlow)):
+bb35[firstDead=7](<block-pre-call-temp>$144: Sorbet::Private::Static::Void, <selfRestore>$145: T.class_of(ControlFlow)):
     <statTemp>$142: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$144, sig>
     <self>: T.class_of(ControlFlow) = <selfRestore>$145
     <cfgAlias>$163: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$165: T.class_of(T) = alias <C T>
     <statTemp>$160: T.class_of(ControlFlow) = <self>: T.class_of(ControlFlow).extend(<cfgAlias>$163: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:orZero5) = :orZero5
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:orZero5)
     <unconditional> -> bb1
 
 # backedges

@@ -91,7 +91,7 @@ bb5[firstDead=-1](<self>: T.class_of(<root>), s: A):
 # backedges
 # - bb5
 bb7[firstDead=2](<self>: T.class_of(<root>), s: A):
-    <statTemp>$71: NilClass = <self>: T.class_of(<root>).puts(s: A)
+    <returnMethodTemp>$2: NilClass = <self>: T.class_of(<root>).puts(s: A)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -150,13 +150,14 @@ bb2[firstDead=-1](<self>: T.class_of(Parent), <block-pre-call-temp>$5: Sorbet::P
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Parent)):
+bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Parent)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(Parent) = <selfRestore>$6
     <cfgAlias>$16: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$18: T.class_of(T) = alias <C T>
     <statTemp>$13: T.class_of(Parent) = <self>: T.class_of(Parent).extend(<cfgAlias>$16: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:returns_self) = :returns_self
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:returns_self)
     <unconditional> -> bb1
 
 # backedges
@@ -228,14 +229,15 @@ bb2[firstDead=-1](<self>: T.class_of(Generic), <block-pre-call-temp>$5: Sorbet::
 
 # backedges
 # - bb2
-bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Generic)):
+bb3[firstDead=8](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Generic)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(Generic) = <selfRestore>$6
     <cfgAlias>$19: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$21: T.class_of(T) = alias <C T>
     <statTemp>$16: T.class_of(Generic) = <self>: T.class_of(Generic).extend(<cfgAlias>$19: T.class_of(T::Generic))
     <C TM>$23: T::Types::TypeMember = <self>: T.class_of(Generic).type_member()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:bad) = :bad
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:bad)
     <unconditional> -> bb1
 
 # backedges
@@ -304,13 +306,14 @@ bb2[firstDead=-1](<self>: T.class_of(Array), <block-pre-call-temp>$5: Sorbet::Pr
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Array)):
+bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(Array)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(Array) = <selfRestore>$6
     <cfgAlias>$16: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$18: T.class_of(T) = alias <C T>
     <statTemp>$13: T.class_of(Array) = <self>: T.class_of(Array).extend(<cfgAlias>$16: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:returns_self) = :returns_self
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:returns_self)
     <unconditional> -> bb1
 
 # backedges
@@ -615,7 +618,7 @@ bb22[firstDead=-1](<self>: T.class_of(B), <block-pre-call-temp>$74: Sorbet::Priv
 
 # backedges
 # - bb22
-bb23[firstDead=10](<block-pre-call-temp>$74: Sorbet::Private::Static::Void, <selfRestore>$75: T.class_of(B)):
+bb23[firstDead=11](<block-pre-call-temp>$74: Sorbet::Private::Static::Void, <selfRestore>$75: T.class_of(B)):
     <statTemp>$72: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$74, sig>
     <self>: T.class_of(B) = <selfRestore>$75
     <cfgAlias>$87: T.class_of(T::Sig) = alias <C Sig>
@@ -625,7 +628,8 @@ bb23[firstDead=10](<block-pre-call-temp>$74: Sorbet::Private::Static::Void, <sel
     <statTemp>$92: T.class_of(B) = <self>: T.class_of(B).private(<statTemp>$94: Symbol(:takes_self_private))
     <statTemp>$98: Symbol(:takes_self_or_integer) = :takes_self_or_integer
     <statTemp>$96: T.class_of(B) = <self>: T.class_of(B).private(<statTemp>$98: Symbol(:takes_self_or_integer))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:==) = :==
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:==)
     <unconditional> -> bb1
 
 # backedges

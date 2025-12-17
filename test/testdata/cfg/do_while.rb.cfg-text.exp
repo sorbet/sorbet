@@ -101,7 +101,7 @@ bb18[firstDead=-1](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
 # backedges
 # - bb18
 bb20[firstDead=2](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0)):
-    <statTemp>$37: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))
+    <returnMethodTemp>$2: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

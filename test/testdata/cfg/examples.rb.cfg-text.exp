@@ -336,9 +336,10 @@ bb4[firstDead=1](<returnMethodTemp>$2: T.untyped):
 
 method ::<Class:Examples>#<static-init> {
 
-bb0[firstDead=2]():
+bb0[firstDead=3]():
     <self>: T.class_of(Examples) = cast(<self>: NilClass, T.class_of(Examples));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:take_arguments) = :take_arguments
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:take_arguments)
     <unconditional> -> bb1
 
 # backedges
