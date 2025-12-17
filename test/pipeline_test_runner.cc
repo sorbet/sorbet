@@ -70,8 +70,7 @@ constexpr string_view packageFileName = "__package.rb"sv;
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &m) {
         if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
             return;
         }
@@ -591,7 +590,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
             core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            ast::ShallowWalk::apply(ctx, collector, resolvedTree.tree);
+            ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
             }
