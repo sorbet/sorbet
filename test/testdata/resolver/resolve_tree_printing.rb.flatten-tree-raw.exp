@@ -198,9 +198,8 @@ InsSeq{
               <runtime method definition of has_next>
               <runtime method definition of has_break>
               <runtime method definition of has_return>
-              <runtime method definition of has_cast>
             ],
-            expr = EmptyTree
+            expr = <runtime method definition of has_cast>
           }
         }
       ]
