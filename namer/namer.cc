@@ -18,6 +18,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/namer.h"
+#include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
 
 using namespace std;
@@ -1806,6 +1807,66 @@ public:
             }
         }
     }
+
+    void populateFoundDefHashes(core::Context ctx, const State &state, core::FoundDefHashesResult &foundHashesOut) {
+        ENFORCE(foundHashesOut.foundClassesHash == 0);
+        auto &foundClassesHash = foundHashesOut.foundClassesHash;
+        foundClassesHash = foundDefs.klasses().size();
+        for (uint32_t idx = 0; idx < foundDefs.klasses().size(); idx++) {
+            auto sym = state.definedClasses[idx];
+            foundClassesHash = core::mix(foundClassesHash, sym.id());
+        }
+
+        ENFORCE(foundHashesOut.staticFieldHashes.empty());
+        foundHashesOut.staticFieldHashes.reserve(foundDefs.staticFields().size());
+        for (const auto &staticField : foundDefs.staticFields()) {
+            auto owner = staticField.owner;
+            ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
+                        owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
+                    "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
+            auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+            auto fullNameHash = core::FullNameHash(ctx, staticField.name);
+            foundHashesOut.staticFieldHashes.emplace_back(owner.idx(), ownerIsSymbol, fullNameHash);
+        }
+
+        ENFORCE(foundHashesOut.typeMemberHashes.empty());
+        foundHashesOut.typeMemberHashes.reserve(foundDefs.typeMembers().size());
+        for (const auto &typeMember : foundDefs.typeMembers()) {
+            auto owner = typeMember.owner;
+            ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
+                        owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
+                    "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
+            auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+            auto fullNameHash = core::FullNameHash(ctx, typeMember.name);
+            foundHashesOut.typeMemberHashes.emplace_back(owner.idx(), ownerIsSymbol, typeMember.isTypeTemplate,
+                                                         fullNameHash);
+        }
+
+        ENFORCE(foundHashesOut.methodHashes.empty());
+        foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
+        for (const auto &method : foundDefs.methods()) {
+            auto owner = method.owner;
+            ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
+                    core::FoundDefinitionRef::kindToString(owner.kind()));
+            auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+            auto fullNameHash = core::FullNameHash(ctx, method.name);
+            foundHashesOut.methodHashes.emplace_back(owner.idx(), ownerIsSymbol, method.flags.isSelfMethod,
+                                                     fullNameHash, method.arityHash);
+        }
+
+        ENFORCE(foundHashesOut.fieldHashes.empty());
+        foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
+        for (const auto &field : foundDefs.fields()) {
+            auto owner = field.owner;
+            ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
+                    core::FoundDefinitionRef::kindToString(owner.kind()));
+            auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+            auto fullNameHash = core::FullNameHash(ctx, field.name);
+            foundHashesOut.fieldHashes.emplace_back(owner.idx(), ownerIsSymbol, field.onSingletonClass,
+                                                    field.kind == core::FoundField::Kind::InstanceVariable,
+                                                    field.fromWithinMethod, fullNameHash);
+        }
+    }
 };
 
 /**
@@ -2235,59 +2296,6 @@ AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::Par
     return allFoundDefinitions;
 }
 
-void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs,
-                            core::FoundDefHashes &foundHashesOut) {
-    ENFORCE(foundHashesOut.staticFieldHashes.empty());
-    foundHashesOut.staticFieldHashes.reserve(foundDefs.staticFields().size());
-    for (const auto &staticField : foundDefs.staticFields()) {
-        auto owner = staticField.owner;
-        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
-                    owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
-                "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
-        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
-        auto fullNameHash = core::FullNameHash(ctx, staticField.name);
-        foundHashesOut.staticFieldHashes.emplace_back(owner.idx(), ownerIsSymbol, fullNameHash);
-    }
-
-    ENFORCE(foundHashesOut.typeMemberHashes.empty());
-    foundHashesOut.typeMemberHashes.reserve(foundDefs.typeMembers().size());
-    for (const auto &typeMember : foundDefs.typeMembers()) {
-        auto owner = typeMember.owner;
-        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
-                    owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
-                "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
-        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
-        auto fullNameHash = core::FullNameHash(ctx, typeMember.name);
-        foundHashesOut.typeMemberHashes.emplace_back(owner.idx(), ownerIsSymbol, typeMember.isTypeTemplate,
-                                                     fullNameHash);
-    }
-
-    ENFORCE(foundHashesOut.methodHashes.empty());
-    foundHashesOut.methodHashes.reserve(foundDefs.methods().size());
-    for (const auto &method : foundDefs.methods()) {
-        auto owner = method.owner;
-        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
-                core::FoundDefinitionRef::kindToString(owner.kind()));
-        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
-        auto fullNameHash = core::FullNameHash(ctx, method.name);
-        foundHashesOut.methodHashes.emplace_back(owner.idx(), ownerIsSymbol, method.flags.isSelfMethod, fullNameHash,
-                                                 method.arityHash);
-    }
-
-    ENFORCE(foundHashesOut.fieldHashes.empty());
-    foundHashesOut.fieldHashes.reserve(foundDefs.fields().size());
-    for (const auto &field : foundDefs.fields()) {
-        auto owner = field.owner;
-        ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class, "kind={}",
-                core::FoundDefinitionRef::kindToString(owner.kind()));
-        auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
-        auto fullNameHash = core::FullNameHash(ctx, field.name);
-        foundHashesOut.fieldHashes.emplace_back(owner.idx(), ownerIsSymbol, field.onSingletonClass,
-                                                field.kind == core::FoundField::Kind::InstanceVariable,
-                                                field.fromWithinMethod, fullNameHash);
-    }
-}
-
 void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap &classBehaviorLocs) {
     vector<pair<core::ClassOrModuleRef, BehaviorLocs>> conflicts;
     for (auto &[ref, locs] : classBehaviorLocs) {
@@ -2321,7 +2329,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
+                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2346,10 +2354,10 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
                 symbolDefiner.deleteOldDefinitions(ctx, state, frefIt->second->foundHashes);
             }
         }
-        incrementalDefinitions[fref] = move(state);
         if (foundHashesOut != nullptr) {
-            populateFoundDefHashes(ctx, *fileFoundDefinitions, *foundHashesOut);
+            symbolDefiner.populateFoundDefHashes(ctx, state, *foundHashesOut);
         }
+        incrementalDefinitions[fref] = move(state);
     }
 
     findConflictingClassDefs(gs, classBehaviorLocs);
@@ -2385,7 +2393,7 @@ void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> tre
 [[nodiscard]] bool
 Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
+                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     auto foundDefs = findSymbols(gs, trees, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
@@ -2404,7 +2412,7 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
 }
 
 [[nodiscard]] bool Namer::run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
-                              core::FoundDefHashes *foundHashesOut) {
+                              core::FoundDefHashesResult *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
     vector<core::ClassOrModuleRef> updatedSymbols;
     return runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);

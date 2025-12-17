@@ -40,7 +40,7 @@ void processSource(core::GlobalState &cb, string str) {
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);
-    core::FoundDefHashes foundHashes; // compute this just for test coverage
+    core::FoundDefHashesResult foundHashes; // compute this just for test coverage
     auto cancelled = namer::Namer::run(cb, absl::Span<ast::ParsedFile>(trees), *workers, &foundHashes);
     ENFORCE(!cancelled);
     auto resolved = resolver::Resolver::run(cb, move(trees), *workers);

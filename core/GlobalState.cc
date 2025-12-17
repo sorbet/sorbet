@@ -2336,9 +2336,9 @@ unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState>
     return what;
 }
 
-unique_ptr<LocalSymbolTableHashes> GlobalState::hash() const {
+unique_ptr<LocalSymbolTableHashes> GlobalState::hash(uint32_t foundClassesHash) const {
     constexpr bool DEBUG_HASHING_TAIL = false;
-    uint32_t hierarchyHash = 0;
+    uint32_t hierarchyHash = foundClassesHash;
     uint32_t classModuleHash = 0;
     uint32_t typeMemberHash = 0;
     uint32_t fieldHash = 0;

@@ -73,14 +73,14 @@ void validatePackagedFiles(core::GlobalState &gs, absl::Span<ast::ParsedFile> wh
 // ----- namer + resolver -----------------------------------------------------
 
 [[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
-                        WorkerPool &workers, core::FoundDefHashes *foundHashes);
+                        WorkerPool &workers, core::FoundDefHashesResult *foundHashes);
 
 ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers);
 
 ast::ParsedFilesOrCancelled nameAndResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
-                                           core::FoundDefHashes *foundHashes);
+                                           core::FoundDefHashesResult *foundHashes);
 
 // If `foundMethodHashesForFiles` is non-nullopt, incrementalResolve invokes Namer in runIncremental mode.
 //
