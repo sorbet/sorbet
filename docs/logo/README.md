@@ -13,7 +13,7 @@ https://sorbet.org/docs/legal/trademark-policy
 
 2.  Choose a place to order from. The places we've ordered stickers from in the past:
 
-    - <https://stickermule.comm> (recommended)
+    - <https://stickermule.com> (recommended)
 
       Good quality, matte vinyl finish. Supports die cut.
 
