@@ -32,8 +32,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
         if (!selfClaz.exists()) {
             selfClaz = res->symbol.data(ctx)->owner;
         }
-        synthesizeExpr(entry, LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(),
-                       make_insn<Cast>(LocalRef::selfVariable(), md.declLoc.copyWithZeroLength(),
+        synthesizeExpr(entry, LocalRef::selfVariable(), res->declLoc.copyWithZeroLength(),
+                       make_insn<Cast>(LocalRef::selfVariable(), res->declLoc.copyWithZeroLength(),
                                        selfClaz.data(ctx)->selfType(ctx), core::Names::cast()));
 
         BasicBlock *presentCont = entry;
@@ -91,13 +91,13 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
 
     core::LocOffsets rvLoc;
     if (cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value)) {
-        auto beginAdjust = md.loc.length() - 3;
-        auto endLoc = ctx.locAt(md.loc).adjust(ctx, beginAdjust, 0);
+        auto beginAdjust = res->loc.length() - 3;
+        auto endLoc = ctx.locAt(res->loc).adjust(ctx, beginAdjust, 0);
         if (endLoc.source(ctx) == "end") {
             rvLoc = endLoc.offsets();
             res->implicitReturnLoc = rvLoc;
         } else {
-            rvLoc = md.loc;
+            rvLoc = res->loc;
         }
     } else {
         rvLoc = cont->exprs.back().loc;
@@ -106,7 +106,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
     jumpToDead(cont, *res.get(), rvLoc);
 
     vector<Binding> aliasesPrefix;
-    for (auto kv : aliases) {
+    for (auto kv : cctx.aliases) {
         core::SymbolRef global = kv.first;
         LocalRef local = kv.second;
         aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_insn<Alias>(global));
@@ -121,7 +121,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
             ENFORCE(global.isTypeMember());
         }
     }
-    for (auto kv : discoveredUndeclaredFields) {
+    for (auto kv : cctx.discoveredUndeclaredFields) {
         aliasesPrefix.emplace_back(kv.second, core::LocOffsets::none(),
                                    make_insn<Alias>(core::Symbols::Magic_undeclaredFieldStub(), kv.first));
         res->minLoops[kv.second.id()] = CFG::MIN_LOOP_FIELD;
