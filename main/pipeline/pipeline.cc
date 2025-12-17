@@ -1422,8 +1422,7 @@ class CFGCollectorAndTyper {
 public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
-    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &m) {
         if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
             return;
         }
