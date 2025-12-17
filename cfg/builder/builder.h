@@ -7,7 +7,7 @@
 namespace sorbet::cfg {
 class CFGBuilder final {
 public:
-    static std::unique_ptr<CFG> buildFor(core::Context ctx, ast::MethodDef &md);
+    static std::unique_ptr<CFG> buildFor(core::Context ctx, const ast::MethodDef &md);
 
 private:
     static BasicBlock *walk(CFGContext cctx, const ast::ExpressionPtr &what, BasicBlock *current);
@@ -70,7 +70,7 @@ public:
     LocalRef newTemporary(core::NameRef name);
 
 private:
-    friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md);
+    friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md);
     CFGContext(core::Context ctx, CFG &inWhat, LocalRef target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)

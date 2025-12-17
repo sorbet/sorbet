@@ -1422,7 +1422,7 @@ class CFGCollectorAndTyper {
 public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
             return;
@@ -1504,7 +1504,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         CFGCollectorAndTyper collector(opts);
         {
-            ast::ShallowWalk::apply(ctx, collector, resolved.tree);
+            ast::ConstShallowWalk::apply(ctx, collector, resolved.tree);
             if (f.data(ctx).isRBI()) {
                 return;
             }
