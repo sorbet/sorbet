@@ -211,7 +211,7 @@ test/cli/rspec/rspec2.rb:116: Method `subject` does not exist on `A::<describe '
      116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
                           ^^^^^^^^^^^
   Got `A::<describe 'its support'>::<describe 'bar'>` originating from:
-    test/cli/rspec/rspec2.rb:116:
+    test/cli/rspec/rspec2.rb:116: Possibly uninitialized (`NilClass`) in:
      116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
               ^
 
@@ -227,7 +227,7 @@ test/cli/rspec/rspec2.rb:124: Method `subject` does not exist on `A::<describe '
      124 |      is_expected.to eq(X) # error: Method `subject` does not exist
                 ^^^^^^^^^^^
   Got `A::<describe 'its support'>::<describe 'size'>` originating from:
-    test/cli/rspec/rspec2.rb:122:
+    test/cli/rspec/rspec2.rb:122: Possibly uninitialized (`NilClass`) in:
      122 |    its(:size) do
               ^
 
@@ -875,7 +875,7 @@ test/cli/rspec/rspec2.rb:116: Method `subject` does not exist on `A::<describe '
      116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
                           ^^^^^^^^^^^
   Got `A::<describe 'its support'>::<describe 'bar'>` originating from:
-    test/cli/rspec/rspec2.rb:116:
+    test/cli/rspec/rspec2.rb:116: Possibly uninitialized (`NilClass`) in:
      116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
               ^
 
@@ -891,7 +891,7 @@ test/cli/rspec/rspec2.rb:124: Method `subject` does not exist on `A::<describe '
      124 |      is_expected.to eq(X) # error: Method `subject` does not exist
                 ^^^^^^^^^^^
   Got `A::<describe 'its support'>::<describe 'size'>` originating from:
-    test/cli/rspec/rspec2.rb:122:
+    test/cli/rspec/rspec2.rb:122: Possibly uninitialized (`NilClass`) in:
      122 |    its(:size) do
               ^
 
@@ -949,16 +949,7 @@ test/cli/rspec/rspec4.rb:19: Revealed type: `NilClass` https://srb.help/7014
   Got `NilClass` originating from:
     test/cli/rspec/rspec4.rb:18: Possibly uninitialized (`NilClass`) in:
     18 |    shared_examples "my shared example" do |my_param|
-    19 |      T.reveal_type(my_param) # error: `NilClass`
-    20 |      let(:foo_exists) { 'bar' }
-    21 |
-    22 |      let(:uses_my_param) {
-       |...
-    28 |        expect(foo_exists).to eq('bar')
-    29 |        this_does_not_exist
-    30 |      # ^^^^^^^^^^^^^^^^^^^ error: `this_does_not_exist` does not exist
-    31 |      end
-    32 |    end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec4.rb:41: Revealed type: `T.untyped` https://srb.help/7014
     41 |        T.reveal_type(param1) # error: `T.untyped`

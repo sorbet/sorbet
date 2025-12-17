@@ -4,7 +4,6 @@
 #include "core/TypeConstraint.h"
 #include "core/TypeErrorDiagnostics.h"
 #include "core/errors/infer.h"
-#include "core/lsp/QueryResponse.h"
 #include "infer/SigSuggestion.h"
 #include "infer/environment.h"
 #include "infer/infer.h"
@@ -46,7 +45,7 @@ bool silenceDeadCodeError(const cfg::InstructionPtr &value) {
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run", {{"func", string(cfg->symbol.toStringFullName(ctx))}});
     ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
-    auto methodLoc = cfg->symbol.data(ctx)->loc();
+    auto methodLoc = ctx.locAt(cfg->declLoc);
     prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
     int totalSendCount = 0;
@@ -177,7 +176,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
 
         current.computePins(ctx, outEnvironments, *cfg.get(), bb);
-        current.setUninitializedVarsToNil(ctx, cfg->symbol.data(ctx)->loc());
+        current.setUninitializedVarsToNil(ctx, ctx.locAt(cfg->declLoc));
 
         for (auto &blockArg : bb->args) {
             current.getAndFillTypeAndOrigin(blockArg);
@@ -396,7 +395,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     }
 
     if (missingReturnType && guessTypes) {
-        if (auto e = ctx.state.beginError(cfg->symbol.data(ctx)->loc(), core::errors::Infer::UntypedMethod)) {
+        if (auto e = ctx.beginError(cfg->declLoc, core::errors::Infer::UntypedMethod)) {
             e.setHeader("The method `{}` does not have a `{}`", cfg->symbol.data(ctx)->name.show(ctx), "sig");
             auto maybeAutocorrect = SigSuggestion::maybeSuggestSig(ctx, *cfg, methodReturnType, *constr);
             if (maybeAutocorrect.has_value()) {
@@ -412,7 +411,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
     }
 
-    // TODO(jez) Delete these?
     prodCounterAdd("types.input.sends.typed", typedSendCount);
     prodCounterAdd("types.input.sends.total", totalSendCount);
 

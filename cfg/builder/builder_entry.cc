@@ -13,6 +13,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     ENFORCE(!md.symbol.data(ctx)->flags.isOverloaded);
     unique_ptr<CFG> res(new CFG); // private constructor
     res->loc = md.loc;
+    res->declLoc = md.declLoc;
     res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
     uint32_t temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, LocalRef> aliases;
