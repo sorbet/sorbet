@@ -214,6 +214,13 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
     inserted.value.setSynthetic();
 }
 
+BasicBlock *CFGBuilder::walkAssign(CFGContext cctx, ast::ExpressionPtr &rhs, core::LocOffsets assignLoc, LocalRef lhs,
+                                   BasicBlock *current) {
+    auto rhsCont = walk(cctx.withTarget(lhs), rhs, current);
+    rhsCont->exprs.emplace_back(cctx.target, assignLoc, make_insn<Ident>(lhs));
+    return rhsCont;
+}
+
 BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
     LocalRef magic = cctx.newTemporary(core::Names::magic());
     InlinedVector<cfg::LocalRef, 2> vars;
@@ -572,51 +579,95 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](ast::Assign &a) {
-                LocalRef lhs;
                 if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a.lhs)) {
-                    lhs = global2Local(cctx, lhsIdent->symbol());
+                    auto lhs = global2Local(cctx, lhsIdent->symbol());
+                    ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a.lhs)) {
-                    lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
+                    auto lhs = cctx.inWhat.enterLocal(lhsLocal->localVariable);
+                    ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
                 } else if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(a.lhs)) {
                     auto isAssign = true;
-                    auto [newLhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
-                    lhs = newLhs;
+                    auto [lhs, foundError] = unresolvedIdent2Local(cctx, *ident, isAssign);
+                    if (!foundError) {
+                        ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
+                        return;
+                    }
+
                     // Detect if we would have reported an error
                     // Only do this transformation if we're sure that it would produce an error, so
                     // that we don't pay the performance cost of inflating the CFG needlessly.
                     auto shouldReportErrorOn =
                         cctx.ctx.state.shouldReportErrorOn(cctx.ctx.file, core::errors::CFG::UndeclaredVariable);
-                    if (foundError && shouldReportErrorOn) {
-                        auto zeroLoc = a.loc.copyWithZeroLength();
-                        auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
-                        core::NameRef fieldKind;
-                        if (ident->kind == ast::UnresolvedIdent::Kind::Class) {
-                            fieldKind = core::Names::class_();
-                        } else {
-                            ENFORCE(cctx.ctx.owner.isMethod());
-                            auto owner = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
-                            if (owner.data(cctx.ctx)->isSingletonClass(cctx.ctx)) {
-                                fieldKind = core::Names::singletonClassInstance();
-                            } else {
-                                fieldKind = core::Names::instance();
-                            }
-                        }
-
-                        // Mutate a.rhs before walking.
-                        a.rhs =
-                            ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
-                                           move(a.rhs), ast::MK::String(zeroLoc, fieldKind),
-                                           ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name),
-                                           ast::MK::Symbol(zeroLoc, ident->name));
+                    if (!shouldReportErrorOn) {
+                        ret = walkAssign(cctx, a.rhs, a.loc, lhs, current);
+                        return;
                     }
-                    ENFORCE(lhs.exists());
+
+                    core::NameRef fieldKind;
+                    if (ident->kind == ast::UnresolvedIdent::Kind::Class) {
+                        fieldKind = core::Names::class_();
+                    } else {
+                        ENFORCE(cctx.ctx.owner.isMethod());
+                        auto owner = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
+                        if (owner.data(cctx.ctx)->isSingletonClass(cctx.ctx)) {
+                            fieldKind = core::Names::singletonClassInstance();
+                        } else {
+                            fieldKind = core::Names::instance();
+                        }
+                    }
+
+                    // This inlines the `ast::Send` case of `walk`.
+                    //
+                    // Previously, this code would wrap the RHS in a newly-allocated `Send` node,
+                    // mutably write that wrapped RHS back into the `Assign::rhs`, then walk the RHS
+                    // as normal.
+                    //
+                    // We no longer mutate the tree in builder walk, and thus we approximate that
+                    // logic by emulating what would have happened had we allocated, mutated, and
+                    // walked that new RHS.
+
+                    auto zeroLoc = a.loc.copyWithZeroLength();
+
+                    InlinedVector<LocalRef, 2> args;
+                    InlinedVector<core::LocOffsets, 2> argLocs;
+
+                    auto recvTemp = cctx.newTemporary(core::Names::statTemp());
+                    auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
+                    current = walk(cctx.withTarget(recvTemp), magic, current);
+
+                    auto rhsTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(rhsTemp);
+                    argLocs.emplace_back(a.rhs.loc());
+                    current = walk(cctx.withTarget(rhsTemp), a.rhs, current);
+
+                    auto fieldKindTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(fieldKindTemp);
+                    auto fieldKindStr = ast::MK::String(zeroLoc, fieldKind);
+                    argLocs.emplace_back(fieldKindStr.loc());
+                    current = walk(cctx.withTarget(fieldKindTemp), fieldKindStr, current);
+
+                    auto ownerTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(ownerTemp);
+                    auto ownerStr = ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name);
+                    argLocs.emplace_back(ownerStr.loc());
+                    current = walk(cctx.withTarget(ownerTemp), ownerStr, current);
+
+                    auto identTemp = cctx.newTemporary(core::Names::statTemp());
+                    args.emplace_back(identTemp);
+                    auto identName = ast::MK::Symbol(zeroLoc, ident->name);
+                    argLocs.emplace_back(identName.loc());
+                    current = walk(cctx.withTarget(identTemp), identName, current);
+
+                    current->exprs.emplace_back(lhs, a.lhs.loc(),
+                                                make_insn<Send>(recvTemp, magic.loc(), core::Names::suggestFieldType(),
+                                                                zeroLoc, args.size(), move(args), move(argLocs),
+                                                                /* isPrivateOk */ true));
+
+                    current->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
+                    ret = current;
                 } else {
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());
                 }
-
-                auto rhsCont = walk(cctx.withTarget(lhs), a.rhs, current);
-                rhsCont->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
-                ret = rhsCont;
             },
             [&](ast::InsSeq &a) {
                 for (auto &exp : a.stats) {
