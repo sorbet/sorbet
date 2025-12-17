@@ -1,24 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        ::A.new().foo()
-        ::A.foo()
-        ::A.new().food()
-        ::A.food()
-        ::A.new().foos()
-        ::A.foos()
-        ::A.sfoo()
-        ::A.new().sfoo()
-        ::A.new().sfood()
-        ::A.sfood()
-        ::A.sfoos()
-        ::A.new().sfoos()
-      end
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::A<<C A>> < (::<todo sym>)
     def foo(<blk>)
       begin
@@ -50,12 +30,32 @@ begin
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <runtime method definition of foo>
-        <runtime method definition of self.sfoo>
-      end
-    end
+    <runtime method definition of foo>
+
+    <runtime method definition of self.sfoo>
   end
-  <emptyTree>
+
+  ::A.new().foo()
+
+  ::A.foo()
+
+  ::A.new().food()
+
+  ::A.food()
+
+  ::A.new().foos()
+
+  ::A.foos()
+
+  ::A.sfoo()
+
+  ::A.new().sfoo()
+
+  ::A.new().sfood()
+
+  ::A.sfood()
+
+  ::A.sfoos()
+
+  ::A.new().sfoos()
 end

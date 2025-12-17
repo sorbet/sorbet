@@ -1,27 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        ::A.new().outer_method()
-        ::A.new().inner_method()
-        b = ::B.new()
-        b.outer_method()
-        b.inner_method()
-        ::C.outer_method()
-        ::C.new().inner_method()
-        ::D.outer_method()
-        ::D.inner_method()
-      end
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::A<<C A>> < (::<todo sym>)
     def outer_method(<blk>)
       <runtime method definition of inner_method>
@@ -31,10 +8,13 @@ begin
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of outer_method>
-    end
+    <runtime method definition of outer_method>
   end
+
+  ::A.new().outer_method()
+
+  ::A.new().inner_method()
+
   class ::B<<C B>> < (::<todo sym>)
     def outer_method(<blk>)
       <runtime method definition of self.inner_method>
@@ -44,10 +24,15 @@ begin
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of outer_method>
-    end
+    <runtime method definition of outer_method>
   end
+
+  b = ::B.new()
+
+  b.outer_method()
+
+  b.inner_method()
+
   class ::C<<C C>> < (::<todo sym>)
     def self.outer_method(<blk>)
       <runtime method definition of inner_method>
@@ -57,10 +42,13 @@ begin
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of self.outer_method>
-    end
+    <runtime method definition of self.outer_method>
   end
+
+  ::C.outer_method()
+
+  ::C.new().inner_method()
+
   class ::D<<C D>> < (::<todo sym>)
     def self.outer_method(<blk>)
       <runtime method definition of self.inner_method>
@@ -70,9 +58,10 @@ begin
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of self.outer_method>
-    end
+    <runtime method definition of self.outer_method>
   end
-  <emptyTree>
+
+  ::D.outer_method()
+
+  ::D.inner_method()
 end

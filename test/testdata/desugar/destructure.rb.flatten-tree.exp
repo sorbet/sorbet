@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Destructure<<C Destructure>> < (::<todo sym>)
     def f((x,y), z, <blk>)
       begin
@@ -34,9 +27,6 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of f>
-    end
+    <runtime method definition of f>
   end
-  <emptyTree>
 end

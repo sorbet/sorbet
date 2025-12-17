@@ -1,39 +1,19 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::TestSig<<C TestSig>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.returns(::T2)
+    end
+
     def test_resolve(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.returns(::T2)
-        end
-        <runtime method definition of test_resolve>
-      end
-    end
+    <runtime method definition of test_resolve>
   end
-  <emptyTree>
 end
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::T2 = ::T1
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::T1<<C T1>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
-  <emptyTree>
+
+  ::T2 = ::T1
 end

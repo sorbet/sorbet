@@ -1,25 +1,11 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::A = 91
 
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        ::A = 91
-        ::B = 91
-      end
-    end
-  end
   class ::A<<C A>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   class ::B<<C B>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
-  <emptyTree>
+
+  ::B = 91
 end
