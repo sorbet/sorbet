@@ -1247,8 +1247,12 @@ ast::ExpressionPtr Translator::desugarAssignment(pm_node_t *untypedNode) {
             // Substitute a fake local variable assignment so parsing can continue
             lhs = MK::Local(nameLoc, core::Names::dynamicConstAssign());
         } else {
-            auto name = translateConstantName(node->name);
-            auto constantName = ctx.state.enterNameConstant(name);
+            core::NameRef constantName;
+            if (node->name == PM_CONSTANT_ID_UNSET) {
+                constantName = core::Names::Constants::ConstantNameMissing();
+            } else {
+                constantName = ctx.state.enterNameConstant(translateConstantName(node->name));
+            }
             lhs = MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), constantName);
         }
     } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_path_write_node>) {
@@ -1268,8 +1272,12 @@ ast::ExpressionPtr Translator::desugarAssignment(pm_node_t *untypedNode) {
             } else {
                 scope = desugar(target->parent);
             }
-            auto name = translateConstantName(target->name);
-            auto constantName = ctx.state.enterNameConstant(name);
+            core::NameRef constantName;
+            if (target->name == PM_CONSTANT_ID_UNSET) {
+                constantName = core::Names::Constants::ConstantNameMissing();
+            } else {
+                constantName = ctx.state.enterNameConstant(translateConstantName(target->name));
+            }
             lhs = MK::UnresolvedConstant(pathLoc, move(scope), constantName);
         }
     } else {
