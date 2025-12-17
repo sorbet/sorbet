@@ -701,6 +701,11 @@ bool ClassOrModuleRef::isLegacyStdlibGeneric() const {
            *this == Symbols::Enumerator_Lazy() || *this == Symbols::Enumerator_Chain();
 }
 
+MethodRef ClassOrModuleRef::lookupStaticInit(const Context &ctx) const {
+    return *this == Symbols::root() ? ctx.state.lookupStaticInitForFile(ctx.file)
+                                    : ctx.state.lookupStaticInitForClass(*this);
+}
+
 namespace {
 MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrModuleRef owner, NameRef name,
                                                int maxDepth) {

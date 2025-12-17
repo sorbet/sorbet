@@ -11,10 +11,8 @@ core::MethodRef enclosingMethod(core::Context ctx) {
 
     if (ctx.owner.isMethod()) {
         enclosingMethod = ctx.owner.asMethodRef();
-    } else if (ctx.owner == core::Symbols::root()) {
-        enclosingMethod = ctx.state.lookupStaticInitForFile(ctx.file);
     } else {
-        enclosingMethod = ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
+        enclosingMethod = ctx.owner.asClassOrModuleRef().lookupStaticInit(ctx);
     }
 
     return enclosingMethod;

@@ -9,6 +9,7 @@
 namespace sorbet::core {
 class ClassOrModule;
 class GlobalState;
+class Context;
 class NameRef;
 class Loc;
 class TypePtr;
@@ -111,6 +112,8 @@ public:
 };
 CheckSize(ConstTypeParameterData, 8, 8);
 
+class MethodRef;
+
 class ClassOrModuleRef final {
     uint32_t _id;
 
@@ -190,6 +193,8 @@ public:
     //
     // The set of stdlib classes receiving this special behavior should not grow over time.
     bool isLegacyStdlibGeneric() const;
+
+    MethodRef lookupStaticInit(const Context &ctx) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
