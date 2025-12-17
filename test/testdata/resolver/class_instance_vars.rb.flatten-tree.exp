@@ -32,7 +32,6 @@ begin
         <runtime method definition of initialize>
         @@class_var = <cast:let>("hi", String, ::String)
         <runtime method definition of hi>
-        <emptyTree>
       end
     end
   end
@@ -41,7 +40,6 @@ begin
       begin
         @@mixin_cvar = <cast:let>(3, Integer, ::Integer)
         @@mixin_cvar
-        <emptyTree>
       end
     end
   end
@@ -62,7 +60,6 @@ begin
         @@mixin_cvar
         @@undefined_cvar
         <runtime method definition of child_method>
-        <emptyTree>
       end
     end
   end

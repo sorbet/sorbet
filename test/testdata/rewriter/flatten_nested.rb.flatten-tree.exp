@@ -19,7 +19,6 @@ begin
         ::C.new().inner_method()
         ::D.outer_method()
         ::D.inner_method()
-        <emptyTree>
       end
     end
   end

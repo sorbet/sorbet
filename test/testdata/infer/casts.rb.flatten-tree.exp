@@ -37,7 +37,6 @@ begin
       begin
         <runtime method definition of untyped>
         <runtime method definition of test_casts>
-        <emptyTree>
       end
     end
   end

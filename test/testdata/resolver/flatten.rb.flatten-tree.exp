@@ -16,7 +16,6 @@ begin
         ::A.sfood()
         ::A.sfoos()
         ::A.new().sfoos()
-        <emptyTree>
       end
     end
   end
@@ -55,7 +54,6 @@ begin
       begin
         <runtime method definition of foo>
         <runtime method definition of self.sfoo>
-        <emptyTree>
       end
     end
   end

@@ -35,7 +35,6 @@ begin
       begin
         <runtime method definition of normal_method>
         <runtime method definition of self.normal_static_method>
-        <emptyTree>
       end
     end
   end
@@ -90,7 +89,6 @@ begin
           <emptyTree>
         end
         <self>.whatever().include(::OtherMixin)
-        <emptyTree>
       end
     end
   end

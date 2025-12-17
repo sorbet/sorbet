@@ -16,7 +16,6 @@ begin
         $b = 2
         $a
         <runtime method definition of meth>
-        <emptyTree>
       end
     end
   end

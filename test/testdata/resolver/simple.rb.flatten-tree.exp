@@ -52,7 +52,6 @@ begin
         ::Outer2::Inner1
         ::Outer2::Inner1::Inner2
         ::Outer1
-        <emptyTree>
       end
     end
   end
@@ -61,7 +60,6 @@ begin
       begin
         ::Outer2::C
         Unresolved: <emptyTree>::<C A>
-        <emptyTree>
       end
     end
   end

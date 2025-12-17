@@ -9,7 +9,6 @@ begin
         <cast:assert_type!>(::Test.new(), Test::Mixin, ::Test::Mixin)
         <cast:assert_type!>(::Test.new(), Test::Other, ::Test::Other)
         <cast:assert_type!>(::Test.new(), Other, ::Other)
-        <emptyTree>
       end
     end
   end
@@ -27,7 +26,6 @@ begin
       begin
         <self>.include(::Test::Mixin)
         <self>.include(::Test::Other)
-        <emptyTree>
       end
     end
   end

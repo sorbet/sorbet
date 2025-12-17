@@ -41,7 +41,6 @@ begin
         end
         <self>.extend(::T::Sig)
         <runtime method definition of self.make>
-        <emptyTree>
       end
     end
   end

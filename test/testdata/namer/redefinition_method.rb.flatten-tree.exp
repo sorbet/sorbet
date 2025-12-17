@@ -28,7 +28,6 @@ begin
         <runtime method definition of foo>
         <runtime method definition of foo>
         <runtime method definition of foo>
-        <emptyTree>
       end
     end
   end

@@ -42,7 +42,6 @@ begin
         <runtime method definition of bar>
         <runtime method definition of qux>
         <runtime method definition of baz>
-        <emptyTree>
       end
     end
   end

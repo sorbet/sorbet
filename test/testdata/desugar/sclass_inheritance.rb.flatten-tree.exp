@@ -20,7 +20,6 @@ begin
       begin
         <runtime method definition of main>
         <self>.main()
-        <emptyTree>
       end
     end
   end
@@ -45,7 +44,6 @@ begin
       begin
         <self>.include(::MM)
         <runtime method definition of newer>
-        <emptyTree>
       end
     end
   end
@@ -58,7 +56,6 @@ begin
       begin
         <self>.extend(::MM)
         <runtime method definition of self.newer>
-        <emptyTree>
       end
     end
   end

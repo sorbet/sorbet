@@ -56,7 +56,6 @@ begin
         <runtime method definition of mixed>
         <runtime method definition of blockyield>
         <runtime method definition of main>
-        <emptyTree>
       end
     end
   end

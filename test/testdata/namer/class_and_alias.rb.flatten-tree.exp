@@ -8,7 +8,6 @@ begin
       begin
         ::A = 91
         ::B = 91
-        <emptyTree>
       end
     end
   end
