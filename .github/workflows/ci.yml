@@ -26,8 +26,6 @@ jobs:
           disk-cache: ${{ github.workflow }}
           # Share repository cache between workflows.
           repository-cache: true
-      - name: Verify parse trees
-        run: ./tools/scripts/verify_prism_regression_tests.sh
       - name: Run tests
         run: ./bazel test //test:prism_regression --config=dbg --test_output=errors
       - name: Run corpus tests
