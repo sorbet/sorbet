@@ -15,6 +15,7 @@ module GC
   # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) build options
   OPTS = T.let(T.unsafe(nil), T::Array[T.untyped])
 
+  sig { returns(T::Hash[T.untyped, T.untyped]) }
   def self.compact; end
 
   # The number of times [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html)
