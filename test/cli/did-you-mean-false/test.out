@@ -1,3 +1,14 @@
+test.rb:9: Method `my_metho` does not exist on `A` https://srb.help/7003
+     9 |A.new.my_metho
+              ^^^^^^^^
+  Got `A` originating from:
+    test.rb:9:
+     9 |A.new.my_metho
+        ^^^^^
+    test.rb:5: Defined here
+     5 |  def my_method
+          ^^^^^^^^^^^^^
+
 test.rb:17: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
     17 |  takes_integer(x)
                         ^
@@ -13,17 +24,6 @@ test.rb:17: Expected `Integer` but found `T.nilable(Integer)` for argument `x` h
     test.rb:17: Replaced with `T.must(x)`
     17 |  takes_integer(x)
                         ^
-
-test.rb:9: Method `my_metho` does not exist on `A` https://srb.help/7003
-     9 |A.new.my_metho
-              ^^^^^^^^
-  Got `A` originating from:
-    test.rb:9:
-     9 |A.new.my_metho
-        ^^^^^
-    test.rb:5: Defined here
-     5 |  def my_method
-          ^^^^^^^^^^^^^
 Errors: 2
 
 --------------------------------------------------------------------------

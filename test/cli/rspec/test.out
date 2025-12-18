@@ -121,22 +121,6 @@ test/cli/rspec/rspec2.rb:89: Method `outer_helper` does not exist on `T.class_of
       NN |  def attr_reader(*arg0); end
             ^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/rspec/rspec2.rb:39: Method `described_class` does not exist on `A::<describe 'inside describe'>` https://srb.help/7003
-    39 |      described_class # error: does not exist
-              ^^^^^^^^^^^^^^^
-  Got `A::<describe 'inside describe'>` originating from:
-    test/cli/rspec/rspec2.rb:37:
-    37 |    xit do
-            ^
-
-test/cli/rspec/rspec2.rb:71: Method `defined_in_shared_examples` does not exist on `A::<describe 'inside describe'>` https://srb.help/7003
-    71 |          defined_in_shared_examples # error: does not exist
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `A::<describe 'inside describe'>` originating from:
-    test/cli/rspec/rspec2.rb:70:
-    70 |        it "has access to defined_in_shared_examples" do
-                ^
-
 test/cli/rspec/rspec2.rb:50: Method `shared_examples` does not exist on `T.class_of(A::<describe 'inside describe'>)` https://srb.help/7003
     50 |    shared_examples "some examples" do
             ^^^^^^^^^^^^^^^
@@ -184,13 +168,21 @@ test/cli/rspec/rspec2.rb:68: Method `include_examples` does not exist on `T.clas
       NN |  def included_modules(); end
             ^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/rspec/rspec2.rb:62: Method `defined_in_shared_examples` does not exist on `A::<describe 'inside describe'>::<describe 'will include shared examples'>` https://srb.help/7003
-    62 |        defined_in_shared_examples
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `A::<describe 'inside describe'>::<describe 'will include shared examples'>` originating from:
-    test/cli/rspec/rspec2.rb:61:
-    61 |      it "has access to defined_in_shared_examples" do
-              ^
+test/cli/rspec/rspec2.rb:39: Method `described_class` does not exist on `A::<describe 'inside describe'>` https://srb.help/7003
+    39 |      described_class # error: does not exist
+              ^^^^^^^^^^^^^^^
+  Got `A::<describe 'inside describe'>` originating from:
+    test/cli/rspec/rspec2.rb:37:
+    37 |    xit do
+            ^
+
+test/cli/rspec/rspec2.rb:71: Method `defined_in_shared_examples` does not exist on `A::<describe 'inside describe'>` https://srb.help/7003
+    71 |          defined_in_shared_examples # error: does not exist
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A::<describe 'inside describe'>` originating from:
+    test/cli/rspec/rspec2.rb:70:
+    70 |        it "has access to defined_in_shared_examples" do
+                ^
 
 test/cli/rspec/rspec2.rb:59: Method `include_examples` does not exist on `T.class_of(A::<describe 'inside describe'>::<describe 'will include shared examples'>)` https://srb.help/7003
     59 |      include_examples("some examples")
@@ -206,6 +198,14 @@ test/cli/rspec/rspec2.rb:59: Method `include_examples` does not exist on `T.clas
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
       NN |  def included_modules(); end
             ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec2.rb:62: Method `defined_in_shared_examples` does not exist on `A::<describe 'inside describe'>::<describe 'will include shared examples'>` https://srb.help/7003
+    62 |        defined_in_shared_examples
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A::<describe 'inside describe'>::<describe 'will include shared examples'>` originating from:
+    test/cli/rspec/rspec2.rb:61:
+    61 |      it "has access to defined_in_shared_examples" do
+              ^
 
 test/cli/rspec/rspec2.rb:116: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>` https://srb.help/7003
      116 |    its(:bar) { is_expected.to eq(foo) } # error: Method `subject` does not exist on `A::<describe 'its support'>::<describe 'bar'>`
@@ -405,6 +405,21 @@ test/cli/rspec/rspec4.rb:42: Revealed type: `T.untyped` https://srb.help/7014
     36 |    shared_context "context with 2 params" do |param1, param2|
                                                                ^^^^^^
 
+test/cli/rspec/rspec4.rb:47: Method `include_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>)` https://srb.help/7003
+    47 |      include_context("context with 2 params", "value1", "value2")
+              ^^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>)` originating from:
+    test/cli/rspec/rspec4.rb:46:
+    46 |    describe "including context" do
+            ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:47: Replace with `included_modules`
+    47 |      include_context("context with 2 params", "value1", "value2")
+              ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
 test/cli/rspec/rspec4.rb:50: Method `value1` does not exist on `MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>` https://srb.help/7003
     50 |        value1
                 ^^^^^^
@@ -434,21 +449,6 @@ test/cli/rspec/rspec4.rb:51: Method `value2` does not exist on `MyClass::<descri
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
       NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test/cli/rspec/rspec4.rb:47: Method `include_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>)` https://srb.help/7003
-    47 |      include_context("context with 2 params", "value1", "value2")
-              ^^^^^^^^^^^^^^^
-  Got `T.class_of(MyClass::<describe 'shared context with 2 params'>::<describe 'including context'>)` originating from:
-    test/cli/rspec/rspec4.rb:46:
-    46 |    describe "including context" do
-            ^
-  Did you mean `included_modules`? Use `-a` to autocorrect
-    test/cli/rspec/rspec4.rb:47: Replace with `included_modules`
-    47 |      include_context("context with 2 params", "value1", "value2")
-              ^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def included_modules(); end
-            ^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec4.rb:57: Method `shared_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>)` https://srb.help/7003
     57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
@@ -546,6 +546,21 @@ test/cli/rspec/rspec4.rb:69: Revealed type: `T.untyped` https://srb.help/7014
     57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
                                                                                        ^^^^^^
 
+test/cli/rspec/rspec4.rb:74: Method `include_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>)` https://srb.help/7003
+    74 |      include_context("context with 5 params", "value1", "value2", "value3", "value4", "value5")
+              ^^^^^^^^^^^^^^^
+  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>)` originating from:
+    test/cli/rspec/rspec4.rb:73:
+    73 |    describe "including context" do
+            ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec4.rb:74: Replace with `included_modules`
+    74 |      include_context("context with 5 params", "value1", "value2", "value3", "value4", "value5")
+              ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
 test/cli/rspec/rspec4.rb:77: Method `value1` does not exist on `MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>` https://srb.help/7003
     77 |        value1
                 ^^^^^^
@@ -620,21 +635,6 @@ test/cli/rspec/rspec4.rb:81: Method `value5` does not exist on `MyClass::<descri
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
       NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test/cli/rspec/rspec4.rb:74: Method `include_context` does not exist on `T.class_of(MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>)` https://srb.help/7003
-    74 |      include_context("context with 5 params", "value1", "value2", "value3", "value4", "value5")
-              ^^^^^^^^^^^^^^^
-  Got `T.class_of(MyClass::<describe 'shared context with 5 params'>::<describe 'including context'>)` originating from:
-    test/cli/rspec/rspec4.rb:73:
-    73 |    describe "including context" do
-            ^
-  Did you mean `included_modules`? Use `-a` to autocorrect
-    test/cli/rspec/rspec4.rb:74: Replace with `included_modules`
-    74 |      include_context("context with 5 params", "value1", "value2", "value3", "value4", "value5")
-              ^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def included_modules(); end
-            ^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec3.rb:18: Method `shared_examples` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
     18 |    shared_examples "my shared example" do
@@ -919,6 +919,14 @@ test/cli/rspec/rspec2.rb:166: Method `no_such_method` does not exist on `A::<des
      166 |      is_expected.to eq(0) # error: Method `no_such_method` does not exist on `A::<describe 'its with typed subject'>::ThingWithSize`
                 ^^^^^^^^^^^
 
+test/cli/rspec/rspec4.rb:19: Revealed type: `NilClass` https://srb.help/7014
+    19 |      T.reveal_type(my_param) # error: `NilClass`
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    test/cli/rspec/rspec4.rb:18: Possibly uninitialized (`NilClass`) in:
+    18 |    shared_examples "my shared example" do |my_param|
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 test/cli/rspec/rspec4.rb:23: Revealed type: `NilClass` https://srb.help/7014
     23 |        T.reveal_type(my_param) # error: `NilClass`
                 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -942,14 +950,6 @@ test/cli/rspec/rspec4.rb:29: Method `this_does_not_exist` does not exist on `MyC
     test/cli/rspec/rspec4.rb:26:
     26 |      it "works for #{my_param}" do
               ^
-
-test/cli/rspec/rspec4.rb:19: Revealed type: `NilClass` https://srb.help/7014
-    19 |      T.reveal_type(my_param) # error: `NilClass`
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    test/cli/rspec/rspec4.rb:18: Possibly uninitialized (`NilClass`) in:
-    18 |    shared_examples "my shared example" do |my_param|
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec4.rb:41: Revealed type: `T.untyped` https://srb.help/7014
     41 |        T.reveal_type(param1) # error: `T.untyped`
