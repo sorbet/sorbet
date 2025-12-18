@@ -150,6 +150,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         }
 
         if (lastStat != -1) {
+            ENFORCE(ast::isa_tree<ast::EmptyTree>(expr), "We're not going to build a CFG using expr if given stats!");
             for (int i = 0; i < lastStat; i++) {
                 if (shouldBuildForStats[i]) {
                     cont = walk(cctx.withTarget(cctx.newTemporary(core::Names::statTemp())), stats[i], cont);
