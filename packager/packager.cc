@@ -1100,7 +1100,7 @@ class PackageDBPackageGraph {
 public:
     PackageDBPackageGraph(PackageDB &packageDB) : packageDB(packageDB) {}
 
-    const absl::Span<const Import> getImports(MangledName packageName) const {
+    absl::Span<const Import> getImports(MangledName packageName) const {
         ENFORCE(packageDB.getPackageInfo(packageName).exists());
         return packageDB.getPackageInfo(packageName).importedPackageNames;
     }

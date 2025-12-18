@@ -18,7 +18,7 @@ inline constexpr auto prismFree = [](void *p) { xfree(p); };
 // * In the event of an exception, will be freed correctly using Prism's `xfree()`.
 template <typename T> using PrismUniquePtr = std::unique_ptr<T, decltype(prismFree)>;
 
-pm_node_list_t Factory::copyNodesToList(const absl::Span<pm_node_t *> nodes) const {
+pm_node_list_t Factory::copyNodesToList(absl::Span<pm_node_t *> nodes) const {
     if (nodes.empty()) {
         return (pm_node_list_t){.size = 0, .capacity = 0, .nodes = nullptr};
     }
@@ -36,7 +36,7 @@ pm_node_list_t Factory::copyNodesToList(const absl::Span<pm_node_t *> nodes) con
     return (pm_node_list_t){.size = size, .capacity = size, .nodes = result};
 }
 
-pm_arguments_node_t *Factory::createArgumentsNode(const absl::Span<pm_node_t *> args, pm_location_t loc) const {
+pm_arguments_node_t *Factory::createArgumentsNode(absl::Span<pm_node_t *> args, pm_location_t loc) const {
     pm_arguments_node_t *arguments = allocateNode<pm_arguments_node_t>();
 
     pm_node_list_t argNodes = copyNodesToList(args);
@@ -230,7 +230,7 @@ pm_node_t *Factory::AssocNode(core::LocOffsets loc, pm_node_t *key, pm_node_t *v
     return up_cast(assocNode);
 }
 
-pm_node_t *Factory::Hash(core::LocOffsets loc, const absl::Span<pm_node_t *> pairs) const {
+pm_node_t *Factory::Hash(core::LocOffsets loc, absl::Span<pm_node_t *> pairs) const {
     pm_hash_node_t *hashNode = allocateNode<pm_hash_node_t>();
 
     pm_node_list_t elements = copyNodesToList(pairs);
@@ -247,7 +247,7 @@ pm_node_t *Factory::Hash(core::LocOffsets loc, const absl::Span<pm_node_t *> pai
     return up_cast(hashNode);
 }
 
-pm_node_t *Factory::KeywordHash(core::LocOffsets loc, const absl::Span<pm_node_t *> pairs) const {
+pm_node_t *Factory::KeywordHash(core::LocOffsets loc, absl::Span<pm_node_t *> pairs) const {
     pm_keyword_hash_node_t *hashNode = allocateNode<pm_keyword_hash_node_t>();
 
     pm_node_list_t elements = copyNodesToList(pairs);
@@ -303,8 +303,8 @@ pm_node_t *Factory::Call1(core::LocOffsets loc, pm_node_t *receiver, string_view
     return up_cast(createCallNode(receiver, methodId, arguments, tinyLoc, fullLoc, tinyLoc));
 }
 
-pm_node_t *Factory::Call(core::LocOffsets loc, pm_node_t *receiver, string_view method,
-                         const absl::Span<pm_node_t *> args, pm_node_t *block) const {
+pm_node_t *Factory::Call(core::LocOffsets loc, pm_node_t *receiver, string_view method, absl::Span<pm_node_t *> args,
+                         pm_node_t *block) const {
     ENFORCE(receiver && !method.empty(), "Receiver or method is null");
 
     pm_constant_id_t methodId = addConstantToPool(method);
@@ -338,7 +338,7 @@ pm_node_t *Factory::TNilable(core::LocOffsets loc, pm_node_t *type) const {
     return Call1(loc, T(loc), "nilable"sv, type);
 }
 
-pm_node_t *Factory::TAny(core::LocOffsets loc, const absl::Span<pm_node_t *> args) const {
+pm_node_t *Factory::TAny(core::LocOffsets loc, absl::Span<pm_node_t *> args) const {
     ENFORCE(!args.empty(), "Args is empty");
 
     pm_constant_id_t methodId = addConstantToPool("any"sv);
@@ -349,7 +349,7 @@ pm_node_t *Factory::TAny(core::LocOffsets loc, const absl::Span<pm_node_t *> arg
     return up_cast(createCallNode(T(loc), methodId, up_cast(arguments), tinyLoc, fullLoc, tinyLoc));
 }
 
-pm_node_t *Factory::TAll(core::LocOffsets loc, const absl::Span<pm_node_t *> args) const {
+pm_node_t *Factory::TAll(core::LocOffsets loc, absl::Span<pm_node_t *> args) const {
     ENFORCE(!args.empty(), "Args is empty");
 
     pm_constant_id_t methodId = addConstantToPool("all"sv);
@@ -454,7 +454,7 @@ pm_node_t *Factory::TTypeAlias(core::LocOffsets loc, pm_node_t *type) const {
     return typeAliasCall;
 }
 
-pm_node_t *Factory::Array(core::LocOffsets loc, const absl::Span<pm_node_t *> elements) const {
+pm_node_t *Factory::Array(core::LocOffsets loc, absl::Span<pm_node_t *> elements) const {
     pm_array_node_t *array = allocateNode<pm_array_node_t>();
 
     pm_node_list_t elemNodes = copyNodesToList(elements);
@@ -518,7 +518,7 @@ pm_node_t *Factory::T_Range(core::LocOffsets loc) const {
     return ConstantPathNode(loc, T(loc), "Range"sv);
 }
 
-pm_node_t *Factory::StatementsNode(core::LocOffsets loc, const absl::Span<pm_node_t *> body) const {
+pm_node_t *Factory::StatementsNode(core::LocOffsets loc, absl::Span<pm_node_t *> body) const {
     pm_statements_node_t *stmts = allocateNode<pm_statements_node_t>();
     *stmts = (pm_statements_node_t){.base = initializeBaseNode(PM_STATEMENTS_NODE, parser.convertLocOffsets(loc)),
                                     .body = copyNodesToList(body)};
