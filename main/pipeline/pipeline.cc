@@ -1442,7 +1442,7 @@ public:
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
         if (print.CFGText.enabled) {
-            print.CFG.fmt("{}\n\n", cfg->toTextualString(ctx));
+            print.CFGText.fmt("{}\n\n", cfg->toTextualString(ctx));
         }
         if (print.CFGRaw.enabled) {
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
@@ -1466,10 +1466,22 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
     definition_validator::runOne(ctx, resolved);
 
     if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
-        opts.print.FlattenTree.fmt("{}\n", resolved.tree.toString(ctx));
+        auto printed = resolved.tree.toString(ctx);
+        if (opts.print.FlattenTree.enabled) {
+            opts.print.FlattenTree.fmt("{}\n", printed);
+        }
+        if (opts.print.AST.enabled) {
+            opts.print.AST.fmt("{}\n", printed);
+        }
     }
     if (opts.print.FlattenTreeRaw.enabled || opts.print.ASTRaw.enabled) {
-        opts.print.FlattenTreeRaw.fmt("{}\n", resolved.tree.showRaw(ctx));
+        auto printed = resolved.tree.showRaw(ctx);
+        if (opts.print.FlattenTreeRaw.enabled) {
+            opts.print.FlattenTreeRaw.fmt("{}\n", printed);
+        }
+        if (opts.print.ASTRaw.enabled) {
+            opts.print.ASTRaw.fmt("{}\n", printed);
+        }
     }
 
     if (opts.stopAfterPhase == options::Phase::RESOLVER) {
