@@ -373,6 +373,9 @@ class ::<root> < ::Object ()
 
 ### ClassFlatten
 
+> Note: ClassFlatten doesn't exist anymore: we've inlined the logic that it did
+> directly into the CFG builder walk. This section is preserved for posterity.
+
 The class_flatten is the final pass that processes the AST. The goal
 here is to move around all the nodes so that the final result only has top level
 classes and they only contain method definitions. Code that executes at the

@@ -1,17 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::Alias = ::Parent
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Parent<<C Parent>> < (::<todo sym>)
     def initialize(<blk>)
       begin
@@ -27,22 +14,19 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <runtime method definition of initialize>
-        @@class_var = <cast:let>("hi", String, ::String)
-        <runtime method definition of hi>
-      end
-    end
+    <runtime method definition of initialize>
+
+    @@class_var = <cast:let>("hi", String, ::String)
+
+    <runtime method definition of hi>
   end
+
   module ::Mixin<<C Mixin>> < ()
-    def self.<static-init>(<blk>)
-      begin
-        @@mixin_cvar = <cast:let>(3, Integer, ::Integer)
-        @@mixin_cvar
-      end
-    end
+    @@mixin_cvar = <cast:let>(3, Integer, ::Integer)
+
+    @@mixin_cvar
   end
+
   class ::Child<<C Child>> < (::Parent, ::Mixin)
     def child_method(<blk>)
       begin
@@ -53,20 +37,20 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.include(::Mixin)
-        @@class_var
-        @@mixin_cvar
-        @@undefined_cvar
-        <runtime method definition of child_method>
-      end
-    end
+    <self>.include(::Mixin)
+
+    @@class_var
+
+    @@mixin_cvar
+
+    @@undefined_cvar
+
+    <runtime method definition of child_method>
   end
+
+  ::Alias = ::Parent
+
   class ::Child1<<C Child1>> < (::Alias)
-    def self.<static-init>(<blk>)
-      @@class_var
-    end
+    @@class_var
   end
-  <emptyTree>
 end

@@ -8,8 +8,13 @@ namespace sorbet::cfg {
 class CFGBuilder final {
 public:
     static std::unique_ptr<CFG> buildFor(core::Context ctx, const ast::MethodDef &md);
+    static std::unique_ptr<CFG> buildFor(core::Context ctx, const ast::ClassDef &cd, core::MethodRef symbol);
 
 private:
+    static std::unique_ptr<CFG> buildFor(CFGContext cctx, std::unique_ptr<CFG> res,
+                                         absl::Span<const ast::ExpressionPtr> params,
+                                         absl::Span<const ast::ExpressionPtr> stats, const ast::ExpressionPtr &expr);
+
     static BasicBlock *walk(CFGContext cctx, const ast::ExpressionPtr &what, BasicBlock *current);
     static void fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);
@@ -71,6 +76,7 @@ public:
 
 private:
     friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md);
+    friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::ClassDef &cd, core::MethodRef sym);
     CFGContext(core::Context ctx, CFG &inWhat, LocalRef target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)

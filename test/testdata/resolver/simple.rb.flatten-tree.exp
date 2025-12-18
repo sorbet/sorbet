@@ -1,72 +1,35 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      Unresolved: Unresolved: Unresolved: <emptyTree>::<C Does>::<C Not>::<C Exist>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Outer1<<C Outer1>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   class ::Outer2<<C Outer2>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
+    class ::Outer2::C<<C C>> < (::<todo sym>)
     end
-  end
-  class ::Outer2::C<<C C>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class ::Outer2::Inner1<<C Inner1>> < (::<todo sym>)
-    <emptyTree>
 
-    <emptyTree>
+    class ::Outer2::Inner1<<C Inner1>> < (::<todo sym>)
+      class ::Outer2::Inner1::A<<C A>> < (::<todo sym>)
+      end
 
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class ::Outer2::Inner1::A<<C A>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      begin
+      class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
         ::Outer2::Inner1::A
+
         ::Outer2::Inner1
+
         ::Outer2::Inner1::Inner2
+
         ::Outer1
       end
     end
-  end
-  class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      begin
-        ::Outer2::C
-        Unresolved: <emptyTree>::<C A>
-      end
+
+    class ::Outer2::Inner1::Inner2<<C Inner2>> < (::<todo sym>)
+      ::Outer2::C
+
+      Unresolved: <emptyTree>::<C A>
+    end
+
+    class ::Outer2::Other<<C Other>> < (::Outer2::Inner1::Inner2)
     end
   end
-  class ::Outer2::Other<<C Other>> < (::Outer2::Inner1::Inner2)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  <emptyTree>
+
+  Unresolved: Unresolved: Unresolved: <emptyTree>::<C Does>::<C Not>::<C Exist>
 end

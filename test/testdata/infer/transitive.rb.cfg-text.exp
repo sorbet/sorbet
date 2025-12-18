@@ -12,20 +12,6 @@ bb1[firstDead=-1]():
 
 }
 
-method ::A#foo {
-
-bb0[firstDead=2]():
-    <self>: A = cast(<self>: NilClass, A);
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:A>#<static-init> {
 
 bb0[firstDead=-1]():
@@ -70,12 +56,11 @@ bb5[firstDead=4](<self>: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Private
 
 }
 
-method ::Bar#baz {
+method ::A#foo {
 
-bb0[firstDead=3]():
-    <self>: Bar = cast(<self>: NilClass, Bar);
-    <returnMethodTemp>$2: Integer = <self>: Bar.foo()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
+bb0[firstDead=2]():
+    <self>: A = cast(<self>: NilClass, A);
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
@@ -129,6 +114,21 @@ bb5[firstDead=7](<self>: T.class_of(Bar), <block-pre-call-temp>$5: Sorbet::Priva
     <blockReturnTemp>$7: T::Private::Methods::DeclBuilder = <statTemp>$8: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$14: T.class_of(Integer))
     <blockReturnTemp>$15: T.noreturn = blockreturn<sig> <blockReturnTemp>$7: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
+
+}
+
+method ::Bar#baz {
+
+bb0[firstDead=3]():
+    <self>: Bar = cast(<self>: NilClass, Bar);
+    <returnMethodTemp>$2: Integer = <self>: Bar.foo()
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 

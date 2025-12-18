@@ -12,23 +12,6 @@ bb1[firstDead=-1]():
 
 }
 
-method ::MyEnum#serialize {
-
-bb0[firstDead=4]():
-    <self>: MyEnum = cast(<self>: NilClass, MyEnum);
-    <cfgAlias>$4: T.class_of(Kernel) = alias <C Kernel>
-    <statTemp>$5: String("Sorbet rewriter pass partially unimplemented") = "Sorbet rewriter pass partially unimplemented"
-    <returnMethodTemp>$2: T.noreturn = <cfgAlias>$4: T.class_of(Kernel).raise(<statTemp>$5: String("Sorbet rewriter pass partially unimplemented"))
-    <finalReturn> = return <returnMethodTemp>$2
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:MyEnum>#<static-init> {
 
 bb0[firstDead=-1]():
@@ -123,6 +106,23 @@ bb9[firstDead=22](<self>: T.class_of(MyEnum), <block-pre-call-temp>$23: Sorbet::
 
 }
 
+method ::MyEnum#serialize {
+
+bb0[firstDead=4]():
+    <self>: MyEnum = cast(<self>: NilClass, MyEnum);
+    <cfgAlias>$4: T.class_of(Kernel) = alias <C Kernel>
+    <statTemp>$5: String("Sorbet rewriter pass partially unimplemented") = "Sorbet rewriter pass partially unimplemented"
+    <returnMethodTemp>$2: T.noreturn = <cfgAlias>$4: T.class_of(Kernel).raise(<statTemp>$5: String("Sorbet rewriter pass partially unimplemented"))
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::MyEnum::<Class:X>#<static-init> {
 
 bb0[firstDead=2]():
@@ -209,37 +209,6 @@ bb5[firstDead=10](<self>: T.class_of(NotAnEnum), <block-pre-call-temp>$4: Sorbet
     <blockReturnTemp>$6: T.untyped = <C Y>$13
     <blockReturnTemp>$17: T.noreturn = blockreturn<enums> <blockReturnTemp>$6: T.untyped
     <unconditional> -> bb2
-
-}
-
-method ::EnumsDoEnum#something_outside {
-
-bb0[firstDead=2]():
-    <self>: EnumsDoEnum = cast(<self>: NilClass, EnumsDoEnum);
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::EnumsDoEnum#serialize {
-
-bb0[firstDead=4]():
-    <self>: EnumsDoEnum = cast(<self>: NilClass, EnumsDoEnum);
-    <cfgAlias>$4: T.class_of(Kernel) = alias <C Kernel>
-    <statTemp>$5: String("Sorbet rewriter pass partially unimplemented") = "Sorbet rewriter pass partially unimplemented"
-    <returnMethodTemp>$2: T.noreturn = <cfgAlias>$4: T.class_of(Kernel).raise(<statTemp>$5: String("Sorbet rewriter pass partially unimplemented"))
-    <finalReturn> = return <returnMethodTemp>$2
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 
@@ -337,6 +306,37 @@ bb9[firstDead=22](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$23: Sor
 
 }
 
+method ::EnumsDoEnum#something_outside {
+
+bb0[firstDead=2]():
+    <self>: EnumsDoEnum = cast(<self>: NilClass, EnumsDoEnum);
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::EnumsDoEnum#serialize {
+
+bb0[firstDead=4]():
+    <self>: EnumsDoEnum = cast(<self>: NilClass, EnumsDoEnum);
+    <cfgAlias>$4: T.class_of(Kernel) = alias <C Kernel>
+    <statTemp>$5: String("Sorbet rewriter pass partially unimplemented") = "Sorbet rewriter pass partially unimplemented"
+    <returnMethodTemp>$2: T.noreturn = <cfgAlias>$4: T.class_of(Kernel).raise(<statTemp>$5: String("Sorbet rewriter pass partially unimplemented"))
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::EnumsDoEnum::<Class:X>#<static-init> {
 
 bb0[firstDead=2]():
@@ -370,23 +370,6 @@ method ::EnumsDoEnum::<Class:Z>#<static-init> {
 bb0[firstDead=2]():
     <self>: T.class_of(EnumsDoEnum::Z) = cast(<self>: NilClass, T.class_of(EnumsDoEnum::Z));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::BadConsts#serialize {
-
-bb0[firstDead=4]():
-    <self>: BadConsts = cast(<self>: NilClass, BadConsts);
-    <cfgAlias>$4: T.class_of(Kernel) = alias <C Kernel>
-    <statTemp>$5: String("Sorbet rewriter pass partially unimplemented") = "Sorbet rewriter pass partially unimplemented"
-    <returnMethodTemp>$2: T.noreturn = <cfgAlias>$4: T.class_of(Kernel).raise(<statTemp>$5: String("Sorbet rewriter pass partially unimplemented"))
-    <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
@@ -498,6 +481,23 @@ bb9[firstDead=10](<self>: T.class_of(BadConsts), <block-pre-call-temp>$32: Sorbe
     <blockReturnTemp>$34: NilClass = nil
     <blockReturnTemp>$45: T.noreturn = blockreturn<enums> <blockReturnTemp>$34: NilClass
     <unconditional> -> bb6
+
+}
+
+method ::BadConsts#serialize {
+
+bb0[firstDead=4]():
+    <self>: BadConsts = cast(<self>: NilClass, BadConsts);
+    <cfgAlias>$4: T.class_of(Kernel) = alias <C Kernel>
+    <statTemp>$5: String("Sorbet rewriter pass partially unimplemented") = "Sorbet rewriter pass partially unimplemented"
+    <returnMethodTemp>$2: T.noreturn = <cfgAlias>$4: T.class_of(Kernel).raise(<statTemp>$5: String("Sorbet rewriter pass partially unimplemented"))
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 

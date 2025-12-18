@@ -12,100 +12,6 @@ bb1[firstDead=-1]():
 
 }
 
-method ::Funcs#f {
-
-bb0[firstDead=4]():
-    <self>: Funcs = cast(<self>: NilClass, Funcs);
-    x: Integer = load_arg(x)
-    <returnMethodTemp>$2: Integer = x
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:Funcs>#f {
-
-bb0[firstDead=2]():
-    <self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::Funcs#g {
-
-bb0[firstDead=4]():
-    <self>: Funcs = cast(<self>: NilClass, Funcs);
-    s: Symbol = load_arg(s)
-    <returnMethodTemp>$2: Symbol = s
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:Funcs>#g {
-
-bb0[firstDead=4]():
-    <self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));
-    s: Symbol = load_arg(s)
-    <returnMethodTemp>$2: Symbol = s
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::Funcs#h {
-
-bb0[firstDead=4]():
-    <self>: Funcs = cast(<self>: NilClass, Funcs);
-    s: String = load_arg(s)
-    <returnMethodTemp>$2: String = s
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:Funcs>#h {
-
-bb0[firstDead=4]():
-    <self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));
-    s: String = load_arg(s)
-    <returnMethodTemp>$2: String = s
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:Funcs>#<static-init> {
 
 bb0[firstDead=-1]():
@@ -275,6 +181,117 @@ bb21[firstDead=7](<self>: T.class_of(Funcs), <block-pre-call-temp>$57: Sorbet::P
 
 }
 
+method ::Funcs#f {
+
+bb0[firstDead=4]():
+    <self>: Funcs = cast(<self>: NilClass, Funcs);
+    x: Integer = load_arg(x)
+    <returnMethodTemp>$2: Integer = x
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:Funcs>#f {
+
+bb0[firstDead=2]():
+    <self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Funcs#g {
+
+bb0[firstDead=4]():
+    <self>: Funcs = cast(<self>: NilClass, Funcs);
+    s: Symbol = load_arg(s)
+    <returnMethodTemp>$2: Symbol = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:Funcs>#g {
+
+bb0[firstDead=4]():
+    <self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));
+    s: Symbol = load_arg(s)
+    <returnMethodTemp>$2: Symbol = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Funcs#h {
+
+bb0[firstDead=4]():
+    <self>: Funcs = cast(<self>: NilClass, Funcs);
+    s: String = load_arg(s)
+    <returnMethodTemp>$2: String = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:Funcs>#h {
+
+bb0[firstDead=4]():
+    <self>: T.class_of(Funcs) = cast(<self>: NilClass, T.class_of(Funcs));
+    s: String = load_arg(s)
+    <returnMethodTemp>$2: String = s
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:C>#<static-init> {
+
+bb0[firstDead=5]():
+    <self>: T.class_of(C) = cast(<self>: NilClass, T.class_of(C));
+    <cfgAlias>$6: T.class_of(Funcs) = alias <C Funcs>
+    <statTemp>$3: T.class_of(C) = <self>: T.class_of(C).include(<cfgAlias>$6: T.class_of(Funcs))
+    <returnMethodTemp>$2: Symbol(:test_calls) = :test_calls
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:test_calls)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::C#test_calls {
 
 bb0[firstDead=19]():
@@ -297,23 +314,6 @@ bb0[firstDead=19]():
     <cfgAlias>$25: T.class_of(C) = alias <C C>
     <returnMethodTemp>$2: T.untyped = <cfgAlias>$25: T.class_of(C).f()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:C>#<static-init> {
-
-bb0[firstDead=5]():
-    <self>: T.class_of(C) = cast(<self>: NilClass, T.class_of(C));
-    <cfgAlias>$6: T.class_of(Funcs) = alias <C Funcs>
-    <statTemp>$3: T.class_of(C) = <self>: T.class_of(C).include(<cfgAlias>$6: T.class_of(Funcs))
-    <returnMethodTemp>$2: Symbol(:test_calls) = :test_calls
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:test_calls)
     <unconditional> -> bb1
 
 # backedges

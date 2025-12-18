@@ -96,12 +96,6 @@ where what the phases of Sorbet actually do are documented.
 │  │ ast::Expression │      │  │ ast::Expression │      │  │ ast::Expression │      │
 │  └─────────────────┘      │  └─────────────────┘      │  └─────────────────┘      │
 │           │               │           │               │           │               │
-│           │ class_flatten │           │ class_flatten │           │ class_flatten │
-│           ▼               │           ▼               │           ▼               │
-│  ┌─────────────────┐      │  ┌─────────────────┐      │  ┌─────────────────┐      │
-│  │ ast::Expression │      │  │ ast::Expression │      │  │ ast::Expression │      │
-│  └─────────────────┘      │  └─────────────────┘      │  └─────────────────┘      │
-│           │               │           │               │           │               │
 │           │ cfg           │           │ cfg           │           │ cfg           │
 │           ▼               │           ▼               │           ▼               │
 │     ┌──────────┐          │     ┌──────────┐          │     ┌──────────┐          │

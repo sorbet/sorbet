@@ -12,62 +12,6 @@ bb1[firstDead=-1]():
 
 }
 
-method ::TestArray#an_int {
-
-bb0[firstDead=3]():
-    <self>: TestArray = cast(<self>: NilClass, TestArray);
-    <returnMethodTemp>$2: Integer(0) = 0
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::TestArray#a_string {
-
-bb0[firstDead=3]():
-    <self>: TestArray = cast(<self>: NilClass, TestArray);
-    <returnMethodTemp>$2: String("str") = "str"
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String("str")
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::TestArray#test_arrays {
-
-bb0[firstDead=14]():
-    <self>: TestArray = cast(<self>: NilClass, TestArray);
-    <magic>$4: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$3: [] = <magic>$4: T.class_of(<Magic>).<build-array>()
-    <arrayTemp>$7: Integer(1) = 1
-    <arrayTemp>$8: Integer(2) = 2
-    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$5: [Integer(1), Integer(2)] = <magic>$6: T.class_of(<Magic>).<build-array>(<arrayTemp>$7: Integer(1), <arrayTemp>$8: Integer(2))
-    <arrayTemp>$10: Integer = <self>: TestArray.an_int()
-    <arrayTemp>$12: String = <self>: TestArray.a_string()
-    <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$14: [] = <magic>$15: T.class_of(<Magic>).<build-array>()
-    <magic>$9: T.class_of(<Magic>) = alias <C <Magic>>
-    <returnMethodTemp>$2: [Integer, String, []] = <magic>$9: T.class_of(<Magic>).<build-array>(<arrayTemp>$10: Integer, <arrayTemp>$12: String, <arrayTemp>$14: [])
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, []]
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:TestArray>#<static-init> {
 
 bb0[firstDead=-1]():
@@ -135,6 +79,62 @@ bb9[firstDead=4](<self>: T.class_of(TestArray), <block-pre-call-temp>$14: Sorbet
     <blockReturnTemp>$16: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$19: T.class_of(String))
     <blockReturnTemp>$20: T.noreturn = blockreturn<sig> <blockReturnTemp>$16: T::Private::Methods::DeclBuilder
     <unconditional> -> bb6
+
+}
+
+method ::TestArray#an_int {
+
+bb0[firstDead=3]():
+    <self>: TestArray = cast(<self>: NilClass, TestArray);
+    <returnMethodTemp>$2: Integer(0) = 0
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::TestArray#a_string {
+
+bb0[firstDead=3]():
+    <self>: TestArray = cast(<self>: NilClass, TestArray);
+    <returnMethodTemp>$2: String("str") = "str"
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String("str")
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::TestArray#test_arrays {
+
+bb0[firstDead=14]():
+    <self>: TestArray = cast(<self>: NilClass, TestArray);
+    <magic>$4: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$3: [] = <magic>$4: T.class_of(<Magic>).<build-array>()
+    <arrayTemp>$7: Integer(1) = 1
+    <arrayTemp>$8: Integer(2) = 2
+    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$5: [Integer(1), Integer(2)] = <magic>$6: T.class_of(<Magic>).<build-array>(<arrayTemp>$7: Integer(1), <arrayTemp>$8: Integer(2))
+    <arrayTemp>$10: Integer = <self>: TestArray.an_int()
+    <arrayTemp>$12: String = <self>: TestArray.a_string()
+    <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$14: [] = <magic>$15: T.class_of(<Magic>).<build-array>()
+    <magic>$9: T.class_of(<Magic>) = alias <C <Magic>>
+    <returnMethodTemp>$2: [Integer, String, []] = <magic>$9: T.class_of(<Magic>).<build-array>(<arrayTemp>$10: Integer, <arrayTemp>$12: String, <arrayTemp>$14: [])
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, []]
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 

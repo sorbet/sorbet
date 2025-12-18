@@ -1,49 +1,45 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Test<<C Test>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.params(:x, ::String).returns(::String)
+    end
+
     def foo(x, <blk>)
       x
+    end
+
+    <self>.sig() do ||
+      <self>.params(:y, ::String).returns(::String)
     end
 
     def bar(y, <blk>)
       y
     end
 
+    <self>.sig() do ||
+      <self>.params(:z, ::String).returns(::String)
+    end
+
     def qux(z, <blk>)
       z
+    end
+
+    <self>.sig() do ||
+      <self>.params(:w, ::String).returns(::String)
     end
 
     def baz(w, <blk>)
       w
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.params(:x, ::String).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params(:y, ::String).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params(:z, ::String).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params(:w, ::String).returns(::String)
-        end
-        <self>.extend(::T::Sig)
-        <runtime method definition of foo>
-        <runtime method definition of bar>
-        <runtime method definition of qux>
-        <runtime method definition of baz>
-      end
-    end
+    <self>.extend(::T::Sig)
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of qux>
+
+    <runtime method definition of baz>
   end
-  <emptyTree>
 end

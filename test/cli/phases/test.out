@@ -106,9 +106,7 @@ ClassDef{
 --- resolve-tree-raw end ---
 --- flatten-tree start ---
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    1
-  end
+  1
 end
 --- flatten-tree end ---
 --- flatten-tree-raw start ---
@@ -121,22 +119,13 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    MethodDef{
-      flags = {self}
-      name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-      params = [Local{
-          localVariable = <U <blk>>
-        }]
-      rhs = Literal{ value = 1 }
-    }
+    Literal{ value = 1 }
   ]
 }
 --- flatten-tree-raw end ---
 --- ast start ---
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    1
-  end
+  1
 end
 --- ast end ---
 --- ast-raw start ---
@@ -149,14 +138,7 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    MethodDef{
-      flags = {self}
-      name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-      params = [Local{
-          localVariable = <U <blk>>
-        }]
-      rhs = Literal{ value = 1 }
-    }
+    Literal{ value = 1 }
   ]
 }
 --- ast-raw end ---

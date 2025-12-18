@@ -1,17 +1,3 @@
-method ::Object#rnd {
-
-bb0[firstDead=2]():
-    <self>: Object = cast(<self>: NilClass, Object);
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=-1]():
@@ -113,12 +99,11 @@ bb9[firstDead=-1](<self>: T.class_of(<root>), s: T.all(A, B)):
 
 }
 
-method ::Parent#returns_self {
+method ::Object#rnd {
 
-bb0[firstDead=3]():
-    <self>: Parent = cast(<self>: NilClass, Parent);
-    <returnMethodTemp>$2: Parent = <self>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Parent
+bb0[firstDead=2]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
@@ -173,11 +158,12 @@ bb5[firstDead=5](<self>: T.class_of(Parent), <block-pre-call-temp>$5: Sorbet::Pr
 
 }
 
-method ::<Class:Normal>#<static-init> {
+method ::Parent#returns_self {
 
-bb0[firstDead=2]():
-    <self>: T.class_of(Normal) = cast(<self>: NilClass, T.class_of(Normal));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb0[firstDead=3]():
+    <self>: Parent = cast(<self>: NilClass, Parent);
+    <returnMethodTemp>$2: Parent = <self>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Parent
     <unconditional> -> bb1
 
 # backedges
@@ -187,16 +173,11 @@ bb1[firstDead=-1]():
 
 }
 
-method ::Generic#bad {
+method ::<Class:Normal>#<static-init> {
 
-bb0[firstDead=7]():
-    <self>: Generic[Generic::TM] = cast(<self>: NilClass, Generic[Generic::TM]);
-    <cfgAlias>$5: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <statTemp>$6: Runtime object representing type: T.untyped = <cfgAlias>$8: T.class_of(T).untyped()
-    <statTemp>$3: Runtime object representing type: Generic[T.untyped] = <cfgAlias>$5: T.class_of(Generic).[](<statTemp>$6: Runtime object representing type: T.untyped)
-    <returnMethodTemp>$2: Generic[T.untyped] = <statTemp>$3: Runtime object representing type: Generic[T.untyped].new()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Generic[T.untyped]
+bb0[firstDead=2]():
+    <self>: T.class_of(Normal) = cast(<self>: NilClass, T.class_of(Normal));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
@@ -255,11 +236,16 @@ bb5[firstDead=7](<self>: T.class_of(Generic), <block-pre-call-temp>$5: Sorbet::P
 
 }
 
-method ::<Class:B>#<static-init> {
+method ::Generic#bad {
 
-bb0[firstDead=2]():
-    <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb0[firstDead=7]():
+    <self>: Generic[Generic::TM] = cast(<self>: NilClass, Generic[Generic::TM]);
+    <cfgAlias>$5: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$8: T.class_of(T) = alias <C T>
+    <statTemp>$6: Runtime object representing type: T.untyped = <cfgAlias>$8: T.class_of(T).untyped()
+    <statTemp>$3: Runtime object representing type: Generic[T.untyped] = <cfgAlias>$5: T.class_of(Generic).[](<statTemp>$6: Runtime object representing type: T.untyped)
+    <returnMethodTemp>$2: Generic[T.untyped] = <statTemp>$3: Runtime object representing type: Generic[T.untyped].new()
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Generic[T.untyped]
     <unconditional> -> bb1
 
 # backedges
@@ -269,12 +255,11 @@ bb1[firstDead=-1]():
 
 }
 
-method ::Array#returns_self {
+method ::<Class:B>#<static-init> {
 
-bb0[firstDead=3]():
-    <self>: T::Array[Array::Elem] = cast(<self>: NilClass, T::Array[Array::Elem]);
-    <returnMethodTemp>$2: T::Array[Array::Elem] = <self>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Array::Elem]
+bb0[firstDead=2]():
+    <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
@@ -329,6 +314,21 @@ bb5[firstDead=5](<self>: T.class_of(Array), <block-pre-call-temp>$5: Sorbet::Pri
 
 }
 
+method ::Array#returns_self {
+
+bb0[firstDead=3]():
+    <self>: T::Array[Array::Elem] = cast(<self>: NilClass, T::Array[Array::Elem]);
+    <returnMethodTemp>$2: T::Array[Array::Elem] = <self>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Array::Elem]
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::<Class:A>#<static-init> {
 
 bb0[firstDead=2]():
@@ -339,108 +339,6 @@ bb0[firstDead=2]():
 # backedges
 # - bb0
 bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::B#returns_self {
-
-bb0[firstDead=3]():
-    <self>: B = cast(<self>: NilClass, B);
-    <returnMethodTemp>$2: B = <self>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: B
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::B#takes_self_public {
-
-bb0[firstDead=4]():
-    <self>: B = cast(<self>: NilClass, B);
-    x: T.untyped = load_arg(x)
-    <returnMethodTemp>$2: T.untyped = x
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::B#takes_self_private {
-
-bb0[firstDead=6]():
-    <self>: B = cast(<self>: NilClass, B);
-    x: B = load_arg(x)
-    <cfgAlias>$5: T.class_of(T) = alias <C T>
-    <statTemp>$3: B = <cfgAlias>$5: T.class_of(T).reveal_type(x: B)
-    <returnMethodTemp>$2: B = x
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: B
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::B#yield_self_void {
-
-bb0[firstDead=4]():
-    <self>: B = cast(<self>: NilClass, B);
-    blk: T.proc.params(arg0: T.untyped).void = load_arg(blk)
-    <returnMethodTemp>$2: Sorbet::Private::Static::Void = blk: T.proc.params(arg0: T.untyped).void.call(<self>: B)
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::B#takes_self_or_integer {
-
-bb0[firstDead=6]():
-    <self>: B = cast(<self>: NilClass, B);
-    x: T.any(Integer, B) = load_arg(x)
-    <cfgAlias>$5: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.any(Integer, B) = <cfgAlias>$5: T.class_of(T).reveal_type(x: T.any(Integer, B))
-    <returnMethodTemp>$2: T.any(Integer, B) = x
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(Integer, B)
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::B#== {
-
-bb0[firstDead=6]():
-    <self>: B = cast(<self>: NilClass, B);
-    other: T.untyped = load_arg(other)
-    <statTemp>$4: T.untyped = <self>: B.class()
-    <statTemp>$6: T.untyped = other: T.untyped.class()
-    <returnTemp>$3: T.untyped = <statTemp>$4: T.untyped.==(<statTemp>$6: T.untyped)
-    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$3: T.untyped
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1](<returnMethodTemp>$2):
-    <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 }
@@ -644,6 +542,108 @@ bb25[firstDead=7](<self>: T.class_of(B), <block-pre-call-temp>$74: Sorbet::Priva
     <blockReturnTemp>$76: T::Private::Methods::DeclBuilder = <statTemp>$77: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$83: T.noreturn = blockreturn<sig> <blockReturnTemp>$76: T::Private::Methods::DeclBuilder
     <unconditional> -> bb22
+
+}
+
+method ::B#returns_self {
+
+bb0[firstDead=3]():
+    <self>: B = cast(<self>: NilClass, B);
+    <returnMethodTemp>$2: B = <self>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: B
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::B#takes_self_public {
+
+bb0[firstDead=4]():
+    <self>: B = cast(<self>: NilClass, B);
+    x: T.untyped = load_arg(x)
+    <returnMethodTemp>$2: T.untyped = x
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::B#takes_self_private {
+
+bb0[firstDead=6]():
+    <self>: B = cast(<self>: NilClass, B);
+    x: B = load_arg(x)
+    <cfgAlias>$5: T.class_of(T) = alias <C T>
+    <statTemp>$3: B = <cfgAlias>$5: T.class_of(T).reveal_type(x: B)
+    <returnMethodTemp>$2: B = x
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: B
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::B#yield_self_void {
+
+bb0[firstDead=4]():
+    <self>: B = cast(<self>: NilClass, B);
+    blk: T.proc.params(arg0: T.untyped).void = load_arg(blk)
+    <returnMethodTemp>$2: Sorbet::Private::Static::Void = blk: T.proc.params(arg0: T.untyped).void.call(<self>: B)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Sorbet::Private::Static::Void
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::B#takes_self_or_integer {
+
+bb0[firstDead=6]():
+    <self>: B = cast(<self>: NilClass, B);
+    x: T.any(Integer, B) = load_arg(x)
+    <cfgAlias>$5: T.class_of(T) = alias <C T>
+    <statTemp>$3: T.any(Integer, B) = <cfgAlias>$5: T.class_of(T).reveal_type(x: T.any(Integer, B))
+    <returnMethodTemp>$2: T.any(Integer, B) = x
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(Integer, B)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::B#== {
+
+bb0[firstDead=6]():
+    <self>: B = cast(<self>: NilClass, B);
+    other: T.untyped = load_arg(other)
+    <statTemp>$4: T.untyped = <self>: B.class()
+    <statTemp>$6: T.untyped = other: T.untyped.class()
+    <returnTemp>$3: T.untyped = <statTemp>$4: T.untyped.==(<statTemp>$6: T.untyped)
+    <returnMethodTemp>$2: T.noreturn = return <returnTemp>$3: T.untyped
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1](<returnMethodTemp>$2):
+    <finalReturn> = return <returnMethodTemp>$2
+    <unconditional> -> bb1
 
 }
 

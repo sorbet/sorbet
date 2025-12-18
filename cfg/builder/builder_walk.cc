@@ -1129,7 +1129,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 ret = current;
             },
 
-            [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
+            [&](const ast::ClassDef &c) {
+                // Skip the RHS of a ClassDef, because the CFGCollectorAndTyper walk will handle it
+                // when it walks to that part of the tree.
+                ret = current;
+            },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
 
             [&](const ast::ExpressionPtr &n) {

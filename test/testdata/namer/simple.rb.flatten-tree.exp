@@ -1,23 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::NormalClass<<C NormalClass>> < (::<todo sym>)
     def normal_method(<blk>)
       <emptyTree>
@@ -27,70 +8,43 @@ begin
       <emptyTree>
     end
 
-    <emptyTree>
+    <runtime method definition of normal_method>
 
-    <emptyTree>
+    <runtime method definition of self.normal_static_method>
 
-    def self.<static-init>(<blk>)
-      begin
-        <runtime method definition of normal_method>
-        <runtime method definition of self.normal_static_method>
-      end
+    class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
+    end
+
+    module ::NormalClass::InnerModule<<C InnerModule>> < ()
     end
   end
-  class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  module ::NormalClass::InnerModule<<C InnerModule>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
+
   module ::ANamespace<<C ANamespace>> < ()
-    <emptyTree>
+    class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
+    end
+  end
 
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
   class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   class ::Parent<<C Parent>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   module ::Mixin<<C Mixin>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   module ::OtherMixin<<C OtherMixin>> < ()
-    def self.<static-init>(<blk>)
+  end
+
+  class ::Child<<C Child>> < (::Parent, ::Mixin)
+    <self>.include(::Mixin)
+
+    <self>.include(3)
+
+    <self>.include(::Mixin) do ||
       <emptyTree>
     end
+
+    <self>.whatever().include(::OtherMixin)
   end
-  class ::Child<<C Child>> < (::Parent, ::Mixin)
-    def self.<static-init>(<blk>)
-      begin
-        <self>.include(::Mixin)
-        <self>.include(3)
-        <self>.include(::Mixin) do ||
-          <emptyTree>
-        end
-        <self>.whatever().include(::OtherMixin)
-      end
-    end
-  end
-  <emptyTree>
 end

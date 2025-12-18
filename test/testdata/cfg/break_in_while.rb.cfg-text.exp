@@ -1,3 +1,19 @@
+method ::<Class:<root>>#<static-init> {
+
+bb0[firstDead=4]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <statTemp>$5: T.untyped = <self>: T.class_of(<root>).foo()
+    <returnMethodTemp>$2: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$5: T.untyped)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::Object#foo {
 
 bb0[firstDead=-1]():
@@ -39,22 +55,6 @@ bb5[firstDead=-1]():
     <block-break-assign>$8: Integer(2) = <returnTemp>$7
     <returnMethodTemp>$2: Integer(2) = <block-break-assign>$8
     <unconditional> -> bb4
-
-}
-
-method ::<Class:<root>>#<static-init> {
-
-bb0[firstDead=4]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$5: T.untyped = <self>: T.class_of(<root>).foo()
-    <returnMethodTemp>$2: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$5: T.untyped)
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 

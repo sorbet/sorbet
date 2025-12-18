@@ -14,6 +14,21 @@ bb1[firstDead=-1]():
 
 }
 
+method ::<Class:A>#<static-init> {
+
+bb0[firstDead=3]():
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <returnMethodTemp>$2: Symbol(:each) = :each
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:each)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::<Class:A>#each {
 
 bb0[firstDead=15]():
@@ -41,12 +56,12 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:A>#<static-init> {
+method ::<Class:E>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <returnMethodTemp>$2: Symbol(:each) = :each
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:each)
+    <self>: T.class_of(E) = cast(<self>: NilClass, T.class_of(E));
+    <returnMethodTemp>$2: Symbol(:e) = :e
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:e)
     <unconditional> -> bb1
 
 # backedges
@@ -94,12 +109,12 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:E>#<static-init> {
+method ::<Class:Main>#<static-init> {
 
 bb0[firstDead=3]():
-    <self>: T.class_of(E) = cast(<self>: NilClass, T.class_of(E));
-    <returnMethodTemp>$2: Symbol(:e) = :e
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:e)
+    <self>: T.class_of(Main) = cast(<self>: NilClass, T.class_of(Main));
+    <returnMethodTemp>$2: Symbol(:main) = :main
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:main)
     <unconditional> -> bb1
 
 # backedges
@@ -393,21 +408,6 @@ bb25[firstDead=44](<self>: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyp
     <blockReturnTemp>$163: NilClass = <self>: T.class_of(Main).puts(<statTemp>$222: T.untyped)
     <blockReturnTemp>$226: T.noreturn = blockreturn<each> <blockReturnTemp>$163: NilClass
     <unconditional> -> bb22
-
-}
-
-method ::<Class:Main>#<static-init> {
-
-bb0[firstDead=3]():
-    <self>: T.class_of(Main) = cast(<self>: NilClass, T.class_of(Main));
-    <returnMethodTemp>$2: Symbol(:main) = :main
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:main)
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 

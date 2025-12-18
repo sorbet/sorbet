@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::TestLocals<<C TestLocals>> < (::<todo sym>)
     def method(<blk>)
       begin
@@ -27,9 +20,6 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of method>
-    end
+    <runtime method definition of method>
   end
-  <emptyTree>
 end

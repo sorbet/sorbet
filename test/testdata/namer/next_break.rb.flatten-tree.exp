@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Test<<C Test>> < (::<todo sym>)
     def test_next_break(<blk>)
       <self>.each() do ||
@@ -24,9 +17,6 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of test_next_break>
-    end
+    <runtime method definition of test_next_break>
   end
-  <emptyTree>
 end

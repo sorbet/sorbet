@@ -3,9 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    <self>.foobar() do ||
-      <runtime method definition of a_method>
-    end
+  <self>.foobar() do ||
+    <runtime method definition of a_method>
   end
 end

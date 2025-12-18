@@ -1,69 +1,3 @@
-test/cli/expected-got/expected-got.rb:7: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
-     7 |end
-        ^^^
-  Expected `Integer` for result type of method `foo`:
-    test/cli/expected-got/expected-got.rb:11:
-    11 |def foo
-        ^^^^^^^
-  Got `NilClass` originating from:
-    test/cli/expected-got/expected-got.rb:5: Possibly uninitialized (`NilClass`) in:
-     5 |def foo
-        ^^^^^^^
-
-test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
-    12 |  nil
-          ^^^
-  Expected `Integer` for result type of method `foo`:
-    test/cli/expected-got/expected-got.rb:11:
-    11 |def foo
-        ^^^^^^^
-  Got `NilClass` originating from:
-    test/cli/expected-got/expected-got.rb:12:
-    12 |  nil
-          ^^^
-
-test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(Integer, String)` for argument `x` https://srb.help/7002
-    27 |  takes_integer(x)
-                        ^
-  Expected `Integer` for argument `x` of method `Object#takes_integer`:
-    test/cli/expected-got/expected-got.rb:15:
-    15 |sig {params(x: Integer).void}
-                    ^
-  Got `T.any(Integer, String)` originating from:
-    test/cli/expected-got/expected-got.rb:22:
-    22 |    x = ''
-                ^^
-    test/cli/expected-got/expected-got.rb:24:
-    24 |    x = 1
-                ^
-  Detailed explanation:
-    `String` (the right side of the `T.any`) is not a subtype of `Integer`
-
-test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but found `T.proc.returns(String)` for block argument https://srb.help/7002
-    42 |  takes_int_block(&blk)
-          ^^^^^^^^^^^^^^^^^^^^^
-  Expected `T.proc.returns(Integer)` for block parameter `blk` of method `Object#takes_int_block`:
-    test/cli/expected-got/expected-got.rb:32:
-    32 |sig {params(blk: T.proc.returns(Integer)).void}
-                    ^^^
-  Got `T.proc.returns(String)` originating from:
-    test/cli/expected-got/expected-got.rb:41:
-    41 |def takes_string_block(&blk)
-                                ^^^
-  Detailed explanation:
-    `String` is not a subtype of `Integer` for covariant type member `Proc0::Return`
-
-test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` because the type `Integer` wasn't handled https://srb.help/7026
-    53 |  else T.absurd(x)
-               ^^^^^^^^^^^
-  Got `Integer` originating from:
-    test/cli/expected-got/expected-got.rb:50:
-    50 |def t_absurd(x)
-                     ^
-    test/cli/expected-got/expected-got.rb:52:
-    52 |  when String then 'string'
-               ^^^^^^
-
 test/cli/expected-got/expected-got.rb:30: `T.must` called on `Integer(0)`, which is never `nil` https://srb.help/7015
     30 |T.must(0)
                ^
@@ -173,4 +107,70 @@ test/cli/expected-got/expected-got.rb:74: Argument does not have asserted type `
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Detailed explanation:
     `T.nilable(Integer)` is not a subtype of `Integer` for covariant type member `Array::Elem`
+
+test/cli/expected-got/expected-got.rb:7: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
+     7 |end
+        ^^^
+  Expected `Integer` for result type of method `foo`:
+    test/cli/expected-got/expected-got.rb:11:
+    11 |def foo
+        ^^^^^^^
+  Got `NilClass` originating from:
+    test/cli/expected-got/expected-got.rb:5: Possibly uninitialized (`NilClass`) in:
+     5 |def foo
+        ^^^^^^^
+
+test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
+    12 |  nil
+          ^^^
+  Expected `Integer` for result type of method `foo`:
+    test/cli/expected-got/expected-got.rb:11:
+    11 |def foo
+        ^^^^^^^
+  Got `NilClass` originating from:
+    test/cli/expected-got/expected-got.rb:12:
+    12 |  nil
+          ^^^
+
+test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(Integer, String)` for argument `x` https://srb.help/7002
+    27 |  takes_integer(x)
+                        ^
+  Expected `Integer` for argument `x` of method `Object#takes_integer`:
+    test/cli/expected-got/expected-got.rb:15:
+    15 |sig {params(x: Integer).void}
+                    ^
+  Got `T.any(Integer, String)` originating from:
+    test/cli/expected-got/expected-got.rb:22:
+    22 |    x = ''
+                ^^
+    test/cli/expected-got/expected-got.rb:24:
+    24 |    x = 1
+                ^
+  Detailed explanation:
+    `String` (the right side of the `T.any`) is not a subtype of `Integer`
+
+test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but found `T.proc.returns(String)` for block argument https://srb.help/7002
+    42 |  takes_int_block(&blk)
+          ^^^^^^^^^^^^^^^^^^^^^
+  Expected `T.proc.returns(Integer)` for block parameter `blk` of method `Object#takes_int_block`:
+    test/cli/expected-got/expected-got.rb:32:
+    32 |sig {params(blk: T.proc.returns(Integer)).void}
+                    ^^^
+  Got `T.proc.returns(String)` originating from:
+    test/cli/expected-got/expected-got.rb:41:
+    41 |def takes_string_block(&blk)
+                                ^^^
+  Detailed explanation:
+    `String` is not a subtype of `Integer` for covariant type member `Proc0::Return`
+
+test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` because the type `Integer` wasn't handled https://srb.help/7026
+    53 |  else T.absurd(x)
+               ^^^^^^^^^^^
+  Got `Integer` originating from:
+    test/cli/expected-got/expected-got.rb:50:
+    50 |def t_absurd(x)
+                     ^
+    test/cli/expected-got/expected-got.rb:52:
+    52 |  when String then 'string'
+               ^^^^^^
 Errors: 16
