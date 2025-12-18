@@ -2901,7 +2901,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 constexpr uint32_t length = "**"sv.size();
                 kwrestLoc = core::LocOffsets{location.beginPos() + length, location.endPos()};
             } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName = nextUniqueParserName(core::Names::starStar());
+                sorbetName = nextUniqueParserName(core::Names::kwargs());
 
                 // This location *does* include the whole `**`.
                 kwrestLoc = location;
@@ -3333,7 +3333,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 sorbetName = translateConstantName(prismName);
                 nameLoc = translateLoc(restParamNode->name_loc);
             } else { // An anonymous rest parameter, like `def foo(*)`
-                sorbetName = core::Names::star();
+                sorbetName = core::Names::restargs();
                 nameLoc = location;
             }
 
@@ -3440,7 +3440,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             if (expr == nullptr) { // An anonymous splat like `f(*)`
-                auto var = MK::Local(location, core::Names::star());
+                auto var = MK::Local(location, core::Names::restargs());
                 auto splatExpr = MK::Splat(location, move(var));
                 return make_node_with_expr<parser::ForwardedRestArg>(move(splatExpr), location);
             } else { // Splatting an expression like `f(*a)`
@@ -4544,7 +4544,7 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
                 // Extract the argument from the old Send and create a new one with array's location
                 if (isAnonymousSplat) {
                     // Recreate the splat and local expr with the correct locations
-                    var = MK::Splat(location, MK::Local(location, core::Names::star()));
+                    var = MK::Splat(location, MK::Local(location, core::Names::restargs()));
                 } else {
                     // Recreate the splat with the correct location, keep the splatted expression as-is.
                     var = MK::Splat(location, move(splattedExpr));

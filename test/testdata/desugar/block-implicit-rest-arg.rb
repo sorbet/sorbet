@@ -1,5 +1,6 @@
-# typed: true
+# typed: false
 
-call do |m, a,| # error: Method `call` does not exist
-  stuff # error: Method `stuff` does not exist
+call do |m, a,|
+#               error: Anonymous rest parameter in block args
+    stuff
 end

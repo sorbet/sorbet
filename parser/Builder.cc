@@ -1192,7 +1192,7 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(dstar);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::kwargs(), ++uniqueCounter_);
         }
 
         return make_unique<Kwrestarg>(loc, nm);
@@ -1559,7 +1559,7 @@ public:
             checkReservedForNumberedParameters(name->view(), nameLoc);
         } else {
             // case like 'def m(*); end'
-            nm = core::Names::star();
+            nm = core::Names::restargs();
         }
 
         return make_unique<RestParam>(loc, nm, nameLoc);
