@@ -462,8 +462,8 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
-    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> packageReferences;
-    UnorderedSet<core::SymbolRef> symbolsReferenced;
+    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
+    UnorderedSet<core::SymbolRef> referencedSymbols;
 
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
@@ -508,7 +508,7 @@ public:
         // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
         // symbolsReferenced, and not A, A::B, A::B::C.
         // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
-        symbolsReferenced.insert(litSymbol);
+        referencedSymbols.insert(litSymbol);
 
         auto loc = litSymbol.loc(ctx);
 
@@ -556,7 +556,7 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        packageReferences[otherPackage] = {importNeeded, false};
+        referencedPackages[otherPackage] = {importNeeded, false};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
@@ -674,7 +674,7 @@ public:
                     ENFORCE(false);
                 }
             } else {
-                packageReferences[otherPackage].causesModularityError = true;
+                referencedPackages[otherPackage].causesModularityError = true;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 core::ErrorClass error =
@@ -800,7 +800,7 @@ public:
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
                 resultq->push(
-                    ThreadResult{f.file, std::move(pass.packageReferences), std::move(pass.symbolsReferenced)}, 1);
+                    ThreadResult{f.file, std::move(pass.referencedPackages), std::move(pass.referencedSymbols)}, 1);
             }
             barrier.DecrementCount();
         });
@@ -811,7 +811,7 @@ public:
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem() && threadResult.has_value()) {
-                    auto file = threadResult->file;
+                    auto &file = threadResult->file;
                     auto pkgName = gs.packageDB().getPackageNameForFile(file);
                     if (!pkgName.exists()) {
                         continue;
@@ -819,13 +819,13 @@ public:
 
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
                     vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
-                    auto referencedPackages = threadResult->referencedPackages;
+                    auto &referencedPackages = threadResult->referencedPackages;
                     for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
                         references.emplace_back(make_pair(packageName, packageReferenceInfo));
                     }
                     nonConstPackageInfo->trackPackageReferences(file, references);
 
-                    auto referencedSymbols = threadResult->referencedSymbols;
+                    auto &referencedSymbols = threadResult->referencedSymbols;
                     nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
                 }
             }
@@ -836,8 +836,8 @@ public:
     }
 };
 
-bool ownerAlreadyExported(const core::GlobalState &gs, vector<core::SymbolRef> &alreadyExported,
-                          core::ClassOrModuleRef owner) {
+bool ownerWillBeExported(const core::GlobalState &gs, const vector<core::SymbolRef> &alreadyExported,
+                         core::ClassOrModuleRef owner) {
     while (owner != core::Symbols::root()) {
         if (absl::c_find(alreadyExported, owner) != alreadyExported.end()) {
             return true;
@@ -849,7 +849,7 @@ bool ownerAlreadyExported(const core::GlobalState &gs, vector<core::SymbolRef> &
 
 void exportClassOrModule(const core::GlobalState &gs,
                          UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport,
-                         core::ClassOrModuleRef symbol, vector<core::FileRef> referencingFiles) {
+                         core::ClassOrModuleRef symbol, vector<core::FileRef> &referencingFiles) {
     auto data = symbol.data(gs);
     auto owningPackage = data->package;
     if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
@@ -863,7 +863,7 @@ void exportClassOrModule(const core::GlobalState &gs,
             continue;
         }
 
-        if (ownerAlreadyExported(gs, toExport[owningPackage], data->owner)) {
+        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
             // No need to check the rest of referencingFiles, we're already going to export the owner
             break;
         }
@@ -875,7 +875,7 @@ void exportClassOrModule(const core::GlobalState &gs,
 
 void exportField(const core::GlobalState &gs,
                  UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport, core::FieldRef symbol,
-                 vector<core::FileRef> referencingFiles) {
+                 vector<core::FileRef> &referencingFiles) {
     auto data = symbol.data(gs);
     auto owningPackage = data->owner.data(gs)->package;
     if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
@@ -889,14 +889,14 @@ void exportField(const core::GlobalState &gs,
             continue;
         }
 
-        if (ownerAlreadyExported(gs, toExport[owningPackage], data->owner)) {
+        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
             // No need to check the rest of referencingFiles, we're already going to export the owner
             break;
         }
 
         auto maybeEnumClass = getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
         if (maybeEnumClass.exists()) {
-            // No need to check if maybeEnumClass is already going to be exported since we have a ownerAlreadyExported
+            // No need to check if maybeEnumClass is already going to be exported since we have a ownerWillBeExported
             // call above
             toExport[owningPackage].push_back(maybeEnumClass);
         } else {
@@ -906,7 +906,7 @@ void exportField(const core::GlobalState &gs,
     }
 }
 
-void reportMissingImportExportAutocorrect(const core::GlobalState &gs, vector<ast::ParsedFile> &files) {
+void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
     Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
     auto packagesInEdit = UnorderedSet<core::packages::MangledName>{};
     for (auto &parsedFile : files) {

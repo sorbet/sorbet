@@ -532,6 +532,9 @@ public:
         return this->files->span();
     }
 
+    // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
+    // find all references. For example, if a file references A::B::C::D, then only A::B::C::D will be in set returned,
+    // and not A, A::B, A::B::C.
     const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(core::FileRef fref) const {
         ENFORCE(packageDB().genPackages());
         ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
