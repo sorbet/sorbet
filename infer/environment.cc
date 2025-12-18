@@ -1058,7 +1058,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 recvType.type,   recvType,
                                                 recvType.type,   send.link.get(),
                                                 ownerLoc,        send.isPrivateOk,
-                                                suppressErrors,  inWhat.symbol.data(ctx)->name};
+                                                suppressErrors,  inWhat.methodName(ctx)};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
@@ -1327,7 +1327,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     type = i.link->result->returnType;
                 }
                 auto loc = ctx.locAt(bind.loc);
-                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc, inWhat.symbol.data(ctx)->name);
+                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc, inWhat.methodName(ctx));
                 tp.type = std::move(type);
                 tp.origins.emplace_back(loc);
             },
@@ -1487,7 +1487,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
                                                     suppressErrors,
-                                                    inWhat.symbol.data(ctx)->name};
+                                                    inWhat.methodName(ctx)};
                     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                     tp.type = dispatched.returnType;
                 }
@@ -1642,7 +1642,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 auto castType = core::Types::resultTypeAsSeenFromSelf(ctx, c.type, klass);
 
-                if (inWhat.symbol.data(ctx)->flags.isGenericMethod) {
+                if (inWhat.symbol.isMethod() && inWhat.symbol.asMethodRef().data(ctx)->flags.isGenericMethod) {
                     // ^ This mimics the check in LoadArg's call to parameterTypeAsSeenByImplementation
                     // It instantiates any `T.type_parameter(:U)`'s in the type (which are only
                     // valid in a method body if the method's signature is generic).
@@ -1819,7 +1819,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     // sometimes a variable has a given type because of a constant outside this method
                                     ctx.locAt(inWhat.loc).contains(cur.origins[0]) &&
                                     // don't attempt to insert a `T.let` into the method params list
-                                    (inWhat.symbol.data(ctx)->name.isAnyStaticInitName(ctx) ||
+                                    (inWhat.symbol.isClassOrModule() ||
                                      !ctx.locAt(inWhat.declLoc).contains(cur.origins[0]))) {
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);

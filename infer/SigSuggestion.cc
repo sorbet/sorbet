@@ -210,7 +210,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
                 }
 
                 if (shouldFindArgumentTypes) {
-                    auto currentMethodName = cfg.symbol.data(ctx)->name;
+                    auto currentMethodName = cfg.methodName(ctx);
                     extractSendArgumentKnowledge(ctx, bind.loc, snd, blockLocals, blockArgRequirements,
                                                  currentMethodName);
                 }
@@ -313,7 +313,11 @@ bool childNeedsOverride(core::Context ctx, core::MethodRef childSymbol, core::Me
 optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Context ctx, cfg::CFG &cfg,
                                                                      const core::TypePtr &methodReturnType,
                                                                      core::TypeConstraint &constr) {
-    core::MethodRef methodSymbol = cfg.symbol;
+    if (cfg.symbol.isClassOrModule()) {
+        return nullopt;
+    }
+
+    auto methodSymbol = cfg.symbol.asMethodRef();
 
     bool guessedSomethingUseful = false;
 

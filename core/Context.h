@@ -31,6 +31,9 @@ public:
 
     ErrorBuilder beginError(LocOffsets loc, ErrorClass what) const;
 
+    // See MutableContext::lookupSelfClass
+    ClassOrModuleRef lookupSelfClass() const;
+
     Context withOwner(SymbolRef sym) const;
     Context withFile(FileRef file) const;
 

@@ -82,9 +82,12 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         CFG::UnfreezeCFGLocalVariables unfreezeVars(*res);
         retSym = cctx.newTemporary(core::Names::returnMethodTemp());
 
-        auto selfClaz = res->symbol.data(ctx)->rebind;
+        core::ClassOrModuleRef selfClaz;
+        if (res->symbol.isMethod()) {
+            selfClaz = res->symbol.asMethodRef().data(ctx)->rebind;
+        }
         if (!selfClaz.exists()) {
-            selfClaz = res->symbol.data(ctx)->owner;
+            selfClaz = ctx.lookupSelfClass();
         }
         synthesizeExpr(entry, LocalRef::selfVariable(), res->declLoc.copyWithZeroLength(),
                        make_insn<Cast>(LocalRef::selfVariable(), res->declLoc.copyWithZeroLength(),
@@ -131,7 +134,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
                     }
                 }
 
-                synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(res->symbol, i));
+                synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(method, i));
             }
         } else {
             // res->symbol being a class symbol means that it's a static-init, which has no parameters

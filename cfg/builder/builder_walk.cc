@@ -130,15 +130,17 @@ bool isKernelLambda(const ast::Send &s) {
 
 InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, const ast::Send &s) {
     const auto &ctx = cctx.ctx;
-    auto method = cctx.inWhat.symbol;
-    if (!method.data(ctx)->flags.isGenericMethod) {
-        // Using staticInit as a crude proxy for "is inside a `sig` block"
+    if (cctx.inWhat.symbol.isClassOrModule()) {
+        // Using "inside static init method" as a crude proxy for "is inside a `sig` block"
         // This means we do not report as many errors as we should (but cheaply guards against false positives)
-        if (!method.data(ctx)->name.isAnyStaticInitName(ctx)) {
-            if (auto e = ctx.beginError(s.loc, core::errors::CFG::UnknownTypeParameter)) {
-                e.setHeader("Method `{}` does not declare any type parameters", method.show(ctx));
-                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
-            }
+        return nullptr;
+    }
+
+    auto method = cctx.inWhat.symbol.asMethodRef();
+    if (!method.data(ctx)->flags.isGenericMethod) {
+        if (auto e = ctx.beginError(s.loc, core::errors::CFG::UnknownTypeParameter)) {
+            e.setHeader("Method `{}` does not declare any type parameters", method.show(ctx));
+            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
         }
 
         return nullptr;
@@ -383,7 +385,7 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
     auto *defaultNext = cctx.inWhat.freshBlock(cctx.loops);
 
     auto present = cctx.newTemporary(core::Names::argPresent());
-    auto methodSymbol = cctx.inWhat.symbol;
+    auto methodSymbol = cctx.inWhat.symbol.asMethodRef(); // walkDefault never called for static-init methods
     synthesizeExpr(presentCont, present, paramLoc, make_insn<ArgPresent>(methodSymbol, paramIndex));
     conditionalJump(presentCont, present, presentNext, defaultNext, cctx.inWhat, paramLoc);
 

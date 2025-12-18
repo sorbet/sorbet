@@ -27,6 +27,10 @@ CFG::UnfreezeCFGLocalVariables::~UnfreezeCFGLocalVariables() {
     this->cfg.localVariablesFrozen = true;
 }
 
+core::NameRef CFG::methodName(core::Context ctx) const {
+    return this->symbol.isMethod() ? this->symbol.name(ctx) : core::Names::staticInit();
+}
+
 int CFG::numLocalVariables() const {
     return this->localVariables.size();
 }

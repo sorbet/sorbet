@@ -117,6 +117,9 @@ public:
      * because they all have lifetime identical with each other and the CFG.
      */
     core::SymbolRef symbol;
+
+    core::NameRef methodName(core::Context ctx) const;
+
     int maxBasicBlockId = 0;
 
     /**

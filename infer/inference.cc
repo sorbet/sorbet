@@ -53,10 +53,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     auto guessTypes = true;
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
-    if (cfg->symbol.data(ctx)->flags.isGenericMethod) {
+    if (cfg->symbol.isMethod() && cfg->symbol.asMethodRef().data(ctx)->flags.isGenericMethod) {
         _constr = make_unique<core::TypeConstraint>();
         constr = _constr.get();
-        for (auto typeParameter : cfg->symbol.data(ctx)->typeParameters()) {
+        for (auto typeParameter : cfg->symbol.asMethodRef().data(ctx)->typeParameters()) {
             constr->rememberIsSubtype(ctx, typeParameter.data(ctx)->resultType,
                                       core::make_type<core::SelfTypeParam>(typeParameter));
         }
@@ -67,11 +67,12 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         guessTypes = false;
     }
 
-    core::TypePtr methodReturnType = cfg->symbol.data(ctx)->resultType;
+    auto methodReturnType =
+        cfg->symbol.isClassOrModule() ? core::Types::top() : cfg->symbol.asMethodRef().data(ctx)->resultType;
     auto missingReturnType = methodReturnType == nullptr;
 
-    if (cfg->symbol.data(ctx)->name.kind() != core::NameKind::UTF8 ||
-        cfg->symbol.data(ctx)->name == core::Names::staticInit() || !cfg->symbol.data(ctx)->loc().exists()) {
+    if (cfg->symbol.name(ctx).kind() != core::NameKind::UTF8 || cfg->symbol.isClassOrModule() ||
+        !cfg->symbol.loc(ctx).exists()) {
         guessTypes = false;
     }
 
@@ -87,16 +88,13 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             methodReturnType = returnTypeVar.data(ctx)->resultType;
 
             constr->defineDomain(ctx, domainTemp);
-        } else if (cfg->symbol.data(ctx)->name.isAnyStaticInitName(ctx)) {
-            methodReturnType = core::Types::top();
         } else {
             methodReturnType = core::Types::untyped(cfg->symbol);
         }
     } else {
-        auto enclosingClass = cfg->symbol.data(ctx)->owner;
+        auto enclosingClass = ctx.lookupSelfClass();
         methodReturnType = core::Types::instantiateTypeVars(
-            ctx, core::Types::resultTypeAsSeenFromSelf(ctx, cfg->symbol.data(ctx)->resultType, enclosingClass),
-            *constr);
+            ctx, core::Types::resultTypeAsSeenFromSelf(ctx, methodReturnType, enclosingClass), *constr);
         methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx)->selfType(ctx));
     }
 
@@ -396,16 +394,16 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
     if (missingReturnType && guessTypes) {
         if (auto e = ctx.beginError(cfg->declLoc, core::errors::Infer::UntypedMethod)) {
-            e.setHeader("The method `{}` does not have a `{}`", cfg->symbol.data(ctx)->name.show(ctx), "sig");
+            e.setHeader("The method `{}` does not have a `{}`", cfg->symbol.name(ctx).show(ctx), "sig");
             auto maybeAutocorrect = SigSuggestion::maybeSuggestSig(ctx, *cfg, methodReturnType, *constr);
             if (maybeAutocorrect.has_value()) {
                 e.addAutocorrect(move(maybeAutocorrect.value()));
-            } else if (cfg->symbol.data(ctx)->owner.data(ctx)->derivesFrom(ctx, core::Symbols::Struct())) {
+            } else if (ctx.lookupSelfClass().data(ctx)->derivesFrom(ctx, core::Symbols::Struct())) {
                 e.addErrorNote("Struct classes defined with `{}` are hard to use in `{}` files.\n"
                                "    Consider using `{}` instead.",
                                "Struct", "# typed: strict", "T::Struct");
             }
-        } else if (ctx.state.lspQuery.matchesSuggestSig(cfg->symbol)) {
+        } else if (cfg->symbol.isMethod() && ctx.state.lspQuery.matchesSuggestSig(cfg->symbol.asMethodRef())) {
             // Force maybeSuggestSig to run just to respond to the query (discard the result)
             SigSuggestion::maybeSuggestSig(ctx, *cfg, methodReturnType, *constr);
         }
