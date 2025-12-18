@@ -116,7 +116,7 @@ public:
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
      * because they all have lifetime identical with each other and the CFG.
      */
-    core::MethodRef symbol;
+    core::SymbolRef symbol;
     int maxBasicBlockId = 0;
 
     /**
