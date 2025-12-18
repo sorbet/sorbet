@@ -1,23 +1,13 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::C<<C C>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      ::C::L = <cast:let>(<self>.lambda() do |x$1|
-        x$1.*(x$1)
-      end, AppliedType {
-        klass = <C <U Proc1>>
-        targs = [
-          <C <U Return>> = Integer
-          <C <U Arg0>> = Integer
-        ]
-      }, ::T.proc().params(:x, ::Integer).returns(::Integer))
-    end
+    ::C::L = <cast:let>(<self>.lambda() do |x$1|
+      x$1.*(x$1)
+    end, AppliedType {
+      klass = <C <U Proc1>>
+      targs = [
+        <C <U Return>> = Integer
+        <C <U Arg0>> = Integer
+      ]
+    }, ::T.proc().params(:x, ::Integer).returns(::Integer))
   end
-  <emptyTree>
 end

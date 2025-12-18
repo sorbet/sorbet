@@ -26,13 +26,12 @@ bb1[firstDead=-1]():
 
 }
 
-method ::Trigger#trigger {
+method ::<Class:Trigger>#<static-init> {
 
-bb0[firstDead=4]():
-    @__fake_logger$3: T.untyped = alias <C <undeclared-field-stub>> (@__fake_logger)
-    <self>: Trigger = cast(<self>: NilClass, Trigger);
-    <returnMethodTemp>$2: T.untyped = @__fake_logger$3
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+bb0[firstDead=3]():
+    <self>: T.class_of(Trigger) = cast(<self>: NilClass, T.class_of(Trigger));
+    <returnMethodTemp>$2: Symbol(:trigger) = :trigger
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:trigger)
     <unconditional> -> bb1
 
 # backedges
@@ -42,12 +41,13 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:Trigger>#<static-init> {
+method ::Trigger#trigger {
 
-bb0[firstDead=3]():
-    <self>: T.class_of(Trigger) = cast(<self>: NilClass, T.class_of(Trigger));
-    <returnMethodTemp>$2: Symbol(:trigger) = :trigger
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:trigger)
+bb0[firstDead=4]():
+    @__fake_logger$3: T.untyped = alias <C <undeclared-field-stub>> (@__fake_logger)
+    <self>: Trigger = cast(<self>: NilClass, Trigger);
+    <returnMethodTemp>$2: T.untyped = @__fake_logger$3
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges

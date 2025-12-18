@@ -69,6 +69,21 @@ bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
 
 }
 
+method ::<Class:A>#<static-init> {
+
+bb0[firstDead=3]():
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <returnMethodTemp>$2: Symbol(:g) = :g
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:g)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::A#f {
 
 bb0[firstDead=-1]():
@@ -124,20 +139,6 @@ bb0[firstDead=10]():
     <statTemp>$3: String = cast(<castTemp>$6: T.untyped, String);
     <returnMethodTemp>$2: String = <statTemp>$3: String.+(y: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:A>#<static-init> {
-
-bb0[firstDead=2]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges

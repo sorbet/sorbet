@@ -1,37 +1,28 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Parent<<C Parent>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.params(:x, ::Integer).void()
+    end
+
     def self.takes_integer_static(x, <blk>)
       <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.params(:x, ::Integer).void()
     end
 
     def takes_integer_instance(x, <blk>)
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.params(:x, ::Integer).void()
-        end
-        <self>.sig() do ||
-          <self>.params(:x, ::Integer).void()
-        end
-        <self>.extend(::T::Sig)
-        <runtime method definition of self.takes_integer_static>
-        <runtime method definition of takes_integer_instance>
-        <emptyTree>
-      end
-    end
+    <self>.extend(::T::Sig)
+
+    <runtime method definition of self.takes_integer_static>
+
+    <runtime method definition of takes_integer_instance>
   end
+
   class ::Child<<C Child>> < (::Parent)
     def self.outer_static(<blk>)
       <self>.takes_integer_static(<runtime method definition of self.inner_static>)
@@ -49,13 +40,8 @@ begin
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.takes_integer_static(<runtime method definition of self.outer_static>)
-        <self>.takes_integer_static(<runtime method definition of outer_instance>)
-        <emptyTree>
-      end
-    end
+    <self>.takes_integer_static(<runtime method definition of self.outer_static>)
+
+    <self>.takes_integer_static(<runtime method definition of outer_instance>)
   end
-  <emptyTree>
 end

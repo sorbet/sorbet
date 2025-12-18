@@ -17,7 +17,6 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/sort/sort.h"
@@ -1434,7 +1433,36 @@ public:
             cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
             if (cfg) {
                 for (auto &extension : ctx.state.semanticExtensions) {
-                    extension->typecheck(ctx, ctx.file, *cfg, m);
+                    extension->typecheck(ctx, ctx.file, *cfg);
+                }
+            }
+        }
+        if (print.CFG.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toString(ctx));
+        }
+        if (print.CFGText.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toTextualString(ctx));
+        }
+        if (print.CFGRaw.enabled) {
+            print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
+        }
+    }
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &c) {
+        auto symbol = c.symbol.lookupStaticInit(ctx);
+
+        if (!infer::Inference::willRun(ctx, c.declLoc, symbol)) {
+            return;
+        }
+
+        auto &print = opts.print;
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(symbol), c, symbol);
+
+        if (opts.stopAfterPhase != options::Phase::CFG) {
+            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            if (cfg) {
+                for (auto &extension : ctx.state.semanticExtensions) {
+                    extension->typecheck(ctx, ctx.file, *cfg);
                 }
             }
         }
@@ -1460,8 +1488,6 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         return;
     }
-
-    resolved = class_flatten::runOne(ctx, move(resolved));
 
     definition_validator::runOne(ctx, resolved);
 

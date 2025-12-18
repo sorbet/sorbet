@@ -1,12 +1,9 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Main<<C Main>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.params(:a, ::Integer).returns(::Integer)
+    end
+
     def foo<foo$1>(a, <blk>)
       a
     end
@@ -19,18 +16,12 @@ begin
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.params(:a, ::Integer).returns(::Integer)
-        end
-        <self>.extend(::T::Sig)
-        <runtime method definition of foo>
-        <runtime method definition of foo>
-        <runtime method definition of foo>
-        <emptyTree>
-      end
-    end
+    <self>.extend(::T::Sig)
+
+    <runtime method definition of foo>
+
+    <runtime method definition of foo>
+
+    <runtime method definition of foo>
   end
-  <emptyTree>
 end

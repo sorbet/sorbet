@@ -106,9 +106,7 @@ ClassDef{
 --- resolve-tree-raw end ---
 --- flatten-tree start ---
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    1
-  end
+  1
 end
 --- flatten-tree end ---
 --- flatten-tree-raw start ---
@@ -121,22 +119,13 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    MethodDef{
-      flags = {self}
-      name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-      params = [Local{
-          localVariable = <U <blk>>
-        }]
-      rhs = Literal{ value = 1 }
-    }
+    Literal{ value = 1 }
   ]
 }
 --- flatten-tree-raw end ---
 --- ast start ---
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    1
-  end
+  1
 end
 --- ast end ---
 --- ast-raw start ---
@@ -149,14 +138,7 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    MethodDef{
-      flags = {self}
-      name = <U <static-init>><<N <U <static-init>> $CENSORED>>
-      params = [Local{
-          localVariable = <U <blk>>
-        }]
-      rhs = Literal{ value = 1 }
-    }
+    Literal{ value = 1 }
   ]
 }
 --- ast-raw end ---
@@ -245,34 +227,25 @@ class <C <U <root>>> < <C <U Object>> ()
 
 --- symbol-table-raw end ---
 --- checking diff ---
+1,12d0
 1,15d0
-1,19d0
-1,5d0
+1,3d0
 < 
 < 
 < 
 < 
-<           localVariable = <U <blk>>
-<         }]
-<       flags = {self}
-<       name = <U <static-init>><<N <U <static-init>> $CENSORED>>
 <       orig = nullptr
-<       params = [Local{
-<       rhs = Literal{ value = 1 }
 <       symbol = (class ::<todo sym>)
-<     1
 <     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
 <     <returnMethodTemp>$2: Integer(1) = 1
 <     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
 <     <unconditional> -> bb1
 <     <unconditional> -> bb1
-<     MethodDef{
-<     }
+<     Literal{ value = 1 }
 <     }]
+<   1
 <   ]
 <   ancestors = [ConstantLit{
-<   def self.<static-init><<static-init>$CENSORED>(<blk>)
-<   end
 <   kind = class
 <   name = EmptyTree
 <   rhs = [

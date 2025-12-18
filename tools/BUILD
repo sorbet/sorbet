@@ -21,7 +21,6 @@ compilation_database(
         "//ast/verifier:verifier",
         "//cfg:cfg",
         "//cfg/builder:builder",
-        "//class_flatten:class_flatten",
         "//common:common",
         "//common:common_test",
         "//common/concurrency:concurrency",

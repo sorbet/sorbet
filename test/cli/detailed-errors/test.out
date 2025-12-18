@@ -71,6 +71,18 @@ union.rb:52: Argument does not have asserted type `T.any(Union::M1, Union::M3)` 
     `T.nilable(T.any(Union::C1, Union::C2))` (the left side of the `T.any`) is not a subtype of `T.any(Union::M1, Union::M3)`
       `Union::C2` (the right side of the `T.any`) is not a subtype of `T.any(Union::M1, Union::M3)`
 
+type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A[String, Lower, Upper]` originating from:
+    type_members.rb:21:
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `String` is not equivalent to `Middle` for invariant type member `A::X`
+    `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
+    `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
+
 type_members.rb:35: Argument does not have asserted type `Box2[Integer]` https://srb.help/7007
     35 |  T.let(box1, Box2[Integer])
           ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -106,18 +118,6 @@ type_members.rb:49: Expected `Box[T.any(Integer, String)]` but found `Box[Intege
     `Integer` is not equivalent to `T.any(Integer, String)` for invariant type member `Box::Elem`
       `Integer` is a subtype of `T.any(Integer, String)` but not the reverse, so they are not equivalent
         `String` (the right side of the `T.any`) is not a subtype of `Integer`
-
-type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
-    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `A[String, Lower, Upper]` originating from:
-    type_members.rb:21:
-    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Detailed explanation:
-    `String` is not equivalent to `Middle` for invariant type member `A::X`
-    `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
-    `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
 
 intersection.rb:46: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
     46 |T.let(C.new, T.all(M1, M2))

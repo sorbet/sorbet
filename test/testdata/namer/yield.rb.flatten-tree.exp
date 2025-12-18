@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::Main.new().main()
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Main<<C Main>> < (::<todo sym>)
     def yielder(<blk>)
       begin
@@ -49,16 +42,16 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <runtime method definition of yielder>
-        <runtime method definition of blockpass>
-        <runtime method definition of mixed>
-        <runtime method definition of blockyield>
-        <runtime method definition of main>
-        <emptyTree>
-      end
-    end
+    <runtime method definition of yielder>
+
+    <runtime method definition of blockpass>
+
+    <runtime method definition of mixed>
+
+    <runtime method definition of blockyield>
+
+    <runtime method definition of main>
   end
-  <emptyTree>
+
+  ::Main.new().main()
 end

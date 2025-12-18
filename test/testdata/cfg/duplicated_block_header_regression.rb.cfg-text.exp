@@ -31,9 +31,9 @@ bb2[firstDead=-1](xyz: Integer, found: T::Boolean):
 # - bb2
 # - bb6
 bb4[firstDead=3](xyz: Integer):
-    <cfgAlias>$28: T.class_of(T) = alias <C T>
-    <statTemp>$26: Integer = <cfgAlias>$28: T.class_of(T).reveal_type(xyz: Integer)
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <cfgAlias>$27: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: Integer = <cfgAlias>$27: T.class_of(T).reveal_type(xyz: Integer)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
     <unconditional> -> bb1
 
 # backedges

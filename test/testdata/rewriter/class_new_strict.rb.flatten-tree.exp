@@ -1,12 +1,9 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::A<<C A>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.void()
+    end
+
     def self.make(<blk>)
       begin
         _cls = ::Class.new() do ||
@@ -34,16 +31,8 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.void()
-        end
-        <self>.extend(::T::Sig)
-        <runtime method definition of self.make>
-        <emptyTree>
-      end
-    end
+    <self>.extend(::T::Sig)
+
+    <runtime method definition of self.make>
   end
-  <emptyTree>
 end

@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Foo<<C Foo>> < ()
+  end
+
+  Unresolved: <emptyTree>::<C Bar>
+
+  Unresolved: ::Foo::<C Bar>
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  Unresolved: <emptyTree>::<C Bar>
+
+  Unresolved: ::Foo::<C Bar>
+end

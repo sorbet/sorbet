@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::OpEq<<C OpEq>> < (::<todo sym>)
     def b(<blk>)
       <emptyTree>
@@ -78,16 +71,14 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <runtime method definition of b>
-        <runtime method definition of b=>
-        <runtime method definition of y>
-        <runtime method definition of z>
-        <runtime method definition of example>
-        <emptyTree>
-      end
-    end
+    <runtime method definition of b>
+
+    <runtime method definition of b=>
+
+    <runtime method definition of y>
+
+    <runtime method definition of z>
+
+    <runtime method definition of example>
   end
-  <emptyTree>
 end

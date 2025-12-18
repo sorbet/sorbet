@@ -1,3 +1,18 @@
+method ::<Class:<root>>#<static-init> {
+
+bb0[firstDead=3]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <returnMethodTemp>$2: Symbol(:foo) = :foo
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::Object#foo {
 
 bb0[firstDead=-1]():
@@ -67,21 +82,6 @@ bb11[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer)):
 # - bb11
 bb12[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:<root>>#<static-init> {
-
-bb0[firstDead=3]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <returnMethodTemp>$2: Symbol(:foo) = :foo
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 }

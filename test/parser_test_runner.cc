@@ -12,7 +12,6 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/sort/sort.h"

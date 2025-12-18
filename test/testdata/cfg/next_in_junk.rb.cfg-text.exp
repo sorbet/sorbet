@@ -1,17 +1,3 @@
-method ::Object#foo {
-
-bb0[firstDead=-1]():
-    <self>: Object = cast(<self>: NilClass, Object);
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <finalReturn> = return <returnMethodTemp>$2
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
@@ -23,6 +9,20 @@ bb0[firstDead=3]():
 # backedges
 # - bb0
 bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Object#foo {
+
+bb0[firstDead=-1]():
+    <self>: Object = cast(<self>: NilClass, Object);
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 }

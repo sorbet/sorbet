@@ -12,6 +12,21 @@ bb1[firstDead=-1]():
 
 }
 
+method ::<Class:Foo>#<static-init> {
+
+bb0[firstDead=3]():
+    <self>: T.class_of(Foo) = cast(<self>: NilClass, T.class_of(Foo));
+    <returnMethodTemp>$2: Symbol(:baz) = :baz
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:baz)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
 method ::Foo#bar {
 
 bb0[firstDead=5]():
@@ -66,20 +81,6 @@ bb5[firstDead=5](<self>: Foo, <block-pre-call-temp>$4: Sorbet::Private::Static::
     <blockReturnTemp>$7: NilClass = <self>: Foo.puts(r$1: T.untyped)
     <blockReturnTemp>$10: T.noreturn = blockreturn<bar> <blockReturnTemp>$7: NilClass
     <unconditional> -> bb2
-
-}
-
-method ::<Class:Foo>#<static-init> {
-
-bb0[firstDead=2]():
-    <self>: T.class_of(Foo) = cast(<self>: NilClass, T.class_of(Foo));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 

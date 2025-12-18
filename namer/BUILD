@@ -19,7 +19,6 @@ cc_library(
         "//ast",
         "//ast/packager",
         "//ast/treemap",
-        "//class_flatten",
         "//core",
     ],
 )

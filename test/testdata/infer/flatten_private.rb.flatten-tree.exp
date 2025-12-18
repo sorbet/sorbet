@@ -1,14 +1,15 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::A<<C A>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.params(:arg0, ::Integer).void()
+    end
+
     def self.private(arg0, <blk>)
       <emptyTree>
+    end
+
+    <self>.sig() do ||
+      <self>.params(:arg0, ::Integer).void()
     end
 
     def self.private_class_method(arg0, <blk>)
@@ -31,22 +32,14 @@ begin
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.params(:arg0, ::Integer).void()
-        end
-        <self>.sig() do ||
-          <self>.params(:arg0, ::Integer).void()
-        end
-        <self>.extend(::T::Sig)
-        <runtime method definition of self.private>
-        <runtime method definition of self.private_class_method>
-        <self>.private_class_method(<runtime method definition of self.outer_static>)
-        <self>.private(<runtime method definition of outer_instance>)
-        <emptyTree>
-      end
-    end
+    <self>.extend(::T::Sig)
+
+    <runtime method definition of self.private>
+
+    <runtime method definition of self.private_class_method>
+
+    <self>.private_class_method(<runtime method definition of self.outer_static>)
+
+    <self>.private(<runtime method definition of outer_instance>)
   end
-  <emptyTree>
 end

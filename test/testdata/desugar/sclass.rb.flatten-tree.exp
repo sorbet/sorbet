@@ -1,183 +1,117 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def main(<blk>)
-      begin
-        <self>.puts(::A.a())
-        <self>.puts(::B.b())
-        <self>.puts($c.c())
-        <self>.puts(::D.singleton_class().d())
-        <self>.puts(::E.e())
-        <self>.puts(::F.f=(91))
-        <self>.puts(::G.new().wrapper())
-        <self>.puts(::T.untyped.h())
-      end
-    end
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        $c = ::Object.new()
-        <runtime method definition of main>
-        <self>.main()
-        <emptyTree>
-      end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def main(<blk>)
+    begin
+      <self>.puts(::A.a())
+      <self>.puts(::B.b())
+      <self>.puts($c.c())
+      <self>.puts(::D.singleton_class().d())
+      <self>.puts(::E.e())
+      <self>.puts(::F.f=(91))
+      <self>.puts(::G.new().wrapper())
+      <self>.puts(::T.untyped.h())
     end
   end
+
   class ::A<<C A>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   class ::B<<C B>> < (::<todo sym>)
-    <emptyTree>
+    class <singleton class><<Class:B>> < ()
+      def b(<blk>)
+        "b"
+      end
 
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class <singleton class><<Class:B>> < ()
-    def b(<blk>)
-      "b"
-    end
-
-    def self.<static-init>(<blk>)
       <runtime method definition of b>
     end
   end
+
+  $c = ::Object.new()
+
   class ::D<<C D>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class <singleton class><<Class:D>> < ()
-    <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class <singleton class><<Class:<Class:D>>> < ()
-    def d(<blk>)
-      "d"
-    end
-
-    def self.<static-init>(<blk>)
-      <runtime method definition of d>
-    end
-  end
-  class ::E<<C E>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <self>.wrapper()
-    end
-  end
-  class <singleton class><<Class:E>> < ()
-    def wrapper(<blk>)
-      <runtime method definition of e>
-    end
-
-    def e(<blk>)
-      "e"
-    end
-
-    def self.<static-init>(<blk>)
-      <runtime method definition of wrapper>
-    end
-  end
-  class ::F<<C F>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class <singleton class><<Class:F>> < ()
-    def initialize(<blk>)
-      @f = <cast:let>(0, Integer, ::Integer)
-    end
-
-    def f=(f, <blk>)
-      @f = f
-    end
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.params(:f, ::Integer).returns(::Integer)
+    class <singleton class><<Class:D>> < ()
+      class <singleton class><<Class:<Class:D>>> < ()
+        def d(<blk>)
+          "d"
         end
-        <runtime method definition of initialize>
-        <self>.extend(::T::Sig)
-        <runtime method definition of f=>
-        <emptyTree>
+
+        <runtime method definition of d>
       end
     end
   end
+
+  class ::E<<C E>> < (::<todo sym>)
+    class <singleton class><<Class:E>> < ()
+      def wrapper(<blk>)
+        <runtime method definition of e>
+      end
+
+      def e(<blk>)
+        "e"
+      end
+
+      <runtime method definition of wrapper>
+    end
+
+    <self>.wrapper()
+  end
+
+  class ::F<<C F>> < (::<todo sym>)
+    class <singleton class><<Class:F>> < ()
+      def initialize(<blk>)
+        @f = <cast:let>(0, Integer, ::Integer)
+      end
+
+      <self>.sig() do ||
+        <self>.params(:f, ::Integer).returns(::Integer)
+      end
+
+      def f=(f, <blk>)
+        @f = f
+      end
+
+      <runtime method definition of initialize>
+
+      <self>.extend(::T::Sig)
+
+      <runtime method definition of f=>
+    end
+  end
+
   class ::G<<C G>> < (::<todo sym>)
     def wrapper(<blk>)
       <self>.inner()
     end
 
-    <emptyTree>
+    class <singleton class><<Class:G>> < ()
+      def inner(<blk>)
+        ::T.reveal_type(<self>)
+      end
+
+      <runtime method definition of inner>
+    end
 
     def self.g(<blk>)
       "g"
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <runtime method definition of wrapper>
-        <runtime method definition of self.g>
-        <emptyTree>
+    <runtime method definition of wrapper>
+
+    <runtime method definition of self.g>
+  end
+
+  class ::H<<C H>> < (::<todo sym>)
+    class <singleton class><<Class:H>> < ()
+      class ::<Class:H>::H2<<C H2>> < (::<todo sym>)
+        def self.h(<blk>)
+          "h"
+        end
+
+        <runtime method definition of self.h>
       end
     end
   end
-  class <singleton class><<Class:G>> < ()
-    def inner(<blk>)
-      ::T.reveal_type(<self>)
-    end
 
-    def self.<static-init>(<blk>)
-      <runtime method definition of inner>
-    end
-  end
-  class ::H<<C H>> < (::<todo sym>)
-    <emptyTree>
+  <runtime method definition of main>
 
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class <singleton class><<Class:H>> < ()
-    <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class ::<Class:H>::H2<<C H2>> < (::<todo sym>)
-    def self.h(<blk>)
-      "h"
-    end
-
-    def self.<static-init>(<blk>)
-      <runtime method definition of self.h>
-    end
-  end
-  <emptyTree>
+  <self>.main()
 end

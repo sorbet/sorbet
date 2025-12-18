@@ -2,7 +2,6 @@
 // has to go first as it violates our requirements
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
-#include "class_flatten/class_flatten.h"
 #include "common/common.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
@@ -44,10 +43,6 @@ void processSource(core::GlobalState &cb, string str) {
     auto cancelled = namer::Namer::run(cb, absl::Span<ast::ParsedFile>(trees), *workers, &foundHashes);
     ENFORCE(!cancelled);
     auto resolved = resolver::Resolver::run(cb, move(trees), *workers);
-    for (auto &tree : resolved.result()) {
-        sorbet::core::MutableContext ctx(cb, core::Symbols::root(), tree.file);
-        tree = class_flatten::runOne(ctx, move(tree));
-    }
 }
 
 TEST_CASE("Infer") {

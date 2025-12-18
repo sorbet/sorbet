@@ -13,7 +13,6 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
@@ -70,8 +69,7 @@ constexpr string_view packageFileName = "__package.rb"sv;
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &m) {
         if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
             return;
         }
@@ -81,7 +79,24 @@ public:
         cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         if (cfg) {
             for (auto &extension : ctx.state.semanticExtensions) {
-                extension->typecheck(ctx, ctx.file, *cfg, m);
+                extension->typecheck(ctx, ctx.file, *cfg);
+            }
+        }
+        cfgs.push_back(move(cfg));
+    }
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &c) {
+        auto symbol = c.symbol.lookupStaticInit(ctx);
+
+        if (!infer::Inference::willRun(ctx, c.declLoc, symbol)) {
+            return;
+        }
+
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(symbol), c, symbol);
+        cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
+        if (cfg) {
+            for (auto &extension : ctx.state.semanticExtensions) {
+                extension->typecheck(ctx, ctx.file, *cfg);
             }
         }
         cfgs.push_back(move(cfg));
@@ -556,7 +571,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto file = resolvedTree.file;
 
         core::Context ctx(*gs, core::Symbols::root(), file);
-        resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
 
         definition_validator::runOne(ctx, resolvedTree);
         handler.drainErrors(*gs);
@@ -591,7 +605,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             checkPragma("cfg");
             CFGCollectorAndTyper collector;
             core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            ast::ShallowWalk::apply(ctx, collector, resolvedTree.tree);
+            ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
             }
@@ -637,7 +651,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             checkTree();
             CFGCollectorAndTyper collector;
             core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            ast::ShallowWalk::apply(ctx, collector, resolvedTree.tree);
+            ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, file);
             }

@@ -1,45 +1,22 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        <cast:assert_type!>(::Test.new(), Test::Mixin, ::Test::Mixin)
-        <cast:assert_type!>(::Test.new(), Test::Other, ::Test::Other)
-        <cast:assert_type!>(::Test.new(), Other, ::Other)
-        <emptyTree>
-      end
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Other<<C Other>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   class ::Test<<C Test>> < (::Other, ::Test::Mixin, ::Test::Other)
-    <emptyTree>
+    module ::Test::Mixin<<C Mixin>> < ()
+    end
 
-    <emptyTree>
+    module ::Test::Other<<C Other>> < ()
+    end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.include(::Test::Mixin)
-        <self>.include(::Test::Other)
-        <emptyTree>
-      end
-    end
+    <self>.include(::Test::Mixin)
+
+    <self>.include(::Test::Other)
   end
-  module ::Test::Mixin<<C Mixin>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  module ::Test::Other<<C Other>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  <emptyTree>
+
+  <cast:assert_type!>(::Test.new(), Test::Mixin, ::Test::Mixin)
+
+  <cast:assert_type!>(::Test.new(), Test::Other, ::Test::Other)
+
+  <cast:assert_type!>(::Test.new(), Other, ::Other)
 end

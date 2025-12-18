@@ -110,20 +110,6 @@ test.rb:73: Parameter **`rest` of type `[String]` not compatible with type of ov
   Detailed explanation:
     `Integer` is not a subtype of `String` for index `0` of `1`-tuple
 
-test.rb:7: Expected `[Integer]` but found `[String("")]` for method result type https://srb.help/7005
-     7 |  ['']
-          ^^^^
-  Expected `[Integer]` for result type of method `foo`:
-    test.rb:6:
-     6 |def foo(x)
-        ^^^^^^^^^^
-  Got `[String("")] (1-tuple)` originating from:
-    test.rb:7:
-     7 |  ['']
-          ^^^^
-  Detailed explanation:
-    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
-
 test.rb:10: Expected `[Integer]` but found `[String("")]` for argument `x` https://srb.help/7002
     10 |foo([''])
             ^^^^
@@ -252,6 +238,20 @@ test.rb:108: Argument does not have asserted type `[Integer]` https://srb.help/7
 test.rb:112: Incompatible assignment to variable declared via `let`: `[String("")]` is not a subtype of `[Integer]` https://srb.help/7001
      112 |  b = [""]
                 ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
+
+test.rb:7: Expected `[Integer]` but found `[String("")]` for method result type https://srb.help/7005
+     7 |  ['']
+          ^^^^
+  Expected `[Integer]` for result type of method `foo`:
+    test.rb:6:
+     6 |def foo(x)
+        ^^^^^^^^^^
+  Got `[String("")] (1-tuple)` originating from:
+    test.rb:7:
+     7 |  ['']
+          ^^^^
   Detailed explanation:
     `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
 

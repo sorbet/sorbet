@@ -1,0 +1,19 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::TestSig<<C TestSig>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.returns(::T2)
+    end
+
+    def test_resolve(<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of test_resolve>
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::T1<<C T1>> < (::<todo sym>)
+  end
+
+  ::T2 = ::T1
+end

@@ -1,43 +1,19 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Mixin1<<C Mixin1>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   module ::Mixin2<<C Mixin2>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   class ::Parent<<C Parent>> < (::<todo sym>, ::Mixin1)
-    def self.<static-init>(<blk>)
-      <self>.include(::Mixin1)
-    end
+    <self>.include(::Mixin1)
   end
+
   class ::Child<<C Child>> < (::Parent, ::Mixin2)
-    def self.<static-init>(<blk>)
-      <self>.include(::Mixin2)
-    end
+    <self>.include(::Mixin2)
   end
+
   class ::MultipleInclude<<C MultipleInclude>> < (::<todo sym>, ::Mixin2, ::Mixin1)
-    def self.<static-init>(<blk>)
-      <self>.include(::Mixin1, ::Mixin2)
-    end
+    <self>.include(::Mixin1, ::Mixin2)
   end
-  <emptyTree>
 end

@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Examples<<C Examples>> < (::<todo sym>)
     def i_like_ifs(<blk>)
       if true
@@ -94,19 +87,20 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <runtime method definition of i_like_ifs>
-        <runtime method definition of i_like_exps>
-        <runtime method definition of return_in_one_branch1>
-        <runtime method definition of return_in_one_branch2>
-        <runtime method definition of variables>
-        <runtime method definition of variables_and_loop>
-        <runtime method definition of variables_loop_if>
-        <runtime method definition of take_arguments>
-        <emptyTree>
-      end
-    end
+    <runtime method definition of i_like_ifs>
+
+    <runtime method definition of i_like_exps>
+
+    <runtime method definition of return_in_one_branch1>
+
+    <runtime method definition of return_in_one_branch2>
+
+    <runtime method definition of variables>
+
+    <runtime method definition of variables_and_loop>
+
+    <runtime method definition of variables_loop_if>
+
+    <runtime method definition of take_arguments>
   end
-  <emptyTree>
 end

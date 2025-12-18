@@ -24,9 +24,9 @@ bb2[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$6: Sorbet::P
 bb3[firstDead=5](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(<root>)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$6, class_helper>
     <self>: T.class_of(<root>) = <selfRestore>$7
-    <cfgAlias>$21: T.class_of(T) = alias <C T>
-    <statTemp>$19: T.class_of(<root>) = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: T.class_of(<root>))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <cfgAlias>$20: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: T.class_of(<root>) = <cfgAlias>$20: T.class_of(T).reveal_type(<self>: T.class_of(<root>))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.class_of(<root>)
     <unconditional> -> bb1
 
 # backedges
@@ -44,6 +44,21 @@ bb5[firstDead=10](<self>: T.class_of(<root>), <block-pre-call-temp>$6: Sorbet::P
     <blockReturnTemp>$8: T.untyped = <self>: B.instance_helper()
     <blockReturnTemp>$18: T.noreturn = blockreturn<class_helper> <blockReturnTemp>$8: T.untyped
     <unconditional> -> bb2
+
+}
+
+method ::<Class:Base>#<static-init> {
+
+bb0[firstDead=3]():
+    <self>: T.class_of(Base) = cast(<self>: NilClass, T.class_of(Base));
+    <returnMethodTemp>$2: Symbol(:before_create) = :before_create
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:before_create)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 
@@ -75,11 +90,12 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:Base>#<static-init> {
+method ::<Class:Concern>#<static-init> {
 
-bb0[firstDead=2]():
-    <self>: T.class_of(Base) = cast(<self>: NilClass, T.class_of(Base));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb0[firstDead=3]():
+    <self>: T.class_of(Concern) = cast(<self>: NilClass, T.class_of(Concern));
+    <returnMethodTemp>$2: Symbol(:included) = :included
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:included)
     <unconditional> -> bb1
 
 # backedges
@@ -107,29 +123,14 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:Concern>#<static-init> {
-
-bb0[firstDead=3]():
-    <self>: T.class_of(Concern) = cast(<self>: NilClass, T.class_of(Concern));
-    <returnMethodTemp>$2: Symbol(:included) = :included
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:included)
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:Readable>#<static-init> {
 
 bb0[firstDead=-1]():
     <self>: T.class_of(Readable) = cast(<self>: NilClass, T.class_of(Readable));
     <cfgAlias>$6: T.class_of(Concern) = alias <C Concern>
     <statTemp>$3: T.class_of(Readable) = <self>: T.class_of(Readable).extend(<cfgAlias>$6: T.class_of(Concern))
-    <block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(Readable).included()
-    <selfRestore>$10: T.class_of(Readable) = <self>
+    <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <self>: T.class_of(Readable).included()
+    <selfRestore>$9: T.class_of(Readable) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -140,25 +141,25 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(Readable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Readable)):
+bb2[firstDead=-1](<self>: T.class_of(Readable), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Readable)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Readable)):
-    <statTemp>$7: T.untyped = Solve<<block-pre-call-temp>$9, included>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb3[firstDead=2](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Readable)):
+    <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$8, included>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=4](<self>: T.class_of(Readable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Readable)):
+bb5[firstDead=4](<self>: T.class_of(Readable), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Readable)):
     # outerLoops: 1
     <self>: T.class_of(Readable) = loadSelf(included)
-    <statTemp>$13: Symbol(:do_this) = :do_this
-    <blockReturnTemp>$11: T.untyped = <self>: T.class_of(Readable).before_create(<statTemp>$13: Symbol(:do_this))
-    <blockReturnTemp>$14: T.noreturn = blockreturn<included> <blockReturnTemp>$11: T.untyped
+    <statTemp>$12: Symbol(:do_this) = :do_this
+    <blockReturnTemp>$10: T.untyped = <self>: T.class_of(Readable).before_create(<statTemp>$12: Symbol(:do_this))
+    <blockReturnTemp>$13: T.noreturn = blockreturn<included> <blockReturnTemp>$10: T.untyped
     <unconditional> -> bb2
 
 }
@@ -169,8 +170,8 @@ bb0[firstDead=-1]():
     <self>: T.class_of(Writable) = cast(<self>: NilClass, T.class_of(Writable));
     <cfgAlias>$6: T.class_of(Concern) = alias <C Concern>
     <statTemp>$3: T.class_of(Writable) = <self>: T.class_of(Writable).extend(<cfgAlias>$6: T.class_of(Concern))
-    <block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(Writable).included()
-    <selfRestore>$10: T.class_of(Writable) = <self>
+    <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <self>: T.class_of(Writable).included()
+    <selfRestore>$9: T.class_of(Writable) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -181,36 +182,36 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(Writable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Writable)):
+bb2[firstDead=-1](<self>: T.class_of(Writable), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Writable)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Writable)):
-    <statTemp>$7: T.untyped = Solve<<block-pre-call-temp>$9, included>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb3[firstDead=2](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Writable)):
+    <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$8, included>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=15](<self>: T.class_of(Writable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Writable)):
+bb5[firstDead=15](<self>: T.class_of(Writable), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Writable)):
     # outerLoops: 1
     <self>: T.class_of(Writable) = loadSelf(included)
-    <cfgAlias>$15: T.class_of(T) = alias <C T>
-    <cfgAlias>$18: T.class_of(T) = alias <C T>
-    <cfgAlias>$20: T.class_of(Article) = alias <C Article>
-    <statTemp>$16: Runtime object representing type: T.class_of(Article) = <cfgAlias>$18: T.class_of(T).class_of(<cfgAlias>$20: T.class_of(Article))
-    <cfgAlias>$23: T.class_of(T) = alias <C T>
-    <cfgAlias>$25: T.class_of(Post) = alias <C Post>
-    <statTemp>$21: Runtime object representing type: T.class_of(Post) = <cfgAlias>$23: T.class_of(T).class_of(<cfgAlias>$25: T.class_of(Post))
-    keep_for_ide$13: Runtime object representing type: T.any(T.class_of(Article), T.class_of(Post)) = <cfgAlias>$15: T.class_of(T).any(<statTemp>$16: Runtime object representing type: T.class_of(Article), <statTemp>$21: Runtime object representing type: T.class_of(Post))
-    keep_for_ide$13: T.untyped = <keep-alive> keep_for_ide$13
-    <castTemp>$26: T.class_of(Writable) = <self>
-    <self>: T.any(T.class_of(Article), T.class_of(Post)) = cast(<castTemp>$26: T.class_of(Writable), T.any(T.class_of(Article), T.class_of(Post)));
-    <statTemp>$28: Symbol(:name) = :name
-    <blockReturnTemp>$11: T.untyped = <self>: T.any(T.class_of(Article), T.class_of(Post)).some_class_method(<statTemp>$28: Symbol(:name))
-    <blockReturnTemp>$29: T.noreturn = blockreturn<included> <blockReturnTemp>$11: T.untyped
+    <cfgAlias>$14: T.class_of(T) = alias <C T>
+    <cfgAlias>$17: T.class_of(T) = alias <C T>
+    <cfgAlias>$19: T.class_of(Article) = alias <C Article>
+    <statTemp>$15: Runtime object representing type: T.class_of(Article) = <cfgAlias>$17: T.class_of(T).class_of(<cfgAlias>$19: T.class_of(Article))
+    <cfgAlias>$22: T.class_of(T) = alias <C T>
+    <cfgAlias>$24: T.class_of(Post) = alias <C Post>
+    <statTemp>$20: Runtime object representing type: T.class_of(Post) = <cfgAlias>$22: T.class_of(T).class_of(<cfgAlias>$24: T.class_of(Post))
+    keep_for_ide$12: Runtime object representing type: T.any(T.class_of(Article), T.class_of(Post)) = <cfgAlias>$14: T.class_of(T).any(<statTemp>$15: Runtime object representing type: T.class_of(Article), <statTemp>$20: Runtime object representing type: T.class_of(Post))
+    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
+    <castTemp>$25: T.class_of(Writable) = <self>
+    <self>: T.any(T.class_of(Article), T.class_of(Post)) = cast(<castTemp>$25: T.class_of(Writable), T.any(T.class_of(Article), T.class_of(Post)));
+    <statTemp>$27: Symbol(:name) = :name
+    <blockReturnTemp>$10: T.untyped = <self>: T.any(T.class_of(Article), T.class_of(Post)).some_class_method(<statTemp>$27: Symbol(:name))
+    <blockReturnTemp>$28: T.noreturn = blockreturn<included> <blockReturnTemp>$10: T.untyped
     <unconditional> -> bb2
 
 }
@@ -221,8 +222,8 @@ bb0[firstDead=-1]():
     <self>: T.class_of(Shareable) = cast(<self>: NilClass, T.class_of(Shareable));
     <cfgAlias>$6: T.class_of(Concern) = alias <C Concern>
     <statTemp>$3: T.class_of(Shareable) = <self>: T.class_of(Shareable).extend(<cfgAlias>$6: T.class_of(Concern))
-    <block-pre-call-temp>$9: Sorbet::Private::Static::Void = <self>: T.class_of(Shareable).included()
-    <selfRestore>$10: T.class_of(Shareable) = <self>
+    <block-pre-call-temp>$8: Sorbet::Private::Static::Void = <self>: T.class_of(Shareable).included()
+    <selfRestore>$9: T.class_of(Shareable) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -233,31 +234,79 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(Shareable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Shareable)):
+bb2[firstDead=-1](<self>: T.class_of(Shareable), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Shareable)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Shareable)):
-    <statTemp>$7: T.untyped = Solve<<block-pre-call-temp>$9, included>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb3[firstDead=2](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Shareable)):
+    <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$8, included>
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=10](<self>: T.class_of(Shareable), <block-pre-call-temp>$9: Sorbet::Private::Static::Void, <selfRestore>$10: T.class_of(Shareable)):
+bb5[firstDead=10](<self>: T.class_of(Shareable), <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(Shareable)):
     # outerLoops: 1
     <self>: T.class_of(Shareable) = loadSelf(included)
-    <cfgAlias>$15: T.class_of(T) = alias <C T>
-    <cfgAlias>$17: T.class_of(Article) = alias <C Article>
-    keep_for_ide$13: Runtime object representing type: T.class_of(Article) = <cfgAlias>$15: T.class_of(T).class_of(<cfgAlias>$17: T.class_of(Article))
-    keep_for_ide$13: T.untyped = <keep-alive> keep_for_ide$13
-    <castTemp>$18: T.class_of(Shareable) = <self>
-    <self>: T.class_of(Article) = cast(<castTemp>$18: T.class_of(Shareable), T.class_of(Article));
-    <statTemp>$20: Symbol(:do_this) = :do_this
-    <blockReturnTemp>$11: T.untyped = <self>: T.class_of(Article).before_save(<statTemp>$20: Symbol(:do_this))
-    <blockReturnTemp>$21: T.noreturn = blockreturn<included> <blockReturnTemp>$11: T.untyped
+    <cfgAlias>$14: T.class_of(T) = alias <C T>
+    <cfgAlias>$16: T.class_of(Article) = alias <C Article>
+    keep_for_ide$12: Runtime object representing type: T.class_of(Article) = <cfgAlias>$14: T.class_of(T).class_of(<cfgAlias>$16: T.class_of(Article))
+    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
+    <castTemp>$17: T.class_of(Shareable) = <self>
+    <self>: T.class_of(Article) = cast(<castTemp>$17: T.class_of(Shareable), T.class_of(Article));
+    <statTemp>$19: Symbol(:do_this) = :do_this
+    <blockReturnTemp>$10: T.untyped = <self>: T.class_of(Article).before_save(<statTemp>$19: Symbol(:do_this))
+    <blockReturnTemp>$20: T.noreturn = blockreturn<included> <blockReturnTemp>$10: T.untyped
+    <unconditional> -> bb2
+
+}
+
+method ::<Class:Post>#<static-init> {
+
+bb0[firstDead=-1]():
+    <self>: T.class_of(Post) = cast(<self>: NilClass, T.class_of(Post));
+    <cfgAlias>$6: T.class_of(Readable) = alias <C Readable>
+    <statTemp>$3: T.class_of(Post) = <self>: T.class_of(Post).include(<cfgAlias>$6: T.class_of(Readable))
+    <cfgAlias>$10: T.class_of(Writable) = alias <C Writable>
+    <statTemp>$7: T.class_of(Post) = <self>: T.class_of(Post).include(<cfgAlias>$10: T.class_of(Writable))
+    <statTemp>$12: T.class_of(Post) = <self>
+    <statTemp>$13: Symbol(:run_callback) = :run_callback
+    <hashTemp>$14: Symbol(:if) = :if
+    <cfgAlias>$17: T.class_of(Kernel) = alias <C Kernel>
+    <block-pre-call-temp>$18: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(Kernel).lambda()
+    <selfRestore>$19: T.class_of(Post) = <self>
+    <unconditional> -> bb2
+
+# backedges
+# - bb3
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+# - bb5
+bb2[firstDead=-1](<self>: T.class_of(Post), <statTemp>$12: T.class_of(Post), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Post)):
+    # outerLoops: 1
+    <block-call> -> (NilClass ? bb5 : bb3)
+
+# backedges
+# - bb2
+bb3[firstDead=4](<statTemp>$12: T.class_of(Post), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Post)):
+    <hashTemp>$15: T.proc.returns(T.untyped) = Solve<<block-pre-call-temp>$18, lambda>
+    <statTemp>$11: T.untyped = <statTemp>$12: T.class_of(Post).before_create(<statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <hashTemp>$15: T.proc.returns(T.untyped))
+    <returnMethodTemp>$2: Symbol(:score) = :score
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:score)
+    <unconditional> -> bb1
+
+# backedges
+# - bb2
+bb5[firstDead=3](<self>: T.class_of(Post), <statTemp>$12: T.class_of(Post), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Post)):
+    # outerLoops: 1
+    <self>: T.class_of(Post) = loadSelf(lambda)
+    <blockReturnTemp>$20: T.untyped = <self>: T.class_of(Post).should_run_callback?()
+    <blockReturnTemp>$22: T.noreturn = blockreturn<lambda> <blockReturnTemp>$20: T.untyped
     <unconditional> -> bb2
 
 }
@@ -322,82 +371,6 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:Post>#<static-init> {
-
-bb0[firstDead=-1]():
-    <self>: T.class_of(Post) = cast(<self>: NilClass, T.class_of(Post));
-    <cfgAlias>$6: T.class_of(Readable) = alias <C Readable>
-    <statTemp>$3: T.class_of(Post) = <self>: T.class_of(Post).include(<cfgAlias>$6: T.class_of(Readable))
-    <cfgAlias>$10: T.class_of(Writable) = alias <C Writable>
-    <statTemp>$7: T.class_of(Post) = <self>: T.class_of(Post).include(<cfgAlias>$10: T.class_of(Writable))
-    <statTemp>$12: T.class_of(Post) = <self>
-    <statTemp>$13: Symbol(:run_callback) = :run_callback
-    <hashTemp>$14: Symbol(:if) = :if
-    <cfgAlias>$17: T.class_of(Kernel) = alias <C Kernel>
-    <block-pre-call-temp>$18: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(Kernel).lambda()
-    <selfRestore>$19: T.class_of(Post) = <self>
-    <unconditional> -> bb2
-
-# backedges
-# - bb3
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-# - bb5
-bb2[firstDead=-1](<self>: T.class_of(Post), <statTemp>$12: T.class_of(Post), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Post)):
-    # outerLoops: 1
-    <block-call> -> (NilClass ? bb5 : bb3)
-
-# backedges
-# - bb2
-bb3[firstDead=3](<statTemp>$12: T.class_of(Post), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Post)):
-    <hashTemp>$15: T.proc.returns(T.untyped) = Solve<<block-pre-call-temp>$18, lambda>
-    <statTemp>$11: T.untyped = <statTemp>$12: T.class_of(Post).before_create(<statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <hashTemp>$15: T.proc.returns(T.untyped))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb2
-bb5[firstDead=3](<self>: T.class_of(Post), <statTemp>$12: T.class_of(Post), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Post)):
-    # outerLoops: 1
-    <self>: T.class_of(Post) = loadSelf(lambda)
-    <blockReturnTemp>$20: T.untyped = <self>: T.class_of(Post).should_run_callback?()
-    <blockReturnTemp>$22: T.noreturn = blockreturn<lambda> <blockReturnTemp>$20: T.untyped
-    <unconditional> -> bb2
-
-}
-
-method ::Article#author {
-
-bb0[firstDead=2]():
-    <self>: Article = cast(<self>: NilClass, Article);
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::Article#should_run_callback? {
-
-bb0[firstDead=3]():
-    <self>: Article = cast(<self>: NilClass, Article);
-    <returnMethodTemp>$2: TrueClass = true
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: TrueClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::<Class:Article>#<static-init> {
 
 bb0[firstDead=-1]():
@@ -428,10 +401,11 @@ bb2[firstDead=-1](<self>: T.class_of(Article), <statTemp>$12: T.class_of(Article
 
 # backedges
 # - bb2
-bb3[firstDead=3](<statTemp>$12: T.class_of(Article), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Article)):
+bb3[firstDead=4](<statTemp>$12: T.class_of(Article), <statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <block-pre-call-temp>$18: Sorbet::Private::Static::Void, <selfRestore>$19: T.class_of(Article)):
     <hashTemp>$15: T.proc.returns(T.untyped) = Solve<<block-pre-call-temp>$18, lambda>
     <statTemp>$11: T.untyped = <statTemp>$12: T.class_of(Article).before_create(<statTemp>$13: Symbol(:run_callback), <hashTemp>$14: Symbol(:if), <hashTemp>$15: T.proc.returns(T.untyped))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:should_run_callback?) = :should_run_callback?
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:should_run_callback?)
     <unconditional> -> bb1
 
 # backedges
@@ -450,11 +424,26 @@ bb5[firstDead=8](<self>: T.class_of(Article), <statTemp>$12: T.class_of(Article)
 
 }
 
-method ::A#instance_helper {
+method ::Article#author {
 
 bb0[firstDead=2]():
-    <self>: A = cast(<self>: NilClass, A);
+    <self>: Article = cast(<self>: NilClass, Article);
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::Article#should_run_callback? {
+
+bb0[firstDead=3]():
+    <self>: Article = cast(<self>: NilClass, Article);
+    <returnMethodTemp>$2: TrueClass = true
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: TrueClass
     <unconditional> -> bb1
 
 # backedges
@@ -492,7 +481,7 @@ bb3[firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRe
     <self>: T.class_of(A) = <selfRestore>$8
     <cfgAlias>$22: T.class_of(T) = alias <C T>
     <statTemp>$20: T.class_of(A) = <cfgAlias>$22: T.class_of(T).reveal_type(<self>: T.class_of(A))
-    <statTemp>$24: NilClass = <self>: T.class_of(A).puts(f: T.proc.returns(T.untyped))
+    <returnMethodTemp>$2: NilClass = <self>: T.class_of(A).puts(f: T.proc.returns(T.untyped))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -514,24 +503,10 @@ bb5[firstDead=10](<self>: T.class_of(A), <block-pre-call-temp>$7: Sorbet::Privat
 
 }
 
-method ::<Class:B>#class_helper {
+method ::A#instance_helper {
 
 bb0[firstDead=2]():
-    <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::B#instance_helper {
-
-bb0[firstDead=2]():
-    <self>: B = cast(<self>: NilClass, B);
+    <self>: A = cast(<self>: NilClass, A);
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -564,13 +539,14 @@ bb2[firstDead=-1](<self>: T.class_of(B), <block-pre-call-temp>$5: Sorbet::Privat
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(B)):
+bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(B)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(B) = <selfRestore>$6
     <cfgAlias>$19: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$21: T.class_of(T) = alias <C T>
     <statTemp>$16: T.class_of(B) = <self>: T.class_of(B).extend(<cfgAlias>$19: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:instance_helper) = :instance_helper
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:instance_helper)
     <unconditional> -> bb1
 
 # backedges
@@ -589,10 +565,24 @@ bb5[firstDead=8](<self>: T.class_of(B), <block-pre-call-temp>$5: Sorbet::Private
 
 }
 
-method ::N#helper_from_N {
+method ::<Class:B>#class_helper {
 
 bb0[firstDead=2]():
-    <self>: N = cast(<self>: NilClass, N);
+    <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::B#instance_helper {
+
+bb0[firstDead=2]():
+    <self>: B = cast(<self>: NilClass, B);
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -609,6 +599,38 @@ bb0[firstDead=3]():
     <self>: T.class_of(N) = cast(<self>: NilClass, T.class_of(N));
     <returnMethodTemp>$2: Symbol(:helper_from_N) = :helper_from_N
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:helper_from_N)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::N#helper_from_N {
+
+bb0[firstDead=2]():
+    <self>: N = cast(<self>: NilClass, N);
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:M>#<static-init> {
+
+bb0[firstDead=6]():
+    <self>: T.class_of(M) = cast(<self>: NilClass, T.class_of(M));
+    <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$8: T.class_of(T) = alias <C T>
+    <statTemp>$3: T.class_of(M) = <self>: T.class_of(M).extend(<cfgAlias>$6: T.class_of(T::Sig))
+    <returnMethodTemp>$2: Symbol(:main) = :main
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:main)
     <unconditional> -> bb1
 
 # backedges
@@ -657,14 +679,15 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:M>#<static-init> {
+method ::<Class:ThisSelf>#<static-init> {
 
-bb0[firstDead=5]():
-    <self>: T.class_of(M) = cast(<self>: NilClass, T.class_of(M));
+bb0[firstDead=6]():
+    <self>: T.class_of(ThisSelf) = cast(<self>: NilClass, T.class_of(ThisSelf));
     <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.class_of(M) = <self>: T.class_of(M).extend(<cfgAlias>$6: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <statTemp>$3: T.class_of(ThisSelf) = <self>: T.class_of(ThisSelf).extend(<cfgAlias>$6: T.class_of(T::Sig))
+    <returnMethodTemp>$2: Symbol(:main) = :main
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:main)
     <unconditional> -> bb1
 
 # backedges
@@ -697,20 +720,100 @@ bb1[firstDead=-1]():
 
 }
 
-method ::<Class:ThisSelf>#<static-init> {
+method ::<Class:Rescues>#<static-init> {
 
-bb0[firstDead=5]():
-    <self>: T.class_of(ThisSelf) = cast(<self>: NilClass, T.class_of(ThisSelf));
-    <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.class_of(ThisSelf) = <self>: T.class_of(ThisSelf).extend(<cfgAlias>$6: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb0[firstDead=-1]():
+    <self>: T.class_of(Rescues) = cast(<self>: NilClass, T.class_of(Rescues));
+    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <self>: T.class_of(Rescues).takes_block()
+    <selfRestore>$7: T.class_of(Rescues) = <self>
+    <unconditional> -> bb2
+
+# backedges
+# - bb3
+# - bb10
+# - bb11
+# - bb12
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
 # - bb0
-bb1[firstDead=-1]():
+# - bb13
+bb2[firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: NilClass, <castTemp>$13: NilClass, <gotoDeadTemp>$24: NilClass):
+    # outerLoops: 1
+    <block-call> -> (NilClass ? bb5 : bb3)
+
+# backedges
+# - bb2
+bb3[firstDead=3](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues)):
+    <statTemp>$4: T.untyped = Solve<<block-pre-call-temp>$6, takes_block>
+    <returnMethodTemp>$2: Symbol(:baz) = :baz
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:baz)
     <unconditional> -> bb1
+
+# backedges
+# - bb2
+bb5[firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: NilClass, <castTemp>$13: NilClass, <gotoDeadTemp>$24: NilClass):
+    # outerLoops: 1
+    <self>: T.class_of(Rescues) = loadSelf(takes_block)
+    <exceptionValue>$9: T.nilable(Exception) = <get-current-exception>
+    <self>: Integer = cast(<castTemp>$13: NilClass, Integer);
+    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb8)
+
+# backedges
+# - bb5
+# - bb8
+bb7[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <exceptionValue>$9: Exception, <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$24: NilClass):
+    # outerLoops: 1
+    <cfgAlias>$19: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$20: T::Boolean = <cfgAlias>$19: T.class_of(StandardError).===(<exceptionValue>$9: Exception)
+    <isaCheckTemp>$20 -> (T::Boolean ? bb11 : bb12)
+
+# backedges
+# - bb5
+bb8[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <gotoDeadTemp>$24: NilClass):
+    # outerLoops: 1
+    <cfgAlias>$12: T.class_of(Integer) = alias <C Integer>
+    keep_for_ide$11: T.class_of(Integer) = <cfgAlias>$12
+    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
+    <castTemp>$13: Integer = <self>
+    <self>: Integer = cast(<castTemp>$13: Integer, Integer);
+    <cfgAlias>$15: T.class_of(T) = alias <C T>
+    <blockReturnTemp>$8: Integer = <cfgAlias>$15: T.class_of(T).reveal_type(<self>: Integer)
+    <exceptionValue>$9: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb10)
+
+# backedges
+# - bb8
+bb10[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: Integer, <castTemp>$13: Integer, <gotoDeadTemp>$24: NilClass):
+    # outerLoops: 1
+    <gotoDeadTemp>$24 -> (NilClass ? bb1 : bb13)
+
+# backedges
+# - bb7
+bb11[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <exceptionValue>$9: StandardError, <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$24: NilClass):
+    # outerLoops: 1
+    <exceptionValue>$9: NilClass = nil
+    <keepForCfgTemp>$17: T.untyped = <keep-alive> <exceptionValue>$9
+    <cfgAlias>$22: T.class_of(T) = alias <C T>
+    <blockReturnTemp>$8: Integer = <cfgAlias>$22: T.class_of(T).reveal_type(<self>: Integer)
+    <gotoDeadTemp>$24 -> (NilClass ? bb1 : bb13)
+
+# backedges
+# - bb7
+bb12[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <castTemp>$13: T.nilable(Integer)):
+    # outerLoops: 1
+    <gotoDeadTemp>$24: TrueClass = true
+    <gotoDeadTemp>$24 -> (TrueClass ? bb1 : bb13)
+
+# backedges
+# - bb10
+# - bb11
+# - bb12
+bb13[firstDead=1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: Integer, <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$24: NilClass):
+    # outerLoops: 1
+    <blockReturnTemp>$26: T.noreturn = blockreturn<takes_block> <blockReturnTemp>$8: Integer
+    <unconditional> -> bb2
 
 }
 
@@ -947,99 +1050,18 @@ bb9[firstDead=1](<returnMethodTemp>$2: String):
 
 }
 
-method ::<Class:Rescues>#<static-init> {
+method ::<Class:UntypedBind>#<static-init> {
 
-bb0[firstDead=-1]():
-    <self>: T.class_of(Rescues) = cast(<self>: NilClass, T.class_of(Rescues));
-    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <self>: T.class_of(Rescues).takes_block()
-    <selfRestore>$7: T.class_of(Rescues) = <self>
-    <unconditional> -> bb2
-
-# backedges
-# - bb3
-# - bb10
-# - bb11
-# - bb12
-bb1[firstDead=-1]():
+bb0[firstDead=3]():
+    <self>: T.class_of(UntypedBind) = cast(<self>: NilClass, T.class_of(UntypedBind));
+    <returnMethodTemp>$2: Symbol(:foo) = :foo
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1
 
 # backedges
 # - bb0
-# - bb13
-bb2[firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: NilClass, <castTemp>$13: NilClass, <gotoDeadTemp>$24: NilClass):
-    # outerLoops: 1
-    <block-call> -> (NilClass ? bb5 : bb3)
-
-# backedges
-# - bb2
-bb3[firstDead=2](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues)):
-    <statTemp>$4: T.untyped = Solve<<block-pre-call-temp>$6, takes_block>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb1[firstDead=-1]():
     <unconditional> -> bb1
-
-# backedges
-# - bb2
-bb5[firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: NilClass, <castTemp>$13: NilClass, <gotoDeadTemp>$24: NilClass):
-    # outerLoops: 1
-    <self>: T.class_of(Rescues) = loadSelf(takes_block)
-    <exceptionValue>$9: T.nilable(Exception) = <get-current-exception>
-    <self>: Integer = cast(<castTemp>$13: NilClass, Integer);
-    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb8)
-
-# backedges
-# - bb5
-# - bb8
-bb7[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <exceptionValue>$9: Exception, <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$24: NilClass):
-    # outerLoops: 1
-    <cfgAlias>$19: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$20: T::Boolean = <cfgAlias>$19: T.class_of(StandardError).===(<exceptionValue>$9: Exception)
-    <isaCheckTemp>$20 -> (T::Boolean ? bb11 : bb12)
-
-# backedges
-# - bb5
-bb8[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <gotoDeadTemp>$24: NilClass):
-    # outerLoops: 1
-    <cfgAlias>$12: T.class_of(Integer) = alias <C Integer>
-    keep_for_ide$11: T.class_of(Integer) = <cfgAlias>$12
-    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
-    <castTemp>$13: Integer = <self>
-    <self>: Integer = cast(<castTemp>$13: Integer, Integer);
-    <cfgAlias>$15: T.class_of(T) = alias <C T>
-    <blockReturnTemp>$8: Integer = <cfgAlias>$15: T.class_of(T).reveal_type(<self>: Integer)
-    <exceptionValue>$9: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb10)
-
-# backedges
-# - bb8
-bb10[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: Integer, <castTemp>$13: Integer, <gotoDeadTemp>$24: NilClass):
-    # outerLoops: 1
-    <gotoDeadTemp>$24 -> (NilClass ? bb1 : bb13)
-
-# backedges
-# - bb7
-bb11[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <exceptionValue>$9: StandardError, <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$24: NilClass):
-    # outerLoops: 1
-    <exceptionValue>$9: NilClass = nil
-    <keepForCfgTemp>$17: T.untyped = <keep-alive> <exceptionValue>$9
-    <cfgAlias>$22: T.class_of(T) = alias <C T>
-    <blockReturnTemp>$8: Integer = <cfgAlias>$22: T.class_of(T).reveal_type(<self>: Integer)
-    <gotoDeadTemp>$24 -> (NilClass ? bb1 : bb13)
-
-# backedges
-# - bb7
-bb12[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <castTemp>$13: T.nilable(Integer)):
-    # outerLoops: 1
-    <gotoDeadTemp>$24: TrueClass = true
-    <gotoDeadTemp>$24 -> (TrueClass ? bb1 : bb13)
-
-# backedges
-# - bb10
-# - bb11
-# - bb12
-bb13[firstDead=1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: Integer, <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$24: NilClass):
-    # outerLoops: 1
-    <blockReturnTemp>$26: T.noreturn = blockreturn<takes_block> <blockReturnTemp>$8: Integer
-    <unconditional> -> bb2
 
 }
 
@@ -1064,21 +1086,6 @@ bb0[firstDead=18]():
     <cfgAlias>$21: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: UntypedBind = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: UntypedBind)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: UntypedBind
-    <unconditional> -> bb1
-
-# backedges
-# - bb0
-bb1[firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:UntypedBind>#<static-init> {
-
-bb0[firstDead=3]():
-    <self>: T.class_of(UntypedBind) = cast(<self>: NilClass, T.class_of(UntypedBind));
-    <returnMethodTemp>$2: Symbol(:foo) = :foo
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1
 
 # backedges

@@ -1,82 +1,48 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def main(<blk>)
-      begin
-        <self>.puts(::A.newer())
-        <self>.puts(::B.newer())
-        <self>.puts(::C.newerer())
-      end
-    end
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        <runtime method definition of main>
-        <self>.main()
-        <emptyTree>
-      end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def main(<blk>)
+    begin
+      <self>.puts(::A.newer())
+      <self>.puts(::B.newer())
+      <self>.puts(::C.newerer())
     end
   end
+
   module ::MM<<C MM>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
+
   class ::A<<C A>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class <singleton class><<Class:A>> < (::MM)
-    def newer(<blk>)
-      <self>.new()
-    end
-
-    def self.<static-init>(<blk>)
-      begin
-        <self>.include(::MM)
-        <runtime method definition of newer>
-        <emptyTree>
+    class <singleton class><<Class:A>> < (::MM)
+      def newer(<blk>)
+        <self>.new()
       end
+
+      <self>.include(::MM)
+
+      <runtime method definition of newer>
     end
   end
+
   class ::B<<C B>> < (::<todo sym>)
     def self.newer(<blk>)
       <self>.new()
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.extend(::MM)
-        <runtime method definition of self.newer>
-        <emptyTree>
-      end
-    end
+    <self>.extend(::MM)
+
+    <runtime method definition of self.newer>
   end
+
   class ::C<<C C>> < (::A)
-    <emptyTree>
+    class <singleton class><<Class:C>> < ()
+      def newerer(<blk>)
+        <self>.newer()
+      end
 
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
-  end
-  class <singleton class><<Class:C>> < ()
-    def newerer(<blk>)
-      <self>.newer()
-    end
-
-    def self.<static-init>(<blk>)
       <runtime method definition of newerer>
     end
   end
-  <emptyTree>
+
+  <runtime method definition of main>
+
+  <self>.main()
 end

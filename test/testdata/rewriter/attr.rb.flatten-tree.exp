@@ -1,12 +1,9 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::TestAttr<<C TestAttr>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.void()
+    end
+
     def initialize(<blk>)
       begin
         @v1 = <cast:let>(0, Integer, ::Integer)
@@ -18,20 +15,40 @@ begin
       end
     end
 
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
     def v1(<blk>)
       @v1
+    end
+
+    <self>.sig() do ||
+      <self>.params(:v1, ::Integer).returns(::Integer)
     end
 
     def v1=(v1, <blk>)
       @v1 = v1
     end
 
+    <self>.sig() do ||
+      <self>.returns(::String)
+    end
+
     def v2(<blk>)
       @v2
     end
 
+    <self>.sig() do ||
+      <self>.params(:v2, ::String).returns(::String)
+    end
+
     def v2=(v2, <blk>)
       @v2 = v2
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::String)
     end
 
     def v3(<blk>)
@@ -46,70 +63,62 @@ begin
       @v5 = v5
     end
 
+    <self>.sig() do ||
+      <self>.returns(::Float)
+    end
+
     def strv7(<blk>)
       @strv7
+    end
+
+    <self>.sig() do ||
+      <self>.params(:strv8, ::Float).returns(::Float)
     end
 
     def strv8=(strv8, <blk>)
       @strv8 = strv8
     end
 
+    <self>.sig() do ||
+      <self>.returns(::Float)
+    end
+
     def strv9(<blk>)
       @strv9
+    end
+
+    <self>.sig() do ||
+      <self>.params(:strv9, ::Float).returns(::Float)
     end
 
     def strv9=(strv9, <blk>)
       @strv9 = strv9
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        <self>.sig() do ||
-          <self>.void()
-        end
-        <self>.sig() do ||
-          <self>.returns(::Integer)
-        end
-        <self>.sig() do ||
-          <self>.params(:v1, ::Integer).returns(::Integer)
-        end
-        <self>.sig() do ||
-          <self>.returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.params(:v2, ::String).returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.returns(::String)
-        end
-        <self>.sig() do ||
-          <self>.returns(::Float)
-        end
-        <self>.sig() do ||
-          <self>.params(:strv8, ::Float).returns(::Float)
-        end
-        <self>.sig() do ||
-          <self>.returns(::Float)
-        end
-        <self>.sig() do ||
-          <self>.params(:strv9, ::Float).returns(::Float)
-        end
-        <self>.extend(::T::Sig)
-        <runtime method definition of initialize>
-        <runtime method definition of v1>
-        <runtime method definition of v1=>
-        <runtime method definition of v2>
-        <runtime method definition of v2=>
-        <runtime method definition of v3>
-        <runtime method definition of v4=>
-        <runtime method definition of v5=>
-        <runtime method definition of strv7>
-        <runtime method definition of strv8=>
-        <runtime method definition of strv9>
-        <runtime method definition of strv9=>
-        <emptyTree>
-      end
-    end
+    <self>.extend(::T::Sig)
+
+    <runtime method definition of initialize>
+
+    <runtime method definition of v1>
+
+    <runtime method definition of v1=>
+
+    <runtime method definition of v2>
+
+    <runtime method definition of v2=>
+
+    <runtime method definition of v3>
+
+    <runtime method definition of v4=>
+
+    <runtime method definition of v5=>
+
+    <runtime method definition of strv7>
+
+    <runtime method definition of strv8=>
+
+    <runtime method definition of strv9>
+
+    <runtime method definition of strv9=>
   end
-  <emptyTree>
 end
