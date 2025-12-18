@@ -8,6 +8,7 @@
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "rbs/TypeToParserNode.h"
+#include "rbs/rbs_method_common.h"
 #include "rewriter/util/Util.h"
 
 using namespace std;
@@ -15,25 +16,6 @@ using namespace std;
 namespace sorbet::rbs {
 
 namespace {
-
-struct RBSArg {
-    core::LocOffsets loc;
-    core::LocOffsets nameLoc;
-    rbs_ast_symbol_t *name;
-    rbs_node_t *type;
-
-    enum class Kind {
-        Positional,
-        OptionalPositional,
-        RestPositional,
-        Keyword,
-        OptionalKeyword,
-        RestKeyword,
-        Block,
-    };
-
-    Kind kind;
-};
 
 core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
     auto range = node->location->rg;
@@ -183,25 +165,6 @@ core::NameRef nodeName(const parser::Node *node) {
         });
 
     return name;
-}
-
-string argKindToString(RBSArg::Kind kind) {
-    switch (kind) {
-        case RBSArg::Kind::Positional:
-            return "positional";
-        case RBSArg::Kind::OptionalPositional:
-            return "optional positional";
-        case RBSArg::Kind::RestPositional:
-            return "rest positional";
-        case RBSArg::Kind::Keyword:
-            return "keyword";
-        case RBSArg::Kind::OptionalKeyword:
-            return "optional keyword";
-        case RBSArg::Kind::RestKeyword:
-            return "rest keyword";
-        case RBSArg::Kind::Block:
-            return "block";
-    }
 }
 
 string nodeKindToString(const parser::Node *node) {
