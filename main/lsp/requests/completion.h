@@ -32,7 +32,7 @@ class CompletionTask final : public LSPRequestTask {
         bool suggestKeywords;
 
         // If not exists(), won't suggest locals for the enclosing method.
-        core::MethodRef enclosingMethod;
+        core::SymbolRef enclosingMethod;
 
         // If not exists(), won't suggest kwargs for the method that this query occurs in the arg list of.
         core::MethodRef kwargsMethod;

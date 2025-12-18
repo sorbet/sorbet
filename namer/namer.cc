@@ -1289,13 +1289,6 @@ private:
             }
         }
 
-        // make sure we've added a static init symbol so we have it ready for the flatten pass later
-        if (symbol == core::Symbols::root()) {
-            ctx.state.staticInitForFile(ctx.locAt(klass.loc));
-        } else if (!isUnknown) {
-            ctx.state.staticInitForClass(symbol, ctx.locAt(klass.loc));
-        }
-
         return symbol;
     }
 
@@ -1974,11 +1967,6 @@ public:
 
         // NameDefiner should have forced this class's singleton class into existence.
         ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
-
-        // This is an invariant that namer must introduce (all ClassDef's have `<static-init>` methods).
-        // ENFORCE'ing it here makes certain errors apparent earlier.
-        auto allowMissing = true;
-        ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
     }
 #endif
 

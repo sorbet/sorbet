@@ -33,7 +33,7 @@ public:
     // Looking for all references to the given variable.
     struct Var {
         // Only look for variables inside this method
-        core::MethodRef owner;
+        core::SymbolRef owner;
         // The loc of the MethodDef that encloses the variable
         core::Loc enclosingLoc;
         core::LocalVariable variable;
@@ -50,12 +50,12 @@ public:
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
     static Query createSymbolQuery(Symbol::STORAGE &&symbols);
-    static Query createVarQuery(core::MethodRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
+    static Query createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
     static Query createSuggestSigQuery(core::MethodRef method);
 
     bool matchesSymbol(core::SymbolRef symbol) const;
     bool matchesLoc(const core::Loc &loc) const;
-    bool matchesVar(core::MethodRef owner, const core::LocalVariable &var) const;
+    bool matchesVar(core::SymbolRef owner, const core::LocalVariable &var) const;
     bool matchesSuggestSig(core::MethodRef method) const;
     bool isEmpty() const;
 };

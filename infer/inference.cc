@@ -11,11 +11,17 @@
 using namespace std;
 namespace sorbet::infer {
 
-bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef method) {
+bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::SymbolRef symbol) {
     if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True) {
         return false;
     }
 
+    if (symbol.isClassOrModule()) {
+        // static init methods are neither overloaded nor abstract
+        return true;
+    }
+
+    auto method = symbol.asMethodRef();
     const auto &methodData = method.data(ctx);
     if (methodData->flags.isOverloaded) {
         if (auto e = ctx.beginError(loc, core::errors::Infer::TypecheckOverloadBody)) {

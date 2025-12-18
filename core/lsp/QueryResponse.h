@@ -11,7 +11,7 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, absl::Span<const core::LocOffsets> argLocOffsets,
-                 core::NameRef callerSideName, core::NameRef originalName, core::MethodRef enclosingMethod,
+                 core::NameRef callerSideName, core::NameRef originalName, core::SymbolRef enclosingMethod,
                  bool isPrivateOk, uint16_t numPosArgs, core::FileRef file, core::LocOffsets termLocOffsets,
                  core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
                  core::LocOffsets locOffsetsWithoutBlock)
@@ -28,7 +28,7 @@ public:
     // The method name from the send with none of the filtering involved in
     // `callerSideName`.
     const core::NameRef originalName;
-    const core::MethodRef enclosingMethod;
+    const core::SymbolRef enclosingMethod;
     const bool isPrivateOk;
     const uint16_t numPosArgs;
     const core::FileRef file;
@@ -57,12 +57,12 @@ CheckSize(SendResponse, 96, 8);
 class IdentResponse final {
 public:
     IdentResponse(core::Loc termLoc, core::LocalVariable variable, core::TypeAndOrigins retType,
-                  core::MethodRef enclosingMethod, core::Loc enclosingMethodLoc)
+                  core::SymbolRef enclosingMethod, core::Loc enclosingMethodLoc)
         : termLoc(termLoc), variable(variable), enclosingMethod(enclosingMethod),
           enclosingMethodLoc(enclosingMethodLoc), retType(std::move(retType)) {}
     const core::Loc termLoc;
     const core::LocalVariable variable;
-    const core::MethodRef enclosingMethod;
+    const core::SymbolRef enclosingMethod;
     // The loc of the MethodDef this ident was in.
     // (not the declLoc, which can be found by way of the enclosingMethod's entry in the symbol table)
     const core::Loc enclosingMethodLoc;
@@ -94,14 +94,14 @@ class ConstantResponse final {
 public:
     using Scopes = InlinedVector<core::SymbolRef, 1>;
     ConstantResponse(core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes, core::NameRef name,
-                     core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
+                     core::TypeAndOrigins retType, core::SymbolRef enclosingMethod)
         : symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
           enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
     const core::SymbolRef symbolBeforeDealias;
     const core::Loc termLoc;
     const Scopes scopes;
     const core::NameRef name;
-    const core::MethodRef enclosingMethod;
+    const core::SymbolRef enclosingMethod;
     const core::TypeAndOrigins retType;
 };
 CheckSize(ConstantResponse, 80, 8);

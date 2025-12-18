@@ -47,11 +47,11 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md
     return buildFor(cctx, move(res), md.params, {}, md.rhs);
 }
 
-unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::ClassDef &cd, core::MethodRef symbol) {
+unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::ClassDef &cd) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->loc = cd.loc;
     res->declLoc = cd.declLoc;
-    res->symbol = symbol;
+    res->symbol = cd.symbol;
 
     UnorderedMap<core::SymbolRef, LocalRef> aliases;
     UnorderedMap<core::NameRef, LocalRef> discoveredUndeclaredFields;

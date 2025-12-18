@@ -7,10 +7,9 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 void LocalVarFinder::preTransformBlock(core::Context ctx, const ast::Block &block) {
-    ENFORCE(!methodStack.empty());
     auto loc = ctx.locAt(block.loc);
 
-    if (methodStack.back() != this->targetMethod) {
+    if (ctx.owner != this->targetMethod) {
         return;
     }
 
@@ -25,14 +24,12 @@ void LocalVarFinder::preTransformBlock(core::Context ctx, const ast::Block &bloc
 }
 
 void LocalVarFinder::postTransformAssign(core::Context ctx, const ast::Assign &assign) {
-    ENFORCE(!methodStack.empty());
-
     auto local = ast::cast_tree<ast::Local>(assign.lhs);
     if (local == nullptr) {
         return;
     }
 
-    if (methodStack.back() == this->targetMethod) {
+    if (ctx.owner == this->targetMethod) {
         this->result_.emplace_back(local->localVariable._name);
     }
 }
@@ -41,33 +38,12 @@ void LocalVarFinder::preTransformMethodDef(core::Context ctx, const ast::MethodD
     ENFORCE(methodDef.symbol.exists());
     ENFORCE(methodDef.symbol != core::Symbols::todoMethod());
 
-    auto currentMethod = methodDef.symbol;
-
-    if (currentMethod == this->targetMethod) {
+    if (ctx.owner == this->targetMethod) {
         auto parsedParams = ast::ParamParsing::parseParams(methodDef.params);
         for (const auto &parsedParam : parsedParams) {
             this->result_.emplace_back(parsedParam.local._name);
         }
     }
-
-    this->methodStack.emplace_back(currentMethod);
-}
-
-void LocalVarFinder::postTransformMethodDef(core::Context ctx, const ast::MethodDef &tree) {
-    this->methodStack.pop_back();
-}
-
-void LocalVarFinder::preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
-    ENFORCE(classDef.symbol.exists());
-    ENFORCE(classDef.symbol != core::Symbols::todo());
-
-    auto currentMethod = classDef.symbol.lookupStaticInit(ctx);
-
-    this->methodStack.emplace_back(currentMethod);
-}
-
-void LocalVarFinder::postTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
-    this->methodStack.pop_back();
 }
 
 }; // namespace sorbet::realmain::lsp

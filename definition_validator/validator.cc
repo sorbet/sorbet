@@ -783,8 +783,6 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
         if (!sym.exists() || !sym.isMethod() ||
             // Method is 'final', and passes the check.
             sym.asMethodRef().data(ctx)->flags.isFinal ||
-            // <static-init> is a fake method Sorbet synthesizes for typechecking.
-            sym.name(ctx) == core::Names::staticInit() ||
             // <unresolved-ancestors> is a fake method Sorbet synthesizes to ensure class hierarchy changes in IDE take
             // slow path.
             sym.name(ctx) == core::Names::unresolvedAncestors()) {

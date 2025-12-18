@@ -5,30 +5,15 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-namespace {
-core::MethodRef enclosingMethod(core::Context ctx) {
-    core::MethodRef enclosingMethod;
-
-    if (ctx.owner.isMethod()) {
-        enclosingMethod = ctx.owner.asMethodRef();
-    } else {
-        enclosingMethod = ctx.owner.asClassOrModuleRef().lookupStaticInit(ctx);
-    }
-
-    return enclosingMethod;
-}
-} // namespace
 
 void LocalVarSaver::postTransformBlock(core::Context ctx, const ast::Block &block) {
-    auto method = enclosingMethod(ctx);
-
     for (auto &arg : block.params) {
         if (auto *localExp = ast::MK::arg2Local(arg)) {
-            bool lspQueryMatch = ctx.state.lspQuery.matchesVar(method, localExp->localVariable);
+            bool lspQueryMatch = ctx.state.lspQuery.matchesVar(ctx.owner, localExp->localVariable);
             if (lspQueryMatch) {
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, method,
+                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, ctx.owner,
                                                   this->enclosingMethodDefLoc.back()));
             }
         }
@@ -36,15 +21,13 @@ void LocalVarSaver::postTransformBlock(core::Context ctx, const ast::Block &bloc
 }
 
 void LocalVarSaver::postTransformLocal(core::Context ctx, const ast::Local &local) {
-    auto method = enclosingMethod(ctx);
-
-    bool lspQueryMatch = ctx.state.lspQuery.matchesVar(method, local.localVariable);
+    bool lspQueryMatch = ctx.state.lspQuery.matchesVar(ctx.owner, local.localVariable);
     if (lspQueryMatch) {
         // No need for type information; this is for a reference request.
         // Let the default constructor make tp.type an empty shared_ptr and tp.origins an empty vector
         core::TypeAndOrigins tp;
         core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(local.loc),
-                                                                                  local.localVariable, tp, method,
+                                                                                  local.localVariable, tp, ctx.owner,
                                                                                   this->enclosingMethodDefLoc.back()));
     }
 }

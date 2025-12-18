@@ -19,6 +19,7 @@ core::SymbolRef getEffectiveOwner(core::Context ctx) {
         // class_flatten hasn't run, this `sig` send is still at a class top-level
         return ctx.owner;
     } else {
+        ENFORCE(false, "TODO(jez) Remove this?");
         auto methodOwner = ctx.owner.asMethodRef();
         ENFORCE(methodOwner.data(ctx)->name == core::Names::staticInit());
         auto owner = methodOwner.data(ctx)->owner.data(ctx)->attachedClass(ctx);

@@ -601,9 +601,6 @@ void GlobalState::initEmpty() {
     enterMethodParameter(Loc::none(), method, Names::args());
     ENFORCE_NO_TIMER(method == Symbols::todoMethod());
 
-    method = this->staticInitForClass(core::Symbols::root(), Loc::none());
-    ENFORCE_NO_TIMER(method == Symbols::rootStaticInit());
-
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToAttachedClass());
@@ -2459,50 +2456,6 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash(uint32_t foundClassesHash) 
     result->classAliasHash = LocalSymbolTableHashes::patchHash(classAliasHash);
     result->methodHash = LocalSymbolTableHashes::patchHash(methodHash);
     return result;
-}
-
-MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
-    auto prevCount = methodsUsed();
-    auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
-    if (prevCount != methodsUsed()) {
-        auto blkLoc = core::Loc::none(loc.file());
-        auto &blkSym = enterMethodParameter(blkLoc, sym, core::Names::blkArg());
-        blkSym.flags.isBlock = true;
-    } else {
-        // Ensures that locs get properly updated on the fast path
-        sym.data(*this)->addLoc(*this, loc);
-    }
-    return sym;
-}
-
-MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass, bool allowMissing) const {
-    auto classData = klass.data(*this);
-    auto ref = classData->lookupSingletonClass(*this).data(*this)->findMethod(*this, core::Names::staticInit());
-    ENFORCE_NO_TIMER(ref.exists() || allowMissing, "looking up non-existent <static-init> for {}",
-                     klass.toString(*this));
-    return ref;
-}
-
-MethodRef GlobalState::staticInitForFile(Loc loc) {
-    auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
-    auto prevCount = this->methodsUsed();
-    auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
-    if (prevCount != this->methodsUsed()) {
-        auto blkLoc = core::Loc::none(loc.file());
-        auto &blkSym = this->enterMethodParameter(blkLoc, sym, core::Names::blkArg());
-        blkSym.flags.isBlock = true;
-    } else {
-        // Ensures that locs get properly updated on the fast path
-        sym.data(*this)->addLoc(*this, loc);
-    }
-    return sym;
-}
-
-MethodRef GlobalState::lookupStaticInitForFile(FileRef file) const {
-    auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), file.id());
-    auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
-    ENFORCE_NO_TIMER(ref.exists(), "looking up non-existent <static-init> for {}", file.data(*this).path());
-    return ref.asMethodRef();
 }
 
 spdlog::logger &GlobalState::tracer() const {

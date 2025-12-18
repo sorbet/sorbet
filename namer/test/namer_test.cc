@@ -91,8 +91,7 @@ TEST_CASE("namer tests") {
             trees = runNamer(gs, move(localTree));
         }
         auto helloWorldMethod = 1;
-        auto staticInit = 1;
-        auto extraSymbols = helloWorldMethod + staticInit;
+        auto extraSymbols = helloWorldMethod;
 
         REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsedTotal());
         REQUIRE_EQ(baseMethods + extraSymbols, gs.methodsUsed());

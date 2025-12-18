@@ -1198,9 +1198,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         fun = lit.name;
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(
-                                 retainedResult, send.argLocs, fun, send.fun, ctx.owner.asMethodRef(), send.isPrivateOk,
-                                 send.numPosArgs, ctx.file, bind.loc, send.receiverLoc, send.funLoc, locWithoutBlock));
+                        ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, send.fun, ctx.owner,
+                                                     send.isPrivateOk, send.numPosArgs, ctx.file, bind.loc,
+                                                     send.receiverLoc, send.funLoc, locWithoutBlock));
                 }
                 if (send.link) {
                     send.link->result = move(retainedResult);

@@ -18,7 +18,7 @@ Query Query::createSymbolQuery(Symbol::STORAGE &&symbols) {
     return Query{Symbol{move(symbols)}};
 }
 
-Query Query::createVarQuery(core::MethodRef owner, core::Loc enclosingLoc, core::LocalVariable variable) {
+Query Query::createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable) {
     ENFORCE(owner.exists());
     ENFORCE(variable.exists());
     return Query{Var{owner, enclosingLoc, variable}};
@@ -46,7 +46,7 @@ bool Query::matchesLoc(const core::Loc &loc) const {
     return false;
 }
 
-bool Query::matchesVar(core::MethodRef owner, const core::LocalVariable &var) const {
+bool Query::matchesVar(core::SymbolRef owner, const core::LocalVariable &var) const {
     if (auto *query = get_if<Var>(&this->query)) {
         return var.exists() && query->owner == owner && query->variable == var;
     }

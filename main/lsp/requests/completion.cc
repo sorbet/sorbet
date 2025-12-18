@@ -616,7 +616,7 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
     return result;
 }
 
-vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, const core::MethodRef method,
+vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, const core::SymbolRef method,
                                           const core::Loc queryLoc, const ast::ParsedFile &resolved) {
     const auto &gs = typechecker.state();
 

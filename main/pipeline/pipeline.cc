@@ -1449,14 +1449,12 @@ public:
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &c) {
-        auto symbol = c.symbol.lookupStaticInit(ctx);
-
-        if (!infer::Inference::willRun(ctx, c.declLoc, symbol)) {
+        if (!infer::Inference::willRun(ctx, c.declLoc, c.symbol)) {
             return;
         }
 
         auto &print = opts.print;
-        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(symbol), c, symbol);
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(c.symbol), c);
 
         if (opts.stopAfterPhase != options::Phase::CFG) {
             cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));

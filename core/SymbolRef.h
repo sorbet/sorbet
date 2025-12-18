@@ -193,8 +193,6 @@ public:
     //
     // The set of stdlib classes receiving this special behavior should not grow over time.
     bool isLegacyStdlibGeneric() const;
-
-    MethodRef lookupStaticInit(const Context &ctx) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
@@ -1036,10 +1034,6 @@ public:
         return MethodRef::fromRaw(10);
     }
 
-    static MethodRef rootStaticInit() {
-        return MethodRef::fromRaw(11);
-    }
-
     static ClassOrModuleRef MagicBindToAttachedClass() {
         return ClassOrModuleRef::fromRaw(88);
     }
@@ -1069,11 +1063,11 @@ public:
     }
 
     static MethodRef T_Generic_squareBrackets() {
-        return MethodRef::fromRaw(12);
+        return MethodRef::fromRaw(11);
     }
 
     static MethodRef Kernel_lambda() {
-        return MethodRef::fromRaw(13);
+        return MethodRef::fromRaw(12);
     }
 
     static TypeParameterRef Kernel_lambda_returnType() {
@@ -1081,19 +1075,19 @@ public:
     }
 
     static MethodRef Kernel_lambdaTLet() {
-        return MethodRef::fromRaw(14);
+        return MethodRef::fromRaw(13);
     }
 
     static MethodRef Kernel_proc() {
-        return MethodRef::fromRaw(15);
+        return MethodRef::fromRaw(14);
     }
 
     static MethodRef Module_syntheticSquareBrackets() {
-        return MethodRef::fromRaw(16);
+        return MethodRef::fromRaw(15);
     }
 
     static MethodRef Sorbet_Private_Static_typeMember() {
-        return MethodRef::fromRaw(17);
+        return MethodRef::fromRaw(16);
     }
 
     static TypeParameterRef Kernel_proc_returnType() {

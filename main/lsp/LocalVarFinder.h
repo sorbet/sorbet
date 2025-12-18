@@ -7,18 +7,14 @@
 namespace sorbet::realmain::lsp {
 
 class LocalVarFinder {
-    core::MethodRef targetMethod;
+    core::SymbolRef targetMethod;
 
     core::Loc queryLoc;
-
-    // We go through the effort of keeping track of a method stack so as to not rely on trees having been
-    // flattened at this point. (LSP code should try to make minimal assumptions to be robust to changes.)
-    std::vector<core::MethodRef> methodStack;
 
     std::vector<core::NameRef> &result_;
 
 public:
-    LocalVarFinder(core::MethodRef targetMethod, core::Loc queryLoc, std::vector<core::NameRef> &result)
+    LocalVarFinder(core::SymbolRef targetMethod, core::Loc queryLoc, std::vector<core::NameRef> &result)
         : targetMethod(targetMethod), queryLoc(queryLoc), result_{result} {}
 
     void postTransformAssign(core::Context ctx, const ast::Assign &assign);
