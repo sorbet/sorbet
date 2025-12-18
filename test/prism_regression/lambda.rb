@@ -3,7 +3,9 @@
 -> { 123 }
 -> (param) { param }
 -> (optional_param = 123) { optional_param }
--> { 456 }.call
+# TODO: Legacy parser doesn't include `->` in the location of lambda's `Block` node,
+# So the the receiver of this call will have the wrong start location.
+# -> { 456 }.call
 lambda { 789 }
 lambda { |param| param }
 

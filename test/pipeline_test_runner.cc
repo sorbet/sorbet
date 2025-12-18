@@ -230,45 +230,44 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         }
 
         // Parser
-        parser::ParseResult parseResult;
-        unique_ptr<parser::Node> directlyDesugaredTree;
+        parser::ParseResult legacyParseResult;
+        parser::ParseResult prismParseResult;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
             core::MutableContext ctx(gs, core::Symbols::root(), file);
 
+            // Always run the legacy parser.
+            auto settings = parser::Parser::Settings{false, false, false, gs.cacheSensitiveOptions.rbsEnabled};
+            legacyParseResult = parser::Parser::run(gs, file, settings);
+
             switch (parser) {
                 case realmain::options::Parser::ORIGINAL: {
-                    auto settings = parser::Parser::Settings{false, false, false, gs.cacheSensitiveOptions.rbsEnabled};
-                    parseResult = parser::Parser::run(gs, file, settings);
-                    directlyDesugaredTree = nullptr;
+                    auto &nodes = legacyParseResult.tree;
+
+                    handler.drainErrors(gs);
+                    handler.addObserved(gs, "parse-tree", [&]() { return nodes->toString(gs); });
+                    handler.addObserved(gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(gs); });
+                    handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
+
                     break;
                 }
                 case realmain::options::Parser::PRISM: {
-                    auto directlyDesugar = false;
-                    parseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
-
-                    // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
-                    // `PrismDesugar.cc`. For now, disable direct desugaring, and fallback to `Desugar.cc`.
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
-                        directlyDesugaredTree = nullptr;
+                        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
+                        // in `PrismDesugar.cc`. For now, just use the legacy parser for RBS.
                     } else {
                         auto directlyDesugar = true;
-                        directlyDesugaredTree = parser::Prism::Parser::run(ctx, directlyDesugar).tree;
+                        prismParseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
                     }
-
-                    break;
                 }
             }
         }
 
-        auto nodes = move(parseResult.tree);
-
-        handler.drainErrors(gs);
-        handler.addObserved(gs, "parse-tree", [&]() { return nodes->toString(gs); });
-        handler.addObserved(gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(gs); });
-        handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
+        parser::ParseResult &parseResult = prismParseResult.tree ? prismParseResult : legacyParseResult;
 
         {
+            auto &nodes = parseResult.tree;
+
             if (gs.cacheSensitiveOptions.rbsEnabled) {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
@@ -291,16 +290,15 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             core::MutableContext ctx(gs, core::Symbols::root(), file);
             core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
 
-            ast::ExpressionPtr ast = ast::desugar::node2Tree(ctx, move(nodes));
+            ast::ExpressionPtr legacyDesugarAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
 
-            if (directlyDesugaredTree != nullptr) {
+            if (prismParseResult.tree != nullptr) {
                 // This AST would have been desugared deirectly by Prism::Translator
-                auto directlyDesugaredAST = ast::prismDesugar::node2Tree(ctx, move(directlyDesugaredTree));
+                auto prismDirectDesugarAST = ast::prismDesugar::node2Tree(ctx, move(prismParseResult.tree));
 
-                if (!ast.prismDesugarEqual(gs, directlyDesugaredAST, file)) {
-                    auto expected = ast.showRawWithLocs(gs, file);
-                    auto actual = directlyDesugaredAST.showRawWithLocs(gs, file);
-
+                if (!legacyDesugarAST.prismDesugarEqual(gs, prismDirectDesugarAST, file)) {
+                    auto expected = legacyDesugarAST.showRawWithLocs(gs, file);
+                    auto actual = prismDirectDesugarAST.showRawWithLocs(gs, file);
                     cout << "--- Expected: " << endl;
                     cout << expected << endl << endl;
                     cout << "+++ Actual: " << endl;
@@ -311,7 +309,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 }
             }
 
-            desugared = testSerialize(gs, ast::ParsedFile{move(ast), file});
+            desugared = testSerialize(gs, ast::ParsedFile{move(legacyDesugarAST), file});
         }
 
         handler.addObserved(gs, "desugar-tree", [&]() { return desugared.tree.toString(gs); });
