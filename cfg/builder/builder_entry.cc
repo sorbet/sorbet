@@ -93,8 +93,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
 
-        auto &paramInfos = res->symbol.data(ctx)->parameters;
-        bool isAbstract = res->symbol.data(ctx)->flags.isAbstract;
+        if (res->symbol.isMethod()) {
+        auto method = res->symbol.asMethodRef();
+        auto &paramInfos = method.data(ctx)->parameters;
+        bool isAbstract = method.data(ctx)->flags.isAbstract;
         bool seenKeyword = false;
         int i = -1;
         for (auto &paramExpr : params) {
@@ -130,6 +132,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
             }
 
             synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(res->symbol, i));
+        }
+        } else {
+            // res->symbol being a class symbol means that it's a static-init, which has no parameters
         }
 
         // Join the presentCont and defaultCont paths together
