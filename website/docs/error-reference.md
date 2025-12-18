@@ -918,7 +918,12 @@ end
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-This error occurs in the `--gen-packages` mode, and is reported on `__package.rb` files that are missing imports.
+This error occurs in `--gen-packages` mode, which aims to report all packaging related errors, and fix those that can be fixed automatically.
+
+This error will be reported on a `__package.rb` file, along with an autocorrect that fixes those issues, if any of the following are true:
+
+- the `__package.rb` is missing `import`s, and it is not a modularity error to `import` those packages
+- the `__package.rb` is missing `export`s
 
 ## 4001
 

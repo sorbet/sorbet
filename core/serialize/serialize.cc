@@ -868,12 +868,14 @@ void SerializerImpl::unpickleFileTable(UnPickler &p, GlobalState &result) {
     // We don't count the empty file that we reserve for the invalid FileRef.
     files.reserve(1 + filesSize);
     files.initEmpty();
+    result.symbolsReferencedByFile.reserve(1 + filesSize);
 
     for (int i = 0; i < filesSize; i++) {
         files.emplace(unpickleFile(p));
     }
 
     result.files = make_shared<FileTable>(move(files));
+    result.symbolsReferencedByFile = vector<UnorderedSet<SymbolRef>>{result.files->size(), UnorderedSet<SymbolRef>{}};
 }
 
 Pickler SerializerImpl::pickleSymbolTable(const GlobalState &gs) {

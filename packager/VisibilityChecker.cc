@@ -462,7 +462,8 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
-    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> packageReferences;
+    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
+    UnorderedSet<core::SymbolRef> referencedSymbols;
 
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
@@ -502,6 +503,12 @@ public:
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
+
+        // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
+        // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
+        // symbolsReferenced, and not A, A::B, A::B::C.
+        // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
+        referencedSymbols.insert(litSymbol);
 
         auto loc = litSymbol.loc(ctx);
 
@@ -549,7 +556,7 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        packageReferences[otherPackage] = {importNeeded, false};
+        referencedPackages[otherPackage] = {importNeeded, false};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
@@ -580,8 +587,6 @@ public:
             }
             if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
                 if (db.genPackages()) {
-                    // TODO(neil): this is technically incorrect since it means export errors won't be reported at all
-                    // until we implement export handling in genPackages mode
                     return;
                 }
 
@@ -669,7 +674,7 @@ public:
                     ENFORCE(false);
                 }
             } else {
-                packageReferences[otherPackage].causesModularityError = true;
+                referencedPackages[otherPackage].causesModularityError = true;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 core::ErrorClass error =
@@ -755,11 +760,16 @@ public:
         }
     }
 
-    static vector<ast::ParsedFile> run(const core::GlobalState &gs, core::packages::PackageDB &nonConstPackageDB,
-                                       WorkerPool &workers, vector<ast::ParsedFile> files) {
-        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<std::pair<
-            core::FileRef, UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>>>(
-            files.size());
+    static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
+                                       vector<ast::ParsedFile> files) {
+        const core::GlobalState &gs = nonConstGs;
+        core::packages::PackageDB &nonConstPackageDB = nonConstGs.packageDB();
+        struct ThreadResult {
+            core::FileRef file;
+            UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
+            UnorderedSet<core::SymbolRef> referencedSymbols;
+        };
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<ThreadResult>>>(files.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto filesSpan = absl::MakeSpan(files);
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(filesSpan.size());
@@ -789,30 +799,34 @@ public:
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                 ast::TreeWalk::apply(ctx, pass, f.tree);
-                resultq->push(make_pair(f.file, std::move(pass.packageReferences)), 1);
+                resultq->push(
+                    ThreadResult{f.file, std::move(pass.referencedPackages), std::move(pass.referencedSymbols)}, 1);
             }
             barrier.DecrementCount();
         });
 
         if (gs.packageDB().genPackages()) {
-            std::optional<std::pair<core::FileRef,
-                                    UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo>>>
-                threadResult;
+            std::optional<ThreadResult> threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem() && threadResult.has_value()) {
-                    auto file = threadResult.value().first;
+                    auto &file = threadResult->file;
                     auto pkgName = gs.packageDB().getPackageNameForFile(file);
                     if (!pkgName.exists()) {
                         continue;
                     }
+
                     auto nonConstPackageInfo = nonConstPackageDB.getPackageInfoNonConst(pkgName);
                     vector<pair<core::packages::MangledName, core::packages::PackageReferenceInfo>> references;
-                    for (auto &[packageName, packageReferenceInfo] : threadResult.value().second) {
+                    auto &referencedPackages = threadResult->referencedPackages;
+                    for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
                         references.emplace_back(make_pair(packageName, packageReferenceInfo));
                     }
                     nonConstPackageInfo->trackPackageReferences(file, references);
+
+                    auto &referencedSymbols = threadResult->referencedSymbols;
+                    nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
                 }
             }
         }
@@ -821,6 +835,152 @@ public:
         return files;
     }
 };
+
+bool ownerWillBeExported(const core::GlobalState &gs, const vector<core::SymbolRef> &alreadyExported,
+                         core::ClassOrModuleRef owner) {
+    while (owner != core::Symbols::root()) {
+        if (absl::c_find(alreadyExported, owner) != alreadyExported.end()) {
+            return true;
+        }
+        owner = owner.data(gs)->owner;
+    }
+    return false;
+}
+
+void exportClassOrModule(const core::GlobalState &gs,
+                         UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport,
+                         core::ClassOrModuleRef symbol, vector<core::FileRef> &referencingFiles) {
+    auto data = symbol.data(gs);
+    auto owningPackage = data->package;
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
+        data->flags.isExported) {
+        return;
+    }
+
+    for (auto &f : referencingFiles) {
+        auto packageForF = gs.packageDB().getPackageNameForFile(f);
+        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+            continue;
+        }
+
+        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
+            // No need to check the rest of referencingFiles, we're already going to export the owner
+            break;
+        }
+
+        toExport[owningPackage].push_back(symbol);
+        break;
+    }
+}
+
+void exportField(const core::GlobalState &gs,
+                 UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport, core::FieldRef symbol,
+                 vector<core::FileRef> &referencingFiles) {
+    auto data = symbol.data(gs);
+    auto owningPackage = data->owner.data(gs)->package;
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
+        data->flags.isExported) {
+        return;
+    }
+
+    for (auto &f : referencingFiles) {
+        auto packageForF = gs.packageDB().getPackageNameForFile(f);
+        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+            continue;
+        }
+
+        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
+            // No need to check the rest of referencingFiles, we're already going to export the owner
+            break;
+        }
+
+        auto maybeEnumClass = getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
+        if (maybeEnumClass.exists()) {
+            // No need to check if maybeEnumClass is already going to be exported since we have a ownerWillBeExported
+            // call above
+            toExport[owningPackage].push_back(maybeEnumClass);
+        } else {
+            toExport[owningPackage].push_back(symbol);
+        }
+        break;
+    }
+}
+
+void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
+    Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
+    auto packagesInEdit = UnorderedSet<core::packages::MangledName>{};
+    for (auto &parsedFile : files) {
+        auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
+        if (!pkgName.exists()) {
+            continue;
+        }
+        packagesInEdit.insert(pkgName);
+    }
+
+    auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
+    {
+        // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
+        // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
+        Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencing_files");
+        auto numFiles = gs.getFiles().size();
+        for (auto i = 1; i < numFiles; i++) {
+            core::FileRef fref(i);
+            auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
+            for (auto &symbol : referencedSymbols) {
+                referencingFiles[symbol].push_back(fref);
+            }
+        }
+    }
+
+    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
+    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
+        exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
+    }
+    for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
+        auto fieldRef = core::FieldRef(gs, i);
+        exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
+    }
+
+    for (auto pkgName : gs.packageDB().packages()) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(pkgInfo.exists());
+        auto importsAutocorrect = packagesInEdit.contains(pkgName) ? pkgInfo.aggregateMissingImports(gs) : nullopt;
+        // It's a bit odd here that for imports, all the logic is in aggregateMissingImports, while for
+        // aggregateMissingExports, we need to do some extra computations outside the method and pass that in.
+        // The difference is that computing what imports are needed is a function only of the files in that package.
+        // However, for exports, we need to look the symbols referenced by other packages, which necessitates a loop
+        // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
+        auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
+        if (importsAutocorrect && exportsAutocorrect) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
+                importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
+                                                 make_move_iterator(exportsAutocorrect->edits.begin()),
+                                                 make_move_iterator(exportsAutocorrect->edits.end()));
+                // TODO(neil): for a file with no imports or exports, this will produce something like:
+                //   export MyPkg::Foo
+                //   import OtherPkg
+                // because e < i
+                core::AutocorrectSuggestion::mergeAdjacentEdits(importsAutocorrect->edits);
+                e.addAutocorrect(
+                    core::AutocorrectSuggestion{"Add missing imports and exports", move(importsAutocorrect->edits)});
+                // TODO(neil): we should also delete imports that are unused but have a modularity error here
+            }
+        } else if (importsAutocorrect) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("{} is missing imports", pkgInfo.show(gs));
+                e.addAutocorrect(move(importsAutocorrect.value()));
+                // TODO(neil): we should also delete imports that are unused but have a modularity error here
+            }
+        } else if (exportsAutocorrect) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("{} is missing exports", pkgInfo.show(gs));
+                e.addAutocorrect(move(exportsAutocorrect.value()));
+            }
+        }
+    }
+}
 } // namespace
 
 vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
@@ -833,30 +993,14 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             PropagateVisibility::run(gs, f);
         }
     }
-    auto result = VisibilityCheckerPass::run(gs, gs.packageDB(), workers, std::move(files));
+    auto result = VisibilityCheckerPass::run(gs, workers, std::move(files));
 
     if (gs.packageDB().genPackages()) {
-        Timer timeit(gs.tracer(), "visibility_checker.run.missing_imports_autocorrect");
-        UnorderedSet<core::packages::MangledName> affectedPackages;
-        for (auto &parsedFile : result) {
-            auto pkgName = gs.packageDB().getPackageNameForFile(parsedFile.file);
-            if (!pkgName.exists()) {
-                continue;
-            }
-            affectedPackages.insert(pkgName);
-        }
-
-        for (auto package : affectedPackages) {
-            auto &pkgInfo = gs.packageDB().getPackageInfo(package);
-            ENFORCE(pkgInfo.exists());
-            if (auto autocorrect = pkgInfo.aggregateMissingImports(gs)) {
-                if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectImportList)) {
-                    e.setHeader("{} is missing imports", pkgInfo.show(gs));
-                    e.addAutocorrect(move(autocorrect.value()));
-                    // TODO(neil): we should also delete imports that are unused but have a modularity error here
-                }
-            }
-        }
+        // TODO(neil): this has to run after VisibilityChecker has been run over all files. With --package-directed,
+        // that will not be the case here, at this point we will only have run it over all the files in this and
+        // previous strata. To handle this, we should add a new phase after the main pipeline has been run over all the
+        // strata and run this logic there.
+        reportMissingImportExportAutocorrect(gs, result);
     }
 
     return result;
