@@ -31,7 +31,7 @@ Begin {
       params = Params {
         params = [
           Kwrestarg {
-            name = <P <U **> $2>
+            name = <U <kwargs>>
           }
         ]
       }

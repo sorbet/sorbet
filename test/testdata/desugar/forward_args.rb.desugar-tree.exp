@@ -4,41 +4,41 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    def foo<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    def foo<<todo method>>(*<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
       ::<Magic>.<call-with-splat-and-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>)
     end
 
-    def foo2<<todo method>>(*args, *kwargs:, &block)
+    def foo2<<todo method>>(*args, **kwargs, &block)
       ::<Magic>.<call-with-splat-and-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>(args), [begin
             <hashTemp>$2 = ::<Magic>.<to-hash-dup>(kwargs)
             <hashTemp>$2
           end], block)
     end
 
-    def foo3<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    def foo3<<todo method>>(*<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
       ::<Magic>.<call-with-splat-and-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>([1, 2, 3]).concat(::<Magic>.<splat>(<fwd-args>)).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>)
     end
 
-    def foo4<<todo method>>(*args, *kwargs:, &block)
+    def foo4<<todo method>>(*args, **kwargs, &block)
       ::<Magic>.<call-with-splat-and-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>([1, 2, 3]).concat(::<Magic>.<splat>(args)), [begin
             <hashTemp>$2 = ::<Magic>.<to-hash-dup>(kwargs)
             <hashTemp>$2
           end], block)
     end
 
-    def foo5<<todo method>>(**, &<blk>)
-      [1, 2, 3].each() do |**|
+    def foo5<<todo method>>(*<restargs>, &<blk>)
+      [1, 2, 3].each() do |*<restargs>|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :p, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       end
     end
 
     def foo6<<todo method>>(*args, &<blk>)
-      [1, 2, 3].each() do |**|
+      [1, 2, 3].each() do |*<restargs>|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :p, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       end
     end
 
-    def foo7<<todo method>>(**, &<blk>)
+    def foo7<<todo method>>(*<restargs>, &<blk>)
       [1, 2, 3].each() do |*args|
         ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :p, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       end

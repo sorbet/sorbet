@@ -32,24 +32,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def method_with_anonymous_block_param<<todo method>>(&&$2)
+  def method_with_anonymous_block_param<<todo method>>(&<blk>)
     begin
-      if &$2
+      if <blk>
         <self>.block_given?()
       else
         false
       end
-      if &$2
+      if <blk>
         <self>.block_given?()
       else
         false
       end
-      if &$2
+      if <blk>
         <emptyTree>::<C Kernel>.block_given?()
       else
         false
       end
-      if &$2
+      if <blk>
         ::<root>::<C Kernel>.block_given?()
       else
         false

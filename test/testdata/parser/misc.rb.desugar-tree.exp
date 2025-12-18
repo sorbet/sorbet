@@ -102,7 +102,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <self>.<super>(ZSuperArgs)
 
-  def kwfoo<<todo method>>(x:, y: = 1, *z:, &<blk>)
+  def kwfoo<<todo method>>(x:, y: = 1, **z, &<blk>)
     <emptyTree>
   end
 
@@ -217,11 +217,11 @@ rescue <emptyTree>::<C E> => x
       <emptyTree>
     end)
 
-  def sfoo<<todo method>>(**, &<blk>)
+  def sfoo<<todo method>>(*<restargs>, &<blk>)
     <emptyTree>
   end
 
-  def ssfoo<<todo method>>(***$2:, &<blk>)
+  def ssfoo<<todo method>>(**<kwargs>, &<blk>)
     <emptyTree>
   end
 

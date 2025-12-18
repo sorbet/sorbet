@@ -1278,7 +1278,11 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) const {
 }
 
 string RestParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "*" + this->expr.toStringWithTabs(gs, tabs);
+    if (auto kwargSplat = cast_tree<KeywordArg>(this->expr)) { // Handle keyword arg splat, like `def foo(**kwargs)`
+        return "**" + kwargSplat->expr.toStringWithTabs(gs, tabs);
+    } else { // Handle rest arg splat, like `def foo(*args)`
+        return "*" + this->expr.toStringWithTabs(gs, tabs);
+    }
 }
 
 string KeywordArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
