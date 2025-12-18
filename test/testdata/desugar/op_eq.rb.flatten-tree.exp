@@ -85,7 +85,6 @@ begin
         <runtime method definition of y>
         <runtime method definition of z>
         <runtime method definition of example>
-        <emptyTree>
       end
     end
   end

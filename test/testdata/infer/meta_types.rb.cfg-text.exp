@@ -96,9 +96,10 @@ bb7[firstDead=2](<self>: TestMetaType, <statTemp>$24: Object):
 
 method ::<Class:TestMetaType>#<static-init> {
 
-bb0[firstDead=2]():
+bb0[firstDead=3]():
     <self>: T.class_of(TestMetaType) = cast(<self>: NilClass, T.class_of(TestMetaType));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:testit) = :testit
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:testit)
     <unconditional> -> bb1
 
 # backedges

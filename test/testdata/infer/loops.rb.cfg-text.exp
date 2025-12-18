@@ -121,9 +121,10 @@ bb5[firstDead=-1](a: String("s")):
 
 method ::<Class:HasLoops>#<static-init> {
 
-bb0[firstDead=2]():
+bb0[firstDead=3]():
     <self>: T.class_of(HasLoops) = cast(<self>: NilClass, T.class_of(HasLoops));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:correct_assignment) = :correct_assignment
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:correct_assignment)
     <unconditional> -> bb1
 
 # backedges

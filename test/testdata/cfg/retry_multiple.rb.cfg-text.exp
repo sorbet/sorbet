@@ -131,8 +131,8 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=3]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$4: T.untyped = <self>: T.class_of(<root>).main()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: T.untyped = <self>: T.class_of(<root>).main()
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges

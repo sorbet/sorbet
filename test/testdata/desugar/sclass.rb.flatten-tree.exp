@@ -32,7 +32,6 @@ begin
         $c = ::Object.new()
         <runtime method definition of main>
         <self>.main()
-        <emptyTree>
       end
     end
   end
@@ -124,7 +123,6 @@ begin
         <runtime method definition of initialize>
         <self>.extend(::T::Sig)
         <runtime method definition of f=>
-        <emptyTree>
       end
     end
   end
@@ -143,7 +141,6 @@ begin
       begin
         <runtime method definition of wrapper>
         <runtime method definition of self.g>
-        <emptyTree>
       end
     end
   end

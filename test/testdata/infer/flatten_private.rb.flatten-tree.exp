@@ -44,7 +44,6 @@ begin
         <runtime method definition of self.private_class_method>
         <self>.private_class_method(<runtime method definition of self.outer_static>)
         <self>.private(<runtime method definition of outer_instance>)
-        <emptyTree>
       end
     end
   end

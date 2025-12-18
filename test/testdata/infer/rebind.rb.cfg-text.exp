@@ -77,13 +77,14 @@ bb2[firstDead=-1](<self>: T.class_of(B), <block-pre-call-temp>$5: Sorbet::Privat
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(B)):
+bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(B)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(B) = <selfRestore>$6
     <cfgAlias>$22: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$24: T.class_of(T) = alias <C T>
     <statTemp>$19: T.class_of(B) = <self>: T.class_of(B).extend(<cfgAlias>$22: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:only_on_B) = :only_on_B
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:only_on_B)
     <unconditional> -> bb1
 
 # backedges
@@ -140,13 +141,14 @@ bb2[firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$5: Sorbet::Privat
 
 # backedges
 # - bb2
-bb3[firstDead=6](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(A)):
+bb3[firstDead=7](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(A)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(A) = <selfRestore>$6
     <cfgAlias>$22: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$24: T.class_of(T) = alias <C T>
     <statTemp>$19: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$22: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:mySig) = :mySig
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:mySig)
     <unconditional> -> bb1
 
 # backedges
@@ -288,12 +290,13 @@ bb9[firstDead=4](<self>: B, <block-pre-call-temp>$5: Sorbet::Private::Static::Vo
 
 method ::<Class:Use>#<static-init> {
 
-bb0[firstDead=5]():
+bb0[firstDead=6]():
     <self>: T.class_of(Use) = cast(<self>: NilClass, T.class_of(Use));
     <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
     <statTemp>$3: T.class_of(Use) = <self>: T.class_of(Use).extend(<cfgAlias>$6: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:jumpBetweenClasses) = :jumpBetweenClasses
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:jumpBetweenClasses)
     <unconditional> -> bb1
 
 # backedges

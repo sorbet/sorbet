@@ -75,9 +75,10 @@ bb1[firstDead=-1]():
 
 method ::<Class:TestHash>#<static-init> {
 
-bb0[firstDead=2]():
+bb0[firstDead=3]():
     <self>: T.class_of(TestHash) = cast(<self>: NilClass, T.class_of(TestHash));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:test_shaped) = :test_shaped
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:test_shaped)
     <unconditional> -> bb1
 
 # backedges

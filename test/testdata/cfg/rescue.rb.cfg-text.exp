@@ -124,8 +124,8 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=4]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$10: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$8: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$10: T.untyped)
+    <statTemp>$9: T.untyped = <self>: T.class_of(<root>).foo()
+    <returnMethodTemp>$2: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$9: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

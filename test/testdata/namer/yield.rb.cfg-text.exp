@@ -166,9 +166,10 @@ bb5[firstDead=6](<self>: Main, <block-pre-call-temp>$5: Sorbet::Private::Static:
 
 method ::<Class:Main>#<static-init> {
 
-bb0[firstDead=2]():
+bb0[firstDead=3]():
     <self>: T.class_of(Main) = cast(<self>: NilClass, T.class_of(Main));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:main) = :main
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:main)
     <unconditional> -> bb1
 
 # backedges

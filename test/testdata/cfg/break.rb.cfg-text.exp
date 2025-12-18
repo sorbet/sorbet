@@ -245,9 +245,9 @@ bb19[firstDead=-1]():
 # - bb19
 # - bb22
 bb20[firstDead=3](c: T.nilable(Symbol)):
-    <cfgAlias>$88: T.class_of(T) = alias <C T>
-    <statTemp>$86: T.nilable(Symbol) = <cfgAlias>$88: T.class_of(T).reveal_type(c: T.nilable(Symbol))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <cfgAlias>$87: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: T.nilable(Symbol) = <cfgAlias>$87: T.class_of(T).reveal_type(c: T.nilable(Symbol))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Symbol)
     <unconditional> -> bb1
 
 # backedges

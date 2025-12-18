@@ -395,13 +395,14 @@ bb18[firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp>$86: Sorbet::P
 
 # backedges
 # - bb18
-bb19[firstDead=6](<block-pre-call-temp>$86: Sorbet::Private::Static::Void, <selfRestore>$87: T.class_of(Test)):
+bb19[firstDead=7](<block-pre-call-temp>$86: Sorbet::Private::Static::Void, <selfRestore>$87: T.class_of(Test)):
     <statTemp>$84: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$86, sig>
     <self>: T.class_of(Test) = <selfRestore>$87
     <cfgAlias>$98: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$100: T.class_of(T) = alias <C T>
     <statTemp>$95: T.class_of(Test) = <self>: T.class_of(Test).extend(<cfgAlias>$98: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:takes_optional_integer) = :takes_optional_integer
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:takes_optional_integer)
     <unconditional> -> bb1
 
 # backedges

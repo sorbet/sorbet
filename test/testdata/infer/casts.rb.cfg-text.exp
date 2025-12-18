@@ -103,9 +103,10 @@ bb1[firstDead=-1]():
 
 method ::<Class:TestCasts>#<static-init> {
 
-bb0[firstDead=2]():
+bb0[firstDead=3]():
     <self>: T.class_of(TestCasts) = cast(<self>: NilClass, T.class_of(TestCasts));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:test_casts) = :test_casts
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:test_casts)
     <unconditional> -> bb1
 
 # backedges

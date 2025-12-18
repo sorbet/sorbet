@@ -7,7 +7,6 @@ begin
         ::A::B::C
         ::A::B::D
         ::A
-        <emptyTree>
       end
     end
   end
@@ -23,7 +22,6 @@ begin
       begin
         ::A::B::C
         ::A::B::D = 1
-        <emptyTree>
       end
     end
   end

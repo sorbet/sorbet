@@ -104,7 +104,6 @@ begin
         <runtime method definition of variables_and_loop>
         <runtime method definition of variables_loop_if>
         <runtime method definition of take_arguments>
-        <emptyTree>
       end
     end
   end

@@ -180,13 +180,14 @@ bb6[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$21: Sorbet::
 
 # backedges
 # - bb6
-bb7[firstDead=6](<block-pre-call-temp>$21: Sorbet::Private::Static::Void, <selfRestore>$22: T.class_of(<root>)):
+bb7[firstDead=7](<block-pre-call-temp>$21: Sorbet::Private::Static::Void, <selfRestore>$22: T.class_of(<root>)):
     <statTemp>$19: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$21, sig>
     <self>: T.class_of(<root>) = <selfRestore>$22
     <cfgAlias>$38: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$40: T.class_of(T) = alias <C T>
     <statTemp>$35: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$38: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:f2) = :f2
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:f2)
     <unconditional> -> bb1
 
 # backedges
@@ -208,14 +209,15 @@ bb9[firstDead=9](<self>: T.class_of(<root>), <block-pre-call-temp>$21: Sorbet::P
 
 method ::<Class:Base>#<static-init> {
 
-bb0[firstDead=7]():
-    <C Klass>$10: Runtime object representing type: T.class_of(Base)::Klass = alias <C Klass>
+bb0[firstDead=8]():
+    <C Klass>$9: Runtime object representing type: T.class_of(Base)::Klass = alias <C Klass>
     <self>: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass] = cast(<self>: NilClass, T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass]);
     <cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
     <statTemp>$3: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass] = <self>: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass].extend(<cfgAlias>$6: T.class_of(T::Generic))
-    <C Klass>$10: T::Types::TypeTemplate = <self>: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass].type_template()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <C Klass>$9: T::Types::TypeTemplate = <self>: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass].type_template()
+    <returnMethodTemp>$2: T::Types::TypeTemplate = <C Klass>$9
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Types::TypeTemplate
     <unconditional> -> bb1
 
 # backedges
@@ -228,13 +230,13 @@ bb1[firstDead=-1]():
 method ::<Class:Concrete>#<static-init> {
 
 bb0[firstDead=-1]():
-    <C Klass>$10: Runtime object representing type: String = alias <C Klass>
+    <C Klass>$9: Runtime object representing type: String = alias <C Klass>
     <self>: T.class_of(Concrete) = cast(<self>: NilClass, T.class_of(Concrete));
     <cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
     <statTemp>$3: T.class_of(Concrete) = <self>: T.class_of(Concrete).extend(<cfgAlias>$6: T.class_of(T::Generic))
-    <block-pre-call-temp>$12: Sorbet::Private::Static::Void = <self>: T.class_of(Concrete).type_template()
-    <selfRestore>$13: T.class_of(Concrete) = <self>
+    <block-pre-call-temp>$11: Sorbet::Private::Static::Void = <self>: T.class_of(Concrete).type_template()
+    <selfRestore>$12: T.class_of(Concrete) = <self>
     <unconditional> -> bb2
 
 # backedges
@@ -245,27 +247,28 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(Concrete), <block-pre-call-temp>$12: Sorbet::Private::Static::Void, <selfRestore>$13: T.class_of(Concrete)):
+bb2[firstDead=-1](<self>: T.class_of(Concrete), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Concrete)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=2](<block-pre-call-temp>$12: Sorbet::Private::Static::Void, <selfRestore>$13: T.class_of(Concrete)):
-    <C Klass>$10: T::Types::TypeTemplate = Solve<<block-pre-call-temp>$12, type_template>
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+bb3[firstDead=3](<block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Concrete)):
+    <C Klass>$9: T::Types::TypeTemplate = Solve<<block-pre-call-temp>$11, type_template>
+    <returnMethodTemp>$2: T::Types::TypeTemplate = <C Klass>$9
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Types::TypeTemplate
     <unconditional> -> bb1
 
 # backedges
 # - bb2
-bb5[firstDead=6](<self>: T.class_of(Concrete), <block-pre-call-temp>$12: Sorbet::Private::Static::Void, <selfRestore>$13: T.class_of(Concrete)):
+bb5[firstDead=6](<self>: T.class_of(Concrete), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: T.class_of(Concrete)):
     # outerLoops: 1
     <self>: T.class_of(Concrete) = loadSelf(type_template)
-    <hashTemp>$16: Symbol(:fixed) = :fixed
-    <cfgAlias>$18: T.class_of(String) = alias <C String>
-    <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
-    <blockReturnTemp>$14: {fixed: T.class_of(String)} = <magic>$15: T.class_of(<Magic>).<build-hash>(<hashTemp>$16: Symbol(:fixed), <cfgAlias>$18: T.class_of(String))
-    <blockReturnTemp>$19: T.noreturn = blockreturn<type_template> <blockReturnTemp>$14: {fixed: T.class_of(String)}
+    <hashTemp>$15: Symbol(:fixed) = :fixed
+    <cfgAlias>$17: T.class_of(String) = alias <C String>
+    <magic>$14: T.class_of(<Magic>) = alias <C <Magic>>
+    <blockReturnTemp>$13: {fixed: T.class_of(String)} = <magic>$14: T.class_of(<Magic>).<build-hash>(<hashTemp>$15: Symbol(:fixed), <cfgAlias>$17: T.class_of(String))
+    <blockReturnTemp>$18: T.noreturn = blockreturn<type_template> <blockReturnTemp>$13: {fixed: T.class_of(String)}
     <unconditional> -> bb2
 
 }

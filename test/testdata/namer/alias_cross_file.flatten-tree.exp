@@ -17,7 +17,6 @@ begin
           <self>.returns(::T2)
         end
         <runtime method definition of test_resolve>
-        <emptyTree>
       end
     end
   end

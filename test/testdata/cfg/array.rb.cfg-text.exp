@@ -116,13 +116,14 @@ bb6[firstDead=-1](<self>: T.class_of(TestArray), <block-pre-call-temp>$14: Sorbe
 
 # backedges
 # - bb6
-bb7[firstDead=6](<block-pre-call-temp>$14: Sorbet::Private::Static::Void, <selfRestore>$15: T.class_of(TestArray)):
+bb7[firstDead=7](<block-pre-call-temp>$14: Sorbet::Private::Static::Void, <selfRestore>$15: T.class_of(TestArray)):
     <statTemp>$12: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$14, sig>
     <self>: T.class_of(TestArray) = <selfRestore>$15
     <cfgAlias>$24: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$26: T.class_of(T) = alias <C T>
     <statTemp>$21: T.class_of(TestArray) = <self>: T.class_of(TestArray).extend(<cfgAlias>$24: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:test_arrays) = :test_arrays
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:test_arrays)
     <unconditional> -> bb1
 
 # backedges

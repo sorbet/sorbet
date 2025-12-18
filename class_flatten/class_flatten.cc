@@ -50,7 +50,9 @@ ast::ExpressionPtr extractClassInit(core::Context ctx, ast::ClassDef *klass) {
     if (inits.size() == 1) {
         return std::move(inits.front());
     }
-    return ast::MK::InsSeq(klass->declLoc, std::move(inits), ast::MK::EmptyTree());
+    auto expr = move(inits.back());
+    inits.pop_back();
+    return ast::MK::InsSeq(klass->declLoc, move(inits), move(expr));
 }
 
 class ClassFlattenWalk {

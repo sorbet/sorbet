@@ -1504,13 +1504,14 @@ bb6[firstDead=-1](<self>: T.class_of(TestRescue), <block-pre-call-temp>$22: Sorb
 
 # backedges
 # - bb6
-bb7[firstDead=6](<block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.class_of(TestRescue)):
+bb7[firstDead=7](<block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfRestore>$23: T.class_of(TestRescue)):
     <statTemp>$20: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$22, sig>
     <self>: T.class_of(TestRescue) = <selfRestore>$23
     <cfgAlias>$42: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$44: T.class_of(T) = alias <C T>
     <statTemp>$39: T.class_of(TestRescue) = <self>: T.class_of(TestRescue).extend(<cfgAlias>$42: T.class_of(T::Sig))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:parse_ruby_bug_12402_2) = :parse_ruby_bug_12402_2
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:parse_ruby_bug_12402_2)
     <unconditional> -> bb1
 
 # backedges

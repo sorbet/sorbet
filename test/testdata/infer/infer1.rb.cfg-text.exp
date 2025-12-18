@@ -211,9 +211,10 @@ bb5[firstDead=-1]():
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[firstDead=2]():
+bb0[firstDead=3]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <returnMethodTemp>$2: Symbol(:baz8) = :baz8
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:baz8)
     <unconditional> -> bb1
 
 # backedges
