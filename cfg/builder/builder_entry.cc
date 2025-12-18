@@ -94,45 +94,45 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         BasicBlock *defaultCont = nullptr;
 
         if (res->symbol.isMethod()) {
-        auto method = res->symbol.asMethodRef();
-        auto &paramInfos = method.data(ctx)->parameters;
-        bool isAbstract = method.data(ctx)->flags.isAbstract;
-        bool seenKeyword = false;
-        int i = -1;
-        for (auto &paramExpr : params) {
-            i++;
-            auto *p = ast::MK::arg2Local(paramExpr);
-            auto local = res->enterLocal(p->localVariable);
-            auto &paramInfo = paramInfos[i];
+            auto method = res->symbol.asMethodRef();
+            auto &paramInfos = method.data(ctx)->parameters;
+            bool isAbstract = method.data(ctx)->flags.isAbstract;
+            bool seenKeyword = false;
+            int i = -1;
+            for (auto &paramExpr : params) {
+                i++;
+                auto *p = ast::MK::arg2Local(paramExpr);
+                auto local = res->enterLocal(p->localVariable);
+                auto &paramInfo = paramInfos[i];
 
-            seenKeyword = seenKeyword || paramInfo.flags.isKeyword;
+                seenKeyword = seenKeyword || paramInfo.flags.isKeyword;
 
-            // If defaultCont is non-null, that means that the previous argument had a default. If the current argument
-            // has a default and also is not a keyword, block or repeated arg, then we can continue by extending that
-            // fall-through case. However if any of those conditions fail, we must merge the two paths back together,
-            // and break out of the fast-path for defaulting.
-            if (defaultCont &&
-                (seenKeyword || paramInfo.flags.isBlock || paramInfo.flags.isRepeated || !paramInfo.flags.isDefault)) {
-                presentCont = joinBlocks(cctx, presentCont, defaultCont);
-                defaultCont = nullptr;
-            }
-
-            // Ignore defaults for abstract methods, because abstract methods do not have bodies and are not called.
-            if (!isAbstract) {
-                // Only emit conditional arg loading if the arg has a default
-                if (auto opt = ast::cast_tree<ast::OptionalParam>(paramExpr)) {
-                    auto [result, presentNext, defaultNext] =
-                        walkDefault(cctx, i, paramInfo, local, p->loc, opt->default_, presentCont, defaultCont);
-
-                    synthesizeExpr(defaultNext, local, p->loc, make_insn<Ident>(result));
-
-                    presentCont = presentNext;
-                    defaultCont = defaultNext;
+                // If defaultCont is non-null, that means that the previous argument had a default. If the current
+                // argument has a default and also is not a keyword, block or repeated arg, then we can continue by
+                // extending that fall-through case. However if any of those conditions fail, we must merge the two
+                // paths back together, and break out of the fast-path for defaulting.
+                if (defaultCont && (seenKeyword || paramInfo.flags.isBlock || paramInfo.flags.isRepeated ||
+                                    !paramInfo.flags.isDefault)) {
+                    presentCont = joinBlocks(cctx, presentCont, defaultCont);
+                    defaultCont = nullptr;
                 }
-            }
 
-            synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(res->symbol, i));
-        }
+                // Ignore defaults for abstract methods, because abstract methods do not have bodies and are not called.
+                if (!isAbstract) {
+                    // Only emit conditional arg loading if the arg has a default
+                    if (auto opt = ast::cast_tree<ast::OptionalParam>(paramExpr)) {
+                        auto [result, presentNext, defaultNext] =
+                            walkDefault(cctx, i, paramInfo, local, p->loc, opt->default_, presentCont, defaultCont);
+
+                        synthesizeExpr(defaultNext, local, p->loc, make_insn<Ident>(result));
+
+                        presentCont = presentNext;
+                        defaultCont = defaultNext;
+                    }
+                }
+
+                synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(res->symbol, i));
+            }
         } else {
             // res->symbol being a class symbol means that it's a static-init, which has no parameters
         }
