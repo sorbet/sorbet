@@ -24,8 +24,14 @@ namespace sorbet::rbs {
  */
 rbs_string_t makeRBSString(const std::string_view str);
 
-// Helper template to map RBS node types to their type enum values
-template <typename Type> struct RBSNodeTypeHelper {};
+// This list of helpers below includes RBS node types that
+// we actually needed to be able to cast, and is not exhaustive.
+template <typename Type> struct RBSNodeTypeHelper {
+    static_assert(always_false_v<Type>,
+                  "RBSNodeTypeHelper is not specialized for this type. "
+                  "You'll need to add a new `DEF_RBS_TYPE_HELPER(rbs_new_node_type, RBS_NEW_NODE_ENUM)`"
+                  "definition to the list in `rbs/rbs_common.h`");
+};
 
 #define DEF_RBS_TYPE_HELPER(rbs_struct_type, type_enum)         \
     template <> struct RBSNodeTypeHelper<rbs_struct_type> {     \
@@ -42,6 +48,7 @@ DEF_RBS_TYPE_HELPER(rbs_types_function_param_t, RBS_TYPES_FUNCTION_PARAM);
 // Safe down_cast for RBS nodes (from rbs_node_t to specific types)
 // In debug builds, checks the node type before casting
 template <typename RBSNode> RBSNode *rbs_down_cast(rbs_node_t *anyNode) {
+    (void)RBSNodeTypeHelper<rbs_ast_symbol_t>::TypeID;
     static_assert(std::is_same_v<decltype(RBSNode::base), rbs_node_t>,
                   "The `rbs_down_cast` function should only be called on RBS node pointers.");
     ENFORCE(anyNode != nullptr, "Failed to cast an RBS node. Expected type {}, but got null",
