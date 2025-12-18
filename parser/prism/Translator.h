@@ -21,7 +21,7 @@ class Translator final {
     core::MutableContext ctx;
 
     // The errors that were found by Prism during parsing
-    const absl::Span<const ParseError> parseErrors;
+    absl::Span<const ParseError> parseErrors;
 
     // Whether to directly desugar during in the Translator, or wait until the usual `Desugar.cc` code path.
     const bool directlyDesugar;
@@ -52,7 +52,7 @@ class Translator final {
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(const Parser &parser, core::MutableContext ctx, const absl::Span<const ParseError> parseErrors,
+    Translator(const Parser &parser, core::MutableContext ctx, absl::Span<const ParseError> parseErrors,
                bool directlyDesugar, bool preserveConcreteSyntax)
         : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
           preserveConcreteSyntax(preserveConcreteSyntax), parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
