@@ -1,7 +1,5 @@
 # typed: strict
 
-extend T::Sig
-
 module Wrong
      # ^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
   class Inside; end
@@ -30,8 +28,6 @@ end
 
 module Root
   module Nested
-    extend T::Sig
-
     class SomeClass
       class Deeper; end
     end
@@ -56,8 +52,6 @@ class Root::Nested::Stringy < String
 end
 
 module Root
-  extend T::Sig
-# ^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
   NOT_IN_PACKAGE = T.let(1, Integer)
 # ^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 

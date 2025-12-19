@@ -1,5 +1,5 @@
 # typed: strict
 
-class ::Object
-  extend T::Sig
+class ::Module
+  include T::Sig
 end
