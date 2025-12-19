@@ -2248,7 +2248,10 @@ ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, Expression
     } else {
         rhs.emplace_back(move(what));
     }
-    return make_expression<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), move(ancestors), move(rhs),
+
+    auto declLoc = core::LocOffsets::none();
+
+    return make_expression<ClassDef>(loc, declLoc, core::Symbols::root(), MK::EmptyTree(), move(ancestors), move(rhs),
                                      ClassDef::Kind::Class);
 }
 } // namespace

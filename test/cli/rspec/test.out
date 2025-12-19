@@ -7,34 +7,18 @@ test/cli/rspec/rspec2.rb:68: Only valid `it`, `before`, `after`, and `describe` 
 test/cli/rspec/rspec2.rb:174: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
      174 |  it "inside B" do
             ^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec2.rb:4:
-     4 |module RSpec
-        ^
 
 test/cli/rspec/rspec2.rb:178: Method `context` does not exist on `T.class_of(<root>)` https://srb.help/7003
      178 |  context("Nested, no RSpec") do
             ^^^^^^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec2.rb:4:
-     4 |module RSpec
-        ^
 
 test/cli/rspec/rspec2.rb:179: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
      179 |    it "inside Nested" do
               ^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec2.rb:4:
-     4 |module RSpec
-        ^
 
 test/cli/rspec/rspec2.rb:181: Method `described_class` does not exist on `T.class_of(<root>)` https://srb.help/7003
      181 |      described_class
                 ^^^^^^^^^^^^^^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec2.rb:4:
-     4 |module RSpec
-        ^
 
 test/cli/rspec/rspec2.rb:77: Method `example` does not exist on `T.class_of(A)` https://srb.help/7003
     77 |  example do # error: Method `example` does not exist
@@ -717,50 +701,26 @@ test/cli/rspec/rspec3.rb:24: Method `this_does_not_exist` does not exist on `T.c
 test/cli/rspec/rspec1.rb:18: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
     18 |  let(:name) { "Alice" }
           ^^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec1.rb:7:
-     7 |module RSpec
-        ^
 
 test/cli/rspec/rspec1.rb:20: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
     20 |  it "has a name" do
           ^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec1.rb:7:
-     7 |module RSpec
-        ^
 
 test/cli/rspec/rspec1.rb:24: Method `context` does not exist on `T.class_of(<root>)` https://srb.help/7003
     24 |  context "when verified" do
           ^^^^^^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec1.rb:7:
-     7 |module RSpec
-        ^
 
 test/cli/rspec/rspec1.rb:25: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
     25 |    let(:verified) { true }
             ^^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec1.rb:7:
-     7 |module RSpec
-        ^
 
 test/cli/rspec/rspec1.rb:27: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
     27 |    it "shows verified status" do
             ^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec1.rb:7:
-     7 |module RSpec
-        ^
 
 test/cli/rspec/rspec1.rb:29: Method `verified` does not exist on `T.class_of(<root>)` https://srb.help/7003
     29 |      verified
               ^^^^^^^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/rspec/rspec1.rb:7:
-     7 |module RSpec
-        ^
 Errors: 80
 --------------------------------------------------------------------------
 test/cli/rspec/rspec2.rb:58: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`) https://srb.help/5064
