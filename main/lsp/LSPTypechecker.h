@@ -64,10 +64,9 @@ class LSPTypechecker final {
 
     /**
      * Trees that have been indexed with this->gs between slow path runs, which means that they may have names that are
-     * not present in the name table of the indexer. This is a sparse diff of trees indexed by position in
-     * this->indexed, and should be consulted before this->indexed when looking up trees. Pelase see the WARNING section
-     * of the comment on this->indexed for more context about why. This lookup strategy is implemented by
-     * this->getResolved. All of the trees in this map are valid to use with this->gs.
+     * not present in the name table of the indexer. This is a sparse diff of trees indexed by file id, and should be
+     * consulted before re-indexing trees. This lookup strategy is implemented by this->getResolved. All of the trees in
+     * this map are valid to use with this->gs.
      */
     UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
 
