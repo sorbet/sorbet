@@ -608,9 +608,24 @@ core::packages::ImportType PackageInfo::fileToImportType(const core::GlobalState
     }
 }
 
-std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
+std::vector<core::AutocorrectSuggestion::Edit>
+computeImportEdits(const core::GlobalState &gs, const core::packages::PackageInfo &thisPkgInfo,
+                   UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport) {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto &[packageName, importType] : toImport) {
+        auto &otherPkgInfo = gs.packageDB().getPackageInfo(packageName);
+        auto autocorrect = thisPkgInfo.addImport(gs, otherPkgInfo, importType);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+    return allEdits;
+}
+
+std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
 
     for (auto &import : importedPackageNames) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
@@ -654,14 +669,8 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             }
         }
     }
-    for (auto &[packageName, importType] : toImport) {
-        auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
-        auto autocorrect = this->addImport(gs, pkgInfo, importType);
-        if (autocorrect.has_value()) {
-            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
-                            make_move_iterator(autocorrect.value().edits.end()));
-        }
-    }
+    auto importEdits = computeImportEdits(gs, *this, toImport);
+    allEdits.insert(allEdits.end(), make_move_iterator(importEdits.begin()), make_move_iterator(importEdits.end()));
     if (allEdits.empty()) {
         return nullopt;
     }
