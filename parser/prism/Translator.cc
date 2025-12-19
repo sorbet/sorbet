@@ -2644,16 +2644,22 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             ancestors.emplace_back(MK::Constant(location, core::Symbols::todo()));
 
             ast::ClassDef::RHS_store classBody;
-            auto statements = desugarStatements(programNode->statements);
+            if (programNode->statements->body.size == 1) {
+                auto statement = desugar(programNode->statements->body.nodes[0]);
 
-            if (auto insSeq = ast::cast_tree<ast::InsSeq>(statements)) {
-                classBody.reserve(insSeq->stats.size() + 1);
-                for (auto &stat : insSeq->stats) {
-                    classBody.emplace_back(move(stat));
+                // If the one statement desugars into an instruction sequence of multiple statements,
+                // inline it so the statements are directly in the class body, rather than wrapped.
+                if (auto insSeq = ast::cast_tree<ast::InsSeq>(statement)) {
+                    classBody.reserve(insSeq->stats.size() + 1);
+                    for (auto &stat : insSeq->stats) {
+                        classBody.emplace_back(move(stat));
+                    }
+                    classBody.emplace_back(move(insSeq->expr));
+                } else {
+                    classBody.emplace_back(move(statement));
                 }
-                classBody.emplace_back(move(insSeq->expr));
             } else {
-                classBody.emplace_back(move(statements));
+                classBody = nodeListToStore<ast::ClassDef::RHS_store>(programNode->statements->body);
             }
 
             return ast::make_expression<ast::ClassDef>(location, location, core::Symbols::root(), MK::EmptyTree(),
