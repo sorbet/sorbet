@@ -14,4 +14,5 @@ module Outer
 
   include Inner::Mixin
 # ^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Outer::Inner`
+#         ^^^^^^^^^^^^ error: Package namespace `Outer` may not have mixins applied
 end
