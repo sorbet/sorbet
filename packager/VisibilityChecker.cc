@@ -447,7 +447,9 @@ class VisibilityCheckerPass final {
             importAutocorrect->edits.insert(importAutocorrect->edits.end(),
                                             make_move_iterator(exportAutocorrect->edits.begin()),
                                             make_move_iterator(exportAutocorrect->edits.end()));
-            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits)});
+            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits),
+                                                         false /* isDidYouMean */,
+                                                         /* shouldSkipWhenAggregated */ false});
         } else if (importAutocorrect.has_value()) {
             e.addAutocorrect(std::move(importAutocorrect.value()));
         } else if (exportAutocorrect.has_value()) {

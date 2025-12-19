@@ -298,7 +298,8 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         suggestionTitle = fmt::format("Convert existing import to `{}`", importTypeMethod);
     }
 
-    core::AutocorrectSuggestion suggestion(suggestionTitle, edits);
+    core::AutocorrectSuggestion suggestion(suggestionTitle, edits, false /* isDidYouMean */,
+                                           true /* shouldSkipWhenAggregated */);
     return {suggestion};
 }
 
@@ -344,7 +345,8 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
 
     core::AutocorrectSuggestion suggestion(
         fmt::format("Export `{}` in package `{}`", newExportName, mangledName_.owner.show(gs)),
-        {{insertionLoc, fmt::format("\n  {}", exportLine)}});
+        {{insertionLoc, fmt::format("\n  {}", exportLine)}}, false /* isDidYouMean */,
+        false /* shouldSkipWhenAggregated */);
     return {suggestion};
 }
 
@@ -525,6 +527,31 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
     }
     AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
     return core::AutocorrectSuggestion{"Add missing imports", std::move(allEdits)};
+}
+
+std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImportsForFile(const core::GlobalState &gs,
+                                                                                       const core::FileRef fref) const {
+    auto it = packagesReferencedByFile.find(fref);
+    if (it == packagesReferencedByFile.end()) {
+        return std::nullopt;
+    }
+
+    UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
+    for (auto &[packageName, packageReferenceInfo] : it->second) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
+        if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
+            continue;
+        }
+        auto importType = fileToImportType(gs, fref);
+        toImport[packageName] = importType;
+    }
+
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits = computeImportEdits(gs, *this, toImport);
+    if (allEdits.empty()) {
+        return nullopt;
+    }
+    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
+    return core::AutocorrectSuggestion{"Add missing imports for this file", std::move(allEdits)};
 }
 
 std::optional<core::AutocorrectSuggestion>
