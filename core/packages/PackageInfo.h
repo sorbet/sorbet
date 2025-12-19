@@ -265,6 +265,8 @@ public:
                                 std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
+    std::optional<core::AutocorrectSuggestion> aggregateMissingImportsForFile(const core::GlobalState &gs,
+                                                                              const core::FileRef fref) const;
     std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
                                                                        std::vector<core::SymbolRef> &toExport) const;
 };
