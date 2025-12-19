@@ -2235,11 +2235,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what)
 }
 
 ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr what) {
-    ClassDef::RHS_store rhs;
     ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
-    auto insSeq = cast_tree<InsSeq>(what);
-    if (insSeq) {
+
+    ClassDef::RHS_store rhs;
+    if (auto insSeq = cast_tree<InsSeq>(what)) {
         rhs.reserve(insSeq->stats.size() + 1);
         for (auto &stat : insSeq->stats) {
             rhs.emplace_back(move(stat));
