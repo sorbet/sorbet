@@ -24,17 +24,6 @@ using namespace std;
 
 namespace {
 
-// Translate a tree to an expression.
-ExpressionPtr node2TreeImpl(unique_ptr<parser::Node> &what) {
-    ENFORCE(what != nullptr);
-    ENFORCE(what->hasDesugaredExpr(), "Node has no desugared expression");
-
-    auto expr = what->takeDesugaredExpr();
-    ENFORCE(expr != nullptr, "Node has null desugared expr");
-
-    return expr;
-}
-
 ExpressionPtr liftTopLevel(core::LocOffsets loc, ExpressionPtr what) {
     ClassDef::RHS_store rhs;
     ClassDef::ANCESTORS_store ancestors;
@@ -58,9 +47,13 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
     try {
         // Callers should not pass null - when Prism falls back, use legacy desugar instead
         ENFORCE(what != nullptr, "node2Tree called with null tree");
+        ENFORCE(what->hasDesugaredExpr(), "Node has no desugared expression");
+
+        auto result = what->takeDesugaredExpr();
+        ENFORCE(result != nullptr, "Node has null desugared expr");
 
         auto liftedClassDefLoc = what->loc;
-        auto result = node2TreeImpl(what);
+
         if (result.loc().exists()) {
             // If the desugared expression has a different loc, we want to use that. This can happen
             // because (:block (:send)) desugars to (:send (:block)), but the (:block) node just has
