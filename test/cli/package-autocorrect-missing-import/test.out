@@ -98,6 +98,9 @@ end
 use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
      6 |      Foo::Bar::AppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     app_package/__package.rb:4: Package `Foo::Bar::AppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
@@ -107,6 +110,9 @@ use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be reference
 use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
      7 |      Foo::Bar::AppPackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     app_package_test/__package.rb:4: Package `Foo::Bar::AppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
@@ -144,6 +150,9 @@ end
 use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
@@ -153,6 +162,9 @@ use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be refer
 use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::FalsePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package_test/__package.rb:5: `Foo::Bar::FalsePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
@@ -190,6 +202,9 @@ end
 use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      6 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_and_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
@@ -202,6 +217,9 @@ use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` c
 use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      7 |      Foo::Bar::FalseAndAppPackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_and_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_and_app_package_test/__package.rb:4: Package `Foo::Bar::FalseAndAppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
@@ -242,6 +260,9 @@ end
 use_cycle_package/foo.rb:6: `Foo::Bar::CyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle https://srb.help/3727
      6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
@@ -256,6 +277,9 @@ use_cycle_package/foo.rb:6: `Foo::Bar::CyclePackage::OtherClass` cannot be refer
 use_cycle_package/foo.rb:7: `Foo::Bar::CyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle https://srb.help/3727
      7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
@@ -298,6 +322,9 @@ end
 use_app_cycle_package/foo.rb:6: `Foo::Bar::AppCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and importing its package would cause a layering violation https://srb.help/3727
      6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
@@ -315,6 +342,9 @@ use_app_cycle_package/foo.rb:6: `Foo::Bar::AppCyclePackage::OtherClass` cannot b
 use_app_cycle_package/foo.rb:7: `Foo::Bar::AppCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and importing its package would cause a layering violation https://srb.help/3727
      7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
@@ -360,6 +390,9 @@ end
 use_false_cycle_package/foo.rb:6: `Foo::Bar::FalseCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
@@ -377,6 +410,9 @@ use_false_cycle_package/foo.rb:6: `Foo::Bar::FalseCyclePackage::OtherClass` cann
 use_false_cycle_package/foo.rb:7: `Foo::Bar::FalseCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
@@ -422,6 +458,9 @@ end
 use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^
@@ -442,6 +481,9 @@ use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage::OtherClas
 use_app_false_cycle_package/foo.rb:7: `Foo::Bar::AppFalseCyclePackageTest::OtherClass` cannot be referenced here because importing its package would put `Foo::MyPackage` into a cycle, importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
      7 |  strict_dependencies 'layered_dag'
                               ^^^^^^^^^^^^^

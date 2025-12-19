@@ -24,6 +24,9 @@ C/__package.rb:3: C is missing imports https://srb.help/3734
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
+    C/__package.rb:3: This file's package declared here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
     F/__package.rb:4: `F` must be at least `strict_dependencies 'dag'` but is currently `strict_dependencies 'layered'`
      4 |  strict_dependencies 'layered'
                               ^^^^^^^^^

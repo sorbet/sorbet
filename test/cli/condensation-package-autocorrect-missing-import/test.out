@@ -130,6 +130,9 @@ use_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/50
 use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
      6 |      Foo::Bar::AppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     app_package/__package.rb:4: Package `Foo::Bar::AppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
@@ -139,6 +142,9 @@ use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be reference
 use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
      7 |      Foo::Bar::AppPackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     app_package_test/__package.rb:4: Package `Foo::Bar::AppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
@@ -190,6 +196,9 @@ use_false_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/
 use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:5: `Foo::Bar::FalsePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
@@ -199,6 +208,9 @@ use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be refer
 use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::FalsePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package_test/__package.rb:5: `Foo::Bar::FalsePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
      5 |  strict_dependencies 'false'
                               ^^^^^^^
@@ -250,6 +262,9 @@ use_false_and_app_package/foo.rb:13: Unable to resolve constant `Test` https://s
 use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      6 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_and_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_and_app_package/__package.rb:4: Package `Foo::Bar::FalseAndAppPackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
@@ -262,6 +277,9 @@ use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` c
 use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      7 |      Foo::Bar::FalseAndAppPackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_and_app_package/__package.rb:5: This file's package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_and_app_package_test/__package.rb:4: Package `Foo::Bar::FalseAndAppPackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
      4 |  layer 'app'
                 ^^^^^
