@@ -24,8 +24,8 @@ using namespace std;
 
 namespace {
 
-// Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
-ExpressionPtr node2TreeImplBody(parser::Node *what) {
+// Translate a tree to an expression.
+ExpressionPtr node2TreeImpl(unique_ptr<parser::Node> &what) {
     ENFORCE(what != nullptr);
     ENFORCE(what->hasDesugaredExpr(), "Node has no desugared expression");
 
@@ -33,13 +33,6 @@ ExpressionPtr node2TreeImplBody(parser::Node *what) {
     ENFORCE(expr != nullptr, "Node has null desugared expr");
 
     return expr;
-}
-
-// Translate trees by calling `node2TreeBody`, and manually reset the unique_ptr argument when it's done.
-ExpressionPtr node2TreeImpl(unique_ptr<parser::Node> &what) {
-    auto res = node2TreeImplBody(what.get());
-    what.reset();
-    return res;
 }
 
 ExpressionPtr liftTopLevel(core::LocOffsets loc, ExpressionPtr what) {
