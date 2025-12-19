@@ -2641,20 +2641,30 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                     "A `PM_STATEMENTS_NODE` should always have non-null statements, even for totally empty programs.");
 
             ast::ClassDef::RHS_store classBody;
-            auto statements = desugarStatements(programNode->statements);
-
             // The ClassDef location should be the location of the desugared content, not the program node.
             // This matches the legacy desugarer behavior from `node2Tree()` in `Desugar.cc`.
-            auto classDefLoc = statements.loc().exists() ? statements.loc() : location;
+            auto classDefLoc = location;
+            if (programNode->statements->body.size == 1) {
+                auto statement = desugar(programNode->statements->body.nodes[0]);
 
-            if (auto insSeq = ast::cast_tree<ast::InsSeq>(statements)) {
-                classBody.reserve(insSeq->stats.size() + 1);
-                for (auto &stat : insSeq->stats) {
-                    classBody.emplace_back(move(stat));
+                // Use the desugared statement's location if it exists
+                if (statement.loc().exists()) {
+                    classDefLoc = statement.loc();
                 }
-                classBody.emplace_back(move(insSeq->expr));
+
+                // If the one statement desugars into an instruction sequence of multiple statements,
+                // inline it so the statements are directly in the class body, rather than wrapped.
+                if (auto insSeq = ast::cast_tree<ast::InsSeq>(statement)) {
+                    classBody.reserve(insSeq->stats.size() + 1);
+                    for (auto &stat : insSeq->stats) {
+                        classBody.emplace_back(move(stat));
+                    }
+                    classBody.emplace_back(move(insSeq->expr));
+                } else {
+                    classBody.emplace_back(move(statement));
+                }
             } else {
-                classBody.emplace_back(move(statements));
+                classBody = nodeListToStore<ast::ClassDef::RHS_store>(programNode->statements->body);
             }
 
             ast::ClassDef::ANCESTORS_store ancestors;
