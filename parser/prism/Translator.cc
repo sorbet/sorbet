@@ -2662,7 +2662,10 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 classBody = nodeListToStore<ast::ClassDef::RHS_store>(programNode->statements->body);
             }
 
-            return ast::make_expression<ast::ClassDef>(location, location, core::Symbols::root(), MK::EmptyTree(),
+            auto declLoc = location; // TODO: make 0-length
+            auto name = MK::EmptyTree();
+
+            return ast::make_expression<ast::ClassDef>(location, declLoc, core::Symbols::root(), move(name),
                                                        move(ancestors), move(classBody), ast::ClassDef::Kind::Class);
         }
         case PM_POST_EXECUTION_NODE: { // The END keyword and body, like `END { ... }`
