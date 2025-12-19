@@ -482,10 +482,24 @@ core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::F
     }
 }
 
+std::vector<core::AutocorrectSuggestion::Edit>
+computeImportEdits(const core::GlobalState &gs, const core::packages::PackageInfo &thisPkgInfo,
+                   UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport) {
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto &[packageName, importType] : toImport) {
+        auto &otherPkgInfo = gs.packageDB().getPackageInfo(packageName);
+        auto autocorrect = thisPkgInfo.addImport(gs, otherPkgInfo, importType);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+    return allEdits;
+}
+
 }; // namespace
 
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
-    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
     for (auto &[file, value] : packagesReferencedByFile) {
         for (auto &[packageName, packageReferenceInfo] : value) {
@@ -505,14 +519,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             }
         }
     }
-    for (auto &[packageName, importType] : toImport) {
-        auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
-        auto autocorrect = this->addImport(gs, pkgInfo, importType);
-        if (autocorrect.has_value()) {
-            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
-                            make_move_iterator(autocorrect.value().edits.end()));
-        }
-    }
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits = computeImportEdits(gs, *this, toImport);
     if (allEdits.empty()) {
         return nullopt;
     }
