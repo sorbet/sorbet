@@ -2637,7 +2637,31 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 }
             }
 
-            return desugarStatements(programNode->statements);
+            ENFORCE(programNode->statements != nullptr,
+                    "A `PM_STATEMENTS_NODE` should always have non-null statements, even for totally empty programs.");
+
+            ast::ClassDef::RHS_store classBody;
+            auto statements = desugarStatements(programNode->statements);
+
+            // The ClassDef location should be the location of the desugared content, not the program node.
+            // This matches the legacy desugarer behavior from `node2Tree()` in `Desugar.cc`.
+            auto classDefLoc = statements.loc().exists() ? statements.loc() : location;
+
+            if (auto insSeq = ast::cast_tree<ast::InsSeq>(statements)) {
+                classBody.reserve(insSeq->stats.size() + 1);
+                for (auto &stat : insSeq->stats) {
+                    classBody.emplace_back(move(stat));
+                }
+                classBody.emplace_back(move(insSeq->expr));
+            } else {
+                classBody.emplace_back(move(statements));
+            }
+
+            ast::ClassDef::ANCESTORS_store ancestors;
+            ancestors.emplace_back(MK::Constant(classDefLoc, core::Symbols::todo()));
+
+            return ast::make_expression<ast::ClassDef>(classDefLoc, classDefLoc, core::Symbols::root(), MK::EmptyTree(),
+                                                       move(ancestors), move(classBody), ast::ClassDef::Kind::Class);
         }
         case PM_POST_EXECUTION_NODE: { // The END keyword and body, like `END { ... }`
             return make_unsupported_node(location, "Postexe");
