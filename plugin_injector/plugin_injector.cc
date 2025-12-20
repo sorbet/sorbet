@@ -10,6 +10,8 @@
 #include "absl/strings/str_split.h"
 #include "absl/synchronization/mutex.h"
 #include "ast/ast.h"
+#include "ast/Helpers.h"
+#include "ast/Trees.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
 #include "common/typecase.h"
@@ -54,6 +56,21 @@ void ensureOutputDir(const string_view outputDir, string_view fileName) {
         absl::StrAppend(&path, "/", part);
         FileOps::ensureDir(path);
     }
+}
+
+// Create a synthetic MethodDef for static-init compilation when we only have a CFG.
+// The static-init is like a method with a single block argument.
+unique_ptr<ast::MethodDef> createSyntheticMethodDefForStaticInit(cfg::CFG &cfg) {
+    // Static-init has a synthesized block argument, same as what CFG builder creates
+    auto blkLoc = core::LocOffsets::none();
+    core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
+    ast::MethodDef::PARAMS_store params;
+    params.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
+
+    // Use CFG's information for loc, declLoc, and symbol
+    ast::MethodDef::Flags flags;
+    return make_unique<ast::MethodDef>(cfg.loc, cfg.declLoc, cfg.symbol, core::Names::staticInit(),
+                                        std::move(params), ast::MK::EmptyTree(), flags);
 }
 
 } // namespace
@@ -194,12 +211,15 @@ public:
 
     virtual void typecheck(const core::GlobalState &gs, core::FileRef file, cfg::CFG &cfg,
                            const ast::MethodDef *md) const override {
-        if (!md) {
-            // ClassDef static init - skip for now
-            return;
-        }
         if (!shouldCompile(gs, file)) {
             return;
+        }
+
+        // For ClassDef static-init, create a synthetic MethodDef
+        unique_ptr<ast::MethodDef> syntheticMd;
+        if (!md) {
+            syntheticMd = createSyntheticMethodDefForStaticInit(cfg);
+            md = syntheticMd.get();
         }
 
         // NOTE: isAttrReader flag was removed from MethodDef::Flags
