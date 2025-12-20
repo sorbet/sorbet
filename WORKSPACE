@@ -88,6 +88,17 @@ bison_register_toolchains(
     extra_copts = ["-Wno-implicit-const-int-float-conversion"],
 )
 
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+
+rules_rust_dependencies()
+
+rust_register_toolchains(
+    edition = "2021",
+    versions = [
+        "1.58.1",
+    ],
+)
+
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()

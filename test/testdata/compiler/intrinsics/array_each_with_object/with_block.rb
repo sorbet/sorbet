@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
+# run_filecheck: INITIAL
 
 a = T.let([1, 2, 3, 4, 5], T::Array[Integer])
 
@@ -24,3 +25,6 @@ end
 
 p result
 p state
+
+# INITIAL-COUNT-2: call i64 @sorbet_callIntrinsicInlineBlock
+# INITIAL-NOT: call i64 @sorbet_callIntrinsicInlineBlock

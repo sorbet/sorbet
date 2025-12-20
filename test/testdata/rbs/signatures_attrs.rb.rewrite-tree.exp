@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @foo
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @bar
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @baz
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:bar, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @bar = <cast:let>(bar, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:baz, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -40,7 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @baz = <cast:let>(baz, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:qux, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @quux3
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 
@@ -114,7 +114,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   x.qux=("")
 
   class <emptyTree>::<C AttrRewriter><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -122,7 +122,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @a
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:a, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -130,7 +130,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @a = <cast:let>(a, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 
@@ -149,7 +149,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C AttrAnnotations><<C <todo sym>>> < (::<todo sym>)
     class <emptyTree>::<C Base><<C <todo sym>>> < (::<todo sym>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.overridable().returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
       end
 
@@ -157,7 +157,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         @foo
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params(:foo, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>)).void()
       end
 
@@ -173,7 +173,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C Sub><<C <todo sym>>> < (<emptyTree>::<C Base>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.override().returns(::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
       end
 
@@ -186,7 +186,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C UnusedComments><<C <todo sym>>> < (::<todo sym>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -194,7 +194,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @foo
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 

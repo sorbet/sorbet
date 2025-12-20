@@ -507,13 +507,14 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     }
 
     auto sigArgs = parser::NodeVec();
+    sigArgs.emplace_back(parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc));
 
     auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
     if (final != annotations.end()) {
         sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
     }
 
-    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc), core::Names::sig(),
+    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::SorbetPrivateStatic(fullTypeLoc), core::Names::sig(),
                                 firstLineTypeLoc, move(sigArgs));
 
     return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));
@@ -571,13 +572,14 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
 
     auto sigArgs = parser::NodeVec();
+    sigArgs.emplace_back(parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc));
 
     auto final = absl::c_find_if(annotations, [](const Comment &annotation) { return annotation.string == "final"; });
     if (final != annotations.end()) {
         sigArgs.emplace_back(parser::MK::Symbol(final->typeLoc, core::Names::final_()));
     }
 
-    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::T_Sig_WithoutRuntime(firstLineTypeLoc), core::Names::sig(),
+    auto sig = parser::MK::Send(fullTypeLoc, parser::MK::SorbetPrivateStatic(fullTypeLoc), core::Names::sig(),
                                 firstLineTypeLoc, move(sigArgs));
 
     return make_unique<parser::Block>(commentLoc, move(sig), nullptr, move(sigBuilder));

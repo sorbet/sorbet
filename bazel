@@ -14,6 +14,52 @@ if [ "${LOCAL_BAZEL_OVERRIDE:-}" != "" ]; then
   exec "$LOCAL_BAZEL_OVERRIDE" "$@"
 fi
 
+# ccache integration for ~4x faster incremental builds
+# Minimal patch: just modifies the final exec line to use ccache.
+# All ccache config is passed via --action_env in .bazelrc
+patch_ccache_if_needed() {
+    local ccache_path
+    ccache_path=$(command -v ccache 2>/dev/null) || return 0
+    [[ -n "${HOME:-}" ]] || return 0
+
+    local user="${USER:-$(id -un)}"
+    for cache_base in "/var/tmp/_bazel_${user}" "${HOME}/.cache/bazel/_bazel_${user}"; do
+    for base_dir in "$cache_base"/*/external/llvm_toolchain_*/bin; do
+        local wrapper="$base_dir/cc_wrapper.sh"
+        [[ -f "$wrapper" ]] || continue
+        grep -q 'ccache "\${cmd' "$wrapper" 2>/dev/null && continue
+
+        # Minimal patch: replace compiler invocation with ccache-aware version
+        local tmp_wrapper
+        tmp_wrapper=$(mktemp "$wrapper.XXXXXX")
+        # Linux: exec "${cmd[@]}" -> exec ccache ... (exec ok, it's last line)
+        # macOS: "${cmd[@]}" -> ccache ... (no exec, post-processing follows)
+        # Both patterns preserve leading whitespace (indentation)
+        # Use full path to ccache since sandbox has restricted PATH
+        sed -e "s|^\([[:space:]]*\)exec \"\\\${cmd\[@\]}\"$|\1if [[ -n \"\${USE_CCACHE:-}\" ]]; then exec $ccache_path \"\${cmd[@]}\"; else exec \"\${cmd[@]}\"; fi|" \
+            -e "s|^\([[:space:]]*\)\"\\\${cmd\[@\]}\"$|\1if [[ -n \"\${USE_CCACHE:-}\" ]]; then $ccache_path \"\${cmd[@]}\"; else \"\${cmd[@]}\"; fi|" \
+            "$wrapper" > "$tmp_wrapper"
+        chmod +x "$tmp_wrapper"
+        mv "$tmp_wrapper" "$wrapper"
+    done
+    done
+}
+
+run_bazel() {
+    case "${1:-}" in
+      build|test|run|coverage|cquery|aquery)
+        patch_ccache_if_needed
+        # Add sandbox_writable_path for ccache (bash expands $HOME, bazel doesn't)
+        if command -v ccache &> /dev/null && [[ -n "${HOME:-}" ]]; then
+            local cmd="$1"
+            shift
+            exec "$bazel_exec_path" "$cmd" "--sandbox_writable_path=$HOME/.ccache" "$@"
+        fi
+        ;;
+    esac
+    exec "$bazel_exec_path" "$@"
+}
+
 old_pwd="$PWD"
 cd "$(dirname "${BASH_SOURCE[0]}")"
 if [[ "$PWD" = */tools ]]; then
@@ -47,7 +93,7 @@ if [ "$expected_sha" != "" ]; then
   bazel_exec_path="$bazel_bin_loc/$expected_sha/bin/bazel-real"
 
   if [ -f "$bazel_exec_path" ]; then
-    exec "$bazel_exec_path" "$@"
+    run_bazel "$@"
   fi
 else
   echo >&2 "$expected_sha_file was empty. Falling back to downloading bazel"
@@ -110,4 +156,4 @@ mkdir -p "$BUILD_DIR"
 )
 rm -rf "$BUILD_DIR"
 
-exec "$bazel_exec_path" "$@"
+run_bazel "$@"

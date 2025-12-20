@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
+# run_filecheck: INITIAL
 
 h = T.let({a: 1, b: 1, c: 2, d: 3, e: 5, f: 8}, T::Hash[Symbol, Integer])
 
@@ -34,3 +35,6 @@ end
 
 p result
 p obj
+
+# INITIAL-COUNT-3: call i64 @sorbet_callIntrinsicInlineBlock
+# INITIAL-NOT: call i64 @sorbet_callIntrinsicInlineBlock

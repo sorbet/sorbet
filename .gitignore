@@ -40,6 +40,11 @@ gems/sorbet-static-and-runtime/Gemfile.lock
 # Used by tools/scripts/ll-view.sh
 /ll-view.out
 
+compiler/IREmitter/Intrinsics/PayloadIntrinsics.c
+compiler/IREmitter/Intrinsics/PayloadIntrinsics.formatted.c
+compiler/IREmitter/Intrinsics/WrappedIntrinsics.h
+compiler/IREmitter/Intrinsics/WrappedIntrinsics.formatted.h
+
 # clangd caches data in these folders
 /.clangd
 /.cache/clangd
@@ -52,3 +57,6 @@ doc/
 test/sandbox/*/*.log
 test/sandbox/*/*.rb
 test/sandbox/*/*.rbi
+
+# Claude Code local settings
+.claude/

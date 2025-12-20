@@ -7,15 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  def parse_error5<<todo method>>(&<blk>)
-    <emptyTree>::<C T>.unsafe(nil)
-  end
-
-  def parse_error6<<todo method>>(&<blk>)
-    <emptyTree>::<C T>.unsafe(nil)
-  end
-
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p1, <emptyTree>::<C P1>).void()
   end
 
@@ -23,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:foo, <emptyTree>::<C P1>).void()
   end
 
@@ -35,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
@@ -43,7 +35,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
@@ -51,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
@@ -59,7 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
@@ -67,7 +59,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
@@ -75,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
@@ -83,7 +75,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
@@ -91,7 +83,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:blk, ::<root>::<C T>.proc().void()).void()
   end
 
@@ -99,7 +91,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p, ::<root>::<C T>.proc().void()).void()
   end
 
@@ -111,7 +103,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.returns(<emptyTree>::<C String>)
   end
 
@@ -119,7 +111,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.returns(<emptyTree>::<C String>)
   end
 
@@ -127,7 +119,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.returns(<emptyTree>::<C String>)
   end
 
@@ -135,7 +127,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.returns(<emptyTree>::<C String>)
   end
 
@@ -143,11 +135,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.returns(<emptyTree>::<C String>)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.void()
   end
 
@@ -155,7 +147,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p1, <emptyTree>::<C P1>).void()
   end
 
@@ -163,7 +155,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(p1)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p1, <emptyTree>::<C P1>, :p2, <emptyTree>::<C P2>).void()
   end
 
@@ -174,7 +166,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p1, <emptyTree>::<C Integer>).void()
   end
 
@@ -182,7 +174,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(p1)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p1, <emptyTree>::<C P1>, :p2, ::<root>::<C T>.nilable(<emptyTree>::<C P2>)).void()
   end
 
@@ -193,7 +185,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
   end
 
@@ -201,7 +193,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
   end
 
@@ -209,7 +201,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(y)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:foo, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
   end
 
@@ -217,7 +209,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(y)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).void()
   end
 
@@ -225,7 +217,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C String>).void()
   end
 
@@ -233,7 +225,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C String>).void()
   end
 
@@ -241,7 +233,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).void()
   end
 
@@ -249,7 +241,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:p1, <emptyTree>::<C P1>, :p2, ::<root>::<C T>.nilable(<emptyTree>::<C P2>), :p3, <emptyTree>::<C P3>, :p4, <emptyTree>::<C P4>, :p5, ::<root>::<C T>.nilable(<emptyTree>::<C P5>), :p6, <emptyTree>::<C P6>, :block, ::<root>::<C T>.proc().void()).void()
   end
 
@@ -265,7 +257,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:block, ::<root>::<C T>.nilable(::<root>::<C T>.proc().void())).void()
   end
 
@@ -273,7 +265,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(block)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.type_parameters(:X).params(:x, ::<root>::<C T>.all(::<root>::<C T>.type_parameter(:X), <emptyTree>::<C Object>)).returns(::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(::<root>::<C T>.type_parameter(:X)))
   end
 
@@ -284,7 +276,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:block, ::<root>::<C T>.untyped()).void()
   end
 
@@ -292,7 +284,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(block)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C String>).void()
   end
 
@@ -300,7 +292,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  <self>.sig() do ||
+  ::Sorbet::Private::Static.sig(<self>) do ||
     <self>.params(:x, <emptyTree>::<C String>).void()
   end
 
@@ -308,7 +300,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  <self>.sig() do ||
+  ::Sorbet::Private::Static.sig(<self>) do ||
     <self>.params(:x, <emptyTree>::<C String>).void()
   end
 
@@ -316,7 +308,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C String>).void()
   end
 
@@ -327,7 +319,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C Integer>).void()
   end
 
@@ -335,7 +327,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
-  ::T::Sig::WithoutRuntime.sig() do ||
+  ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
     <self>.params(:x, <emptyTree>::<C Integer>).void()
   end
 
@@ -382,10 +374,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <runtime method definition of parse_error4>
-
-  <runtime method definition of parse_error5>
-
-  <runtime method definition of parse_error6>
 
   <runtime method definition of sig_mismatch1>
 
@@ -532,11 +520,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C FooProc><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:p, ::<root>::<C T>.proc().returns(<emptyTree>::<C Integer>), :block, ::<root>::<C T>.nilable(::<root>::<C T>.proc().params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>).bind(<emptyTree>::<C FooProc>))).void()
     end
 
-    def initialize<<todo method>>(p: = ::Kernel.lambda() do ||
+    def initialize<<todo method>>(p: = <emptyTree>::<C Kernel>.lambda() do ||
         42
       end, &block)
       begin
@@ -566,7 +554,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C Annotations><<C <todo sym>>> < ()
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.override().returns(<emptyTree>::<C Integer>)
     end
 
@@ -577,7 +565,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of method1>
 
     class <emptyTree>::<C Parent><<C <todo sym>>> < (::<todo sym>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.params(:x, <emptyTree>::<C Integer>).void()
       end
 
@@ -589,7 +577,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C OverrideIncompatible><<C <todo sym>>> < (<emptyTree>::<C Parent>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.override().params(:x, <emptyTree>::<C String>).void()
       end
 
@@ -601,7 +589,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C OverrideAllowIncompatible><<C <todo sym>>> < (<emptyTree>::<C Parent>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.override(:allow_incompatible, true).params(:x, <emptyTree>::<C String>).void()
       end
 
@@ -612,32 +600,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of method>
     end
 
-    class <emptyTree>::<C OverrideIncompatibleVisibility><<C <todo sym>>> < (<emptyTree>::<C Parent>)
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.override().params(:x, <emptyTree>::<C Integer>).void()
-      end
-
-      def method<<todo method>>(x, &<blk>)
-        <emptyTree>::<C T>.reveal_type(x)
-      end
-
-      <self>.private(<runtime method definition of method>)
-    end
-
-    class <emptyTree>::<C OverrideAllowIncompatibleVisibility><<C <todo sym>>> < (<emptyTree>::<C Parent>)
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.override(:allow_incompatible, :visibility).params(:x, <emptyTree>::<C Integer>).void()
-      end
-
-      def method<<todo method>>(x, &<blk>)
-        <emptyTree>::<C T>.reveal_type(x)
-      end
-
-      <self>.private(<runtime method definition of method>)
-    end
-
     class <emptyTree>::<C Abstract><<C <todo sym>>> < (::<todo sym>)
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -645,7 +609,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -653,7 +617,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -661,7 +625,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -669,7 +633,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -677,7 +641,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.puts("foo")
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -688,7 +652,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -696,7 +660,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -704,7 +668,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -712,7 +676,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -720,7 +684,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C Abstract>.raise()
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
@@ -728,7 +692,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      ::T::Sig::WithoutRuntime.sig() do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
         <self>.returns(::<root>::<C T>.noreturn())
       end
 
@@ -769,7 +733,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
-      ::T::Sig::WithoutRuntime.sig(:final) do ||
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime, :final) do ||
         <self>.void()
       end
 
@@ -786,7 +750,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C Visibility><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:x, <emptyTree>::<C Integer>).void()
     end
 
@@ -794,7 +758,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C T>.reveal_type(x)
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:x, <emptyTree>::<C Integer>).void()
     end
 
@@ -802,7 +766,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C T>.reveal_type(x)
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.params(:x, <emptyTree>::<C Integer>).void()
     end
 

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
+# run_filecheck: INITIAL
 
 extend T::Sig
 
@@ -9,6 +10,9 @@ def one_arg(hash, key)
   hash.delete(key)
 end
 
+# INITIAL-LABEL: define internal i64 @"func_Object#7one_arg"
+# INITIAL: call i64 @sorbet_rb_hash_delete_m
+# INITIAL{LITERAL}: }
 
 sig {params(hash: T::Hash[T.untyped, T.untyped], key: T.untyped, blk: T.untyped).returns(T.untyped)}
 def block_arg(hash, key, &blk)
@@ -17,6 +21,10 @@ def block_arg(hash, key, &blk)
   end
 end
 
+# INITIAL-LABEL: define internal i64 @"func_Object#9block_arg"
+# INITIAL-NOT: call i64 @sorbet_rb_hash_delete_m
+# INITIAL: call i64 @sorbet_callIntrinsicInlineBlock_noBreak(i64 (i64)* @forward_sorbet_rb_hash_delete_m_withBlock
+# INITIAL{LITERAL}: }
 
 h = {key: 5, otherkey: 99}
 p one_arg(h, :key)

@@ -1,6 +1,8 @@
 load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
 load(":pipeline_test.bzl", "pipeline_tests")
 
+clang_tool("llvm-diff")  # depended on by compiler_tests
+
 clang_tool("llvm-symbolizer")
 
 cc_binary(
@@ -272,6 +274,8 @@ pipeline_tests(
         exclude = [
             # Specific test that is modified for Prism, contains minor differences in the exp file
             "testdata/rbs/assertions_heredoc_modified.rb",
+            "testdata/compiler/**/*",
+            "testdata/ruby_benchmark/**/*",
         ],
     ),
     "PosTests",
@@ -444,6 +448,10 @@ pipeline_tests(
             "testdata/**/*.rbi",
             "testdata/**/*.exp",
         ],
+        exclude = [
+            "testdata/compiler/**/*",
+            "testdata/ruby_benchmark/**/*",
+        ],
     ),
     "LSPTests",
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
@@ -504,4 +512,85 @@ test_suite(
 test_suite(
     name = "prism_regression",
     tests = ["prism_regression_corpus"],
+)
+
+load(":compiler_tests.bzl", "compiler_tests")
+
+compiler_tests(
+    "compiler",
+    glob([
+        "testdata/compiler/**/*.rb",
+        "testdata/ruby_benchmark/**/*.rb",
+    ]),
+    tags = ["compiler"],
+)
+
+sh_library(
+    name = "logging",
+    srcs = ["logging.sh"],
+)
+
+sh_library(
+    name = "hermetic_tar",
+    srcs = ["hermetic_tar.sh"],
+)
+
+sh_binary(
+    name = "generate_out_file",
+    srcs = ["generate_out_file.sh"],
+    data = [
+        "patch_require.rb",
+        "//gems/sorbet-runtime",
+        "@sorbet_ruby_2_7_for_compiler//:ruby",
+    ],
+    deps = [
+        ":logging",
+        "@bazel_tools//tools/bash/runfiles",
+    ],
+)
+
+sh_binary(
+    name = "build_extension",
+    srcs = ["build_extension.sh"],
+    data = ["//compiler:sorbet"],
+    tags = ["compiler"],
+    deps = [
+        ":hermetic_tar",
+        ":logging",
+        "@bazel_tools//tools/bash/runfiles",
+    ],
+)
+
+sh_binary(
+    name = "test_corpus_runner",
+    srcs = ["test_corpus_runner.sh"],
+    tags = ["compiler"],
+    deps = [
+        ":logging",
+    ],
+)
+
+sh_binary(
+    name = "validate_exp",
+    srcs = ["validate_exp.sh"],
+    data = [
+        "diff-diff.rb",
+        "@sorbet_ruby_2_7_for_compiler//:ruby",
+    ],
+    tags = ["compiler"],
+    deps = [
+        ":logging",
+        "@bazel_tools//tools/bash/runfiles",
+    ],
+)
+
+sh_binary(
+    name = "filecheck",
+    testonly = 1,
+    srcs = ["filecheck.sh"],
+    data = ["@llvm//:FileCheck"],
+    tags = ["compiler"],
+    deps = [
+        ":logging",
+    ],
 )

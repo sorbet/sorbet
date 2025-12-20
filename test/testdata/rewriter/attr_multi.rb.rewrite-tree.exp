@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @a
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:a, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @a = <cast:let>(a, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @b
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @c
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:b, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -40,7 +40,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @b = <cast:let>(b, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:c, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -48,7 +48,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @c = <cast:let>(c, <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @d
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -64,7 +64,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @e
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.returns(<emptyTree>::<C String>)
     end
 
@@ -72,7 +72,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @f
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:g, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -80,7 +80,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @g = g
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:h, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
@@ -88,7 +88,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @h = h
     end
 
-    <self>.sig() do ||
+    ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.params(:i, <emptyTree>::<C String>).params(:h, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 

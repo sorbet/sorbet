@@ -117,3 +117,6 @@ require_relative 'types/props/generated_code_validation'
 require_relative 'types/struct'
 
 require_relative 'types/compatibility_patches'
+
+# Sorbet Compiler support module
+require_relative 'types/private/compiler'

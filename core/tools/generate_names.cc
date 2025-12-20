@@ -421,6 +421,11 @@ NameDef names[] = {
     {"args"},
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
+    {"keepDef", "keep_def"},                      // Used by compiler
+    {"keepSelfDef", "keep_self_def"},             // Used by compiler
+    {"keepForCfg", "<keep-for-cfg>"},             // Used by compiler
+    {"callWithBlock", "<call-with-block>"},       // Used by compiler
+    {"callWithSplatAndBlock", "<call-with-splat-and-block>"}, // Used by compiler
     {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
@@ -501,6 +506,10 @@ NameDef names[] = {
     {"only"},
     {"testRb", "test_rb"},
     {"preludePackage", "prelude_package"},
+
+    // Compiler
+    {"runningCompiled_p", "running_compiled?"},
+    {"compilerVersion", "compiler_version"},
 
     // GlobalState initEmpty()
     {"Top", "T.anything", true},
@@ -584,6 +593,7 @@ NameDef names[] = {
     {"Subclasses", "SUBCLASSES", true},
     {"Sorbet", "Sorbet", true},
     {"ReturnTypeInference", "ReturnTypeInference", true},
+    {"ResolvedSig", "ResolvedSig", true},
     {"InferredReturnType", "INFERRED_RETURN_TYPE", true},
     {"InferredArgumentType", "INFERRED_ARGUMENT_TYPE", true},
     {"ImplicitModuleSuperclass", "ImplicitModuleSuperclass", true},
@@ -603,6 +613,7 @@ NameDef names[] = {
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
+    {"Compiler", "Compiler", true},
     {"Test", "Test", true},
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
@@ -622,6 +633,9 @@ NameDef names[] = {
     {"Int", "Int", true},
     {"Timestamp", "Timestamp", true},
     {"Bool", "Bool", true},
+
+    // used by the compiler
+    {"returnValue", "<returnValue>"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

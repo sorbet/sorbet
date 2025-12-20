@@ -54,6 +54,7 @@ public:
     LocalRef target;
     LocalRef blockBreakTarget;
     int loops;
+    int rubyRegionId;
     bool isInsideRubyBlock;
     bool isInsideLambda;
     bool breakIsJump;
@@ -69,10 +70,15 @@ public:
     CFGContext withTarget(LocalRef target);
     CFGContext withBlockBreakTarget(LocalRef blockBreakTarget);
     CFGContext withLoopBreakTarget(LocalRef blockBreakTarget);
-    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock = false);
+    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock = false,
+                             int rubyRegionId = 0);
     CFGContext withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> &link);
 
     LocalRef newTemporary(core::NameRef name);
+
+    // Creates a fresh block, using the current rubyRegionId if inside a Ruby block
+    // loopOffset can be used to increase the loop depth (e.g., for loop headers/bodies)
+    BasicBlock *freshBlock(int loopOffset = 0);
 
 private:
     friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, const ast::MethodDef &md);
@@ -80,9 +86,10 @@ private:
     CFGContext(core::Context ctx, CFG &inWhat, LocalRef target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), isInsideLambda(false),
-          breakIsJump(false), nextScope(nextScope), breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
-          discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter){};
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), rubyRegionId(0), isInsideRubyBlock(false),
+          isInsideLambda(false), breakIsJump(false), nextScope(nextScope), breakScope(breakScope),
+          rescueScope(rescueScope), aliases(aliases), discoveredUndeclaredFields(discoveredUndeclaredFields),
+          temporaryCounter(temporaryCounter){};
 };
 } // namespace sorbet::cfg
 #endif // SORBET_BUILDER_H

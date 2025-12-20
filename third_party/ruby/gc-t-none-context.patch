@@ -1,0 +1,78 @@
+diff --git gc.c gc.c
+index 6f4ae3a397..033a89f8f3 100644
+--- gc.c
++++ gc.c
+@@ -6709,6 +6709,49 @@ gc_aging(rb_objspace_t *objspace, VALUE obj)
+ NOINLINE(static void gc_mark_ptr(rb_objspace_t *objspace, VALUE obj));
+ static void reachable_objects_from_callback(VALUE obj);
+ 
++/**
++ * BEGIN Stripe debugging code.
++ *
++ * Context: We are seeing instances of "try to mark T_NONE" crashes at Stripe, at times tied to T_HASH parent object.
++ * In these cases, we want to print contextual information about the parent object at the time of the crash.
++ *
++*/
++
++const char *
++gc_debug_parent_object_STRIPE(rb_objspace_t *objspace, VALUE parent, char *buff, const int buff_size) {
++    int pos = 0;
++
++    #define BUFF_ARGS buff + pos, buff_size - pos
++    #define APPENDF(f) if ((pos += snprintf f) >= buff_size) goto end
++
++    // "P" is for parent object
++    APPENDF((BUFF_ARGS, "P:%s", obj_type_name(parent)));
++
++    switch (BUILTIN_TYPE(parent)) {
++        case T_CLASS:
++        case T_MODULE: {
++          // If the parent object is a class or module, print its fully qualified name.
++          VALUE class_path = rb_class_path_cached(parent);
++          if (!NIL_P(class_path)) {
++              APPENDF((BUFF_ARGS, "(%s)", RSTRING_PTR(class_path)));
++          }
++          break;
++        }
++        // No special handling for other types
++    }
++
++    APPENDF((BUFF_ARGS, "\n"));
++
++  end:
++
++    return buff;
++
++    #undef BUFF_ARGS
++    #undef APPENDF
++}
++
++/***** END Stripe debugging code ***/
++
+ static void
+ gc_mark_ptr(rb_objspace_t *objspace, VALUE obj)
+ {
+@@ -6729,8 +6772,22 @@ gc_mark_ptr(rb_objspace_t *objspace, VALUE obj)
+ 
+         if (UNLIKELY(RB_TYPE_P(obj, T_NONE))) {
+             rp(obj);
+-            rb_bug("try to mark T_NONE object"); /* check here will help debugging */
++
++/***** BEGIN Stripe debugging code ***/
++            // Note: rgengc.parent_object will be set if we followed a reference from an old-gen object to
++            // get here.
++            if (objspace->rgengc.parent_object) {
++                char buff[0x200];
++                rb_bug(
++                    "try to mark T_NONE object -- %s",
++                    gc_debug_parent_object_STRIPE(objspace, objspace->rgengc.parent_object, buff, 0x200)
++                ); /* check here will help debugging */
++            } else {
++/***** END Stripe debugging code ***/
++                rb_bug("try to mark T_NONE object"); /* check here will help debugging */
++            }
+         }
++
+ 	gc_aging(objspace, obj);
+ 	gc_grey(objspace, obj);
+     }

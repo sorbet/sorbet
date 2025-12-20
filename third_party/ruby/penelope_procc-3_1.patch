@@ -1,0 +1,61 @@
+diff --git proc.c proc.c
+index d075b7382e..03fce80ec4 100644
+--- proc.c
++++ proc.c
+@@ -47,6 +47,9 @@ VALUE rb_cMethod;
+ VALUE rb_cBinding;
+ VALUE rb_cProc;
+ 
++static int ME_CLONE_DO_NOT_CLONE = false;
++static int ME_CLONE_CLONE = true;
++
+ static rb_block_call_func bmcall;
+ static int method_arity(VALUE);
+ static int method_min_max_arity(VALUE, int *max);
+@@ -2498,7 +2501,7 @@ rb_method_call_with_block(int argc, const VALUE *argv, VALUE method, VALUE passe
+  */
+ 
+ static void
+-convert_umethod_to_method_components(const struct METHOD *data, VALUE recv, VALUE *methclass_out, VALUE *klass_out, VALUE *iclass_out, const rb_method_entry_t **me_out)
++convert_umethod_to_method_components(const struct METHOD *data, VALUE recv, VALUE *methclass_out, VALUE *klass_out, VALUE *iclass_out, const rb_method_entry_t **me_out, bool clone)
+ {
+     VALUE methclass = data->me->owner;
+     VALUE iclass = data->me->defined_class;
+@@ -2520,9 +2523,18 @@ convert_umethod_to_method_components(const struct METHOD *data, VALUE recv, VALU
+ 	}
+     }
+ 
+-    const rb_method_entry_t *me = rb_method_entry_clone(data->me);
++    const rb_method_entry_t *me;
++
++    if (clone == ME_CLONE_CLONE) {
++	me = rb_method_entry_clone(data->me);
++    } else {
++	me = data->me;
++    }
+ 
+     if (RB_TYPE_P(me->owner, T_MODULE)) {
++	if (clone == ME_CLONE_DO_NOT_CLONE) {
++	    me = rb_method_entry_clone(data->me);
++	}
+ 	VALUE ic = rb_class_search_ancestor(klass, me->owner);
+ 	if (ic) {
+ 	    klass = ic;
+@@ -2582,7 +2594,7 @@ umethod_bind(VALUE method, VALUE recv)
+     const rb_method_entry_t *me;
+     const struct METHOD *data;
+     TypedData_Get_Struct(method, struct METHOD, &method_data_type, data);
+-    convert_umethod_to_method_components(data, recv, &methclass, &klass, &iclass, &me);
++    convert_umethod_to_method_components(data, recv, &methclass, &klass, &iclass, &me, ME_CLONE_CLONE);
+ 
+     struct METHOD *bound;
+     method = TypedData_Make_Struct(rb_cMethod, struct METHOD, &method_data_type, bound);
+@@ -2624,7 +2636,7 @@ umethod_bind_call(int argc, VALUE *argv, VALUE method)
+     else {
+         VALUE methclass, klass, iclass;
+         const rb_method_entry_t *me;
+-        convert_umethod_to_method_components(data, recv, &methclass, &klass, &iclass, &me);
++        convert_umethod_to_method_components(data, recv, &methclass, &klass, &iclass, &me, ME_CLONE_DO_NOT_CLONE);
+         struct METHOD bound = { recv, klass, 0, me };
+ 
+         return call_method_data(ec, &bound, argc, argv, passed_procval, RB_PASS_CALLED_KEYWORDS);

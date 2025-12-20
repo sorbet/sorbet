@@ -63,6 +63,10 @@ build --cxxopt=-Wno-ambiguous-reversed-operator
 # warning saying _never_ use unqualified `std` calls...
 build --cxxopt=-Wno-unqualified-std-cast-call --host_cxxopt=-Wno-unqualified-std-cast-call
 
+# LLVM 15 code has some warnings that need to be suppressed
+build --copt=-Wno-bitwise-instead-of-logical
+build --copt=-Wno-unused-but-set-variable
+
 ##
 ## debug configuration
 ##
@@ -302,6 +306,17 @@ build:webasm --linkopt=--stack-first
 common:stripeci --config=ci
 common:ci --color yes
 
+## ccache: install ccache for ~4x faster incremental builds
+## The ./bazel wrapper auto-adds --sandbox_writable_path=$HOME/.ccache
+build --action_env=HOME
+build --action_env=USE_CCACHE=1
+build --action_env=CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,time_macros,file_stat_matches,pch_defines
+build --action_env=CCACHE_MAXSIZE=10G
+build --action_env=CCACHE_COMPILERCHECK=content
+build --action_env=CCACHE_NOHASHDIR=1
+
+## Bazel disk cache: speeds up branch switching by caching build outputs
+build --disk_cache=~/.cache/bazel-disk-cache
 
 # enables a lot of features in mac instruments profiler
 build:instruments --linkopt=-framework --linkopt=CoreFoundation

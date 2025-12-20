@@ -28,6 +28,14 @@ using namespace std;
 namespace sorbet::resolver {
 namespace {
 
+// Check if a file has the "# compiled: true" sigil
+static bool isCompiledFile(core::Context ctx) {
+    auto source = ctx.file.data(ctx).source();
+    // Look in the first 500 characters for the compiled sigil
+    auto searchRegion = source.substr(0, std::min(source.size(), size_t(500)));
+    return searchRegion.find("compiled: true") != std::string_view::npos;
+}
+
 /*
  * Note: There are multiple separate tree walks defined in this file, the main
  * ones being:
@@ -3224,6 +3232,38 @@ private:
         optional<core::ParamInfo> blkArg;
     };
 
+    // Record some information in the sig call itself so that we can reassociate
+    // them later in the compiler for signature registration.
+    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
+                                      const ast::MethodDef &mdef) {
+        // Only rewrite the sig call for compiled files.
+        if (!isCompiledFile(ctx)) {
+            return;
+        }
+
+        // Note that the sig still needs to send to a method called "sig" so that
+        // code completion in LSP works. We change the receiver, below, so that
+        // sigs that don't pass through here still reflect the user's intent.
+        auto *send = sig.origSend;
+        if (send == nullptr) {
+            return;
+        }
+
+        // We distinguish "user-written" sends by checking for self.
+        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
+        // to record later.
+        auto &arg0 = send->getPosArg(0);
+        if (!arg0.isSelfReference()) {
+            return;
+        }
+
+        // Replace the receiver with ResolvedSig instead of Static
+        send->recv = ast::MK::Constant(send->recv.loc(), core::Symbols::Sorbet_Private_Static_ResolvedSig());
+
+        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
+        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
+    }
+
     // This structure serves double duty: it holds information about a single sig and the
     // results of running it through fillInInfoFromSig and it also holds information about
     // merging the results of several such structures together from overloaded methods.
@@ -3477,6 +3517,7 @@ private:
             }
         }
 
+        recordMethodInfoInSig(ctx, method, sig, mdef);
         return info;
     }
 
@@ -3782,6 +3823,54 @@ public:
                                 "as abstract using `abstract!` or `interface!`");
                 }
             }
+
+            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
+            // behavior of the runtime, but only in compiled files.
+            if (!isCompiledFile(ctx)) {
+                return;
+            }
+
+            ast::Send::ARGS_store args;
+            ast::Hash::ENTRY_store keywordArgKeys;
+            ast::Hash::ENTRY_store keywordArgVals;
+
+            auto argIdx = -1;
+            for (auto &param : mdef.params) {
+                ++argIdx;
+
+                ast::ExpressionPtr *localExpr = &param;
+                if (auto opt = ast::cast_tree<ast::OptionalParam>(param)) {
+                    localExpr = &opt->expr;
+                }
+
+                auto local = ast::cast_tree<ast::Local>(*localExpr);
+                if (local == nullptr) {
+                    continue;
+                }
+
+                auto &info = mdef.symbol.data(ctx)->parameters[argIdx];
+                if (info.flags.isKeyword) {
+                    keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                    keywordArgVals.emplace_back(local->deepCopy());
+                } else if (info.flags.isRepeated || info.flags.isBlock) {
+                    // Explicitly skip for now.
+                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
+                    // callWithSplatAndBlock
+                } else {
+                    ENFORCE(keywordArgKeys.empty());
+                    args.emplace_back(local->deepCopy());
+                }
+            }
+
+            if (!keywordArgKeys.empty()) {
+                args.emplace_back(
+                    ast::MK::Hash(mdef.loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
+            }
+
+            auto self = ast::MK::Self(mdef.loc);
+            auto numPosArgs = args.size();
+            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), mdef.loc.copyWithZeroLength(),
+                                     numPosArgs, std::move(args));
         } else if (mdef.symbol.data(ctx)->owner.data(ctx)->flags.isInterface) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");

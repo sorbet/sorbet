@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
+# run_filecheck: INITIAL
 
 def no_block
   h1 = {x: "foo", q: "bar", z: 33}
@@ -10,6 +11,9 @@ def no_block
   p h1
 end
 
+# INITIAL-LABEL: define internal i64 @"func_Object#8no_block"(
+# INITIAL: call i64 @sorbet_rb_hash_merge(
+# INITIAL{LITERAL}: }
 
 def with_block
   h1 = {x: "foo", q: "bar", z: 33}
@@ -21,6 +25,9 @@ def with_block
   p h1
 end
 
+# INITIAL-LABEL: define internal i64 @"func_Object#10with_block"(
+# INITIAL: call i64 @sorbet_callIntrinsicInlineBlock_noBreak(i64 (i64)* @forward_sorbet_rb_hash_merge_withBlock
+# INITIAL{LITERAL}: }
 
 with_block
 
@@ -41,5 +48,8 @@ def with_block_raise
   p h1
 end
 
+# INITIAL-LABEL: define internal i64 @"func_Object#16with_block_raise"(
+# INITIAL: call i64 @sorbet_callIntrinsicInlineBlock_noBreak(i64 (i64)* @forward_sorbet_rb_hash_merge_withBlock
+# INITIAL{LITERAL}: }
 
 with_block_raise

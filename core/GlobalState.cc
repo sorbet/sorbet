@@ -579,6 +579,12 @@ void GlobalState::initEmpty() {
         enterMethod(*this, Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE_NO_TIMER(method == Symbols::sigWithoutRuntime());
 
+    method = enterMethod(*this, Symbols::Sorbet_Private_StaticSingleton(), Names::sig())
+                 .arg(Names::arg0())
+                 .defaultArg(Names::arg1())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::SorbetPrivateStaticSingleton_sig());
+
     klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 
@@ -610,6 +616,13 @@ void GlobalState::initEmpty() {
 
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToSelfType());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToSelfType());
+
+    // Compiler symbols
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
+    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
+    ENFORCE(klass == Symbols::T_Private_Compiler());
+    klass = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
+    ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Types());
     ENFORCE_NO_TIMER(klass == Symbols::T_Types());
@@ -894,6 +907,14 @@ void GlobalState::initEmpty() {
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
+
+    // Compiler-specific: ResolvedSig is used to tag sig calls that have been associated
+    // with their method definitions and have additional args for signature registration
+    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
+    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
+    ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
+    klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
+    ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
 
     int reservedCount = 0;
 

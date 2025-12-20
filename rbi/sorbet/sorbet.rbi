@@ -41,6 +41,26 @@ module Sorbet::Private::Static
   def self.enumerable_to_h(*arg0); end
 end
 
+module Sorbet::Private::Static::ResolvedSig
+  # This sig is a bit of a fib: `sig_arg` is technically T.nilable(Symbol), so
+  # we might have sends to this method that only have three args: `original_recv`,
+  # `is_self_method`, and `method_name`.  But we never resolve sends to this
+  # method; any sends to this method are resolved instead as sends to
+  # original_recv.sig with the last two args dropped.
+  sig do
+    params(
+        original_recv: T.untyped,
+        sig_arg: T.untyped,
+        is_self_method: T.untyped,
+        method_name: T.untyped,
+        blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
+    )
+    .void
+  end
+  def self.sig(original_recv, sig_arg, is_self_method, method_name=nil, &blk)
+  end
+end
+
 class Sorbet::Private::Static::ImplicitModuleSuperclass < BasicObject
 end
 
