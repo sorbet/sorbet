@@ -24,14 +24,14 @@ namespace {
 struct DesugarContext final {
     core::MutableContext ctx;
     uint32_t &uniqueCounter;
-    core::NameRef enclosingBlockParamName;
+    core::NameRef &enclosingBlockParamName;
     core::LocOffsets enclosingMethodLoc;
     core::NameRef enclosingMethodName;
     bool inAnyBlock;
     bool inModule;
     bool preserveConcreteSyntax;
 
-    DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef enclosingBlockParamName,
+    DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef &enclosingBlockParamName,
                    core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName, bool inAnyBlock,
                    bool inModule, bool preserveConcreteSyntax)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockParamName(enclosingBlockParamName),
@@ -2470,7 +2470,8 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
     try {
         uint32_t uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
-        DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
+        auto enclosingBlockParamName = core::NameRef::noName();
+        DesugarContext dctx(ctx, uniqueCounter, enclosingBlockParamName, core::LocOffsets::none(),
                             core::NameRef::noName(), false, false, preserveConcreteSyntax);
         auto liftedClassDefLoc = what->loc;
         auto result = node2TreeImpl(dctx, what);
