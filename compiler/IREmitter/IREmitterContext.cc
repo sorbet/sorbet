@@ -615,7 +615,12 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             // expect for the handler and body blocks. The reason we bail out here if this isn't the case is because
             // there are other blocks within the translation that will also jump based on the value of the same
             // exception value variable.
-            if (handlersBlock->rubyRegionId != handlersBlockId) {
+            //
+            // For begin/ensure without rescue, the "thenb" branch goes directly to the ensure block,
+            // not to a handlers block. In this case, handlersBlock->rubyRegionId will be ensureBlockId.
+            bool hasRescueHandlers = (handlersBlock->rubyRegionId == handlersBlockId);
+            bool hasEnsureOnly = (handlersBlock->rubyRegionId == ensureBlockId);
+            if (!hasRescueHandlers && !hasEnsureOnly) {
                 continue;
             }
 
@@ -655,7 +660,10 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             exceptionHandlingBlockHeaders[b->id] = bodyBlockId;
 
             blockTypes[bodyBlockId] = FunctionType::ExceptionBegin;
-            blockTypes[handlersBlockId] = FunctionType::Rescue;
+            // Only set handlers block type if there's actually a rescue handlers block
+            if (hasRescueHandlers) {
+                blockTypes[handlersBlockId] = FunctionType::Rescue;
+            }
 
             if (elseBlock) {
                 blockTypes[elseBlockId] = FunctionType::ExceptionBegin;
@@ -667,7 +675,9 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
 
             // All exception handling blocks are children of `b`, as far as ruby iseq allocation is concerned.
             blockParents[bodyBlockId] = b->rubyRegionId;
-            blockParents[handlersBlockId] = b->rubyRegionId;
+            if (hasRescueHandlers) {
+                blockParents[handlersBlockId] = b->rubyRegionId;
+            }
             blockParents[elseBlockId] = b->rubyRegionId;
             blockParents[ensureBlockId] = b->rubyRegionId;
         }

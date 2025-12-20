@@ -33,9 +33,8 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
     // TODO: it would be nice if we could detect some of these functions
     // were empty and/or not useful so that we could eliminate dealing with
     // them from the exception handling logic.
-    ENFORCE(irctx.rubyBlockType[handlersRubyRegionId] != FunctionType::Unused);
-    // ENFORCE(irctx.rubyBlockType[ensureRubyRegionId] != FunctionType::Unused);
-    // ENFORCE(irctx.rubyBlockType[elseRubyRegionId] != FunctionType::Unused);
+    // Note: For begin/ensure without rescue, handlersRubyRegionId may be Unused.
+    // getExceptionFunc handles this by returning a no-op function.
     auto *handlersFunc = getExceptionFunc(cs, irctx, handlersRubyRegionId);
     auto *ensureFunc = getExceptionFunc(cs, irctx, ensureRubyRegionId);
     auto *elseFunc = getExceptionFunc(cs, irctx, elseRubyRegionId);
