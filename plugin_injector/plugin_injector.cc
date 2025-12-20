@@ -193,7 +193,11 @@ public:
     virtual void run(core::MutableContext &ctx, ast::ClassDef *klass) const override{};
 
     virtual void typecheck(const core::GlobalState &gs, core::FileRef file, cfg::CFG &cfg,
-                           ast::MethodDef &md) const override {
+                           const ast::MethodDef *md) const override {
+        if (!md) {
+            // ClassDef static init - skip for now
+            return;
+        }
         if (!shouldCompile(gs, file)) {
             return;
         }
@@ -203,8 +207,8 @@ public:
         // as VM_METHOD_TYPE_IVAR by the standard VM mechanisms.
         // For now, we compile all methods including attr_readers.
 
-        if (md.symbol.data(gs)->name == core::Names::staticInit()) {
-            auto attachedClass = md.symbol.data(gs)->owner.data(gs)->attachedClass(gs);
+        if (md->symbol.data(gs)->name == core::Names::staticInit()) {
+            auto attachedClass = md->symbol.data(gs)->owner.data(gs)->attachedClass(gs);
             if (attachedClass.exists() && attachedClass.data(gs)->name.isTEnumName(gs)) {
                 return;
             }
@@ -281,7 +285,7 @@ public:
             threadState->file = core::FileRef();
         };
         try {
-            compiler::IREmitter::run(state, cfg, md);
+            compiler::IREmitter::run(state, cfg, *md);
             string fileName = objectFileName(gs, file);
             compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
             std::move(dropInternalState).Cancel();

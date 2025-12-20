@@ -185,6 +185,55 @@ run_cmd ./configure \
         --prefix=/
 
 run_cmd make V=1 -j8
+
+# Create openssl stub if openssl extension wasn't built (for --without-openssl)
+if [[ ! -f ext/openssl/openssl.so ]]; then
+    echo "Creating openssl stub for gem installation..."
+    cat > lib/openssl.rb << 'OPENSSL_STUB'
+# Stub openssl module for Ruby built without OpenSSL
+module OpenSSL
+  VERSION = "0.0.0"
+  OPENSSL_VERSION = "0.0.0"
+  OPENSSL_LIBRARY_VERSION = "0.0.0"
+  class OpenSSLError < StandardError; end
+  class SSLError < OpenSSLError; end
+  module SSL
+    VERIFY_NONE = 0
+    VERIFY_PEER = 1
+    class SSLError < OpenSSL::SSLError; end
+    class SSLContext; def initialize; end; end
+  end
+  module Digest
+    class SHA256
+      def self.digest(data); "\\x00" * 32; end
+      def self.hexdigest(data); "0" * 64; end
+    end
+    class SHA1
+      def self.digest(data); "\\x00" * 20; end
+      def self.hexdigest(data); "0" * 40; end
+    end
+    class MD5
+      def self.digest(data); "\\x00" * 16; end
+      def self.hexdigest(data); "0" * 32; end
+    end
+  end
+  module X509
+    class Certificate; end
+    class Store; def initialize; end; def add_file(f); end; def add_path(p); end; end
+  end
+  module PKey
+    class RSA; end
+    class DSA; end
+    class EC; end
+  end
+  module Cipher
+    class AES; end
+    def self.new(*args); Class.new {{ def update(d); d; end; def final; ""; end; def encrypt; end; def decrypt; end; def key=(k); end; def iv=(i); end; }}.new; end
+  end
+end
+OPENSSL_STUB
+fi
+
 run_cmd make V=1 install
 
 ruby_version=$(./miniruby -r ./rbconfig.rb -e 'puts "#{{RbConfig::CONFIG["MAJOR"]}}.#{{RbConfig::CONFIG["MINOR"]}}"')

@@ -15,6 +15,7 @@ ruby(
         "--disable-dependency-tracking",
         "--disable-jit-support",
         "--disable-install-doc",
+        "--without-openssl",
     ] + select({
         # Enforce that we don't need Ruby to build in release builds.
         # (In non-release builds, we allow for an available system Ruby to
@@ -56,14 +57,5 @@ ruby(
         "//conditions:default": [],
     }),
     rubygems = "@rubygems_update_stripe_ruby2//file",
-    deps = select({
-        "@platforms//os:osx": [
-            "@system_ssl_darwin//:crypto",
-            "@system_ssl_darwin//:ssl",
-        ],
-        "@platforms//os:linux": [
-            "@system_ssl_linux//:crypto",
-            "@system_ssl_linux//:ssl",
-        ],
-    }),
+    deps = [],
 )

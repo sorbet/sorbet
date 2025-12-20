@@ -332,6 +332,7 @@ llvm_defines = [
 llvm_copts = [
     "-Wno-error=implicit-fallthrough",
     "-Wno-error=range-loop-construct",
+    "-Wno-error=deprecated-declarations",
 
     # don't compile llvm with lto. It's too slow to compile and not worth it
     "-fno-lto",
