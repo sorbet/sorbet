@@ -4,6 +4,7 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
+#include "common/concurrency/Parallel.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -602,6 +603,14 @@ int realmain(int argc, char *argv[]) {
         // enabled, everything ends up in one big stratum.
         vector<ast::ParsedFile> stratumFiles;
         for (auto &stratum : pipeline::computePackageStrata(*gs, indexed, inputFilesSpan, opts)) {
+            // We can unconditionally reset (to drop the vectors) instead of having to consult
+            // intentionallyLeakASTs, because if intentionallyLeakASTs, then necessarily
+            // packageDirected will be false, and thus this loop will only iterate once, and since
+            // it's at the beginning, the list will be empty to start, and thus a no-op.
+            Parallel::iterate(*workers, "clearStratumFiles", absl::MakeSpan(stratumFiles), [](auto &job) {
+                // Force the destructor of `ast::ExpressionPtr` to run for `job.tree`.
+                job.tree.reset();
+            });
             stratumFiles.clear();
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
 
