@@ -15,7 +15,6 @@ end
 f = ->(){}
 
 p(takes_no_block())
-#                 ^ error: requires a block parameter, but no block was passed
 p(takes_no_block() {})
 p(takes_no_block(&nil))
 # ^^^^^^^^^^^^^^^^^^^^ error: Expected `T.noreturn` but found `NilClass` for block argument

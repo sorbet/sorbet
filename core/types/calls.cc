@@ -1671,7 +1671,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(methodData->parameters.back().flags.isBlock, "The last param should be the block param.");
         auto blockType = methodData->parameters.back().type;
         // TODO(jez) Highlight untyped code for this error
-        if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
+        if (blockType && !blockType.isBottom() && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
                 e.addErrorLine(methodData->loc(), "defined here");
