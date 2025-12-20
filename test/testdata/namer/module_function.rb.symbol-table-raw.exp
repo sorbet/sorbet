@@ -12,13 +12,13 @@ class <C <U <root>>> < <C <U Object>> ()
   module <C <U Funcs>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
     method <C <U Funcs>>#<U f> : private (x, <blk>) -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=6:3 end=6:11}
       argument x<> -> Integer @ Loc {file=test/testdata/namer/module_function.rb start=5:15 end=5:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <C <U Funcs>>#<U g> : private (s, <blk>) -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=11:19 end=11:27}
       argument s<> -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=10:15 end=10:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <C <U Funcs>>#<U h> : private (s, <blk>) -> String @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}
       argument s<> -> String @ Loc {file=test/testdata/namer/module_function.rb start=15:15 end=15:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
   class <S <C <U Funcs>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
     type-member(+) <S <C <U Funcs>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Funcs>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Funcs) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
     method <S <C <U Funcs>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=17:4}
@@ -28,8 +28,8 @@ class <C <U <root>>> < <C <U Object>> ()
       argument module_function :f<block> @ Loc {file=test/testdata/namer/module_function.rb start=8:3 end=8:21}
     method <S <C <U Funcs>> $1>#<U g> (s, <blk>) -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=11:19 end=11:27}
       argument s<> -> Symbol @ Loc {file=test/testdata/namer/module_function.rb start=10:15 end=10:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <S <C <U Funcs>> $1>#<U h> (s, <blk>) -> String @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}
       argument s<> -> String @ Loc {file=test/testdata/namer/module_function.rb start=15:15 end=15:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
 

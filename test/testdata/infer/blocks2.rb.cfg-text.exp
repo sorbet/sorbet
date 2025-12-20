@@ -31,9 +31,9 @@ method ::Foo#bar {
 
 bb0[firstDead=5]():
     <self>: Foo = cast(<self>: NilClass, Foo);
-    <blk>: T.untyped = load_arg(<blk>)
+    <implicit yield>: T.untyped = load_arg(<blk>)
     <statTemp>$4: Integer(1) = 1
-    <returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$4: Integer(1))
+    <returnMethodTemp>$2: T.untyped = <implicit yield>: T.untyped.call(<statTemp>$4: Integer(1))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 

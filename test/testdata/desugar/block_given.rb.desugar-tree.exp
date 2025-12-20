@@ -61,24 +61,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def method_with_implicit_block_param<<todo method>>(&<blk>)
+  def method_with_implicit_block_param<<todo method>>(&<implicit yield>)
     begin
-      if <blk>
+      if <implicit yield>
         <self>.block_given?()
       else
         false
       end
-      if <blk>
+      if <implicit yield>
         <self>.block_given?()
       else
         false
       end
-      if <blk>
+      if <implicit yield>
         <emptyTree>::<C Kernel>.block_given?()
       else
         false
       end
-      if <blk>
+      if <implicit yield>
         ::<root>::<C Kernel>.block_given?()
       else
         false
