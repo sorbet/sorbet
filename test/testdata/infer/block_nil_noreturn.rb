@@ -13,6 +13,7 @@ def takes_no_block_does_not_use_it(&blk)
 end
 
 f = ->(){}
+g = Proc.new {}
 
 p(takes_no_block())
 p(takes_no_block() {})
@@ -29,8 +30,9 @@ def takes_nil_block(&blk)
 end
 
 p(takes_nil_block())
-p(takes_nil_block() {})
+p(takes_nil_block() {}) # TODO(jez) This should report an error
 p(takes_nil_block(&nil))
 p(takes_nil_block(&f))
 # ^^^^^^^^^^^^^^^^^^^ error: Expected `NilClass` but found `T.proc.returns(NilClass)`
+p(takes_nil_block(&g)) # TODO(jez) This should report an error
 
