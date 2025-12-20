@@ -378,6 +378,7 @@ NameDef names[] = {
     {"kwargs", "<kwargs>"},
     {"restargs", "<restargs>"},
     {"blkArg", "<blk>"},
+    {"implicitYield", "<implicit yield>"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 

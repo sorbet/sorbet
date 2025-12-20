@@ -46,10 +46,10 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U IsGood>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:1 end=14:13}
     method <C <U IsGood>>#<U foo1> (a, <blk>) -> Integer @ Loc {file=test/testdata/resolver/resolution_order.rb start=18:3 end=18:14}
       argument a<> -> C @ Loc {file=test/testdata/resolver/resolution_order.rb start=17:15 end=17:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
     method <C <U IsGood>>#<U foo2> (a, <blk>) -> Integer @ Loc {file=test/testdata/resolver/resolution_order.rb start=23:3 end=23:14}
       argument a<> -> A @ Loc {file=test/testdata/resolver/resolution_order.rb start=22:15 end=22:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
   class <S <C <U IsGood>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:1 end=14:13}
     type-member(+) <S <C <U IsGood>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U IsGood>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=IsGood) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:1 end=14:13}
     method <S <C <U IsGood>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=14:1 end=26:4}
