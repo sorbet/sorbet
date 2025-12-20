@@ -1,5 +1,5 @@
 # typed: strict
-# assert-fast-path: no_block_strict__1.rb
+# assert-fast-path: no_block_strict__1.rb,no_block_strict__2.rb
 
 class A
   extend T::Sig

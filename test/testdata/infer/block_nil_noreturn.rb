@@ -16,10 +16,11 @@ f = ->(){}
 
 p(takes_no_block())
 p(takes_no_block() {})
+#                  ^^ error: does not take a block
 p(takes_no_block(&nil))
-# ^^^^^^^^^^^^^^^^^^^^ error: Expected `T.noreturn` but found `NilClass` for block argument
+#                ^^^^ error: does not take a block
 p(takes_no_block(&f))
-# ^^^^^^^^^^^^^^^^^^ error: Expected `T.noreturn` but found `T.proc.returns(NilClass)` for block argument
+#                ^^ error: does not take a block
 
 sig { params(blk: NilClass).returns(Integer) }
 def takes_nil_block(&blk)

@@ -3411,7 +3411,22 @@ private:
                 }
 
                 if (param.type == nullptr) {
-                    param.type = core::Types::untyped(method);
+                    if (isBlkArg && ctx.file.data(ctx).strictLevel >= core::StrictLevel::Strict) {
+                        // Only in `typed: strict` do we report the "method uses `yield` but does
+                        // not mention a block parameter" error, because we only know for sure that
+                        // there will be a sig on a method in `# typed: strict` files.
+                        //
+                        // If we were to somehow communicate from Desugar to Resolver that the
+                        // method is relying on `yield` despite not mentioning an explicit block
+                        // arg, then we could report that error here and expand the cases where we
+                        // know for sure that the method does not take a block to any method with a
+                        // sig, regardless of the enclosing file's sigil.
+                        //
+                        // Short of that, we can only set this for `# typed: strict` files today.
+                        param.type = core::Types::bottom();
+                    } else {
+                        param.type = core::Types::untyped(method);
+                    }
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
