@@ -3423,6 +3423,8 @@ private:
                         // sig, regardless of the enclosing file's sigil.
                         //
                         // Short of that, we can only set this for `# typed: strict` files today.
+                        //
+                        // We're using `bottom` instead of `nilClass` because `foo(&nil)` is valid.
                         param.type = core::Types::bottom();
                     } else {
                         param.type = core::Types::untyped(method);

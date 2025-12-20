@@ -3,7 +3,7 @@ extend T::Sig
 
 sig { params(blk: T.noreturn).returns(Integer) }
 def takes_no_block(&blk)
-  T.reveal_type(blk) # error: This code is unreachable
+  T.reveal_type(blk) # error: `NilClass`
   0
 end
 
