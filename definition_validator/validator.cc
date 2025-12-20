@@ -6,6 +6,7 @@
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/core.h"
+#include "core/errors/infer.h"
 #include "core/errors/resolver.h"
 #include "core/source_generator/source_generator.h"
 
@@ -1336,6 +1337,15 @@ public:
         if (!methodData->loc().file().exists()) {
             Exception::raise("file for method does not exist! ctx.file=\"{}\" method=\"{}\"", ctx.file.data(ctx).path(),
                              methodDef.symbol.show(ctx));
+        }
+
+        if (ctx.file.data(ctx).isRBI() && !methodData->flags.isOverloaded && !methodData->hasSig()) {
+            // Only check RBI files here, because non-RBI files will have this reported in
+            // inference, to be able to report a suggested sig. Note that this might report multiple
+            // errors (if a method is in a source file and an RBI file both without a sig), but that's okay.
+            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Infer::UntypedMethod)) {
+                e.setHeader("The method `{}` does not have a `{}`", methodData->name.show(ctx), "sig");
+            }
         }
 
         // Only perform this check if this isn't a module from the stdlib, and
