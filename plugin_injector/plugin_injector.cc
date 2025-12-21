@@ -11,7 +11,6 @@
 #include "absl/synchronization/mutex.h"
 #include "ast/ast.h"
 #include "ast/Helpers.h"
-#include "ast/Trees.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
 #include "common/typecase.h"
@@ -215,7 +214,8 @@ public:
             return;
         }
 
-        // For ClassDef static-init, create a synthetic MethodDef
+        // When md is nullptr, this is a static-init without a corresponding MethodDef.
+        // Create a synthetic MethodDef for compilation (works for both file-level and class-level).
         unique_ptr<ast::MethodDef> syntheticMd;
         if (!md) {
             syntheticMd = createSyntheticMethodDefForStaticInit(cfg);

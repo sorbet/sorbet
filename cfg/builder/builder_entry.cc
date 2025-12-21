@@ -9,12 +9,20 @@ namespace sorbet::cfg {
 
 namespace {
 
+// Check if a file has the "# compiled: true" sigil
+static bool isCompiledFile(core::Context ctx) {
+    auto source = ctx.file.data(ctx).source();
+    auto searchRegion = source.substr(0, std::min(source.size(), size_t(500)));
+    return searchRegion.find("compiled: true") != std::string_view::npos;
+}
+
 bool shouldBuildFor(core::Context ctx, const ast::ExpressionPtr &what) {
     if (ast::isa_tree<ast::MethodDef>(what)) {
         return false;
     }
     if (ast::isa_tree<ast::ClassDef>(what)) {
-        return false;
+        // For compiled files, we need to walk ClassDefs to emit defineTopClassOrModule
+        return isCompiledFile(ctx);
     }
     if (ast::isa_tree<ast::EmptyTree>(what)) {
         return false;

@@ -43,6 +43,13 @@ void CFGBuilder::unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat
 
 namespace {
 
+// Check if a file has the "# compiled: true" sigil
+static bool isCompiledFile(core::Context ctx) {
+    auto source = ctx.file.data(ctx).source();
+    auto searchRegion = source.substr(0, std::min(source.size(), size_t(500)));
+    return searchRegion.find("compiled: true") != std::string_view::npos;
+}
+
 LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     if (what == core::Symbols::StubModule()) {
         // We don't need all stub module assignments to alias to the same temporary.
@@ -1168,6 +1175,28 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
             [&](const ast::ClassDef &c) {
                 // Skip the RHS of a ClassDef, because the CFGCollectorAndTyper walk will handle it
                 // when it walks to that part of the tree.
+                //
+                // For compiled files, we need to emit a defineTopClassOrModule intrinsic call
+                // so that the class is created at runtime and its static-init is invoked.
+                if (isCompiledFile(cctx.ctx)) {
+                    auto magic = cctx.newTemporary(core::Names::magic());
+                    synthesizeExpr(current, magic, core::LocOffsets::none(),
+                                   make_insn<Alias>(core::Symbols::Magic()));
+
+                    auto klassTemp = cctx.newTemporary(core::Names::cfgAlias());
+                    current->exprs.emplace_back(klassTemp, c.declLoc, make_insn<Alias>(c.symbol));
+
+                    InlinedVector<LocalRef, 2> args{klassTemp};
+                    InlinedVector<core::LocOffsets, 2> argLocs{c.declLoc};
+                    auto isPrivateOk = false;
+
+                    // Use a 0-sized loc at the beginning so that LSP queries don't return this synthetic send
+                    auto sendLoc = core::LocOffsets{c.declLoc.beginLoc, c.declLoc.beginLoc};
+                    current->exprs.emplace_back(
+                        cctx.target, sendLoc,
+                        make_insn<Send>(magic, sendLoc, core::Names::defineTopClassOrModule(), c.declLoc, args.size(),
+                                        args, std::move(argLocs), isPrivateOk));
+                }
                 ret = current;
             },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
