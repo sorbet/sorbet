@@ -181,7 +181,10 @@ public:
 
         auto *recv = mcctx.varGetRecv();
         auto *id = Payload::idIntern(cs, builder, send->fun.shortName(cs));
-        auto *offset = Payload::buildLocalsOffset(cs);
+        // Use escaped vars closure when available for proper variable capture in blocks
+        auto *offset = mcctx.irctx.escapedVarsArray != nullptr
+                           ? Payload::getEscapedVarsClosure(cs, builder, mcctx.irctx, mcctx.rubyRegionId)
+                           : Payload::buildLocalsOffset(cs);
 
         // kwsplat is used by the vm only, and we don't use the vm's api for calling an intrinsic directly.
         auto args = IREmitterHelpers::fillSendArgArray(mcctx);

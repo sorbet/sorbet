@@ -241,7 +241,10 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
         blkPtr = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(blkPtrExpectedType));
     }
 
-    llvm::Value *offset = Payload::buildLocalsOffset(cs);
+    // Use escaped vars closure when available for proper variable capture in blocks
+    llvm::Value *offset = mcctx.irctx.escapedVarsArray != nullptr
+                              ? Payload::getEscapedVarsClosure(cs, builder, mcctx.irctx, mcctx.rubyRegionId)
+                              : Payload::buildLocalsOffset(cs);
 
     auto fun = Payload::idIntern(cs, builder, mcctx.send->fun.shortName(cs));
     auto *value =

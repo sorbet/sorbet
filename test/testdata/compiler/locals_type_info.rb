@@ -29,7 +29,7 @@ p q
 # OPT-NOT test below succeeding.
 
 # INITIAL-LABEL: define internal i64 @"func_Object#1f$block_1"
-# INITIAL: [[QUEUE:%[0-9]+]] = call i64 @sorbet_readLocal{{.*}}
+# INITIAL: [[QUEUE:%[0-9]+]] = call i64 @sorbet_readEscapedVar{{.*}}
 # INITIAL-NEXT: [[ASSUMPTION:%[0-9]+]] = call i1 @sorbet_i_isa_Array(i64 [[QUEUE]]){{.*}}
 # INITIAL-NEXT: call void @llvm.assume(i1 [[ASSUMPTION]]){{.*}}
 # INITIAL: sendContinuation:

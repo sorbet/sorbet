@@ -729,7 +729,7 @@ sorbet_isa_String.exit:                           ; preds = %sorbet_afterIntrins
   %callArgs1Addr = getelementptr [3 x i64], [3 x i64]* %callArgs, i64 0, i64 1, !dbg !86
   store i64 %"rubyStr_ wasn't nil", i64* %callArgs1Addr, align 8, !dbg !86
   %"rubyId_<string-interpolate>" = load i64, i64* getelementptr inbounds ([17 x i64], [17 x i64]* @sorbet_moduleIDTable, i64 0, i64 16), align 8, !dbg !86, !invariant.load !14
-  %rawSendResult13 = call i64 @sorbet_stringInterpolate(i64 noundef 8, i64 noundef %"rubyId_<string-interpolate>", i32 noundef 2, i64* noundef nonnull %callArgs0Addr, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0), !dbg !86
+  %rawSendResult13 = call i64 @sorbet_stringInterpolate(i64 noundef 8, i64 noundef %"rubyId_<string-interpolate>", i32 noundef 2, i64* noundef nonnull %callArgs0Addr, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef %localsOffset), !dbg !86
   %34 = and i64 %rawSendResult13, 7, !dbg !86
   %35 = icmp ne i64 %34, 0, !dbg !86
   %36 = and i64 %rawSendResult13, -9, !dbg !86

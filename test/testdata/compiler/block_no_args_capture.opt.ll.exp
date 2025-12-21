@@ -279,7 +279,7 @@ sorbet_isa_String.exit:                           ; preds = %entry, %22
   store i64 %51, i64* %49, align 8, !dbg !30, !tbaa !5
   %52 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %46, i64 0, i32 0, !dbg !30
   store i64* getelementptr inbounds ([8 x i64], [8 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %52, align 8, !dbg !35, !tbaa !16
-  %53 = call i64 @rb_ary_entry(i64 noundef 0, i64 noundef 0) #6, !dbg !37
+  %53 = call i64 @rb_ary_entry(i64 noundef %6, i64 noundef 0) #6, !dbg !37
   %54 = load i64, i64* @rb_mKernel, align 8, !dbg !37
   %55 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %46, i64 0, i32 1, !dbg !37
   %56 = load i64*, i64** %55, align 8, !dbg !37

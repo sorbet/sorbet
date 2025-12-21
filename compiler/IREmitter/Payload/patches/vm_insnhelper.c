@@ -615,6 +615,17 @@ static void sorbet_writeLocal(rb_control_frame_t *cfp, long index, long level, V
     vm_env_write(vm_get_ep(cfp->ep, level), -offset, value);
 }
 
+// Helper functions for reading/writing escaped variables from the closure array.
+// These are intentionally duplicated from codegen-payload.c to avoid cross-module dependencies.
+SORBET_INLINE
+static VALUE sorbet_readEscapedVarHelper(VALUE closure, long index) {
+    return rb_ary_entry(closure, index);
+}
+SORBET_INLINE
+static void sorbet_writeEscapedVarHelper(VALUE closure, long index, VALUE value) {
+    rb_ary_store(closure, index, value);
+}
+
 typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure, rb_control_frame_t *);
 
 SORBET_INLINE
@@ -669,7 +680,12 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t *volatile ec, volatil
         // out a pointer to the local variable and use that throughout this function,
         // as it's possible that the locals may shift from the Ruby stack to the
         // heap during the execution of the exception-handling region.
-        sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, Qnil);
+        // When methodClosure is non-zero, variables are stored in the escaped vars array.
+        if (methodClosure != 0) {
+            sorbet_writeEscapedVarHelper(methodClosure, exceptionValueIndex, Qnil);
+        } else {
+            sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, Qnil);
+        }
 
         // We're also done with whatever exceptions might have gotten thrown along the way.
         bodyException = Qnil;
@@ -720,7 +736,11 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t *volatile ec, volatil
             bodyException = ec->errinfo;
 
             // Any exception that got thrown needs to be set for the handler.
-            sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
+            if (methodClosure != 0) {
+                sorbet_writeEscapedVarHelper(methodClosure, exceptionValueIndex, bodyException);
+            } else {
+                sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, bodyException);
+            }
 
             ExceptionFFIType handler = (bodyException != Qnil) ? handlers : elseClause;
 
@@ -750,7 +770,11 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t *volatile ec, volatil
             }
 
             handlerException = ec->errinfo;
-            sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, handlerException);
+            if (methodClosure != 0) {
+                sorbet_writeEscapedVarHelper(methodClosure, exceptionValueIndex, handlerException);
+            } else {
+                sorbet_writeLocal(cfp, exceptionValueIndex, exceptionValueLevel, handlerException);
+            }
         }
 
         // We need to determine what the value of the "current" exception is for the
@@ -769,7 +793,9 @@ VALUE sorbet_run_exception_handling(rb_execution_context_t *volatile ec, volatil
             // handler (it will be `nil` if the body didn't raise an exception).
             // The rescue handler will have nil'd out this variable if an
             // appropriate handler was run.
-            VALUE bodyException = sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel);
+            VALUE bodyException = (methodClosure != 0)
+                ? sorbet_readEscapedVarHelper(methodClosure, exceptionValueIndex)
+                : sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel);
             if (bodyException != Qnil) {
                 // Case 2.
                 postRescueExceptionContext = bodyException;
@@ -818,7 +844,10 @@ execute_ensure:
     // depending on what path we took through the code above.
 
     sorbet_raiseIfNotNil(handlerException);
-    sorbet_raiseIfNotNil(sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel));
+    VALUE remainingException = (methodClosure != 0)
+        ? sorbet_readEscapedVarHelper(methodClosure, exceptionValueIndex)
+        : sorbet_readLocal(cfp, exceptionValueIndex, exceptionValueLevel);
+    sorbet_raiseIfNotNil(remainingException);
 
     return executionResult;
 }
