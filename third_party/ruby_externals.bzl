@@ -131,6 +131,19 @@ def register_ruby_dependencies():
         ],
     )
 
+    http_archive(
+        name = "sorbet_ruby_3_4",
+        urls = _ruby_urls("3.4/ruby-3.4.8.tar.gz"),
+        sha256 = "53c4ddad41fbb6189f1f5ee0db57a51d54bd1f87f8755b3d68604156a35b045b",
+        strip_prefix = "ruby-3.4.8",
+        build_file = ruby_3_3_build,
+        patch_tool = "patch",
+        patch_args = ["-p1"],
+        patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:ldflags.patch",
+        ],
+    )
+
 def _rubygems_urls(gem):
     """
     Produce a url list that works both with rubygems, and stripe's internal gem cache.
