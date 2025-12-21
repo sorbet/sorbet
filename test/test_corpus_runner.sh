@@ -158,7 +158,10 @@ info    "├─ stderr:      $stderr"
 success "└─ exit code:   $code"
 
 shorten_bazel() {
-  sed -e "s+_bazel_$USER/[^ ]*com_stripe_ruby_typer/+bazel/.../com_stripe_ruby_typer/+"
+  # Strip the full bazel cache path prefix to just leave bazel-out/...
+  # This handles both the cache path format and the symlink format
+  sed -e "s+/[^ ]*_bazel_[^/]*/[^ ]*/execroot/com_stripe_ruby_typer/++" \
+      -e "s+_bazel_$USER/[^ ]*com_stripe_ruby_typer/++"
 }
 
 something_failed=

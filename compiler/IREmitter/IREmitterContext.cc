@@ -674,12 +674,17 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             }
 
             // All exception handling blocks are children of `b`, as far as ruby iseq allocation is concerned.
+            // Only set blockParents for blocks that actually exist.
             blockParents[bodyBlockId] = b->rubyRegionId;
             if (hasRescueHandlers) {
                 blockParents[handlersBlockId] = b->rubyRegionId;
             }
-            blockParents[elseBlockId] = b->rubyRegionId;
-            blockParents[ensureBlockId] = b->rubyRegionId;
+            if (elseBlock) {
+                blockParents[elseBlockId] = b->rubyRegionId;
+            }
+            if (ensureBlock) {
+                blockParents[ensureBlockId] = b->rubyRegionId;
+            }
         }
     }
 
@@ -1059,6 +1064,15 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     for (auto &b : cfg.basicBlocks) {
         if (b->bexit.cond.variable == cfg::LocalRef::blockCall()) {
             userEntryBlockByFunction[b->rubyRegionId] = llvmBlocks[b->bexit.thenb->id];
+            // Also set the user entry for the iterator/block function itself (the child region).
+            // This is needed so that after the block's argument setup, we jump to the correct
+            // entry point for the block's user code.
+            // Only set if not already set - exception handling inside the block may have already
+            // set the correct entry to be the rescue header block.
+            auto childRegionId = b->bexit.thenb->rubyRegionId;
+            if (userEntryBlockByFunction[childRegionId] == nullptr) {
+                userEntryBlockByFunction[childRegionId] = llvmBlocks[b->bexit.thenb->id];
+            }
             basicBlockJumpOverrides[b->id] = b->bexit.elseb->id;
             auto backId = -1;
             for (auto bid = 0; bid < b->backEdges.size(); bid++) {
@@ -1110,6 +1124,13 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
             userEntryBlockByFunction[bodyBlockId] = llvmBlocks[bodyBlock->id];
             userEntryBlockByFunction[handlersBlockId] = llvmBlocks[handlersBlock->id];
+
+            // If exception handling is inside a block (iterator), the block's user entry
+            // should be this rescue header block (b), so that after argument setup we
+            // jump to the exception handling setup, not skip over it.
+            if (b->rubyRegionId != 0) {
+                userEntryBlockByFunction[b->rubyRegionId] = llvmBlocks[b->id];
+            }
 
             if (auto *elseBlock = CFGHelpers::findRegionEntry(cfg, elseBlockId)) {
                 userEntryBlockByFunction[elseBlockId] = llvmBlocks[elseBlock->id];

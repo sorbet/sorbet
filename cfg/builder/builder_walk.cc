@@ -958,7 +958,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
             },
 
             [&](const ast::Rescue &a) {
-                auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops);
+                // Use cctx.freshBlock() to inherit the parent's rubyRegionId when we're inside
+                // an outer Ruby block (like an iterator). This ensures exception handling inside
+                // iterators is properly associated with the iterator's region.
+                auto rescueHeaderBlock = cctx.freshBlock();
                 unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a.loc);
                 cctx.rescueScope = rescueHeaderBlock;
 
