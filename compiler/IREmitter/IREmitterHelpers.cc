@@ -439,9 +439,17 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
     }
 
     auto file = funSym.data(gs)->loc().file();
-    // NOTE: compiledLevel was removed when the compiler was removed.
-    // When the compiler is in use, we assume all files are being compiled.
-    // TODO: Re-add compiledLevel tracking if needed for partial compilation support.
+
+    // Check if the file containing the final method is compiled.
+    // If the file is not compiled, we cannot generate a direct call to it
+    // because the direct call symbol won't exist at runtime.
+    if (file.exists()) {
+        auto source = file.data(gs).source();
+        auto searchRegion = source.substr(0, std::min(source.size(), size_t(500)));
+        if (searchRegion.find("compiled: true") == std::string_view::npos) {
+            return std::nullopt;
+        }
+    }
 
     return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, file};
 }
