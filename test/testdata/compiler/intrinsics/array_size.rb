@@ -10,7 +10,7 @@ def ary_length(ary)
   ary.length
 end
 
-# INITIAL-LABEL: "func_Object#10ary_length"
+# INITIAL-LABEL: {{^}}define{{.*}}"func_Object#10ary_length"
 # INITIAL: call i64 @sorbet_rb_array_len
 # INITIAL{LITERAL}: }
 
@@ -19,7 +19,7 @@ def ary_size(ary)
   ary.size
 end
 
-# INITIAL-LABEL: "func_Object#8ary_size"
+# INITIAL-LABEL: {{^}}define{{.*}}"func_Object#8ary_size"
 # INITIAL: call i64 @sorbet_rb_array_len
 # INITIAL{LITERAL}: }
 

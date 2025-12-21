@@ -16,7 +16,7 @@ def do_neq(x, y)
   x != y
 end
 
-# INITIAL-LABEL: @"func_Object#6do_neq"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#6do_neq"
 # INITIAL-NOT: call i64 @sorbet_vm_neq
 # INITIAL: call i64{{.*}}@sorbet_i_send
 # INITIAL-NOT: call i64 @sorbet_vm_neq
@@ -28,7 +28,7 @@ def do_neq_untyped(x, y)
   x != y
 end
 
-# INITIAL-LABEL: @"func_Object#14do_neq_untyped"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#14do_neq_untyped"
 # INITIAL-NOT: call i64 @sorbet_rb_int_neq
 # INITIAL: call i64 @sorbet_vm_neq
 # INITIAL-NOT: call i64 @sorbet_rb_int_neq

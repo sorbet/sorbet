@@ -16,7 +16,7 @@ def do_minus(x, y)
   x - y
 end
 
-# INITIAL-LABEL: @"func_Object#8do_minus"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#8do_minus"
 # INITIAL-NOT: call i64 @sorbet_vm_minus
 # INITIAL: call i64{{.*}}@sorbet_i_send
 # INITIAL-NOT: call i64 @sorbet_vm_minus
@@ -28,7 +28,7 @@ def do_minus_untyped(x, y)
   x - y
 end
 
-# INITIAL-LABEL: @"func_Object#16do_minus_untyped"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#16do_minus_untyped"
 # INITIAL-NOT: call i64 @sorbet_rb_int_minus
 # INITIAL: call i64 @sorbet_vm_minus
 # INITIAL-NOT: call i64 @sorbet_rb_int_minus

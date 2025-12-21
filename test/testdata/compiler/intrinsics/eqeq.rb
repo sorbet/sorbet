@@ -16,7 +16,7 @@ def do_eqeq(x, y)
   x == y
 end
 
-# INITIAL-LABEL: @"func_Object#7do_eqeq"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#7do_eqeq"
 # INITIAL-NOT: call i64 @sorbet_vm_eqeq
 # INITIAL: call i64{{.*}}@sorbet_i_send
 # INITIAL-NOT: call i64 @sorbet_vm_eqeq
@@ -28,7 +28,7 @@ def do_eqeq_untyped(x, y)
   x == y
 end
 
-# INITIAL-LABEL: @"func_Object#15do_eqeq_untyped"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#15do_eqeq_untyped"
 # INITIAL-NOT: call i64 @sorbet_rb_int_equal
 # INITIAL: call i64 @sorbet_vm_eqeq
 # INITIAL-NOT: call i64 @sorbet_rb_int_equal

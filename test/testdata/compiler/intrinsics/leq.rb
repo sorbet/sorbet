@@ -16,7 +16,7 @@ def do_leq(x, y)
   x <= y
 end
 
-# INITIAL-LABEL: @"func_Object#6do_leq"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#6do_leq"
 # INITIAL-NOT: call i64 @sorbet_vm_leq
 # INITIAL: call i64{{.*}}@sorbet_i_send
 # INITIAL-NOT: call i64 @sorbet_vm_leq
@@ -28,7 +28,7 @@ def do_leq_untyped(x, y)
   x <= y
 end
 
-# INITIAL-LABEL: @"func_Object#14do_leq_untyped"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#14do_leq_untyped"
 # INITIAL-NOT: call i64 @sorbet_rb_int_le
 # INITIAL: call i64 @sorbet_vm_leq
 # INITIAL-NOT: call i64 @sorbet_rb_int_le

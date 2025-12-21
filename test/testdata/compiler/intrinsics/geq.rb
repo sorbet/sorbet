@@ -16,7 +16,7 @@ def do_geq(x, y)
   x >= y
 end
 
-# INITIAL-LABEL: @"func_Object#6do_geq"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#6do_geq"
 # INITIAL-NOT: call i64 @sorbet_vm_geq
 # INITIAL: call i64{{.*}}@sorbet_i_send
 # INITIAL-NOT: call i64 @sorbet_vm_geq
@@ -28,7 +28,7 @@ def do_geq_untyped(x, y)
   x >= y
 end
 
-# INITIAL-LABEL: @"func_Object#14do_geq_untyped"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#14do_geq_untyped"
 # INITIAL-NOT: call i64 @sorbet_rb_int_ge
 # INITIAL: call i64 @sorbet_vm_geq
 # INITIAL-NOT: call i64 @sorbet_rb_int_ge

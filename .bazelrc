@@ -9,6 +9,9 @@ startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the d
 common:build --define absl=1
 common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 
+# Default test timeout to prevent hanging tests (5 minutes)
+test --test_timeout=300
+
 ##
 ##  Custom toolchain (bazel-contrib/toolchains_llvm).
 ##

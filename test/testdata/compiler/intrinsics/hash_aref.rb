@@ -19,7 +19,7 @@ end
 # Try and ensure that we inline for the hash case and don't call the vm-like
 # fastpath, since we have type information.
 
-# INITIAL-LABEL: @"func_Object#7do_aref"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#7do_aref"
 # INITIAL-NOT: call i64 @sorbet_vm_aref
 # INITIAL: call i64{{.*}}@sorbet_i_send
 # INITIAL-NOT: call i64 @sorbet_vm_aref
@@ -33,7 +33,7 @@ end
 
 # Make sure we call our vm-like fastpath for untyped args.
 
-# INITIAL-LABEL: @"func_Object#14do_aref_notype"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#14do_aref_notype"
 # INITIAL-NOT: call i64 @sorbet_rb_hash_square_br
 # INITIAL: call i64 @sorbet_vm_aref
 # INITIAL-NOT: call i64 @sorbet_rb_hash_square_br

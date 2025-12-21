@@ -10,7 +10,7 @@ def string_brackets(str, i)
   str[i]
 end
 
-# INITIAL-LABEL: @"func_Object#15string_brackets"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#15string_brackets"
 # INITIAL: call i64 @sorbet_int_rb_str_aref_m
 # INITIAL{LITERAL}: }
 
@@ -19,7 +19,7 @@ def string_slice(str, i)
   str.slice(i)
 end
 
-# INITIAL-LABEL: @"func_Object#12string_slice"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#12string_slice"
 # INITIAL: call i64 @sorbet_int_rb_str_aref_m
 # INITIAL{LITERAL}: }
 

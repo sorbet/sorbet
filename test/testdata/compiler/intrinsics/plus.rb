@@ -16,7 +16,7 @@ def do_plus(x, y)
   x + y
 end
 
-# INITIAL-LABEL: @"func_Object#7do_plus"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#7do_plus"
 # INITIAL-NOT: call i64 @sorbet_vm_plus
 # INITIAL: call i64{{.*}}@sorbet_i_send
 # INITIAL-NOT: call i64 @sorbet_vm_plus
@@ -28,7 +28,7 @@ def do_plus_untyped(x, y)
   x + y
 end
 
-# INITIAL-LABEL: @"func_Object#15do_plus_untyped"
+# INITIAL-LABEL: {{^}}define{{.*}}@"func_Object#15do_plus_untyped"
 # INITIAL-NOT: call i64 @sorbet_rb_int_plus
 # INITIAL: call i64 @sorbet_vm_plus
 # INITIAL-NOT: call i64 @sorbet_rb_int_plus
