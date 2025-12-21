@@ -111,6 +111,15 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
             builder.CreateStore(cfp, irctx.blockControlFramePtrs.at(rubyRegionId));
         }
 
+        // Initialize the escaped vars array for the main function
+        if (rubyRegionId == 0 && irctx.escapedVarsArray != nullptr) {
+            auto numEscapedVars = static_cast<int>(irctx.escapedVariableIndices.size());
+            auto *allocateFunc = cs.getFunction("sorbet_allocateEscapedVarsArray");
+            auto *array = builder.CreateCall(allocateFunc, {IREmitterHelpers::buildS4(cs, numEscapedVars)},
+                                             "escapedVarsArrayValue");
+            builder.CreateStore(array, irctx.escapedVarsArray);
+        }
+
         setupStackFrame(cs, md, irctx, builder, rubyRegionId);
         auto lastLoc = core::Loc::none();
         auto startLoc = md.symbol.data(base)->loc();

@@ -451,7 +451,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
         typecase(
             what,
             [&](const ast::While &a) {
-                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+                // Use cctx.freshBlock() to preserve rubyRegionId for while loops inside Ruby blocks
+                auto headerBlock = cctx.freshBlock(1);
                 // breakNotCalledBlock is only entered if break is not called in
                 // the loop body
                 auto breakNotCalledBlock = cctx.freshBlock();

@@ -129,6 +129,12 @@ public:
     static llvm::Value *getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                        int rubyRegionId);
 
+    // Get the escaped vars closure for the given region.
+    // For the main method, loads from the escapedVarsArray alloca.
+    // For blocks, gets from the closure function parameter.
+    static llvm::Value *getEscapedVarsClosure(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                              const IREmitterContext &irctx, int rubyRegionId);
+
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
 
     static llvm::Value *getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBase &builder,

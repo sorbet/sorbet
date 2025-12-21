@@ -1187,6 +1187,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockLevels),
         move(lineNumberPtrsByFunction),
         std::move(blockControlFramePtrs),
+        nullptr, // escapedVarsArray - set below if needed
         blockArgUsage,
         move(exceptionHandlingBlockHeaders),
         move(deadBlocks),
@@ -1201,6 +1202,16 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
     approximation.llvmVariables = std::move(llvmVariables);
     approximation.selfVariables = std::move(selfVariables);
+
+    // Create the escaped vars array alloca if there are any escaped variables.
+    // This array is used for heap-based storage of captured variables, which allows
+    // blocks to safely access them even when running in a different thread.
+    if (!approximation.escapedVariableIndices.empty()) {
+        builder.SetInsertPoint(functionInitializersByFunction[0]);
+        auto *escapedVarsArrayAlloca =
+            builder.CreateAlloca(llvm::Type::getInt64Ty(cs), nullptr, "escapedVarsArray");
+        approximation.escapedVarsArray = escapedVarsArrayAlloca;
+    }
 
     return approximation;
 }

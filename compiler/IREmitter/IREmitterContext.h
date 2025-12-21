@@ -273,6 +273,15 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::rubyRegionId
     UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
+    // Stores the heap-allocated array for escaped variables. This array is used
+    // instead of the stack-based ep chain to store variables that are captured
+    // by blocks. This allows blocks to safely access captured variables even
+    // when running in a different thread (e.g., via Thread.new).
+    //
+    // For the main method (rubyRegionId == 0), this is an alloca that holds the array.
+    // For blocks, the array is passed via the closure parameter.
+    llvm::AllocaInst *escapedVarsArray = nullptr;
+
     // How this function uses its block arg, if any.
     BlockArgUsage blockArgUsage;
 

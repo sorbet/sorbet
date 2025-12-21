@@ -43,7 +43,11 @@ void IREmitterHelpers::emitExceptionHandlers(CompilerState &cs, llvm::IRBuilderB
 
     auto *lineNumAlloca = irctx.lineNumberPtrsByFunction[rubyRegionId];
     auto *pc = builder.CreateLoad(lineNumAlloca->getAllocatedType(), lineNumAlloca);
-    auto *closure = Payload::buildLocalsOffset(cs);
+    // When we have escaped vars, use the escaped vars closure so exception handling
+    // blocks can access captured variables. Otherwise, use the legacy locals offset.
+    auto *closure = irctx.escapedVarsArray != nullptr
+                        ? Payload::getEscapedVarsClosure(cs, builder, irctx, rubyRegionId)
+                        : Payload::buildLocalsOffset(cs);
     auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
 
     auto info = Payload::escapedVariableInfo(cs, exceptionValue, irctx, bodyRubyRegionId);

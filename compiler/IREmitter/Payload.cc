@@ -925,9 +925,9 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
-        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyRegionId);
+        auto *closure = getEscapedVarsClosure(cs, builder, irctx, rubyRegionId);
         auto info = escapedVariableInfo(cs, local, irctx, rubyRegionId);
-        auto *value = builder.CreateCall(cs.getFunction("sorbet_readLocal"), {cfp, info.index, info.level});
+        auto *value = builder.CreateCall(cs.getFunction("sorbet_readEscapedVar"), {closure, info.index});
         // If we ever wrote to this local, we cannot guarantee that the type has
         // been checked prior to the access from the locals array.
         if (info.use.used == LocalUsedHow::WrittenTo) {
@@ -994,9 +994,9 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
         return;
     }
     if (irctx.escapedVariableIndices.contains(local)) {
-        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyRegionId);
+        auto *closure = getEscapedVarsClosure(cs, builder, irctx, rubyRegionId);
         auto info = escapedVariableInfo(cs, local, irctx, rubyRegionId);
-        builder.CreateCall(cs.getFunction("sorbet_writeLocal"), {cfp, info.index, info.level, var});
+        builder.CreateCall(cs.getFunction("sorbet_writeEscapedVar"), {closure, info.index, var});
         return;
     }
 
@@ -1160,6 +1160,26 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
     }
 }
 
+// Get the escaped vars closure for a given ruby region.
+// For the main method (rubyRegionId == 0), loads from the escapedVarsArray alloca.
+// For blocks, gets from the closure function parameter (second argument).
+llvm::Value *Payload::getEscapedVarsClosure(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                            const IREmitterContext &irctx, int rubyRegionId) {
+    if (irctx.escapedVarsArray == nullptr) {
+        // No escaped vars, return nil (this shouldn't happen if called correctly)
+        return rubyNil(cs, builder);
+    }
+
+    if (rubyRegionId == 0) {
+        // Main method: load from the alloca
+        return builder.CreateLoad(llvm::Type::getInt64Ty(cs), irctx.escapedVarsArray, "escapedVarsClosure");
+    }
+
+    // For blocks, the closure is the second function argument
+    auto *func = irctx.rubyBlocks2Functions[rubyRegionId];
+    return func->arg_begin() + 1; // Second argument is the closure
+}
+
 // Currently this function is an historical artifact. Prior to https://github.com/stripe/sorbet_llvm/pull/353, it was
 // used to compute an offset into a global array that was used to hold locals for all method and class static-init
 // functions. We now push stack frames for these functions to track the locals. Computing such an offset into the
@@ -1173,6 +1193,28 @@ llvm::Value *Payload::getOrBuildBlockIfunc(CompilerState &cs, llvm::IRBuilderBas
                                            const IREmitterContext &irctx, int blkId) {
     auto *blk = irctx.rubyBlocks2Functions[blkId];
     auto &arity = irctx.rubyBlockArity[blkId];
+
+    // When we have escaped variables, we need to create the ifunc at runtime
+    // with the escaped vars array as the closure. This is necessary for thread
+    // safety - the closure must be specific to this method invocation.
+    if (irctx.escapedVarsArray != nullptr) {
+        // Get the parent region for this block to get the closure from the right context.
+        // For nested blocks, we need to get the closure from the enclosing block/method.
+        int parentRegion = irctx.rubyBlockParent[blkId];
+        auto *closure = getEscapedVarsClosure(cs, builder, irctx, parentRegion);
+
+        auto *blkMinArgs = IREmitterHelpers::buildS4(cs, arity.min);
+        auto *blkMaxArgs = IREmitterHelpers::buildS4(cs, arity.max);
+        auto *buildBlockIfuncFunc = cs.getFunction("sorbet_buildBlockIfunc");
+        auto *expectedBlkType = buildBlockIfuncFunc->getFunctionType()->getParamType(0);
+        llvm::Value *blkCast = blk;
+        if (blk->getType() != expectedBlkType) {
+            blkCast = builder.CreateBitCast(blk, expectedBlkType, "blk_cast");
+        }
+        return builder.CreateCall(buildBlockIfuncFunc, {blkCast, blkMinArgs, blkMaxArgs, closure}, "ifunc");
+    }
+
+    // No escaped variables - use the cached ifunc with closure=0
     auto rawName = fmt::format("{}_ifunc", (string)blk->getName());
 
     auto *globalTy = llvm::Type::getInt64Ty(cs);

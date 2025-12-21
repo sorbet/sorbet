@@ -2564,6 +2564,37 @@ void sorbet_writeLocal(rb_control_frame_t *cfp, long index, long level, VALUE va
     vm_env_write(vm_get_ep(cfp->ep, level), -offset, value);
 }
 
+// Heap-based escaped variable storage for thread-safe variable capture.
+// These functions store escaped variables in a Ruby Array instead of the
+// stack-based ep chain, making them safe to use across thread boundaries.
+
+// Allocate a Ruby Array to hold escaped variables for a method.
+// The array is heap-allocated and managed by Ruby's GC.
+SORBET_INLINE
+VALUE sorbet_allocateEscapedVarsArray(int numVars) {
+    VALUE ary = rb_ary_new_capa(numVars);
+    // Initialize all slots with nil
+    for (int i = 0; i < numVars; i++) {
+        rb_ary_push(ary, Qnil);
+    }
+    return ary;
+}
+KEEP_ALIVE(sorbet_allocateEscapedVarsArray);
+
+// Read an escaped variable from the closure array.
+SORBET_INLINE
+VALUE sorbet_readEscapedVar(VALUE closure, long index) {
+    return rb_ary_entry(closure, index);
+}
+KEEP_ALIVE(sorbet_readEscapedVar);
+
+// Write an escaped variable to the closure array.
+SORBET_INLINE
+void sorbet_writeEscapedVar(VALUE closure, long index, VALUE value) {
+    rb_ary_store(closure, index, value);
+}
+KEEP_ALIVE(sorbet_writeEscapedVar);
+
 SORBET_INLINE
 VALUE sorbet_vmBlockHandlerNone() {
     return VM_BLOCK_HANDLER_NONE;
