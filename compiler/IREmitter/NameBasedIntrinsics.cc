@@ -972,6 +972,7 @@ static const vector<CallCMethod> knownCMethods{
      core::Symbols::String()},
     {core::Names::blockBreak(), "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::nil_p(), "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
+    {core::Names::blockGiven_p(), "sorbet_block_given_p", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::checkMatchArray(), "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::ClassOrModuleRef()},
 

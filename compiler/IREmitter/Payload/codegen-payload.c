@@ -2301,6 +2301,11 @@ VALUE sorbet_nil_p(VALUE recv, ID fun, int argc, const VALUE *const restrict arg
 }
 
 SORBET_INLINE
+VALUE sorbet_block_given_p(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    return rb_block_given_p() ? Qtrue : Qfalse;
+}
+
+SORBET_INLINE
 VALUE sorbet_returnRecv(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                         VALUE closure) {
     return recv;
