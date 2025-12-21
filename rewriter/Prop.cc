@@ -726,8 +726,13 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
     vector<ast::ExpressionPtr> typedInitializeStats;
     if (wantTypedInitialize(syntacticSuperClass)) {
-        // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
-        typedInitializeStats = mkTypedInitialize(ctx, klass->loc, klass->declLoc, props);
+        // Don't generate typed initialize if any prop has enum validation.
+        // The runtime's initialize properly validates enum values via setter_proc.
+        bool hasEnumProp = absl::c_any_of(props, [](const PropInfo &p) { return p.enum_ != nullptr; });
+        if (!hasEnumProp) {
+            // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
+            typedInitializeStats = mkTypedInitialize(ctx, klass->loc, klass->declLoc, props);
+        }
     }
 
     auto capacity = klass->rhs.size() + typedInitializeStats.size();
