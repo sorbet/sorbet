@@ -2525,6 +2525,45 @@ public:
     }
 } Magic_expandSplat;
 
+class Magic_splatSlice : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // splatSlice(arr, before, after) extracts a slice for splat assignment
+        // For type checking, we return T::Array[element_type] where element_type
+        // is the union of all element types in the input array/tuple
+        if (args.args.size() != 3) {
+            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
+            return;
+        }
+        auto val = args.args.front()->type;
+
+        // For tuples, we could compute the exact slice type, but for simplicity
+        // we just return Array[union of element types]
+        if (auto tuple = cast_type<TupleType>(val)) {
+            if (tuple->elems.empty()) {
+                res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
+                return;
+            }
+            TypePtr elemType = tuple->elems[0];
+            for (size_t i = 1; i < tuple->elems.size(); i++) {
+                elemType = Types::any(gs, elemType, tuple->elems[i]);
+            }
+            res.returnType = Types::arrayOf(gs, elemType);
+            return;
+        }
+
+        // For arrays, just pass through the type
+        if (core::Types::approximateTypeVars(gs, val, core::TypeConstraint::EmptyFrozenConstraint)
+                .derivesFrom(gs, Symbols::Array())) {
+            res.returnType = val;
+            return;
+        }
+
+        // Fallback to untyped array
+        res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
+    }
+} Magic_splatSlice;
+
 class Magic_callWithSplat : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlockPass;
 
@@ -4702,6 +4741,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splatSlice(), &Magic_splatSlice},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlockPass(), &Magic_callWithBlockPass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlockPass(),

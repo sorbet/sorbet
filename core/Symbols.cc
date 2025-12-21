@@ -21,7 +21,7 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 218;   // +2 for T_Private_Compiler and T_Private_CompilerSingleton, +2 for ResolvedSig and ResolvedSigSingleton
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 52;  // +1 for SorbetPrivateStaticSingleton_sig
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 53;  // +1 for SorbetPrivateStaticSingleton_sig, +1 for splatSlice
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 110; // +2 for compiler class type members, +2 for ResolvedSig/ResolvedSigSingleton type members

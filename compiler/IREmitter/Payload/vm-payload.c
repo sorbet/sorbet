@@ -341,6 +341,30 @@ VALUE sorbet_vm_expandSplatIntrinsic(VALUE thing, VALUE before, VALUE after) {
     return arr;
 }
 
+VALUE sorbet_vm_splatSliceIntrinsic(VALUE thing, VALUE before, VALUE after) {
+    /* Extract the slice of an expanded array for a splat variable.
+     * For `a, *b, c = arr`, after expandSplat we have an array with enough elements.
+     * This function extracts arr[before..-(after+1)] which is the portion for `b`.
+     */
+    if (!RB_TYPE_P(thing, T_ARRAY)) {
+        return rb_ary_new();
+    }
+
+    long len = RARRAY_LEN(thing);
+    long start = FIX2LONG(before);
+    long after_count = FIX2LONG(after);
+
+    /* The slice length is: len - before - after */
+    long slice_len = len - start - after_count;
+
+    if (slice_len <= 0) {
+        return rb_ary_new();
+    }
+
+    /* rb_ary_subseq returns a new array containing elements from start with length slice_len */
+    return rb_ary_subseq(thing, start, slice_len);
+}
+
 // ****
 // ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
 // ****

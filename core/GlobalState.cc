@@ -723,6 +723,12 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg1())
                  .untypedArg(Names::arg2())
                  .buildWithResultUntyped();
+    // Synthesize <Magic>.<splat-slice>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::splatSlice())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .untypedArg(Names::arg2())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<call-with-splat>(args: *T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplat())
                  .repeatedUntypedArg(Names::arg0())

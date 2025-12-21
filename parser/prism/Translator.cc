@@ -347,16 +347,16 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *l
             int right = lhs->exprs.size() - left - 1;
 
             if (!ast::isa_tree<ast::EmptyTree>(lh)) {
-                if (right == 0) {
-                    right = 1;
-                }
                 auto lhloc = lh.loc();
                 auto zlhloc = lhloc.copyWithZeroLength();
-                // Calling `to_ary` is not faithful to the runtime behavior,
-                // but that it is faithful to the expected static type-checking behavior.
-                auto ary = MK::Send0(loc, MK::Local(loc, tempExpanded), core::Names::toAry(), zlhloc);
+                // Extract the slice of the expanded array that corresponds to the splat variable.
+                // For `a, *b, c = arr`, this extracts arr[left..-(right)] as the value for `b`.
+                // When right is 0 (splat at end), this extracts arr[left..-1] which is the rest of the array.
+                auto ary = MK::Send3(loc, MK::Magic(loc), core::Names::splatSlice(), zlhloc,
+                                     MK::Local(loc, tempExpanded), MK::Int(loc, left), MK::Int(loc, right));
                 stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
             }
+            // When right is 0, we're at the end and won't index any more elements
             i = -right;
         } else {
             if (didSplat) {

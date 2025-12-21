@@ -113,6 +113,7 @@ SORBET_ALIVE(void, sorbet_setExceptionStackFrame,
 SORBET_ALIVE(VALUE, sorbet_blockReturnUndef, (VALUE * *pc, VALUE closure, rb_control_frame_t *));
 
 SORBET_ALIVE(VALUE, sorbet_vm_expandSplatIntrinsic, (VALUE thing, VALUE before, VALUE after));
+SORBET_ALIVE(VALUE, sorbet_vm_splatSliceIntrinsic, (VALUE thing, VALUE before, VALUE after));
 SORBET_ALIVE(VALUE, sorbet_vm_check_match_array, (rb_execution_context_t * ec, VALUE target, VALUE pattern));
 SORBET_ALIVE(VALUE, sorbet_vm_splatIntrinsic, (VALUE thing));
 SORBET_ALIVE(VALUE, sorbet_definedIntrinsic,
@@ -2228,6 +2229,13 @@ VALUE sorbet_expandSplatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *con
                                   VALUE closure) {
     sorbet_ensure_arity(argc, 3);
     return sorbet_vm_expandSplatIntrinsic(argv[0], argv[1], argv[2]);
+}
+
+SORBET_INLINE
+VALUE sorbet_splatSliceIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                 VALUE closure) {
+    sorbet_ensure_arity(argc, 3);
+    return sorbet_vm_splatSliceIntrinsic(argv[0], argv[1], argv[2]);
 }
 
 SORBET_INLINE

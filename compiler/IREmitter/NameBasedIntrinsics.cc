@@ -961,6 +961,8 @@ public:
 static const vector<CallCMethod> knownCMethods{
     {core::Names::expandSplat(), "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
+    {core::Names::splatSlice(), "sorbet_splatSliceIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Array()},
     {core::Names::splat(), "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::Array()},
     {core::Names::defined_p(), "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
