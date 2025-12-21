@@ -513,10 +513,16 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), flags));
             }
         } else {
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
+            // For unknown superclasses (e.g., child classes of T::InexactStruct), generate a
+            // discardable stub so the runtime's prop-defined method takes precedence.
+            ast::MethodDef::Flags flags;
+            flags.discardDef = true;
+            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc), flags));
         }
     } else {
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
+        ast::MethodDef::Flags flags;
+        flags.discardDef = true;
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc), flags));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -545,10 +551,18 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
                 }
             } else {
-                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
+                // For unknown superclasses (e.g., child classes of T::InexactStruct), generate a
+                // discardable stub so the runtime's prop-defined method takes precedence.
+                ast::MethodDef::Flags flags;
+                flags.discardDef = true;
+                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc), flags));
             }
         } else {
-            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
+            // For enum props, generate a discardable stub so the runtime's prop-defined
+            // method (with proper validation) takes precedence.
+            ast::MethodDef::Flags flags;
+            flags.discardDef = true;
+            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc), flags));
         }
     }
 
