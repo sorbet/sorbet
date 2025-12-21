@@ -14,6 +14,8 @@ rescue => e
   T.must(e.backtrace).each do |line|
     puts line
       .sub(path, '')
+      # Strip bazel cache paths (compiled code uses absolute paths)
+      .sub(%r{/root/\.cache/bazel/_bazel_root/[^/]+/execroot/com_stripe_ruby_typer/}, '')
       .sub(%r{.*test/patch_require.rb:.*}, 'test/patch_require.rb:<censored>:')
       .sub(%r{^.*tmp\..*:}, '<censored>') # OSX
       .sub(%r{^/tmp.*:}, '<censored>')    # linux
