@@ -187,7 +187,7 @@ rescue <emptyTree>::<C E> => x
   begin
     <assignTemp>$14 = ::<Magic>.<splat>(y)
     <assignTemp>$15 = ::<Magic>.<expand-splat>(<assignTemp>$14, 0, 0)
-    x = <assignTemp>$15.to_ary()
+    x = ::<Magic>.<splat-slice>(<assignTemp>$15, 0, 0)
     <assignTemp>$14
   end
 
