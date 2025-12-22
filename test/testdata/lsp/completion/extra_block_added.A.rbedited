@@ -7,5 +7,5 @@ def my_method
   ""
 end
 
-my_method {${0}} # error: Method `my_me` does not exist on `T.class_of(<root>)`
+my_method${0} # error: Method `my_me` does not exist on `T.class_of(<root>)`
 #    ^ apply-completion: [A] item: 0
