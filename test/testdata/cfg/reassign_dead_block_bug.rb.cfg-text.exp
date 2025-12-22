@@ -17,6 +17,7 @@ bb1[firstDead=-1]():
 # - bb0
 bb2[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$4: Sorbet::Private::Static::Void):
     # outerLoops: 1
+    # rubyRegionId: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
@@ -31,6 +32,7 @@ bb3[firstDead=3](<self>: T.class_of(<root>), <block-pre-call-temp>$4: Sorbet::Pr
 # - bb2
 bb5[firstDead=4](<self>: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 1
     <self>: T.class_of(<root>) = loadSelf(times)
     x$1: Integer(1) = 1
     <returnTemp>$9: Integer(1) = 1

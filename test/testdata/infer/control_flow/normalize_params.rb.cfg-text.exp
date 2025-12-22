@@ -74,6 +74,7 @@ bb5[firstDead=-1](v: T.untyped):
 # - bb9
 bb6[firstDead=-1](<self>: Test, <block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test):
     # outerLoops: 1
+    # rubyRegionId: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
@@ -86,6 +87,7 @@ bb7[firstDead=-1](<block-pre-call-temp>$16: Sorbet::Private::Static::Void, <self
 # - bb6
 bb9[firstDead=5](<self>: Test, <block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test):
     # outerLoops: 1
+    # rubyRegionId: 1
     <self>: Test = loadSelf(map)
     <blk>$18: [T.untyped] = load_yield_params(map)
     e$1: T.untyped = yield_load_arg(0, <blk>$18: [T.untyped])

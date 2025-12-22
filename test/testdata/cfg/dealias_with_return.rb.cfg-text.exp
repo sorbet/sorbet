@@ -22,8 +22,7 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb4
-# - bb7
-# - bb8
+# - bb6
 # - bb9
 bb1[firstDead=-1]():
     <exceptionValue>$4 = <get-current-exception>
@@ -32,6 +31,7 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 bb3[firstDead=-1](<exceptionValue>$4: Exception):
+    # rubyRegionId: 2
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$4: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
@@ -39,27 +39,35 @@ bb3[firstDead=-1](<exceptionValue>$4: Exception):
 # backedges
 # - bb0
 bb4[firstDead=2]():
+    # rubyRegionId: 1
     <returnTemp>$5: Integer(1) = 1
     <statTemp>$3: T.noreturn = return <returnTemp>$5: Integer(1)
     <unconditional> -> bb1
 
 # backedges
+# - bb7
+# - bb8
+bb6[firstDead=-1](a: T.nilable(Integer), <gotoDeadTemp>$10: T.nilable(TrueClass)):
+    # rubyRegionId: 3
+    <gotoDeadTemp>$10 -> (T.nilable(TrueClass) ? bb1 : bb9)
+
+# backedges
 # - bb3
 bb7[firstDead=-1](<exceptionValue>$4: StandardError):
+    # rubyRegionId: 2
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$6: T.untyped = <keep-alive> <exceptionValue>$4
     a: Integer(2) = 2
-    <gotoDeadTemp>$10 -> (NilClass ? bb1 : bb9)
+    <unconditional> -> bb6
 
 # backedges
 # - bb3
 bb8[firstDead=-1]():
     <gotoDeadTemp>$10: TrueClass = true
-    <gotoDeadTemp>$10 -> (TrueClass ? bb1 : bb9)
+    <unconditional> -> bb6
 
 # backedges
-# - bb7
-# - bb8
+# - bb6
 bb9[firstDead=3](a: Integer(2)):
     <statTemp>$13: Integer(3) = 3
     <returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$13: Integer(3))

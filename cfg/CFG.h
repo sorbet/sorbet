@@ -65,6 +65,7 @@ public:
     };
     Flags flags;
     int outerLoops = 0;
+    int rubyRegionId = 0;
     int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
     BlockExit bexit;
@@ -110,6 +111,7 @@ public:
     };
 
     friend class CFGBuilder;
+    friend class CFGContext;
     friend class LocalRef;
     friend class UnfreezeCFGLocalVariables;
     /**
@@ -118,6 +120,7 @@ public:
      */
     core::MethodRef symbol;
     int maxBasicBlockId = 0;
+    int maxRubyRegionId = 0;
 
     /**
      * Get the number of unique local variables in the CFG. Used to size vectors that contain an entry per LocalRef.
@@ -168,11 +171,6 @@ public:
     // static constexpr int MIN_LOOP_GLOBAL = -2;
     static constexpr int MIN_LOOP_LET = -3;
 
-    // special ruby region id offsets for exception handling
-    static constexpr int HANDLERS_REGION_OFFSET = 1;
-    static constexpr int ENSURE_REGION_OFFSET = 2;
-    static constexpr int ELSE_REGION_OFFSET = 3;
-
     void sanityCheck(core::Context ctx);
 
     class ReadsAndWrites {
@@ -193,6 +191,7 @@ public:
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops);
+    BasicBlock *freshBlockWithRegion(int outerLoops, int rubyRegionId);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;

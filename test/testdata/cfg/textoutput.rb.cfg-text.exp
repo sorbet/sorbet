@@ -15,6 +15,7 @@ bb1[firstDead=-1]():
 # - bb0
 # - bb4
 bb3[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    # rubyRegionId: 2
     <cfgAlias>$19: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$20: T::Boolean = <cfgAlias>$19: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$20 -> (T::Boolean ? bb7 : bb8)
@@ -22,6 +23,7 @@ bb3[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <
 # backedges
 # - bb0
 bb4[firstDead=-1](<self>: T.class_of(<root>)):
+    # rubyRegionId: 1
     <cfgAlias>$6: T.class_of(A) = alias <C A>
     <statTemp>$4: A = <cfgAlias>$6: T.class_of(A).new()
     <hashTemp>$9: Symbol(:z) = :z
@@ -40,6 +42,7 @@ bb4[firstDead=-1](<self>: T.class_of(<root>)):
 # - bb7
 # - bb8
 bb6[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$23: T.nilable(TrueClass)):
+    # rubyRegionId: 3
     <cfgAlias>$15: T.class_of(T) = alias <C T>
     e: T.untyped = <cfgAlias>$15: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
     <statTemp>$26: String("done") = "done"
@@ -49,6 +52,7 @@ bb6[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <
 # backedges
 # - bb3
 bb7[firstDead=-1](<self>: T.class_of(<root>), <exceptionValue>$3: StandardError):
+    # rubyRegionId: 2
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$17: T.untyped = <keep-alive> <exceptionValue>$3
     <statTemp>$22: String("whoops") = "whoops"
@@ -104,6 +108,7 @@ bb1[firstDead=-1]():
 # - bb5
 bb2[firstDead=-1](<self>: A, y: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: A):
     # outerLoops: 1
+    # rubyRegionId: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
@@ -117,6 +122,7 @@ bb3[firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRe
 # - bb2
 bb5[firstDead=5](<self>: A, y: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: A):
     # outerLoops: 1
+    # rubyRegionId: 1
     <self>: A = loadSelf(map)
     <blk>$6: T.untyped = load_yield_params(map)
     e$1: T.untyped = yield_load_arg(0, <blk>$6: T.untyped)

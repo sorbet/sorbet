@@ -146,6 +146,7 @@ bb1[firstDead=-1]():
 # - bb5
 bb2[firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
@@ -162,6 +163,7 @@ bb3[firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfR
 # - bb2
 bb5[firstDead=6](<self>: T.class_of(Main), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 1
     <self>: T.class_of(Main) = loadSelf(each)
     <blk>$8: T.untyped = load_yield_params(each)
     a$1: T.untyped = yield_load_arg(0, <blk>$8: T.untyped)
@@ -175,6 +177,7 @@ bb5[firstDead=6](<self>: T.class_of(Main), <block-pre-call-temp>$6: Sorbet::Priv
 # - bb9
 bb6[firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 2
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
@@ -191,6 +194,7 @@ bb7[firstDead=-1](<block-pre-call-temp>$17: Sorbet::Private::Static::Void, <self
 # - bb6
 bb9[firstDead=14](<self>: T.class_of(Main), <block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 2
     <self>: T.class_of(Main) = loadSelf(each)
     <blk>$19: T.untyped = load_yield_params(each)
     forTemp$2: T.untyped = yield_load_arg(0, <blk>$19: T.untyped)
@@ -212,6 +216,7 @@ bb9[firstDead=14](<self>: T.class_of(Main), <block-pre-call-temp>$17: Sorbet::Pr
 # - bb13
 bb10[firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$42: Sorbet::Private::Static::Void, <selfRestore>$43: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 3
     <block-call> -> (NilClass ? bb13 : bb11)
 
 # backedges
@@ -228,6 +233,7 @@ bb11[firstDead=-1](<block-pre-call-temp>$42: Sorbet::Private::Static::Void, <sel
 # - bb10
 bb13[firstDead=9](<self>: T.class_of(Main), <block-pre-call-temp>$42: Sorbet::Private::Static::Void, <selfRestore>$43: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 3
     <self>: T.class_of(Main) = loadSelf(each)
     <blk>$44: T.untyped = load_yield_params(each)
     a$3: T.untyped = yield_load_arg(0, <blk>$44: T.untyped)
@@ -244,6 +250,7 @@ bb13[firstDead=9](<self>: T.class_of(Main), <block-pre-call-temp>$42: Sorbet::Pr
 # - bb17
 bb14[firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 4
     <block-call> -> (NilClass ? bb17 : bb15)
 
 # backedges
@@ -262,6 +269,7 @@ bb15[firstDead=-1](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <sel
 # - bb14
 bb17[firstDead=18](<self>: T.class_of(Main), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 4
     <self>: T.class_of(Main) = loadSelf(each)
     <blk>$59: T.untyped = load_yield_params(each)
     forTemp$4: T.untyped = yield_load_arg(0, <blk>$59: T.untyped)
@@ -287,6 +295,7 @@ bb17[firstDead=18](<self>: T.class_of(Main), <block-pre-call-temp>$57: Sorbet::P
 # - bb21
 bb18[firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$92: Sorbet::Private::Static::Void, <selfRestore>$93: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 5
     <block-call> -> (NilClass ? bb21 : bb19)
 
 # backedges
@@ -303,6 +312,7 @@ bb19[firstDead=-1](<block-pre-call-temp>$92: Sorbet::Private::Static::Void, <sel
 # - bb18
 bb21[firstDead=40](<self>: T.class_of(Main), <block-pre-call-temp>$92: Sorbet::Private::Static::Void, <selfRestore>$93: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
     # outerLoops: 1
+    # rubyRegionId: 5
     <self>: T.class_of(Main) = loadSelf(each)
     <cfgAlias>$99: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$101: Integer(5) = 5
@@ -350,6 +360,7 @@ bb21[firstDead=40](<self>: T.class_of(Main), <block-pre-call-temp>$92: Sorbet::P
 # - bb25
 bb22[firstDead=-1](<self>: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped, <block-pre-call-temp>$160: Sorbet::Private::Static::Void, <selfRestore>$161: T.class_of(Main)):
     # outerLoops: 1
+    # rubyRegionId: 6
     <block-call> -> (NilClass ? bb25 : bb23)
 
 # backedges
@@ -363,6 +374,7 @@ bb23[firstDead=2](<block-pre-call-temp>$160: Sorbet::Private::Static::Void, <sel
 # - bb22
 bb25[firstDead=44](<self>: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped, <block-pre-call-temp>$160: Sorbet::Private::Static::Void, <selfRestore>$161: T.class_of(Main)):
     # outerLoops: 1
+    # rubyRegionId: 6
     <self>: T.class_of(Main) = loadSelf(each)
     <blk>$162: T.untyped = load_yield_params(each)
     forTemp$6: T.untyped = yield_load_arg(0, <blk>$162: T.untyped)

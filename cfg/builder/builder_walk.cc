@@ -366,7 +366,7 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
 }
 
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
-    auto *join = cctx.inWhat.freshBlock(cctx.loops);
+    auto *join = cctx.freshBlock();
     unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
     unconditionalJump(b, join, cctx.inWhat, core::LocOffsets::none());
     return join;
@@ -379,8 +379,8 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
                                                                     BasicBlock *presentCont, BasicBlock *defaultCont) {
     auto defLoc = def.loc();
 
-    auto *presentNext = cctx.inWhat.freshBlock(cctx.loops);
-    auto *defaultNext = cctx.inWhat.freshBlock(cctx.loops);
+    auto *presentNext = cctx.freshBlock();
+    auto *defaultNext = cctx.freshBlock();
 
     auto present = cctx.newTemporary(core::Names::argPresent());
     auto methodSymbol = cctx.inWhat.symbol;
@@ -422,7 +422,7 @@ BasicBlock *CFGBuilder::buildExceptionHandler(CFGContext cctx, const ast::Expres
                                                             loc.copyWithZeroLength(), args.size(), args,
                                                             std::move(argLocs), isPrivateOk));
 
-    auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
+    auto otherHandlerBlock = cctx.freshBlock();
     conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
 
     return otherHandlerBlock;
@@ -444,17 +444,18 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
         typecase(
             what,
             [&](const ast::While &a) {
-                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+                // Use cctx.freshBlock() to preserve rubyRegionId for while loops inside Ruby blocks
+                auto headerBlock = cctx.freshBlock(1);
                 // breakNotCalledBlock is only entered if break is not called in
                 // the loop body
-                auto breakNotCalledBlock = cctx.inWhat.freshBlock(cctx.loops);
-                auto continueBlock = cctx.inWhat.freshBlock(cctx.loops);
+                auto breakNotCalledBlock = cctx.freshBlock();
+                auto continueBlock = cctx.freshBlock();
                 unconditionalJump(current, headerBlock, cctx.inWhat, a.loc);
 
                 LocalRef condSym = cctx.newTemporary(core::Names::whileTemp());
                 auto headerEnd =
                     walk(cctx.withTarget(condSym).withLoopScope(headerBlock, continueBlock), a.cond, headerBlock);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+                auto bodyBlock = cctx.freshBlock(1);
                 conditionalJump(headerEnd, condSym, bodyBlock, breakNotCalledBlock, cctx.inWhat, a.cond.loc());
                 // finishHeader
                 LocalRef bodySym = cctx.newTemporary(core::Names::statTemp());
@@ -504,8 +505,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 LocalRef ifSym = cctx.newTemporary(core::Names::ifTemp());
                 ENFORCE(ifSym.exists(), "ifSym does not exist");
                 auto cont = walk(cctx.withTarget(ifSym), a.cond, current);
-                auto thenBlock = cctx.inWhat.freshBlock(cctx.loops);
-                auto elseBlock = cctx.inWhat.freshBlock(cctx.loops);
+                auto thenBlock = cctx.freshBlock();
+                auto elseBlock = cctx.freshBlock();
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a.cond.loc());
 
                 auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTreeInIf(cctx, a.loc, thenBlock)
@@ -518,7 +519,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     } else if (elseEnd == cctx.inWhat.deadBlock()) {
                         ret = thenEnd;
                     } else {
-                        ret = cctx.inWhat.freshBlock(cctx.loops);
+                        ret = cctx.freshBlock();
                         unconditionalJump(thenEnd, ret, cctx.inWhat, a.loc);
                         unconditionalJump(elseEnd, ret, cctx.inWhat, a.loc);
                     }
@@ -731,13 +732,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     synthesizeExpr(current, restoreSelf, core::LocOffsets::none(),
                                    make_insn<Ident>(LocalRef::selfVariable()));
 
-                    auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+                    // Allocate a new ruby region id for this block
+                    auto rubyRegionId = ++cctx.inWhat.maxRubyRegionId;
+
+                    // headerBlock belongs to the new block region; solveConstraintBlock and postBlock
+                    // belong to the outer region (current->rubyRegionId)
+                    auto headerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops + 1, rubyRegionId);
                     // solveConstraintBlock is only entered if break is not called
                     // in the block body.
-                    auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops);
-                    auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
+                    // Use cctx.freshBlock() to inherit the parent's rubyRegionId when we're inside
+                    // an outer Ruby block
+                    auto solveConstraintBlock = cctx.freshBlock();
+                    auto postBlock = cctx.freshBlock();
                     auto bodyLoops = cctx.loops + 1;
-                    auto bodyBlock = cctx.inWhat.freshBlock(bodyLoops);
+                    auto bodyBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, rubyRegionId);
 
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
                                                   make_insn<LoadSelf>(link, LocalRef::selfVariable()));
@@ -761,8 +769,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                             }
 
                             if (auto opt = ast::cast_tree<ast::OptionalParam>(blockParams[i])) {
-                                auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops);
-                                auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops);
+                                auto *presentBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, rubyRegionId);
+                                auto *missingBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, rubyRegionId);
 
                                 // add a test for YieldParamPresent
                                 auto present = cctx.newTemporary(core::Names::argPresent());
@@ -771,7 +779,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                                 conditionalJump(argBlock, present, presentBlock, missingBlock, cctx.inWhat, arg.loc);
 
                                 // make a new block for the present and missing blocks to join
-                                argBlock = cctx.inWhat.freshBlock(bodyLoops);
+                                argBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, rubyRegionId);
 
                                 // compile the argument fetch in the present block
                                 presentBlock->exprs.emplace_back(argLoc, arg.loc,
@@ -798,7 +806,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     {
                         auto newCctx = cctx.withTarget(blockrv)
                                            .withBlockBreakTarget(cctx.target)
-                                           .withLoopScope(headerBlock, postBlock, true)
+                                           .withLoopScope(headerBlock, postBlock, true, rubyRegionId)
                                            .withSendAndBlockLink(link);
                         if (isKernelLambda(s)) {
                             newCctx.isInsideLambda = true;
@@ -943,9 +951,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
             },
 
             [&](const ast::Rescue &a) {
-                auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops);
+                // Use cctx.freshBlock() to inherit the parent's rubyRegionId when we're inside
+                // an outer Ruby block (like an iterator). This ensures exception handling inside
+                // iterators is properly associated with the iterator's region.
+                auto rescueHeaderBlock = cctx.freshBlock();
                 unconditionalJump(current, rescueHeaderBlock, cctx.inWhat, a.loc);
                 cctx.rescueScope = rescueHeaderBlock;
+
+                // Allocate ruby region ids for exception handling:
+                // bodyBlock=N, handlersBlock=N+1, ensureBlock=N+2, elseBlock=N+3
+                auto bodyRegionId = ++cctx.inWhat.maxRubyRegionId;
+                auto handlersRegionId = ++cctx.inWhat.maxRubyRegionId;
+                auto ensureRegionId = ++cctx.inWhat.maxRubyRegionId;
+                auto elseRegionId = ++cctx.inWhat.maxRubyRegionId;
 
                 // We have a simplified view of the control flow here but in
                 // practise it has been reasonable on our codebase.
@@ -955,8 +973,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 // Unanalyzable variable at the top of the body using
                 // `exceptionValue` and one at the end of the else using
                 // `rescueEndTemp` which can jump into the rescue handlers.
-                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops);
+                auto rescueHandlersBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRegionId);
+                auto bodyBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, bodyRegionId);
                 auto exceptionValue = cctx.newTemporary(core::Names::exceptionValue());
                 // In `rescue; ...; end`, we don't want the conditional jumps' variables nor the
                 // GetCurrentException calls to look like they blame to the whole `rescue; ...; end`
@@ -977,18 +995,18 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 bodyBlock = walk(cctx, a.body, bodyBlock);
 
                 // else is only executed if body didn't raise an exception
-                auto elseBody = cctx.inWhat.freshBlock(cctx.loops);
+                auto elseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, elseRegionId);
                 synthesizeExpr(bodyBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
                 conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
                                 rescueKeywordLoc);
 
                 elseBody = walk(cctx, a.else_, elseBody);
-                auto ensureBody = cctx.inWhat.freshBlock(cctx.loops);
+                auto ensureBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, ensureRegionId);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a.loc);
 
                 for (auto &expr : a.rescueCases) {
                     auto rescueCase = ast::cast_tree<ast::RescueCase>(expr);
-                    auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
+                    auto caseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRegionId);
                     auto &exceptions = rescueCase->exceptions;
                     auto local = ast::cast_tree<ast::Local>(rescueCase->var);
                     ENFORCE(local != nullptr, "rescue case var not a local?");
@@ -1039,7 +1057,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
                 ensureBody = walk(cctx.withTarget(throwAway), a.ensure, ensureBody);
-                ret = cctx.inWhat.freshBlock(cctx.loops);
+                ret = cctx.freshBlock();
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a.loc);
             },
 

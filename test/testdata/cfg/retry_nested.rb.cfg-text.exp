@@ -22,9 +22,7 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb15
-# - bb17
 # - bb20
-# - bb22
 # - bb23
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -40,6 +38,7 @@ bb2[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0
 # - bb2
 # - bb18
 bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: Exception, <gotoDeadTemp>$39: NilClass):
+    # rubyRegionId: 2
     <cfgAlias>$43: T.class_of(B) = alias <C B>
     <isaCheckTemp>$44: T::Boolean = <cfgAlias>$43: T.class_of(B).===(<exceptionValue>$4: Exception)
     <isaCheckTemp>$44 -> (T::Boolean ? bb21 : bb22)
@@ -47,6 +46,7 @@ bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0
 # backedges
 # - bb2
 bb4[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+    # rubyRegionId: 1
     <statTemp>$7: String("top") = "top"
     <statTemp>$5: NilClass = <self>: Object.puts(<statTemp>$7: String("top"))
     <unconditional> -> bb5
@@ -62,6 +62,7 @@ bb5[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0
 # - bb5
 # - bb13
 bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: Exception, <gotoDeadTemp>$39: NilClass):
+    # rubyRegionId: 6
     <cfgAlias>$31: T.class_of(A) = alias <C A>
     <isaCheckTemp>$32: T::Boolean = <cfgAlias>$31: T.class_of(A).===(<exceptionValue>$8: Exception)
     <isaCheckTemp>$32 -> (T::Boolean ? bb16 : bb17)
@@ -69,6 +70,7 @@ bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0
 # backedges
 # - bb5
 bb7[firstDead=-1](<self>: Object, try: Integer(0), <gotoDeadTemp>$39: NilClass):
+    # rubyRegionId: 5
     <statTemp>$11: Integer(3) = 3
     <ifTemp>$9: T::Boolean = try: Integer(0).<(<statTemp>$11: Integer(3))
     <ifTemp>$9 -> (T::Boolean ? bb8 : bb9)
@@ -118,12 +120,15 @@ bb13[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(
 
 # backedges
 # - bb13
-bb15[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
-    <gotoDeadTemp>$39 -> (NilClass ? bb1 : bb18)
+# - bb17
+bb15[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: T.nilable(TrueClass)):
+    # rubyRegionId: 7
+    <gotoDeadTemp>$39 -> (T.nilable(TrueClass) ? bb1 : bb18)
 
 # backedges
 # - bb6
 bb16[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: A, <gotoDeadTemp>$39: NilClass):
+    # rubyRegionId: 6
     <exceptionValue>$8: NilClass = nil
     <keepForCfgTemp>$29: T.untyped = <keep-alive> <exceptionValue>$8
     <statTemp>$35: String("rescue A") = "rescue A"
@@ -136,23 +141,25 @@ bb16[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(
 # - bb6
 bb17[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0)):
     <gotoDeadTemp>$39: TrueClass = true
-    <gotoDeadTemp>$39 -> (TrueClass ? bb1 : bb18)
+    <unconditional> -> bb15
 
 # backedges
 # - bb15
-# - bb17
 bb18[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$39: NilClass):
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb20)
 
 # backedges
 # - bb18
-bb20[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$51: NilClass):
-    <gotoDeadTemp>$51 -> (NilClass ? bb1 : bb23)
+# - bb22
+bb20[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$51: T.nilable(TrueClass)):
+    # rubyRegionId: 3
+    <gotoDeadTemp>$51 -> (T.nilable(TrueClass) ? bb1 : bb23)
 
 # backedges
 # - bb3
 bb21[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: B, <gotoDeadTemp>$39: NilClass):
+    # rubyRegionId: 2
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$41: T.untyped = <keep-alive> <exceptionValue>$4
     <statTemp>$47: String("rescue B ") = "rescue B "
@@ -165,11 +172,10 @@ bb21[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(
 # - bb3
 bb22[firstDead=-1](<returnMethodTemp>$2: NilClass):
     <gotoDeadTemp>$51: TrueClass = true
-    <gotoDeadTemp>$51 -> (TrueClass ? bb1 : bb23)
+    <unconditional> -> bb20
 
 # backedges
 # - bb20
-# - bb22
 bb23[firstDead=1](<returnMethodTemp>$2: NilClass):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1

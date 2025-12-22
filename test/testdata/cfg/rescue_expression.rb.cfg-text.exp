@@ -23,8 +23,6 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
-# - bb7
-# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -33,6 +31,7 @@ bb1[firstDead=-1]():
 # - bb0
 # - bb4
 bb3[firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: Exception):
+    # rubyRegionId: 2
     <cfgAlias>$12: T.class_of(MyException) = alias <C MyException>
     <statTemp>$10: MyException = <cfgAlias>$12: T.class_of(MyException).new()
     <exceptionClassTemp>$9: T.class_of(MyException) = <statTemp>$10: MyException.class()
@@ -42,6 +41,7 @@ bb3[firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: Exception)
 # backedges
 # - bb0
 bb4[firstDead=3](<self>: Object):
+    # rubyRegionId: 1
     <cfgAlias>$7: T.class_of(MyException) = alias <C MyException>
     <statTemp>$5: MyException = <cfgAlias>$7: T.class_of(MyException).new()
     <returnMethodTemp>$2: T.noreturn = <self>: Object.raise(<statTemp>$5: MyException)
@@ -50,27 +50,29 @@ bb4[firstDead=3](<self>: Object):
 
 # backedges
 # - bb4
-bb6[firstDead=0](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$14: NilClass):
-    <gotoDeadTemp>$14 -> (<nullptr> ? bb1 : bb9)
+# - bb7
+# - bb8
+bb6[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$14: T.nilable(TrueClass)):
+    # rubyRegionId: 3
+    <gotoDeadTemp>$14 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb7[firstDead=-1](<exceptionValue>$3: MyException):
+    # rubyRegionId: 2
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$8: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: Integer(3) = 3
-    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb9)
+    <unconditional> -> bb6
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: NilClass):
     <gotoDeadTemp>$14: TrueClass = true
-    <gotoDeadTemp>$14 -> (TrueClass ? bb1 : bb9)
+    <unconditional> -> bb6
 
 # backedges
 # - bb6
-# - bb7
-# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: Integer(3)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)
     <unconditional> -> bb1

@@ -278,11 +278,21 @@ CFGContext CFGContext::withLoopBreakTarget(LocalRef blockBreakTarget) {
     return ret;
 }
 
-CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock) {
+CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope, bool insideRubyBlock,
+                                     int rubyRegionId) {
     auto ret = CFGContext(*this);
     ret.nextScope = nextScope;
     ret.breakScope = breakScope;
-    ret.isInsideRubyBlock = insideRubyBlock;
+    // Only override isInsideRubyBlock if we're entering a Ruby block (insideRubyBlock=true)
+    // Otherwise preserve the existing value (we might be inside a while loop that's inside a Ruby block)
+    if (insideRubyBlock) {
+        ret.isInsideRubyBlock = true;
+    }
+    // Only override rubyRegionId if a new one is provided
+    // Otherwise preserve the existing value for nested control flow inside Ruby blocks
+    if (rubyRegionId != 0) {
+        ret.rubyRegionId = rubyRegionId;
+    }
     ret.loops += 1;
     return ret;
 }
@@ -291,6 +301,13 @@ CFGContext CFGContext::withSendAndBlockLink(shared_ptr<core::SendAndBlockLink> &
     auto ret = CFGContext(*this);
     ret.link = &link;
     return ret;
+}
+
+BasicBlock *CFGContext::freshBlock(int loopOffset) {
+    if (rubyRegionId != 0) {
+        return inWhat.freshBlockWithRegion(loops + loopOffset, rubyRegionId);
+    }
+    return inWhat.freshBlock(loops + loopOffset);
 }
 
 } // namespace sorbet::cfg

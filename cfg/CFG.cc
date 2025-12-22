@@ -39,6 +39,15 @@ BasicBlock *CFG::freshBlock(int outerLoops) {
     return r.get();
 }
 
+BasicBlock *CFG::freshBlockWithRegion(int outerLoops, int rubyRegionId) {
+    int id = this->maxBasicBlockId++;
+    auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
+    r->id = id;
+    r->outerLoops = outerLoops;
+    r->rubyRegionId = rubyRegionId;
+    return r.get();
+}
+
 void CFG::enterLocalInternal(core::LocalVariable variable, LocalRef &ref) {
     ENFORCE_NO_TIMER(!this->localVariablesFrozen);
     int id = this->localVariables.size();
@@ -374,6 +383,9 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "    # outerLoops: {}\n", this->outerLoops);
+    }
+    if (this->rubyRegionId > 0) {
+        fmt::format_to(std::back_inserter(buf), "    # rubyRegionId: {}\n", this->rubyRegionId);
     }
     for (const Binding &exp : this->exprs) {
         fmt::format_to(std::back_inserter(buf), "    {} = {}\n", exp.bind.toString(gs, cfg),

@@ -16,6 +16,7 @@ bb1[firstDead=-1]():
 # - bb5
 bb2[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
@@ -36,6 +37,7 @@ bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfR
 # - bb2
 bb5[firstDead=13](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$10: Symbol(:blk) = :blk
     <cfgAlias>$15: T.class_of(T) = alias <C T>
@@ -56,6 +58,7 @@ bb5[firstDead=13](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::P
 # - bb11
 bb6[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 2
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
@@ -79,6 +82,7 @@ bb8[firstDead=-1](a: T.any(String, Integer), <selfRestore>$39: T.class_of(<root>
 # - bb6
 bb9[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 2
     <self>: T.class_of(<root>) = loadSelf(bar)
     <blk>$40: [Integer] = load_yield_params(bar)
     x$2: Integer = yield_load_arg(0, <blk>$40: [Integer])
@@ -90,6 +94,7 @@ bb9[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::
 # - bb9
 bb10[firstDead=-1](<selfRestore>$39: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 2
     <returnTemp>$46: Integer(10) = 10
     <block-break-assign>$47: Integer(10) = <returnTemp>$46
     <magic>$48: T.class_of(<Magic>) = alias <C <Magic>>
@@ -101,6 +106,7 @@ bb10[firstDead=-1](<selfRestore>$39: T.class_of(<root>)):
 # - bb9
 bb11[firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::Private::Static::Void, <selfRestore>$39: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 2
     <blockReturnTemp>$41: String("test") = "test"
     <blockReturnTemp>$50: T.noreturn = blockreturn<bar> <blockReturnTemp>$41: String("test")
     <unconditional> -> bb6
@@ -110,6 +116,7 @@ bb11[firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$38: Sorbet::
 # - bb17
 bb12[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 3
     <block-call> -> (NilClass ? bb15 : bb13)
 
 # backedges
@@ -130,6 +137,7 @@ bb14[firstDead=-1](b: T.nilable(String), <selfRestore>$58: T.class_of(<root>)):
 # - bb12
 bb15[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 3
     <self>: T.class_of(<root>) = loadSelf(bar)
     <blk>$59: [Integer] = load_yield_params(bar)
     x$3: Integer = yield_load_arg(0, <blk>$59: [Integer])
@@ -141,6 +149,7 @@ bb15[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet:
 # - bb15
 bb16[firstDead=-1](<selfRestore>$58: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 3
     <block-break-assign>$66: NilClass = <returnTemp>$65
     <magic>$67: T.class_of(<Magic>) = alias <C <Magic>>
     <block-break>$68: T.untyped = <magic>$67: T.class_of(<Magic>).<block-break>(<returnTemp>$65: NilClass)
@@ -151,6 +160,7 @@ bb16[firstDead=-1](<selfRestore>$58: T.class_of(<root>)):
 # - bb15
 bb17[firstDead=2](<self>: T.class_of(<root>), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(<root>)):
     # outerLoops: 1
+    # rubyRegionId: 3
     <blockReturnTemp>$60: String("test") = "test"
     <blockReturnTemp>$69: T.noreturn = blockreturn<bar> <blockReturnTemp>$60: String("test")
     <unconditional> -> bb12
@@ -223,6 +233,7 @@ bb1[firstDead=-1]():
 # - bb0
 bb2[firstDead=-1](<self>: Object, <block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: Object):
     # outerLoops: 1
+    # rubyRegionId: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
@@ -244,6 +255,7 @@ bb4[firstDead=3](target: T.any(T::Array[T.noreturn], Integer), <selfRestore>$9: 
 # - bb2
 bb5[firstDead=-1](<self>: Object, <selfRestore>$9: Object):
     # outerLoops: 1
+    # rubyRegionId: 1
     <self>: Object = loadSelf(map)
     <blk>$10: [Integer] = load_yield_params(map)
     x$1: Integer = yield_load_arg(0, <blk>$10: [Integer])

@@ -31,6 +31,7 @@ bb1[firstDead=-1]():
 # - bb0
 # - bb4
 bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception):
+    # rubyRegionId: 2
     <cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$12: T::Boolean = <cfgAlias>$11: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$12 -> (T::Boolean ? bb7 : bb8)
@@ -38,6 +39,7 @@ bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <exceptionVal
 # backedges
 # - bb0
 bb4[firstDead=-1](<self>: Object):
+    # rubyRegionId: 1
     <returnMethodTemp>$2: T.untyped = <self>: Object.a()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
@@ -45,6 +47,7 @@ bb4[firstDead=-1](<self>: Object):
 # backedges
 # - bb4
 bb5[firstDead=-1](<self>: Object, <exceptionValue>$3: NilClass):
+    # rubyRegionId: 4
     <returnMethodTemp>$2: T.untyped = <self>: Object.c()
     <unconditional> -> bb6
 
@@ -53,6 +56,7 @@ bb5[firstDead=-1](<self>: Object, <exceptionValue>$3: NilClass):
 # - bb7
 # - bb8
 bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$14: T.nilable(TrueClass)):
+    # rubyRegionId: 3
     <cfgAlias>$7: T.class_of(T) = alias <C T>
     <rescueTemp>$2: T.untyped = <cfgAlias>$7: T.class_of(T).unsafe(<exceptionValue>$3: T.nilable(Exception))
     <throwAwayTemp>$15: T.untyped = <self>: Object.d()
@@ -61,6 +65,7 @@ bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <exceptionVal
 # backedges
 # - bb3
 bb7[firstDead=-1](<self>: Object, <exceptionValue>$3: StandardError):
+    # rubyRegionId: 2
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$9: T.untyped = <keep-alive> <exceptionValue>$3
     <returnMethodTemp>$2: T.untyped = <self>: Object.b()

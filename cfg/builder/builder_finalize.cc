@@ -53,11 +53,15 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 // 1. Are not to the dead block
                 // 2. Are not a back edge to the parent
                 // 3. Do not differ in their outerLoops values
+                // 4. Do not differ in their rubyRegionId values
                 //
                 // The third condition is important to avoid situations where we might duplicate a loop header.
                 // Duplicating a loop header will potentially invalidate the cached `forwardsTopoSort` traversal, and
                 // throw off inference by causing values to look nilable after loops that don't use them.
-                if (thenb != cfg.deadBlock() && thenb != bb && thenb->outerLoops == bb->outerLoops) {
+                //
+                // The fourth condition preserves region information critical for exception handling.
+                if (thenb != cfg.deadBlock() && thenb != bb && thenb->outerLoops == bb->outerLoops &&
+                    thenb->rubyRegionId == bb->rubyRegionId) {
                     // If this is the only block that jumps to `thenb`, we can squish it into `bb` and disconnect it
                     // from the graph.
                     if (thenb->backEdges.size() == 1) {
