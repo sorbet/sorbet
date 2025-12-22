@@ -218,6 +218,7 @@ public:
     const core::TypeAndOrigins &getTypeAndOrigin(cfg::LocalRef symbol) const;
 
     const core::TypeAndOrigins &getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const;
+    const core::TypeAndOrigins &getAndFillTypeAndOrigin(cfg::LocalRef symbol, core::TypePtr &ty) const;
 
     /*
      * Create an Environment out of this one that holds if final condition in
