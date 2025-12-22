@@ -10,29 +10,29 @@ class <C <U <root>>> < <C <U Object>> ()
     field <C <U TestAttr>>#<U @v2> -> String @ Loc {file=test/testdata/rewriter/attr.rb start=8:5 end=8:8}
     field <C <U TestAttr>>#<U @v6> -> String @ Loc {file=test/testdata/rewriter/attr.rb start=9:5 end=9:8}
     method <C <U TestAttr>>#<U initialize> : private (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/attr.rb start=6:3 end=6:17}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U strv7> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=33:3 end=33:22}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U strv8=> (strv8, <blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=36:3 end=36:22}
       argument strv8<> -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=35:15 end=35:20}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U strv9> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=39:3 end=39:24}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U strv9=> (strv9, <blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=39:3 end=39:24}
       argument strv9<> -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=39:18 end=39:23}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U v1> (<blk>) -> Integer @ Loc {file=test/testdata/rewriter/attr.rb start=16:3 end=16:11}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U v1=> (v1, <blk>) -> Integer @ Loc {file=test/testdata/rewriter/attr.rb start=18:3 end=18:18}
       argument v1<> -> Integer @ Loc {file=test/testdata/rewriter/attr.rb start=17:15 end=17:17}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U v2> (<blk>) -> String @ Loc {file=test/testdata/rewriter/attr.rb start=21:3 end=21:20}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U v2=> (v2, <blk>) -> String @ Loc {file=test/testdata/rewriter/attr.rb start=21:3 end=21:20}
       argument v2<> -> String @ Loc {file=test/testdata/rewriter/attr.rb start=21:18 end=21:20}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U v3> (<blk>) -> String @ Loc {file=test/testdata/rewriter/attr.rb start=24:3 end=24:18}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U v4=> (v4, <blk>) @ Loc {file=test/testdata/rewriter/attr.rb start=26:3 end=26:23}
       argument v4<> @ Loc {file=test/testdata/rewriter/attr.rb start=26:16 end=26:18}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}

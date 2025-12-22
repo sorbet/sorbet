@@ -715,6 +715,10 @@ Loc expandToLeadingComma(const GlobalState &gs, Loc loc) {
 }
 
 void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePtr blockType) {
+    if (!blockType) {
+        blockType = Types::untyped(component.method);
+    }
+
     component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
     blockType = component.constr->isSolved() ? Types::instantiateTypeVars(gs, blockType, *component.constr)
                                              : Types::approximateTypeVars(gs, blockType, *component.constr);
@@ -1590,10 +1594,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 method.show(gs));
         const auto &blockParam = methodData->parameters.back();
         ENFORCE(blockParam.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
-        auto blockType = Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs);
-        if (!blockType) {
-            blockType = Types::untyped(method);
-        }
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
         // file or higher and has a sig, which would force the "uses `yield` but does not mention a
@@ -1606,7 +1606,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (methodData->hasSig() && methodData->loc().exists()) {
             auto file = methodData->loc().file();
             auto blockLoc = args.blockLoc(gs);
-            if (file.exists() && blockType.isBottom() && blockLoc.exists() && !blockLoc.empty()) {
+            if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
+                blockParam.isSyntheticBlockParameter() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : methodData->locs()) {
@@ -1623,6 +1624,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
+        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, blockParam.type, methodData->owner, symbol, targs);
         handleBlockType(gs, component, blockType);
         component.rebind = blockParam.rebind;
         component.rebindLoc = blockParam.loc;
@@ -1669,7 +1671,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(methodData->parameters.back().flags.isBlock, "The last param should be the block param.");
         auto blockType = methodData->parameters.back().type;
         // TODO(jez) Highlight untyped code for this error
-        if (blockType && !blockType.isBottom() && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
+        if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
                 e.addErrorLine(methodData->loc(), "defined here");
@@ -2713,10 +2715,8 @@ private:
         auto &blockPreType = dispatched.main.blockPreType;
         // TODO(jez) How should this interact with highlight untyped?
         core::ErrorSection::Collector errorDetailsCollector;
-        // Can skip when blockPreType is bottom because a "does not take a block" error was already reported
-        if (blockPreType && !blockPreType.isBottom() &&
-            !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
-                                             UntypedMode::AlwaysCompatible, errorDetailsCollector)) {
+        if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
+                                                             UntypedMode::AlwaysCompatible, errorDetailsCollector)) {
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
             if (isa_type<ClassType>(passedInBlockType) &&
                 cast_type_nonnull<ClassType>(passedInBlockType).symbol == Symbols::Proc() &&
