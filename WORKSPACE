@@ -5,6 +5,13 @@ load("//third_party:externals.bzl", "register_sorbet_dependencies")
 
 register_sorbet_dependencies()
 
+# Required for Bazel 8 compatibility
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+bazel_features_deps()
+
+load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
+compatibility_proxy_repo()
+
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 
 # We need to explicitly pull in make here for rules_foreign_cc
@@ -42,7 +49,6 @@ llvm_toolchain(
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
     llvm_version = "15.0.7",
-    # The sysroots are needed for cross-compiling
     sysroot = {
         "": "",
         "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
