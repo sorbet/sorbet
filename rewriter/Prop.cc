@@ -1,4 +1,5 @@
 #include "rewriter/Prop.h"
+#include "absl/algorithm/container.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -642,9 +643,17 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
     // then initialize all the instance variables in the body
     ast::InsSeq::STATS_store stats;
     for (const auto &prop : props) {
-        auto ivarName = prop.name.addAt(ctx);
-        stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
-                                           ast::MK::Local(prop.nameLoc, prop.name)));
+        if (prop.enum_ != nullptr) {
+            // For enum props, use the setter to go through enum validation
+            auto setName = prop.name.addEq(ctx);
+            stats.emplace_back(ast::MK::Send1(prop.loc, ast::MK::Self(prop.loc), setName, prop.nameLoc,
+                                              ast::MK::Local(prop.nameLoc, prop.name)));
+        } else {
+            // For non-enum props, assign directly to instance variable
+            auto ivarName = prop.name.addAt(ctx);
+            stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
+                                               ast::MK::Local(prop.nameLoc, prop.name)));
+        }
     }
     auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::Nil(klassDeclLoc));
 

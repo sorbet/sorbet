@@ -1,0 +1,53 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def initialize<<todo method>>(foo: = nil, &<blk>)
+      begin
+        <self>.foo=(foo)
+        nil
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def foo<<todo method>>(&<blk>)
+      @foo
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <runtime method definition of initialize>
+
+    <self>.prop(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :enum, ["foo", "bar"])
+
+    <runtime method definition of foo>
+
+    <runtime method definition of foo=>
+  end
+
+  a1 = <emptyTree>::<C A>.new(:foo, "bar")
+
+  <self>.p(a1.foo())
+
+  a1.foo=("foo")
+
+  <self>.p(a1.foo())
+
+  begin
+    a1.foo=("nope")
+    <self>.p(a1.foo())
+  end
+rescue => <rescueTemp>$2
+  <self>.p(:ok)
+end
