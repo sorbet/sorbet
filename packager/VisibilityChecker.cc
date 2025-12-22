@@ -683,6 +683,7 @@ public:
                                                      : core::errors::Packager::StrictDependenciesViolation);
                 if (auto e = ctx.beginError(lit.loc(), error)) {
                     vector<string> reasons;
+                    e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format(
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
