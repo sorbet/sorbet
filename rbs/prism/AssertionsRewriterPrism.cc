@@ -4,12 +4,12 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-AssertionsRewriterPrism::AssertionsRewriterPrism(core::MutableContext ctx,
-                                                 std::map<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode)
-    : ctx(ctx), commentsByNode(&commentsByNode) {}
+AssertionsRewriterPrism::AssertionsRewriterPrism(
+    core::MutableContext ctx, parser::Prism::Parser &parser,
+    std::unordered_map<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode)
+    : ctx(ctx) {}
 
 pm_node_t *AssertionsRewriterPrism::run(pm_node_t *node) {
-    [[maybe_unused]] auto *_commentsByNode = this->commentsByNode;
     return node;
 }
 

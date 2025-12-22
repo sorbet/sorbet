@@ -13,15 +13,12 @@ namespace sorbet::rbs {
 
 class SigsRewriterPrism {
 public:
-    SigsRewriterPrism(core::MutableContext ctx, const parser::Prism::Parser &parser,
-                      std::map<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode);
-
+    SigsRewriterPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
+                      std::unordered_map<pm_node_t *, std::vector<rbs::CommentNodePrism>> &commentsByNode);
     pm_node_t *run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
-    const parser::Prism::Parser &parser;
-    std::map<pm_node_t *, std::vector<CommentNodePrism>> *commentsByNode;
 };
 
 } // namespace sorbet::rbs

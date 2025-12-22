@@ -15,6 +15,7 @@ cc_library(
         "//ast",
         "//common",
         "//core",
+        "//main/options",
         "//parser",
         "//parser/prism",
         "//rewriter/util",
