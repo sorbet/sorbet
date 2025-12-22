@@ -331,35 +331,6 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
             }
             break;
         }
-        case core::Names::new_().rawId(): {
-            auto id = ast::cast_tree<ast::ConstantLit>(s.recv);
-            if (id == nullptr || !id->symbol().exists() || !id->symbol().isClassOrModule()) {
-                return nullptr;
-            }
-
-            auto symbol = id->symbol().asClassOrModuleRef().data(cctx.ctx);
-            if (!symbol->flags.isAbstract) {
-                return nullptr;
-            }
-
-            auto singletonClass = symbol->lookupSingletonClass(cctx.ctx.state);
-            if (!singletonClass.exists()) {
-                return nullptr;
-            }
-
-            auto method_new = singletonClass.data(cctx.ctx)->findMethodTransitive(cctx.ctx.state, core::Names::new_());
-            // If the .new method we find is owned by Class, that means
-            // there was no user defined .new method, which warrants an error.
-            if (method_new.data(cctx.ctx)->owner == core::Symbols::Class()) {
-                if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::AbstractClassInstantiated)) {
-                    auto symbolName = id->symbol().show(cctx.ctx);
-                    e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
-                    e.addErrorLine(id->symbol().loc(cctx.ctx), "`{}` defined here", symbolName);
-                }
-            }
-
-            return nullptr;
-        }
     }
 
     return nullptr;

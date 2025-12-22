@@ -78,7 +78,7 @@ constexpr ErrorClass MultipleStatementsInSig{5069, StrictLevel::False};
 constexpr ErrorClass NilableUntyped{5070, StrictLevel::False};
 constexpr ErrorClass BindNonBlockParameter{5071, StrictLevel::False};
 constexpr ErrorClass TypeMemberScopeMismatch{5072, StrictLevel::False};
-// constexpr ErrorClass AbstractClassInstantiated{5073, StrictLevel::True};
+constexpr ErrorClass AbstractClassInstantiated{5073, StrictLevel::True};
 constexpr ErrorClass HasAttachedClassIncluded{5074, StrictLevel::False};
 constexpr ErrorClass TypeAliasToTypeMember{5075, StrictLevel::False};
 constexpr ErrorClass TNilableArity{5076, StrictLevel::False};
