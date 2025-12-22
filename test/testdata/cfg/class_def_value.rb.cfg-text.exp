@@ -1,0 +1,47 @@
+method ::<Class:<root>>#<static-init> {
+
+bb0[firstDead=2]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:A>#<static-init> {
+
+bb0[firstDead=7]():
+    <C X>$3: T.untyped = alias <C X>
+    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
+    <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <cfgAlias>$7: T.class_of(A::Foo) = alias <C Foo>
+    <C X>$3: T.class_of(A::Foo) = <cfgAlias>$5: T.class_of(<Magic>).<suggest-constant-type>(<cfgAlias>$7: T.class_of(A::Foo))
+    <returnMethodTemp>$2: T.class_of(A::Foo) = <C X>$3
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.class_of(A::Foo)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::A::<Class:Foo>#<static-init> {
+
+bb0[firstDead=2]():
+    <self>: T.class_of(A::Foo) = cast(<self>: NilClass, T.class_of(A::Foo));
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb0
+bb1[firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+

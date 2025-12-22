@@ -1130,8 +1130,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
             },
 
             [&](const ast::ClassDef &c) {
-                // Skip the RHS of a ClassDef, because the CFGCollectorAndTyper walk will handle it
-                // when it walks to that part of the tree.
+                // CFGCollectorAndTyper will walk the class body separately for its <static-init>.
+                // However, we still need to produce a value for the class definition expression,
+                // since in Ruby `x = class Foo; end` assigns Foo to x.
+                auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
+                auto loc = c.loc;
+                current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(c.symbol));
+                synthesizeExpr(current, cctx.target, loc, make_insn<Ident>(aliasName));
                 ret = current;
             },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
