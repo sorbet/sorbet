@@ -129,6 +129,19 @@ def register_ruby_dependencies():
     )
 
     http_archive(
+        name = "sorbet_ruby_3_1_for_compiler",
+        urls = _ruby_urls("3.1/ruby-3.1.4.tar.gz"),
+        sha256 = "a3d55879a0dfab1d7141fdf10d22a07dbf8e5cdc4415da1bde06127d5cc3c7b6",
+        strip_prefix = "ruby-3.1.4",
+        build_file = ruby_for_compiler_build,
+        patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_3_1_for_compiler.patch",
+        ],
+        patch_tool = "patch",
+        patch_args = ["-p1"],
+    )
+
+    http_archive(
         name = "sorbet_ruby_3_3",
         urls = _ruby_urls("3.3/ruby-3.3.1.tar.gz"),
         sha256 = "8dc2af2802cc700cd182d5430726388ccf885b3f0a14fcd6a0f21ff249c9aa99",
