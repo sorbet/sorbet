@@ -4,10 +4,12 @@
 
 try-import .bazelrc.local
 
-# Bazel 8: Enable WORKSPACE support (disabled by default in Bazel 8+)
+# Bazel 8: Use WORKSPACE for now (full Bzlmod migration requires updating all dependencies)
 common --enable_workspace
-# Disable Bzlmod as this project uses WORKSPACE for dependencies
 common --enable_bzlmod=false
+# Allow empty globs for backwards compatibility
+common --noincompatible_disallow_empty_glob
+
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
 
 # enable https://github.com/google/googletest/pull/1653

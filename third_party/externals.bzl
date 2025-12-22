@@ -8,6 +8,29 @@ def register_sorbet_dependencies():
         sha256 = "218efe8ee736d26a3572663b374a253c012b716d8af0c07e842e82f238a0a7ee",
     )
 
+    # Required for Bazel 8 compatibility
+    http_archive(
+        name = "bazel_features",
+        sha256 = "07271d0f6b12633777b69020c4cb1eb67b1939c0cf84bb3944dc85cc250c0c01",
+        strip_prefix = "bazel_features-1.38.0",
+        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.38.0/bazel_features-v1.38.0.tar.gz",
+    )
+
+    # Required for Bazel 8 compatibility
+    http_archive(
+        name = "rules_java",
+        urls = ["https://github.com/bazelbuild/rules_java/releases/download/8.9.0/rules_java-8.9.0.tar.gz"],
+        sha256 = "8daa0e4f800979c74387e4cd93f97e576ec6d52beab8ac94710d2931c57f8d8b",
+    )
+
+    # Required for Bazel 8 compatibility
+    http_archive(
+        name = "rules_python",
+        sha256 = "4f7e2aa1eb9aa722d96498f5ef514f426c1f55161c3c9ae628c857a7128ceb07",
+        strip_prefix = "rules_python-1.0.0",
+        url = "https://github.com/bazelbuild/rules_python/releases/download/1.0.0/rules_python-1.0.0.tar.gz",
+    )
+
     http_archive(
         name = "prism",
         url = "https://github.com/ruby/prism/releases/download/v1.6.0/libprism-src.tar.gz",
@@ -59,15 +82,12 @@ def register_sorbet_dependencies():
 
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
     # depend on @com_google_protobuf for protoc and proto runtimes.
-    # This statement defines the @com_google_protobuf repo.
+    # Updated to v29.3 for Bazel 8 compatibility
     http_archive(
         name = "com_google_protobuf",
-        url = "https://github.com/protocolbuffers/protobuf/archive/v3.27.0.zip",
-        sha256 = "913530eba097b17f58b9087fe9c4944de87b56913e3e340b91e317d1e6763dde",
-        strip_prefix = "protobuf-3.27.0",
-        patches = [
-            "@com_stripe_ruby_typer//third_party:com_google_protobuf/cpp_opts.bzl.patch",
-        ],
+        url = "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protobuf-29.3.zip",
+        sha256 = "e9b9ac1910b1041065839850603caf36e29d3d3d230ddf52bd13778dd31b9046",
+        strip_prefix = "protobuf-29.3",
     )
 
     http_archive(
@@ -183,16 +203,15 @@ def register_sorbet_dependencies():
         strip_prefix = "bazel-compilation-database-6b9329e37295eab431f82af5fe24219865403e0f",
     )
 
+    # Updated for Bazel 8 compatibility
     http_archive(
         name = "rules_cc",
-        sha256 = "b6f34b3261ec02f85dbc5a8bdc9414ce548e1f5f67e000d7069571799cb88b25",
-        strip_prefix = "rules_cc-726dd8157557f1456b3656e26ab21a1646653405",
-        urls = ["https://github.com/bazelbuild/rules_cc/archive/726dd8157557f1456b3656e26ab21a1646653405.tar.gz"],
+        sha256 = "a2fdfde2ab9b2176bd6a33afca14458039023edb1dd2e73e6823810809df4027",
+        strip_prefix = "rules_cc-0.2.14",
+        urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.2.14/rules_cc-0.2.14.tar.gz"],
     )
 
-    # TODO(jez) We keep our changes on the `sorbet` branch of `sorbet/bazel-toolchain`
-    # The `master` branch is the commit of `bazel-contrib/toolchains_llvm` that we're based on
-    # In 2ddd7d791 (#7912) we upgraded the toolchain. Our old toolchain patches are on the `sorbet-old-toolchain` branch
+    # Using sorbet/bazel-toolchain fork - needs to be updated for Bazel 8 compatibility
     http_archive(
         name = "toolchains_llvm",
         url = "https://github.com/sorbet/bazel-toolchain/archive/5ed6d56dd7d2466bda56a6237c5ed70336b95ee5.tar.gz",
@@ -282,10 +301,11 @@ def register_sorbet_dependencies():
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
+    # Updated for Bazel 8 compatibility
     http_archive(
         name = "bazel_skylib",
-        sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
-        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
+        sha256 = "3b5b49006181f5f8ff626ef8ddceaa95e9bb8ad294f7b5d7b11ea9f7ddaf8c59",
+        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.9.0/bazel-skylib-1.9.0.tar.gz",
     )
 
     http_archive(
