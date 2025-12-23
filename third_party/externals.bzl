@@ -11,13 +11,7 @@ def register_sorbet_dependencies():
         url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.30.0/bazel_features-v1.30.0.tar.gz",
     )
 
-    http_archive(
-        name = "prism",
-        url = "https://github.com/ruby/prism/releases/download/v1.6.0/libprism-src.tar.gz",
-        sha256 = "a643517b910c510c998a518e45a66f7f3460e5b32f80d64aa0021fed7c967d0f",
-        build_file = "@com_stripe_ruby_typer//third_party:prism.BUILD",
-        strip_prefix = "libprism-src",
-    )
+    # prism now comes from MODULE.bazel with archive_override
 
     # dtl now comes from MODULE.bazel with archive_override
 
@@ -35,13 +29,7 @@ def register_sorbet_dependencies():
 
     # pdqsort now comes from MODULE.bazel with archive_override
 
-    http_archive(
-        name = "jemalloc",
-        url = "https://github.com/jemalloc/jemalloc/archive/20f9802e4f25922884448d9581c66d76cc905c0c.zip",  # 5.3
-        sha256 = "1cc1ec93701868691c73b371eb87e5452257996279a42303a91caad355374439",
-        build_file = "@com_stripe_ruby_typer//third_party:jemalloc.BUILD",
-        strip_prefix = "jemalloc-20f9802e4f25922884448d9581c66d76cc905c0c",
-    )
+    # jemalloc now comes from MODULE.bazel with archive_override
 
     # mimalloc now comes from BCR via MODULE.bazel
 
@@ -144,10 +132,4 @@ def register_sorbet_dependencies():
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
 
-    http_archive(
-        name = "rbs_parser",
-        url = "https://github.com/ruby/rbs/archive/e5901cd788caa00392c38518e27d3c2800a34328.zip",
-        sha256 = "09413ce9f75e7f65fdafb6c64a2feed20f12c5c0e1b383716fd4f2fe92eae1a0",
-        strip_prefix = "rbs-e5901cd788caa00392c38518e27d3c2800a34328",
-        build_file = "@com_stripe_ruby_typer//third_party:rbs_parser.BUILD",
-    )
+    # rbs_parser now comes from MODULE.bazel with archive_override

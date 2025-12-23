@@ -173,3 +173,36 @@ archive_override(
     build_file = "//third_party/libb2_override:libb2.BUILD",
     patches = ["//third_party/libb2_override:module.patch"],
 )
+
+bazel_dep(name = "prism", version = "1.6.0")
+
+archive_override(
+    module_name = "prism",
+    urls = ["https://github.com/ruby/prism/releases/download/v1.6.0/libprism-src.tar.gz"],
+    strip_prefix = "libprism-src",
+    integrity = "sha256-pkNRe5EMUQyZilGORaZvfzRg5bMvgNZKoAIf7XyWfQ8=",
+    build_file = "//third_party/prism_override:prism.BUILD",
+    patches = ["//third_party/prism_override:module.patch"],
+)
+
+bazel_dep(name = "jemalloc", version = "5.3.0")
+
+archive_override(
+    module_name = "jemalloc",
+    urls = ["https://github.com/jemalloc/jemalloc/archive/20f9802e4f25922884448d9581c66d76cc905c0c.zip"],
+    strip_prefix = "jemalloc-20f9802e4f25922884448d9581c66d76cc905c0c",
+    integrity = "sha256-HMHsk3AYaGkcc7Nx64flRSJXmWJ5pCMDqRyq01U3RDk=",
+    build_file = "//third_party/jemalloc_override:jemalloc.BUILD",
+    patches = ["//third_party/jemalloc_override:module.patch"],
+)
+
+bazel_dep(name = "rbs_parser", version = "1.0.0")
+
+archive_override(
+    module_name = "rbs_parser",
+    urls = ["https://github.com/ruby/rbs/archive/e5901cd788caa00392c38518e27d3c2800a34328.zip"],
+    strip_prefix = "rbs-e5901cd788caa00392c38518e27d3c2800a34328",
+    integrity = "sha256-CUE86fdef2X9r7bGSi/u0g8SxcDhs4Nxb9Ty/pLq4aA=",
+    build_file = "//third_party/rbs_parser_override:rbs_parser.BUILD",
+    patches = ["//third_party/rbs_parser_override:module.patch"],
+)
