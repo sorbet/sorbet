@@ -4,7 +4,6 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
-#include "common/concurrency/Parallel.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -22,6 +21,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/concurrency/Parallel.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
