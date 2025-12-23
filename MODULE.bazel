@@ -151,3 +151,25 @@ archive_override(
     build_file = "//third_party/cpp_subprocess_override:cpp_subprocess.BUILD",
     patches = ["//third_party/cpp_subprocess_override:module.patch"],
 )
+
+bazel_dep(name = "blake2", version = "1.0.0", repo_name = "com_github_blake2_blake2")
+
+archive_override(
+    module_name = "blake2",
+    urls = ["https://github.com/BLAKE2/BLAKE2/archive/997fa5ba1e14b52c554fb03ce39e579e6f27b90c.zip"],
+    strip_prefix = "BLAKE2-997fa5ba1e14b52c554fb03ce39e579e6f27b90c",
+    integrity = "sha256-Vtr+lRL2VyjOerx4kAJy+L+OlcoEQ5s2LS3EYZJ7Khc=",
+    build_file = "//third_party/blake2_override:blake2.BUILD",
+    patches = ["//third_party/blake2_override:module.patch"],
+)
+
+bazel_dep(name = "libb2", version = "1.0.0", repo_name = "com_github_blake2_libb2")
+
+archive_override(
+    module_name = "libb2",
+    urls = ["https://github.com/BLAKE2/libb2/archive/fa83ddbe179912e9a7a57edf0333b33f6ff83056.zip"],
+    strip_prefix = "libb2-fa83ddbe179912e9a7a57edf0333b33f6ff83056",
+    integrity = "sha256-3SX3rFM3HCoVdh/BaJ0E3i/5SKx+IToQ0Tlh4ksMmuY=",
+    build_file = "//third_party/libb2_override:libb2.BUILD",
+    patches = ["//third_party/libb2_override:module.patch"],
+)

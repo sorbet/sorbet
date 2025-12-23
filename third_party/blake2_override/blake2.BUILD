@@ -12,13 +12,8 @@ cc_library(
         "ref/blake2.h",
         "ref/blake2-impl.h",
     ],
-    includes = [
-        "ref",
-    ],
-    linkstatic = select({
-        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
+    includes = ["ref"],
+    linkstatic = True,
     visibility = ["//visibility:public"],
 )
 
@@ -32,12 +27,7 @@ cc_library(
         "neon/blake2.h",
         "neon/blake2-impl.h",
     ],
-    includes = [
-        "neon",
-    ],
-    linkstatic = select({
-        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
+    includes = ["neon"],
+    linkstatic = True,
     visibility = ["//visibility:public"],
 )
