@@ -17,17 +17,10 @@ cc_library(
         "src/blake2b.c",
         "src/config.h",
     ] + glob(["src/*.h"]),
-    hdrs = [
-        "src/blake2.h",
-    ],
+    hdrs = ["src/blake2.h"],
     copts = BLAKE2_COPTS,
     defines = ["SUFFIX="],
-    includes = [
-        "src",
-    ],
-    linkstatic = select({
-        "@com_stripe_ruby_typer//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
+    includes = ["src"],
+    linkstatic = True,
     visibility = ["//visibility:public"],
 )

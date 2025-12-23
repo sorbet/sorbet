@@ -84,23 +84,9 @@ def register_sorbet_dependencies():
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
     )
 
-    # optimized version of blake2 hashing algorithm, using SSE vector extensions
-    http_archive(
-        name = "com_github_blake2_libb2",
-        url = "https://github.com/BLAKE2/libb2/archive/fa83ddbe179912e9a7a57edf0333b33f6ff83056.zip",
-        sha256 = "dd25f7ac53371c2a15761fc1689d04de2ff948ac7e213a10d13961e24b0c9ae6",
-        build_file = "@com_stripe_ruby_typer//third_party:libb2.BUILD",
-        strip_prefix = "libb2-fa83ddbe179912e9a7a57edf0333b33f6ff83056",
-    )
+    # libb2 now comes from MODULE.bazel with archive_override
 
-    # portable reference implementation of blake2
-    http_archive(
-        name = "com_github_blake2_blake2",
-        url = "https://github.com/BLAKE2/BLAKE2/archive/997fa5ba1e14b52c554fb03ce39e579e6f27b90c.zip",
-        sha256 = "56dafe9512f65728ce7abc78900272f8bf8e95ca04439b362d2dc461927b2a17",
-        build_file = "@com_stripe_ruby_typer//third_party:blake2.BUILD",
-        strip_prefix = "BLAKE2-997fa5ba1e14b52c554fb03ce39e579e6f27b90c",
-    )
+    # blake2 now comes from MODULE.bazel with archive_override
 
     # mpack now comes from MODULE.bazel with archive_override
 
