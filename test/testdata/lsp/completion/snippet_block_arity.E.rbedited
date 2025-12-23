@@ -41,13 +41,13 @@ end
 
 A.unary_bloc # error: does not exist
 #           ^ apply-completion: [A] item: 0
-A.binary_block {${0}} # error: does not exist
+A.binary_bloc # error: does not exist
 #            ^ apply-completion: [B] item: 0
 A.arg0_arg1_bl # error: does not exist
 #             ^ apply-completion: [C] item: 0
 A.no_sig_no # error: does not exist
 #          ^ apply-completion: [D] item: 0
-A.void_no_b # error: does not exist
+A.void_no_block${0} # error: does not exist
 #          ^ apply-completion: [E] item: 0
 A.noreturn_ # error: does not exist
 #          ^ apply-completion: [F] item: 0
