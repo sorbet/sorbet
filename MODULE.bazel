@@ -1,5 +1,6 @@
 module(
-    name = "com_stripe_ruby_typer",
+    name = "sorbet",
+    repo_name = "com_stripe_ruby_typer",
     version = "0.0.0",
 )
 
@@ -20,7 +21,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.0")
 
 # Testing
-bazel_dep(name = "doctest", version = "2.4.11")
+bazel_dep(name = "doctest", version = "2.4.11", dev_dependency = True)
 
 # C++ Libraries (migrated from WORKSPACE)
 bazel_dep(name = "lz4", version = "1.10.0.bcr.1")
