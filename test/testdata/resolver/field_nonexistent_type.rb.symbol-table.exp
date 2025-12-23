@@ -12,7 +12,7 @@ class ::<root> < ::Object ()
     field ::A#@biz -> T.untyped @ test/testdata/resolver/field_nonexistent_type.rb:29
     field ::A#@foo -> A::Foo (unresolved) @ test/testdata/resolver/field_nonexistent_type.rb:20
     method ::A#initialize : private (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/field_nonexistent_type.rb:19
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/field_nonexistent_type.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/field_nonexistent_type.rb start=??? end=???}
   class ::<Class:A>[<AttachedClass>] < ::<Class:Object> (Sig) @ test/testdata/resolver/field_nonexistent_type.rb:3
     type-member(+) ::<Class:A>::<AttachedClass> -> T.attached_class (of A) @ test/testdata/resolver/field_nonexistent_type.rb:3
     method ::<Class:A>#<static-init> (<blk>) @ test/testdata/resolver/field_nonexistent_type.rb:3
