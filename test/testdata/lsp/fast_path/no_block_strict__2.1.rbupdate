@@ -1,4 +1,0 @@
-# typed: true
-# exclude-from-file-update: true
-
-A.foo {} # error: does not take a block

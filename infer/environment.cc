@@ -1361,20 +1361,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 } else {
                     tp.type = argInfo.parameterTypeAsSeenByImplementation(ctx, constr);
                 }
-                if (argInfo.flags.isBlock && tp.type.isBottom()) {
-                    // We use `T.noreturn` to prevent passing blocks to methods. If you then try to
-                    // use such a block in the method body, you'd get a hard-to-understand "This
-                    // code is unreachable" error. Also: in LSP, we don't removeDeadAssigns, which
-                    // means that even if you _don't_ mention the block arg, we still might
-                    // construct an environment where the block arg is live and also typed as
-                    // `T.noreturn`, thus marking the block as unreachable and preventing inference
-                    // in it (i.e., preventing hover queries from working).
-                    //
-                    // To short circuit all of this, we treat a block that is not meant to be given
-                    // a value as `NilClass` in the body (which is what the type of the `&blk`
-                    // parameter would be if not passed a block at runtime).
-                    tp.type = core::Types::nilClass();
-                }
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 if (lspQuery.matchesLoc(argInfo.loc)) {
