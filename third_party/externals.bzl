@@ -1,27 +1,13 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# Toolchain and rules dependencies that must stay in WORKSPACE.
-# Library dependencies have been migrated to MODULE.bazel.
+# Toolchain dependencies that must stay in WORKSPACE.
+# Library and rules dependencies have been migrated to MODULE.bazel.
 def register_sorbet_dependencies():
-    http_archive(
-        name = "bazel_features",
-        sha256 = "a660027f5a87f13224ab54b8dc6e191693c554f2692fcca46e8e29ee7dabc43b",
-        strip_prefix = "bazel_features-1.30.0",
-        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.30.0/bazel_features-v1.30.0.tar.gz",
-    )
-
     http_archive(
         name = "com_grail_bazel_compdb",
         url = "https://github.com/grailbio/bazel-compilation-database/archive/6b9329e37295eab431f82af5fe24219865403e0f.zip",
         sha256 = "6cf0dc4b40023a26787cd7cdb629dccd26e2208c8a2f19e1dde4ca10c109c86c",
         strip_prefix = "bazel-compilation-database-6b9329e37295eab431f82af5fe24219865403e0f",
-    )
-
-    http_archive(
-        name = "rules_cc",
-        sha256 = "a2fdfde2ab9b2176bd6a33afca14458039023edb1dd2e73e6823810809df4027",
-        strip_prefix = "rules_cc-0.2.14",
-        urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.2.14/rules_cc-0.2.14.tar.gz"],
     )
 
     http_archive(
@@ -36,6 +22,13 @@ def register_sorbet_dependencies():
         url = "https://github.com/bazelbuild/buildtools/archive/5bcc31df55ec1de770cb52887f2e989e7068301f.zip",
         sha256 = "875d0c49953e221cfc35d2a3846e502f366dfa4024b271fa266b186ca4664b37",
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
+    )
+
+    http_archive(
+        name = "rules_foreign_cc",
+        url = "https://github.com/bazelbuild/rules_foreign_cc/archive/d74623f0ad47f4e375de81baa454eb106715a416.zip",
+        sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
+        strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
 
     http_archive(
@@ -79,11 +72,4 @@ def register_sorbet_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party:shellcheck.BUILD",
         sha256 = "e065d4afb2620cc8c1d420a9b3e6243c84ff1a693c1ff0e38f279c8f31e86634",
         strip_prefix = "shellcheck-v{}".format(shellcheck_version),
-    )
-
-    http_archive(
-        name = "rules_foreign_cc",
-        url = "https://github.com/bazelbuild/rules_foreign_cc/archive/d74623f0ad47f4e375de81baa454eb106715a416.zip",
-        sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
-        strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
