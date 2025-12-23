@@ -1,0 +1,6 @@
+--- /dev/null
++++ MODULE.bazel
+@@ -0,0 +1,3 @@
++module(
++    name = "rbs_parser",
++)
