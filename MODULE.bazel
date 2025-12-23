@@ -41,6 +41,16 @@ archive_override(
 )
 
 bazel_dep(name = "lmdb", version = "0.9.29")
+bazel_dep(name = "cxxopts", version = "2.2.1")
+
+archive_override(
+    module_name = "cxxopts",
+    urls = ["https://github.com/jarro2783/cxxopts/archive/c74846a891b3cc3bfa992d588b1295f528d43039.zip"],
+    strip_prefix = "cxxopts-c74846a891b3cc3bfa992d588b1295f528d43039",
+    integrity = "sha256-S6Kwo8lOYVAbl0EYoP4XHNZY+O/dlB6a2C5x9IqYkzo=",
+    build_file = "//third_party/cxxopts_override:cxxopts.BUILD",
+    patches = ["//third_party/cxxopts_override:module.patch"],
+)
 
 archive_override(
     module_name = "lmdb",
@@ -52,4 +62,48 @@ archive_override(
         "//third_party/lmdb_override:module.patch",
         "//third_party/lmdb:strdup.patch",
     ],
+)
+
+bazel_dep(name = "dtl", version = "1.19")
+
+archive_override(
+    module_name = "dtl",
+    urls = ["https://github.com/cubicdaiya/dtl/archive/v1.19.tar.gz"],
+    strip_prefix = "dtl-1.19",
+    integrity = "sha256-9HuZ3RHl13GtMqjclg20qy++NJ+wNG+geV9TyEapnF0=",
+    build_file = "//third_party/dtl_override:dtl.BUILD",
+    patches = ["//third_party/dtl_override:module.patch"],
+)
+
+bazel_dep(name = "pdqsort", version = "1.0.0")
+
+archive_override(
+    module_name = "pdqsort",
+    urls = ["https://github.com/orlp/pdqsort/archive/08879029ab8dcb80a70142acb709e3df02de5d37.zip"],
+    strip_prefix = "pdqsort-08879029ab8dcb80a70142acb709e3df02de5d37",
+    integrity = "sha256-rYyc09Gr5dVmutNBvM4yei6Je2Qjan+edPS5sOfl3Dk=",
+    build_file = "//third_party/pdqsort_override:pdqsort.BUILD",
+    patches = ["//third_party/pdqsort_override:module.patch"],
+)
+
+bazel_dep(name = "rang", version = "3.1.0")
+
+archive_override(
+    module_name = "rang",
+    urls = ["https://github.com/agauniyal/rang/archive/v3.1.0.zip"],
+    strip_prefix = "rang-3.1.0",
+    integrity = "sha256-ZYreuKNtNpgdQzn8g58t7twOdctCHbGYIEHYoKJVg10=",
+    build_file = "//third_party/rang_override:rang.BUILD",
+    patches = ["//third_party/rang_override:module.patch"],
+)
+
+bazel_dep(name = "concurrentqueue", version = "1.0.0")
+
+archive_override(
+    module_name = "concurrentqueue",
+    urls = ["https://github.com/cameron314/concurrentqueue/archive/79cec4c3bf1ca23ea4a03adfcd3c2c3659684dd2.zip"],
+    strip_prefix = "concurrentqueue-79cec4c3bf1ca23ea4a03adfcd3c2c3659684dd2",
+    integrity = "sha256-p4/yMuKZaSetb70BXR8V37IL9SSofOKJPmTbvh8EBR4=",
+    build_file = "//third_party/concurrentqueue_override:concurrentqueue.BUILD",
+    patches = ["//third_party/concurrentqueue_override:module.patch"],
 )
