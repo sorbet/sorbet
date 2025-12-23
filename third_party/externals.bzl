@@ -70,13 +70,7 @@ def register_sorbet_dependencies():
         strip_prefix = "rapidjson-f376690822cbc2d17044e626be5df21f7d91ca8f",
     )
 
-    http_archive(
-        name = "lz4",
-        url = "https://github.com/lz4/lz4/archive/v1.9.3.zip",
-        sha256 = "4ec935d99aa4950eadfefbd49c9fad863185ac24c32001162c44a683ef61b580",
-        build_file = "@com_stripe_ruby_typer//third_party:lz4.BUILD",
-        strip_prefix = "lz4-1.9.3",
-    )
+    # lz4 now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "pdqsort",
