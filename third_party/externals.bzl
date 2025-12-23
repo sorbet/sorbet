@@ -1,21 +1,8 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # We define our externals here instead of directly in WORKSPACE
+# Note: bazel_skylib, platforms, and bazel_features now come from BCR via MODULE.bazel
 def register_sorbet_dependencies():
-    http_archive(
-        name = "platforms",
-        url = "https://github.com/bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz",
-        sha256 = "218efe8ee736d26a3572663b374a253c012b716d8af0c07e842e82f238a0a7ee",
-    )
-
-    # Required for Bazel 8 compatibility
-    http_archive(
-        name = "bazel_features",
-        sha256 = "07271d0f6b12633777b69020c4cb1eb67b1939c0cf84bb3944dc85cc250c0c01",
-        strip_prefix = "bazel_features-1.38.0",
-        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.38.0/bazel_features-v1.38.0.tar.gz",
-    )
-
     # Required for Bazel 8 compatibility
     http_archive(
         name = "rules_java",
@@ -70,25 +57,7 @@ def register_sorbet_dependencies():
         strip_prefix = "spdlog-8e5613379f5140fefb0b60412fbf1f5406e7c7f8",
     )
 
-    # We don't use this directly, but protobuf will skip defining its own
-    # `@zlib` if it's present.
-    http_archive(
-        name = "zlib",
-        url = "https://github.com/madler/zlib/archive/v1.3.1.zip",
-        build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
-        sha256 = "50b24b47bf19e1f35d2a21ff36d2a366638cdf958219a66f30ce0861201760e6",
-        strip_prefix = "zlib-1.3.1",
-    )
-
-    # proto_library, cc_proto_library, and java_proto_library rules implicitly
-    # depend on @com_google_protobuf for protoc and proto runtimes.
-    # Updated to v29.3 for Bazel 8 compatibility
-    http_archive(
-        name = "com_google_protobuf",
-        url = "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protobuf-29.3.zip",
-        sha256 = "e9b9ac1910b1041065839850603caf36e29d3d3d230ddf52bd13778dd31b9046",
-        strip_prefix = "protobuf-29.3",
-    )
+    # zlib and com_google_protobuf now come from BCR via MODULE.bazel
 
     http_archive(
         name = "libprotobuf-mutator",
@@ -189,12 +158,7 @@ def register_sorbet_dependencies():
         strip_prefix = "xxHash-0.8.0",
     )
 
-    http_archive(
-        name = "com_google_absl",
-        url = "https://github.com/abseil/abseil-cpp/archive/20240722.0.zip",
-        sha256 = "95e90be7c3643e658670e0dd3c1b27092349c34b632c6e795686355f67eca89f",
-        strip_prefix = "abseil-cpp-20240722.0",
-    )
+    # com_google_absl now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "com_grail_bazel_compdb",
@@ -301,12 +265,7 @@ def register_sorbet_dependencies():
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
-    # Updated for Bazel 8 compatibility
-    http_archive(
-        name = "bazel_skylib",
-        sha256 = "3b5b49006181f5f8ff626ef8ddceaa95e9bb8ad294f7b5d7b11ea9f7ddaf8c59",
-        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.9.0/bazel-skylib-1.9.0.tar.gz",
-    )
+    # bazel_skylib now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "aspect_bazel_lib",

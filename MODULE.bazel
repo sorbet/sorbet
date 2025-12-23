@@ -1,0 +1,13 @@
+module(
+    name = "com_stripe_ruby_typer",
+    version = "0.0.0",
+)
+
+# Core Bazel dependencies from BCR
+# These are foundational deps that shouldn't conflict with WORKSPACE
+
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "bazel_features", version = "1.38.0")
+bazel_dep(name = "protobuf", version = "29.3", repo_name = "com_google_protobuf")
+bazel_dep(name = "abseil-cpp", version = "20240722.0", repo_name = "com_google_absl")
