@@ -76,6 +76,9 @@ build --per_file_copt='external/com_google_protobuf/.*\\.cc$@-Wno-missing-field-
 # Suppress implicit-fallthrough warning for zlib from BCR (zlib+ repo)
 build --per_file_copt='external/zlib\\+/.*\\.c$@-Wno-implicit-fallthrough'
 
+# Suppress implicit-fallthrough warning for lz4 from BCR (lz4+ repo)
+build --per_file_copt='external/lz4\\+/.*\\.c$@-Wno-implicit-fallthrough'
+
 build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
 build --host_cxxopt=-Wno-deprecated-enum-enum-conversion
 build --cxxopt=-Wno-deprecated-anon-enum-enum-conversion
