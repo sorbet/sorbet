@@ -49,7 +49,7 @@ A.no_sig_no # error: does not exist
 #          ^ apply-completion: [D] item: 0
 A.void_no_b # error: does not exist
 #          ^ apply-completion: [E] item: 0
-A.noreturn_no_block {${0}} # error: does not exist
+A.noreturn_no_block${0} # error: does not exist
 #          ^ apply-completion: [F] item: 0
 A.nilclass_ # error: does not exist
 #          ^ apply-completion: [G] item: 0
