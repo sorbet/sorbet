@@ -21,6 +21,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/concurrency/Parallel.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
@@ -602,6 +603,14 @@ int realmain(int argc, char *argv[]) {
         // enabled, everything ends up in one big stratum.
         vector<ast::ParsedFile> stratumFiles;
         for (auto &stratum : pipeline::computePackageStrata(*gs, indexed, inputFilesSpan, opts)) {
+            // We can unconditionally reset (to drop the vectors) instead of having to consult
+            // intentionallyLeakASTs, because if intentionallyLeakASTs, then necessarily
+            // packageDirected will be false, and thus this loop will only iterate once, and since
+            // it's at the beginning, the list will be empty to start, and thus a no-op.
+            Parallel::iterate(*workers, "clearStratumFiles", absl::MakeSpan(stratumFiles), [](auto &job) {
+                // Force the destructor of `ast::ExpressionPtr` to run for `job.tree`.
+                job.tree.reset();
+            });
             stratumFiles.clear();
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
 
