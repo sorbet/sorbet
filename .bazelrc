@@ -4,9 +4,11 @@
 
 try-import .bazelrc.local
 
-# Bazel 8: Use WORKSPACE (Bzlmod migration requires more work)
+# Bazel 8: Hybrid mode - use both WORKSPACE and Bzlmod
+# Core deps (bazel_skylib, platforms, bazel_features) come from BCR via MODULE.bazel
+# All other deps remain in WORKSPACE
 common --enable_workspace
-common --enable_bzlmod=false
+common --enable_bzlmod
 # Allow empty globs for backwards compatibility
 common --noincompatible_disallow_empty_glob
 
@@ -65,7 +67,12 @@ build --copt=-Wno-macro-redefined
 build --copt=-Wno-incomplete-umbrella
 
 # Suppress missing-field-initializers warning for protobuf 29.3 (incompatible with our -Werror)
-build --per_file_copt='external/com_google_protobuf/.*\.cc$@-Wno-missing-field-initializers'
+# Need to match both WORKSPACE (com_google_protobuf) and BCR (protobuf+) repo names
+build --per_file_copt='external/com_google_protobuf/.*\\.cc$@-Wno-missing-field-initializers'
+build --per_file_copt='external/protobuf\\+/.*\\.cc$@-Wno-missing-field-initializers'
+
+# Suppress implicit-fallthrough warning for zlib from BCR (zlib+ repo)
+build --per_file_copt='external/zlib\\+/.*\\.c$@-Wno-implicit-fallthrough'
 
 build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
 build --host_cxxopt=-Wno-deprecated-enum-enum-conversion
