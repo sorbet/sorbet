@@ -47,13 +47,7 @@ def register_sorbet_dependencies():
 
     # concurrentqueue now comes from MODULE.bazel with archive_override
 
-    http_archive(
-        name = "statsd",
-        url = "https://github.com/romanbsd/statsd-c-client/archive/08ecca678345f157e72a1db1446facb403cbeb65.zip",
-        sha256 = "825395556fb553383173e47dbce98165981d100587993292ec9d174ec40a7ba1",
-        build_file = "@com_stripe_ruby_typer//third_party:statsd.BUILD",
-        strip_prefix = "statsd-c-client-08ecca678345f157e72a1db1446facb403cbeb65",
-    )
+    # statsd now comes from MODULE.bazel with archive_override
 
     # cxxopts now comes from MODULE.bazel with archive_override
 
@@ -108,21 +102,9 @@ def register_sorbet_dependencies():
         strip_prefix = "BLAKE2-997fa5ba1e14b52c554fb03ce39e579e6f27b90c",
     )
 
-    http_archive(
-        name = "com_github_ludocode_mpack",
-        url = "https://github.com/ludocode/mpack/archive/6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c.zip",
-        sha256 = "fb184dc169722cecf9b47bece308f70861787f4615ebdbee7383b6434cfdbc0d",
-        build_file = "@com_stripe_ruby_typer//third_party:mpack.BUILD",
-        strip_prefix = "mpack-6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c",
-    )
+    # mpack now comes from MODULE.bazel with archive_override
 
-    http_archive(
-        name = "com_github_d_bahr_crcpp",
-        url = "https://github.com/d-bahr/CRCpp/archive/51fbc35ef892e98abe91a51f7320749c929d72bd.zip",
-        sha256 = "57c4c127b5aa4451556969d6929cf9465a5d5481b3442ddb878d95296caeee4b",
-        build_file = "@com_stripe_ruby_typer//third_party:crcpp.BUILD",
-        strip_prefix = "CRCpp-51fbc35ef892e98abe91a51f7320749c929d72bd",
-    )
+    # crcpp now comes from MODULE.bazel with archive_override
 
     http_archive(
         name = "emsdk",
@@ -151,13 +133,7 @@ def register_sorbet_dependencies():
         sha256 = "f59f75ac8a315d7647a2d058d324a87ff9ebbc4bf5c7a61b08d58da119a7fb43",
     )
 
-    http_archive(
-        name = "cpp_subprocess",
-        url = "https://github.com/arun11299/cpp-subprocess/archive/9c624ce4e3423cce9f148bafbae56abfd6437ea0.zip",
-        sha256 = "1810d1ec80f3c319dcbb530443b264b9a32a449b5a5d3630076e473648bba8cc",
-        build_file = "@com_stripe_ruby_typer//third_party:cpp_subprocess.BUILD",
-        strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
-    )
+    # cpp_subprocess now comes from MODULE.bazel with archive_override
 
     shellcheck_version = "0.8.0"
     http_archive(

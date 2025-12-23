@@ -107,3 +107,47 @@ archive_override(
     build_file = "//third_party/concurrentqueue_override:concurrentqueue.BUILD",
     patches = ["//third_party/concurrentqueue_override:module.patch"],
 )
+
+bazel_dep(name = "statsd", version = "1.0.0")
+
+archive_override(
+    module_name = "statsd",
+    urls = ["https://github.com/romanbsd/statsd-c-client/archive/08ecca678345f157e72a1db1446facb403cbeb65.zip"],
+    strip_prefix = "statsd-c-client-08ecca678345f157e72a1db1446facb403cbeb65",
+    integrity = "sha256-glOVVW+1Uzgxc+R9vOmBZZgdEAWHmTKS7J0XTsQKe6E=",
+    build_file = "//third_party/statsd_override:statsd.BUILD",
+    patches = ["//third_party/statsd_override:module.patch"],
+)
+
+bazel_dep(name = "mpack", version = "1.0.0", repo_name = "com_github_ludocode_mpack")
+
+archive_override(
+    module_name = "mpack",
+    urls = ["https://github.com/ludocode/mpack/archive/6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c.zip"],
+    strip_prefix = "mpack-6883f6f8067d5c6dbaaddeaa47aaaaa763eea51c",
+    integrity = "sha256-+xhNwWlyLOz5tHvs4wj3CGF4f0YV69vuc4O2Q0z9vA0=",
+    build_file = "//third_party/mpack_override:mpack.BUILD",
+    patches = ["//third_party/mpack_override:module.patch"],
+)
+
+bazel_dep(name = "crcpp", version = "1.0.0", repo_name = "com_github_d_bahr_crcpp")
+
+archive_override(
+    module_name = "crcpp",
+    urls = ["https://github.com/d-bahr/CRCpp/archive/51fbc35ef892e98abe91a51f7320749c929d72bd.zip"],
+    strip_prefix = "CRCpp-51fbc35ef892e98abe91a51f7320749c929d72bd",
+    integrity = "sha256-V8TBJ7WqRFFVaWnWkpz5RlpdVIGzRC3bh42VKWyu7ks=",
+    build_file = "//third_party/crcpp_override:crcpp.BUILD",
+    patches = ["//third_party/crcpp_override:module.patch"],
+)
+
+bazel_dep(name = "cpp_subprocess", version = "1.0.0")
+
+archive_override(
+    module_name = "cpp_subprocess",
+    urls = ["https://github.com/arun11299/cpp-subprocess/archive/9c624ce4e3423cce9f148bafbae56abfd6437ea0.zip"],
+    strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
+    integrity = "sha256-GBDR7IDzwxncu1MEQ7JkuaMqRJtaXTYwB25HNki7qMw=",
+    build_file = "//third_party/cpp_subprocess_override:cpp_subprocess.BUILD",
+    patches = ["//third_party/cpp_subprocess_override:module.patch"],
+)
