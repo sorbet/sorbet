@@ -119,7 +119,7 @@ archive_override(
     patches = ["//third_party/statsd_override:module.patch"],
 )
 
-bazel_dep(name = "mpack", version = "1.0.0", repo_name = "com_github_ludocode_mpack")
+bazel_dep(name = "mpack", version = "1.0.0")
 
 archive_override(
     module_name = "mpack",
@@ -130,7 +130,7 @@ archive_override(
     patches = ["//third_party/mpack_override:module.patch"],
 )
 
-bazel_dep(name = "crcpp", version = "1.0.0", repo_name = "com_github_d_bahr_crcpp")
+bazel_dep(name = "crcpp", version = "1.0.0")
 
 archive_override(
     module_name = "crcpp",
@@ -152,7 +152,7 @@ archive_override(
     patches = ["//third_party/cpp_subprocess_override:module.patch"],
 )
 
-bazel_dep(name = "blake2", version = "1.0.0", repo_name = "com_github_blake2_blake2")
+bazel_dep(name = "blake2", version = "1.0.0")
 
 archive_override(
     module_name = "blake2",
@@ -163,7 +163,7 @@ archive_override(
     patches = ["//third_party/blake2_override:module.patch"],
 )
 
-bazel_dep(name = "libb2", version = "1.0.0", repo_name = "com_github_blake2_libb2")
+bazel_dep(name = "libb2", version = "1.0.0")
 
 archive_override(
     module_name = "libb2",

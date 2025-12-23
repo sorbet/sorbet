@@ -18,7 +18,7 @@ cc_library(
     deps = [
         "//ast",
         "//core",
-        "@com_github_ludocode_mpack",
+        "@mpack",
     ],
 )
 

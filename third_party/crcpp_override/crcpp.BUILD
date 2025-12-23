@@ -1,5 +1,5 @@
 cc_library(
-    name = "com_github_d_bahr_crcpp",
+    name = "crcpp",
     hdrs = ["inc/CRC.h"],
     includes = ["inc"],
     linkstatic = True,
