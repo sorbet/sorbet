@@ -5,7 +5,6 @@ load("//third_party:externals.bzl", "register_sorbet_dependencies")
 
 register_sorbet_dependencies()
 
-# Required for Bazel 8 compatibility
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 bazel_features_deps()
 
@@ -94,14 +93,3 @@ bison_register_toolchains(
     extra_copts = ["-Wno-implicit-const-int-float-conversion"],
 )
 
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-
-bazel_skylib_workspace()
-
-load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
-
-aspect_bazel_lib_dependencies()
