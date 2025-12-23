@@ -3362,7 +3362,6 @@ private:
             defParams.push_back(local);
 
             auto spec = absl::c_find_if(sig.argTypes, [&](const auto &spec) { return spec.name == treeArgName; });
-            bool isSyntheticBlkArg = param.isSyntheticBlockParameter();
             bool isBlkArg = param.flags.isBlock;
 
             if (spec != sig.argTypes.end()) {
@@ -3411,10 +3410,30 @@ private:
                 }
 
                 if (param.type == nullptr) {
-                    param.type = core::Types::untyped(method);
+                    if (isBlkArg) {
+                        if (treeArgName == core::Names::implicitYield()) {
+                            if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::UnnamedBlockParameter)) {
+                                e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
+                                            mdef.name.show(ctx), "yield");
+                                // TODO(jez) Use the loc of the first yield for the loc of the BlockParam
+                            }
+                            param.type = core::Types::untyped(method);
+                        } else {
+                            // If we got a sig, and the MethodDef mentions `yield` but did not
+                            // mention a blockArg, and the sig omits a type for the block arg, we
+                            // can assume that this method does not take a block arg.
+                            //
+                            // We're using `bottom` instead of `nilClass` because `foo(&nil)` is valid.
+                            param.type = core::Types::bottom();
+                        }
+                    } else {
+                        param.type = core::Types::untyped(method);
+                    }
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
+                bool isSyntheticBlkArg =
+                    treeArgName == core::Names::blkArg() || treeArgName == core::Names::implicitYield();
                 if (!isOverloaded && !isSyntheticBlkArg &&
                     (sig.seen.params.exists() || sig.seen.returns.exists() || sig.seen.void_.exists())) {
                     auto errLoc = local->loc.exists() ? local->loc : mdef.declLoc;

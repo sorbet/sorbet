@@ -7,6 +7,7 @@ class TypedStrict
   def self.implicit_yield
 # ^^^^^^^^^^^^^^^^^^^^^^^ error: uses `yield` but does not mention a block parameter
     yield
+  # ^^^^^ error: Method `call` does not exist on `NilClass`
   end
 
   sig {params(blk: T.proc.void).void}
