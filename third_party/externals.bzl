@@ -19,13 +19,7 @@ def register_sorbet_dependencies():
         strip_prefix = "libprism-src",
     )
 
-    http_archive(
-        name = "dtl",
-        url = "https://github.com/cubicdaiya/dtl/archive/v1.19.tar.gz",
-        sha256 = "f47b99dd11e5d771ad32a8dc960db4ab2fbe349fb0346fa0795f53c846a99c5d",
-        build_file = "@com_stripe_ruby_typer//third_party:dtl.BUILD",
-        strip_prefix = "dtl-1.19",
-    )
+    # dtl now comes from MODULE.bazel with archive_override
 
     # yaml_cpp now comes from BCR via MODULE.bazel
 
@@ -39,13 +33,7 @@ def register_sorbet_dependencies():
 
     # lz4 now comes from BCR via MODULE.bazel
 
-    http_archive(
-        name = "pdqsort",
-        url = "https://github.com/orlp/pdqsort/archive/08879029ab8dcb80a70142acb709e3df02de5d37.zip",
-        sha256 = "ad8c9cd3d1abe5d566bad341bcce327a2e897b64236a7f9e74f4b9b0e7e5dc39",
-        build_file = "@com_stripe_ruby_typer//third_party:pdqsort.BUILD",
-        strip_prefix = "pdqsort-08879029ab8dcb80a70142acb709e3df02de5d37",
-    )
+    # pdqsort now comes from MODULE.bazel with archive_override
 
     http_archive(
         name = "jemalloc",
@@ -57,13 +45,7 @@ def register_sorbet_dependencies():
 
     # mimalloc now comes from BCR via MODULE.bazel
 
-    http_archive(
-        name = "concurrentqueue",
-        url = "https://github.com/cameron314/concurrentqueue/archive/79cec4c3bf1ca23ea4a03adfcd3c2c3659684dd2.zip",
-        sha256 = "a78ff232e2996927ad6fbd015d1f15dfb20bf524a87ce2893e64dbbe1f04051e",
-        build_file = "@com_stripe_ruby_typer//third_party:concurrentqueue.BUILD",
-        strip_prefix = "concurrentqueue-79cec4c3bf1ca23ea4a03adfcd3c2c3659684dd2",
-    )
+    # concurrentqueue now comes from MODULE.bazel with archive_override
 
     http_archive(
         name = "statsd",
@@ -73,21 +55,9 @@ def register_sorbet_dependencies():
         strip_prefix = "statsd-c-client-08ecca678345f157e72a1db1446facb403cbeb65",
     )
 
-    http_archive(
-        name = "cxxopts",
-        url = "https://github.com/jarro2783/cxxopts/archive/c74846a891b3cc3bfa992d588b1295f528d43039.zip",
-        sha256 = "4ba2b0a3c94e61501b974118a0fe171cd658f8efdd941e9ad82e71f48a98933a",
-        build_file = "@com_stripe_ruby_typer//third_party:cxxopts.BUILD",
-        strip_prefix = "cxxopts-c74846a891b3cc3bfa992d588b1295f528d43039",
-    )
+    # cxxopts now comes from MODULE.bazel with archive_override
 
-    http_archive(
-        name = "rang",
-        url = "https://github.com/agauniyal/rang/archive/v3.1.0.zip",
-        sha256 = "658adeb8a36d36981d4339fc839f2deedc0e75cb421db1982041d8a0a255835d",
-        build_file = "@com_stripe_ruby_typer//third_party:rang.BUILD",
-        strip_prefix = "rang-3.1.0",
-    )
+    # rang now comes from MODULE.bazel with archive_override
 
     # xxhash now comes from BCR via MODULE.bazel
 
