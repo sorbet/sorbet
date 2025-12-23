@@ -24,3 +24,5 @@ bazel_dep(name = "doctest", version = "2.4.11")
 
 # C++ Libraries (migrated from WORKSPACE)
 bazel_dep(name = "lz4", version = "1.10.0.bcr.1")
+bazel_dep(name = "yaml-cpp", version = "0.8.0")
+bazel_dep(name = "xxhash", version = "0.8.3.bcr.1")

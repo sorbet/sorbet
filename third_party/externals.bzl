@@ -27,13 +27,7 @@ def register_sorbet_dependencies():
         strip_prefix = "dtl-1.19",
     )
 
-    http_archive(
-        name = "yaml_cpp",
-        url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.zip",
-        sha256 = "7c0ddc08a99655508ae110ba48726c67e4a10b290c214aed866ce4bbcbe3e84c",
-        build_file = "@com_stripe_ruby_typer//third_party:yaml_cpp.BUILD",
-        strip_prefix = "yaml-cpp-yaml-cpp-0.6.3",
-    )
+    # yaml_cpp now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "spdlog",
@@ -128,13 +122,7 @@ def register_sorbet_dependencies():
         strip_prefix = "rang-3.1.0",
     )
 
-    http_archive(
-        name = "xxhash",
-        url = "https://github.com/Cyan4973/xxHash/archive/v0.8.0.zip",
-        sha256 = "064333c754f166837bbefefa497642a60b3f8035e54bae52eb304d3cb3ceb655",
-        build_file = "@com_stripe_ruby_typer//third_party:xxhash.BUILD",
-        strip_prefix = "xxHash-0.8.0",
-    )
+    # xxhash now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "com_grail_bazel_compdb",
