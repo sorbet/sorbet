@@ -355,7 +355,8 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         auto &blkParam = method.data(gs)->parameters.back();
         ENFORCE(blkParam.flags.isBlock);
 
-        auto hasBlockType = blkParam.type != nullptr && !blkParam.type.isUntyped();
+        auto hasBlockType = blkParam.type != nullptr && !blkParam.type.isUntyped() && !blkParam.type.isBottom() &&
+                            blkParam.type != core::Types::nilClass();
         if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkParam.type)) {
             // If the method has no parameters except a required block, put the cursor inside `{|}`.
             fmt::format_to(back_inserter(result), " {{${{0}}}}");
