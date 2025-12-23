@@ -152,10 +152,6 @@ pm_node_t *TypeToParserNodePrism::optionalType(const rbs_types_optional_t *node,
     return prism.TNilable(loc, innerType);
 }
 
-pm_node_t *TypeToParserNodePrism::voidType(const rbs_types_bases_void_t *node, core::LocOffsets loc) {
-    return prism.ConstantReadNode("T.void"sv, loc);
-}
-
 pm_node_t *TypeToParserNodePrism::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
                                                const RBSDeclaration &declaration) {
     vector<pm_node_t *> pairs;
@@ -351,8 +347,6 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
             return prism.TSelfType(nodeLoc);
         case RBS_TYPES_BASES_TOP:
             return prism.TAnything(nodeLoc);
-        case RBS_TYPES_BASES_VOID:
-            return voidType((rbs_types_bases_void_t *)node, nodeLoc);
         case RBS_TYPES_BLOCK:
             return blockType((rbs_types_block_t *)node, nodeLoc, declaration);
         case RBS_TYPES_CLASS_INSTANCE:

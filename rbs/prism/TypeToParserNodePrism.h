@@ -44,7 +44,6 @@ private:
                                 const RBSDeclaration &declaration);
     pm_node_t *unionType(const rbs_types_union_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
     pm_node_t *optionalType(const rbs_types_optional_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
-    pm_node_t *voidType(const rbs_types_bases_void_t *node, core::LocOffsets loc);
     pm_node_t *functionType(const rbs_types_function_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
     pm_node_t *procType(const rbs_types_proc_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
     pm_node_t *blockType(const rbs_types_block_t *node, core::LocOffsets loc, const RBSDeclaration &declaration);
