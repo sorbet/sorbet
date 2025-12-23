@@ -8,10 +8,7 @@ cc_library(
     hdrs = [
         "licenses.h",
     ],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
+    linkstatic = True,
     visibility = ["//visibility:public"],
 )
 
@@ -26,10 +23,7 @@ filegroup(
 cc_binary(
     name = "generate_licenses",
     srcs = ["tools/generate_licenses.cc"],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
+    linkstatic = True,
     visibility = ["//tools:__pkg__"],
     deps = ["//common"],
 )
