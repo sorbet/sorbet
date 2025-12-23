@@ -17,7 +17,7 @@ cc_library(
         "//third_party/licenses",
         "@cxxopts",
         "@spdlog",
-        "@yaml_cpp",
+        "@yaml-cpp",
     ],
 )
 
