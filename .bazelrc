@@ -8,7 +8,7 @@ try-import .bazelrc.local
 # Core deps come from BCR via MODULE.bazel, toolchain stays in WORKSPACE
 common --enable_workspace
 common --enable_bzlmod
-# Allow empty globs for backwards compatibility
+# Allow empty globs (needed for patterns like *.cc in ast/treemap/BUILD)
 common --noincompatible_disallow_empty_glob
 
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
@@ -30,6 +30,9 @@ build --features=-supports_dynamic_linker
 # Apply to both target and exec configurations
 build --features=-libtool
 build --host_features=-libtool
+# Set minimum macOS version to 13.0 to match LLVM toolchain libraries
+# (Bazel 8 defaults to 10.11.0, but LLVM libs were built for 12.6.0)
+build --macos_minimum_os=13.0
 
 ##
 ##  Common build options across all build configurations
