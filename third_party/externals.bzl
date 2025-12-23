@@ -31,13 +31,7 @@ def register_sorbet_dependencies():
 
     # spdlog now comes from BCR via MODULE.bazel
 
-    http_archive(
-        name = "libprotobuf-mutator",
-        url = "https://github.com/google/libprotobuf-mutator/archive/68e10c13248517c5bcd531d0e02be483da83fc13.zip",
-        sha256 = "8684276b996e8d8541ed3703420f9dbcc17702bd7b13c6f3d9c13a4656597c76",
-        build_file = "@com_stripe_ruby_typer//third_party:libprotobuf-mutator.BUILD",
-        strip_prefix = "libprotobuf-mutator-68e10c13248517c5bcd531d0e02be483da83fc13",
-    )
+    # libprotobuf-mutator now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "lmdb",
