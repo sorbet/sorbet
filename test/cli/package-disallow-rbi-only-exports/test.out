@@ -4,4 +4,16 @@ root/__package.rb:5: Cannot export `Project::Root::B` because it is only defined
     root/root.rbi:8: Defined here
      8 |class Project::Root::B
         ^^^^^^^^^^^^^^^^^^^^^^
-Errors: 1
+
+root/root.rbi:4: The method `method1` does not have a `sig` https://srb.help/7017
+     4 |  def method1
+          ^^^^^^^^^^^
+
+root/root.rbi:9: The method `method2` does not have a `sig` https://srb.help/7017
+     9 |  def method2
+          ^^^^^^^^^^^
+
+skip-rbi-export-enforcement/skip.rbi:4: The method `method1` does not have a `sig` https://srb.help/7017
+     4 |  def method1
+          ^^^^^^^^^^^
+Errors: 4

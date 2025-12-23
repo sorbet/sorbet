@@ -1,4 +1,12 @@
 test/cli/sigil-rbi/no_type.rbi:3: To use `sig`, this file must declare an explicit `# typed:` sigil (found: none). If you're not sure which one to use, start with `# typed: false` https://srb.help/5038
      3 |sig {returns(Integer)}
         ^^^^^^^^^^^^^^^^^^^^^^
-Errors: 1
+
+test/cli/sigil-rbi/multiple_definition.rbi:4: The method `m` does not have a `sig` https://srb.help/7017
+     4 |    def m; end
+            ^^^^^
+
+test/cli/sigil-rbi/multiple_definition.rbi:5: The method `m` does not have a `sig` https://srb.help/7017
+     5 |    def m; end
+            ^^^^^
+Errors: 3
