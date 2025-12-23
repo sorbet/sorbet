@@ -14,9 +14,13 @@ bazel_dep(name = "bazel_features", version = "1.38.0")
 bazel_dep(name = "protobuf", version = "29.3", repo_name = "com_google_protobuf")
 bazel_dep(name = "abseil-cpp", version = "20240722.0", repo_name = "com_google_absl")
 
-# Rule sets
-bazel_dep(name = "rules_cc", version = "0.2.14")
+# Rule sets (rules_cc stays in WORKSPACE for toolchains_llvm compatibility)
 bazel_dep(name = "rules_java", version = "8.9.0")
 bazel_dep(name = "rules_python", version = "1.0.0")
 bazel_dep(name = "rules_go", version = "0.43.0", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "rules_m4", version = "0.3")
+bazel_dep(name = "rules_bison", version = "0.4")
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.0")
+
+# Testing
+bazel_dep(name = "doctest", version = "2.4.11")
