@@ -29,13 +29,7 @@ def register_sorbet_dependencies():
 
     # yaml_cpp now comes from BCR via MODULE.bazel
 
-    http_archive(
-        name = "spdlog",
-        url = "https://github.com/gabime/spdlog/archive/8e5613379f5140fefb0b60412fbf1f5406e7c7f8.zip",  # v1.15.0
-        sha256 = "86d0688c088f6cad36533c731e8377882d1cb0d05508afa3e624d3c0e7cf92af",
-        build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
-        strip_prefix = "spdlog-8e5613379f5140fefb0b60412fbf1f5406e7c7f8",
-    )
+    # spdlog now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "libprotobuf-mutator",
