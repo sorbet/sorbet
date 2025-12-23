@@ -1,10 +1,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # We define our externals here instead of directly in WORKSPACE
-# Many dependencies now come from BCR via MODULE.bazel:
-# - bazel_skylib, platforms, bazel_features
-# - protobuf, abseil-cpp, zlib
-# - rules_cc, rules_java, rules_python, rules_go, aspect_bazel_lib
+# Many dependencies now come from BCR via MODULE.bazel
 def register_sorbet_dependencies():
     http_archive(
         name = "prism",
@@ -12,13 +9,6 @@ def register_sorbet_dependencies():
         sha256 = "a643517b910c510c998a518e45a66f7f3460e5b32f80d64aa0021fed7c967d0f",
         build_file = "@com_stripe_ruby_typer//third_party:prism.BUILD",
         strip_prefix = "libprism-src",
-    )
-
-    http_archive(
-        name = "doctest",
-        url = "https://github.com/doctest/doctest/archive/v2.4.9.zip",
-        sha256 = "88a552f832ef3e4e7b733f9ab4eff5d73d7c37e75bebfef4a3339bf52713350d",
-        strip_prefix = "doctest-2.4.9",
     )
 
     http_archive(
@@ -44,8 +34,6 @@ def register_sorbet_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
         strip_prefix = "spdlog-8e5613379f5140fefb0b60412fbf1f5406e7c7f8",
     )
-
-    # zlib and com_google_protobuf now come from BCR via MODULE.bazel
 
     http_archive(
         name = "libprotobuf-mutator",
@@ -146,8 +134,6 @@ def register_sorbet_dependencies():
         strip_prefix = "xxHash-0.8.0",
     )
 
-    # com_google_absl now comes from BCR via MODULE.bazel
-
     http_archive(
         name = "com_grail_bazel_compdb",
         url = "https://github.com/grailbio/bazel-compilation-database/archive/6b9329e37295eab431f82af5fe24219865403e0f.zip",
@@ -155,7 +141,12 @@ def register_sorbet_dependencies():
         strip_prefix = "bazel-compilation-database-6b9329e37295eab431f82af5fe24219865403e0f",
     )
 
-    # rules_cc now comes from BCR via MODULE.bazel
+    http_archive(
+        name = "rules_cc",
+        sha256 = "a2fdfde2ab9b2176bd6a33afca14458039023edb1dd2e73e6823810809df4027",
+        strip_prefix = "rules_cc-0.2.14",
+        urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.2.14/rules_cc-0.2.14.tar.gz"],
+    )
 
     # Using sorbet/bazel-toolchain fork - needs to be updated for Bazel 8 compatibility
     http_archive(
@@ -164,8 +155,6 @@ def register_sorbet_dependencies():
         sha256 = "bdc706dbc33811ce4b2089d52564da106c2afbf3723cffbef301cc64e7615251",
         strip_prefix = "bazel-toolchain-5ed6d56dd7d2466bda56a6237c5ed70336b95ee5",
     )
-
-    # io_bazel_rules_go now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "com_github_bazelbuild_buildtools",
@@ -223,27 +212,12 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "rules_bison",
-        url = "https://github.com/jmillikin/rules_bison/archive/478079b28605a38000eaf83719568d756b3383a0.zip",
-        sha256 = "d662d200f4e2a868f6873d666402fa4d413f07ba1a433591c5f60ac601157fb9",
-        strip_prefix = "rules_bison-478079b28605a38000eaf83719568d756b3383a0",
-    )
-
-    http_archive(
-        name = "rules_m4",
-        url = "https://github.com/jmillikin/rules_m4/releases/download/v0.2.1/rules_m4-v0.2.1.tar.xz",
-        sha256 = "f59f75ac8a315d7647a2d058d324a87ff9ebbc4bf5c7a61b08d58da119a7fb43",
-    )
-
-    http_archive(
         name = "cpp_subprocess",
         url = "https://github.com/arun11299/cpp-subprocess/archive/9c624ce4e3423cce9f148bafbae56abfd6437ea0.zip",
         sha256 = "1810d1ec80f3c319dcbb530443b264b9a32a449b5a5d3630076e473648bba8cc",
         build_file = "@com_stripe_ruby_typer//third_party:cpp_subprocess.BUILD",
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
-
-    # bazel_skylib and aspect_bazel_lib now come from BCR via MODULE.bazel
 
     shellcheck_version = "0.8.0"
     http_archive(
