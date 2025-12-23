@@ -36,6 +36,20 @@ archive_override(
     urls = ["https://github.com/Tencent/rapidjson/archive/f376690822cbc2d17044e626be5df21f7d91ca8f.zip"],
     strip_prefix = "rapidjson-f376690822cbc2d17044e626be5df21f7d91ca8f",
     integrity = "sha256-lCUnZYPf+QIM7mMyRysM8keuMly18m2+FXGD90faORA=",
-    build_file = "//third_party:rapidjson.BUILD",
+    build_file = "//third_party/rapidjson:rapidjson.BUILD",
     patches = ["//third_party/rapidjson:module.patch"],
+)
+
+bazel_dep(name = "lmdb", version = "0.9.29")
+
+archive_override(
+    module_name = "lmdb",
+    urls = ["https://github.com/LMDB/lmdb/archive/da9aeda08c3ff710a0d47d61a079f5a905b0a10a.zip"],
+    strip_prefix = "lmdb-da9aeda08c3ff710a0d47d61a079f5a905b0a10a",
+    integrity = "sha256-iToyS2DGRl7c9/632vrLPV9YA2SfG13m9FOzptniu5c=",
+    build_file = "//third_party/lmdb_override:lmdb.BUILD",
+    patches = [
+        "//third_party/lmdb_override:module.patch",
+        "//third_party/lmdb:strdup.patch",
+    ],
 )
