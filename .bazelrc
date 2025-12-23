@@ -4,7 +4,7 @@
 
 try-import .bazelrc.local
 
-# Bazel 8: Use WORKSPACE for now (full Bzlmod migration requires updating all dependencies)
+# Bazel 8: Use WORKSPACE (Bzlmod migration requires more work)
 common --enable_workspace
 common --enable_bzlmod=false
 # Allow empty globs for backwards compatibility
@@ -25,8 +25,10 @@ build --incompatible_enable_cc_toolchain_resolution
 # Without this, one can use `--linkopt='-undefined dynamic_lookup'`.
 # This feature is intentionally not supported on macOS.
 build --features=-supports_dynamic_linker
-# Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
+# Disable libtool feature for sorbet fork (uses llvm-ar with ar-style arguments)
+# Apply to both target and exec configurations
 build --features=-libtool
+build --host_features=-libtool
 
 ##
 ##  Common build options across all build configurations
@@ -59,6 +61,11 @@ build --host_cxxopt=-Wno-pass-failed # host build doesn't have enough optimizati
 # The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
 # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
 build --copt=-Wno-macro-redefined
+# Suppress modulemap warnings for missing umbrella directories in upstream LLVM
+build --copt=-Wno-incomplete-umbrella
+
+# Suppress missing-field-initializers warning for protobuf 29.3 (incompatible with our -Werror)
+build --per_file_copt='external/com_google_protobuf/.*\.cc$@-Wno-missing-field-initializers'
 
 build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
 build --host_cxxopt=-Wno-deprecated-enum-enum-conversion
