@@ -1,10 +1,8 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # We define our externals here instead of directly in WORKSPACE
-# Some deps come from BCR via MODULE.bazel:
-# - bazel_skylib, platforms, protobuf, abseil-cpp, rules_java, rules_python, rules_go
-# These stay in WORKSPACE for toolchain compatibility:
-# - bazel_features, rules_cc
+# Many deps now come from BCR via MODULE.bazel
+# These stay in WORKSPACE for toolchain compatibility: bazel_features, rules_cc
 def register_sorbet_dependencies():
     http_archive(
         name = "bazel_features",
@@ -19,13 +17,6 @@ def register_sorbet_dependencies():
         sha256 = "a643517b910c510c998a518e45a66f7f3460e5b32f80d64aa0021fed7c967d0f",
         build_file = "@com_stripe_ruby_typer//third_party:prism.BUILD",
         strip_prefix = "libprism-src",
-    )
-
-    http_archive(
-        name = "doctest",
-        url = "https://github.com/doctest/doctest/archive/v2.4.9.zip",
-        sha256 = "88a552f832ef3e4e7b733f9ab4eff5d73d7c37e75bebfef4a3339bf52713350d",
-        strip_prefix = "doctest-2.4.9",
     )
 
     http_archive(
@@ -249,20 +240,6 @@ def register_sorbet_dependencies():
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
     )
 
-    # Updated for Bazel 8 compatibility
-    http_archive(
-        name = "bazel_skylib",
-        sha256 = "3b5b49006181f5f8ff626ef8ddceaa95e9bb8ad294f7b5d7b11ea9f7ddaf8c59",
-        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.9.0/bazel-skylib-1.9.0.tar.gz",
-    )
-
-    http_archive(
-        name = "aspect_bazel_lib",
-        sha256 = "357dad9d212327c35d9244190ef010aad315e73ffa1bed1a29e20c372f9ca346",
-        strip_prefix = "bazel-lib-2.7.0",
-        url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.0/bazel-lib-v2.7.0.tar.gz",
-    )
-
     shellcheck_version = "0.8.0"
     http_archive(
         name = "shellcheck_linux",
@@ -279,7 +256,6 @@ def register_sorbet_dependencies():
         strip_prefix = "shellcheck-v{}".format(shellcheck_version),
     )
 
-    # Needed to build CMake projects
     http_archive(
         name = "rules_foreign_cc",
         url = "https://github.com/bazelbuild/rules_foreign_cc/archive/d74623f0ad47f4e375de81baa454eb106715a416.zip",
