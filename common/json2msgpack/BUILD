@@ -23,7 +23,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//common",
-        "@com_github_ludocode_mpack",
+        "@mpack",
         "@rapidjson",
     ],
 )

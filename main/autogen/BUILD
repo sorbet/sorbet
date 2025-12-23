@@ -22,6 +22,6 @@ cc_library(
         "//core",
         "//main/autogen/data",
         "//main/options",
-        "@com_github_d_bahr_crcpp",
+        "@crcpp",
     ],
 )

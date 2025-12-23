@@ -1,5 +1,5 @@
 cc_library(
-    name = "com_github_ludocode_mpack",
+    name = "mpack",
     srcs = glob([
         "src/mpack/*.c",
         "src/mpack/*.h",

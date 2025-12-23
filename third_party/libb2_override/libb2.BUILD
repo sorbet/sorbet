@@ -11,7 +11,7 @@ genrule(
 )
 
 cc_library(
-    name = "com_github_blake2_libb2",
+    name = "libb2",
     srcs = [
         "src/blake2s.c",
         "src/blake2b.c",
