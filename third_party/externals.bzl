@@ -44,13 +44,7 @@ def register_sorbet_dependencies():
         ],
     )
 
-    http_archive(
-        name = "rapidjson",
-        url = "https://github.com/Tencent/rapidjson/archive/f376690822cbc2d17044e626be5df21f7d91ca8f.zip",
-        sha256 = "9425276583dff9020cee6332472b0cf247ae325cb5f26dbe157183f747da3910",
-        build_file = "@com_stripe_ruby_typer//third_party:rapidjson.BUILD",
-        strip_prefix = "rapidjson-f376690822cbc2d17044e626be5df21f7d91ca8f",
-    )
+    # rapidjson now comes from MODULE.bazel with archive_override
 
     # lz4 now comes from BCR via MODULE.bazel
 
