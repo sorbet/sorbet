@@ -1,8 +1,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# We define our externals here instead of directly in WORKSPACE
-# Many deps now come from BCR via MODULE.bazel
-# These stay in WORKSPACE for toolchain compatibility: bazel_features, rules_cc
+# Toolchain and rules dependencies that must stay in WORKSPACE.
+# Library dependencies have been migrated to MODULE.bazel.
 def register_sorbet_dependencies():
     http_archive(
         name = "bazel_features",
@@ -10,38 +9,6 @@ def register_sorbet_dependencies():
         strip_prefix = "bazel_features-1.30.0",
         url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.30.0/bazel_features-v1.30.0.tar.gz",
     )
-
-    # prism now comes from MODULE.bazel with archive_override
-
-    # dtl now comes from MODULE.bazel with archive_override
-
-    # yaml_cpp now comes from BCR via MODULE.bazel
-
-    # spdlog now comes from BCR via MODULE.bazel
-
-    # libprotobuf-mutator now comes from BCR via MODULE.bazel
-
-    # lmdb now comes from MODULE.bazel with archive_override
-
-    # rapidjson now comes from MODULE.bazel with archive_override
-
-    # lz4 now comes from BCR via MODULE.bazel
-
-    # pdqsort now comes from MODULE.bazel with archive_override
-
-    # jemalloc now comes from MODULE.bazel with archive_override
-
-    # mimalloc now comes from BCR via MODULE.bazel
-
-    # concurrentqueue now comes from MODULE.bazel with archive_override
-
-    # statsd now comes from MODULE.bazel with archive_override
-
-    # cxxopts now comes from MODULE.bazel with archive_override
-
-    # rang now comes from MODULE.bazel with archive_override
-
-    # xxhash now comes from BCR via MODULE.bazel
 
     http_archive(
         name = "com_grail_bazel_compdb",
@@ -57,7 +24,6 @@ def register_sorbet_dependencies():
         urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.2.14/rules_cc-0.2.14.tar.gz"],
     )
 
-    # Using sorbet/bazel-toolchain fork - needs to be updated for Bazel 8 compatibility
     http_archive(
         name = "toolchains_llvm",
         url = "https://github.com/sorbet/bazel-toolchain/archive/5ed6d56dd7d2466bda56a6237c5ed70336b95ee5.tar.gz",
@@ -71,14 +37,6 @@ def register_sorbet_dependencies():
         sha256 = "875d0c49953e221cfc35d2a3846e502f366dfa4024b271fa266b186ca4664b37",
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
     )
-
-    # libb2 now comes from MODULE.bazel with archive_override
-
-    # blake2 now comes from MODULE.bazel with archive_override
-
-    # mpack now comes from MODULE.bazel with archive_override
-
-    # crcpp now comes from MODULE.bazel with archive_override
 
     http_archive(
         name = "emsdk",
@@ -107,8 +65,6 @@ def register_sorbet_dependencies():
         sha256 = "f59f75ac8a315d7647a2d058d324a87ff9ebbc4bf5c7a61b08d58da119a7fb43",
     )
 
-    # cpp_subprocess now comes from MODULE.bazel with archive_override
-
     shellcheck_version = "0.8.0"
     http_archive(
         name = "shellcheck_linux",
@@ -131,5 +87,3 @@ def register_sorbet_dependencies():
         sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
-
-    # rbs_parser now comes from MODULE.bazel with archive_override
