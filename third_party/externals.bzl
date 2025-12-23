@@ -1,14 +1,49 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # We define our externals here instead of directly in WORKSPACE
-# Many dependencies now come from BCR via MODULE.bazel
 def register_sorbet_dependencies():
+    http_archive(
+        name = "platforms",
+        url = "https://github.com/bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz",
+        sha256 = "218efe8ee736d26a3572663b374a253c012b716d8af0c07e842e82f238a0a7ee",
+    )
+
+    # Required for Bazel 8 compatibility
+    http_archive(
+        name = "bazel_features",
+        sha256 = "07271d0f6b12633777b69020c4cb1eb67b1939c0cf84bb3944dc85cc250c0c01",
+        strip_prefix = "bazel_features-1.38.0",
+        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.38.0/bazel_features-v1.38.0.tar.gz",
+    )
+
+    # Required for Bazel 8 compatibility
+    http_archive(
+        name = "rules_java",
+        urls = ["https://github.com/bazelbuild/rules_java/releases/download/8.9.0/rules_java-8.9.0.tar.gz"],
+        sha256 = "8daa0e4f800979c74387e4cd93f97e576ec6d52beab8ac94710d2931c57f8d8b",
+    )
+
+    # Required for Bazel 8 compatibility
+    http_archive(
+        name = "rules_python",
+        sha256 = "4f7e2aa1eb9aa722d96498f5ef514f426c1f55161c3c9ae628c857a7128ceb07",
+        strip_prefix = "rules_python-1.0.0",
+        url = "https://github.com/bazelbuild/rules_python/releases/download/1.0.0/rules_python-1.0.0.tar.gz",
+    )
+
     http_archive(
         name = "prism",
         url = "https://github.com/ruby/prism/releases/download/v1.6.0/libprism-src.tar.gz",
         sha256 = "a643517b910c510c998a518e45a66f7f3460e5b32f80d64aa0021fed7c967d0f",
         build_file = "@com_stripe_ruby_typer//third_party:prism.BUILD",
         strip_prefix = "libprism-src",
+    )
+
+    http_archive(
+        name = "doctest",
+        url = "https://github.com/doctest/doctest/archive/v2.4.9.zip",
+        sha256 = "88a552f832ef3e4e7b733f9ab4eff5d73d7c37e75bebfef4a3339bf52713350d",
+        strip_prefix = "doctest-2.4.9",
     )
 
     http_archive(
@@ -33,6 +68,26 @@ def register_sorbet_dependencies():
         sha256 = "86d0688c088f6cad36533c731e8377882d1cb0d05508afa3e624d3c0e7cf92af",
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
         strip_prefix = "spdlog-8e5613379f5140fefb0b60412fbf1f5406e7c7f8",
+    )
+
+    # We don't use this directly, but protobuf will skip defining its own
+    # `@zlib` if it's present.
+    http_archive(
+        name = "zlib",
+        url = "https://github.com/madler/zlib/archive/v1.3.1.zip",
+        build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
+        sha256 = "50b24b47bf19e1f35d2a21ff36d2a366638cdf958219a66f30ce0861201760e6",
+        strip_prefix = "zlib-1.3.1",
+    )
+
+    # proto_library, cc_proto_library, and java_proto_library rules implicitly
+    # depend on @com_google_protobuf for protoc and proto runtimes.
+    # Updated to v29.3 for Bazel 8 compatibility
+    http_archive(
+        name = "com_google_protobuf",
+        url = "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protobuf-29.3.zip",
+        sha256 = "e9b9ac1910b1041065839850603caf36e29d3d3d230ddf52bd13778dd31b9046",
+        strip_prefix = "protobuf-29.3",
     )
 
     http_archive(
@@ -135,12 +190,20 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "com_google_absl",
+        url = "https://github.com/abseil/abseil-cpp/archive/20240722.0.zip",
+        sha256 = "95e90be7c3643e658670e0dd3c1b27092349c34b632c6e795686355f67eca89f",
+        strip_prefix = "abseil-cpp-20240722.0",
+    )
+
+    http_archive(
         name = "com_grail_bazel_compdb",
         url = "https://github.com/grailbio/bazel-compilation-database/archive/6b9329e37295eab431f82af5fe24219865403e0f.zip",
         sha256 = "6cf0dc4b40023a26787cd7cdb629dccd26e2208c8a2f19e1dde4ca10c109c86c",
         strip_prefix = "bazel-compilation-database-6b9329e37295eab431f82af5fe24219865403e0f",
     )
 
+    # Updated for Bazel 8 compatibility
     http_archive(
         name = "rules_cc",
         sha256 = "a2fdfde2ab9b2176bd6a33afca14458039023edb1dd2e73e6823810809df4027",
@@ -154,6 +217,12 @@ def register_sorbet_dependencies():
         url = "https://github.com/sorbet/bazel-toolchain/archive/5ed6d56dd7d2466bda56a6237c5ed70336b95ee5.tar.gz",
         sha256 = "bdc706dbc33811ce4b2089d52564da106c2afbf3723cffbef301cc64e7615251",
         strip_prefix = "bazel-toolchain-5ed6d56dd7d2466bda56a6237c5ed70336b95ee5",
+    )
+
+    http_archive(
+        name = "io_bazel_rules_go",
+        sha256 = "d6ab6b57e48c09523e93050f13698f708428cfd5e619252e369d377af6597707",
+        url = "https://github.com/bazelbuild/rules_go/releases/download/v0.43.0/rules_go-v0.43.0.zip",
     )
 
     http_archive(
@@ -212,11 +281,38 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "rules_bison",
+        url = "https://github.com/jmillikin/rules_bison/archive/478079b28605a38000eaf83719568d756b3383a0.zip",
+        sha256 = "d662d200f4e2a868f6873d666402fa4d413f07ba1a433591c5f60ac601157fb9",
+        strip_prefix = "rules_bison-478079b28605a38000eaf83719568d756b3383a0",
+    )
+
+    http_archive(
+        name = "rules_m4",
+        url = "https://github.com/jmillikin/rules_m4/releases/download/v0.2.1/rules_m4-v0.2.1.tar.xz",
+        sha256 = "f59f75ac8a315d7647a2d058d324a87ff9ebbc4bf5c7a61b08d58da119a7fb43",
+    )
+
+    http_archive(
         name = "cpp_subprocess",
         url = "https://github.com/arun11299/cpp-subprocess/archive/9c624ce4e3423cce9f148bafbae56abfd6437ea0.zip",
         sha256 = "1810d1ec80f3c319dcbb530443b264b9a32a449b5a5d3630076e473648bba8cc",
         build_file = "@com_stripe_ruby_typer//third_party:cpp_subprocess.BUILD",
         strip_prefix = "cpp-subprocess-9c624ce4e3423cce9f148bafbae56abfd6437ea0",
+    )
+
+    # Updated for Bazel 8 compatibility
+    http_archive(
+        name = "bazel_skylib",
+        sha256 = "3b5b49006181f5f8ff626ef8ddceaa95e9bb8ad294f7b5d7b11ea9f7ddaf8c59",
+        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.9.0/bazel-skylib-1.9.0.tar.gz",
+    )
+
+    http_archive(
+        name = "aspect_bazel_lib",
+        sha256 = "357dad9d212327c35d9244190ef010aad315e73ffa1bed1a29e20c372f9ca346",
+        strip_prefix = "bazel-lib-2.7.0",
+        url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.0/bazel-lib-v2.7.0.tar.gz",
     )
 
     shellcheck_version = "0.8.0"
