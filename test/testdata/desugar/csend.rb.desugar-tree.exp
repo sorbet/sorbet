@@ -100,4 +100,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
   end
+
+  begin
+    <assignTemp>$3 = <self>
+    if ::NilClass.===(<assignTemp>$3)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
+    else
+      <self>.can_be_private()
+    end
+  end
 end

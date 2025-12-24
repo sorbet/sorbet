@@ -51,11 +51,8 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
-          recv = UnresolvedIdent{
-            kind = Local
-            name = <D <U <assignTemp>> $2>
-          }
+          flags = {privateOk}
+          recv = Self
           fun = <U foo>
           block = nullptr
           pos_args = 0
@@ -109,11 +106,8 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
-          recv = UnresolvedIdent{
-            kind = Local
-            name = <D <U <assignTemp>> $3>
-          }
+          flags = {privateOk}
+          recv = Self
           fun = <U foo>
           block = nullptr
           pos_args = 1
@@ -168,11 +162,8 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
-          recv = UnresolvedIdent{
-            kind = Local
-            name = <D <U <assignTemp>> $4>
-          }
+          flags = {privateOk}
+          recv = Self
           fun = <U foo>
           block = nullptr
           pos_args = 0
@@ -228,7 +219,7 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
+          flags = {privateOk}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -237,10 +228,7 @@ ClassDef{
           block = nullptr
           pos_args = 3
           args = [
-            UnresolvedIdent{
-              kind = Local
-              name = <D <U <assignTemp>> $5>
-            }
+            Self
             Literal{ value = :foo }
             Send{
               flags = {privateOk}
@@ -300,11 +288,8 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
-          recv = UnresolvedIdent{
-            kind = Local
-            name = <D <U <assignTemp>> $6>
-          }
+          flags = {privateOk}
+          recv = Self
           fun = <U foo>
           block = Block {
             params = [
@@ -369,7 +354,7 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
+          flags = {privateOk}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -378,10 +363,7 @@ ClassDef{
           block = nullptr
           pos_args = 4
           args = [
-            UnresolvedIdent{
-              kind = Local
-              name = <D <U <assignTemp>> $7>
-            }
+            Self
             Literal{ value = :foo }
             Send{
               flags = {}
