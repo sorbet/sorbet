@@ -9,16 +9,15 @@ namespace sorbet::parser::Prism {
 
 using namespace std::literals::string_view_literals;
 
-parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, bool preserveConcreteSyntax) {
+parser::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSyntax) {
     auto file = ctx.file;
     auto source = file.data(ctx).source();
     Prism::Parser parser{source};
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
     Prism::ParseResult parseResult = parser.parseWithoutTranslation(collectComments);
 
-    auto translatedTree =
-        Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
-            .translate(parseResult.getRawNodePointer());
+    auto translatedTree = Prism::Translator(parser, ctx, parseResult.parseErrors, preserveConcreteSyntax)
+                              .translate_TODO(parseResult.getRawNodePointer());
     return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
 }
 
