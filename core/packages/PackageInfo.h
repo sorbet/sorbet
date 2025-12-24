@@ -121,6 +121,11 @@ public:
         return visibleToTests_;
     }
 
+    bool hasSubPackages() const {
+        ENFORCE(exists());
+        return hasSubPackages_;
+    }
+
     // The possible path prefixes associated with files in the package, including path separator at end.
     std::vector<std::string> packagePathPrefixes = {};
 
@@ -176,6 +181,9 @@ public:
     bool visibleToTests_ = false;
 
     bool isPreludePackage_ = false;
+
+    // Whether or not this package has other packages underneath its namespace.
+    bool hasSubPackages_ = false;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;

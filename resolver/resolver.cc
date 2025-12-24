@@ -788,12 +788,20 @@ private:
                 }
             }
         } else {
-            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
-                    e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolvedClass.show(ctx));
-                    e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolvedClass.show(ctx));
+            auto package = job.klass.data(ctx)->package;
+            if (!package.exists() || !job.klass.data(ctx)->isPackageNamespace() ||
+                !ctx.state.packageDB().getPackageInfo(package).hasSubPackages()) {
+                if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
+                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
+                        e.setHeader("Only modules can be `{}`d, but `{}` is a class",
+                                    job.isInclude ? "include" : "extend", resolvedClass.show(ctx));
+                        e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
+                                       resolvedClass.show(ctx));
+                    }
+                }
+            } else {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
+                    e.setHeader("Package namespace `{}` may not have mixins applied", job.klass.show(ctx));
                 }
             }
         }

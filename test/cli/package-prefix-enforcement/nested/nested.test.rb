@@ -1,7 +1,5 @@
 # typed: strict
 
-extend T::Sig
-
 class ::UnitTest; end
 
 # Correct location

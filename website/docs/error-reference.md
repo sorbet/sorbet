@@ -1108,6 +1108,8 @@ where `...` is some expression which computes a class or module. Sorbet can't kn
 
 `type_member` and `type_template` cannot be used at the top-level of a file. Instead, they must be used inside a class or module definition.
 
+When using `--sorbet-packages`, this error also applies to the root module or class of a package whose namespace contains sub-packages. For example, if there are two packages `Foo` and `Foo::Bar`, the module or class `Foo` may not have `type_member` or `type_template` definitions while `Foo::Bar` would be allowed to. This restriction does not apply to modules or classes that are a member of the `Foo` package, so if there is a class exported by the `Foo` package named `Foo::Baz`, that class is allowed to define type members.
+
 ## 4019
 
 This error is only reported when running Sorbet with the `--uniquely-defined-behavior` command line flag (formerly called `--stripe-mode`).
@@ -2846,6 +2848,26 @@ end
 Sorbet treats the `::Class` and `::Module` classes in the Ruby standard library as generic classes—generic in their [attached class](attached-class.md). For more about this, read [T::Class and T::Module](class-of.md). As a result, code that creates custom subclasses of `::Module` must redeclare this generic type member by writing `has_attached_class!`.
 
 Note that this error is only reported in `# typed: strict` files and above. Downgrading the file that declares an explicit subclass of `Module` to `typed: true` will silence this error. (This also applies to direct subclasses of `Class`, but note that directly subclassing `Class` is rejected by the Ruby VM at runtime.)
+
+## 5082
+
+If a package contains a sub-package, its root namespace is restricted to not allow mixins. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class. There are no such restrictions on the members of the `A` package, so resolving this error involves moving the functionality off of the package root symbol `A` and onto a member of the `A` package instead. For example,
+
+```ruby
+module A
+  extend Foo # error
+end
+```
+
+Could be refactored into:
+
+```ruby
+module A
+  class C
+    extend Foo
+  end
+end
+```
 
 ## 6001
 
