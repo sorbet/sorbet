@@ -1,0 +1,22 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <self>.sig() do ||
+    <self>.type_parameters(:U).params(:blk, <emptyTree>::<C T>.proc().returns(<emptyTree>::<C T>.type_parameter(:U))).returns(<emptyTree>::<C T>.type_parameter(:U))
+  end
+
+  def takes_block<<todo method>>(&blk)
+    blk.call()
+  end
+
+  <self>.sig() do ||
+    <self>.params(:&, <emptyTree>::<C T>.proc().returns(<emptyTree>::<C Integer>)).void()
+  end
+
+  def foo<<todo method>>(&&)
+    begin
+      res = ::<Magic>.<call-with-block-pass>(<self>, :takes_block, &)
+      <emptyTree>::<C T>.reveal_type(res)
+    end
+  end
+end
