@@ -1,10 +1,6 @@
 test/cli/suggest-new/suggest-new.rb:9: Method `ABC` does not exist on `T.class_of(<root>)` https://srb.help/7003
      9 |ABC(1)
         ^^^
-  Got `T.class_of(<root>)` originating from:
-    test/cli/suggest-new/suggest-new.rb:2:
-     2 |class ABD
-        ^
   Note:
     Ruby uses `.new` to invoke a class's constructor
   Autocorrect: Use `-a` to autocorrect

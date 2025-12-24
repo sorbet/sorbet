@@ -3,8 +3,4 @@ No errors! Great job.
 -e:1: Method `puts` does not exist on `T.class_of(<root>)` https://srb.help/7003
      1 |puts 'Hello > World'
         ^^^^
-  Got `T.class_of(<root>)` originating from:
-    -e:1:
-     1 |puts 'Hello > World'
-        ^
 Errors: 1
