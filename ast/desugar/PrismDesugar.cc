@@ -435,11 +435,11 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
 // ```rb
 // tmp = ::<Magic>.expandSplat(arr, 1, 0)
 // a = tmp[0]
-// b = tmp.to_ary
+// b = ::<Magic>.splatSlice(tmp, 1, 0)
 // ```
 //
-// While calling `to_ary` doesn't return the correct value if we were to execute this code,
-// it returns the correct type from a static point of view.
+// The splatSlice intrinsic extracts the correct slice of elements for the splat variable,
+// allowing for precise type inference of the splat portion.
 ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs, ExpressionPtr rhs) {
     InsSeq::STATS_store stats;
 
@@ -461,14 +461,11 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
             int left = i;
             int right = lhs->exprs.size() - left - 1;
             if (!isa_tree<EmptyTree>(lh)) {
-                if (right == 0) {
-                    right = 1;
-                }
                 auto lhloc = lh.loc();
                 auto zlhloc = lhloc.copyWithZeroLength();
-                // Calling `to_ary` is not faithful to the runtime behavior,
-                // but that it is faithful to the expected static type-checking behavior.
-                auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
+                // Use splatSlice to extract the correct slice of elements for this splat variable
+                auto ary = MK::Send3(zloc, MK::Magic(zloc), core::Names::splatSlice(), zlhloc,
+                                     MK::Local(zloc, tempExpanded), MK::Int(zloc, left), MK::Int(zloc, right));
                 stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
             }
             i = -right;

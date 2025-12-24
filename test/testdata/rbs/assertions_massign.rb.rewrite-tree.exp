@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <assignTemp>$2 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>))
     <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 1, 0)
     let1 = <assignTemp>$3.[](0)
-    let2 = <assignTemp>$3.to_ary()
+    let2 = ::<Magic>.<splat-slice>(<assignTemp>$3, 1, 0)
     <assignTemp>$2
   end
 
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <assignTemp>$4 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>))
     <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 1, 0)
     let3 = <assignTemp>$5.[](0)
-    let4 = <assignTemp>$5.to_ary()
+    let4 = ::<Magic>.<splat-slice>(<assignTemp>$5, 1, 0)
     <assignTemp>$4
   end
 
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <assignTemp>$6 = <cast:let>(<emptyTree>::<C ARGV>, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>))
     <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 1, 0)
     let5 = <assignTemp>$7.[](0)
-    let6 = <assignTemp>$7.to_ary()
+    let6 = ::<Magic>.<splat-slice>(<assignTemp>$7, 1, 0)
     <assignTemp>$6
   end
 
@@ -39,7 +39,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <assignTemp>$8 = <emptyTree>::<C ARGV>
     <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 1, 0)
     let7 = <assignTemp>$9.[](0)
-    let8 = <assignTemp>$9.to_ary()
+    let8 = ::<Magic>.<splat-slice>(<assignTemp>$9, 1, 0)
     <assignTemp>$8
   end, <todo sym>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>))
 

@@ -320,11 +320,11 @@ ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list
 // ```rb
 // tmp = ::<Magic>.expandSplat(arr, 1, 0)
 // a = tmp[0]
-// b = tmp.to_ary
+// b = ::<Magic>.splatSlice(tmp, 1, 0)
 // ```
 //
-// While calling `to_ary` doesn't return the correct value if we were to execute this code,
-// it returns the correct type from a static point of view.
+// The splatSlice intrinsic extracts the correct slice of elements for the splat variable,
+// allowing for precise type inference of the splat portion.
 ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *lhs, ast::ExpressionPtr rhs) {
     ast::InsSeq::STATS_store stats;
 
@@ -347,14 +347,11 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, parser::Mlhs *l
             int right = lhs->exprs.size() - left - 1;
 
             if (!ast::isa_tree<ast::EmptyTree>(lh)) {
-                if (right == 0) {
-                    right = 1;
-                }
                 auto lhloc = lh.loc();
                 auto zlhloc = lhloc.copyWithZeroLength();
-                // Calling `to_ary` is not faithful to the runtime behavior,
-                // but that it is faithful to the expected static type-checking behavior.
-                auto ary = MK::Send0(loc, MK::Local(loc, tempExpanded), core::Names::toAry(), zlhloc);
+                // Use splatSlice to extract the correct slice of elements for this splat variable
+                auto ary = MK::Send3(loc, MK::Magic(loc), core::Names::splatSlice(), zlhloc,
+                                     MK::Local(loc, tempExpanded), MK::Int(loc, left), MK::Int(loc, right));
                 stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
             }
             i = -right;
