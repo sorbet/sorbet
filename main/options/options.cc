@@ -255,6 +255,7 @@ const vector<StopAfterOptions> stop_after_options({
     {"local-vars", Phase::LOCAL_VARS},
     {"namer", Phase::NAMER},
     {"resolver", Phase::RESOLVER},
+    {"visibility-checker", Phase::VISIBILITY_CHECKER},
     {"cfg", Phase::CFG},
     {"inferencer", Phase::INFERENCER},
 });
