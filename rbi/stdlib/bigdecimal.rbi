@@ -844,7 +844,7 @@ class BigDecimal < Numeric
     params(
         arg0: T.any(Integer, Float, Rational, BigDecimal),
     )
-    .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+    .returns([Integer, BigDecimal])
   end
   def divmod(arg0); end
 
@@ -1042,20 +1042,6 @@ class BigDecimal < Numeric
     .returns(BigDecimal)
   end
   def power(arg0); end
-
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of two
-  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) values.
-  #
-  # The first value is the current number of significant digits in the
-  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html). The
-  # second value is the maximum number of significant digits for the
-  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html).
-  #
-  # ```ruby
-  # BigDecimal('5').precs #=> [9, 18]
-  # ```
-  sig {returns([Integer, Integer])}
-  def precs(); end
 
   # Divide by the specified value.
   #
