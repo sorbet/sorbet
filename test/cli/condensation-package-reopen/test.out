@@ -1,24 +1,148 @@
-root/root.rb:17: `type_member` may not be used in a package root https://srb.help/4016
+root/subpackage/test/test.rb:3: File belongs to package `Test::Root::Subpackage` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::Root
+               ^^^^^^^^^^
+    root/subpackage/test/__package.rb:3: Enclosing package declared here
+     3 |class Test::Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/__package.rb:3: Must belong to this package, given constant name `Test::Root`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/root.rb:17: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
     17 |  X = type_member
               ^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:19: `type_template` may not be used in a package root https://srb.help/4016
+root/root.rb:19: `type_template` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
     19 |  Y = type_template
               ^^^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:15: Package namespace `Root` may not have mixins applied https://srb.help/5082
+root/root.rb:15: `include` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:12: Package namespace `T.class_of(Root)` may not have mixins applied https://srb.help/5082
+root/root.rb:12: `extend` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rbi:4: `type_member` may not be used in a package root https://srb.help/4016
+root/root.rbi:4: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
      4 |  X = type_member
               ^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rbi:5: `type_template` may not be used in a package root https://srb.help/4016
+root/root.rbi:5: `type_template` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
      5 |  Y = type_template
               ^^^^^^^^^^^^^
-Errors: 6
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/test/root.rb:17: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+    17 |  X = type_member
+              ^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/test/root.rb:19: `type_template` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+    19 |  Y = type_template
+              ^^^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/test/root.rb:3: File belongs to package `Test::Root` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::Root
+               ^^^^^^^^^^
+    root/test/__package.rb:3: Enclosing package declared here
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/__package.rb:3: Must belong to this package, given constant name `Test::Root`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/test/root.rb:15: `include` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/test/root.rb:12: `extend` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/__package.rb:3: First subpackage defined here
+     3 |class Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/test/root.rb:12: `Test::Root::ClassMethods` resolves but is not exported from `Root` and `Root` is not imported https://srb.help/3718
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+    root/test/root.rb:4: Defined here
+     4 |  module ClassMethods
+          ^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    root/test/__package.rb:3: Insert `test_import Root`
+     3 |class Test::Root < PackageSpec
+                                      ^
+    root/__package.rb:4: Insert `export Test::Root::ClassMethods`
+     4 |  import Root::Subpackage
+                                 ^
+
+root/test/root.rb:15: `Test::Root::ClassMethods` resolves but is not exported from `Root` and `Root` is not imported https://srb.help/3718
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+    root/test/root.rb:4: Defined here
+     4 |  module ClassMethods
+          ^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    root/test/__package.rb:3: Insert `test_import Root`
+     3 |class Test::Root < PackageSpec
+                                      ^
+    root/__package.rb:4: Insert `export Test::Root::ClassMethods`
+     4 |  import Root::Subpackage
+                                 ^
+Errors: 14
