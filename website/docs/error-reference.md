@@ -1110,7 +1110,29 @@ where `...` is some expression which computes a class or module. Sorbet can't kn
 
 `type_member` and `type_template` cannot be used at the top-level of a file. Instead, they must be used inside a class or module definition.
 
-When using `--sorbet-packages`, this error also applies to the root module or class of a package whose namespace contains sub-packages. For example, if there are two packages `Foo` and `Foo::Bar`, the module or class `Foo` may not have `type_member` or `type_template` definitions while `Foo::Bar` would be allowed to. This restriction does not apply to modules or classes that are a member of the `Foo` package, so if there is a class exported by the `Foo` package named `Foo::Baz`, that class is allowed to define type members.
+When using `--sorbet-packages`, this error also applies to the root module or class of a package whose namespace contains sub-packages. For example, if there are two packages `Foo` and `Foo::Bar`, the module or class `Foo` may not have `type_member` or `type_template` definitions while `Foo::Bar` would be allowed to. To fix this error, you must either move the generic functionality to a class that's exported by the package, or move its sub-packages to a different place in the package hierarchy.
+
+For example, if you have the following definition for the package namespace `A`, and there are subpackages defined underneath `A`:
+
+```ruby
+module A
+  extend T::Generic
+
+  X = type_member # error
+end
+```
+
+Could be refactored into the following, to avoid this error:
+
+```ruby
+module A
+  class C
+    extend T::Generic
+
+    X = type_member
+  end
+end
+```
 
 ## 4019
 
@@ -2877,7 +2899,9 @@ end
 
 ## 5083
 
-If a package contains a sub-package, its root namespace is restricted to not allow mixins. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class. There are no such restrictions on the members of the `A` package, so resolving this error involves moving the functionality off of the package root symbol `A` and onto a member of the `A` package instead. For example,
+If a package contains a sub-package, its namespace module (or class) is required to not have mixins. Alternatively, if a package namespace must have mixins, it may not have sub-packages. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
+
+Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, or moving the sub-package to a different place in the package hierarchy. For example,
 
 ```ruby
 module A
