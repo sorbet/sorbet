@@ -2180,10 +2180,18 @@ public:
 
         if (onSymbol.data(ctx)->isPackageNamespace()) {
             auto package = onSymbol.data(ctx)->package;
-            if (ctx.state.packageDB().getPackageInfo(package).hasSubPackages()) {
+            auto &info = ctx.state.packageDB().getPackageInfo(package);
+            if (info.hasSubPackages()) {
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
-                    e.setHeader("`{}` may not be used in a package root",
+                    e.setHeader("`{}` may not be used in a package namespace for a package that has subpackages",
                                 isTypeTemplate ? "type_template" : "type_member");
+
+                    e.addErrorLine(info.declLoc(), "Package defined here");
+                    auto subpackages = info.directSubPackages(ctx);
+                    if (!subpackages.empty()) {
+                        auto &subpackageInfo = ctx.state.packageDB().getPackageInfo(subpackages[0]);
+                        e.addErrorLine(subpackageInfo.declLoc(), "First subpackage defined here");
+                    }
                 }
                 return ignoreBadTypeMember(ctx, move(tree));
             }

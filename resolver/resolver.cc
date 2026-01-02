@@ -801,7 +801,16 @@ private:
                 }
             } else {
                 if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
-                    e.setHeader("Package namespace `{}` may not have mixins applied", job.klass.show(ctx));
+                    e.setHeader("`{}` may not be used on the package namespace for a package that has subpackages",
+                                job.isInclude ? "include" : "extend");
+
+                    auto &info = ctx.state.packageDB().getPackageInfo(package);
+                    e.addErrorLine(info.declLoc(), "Package defined here");
+
+                    auto subpackages = info.directSubPackages(ctx);
+                    if (!subpackages.empty()) {
+                        e.addErrorLine(subpackages.front().owner.data(ctx)->loc(), "First subpackage defined here");
+                    }
                 }
             }
         }

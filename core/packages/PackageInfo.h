@@ -183,6 +183,12 @@ public:
     bool isPreludePackage_ = false;
 
     // Whether or not this package has other packages underneath its namespace.
+    //
+    // We're caching this value for performance, to avoid consulting the symbol hierarchy when deciding if this package
+    // has subpackages. An alternative implementation that wouldn't require keeping this flag up-to-date would be to
+    // check if the corresponding symbol in the PackageSpecRegistry tree has any members. That approach would aovid
+    // maintaining this field as it becomes a property of symbol nesting, but would involve following more memory
+    // indirections.
     bool hasSubPackages_ = false;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
@@ -247,6 +253,9 @@ public:
     std::vector<VisibleTo> visibleTo() const {
         return visibleTo_;
     }
+
+    // The list of known direct sub-packages of this package.
+    std::vector<MangledName> directSubPackages(const core::GlobalState &gs) const;
 
     std::optional<ImportType> importsPackage(MangledName mangledName) const;
 
