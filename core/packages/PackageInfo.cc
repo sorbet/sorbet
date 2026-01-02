@@ -547,4 +547,59 @@ string PackageInfo::show(const core::GlobalState &gs) const {
     return this->mangledName().owner.show(gs);
 }
 
+namespace {
+
+void addChildren(vector<ClassOrModuleRef> &work, core::ConstClassOrModuleData klass) {
+    // This is an overallocation as we'll be skipping some members.
+    work.reserve(work.size() + klass->members().size());
+    for (auto [key, sym] : klass->members()) {
+        if (!sym.isClassOrModule()) {
+            continue;
+        }
+
+        work.push_back(sym.asClassOrModuleRef());
+    }
+}
+
+} // namespace
+
+vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs) const {
+    vector<MangledName> subpackages;
+
+    vector<ClassOrModuleRef> work;
+    addChildren(work, this->mangledName_.owner.data(gs));
+
+    // Termination argument: we only have one loop in the hierarchy for root, and as we know we're already calling this
+    // for a valid package and only processing its members, we know we won't find a cycle.
+    while (!work.empty()) {
+        auto sym = work.back();
+        auto klass = sym.data(gs);
+        work.pop_back();
+
+        if (klass->isSingletonClass(gs)) {
+            continue;
+        }
+
+        // This handles cases like:
+        // A < PackageSpec
+        // └─ A::B
+        //    └─ A::B::Subpackage < PackageSpec
+        if (klass->superClass() != core::Symbols::PackageSpec()) {
+            addChildren(work, klass);
+            continue;
+        }
+
+        subpackages.push_back(MangledName(sym));
+    }
+
+    if (subpackages.size() > 1) {
+        // This will sort `A::Z::A` before `A::B`.
+        fast_sort(subpackages, [&gs](MangledName l, MangledName r) {
+            return l.owner.data(gs)->name.shortName(gs) < r.owner.data(gs)->name.shortName(gs);
+        });
+    }
+
+    return subpackages;
+}
+
 } // namespace sorbet::core::packages

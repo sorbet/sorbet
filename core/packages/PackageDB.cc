@@ -54,9 +54,7 @@ const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
 }
 
 MangledName PackageDB::getParentPackage(const GlobalState &gs, MangledName pkg) const {
-    if (!pkg.exists()) {
-        return MangledName();
-    }
+    ENFORCE(pkg.exists());
 
     auto ownerSym = pkg.owner.data(gs)->owner;
     while (ownerSym.exists() && ownerSym != core::Symbols::PackageSpecRegistry()) {
