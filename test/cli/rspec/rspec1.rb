@@ -10,7 +10,7 @@ module RSpec
     end
   end
 
-  def self.describe(description, &block); end
+  def self.describe(*args, &block); end
 end
 
 # Test RSpec.describe with let, it, and nested context

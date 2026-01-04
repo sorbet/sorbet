@@ -82,6 +82,13 @@ class MyTest
     it do
       puts("anonymous it blocks")
     end
+
+    # Minitest describe should only accept exactly 1 argument
+    # Multiple arguments should not be transformed by the rewriter
+    describe "test", :metadata do # error: Method `describe` does not exist on `T.class_of(MyTest)`
+      it "should not work" do
+      end
+    end
 end
 
 describe 'extends T::Sig' do

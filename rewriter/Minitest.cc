@@ -637,13 +637,25 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::xcontext().rawId():
         case core::Names::fcontext().rawId():
         case core::Names::exampleGroup().rawId(): {
-            if (block == nullptr || send->numPosArgs() != 1) {
+            if (block == nullptr) {
                 return nullptr;
             }
 
             auto recvIsRSpec = isRSpec(ctx, send->recv);
             if (!send->recv.isSelfReference() && !recvIsRSpec) {
                 return nullptr;
+            }
+
+            // For RSpec, allow one or more arguments (description + optional metadata tags)
+            // For minitest, require exactly one argument
+            if (recvIsRSpec) {
+                if (send->numPosArgs() == 0) {
+                    return nullptr;
+                }
+            } else {
+                if (send->numPosArgs() != 1) {
+                    return nullptr;
+                }
             }
 
             if (recvIsRSpec && !ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
