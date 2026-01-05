@@ -89,6 +89,8 @@ constexpr ErrorClass HasAttachedClassInClass{5080, StrictLevel::False};
 constexpr ErrorClass HasAttachedClassModuleNotDeclared{5081, StrictLevel::Strict};
 constexpr ErrorClass UnnamedBlockParameter{5082, StrictLevel::False};
 constexpr ErrorClass PackageNamespaceMixin{5083, StrictLevel::False};
+constexpr ErrorClass ModifyingUnpackagedConstant{5084, StrictLevel::False};
+constexpr ErrorClass InvalidPackageExpression{5085, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

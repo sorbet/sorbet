@@ -277,6 +277,33 @@ public:
         return this->isPreludePackage_;
     }
 
+    enum class ModifySymbolError : uint8_t {
+        // The symbol is the namespace of a package, and subpackges exist.
+        Subpackages,
+
+        // The symbol belongs to another package.
+        NotOwner,
+
+        // The symbol is unpackaged, and the context is not a prelude package.
+        UnpackagedSymbol,
+
+        // The symbol is in the PackageSpecRegistry hierarchy, and cannot be modified.
+        PackageSpec,
+    };
+
+    struct CanModifyResult {
+        // Whether or not the symbol in question is modifyable from this package.
+        bool canModify = false;
+
+        // The reason that it's not possible to modify this symbol. Only valid if `canModify` is false.
+        ModifySymbolError err = ModifySymbolError::NotOwner;
+    };
+
+    // True when it's safe to modify this symbol from the context of a file owned by this package. Modification in this
+    // case is something that fundamentally changes the meaning of the symbol (adding type members or mixins, for
+    // example).
+    CanModifyResult canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const;
+
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
                                 std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
