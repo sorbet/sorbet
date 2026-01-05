@@ -4375,7 +4375,7 @@ class RDoc::Markup::Attributes
 end
 
 # An empty line. This class is a singleton.
-class RDoc::Markup::BlankLine
+class RDoc::Markup::BlankLine < ::RDoc::Markup::Element
   # Calls accept\_blank\_line on `visitor`
   def accept(visitor); end
 
@@ -4390,6 +4390,13 @@ end
 class RDoc::Markup::BlockQuote < ::RDoc::Markup::Raw
   # Calls accept\_block\_quote on `visitor`
   def accept(visitor); end
+end
+
+# Base class defining the interface for all markup elements found in documentation
+class RDoc::Markup::Element
+  def accept(visitor); end
+
+  def pretty_print(q); end
 end
 
 # A [`Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
@@ -4572,7 +4579,7 @@ class RDoc::Markup::Formatter::InlineTag < ::Struct
 end
 
 # A hard-break in the middle of a paragraph.
-class RDoc::Markup::HardBreak
+class RDoc::Markup::HardBreak < ::RDoc::Markup::Element
   def ==(other); end
 
   # Calls accept\_hard\_break on `visitor`
@@ -4585,7 +4592,7 @@ class RDoc::Markup::HardBreak
   def self.new; end
 end
 
-class RDoc::Markup::Heading < ::Struct
+class RDoc::Markup::Heading < ::RDoc::Markup::Element
   Elem = type_member(:out)
 
   def accept(visitor); end
