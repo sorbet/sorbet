@@ -1,0 +1,83 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U f><<U <todo method>>>
+      params = [UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $2>
+            }
+            rhs = UnresolvedIdent{
+              kind = Local
+              name = <U x>
+            }
+          }
+        ],
+        expr = If{
+          cond = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::NilClass)
+              orig = nullptr
+            }
+            fun = <U ===>
+            block = nullptr
+            pos_args = 1
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $2>
+              }
+            ]
+          }
+          thenp = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <nil-for-safe-navigation>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $2>
+              }
+            ]
+          }
+          elsep = Send{
+            flags = {}
+            recv = UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $2>
+            }
+            fun = <U []>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 0 }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
