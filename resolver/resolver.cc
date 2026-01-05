@@ -788,9 +788,10 @@ private:
                 }
             }
         } else {
-            auto package = job.klass.data(ctx)->package;
-            if (!package.exists() || !job.klass.data(ctx)->isPackageNamespace() ||
-                !ctx.state.packageDB().getPackageInfo(package).hasSubPackages()) {
+            auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+            auto [canModify, reason] =
+                ctx.state.packageDB().getPackageInfo(filePackage).canModifySymbol(ctx, job.klass);
+            if (canModify) {
                 if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
                     if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
                         e.setHeader("Only modules can be `{}`d, but `{}` is a class",
@@ -800,17 +801,59 @@ private:
                     }
                 }
             } else {
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
-                    e.setHeader("`{}` may not be used on the package namespace for a package that has subpackages",
+                switch (reason) {
+                    case core::packages::PackageInfo::ModifySymbolError::Subpackages:
+                        if (auto e =
+                                ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
+                            e.setHeader(
+                                "`{}` may not be used on the package namespace for a package that has subpackages",
                                 job.isInclude ? "include" : "extend");
 
-                    auto &info = ctx.state.packageDB().getPackageInfo(package);
-                    e.addErrorLine(info.declLoc(), "Package defined here");
+                            auto &info = ctx.state.packageDB().getPackageInfo(filePackage);
+                            e.addErrorLine(info.declLoc(), "Package defined here");
 
-                    auto subpackages = info.directSubPackages(ctx);
-                    if (!subpackages.empty()) {
-                        e.addErrorLine(subpackages.front().owner.data(ctx)->loc(), "First subpackage defined here");
-                    }
+                            auto subpackages = info.directSubPackages(ctx);
+                            if (!subpackages.empty()) {
+                                e.addErrorLine(subpackages.front().owner.data(ctx)->loc(),
+                                               "First subpackage defined here");
+                            }
+                        }
+                        break;
+
+                    case core::packages::PackageInfo::ModifySymbolError::NotOwner:
+                    case core::packages::PackageInfo::ModifySymbolError::UnpackagedSymbol:
+                        if (auto e = ctx.beginError(job.ancestor->loc(),
+                                                    core::errors::Resolver::ModifyingUnpackagedConstant)) {
+                            e.setHeader("`{}` may only be used on constants in the package that owns them",
+                                        job.isInclude ? "include" : "extend");
+
+                            e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                            auto &info = ctx.state.packageDB().getPackageInfo(filePackage);
+                            if (reason == core::packages::PackageInfo::ModifySymbolError::NotOwner) {
+                                e.addErrorLine(info.declLoc(), "Package where the `{}` occurs",
+                                               job.isInclude ? "include" : "extend");
+
+                                auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                                ENFORCE(ownerPackage.exists());
+                                e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                                               job.klass.show(ctx));
+                            } else {
+                                e.addErrorLine(info.declLoc(), "Package defined here is not a `{}`", "prelude_package");
+                                e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                               job.klass.show(ctx), "prelude_package");
+                            }
+                        }
+                        break;
+                    case core::packages::PackageInfo::ModifySymbolError::PackageSpec:
+                        if (auto e =
+                                ctx.beginError(job.ancestor->loc(), core::errors::Resolver::InvalidPackageExpression)) {
+                            e.setHeader("Invalid expression in package: `{}` is not allowed",
+                                        job.isInclude ? "include" : "extend");
+
+                            e.addErrorLine(job.klass.data(ctx)->loc(), "Package defined here");
+                        }
+                        break;
                 }
             }
         }

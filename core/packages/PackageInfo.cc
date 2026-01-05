@@ -632,4 +632,55 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs) 
     return subpackages;
 }
 
+PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(sym.exists());
+
+    PackageInfo::CanModifyResult res;
+
+    // Unpackaged code is allowed to modify anything.
+    if (!this->exists()) {
+        res.canModify = true;
+        return res;
+    }
+
+    // Ensure we're not working with a singleton class before performing any further checks.
+    while (sym.data(gs)->isSingletonClass(gs)) {
+        sym = sym.data(gs)->attachedClass(gs);
+    }
+
+    auto symData = sym.data(gs);
+
+    // It's not okay to modify anything in the package hierarchy, as we don't support packages with generics, or mixins
+    // on packages.
+    if (symData->packageRegistryOwner == sym) {
+        res.canModify = false;
+        res.err = ModifySymbolError::PackageSpec;
+        return res;
+    }
+
+    auto symPackage = symData->package;
+
+    // The symbol is already owned by this package, so we only need to check if the symbol corresponds to the package
+    // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
+    // work with package-directed type checking.
+    if (symPackage == this->mangledName_) {
+        res.canModify = !this->hasSubPackages_ || !symData->isPackageNamespace();
+        res.err = ModifySymbolError::Subpackages;
+        return res;
+    }
+
+    // Modifying an unpackaged symbol is only allowed from prelude packages.
+    if (!symPackage.exists()) {
+        res.canModify = this->isPreludePackage_;
+        res.err = ModifySymbolError::UnpackagedSymbol;
+        return res;
+    }
+
+    // At this point, we know we're in a packaged context, trying to modify the symbol of another package, which is not
+    // allowed.
+    res.canModify = false;
+    res.err = ModifySymbolError::NotOwner;
+    return res;
+}
+
 } // namespace sorbet::core::packages

@@ -495,11 +495,8 @@ struct PackageSpecBodyWalk {
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
-        // Disallowed methods
+        // Disallowed methods. Errors will be raised in the resolver when processing the mixins.
         if (send.fun == core::Names::extend() || send.fun == core::Names::include()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
-                e.setHeader("Invalid expression in package: `{}` is not allowed", send.fun.shortName(ctx));
-            }
             return;
         }
 
