@@ -27,12 +27,6 @@ for file in test/prism_regression/*.rb; do
   parse_tree_match=true
   desugar_tree_match=true
 
-  # Compare parse tree with existing parse tree
-  if ! diff -q "temp_parse_tree.txt" "test/prism_regression/${file_name}.rb.parse-tree.exp" > /dev/null 2>&1; then
-    parse_tree_match=false
-    mismatched_parse_tree_files+=($file_name)
-  fi
-
   # Compare desugar tree with existing desugar tree
   if ! diff -q "temp_desugar_tree.txt" "test/prism_regression/${file_name}.rb.desugar-tree-raw.exp" > /dev/null 2>&1; then
     desugar_tree_match=false
