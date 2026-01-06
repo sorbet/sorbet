@@ -356,7 +356,7 @@ class Hash < Object
   # h1["a".dup]    #=> nil  # different objects.
   # h1[:c]         #=> "c"  # same symbols are all same.
   # ```
-  sig {returns(T::Hash[K, V])}
+  sig { returns(T.self_type) }
   def compare_by_identity(); end
 
   # Returns `true` if *hsh* will compare its keys by their identity. Also see

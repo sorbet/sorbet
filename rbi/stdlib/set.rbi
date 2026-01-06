@@ -530,7 +530,7 @@ class Set < Object
   # self.
   # This method may not be supported by all subclasses of
   # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html).
-  sig { void }
+  sig { returns(T.self_type) }
   def compare_by_identity; end
 
   # Returns true if the set will compare its elements by
