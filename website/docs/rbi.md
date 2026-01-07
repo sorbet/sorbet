@@ -32,7 +32,7 @@ These are the many commands to create or update RBI files within a Sorbet projec
 | (Re)generate RBIs for all gems using runtime reflection | `tapioca gems` |
 | (Re)generate RBIs for all DSLs such as Rails using runtime reflection | `tapioca dsl` |
 | (Re)generate an RBI for all "hidden definitions" in a project (deprecated) | `srb rbi hidden-definitions` |
-| (Re)generate a the TODO RBI file (for missing constants) | `tapioca todo` |
+| (Re)generate the TODO RBI file (for missing constants) | `tapioca todo` |
 
 For more information about `tapioca init`, see [Adopting Sorbet](adopting.md).
 
