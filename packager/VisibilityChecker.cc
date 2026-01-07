@@ -836,76 +836,6 @@ public:
     }
 };
 
-bool ownerWillBeExported(const core::GlobalState &gs, const vector<core::SymbolRef> &alreadyExported,
-                         core::ClassOrModuleRef owner) {
-    while (owner != core::Symbols::root()) {
-        if (absl::c_find(alreadyExported, owner) != alreadyExported.end()) {
-            return true;
-        }
-        owner = owner.data(gs)->owner;
-    }
-    return false;
-}
-
-void exportClassOrModule(const core::GlobalState &gs,
-                         UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport,
-                         core::ClassOrModuleRef symbol, vector<core::FileRef> &referencingFiles) {
-    auto data = symbol.data(gs);
-    auto owningPackage = data->package;
-    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
-        data->flags.isExported) {
-        return;
-    }
-
-    for (auto &f : referencingFiles) {
-        auto packageForF = gs.packageDB().getPackageNameForFile(f);
-        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
-            continue;
-        }
-
-        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
-            // No need to check the rest of referencingFiles, we're already going to export the owner
-            break;
-        }
-
-        toExport[owningPackage].push_back(symbol);
-        break;
-    }
-}
-
-void exportField(const core::GlobalState &gs,
-                 UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport, core::FieldRef symbol,
-                 vector<core::FileRef> &referencingFiles) {
-    auto data = symbol.data(gs);
-    auto owningPackage = data->owner.data(gs)->package;
-    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
-        data->flags.isExported) {
-        return;
-    }
-
-    for (auto &f : referencingFiles) {
-        auto packageForF = gs.packageDB().getPackageNameForFile(f);
-        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
-            continue;
-        }
-
-        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
-            // No need to check the rest of referencingFiles, we're already going to export the owner
-            break;
-        }
-
-        auto maybeEnumClass = getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
-        if (maybeEnumClass.exists()) {
-            // No need to check if maybeEnumClass is already going to be exported since we have a ownerWillBeExported
-            // call above
-            toExport[owningPackage].push_back(maybeEnumClass);
-        } else {
-            toExport[owningPackage].push_back(symbol);
-        }
-        break;
-    }
-}
-
 void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
     Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect");
     auto packagesInEdit = UnorderedSet<core::packages::MangledName>{};
@@ -917,30 +847,7 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
         packagesInEdit.insert(pkgName);
     }
 
-    auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
-    {
-        // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
-        // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
-        Timer timeit(gs.tracer(), "visibility_checker.run.build_autocorrect.build_referencing_files");
-        auto numFiles = gs.getFiles().size();
-        for (auto i = 1; i < numFiles; i++) {
-            core::FileRef fref(i);
-            auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
-            for (auto &symbol : referencedSymbols) {
-                referencingFiles[symbol].push_back(fref);
-            }
-        }
-    }
-
-    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
-    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
-        exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
-    }
-    for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
-        auto fieldRef = core::FieldRef(gs, i);
-        exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
-    }
+    auto toExport = gs.packageDB().missingExportsByPackage(gs);
 
     for (auto pkgName : gs.packageDB().packages()) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
