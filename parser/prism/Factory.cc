@@ -267,6 +267,11 @@ pm_node_t *Factory::SorbetPrivateStatic(core::LocOffsets loc) const {
     return ConstantPathNode(loc, sorbetPrivate, "Static"sv);
 }
 
+pm_node_t *Factory::SorbetPrivateStaticVoid(core::LocOffsets loc) const {
+    // Build a root-anchored constant path ::Sorbet::Private::Static::Void
+    return ConstantPathNode(loc, SorbetPrivateStatic(loc), "Void"sv);
+}
+
 pm_node_t *Factory::TSigWithoutRuntime(core::LocOffsets loc) const {
     // Build a root-anchored constant path ::T::Sig::WithoutRuntime
     pm_node_t *tConst = ConstantPathNode(loc, nullptr, "T"sv);
@@ -504,6 +509,14 @@ pm_node_t *Factory::T_Enumerable(core::LocOffsets loc) const {
 
 pm_node_t *Factory::T_Enumerator(core::LocOffsets loc) const {
     return ConstantPathNode(loc, T(loc), "Enumerator"sv);
+}
+
+pm_node_t *Factory::T_Enumerator_Lazy(core::LocOffsets loc) const {
+    return ConstantPathNode(loc, T_Enumerator(loc), "Lazy"sv);
+}
+
+pm_node_t *Factory::T_Enumerator_Chain(core::LocOffsets loc) const {
+    return ConstantPathNode(loc, T_Enumerator(loc), "Chain"sv);
 }
 
 pm_node_t *Factory::T_Hash(core::LocOffsets loc) const {

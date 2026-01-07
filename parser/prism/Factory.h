@@ -74,6 +74,7 @@ public:
 
     // High-level node creators
     pm_node_t *SorbetPrivateStatic(core::LocOffsets loc) const;
+    pm_node_t *SorbetPrivateStaticVoid(core::LocOffsets loc) const;
     pm_node_t *TSigWithoutRuntime(core::LocOffsets loc) const;
 
     // T constant and method helpers
@@ -102,6 +103,8 @@ public:
     pm_node_t *T_Module(core::LocOffsets loc) const;
     pm_node_t *T_Enumerable(core::LocOffsets loc) const;
     pm_node_t *T_Enumerator(core::LocOffsets loc) const;
+    pm_node_t *T_Enumerator_Lazy(core::LocOffsets loc) const;
+    pm_node_t *T_Enumerator_Chain(core::LocOffsets loc) const;
     pm_node_t *T_Hash(core::LocOffsets loc) const;
     pm_node_t *T_Set(core::LocOffsets loc) const;
     pm_node_t *T_Range(core::LocOffsets loc) const;
