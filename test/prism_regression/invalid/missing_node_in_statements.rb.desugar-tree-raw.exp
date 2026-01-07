@@ -1,0 +1,35 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U foo>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+
+    ConstantLit{
+      symbol = (static-field ::<ErrorNode>)
+      orig = nullptr
+    }
+
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U bar>
+      block = nullptr
+      pos_args = 0
+      args = [
+      ]
+    }
+  ]
+}

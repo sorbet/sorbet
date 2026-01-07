@@ -22,9 +22,9 @@ ClassDef{
           kind = Local
           name = <U x>
         }
-        rhs = UnresolvedConstantLit{
-          cnst = <C <U <ErrorNode>>>
-          scope = EmptyTree
+        rhs = ConstantLit{
+          symbol = (static-field ::<ErrorNode>)
+          orig = nullptr
         }
       }
     }

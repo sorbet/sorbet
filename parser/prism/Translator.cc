@@ -2876,7 +2876,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
         case PM_MISSING_NODE: {
-            return MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::Constants::ErrorNode());
+            return MK::Constant(location, core::Symbols::ErrorNode());
         }
     }
 }
