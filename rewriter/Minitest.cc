@@ -649,17 +649,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             // For RSpec, allow one or more arguments (description + optional metadata tags)
             // For minitest, require exactly one argument
             if (recvIsRSpec) {
-                if (send->numPosArgs() == 0) {
+                if (send->numPosArgs() == 0 || !ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
                     return nullptr;
                 }
             } else {
                 if (send->numPosArgs() != 1) {
                     return nullptr;
                 }
-            }
-
-            if (recvIsRSpec && !ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
-                return nullptr;
             }
 
             if (requiresSecondFactor(send->fun) && !recvIsRSpec && !insideDescribe) {
