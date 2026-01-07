@@ -4,8 +4,8 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, const parser::Prism::Parser &parser,
-                                                 const std::vector<core::LocOffsets> &commentLocations)
+CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
+                                                 std::vector<core::LocOffsets> commentLocations)
     : ctx(ctx), parser(parser), commentLocations(commentLocations) {}
 
 CommentMapPrism CommentsAssociatorPrism::run(pm_node_t *node) {

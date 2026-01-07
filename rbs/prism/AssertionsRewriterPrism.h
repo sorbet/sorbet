@@ -12,14 +12,12 @@ namespace sorbet::rbs {
 
 class AssertionsRewriterPrism {
 public:
-    AssertionsRewriterPrism(core::MutableContext ctx,
-                            std::map<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode);
-
+    AssertionsRewriterPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
+                            std::unordered_map<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode);
     pm_node_t *run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
-    std::map<pm_node_t *, std::vector<CommentNodePrism>> *commentsByNode;
 };
 
 } // namespace sorbet::rbs
