@@ -123,6 +123,11 @@ public:
     // Fetch the condensation graph for queries.
     const Condensation &condensation() const;
 
+    // Uses symbolsReferencedByFile to compute which symbols are no exported, and returns them in a map indexed by their
+    // owning package.
+    static UnorderedMap<core::packages::MangledName, std::vector<core::SymbolRef>>
+    exportsByPackage(const core::GlobalState &gs);
+
 private:
     bool enabled_ = false;
     GenPackagesMode genPackagesMode_ = GenPackagesMode::Disabled;
