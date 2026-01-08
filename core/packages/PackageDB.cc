@@ -312,4 +312,38 @@ PackageDB::missingExportsByPackage(const core::GlobalState &gs) {
     return toExport;
 }
 
+std::optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsForFile(const core::GlobalState &gs,
+                                                                                     const core::FileRef fref) {
+    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
+    auto referencingFiles = std::vector<FileRef>{fref};
+    for (auto &sym : gs.getSymbolsReferencedByFile(fref)) {
+        if (sym.isFieldOrStaticField()) {
+            exportField(gs, toExport, sym.asFieldRef(), referencingFiles);
+        } else if (sym.isClassOrModule()) {
+            exportClassOrModule(gs, toExport, sym.asClassOrModuleRef(), referencingFiles);
+        } else {
+            ENFORCE(false);
+        }
+    }
+
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto &[pkgName, syms] : toExport) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(pkgInfo.exists());
+        for (auto &sym : syms) {
+            auto autocorrect = pkgInfo.addExport(gs, sym);
+            if (autocorrect.has_value()) {
+                allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                                make_move_iterator(autocorrect.value().edits.end()));
+            }
+        }
+    }
+
+    if (allEdits.empty()) {
+        return nullopt;
+    }
+
+    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
+    return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
+}
 } // namespace sorbet::core::packages
