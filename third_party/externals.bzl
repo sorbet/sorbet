@@ -24,11 +24,12 @@ def register_sorbet_dependencies():
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
     )
 
+    # rules_foreign_cc needs to be in WORKSPACE for toolchain registration
     http_archive(
         name = "rules_foreign_cc",
-        url = "https://github.com/bazelbuild/rules_foreign_cc/archive/d74623f0ad47f4e375de81baa454eb106715a416.zip",
-        sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
-        strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
+        url = "https://github.com/bazelbuild/rules_foreign_cc/releases/download/0.15.0/rules_foreign_cc-0.15.0.tar.gz",
+        sha256 = "92bf237df47776ef5127506234135a48de939b57553c253097b632726d881a7d",
+        strip_prefix = "rules_foreign_cc-0.15.0",
     )
 
     http_archive(
