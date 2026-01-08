@@ -1,0 +1,7 @@
+# typed: strict
+
+class D < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  export D::Foo
+end
