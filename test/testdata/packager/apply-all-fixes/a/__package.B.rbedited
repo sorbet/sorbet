@@ -7,4 +7,5 @@ class A < PackageSpec
   strict_dependencies 'layered'
   import B
   import C
+  import D
 end
