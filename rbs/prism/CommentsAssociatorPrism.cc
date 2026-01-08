@@ -1,12 +1,12 @@
 #include "rbs/prism/CommentsAssociatorPrism.h"
 
-#include <algorithm>
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "parser/prism/Helpers.h"
 #include "rbs/SignatureTranslator.h"
+#include <algorithm>
 
 using namespace std;
 using namespace sorbet::parser::Prism;

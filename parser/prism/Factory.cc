@@ -308,8 +308,8 @@ pm_node_t *Factory::Call1(core::LocOffsets loc, pm_node_t *receiver, string_view
     return up_cast(createCallNode(receiver, methodId, arguments, tinyLoc, fullLoc, tinyLoc));
 }
 
-pm_node_t *Factory::Call(core::LocOffsets loc, pm_node_t *receiver, string_view method,
-                         absl::Span<pm_node_t *> args, pm_node_t *block) const {
+pm_node_t *Factory::Call(core::LocOffsets loc, pm_node_t *receiver, string_view method, absl::Span<pm_node_t *> args,
+                         pm_node_t *block) const {
     ENFORCE(receiver && !method.empty(), "Receiver or method is null");
 
     pm_constant_id_t methodId = addConstantToPool(method);
