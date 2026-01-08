@@ -160,11 +160,11 @@ Consider some examples:
 
 - A new version of Ruby **adds** a method to a class defined in the standard library.
 
-  We will accept PRs to add an RBI definition for the new method. This means that Sorbet **will not** report "method does not exist errors" for codebases that are still on the old version of Ruby.
+  We will accept PRs to add an RBI definition for the new method. This means that Sorbet **will not** report "method does not exist errors" for codebases that are still on the old version of Ruby or the gem.
 
 - A new version of Ruby **deletes** a method that was deprecated.
 
-  We **will not** accept PRs to remove the corresponding method definition from Sorbet, as that would prevent users on old Sorbet versions from calling it.
+  We **will not** accept PRs to remove the corresponding method definition from Sorbet, as that would prevent users on old Ruby or gem versions from calling it.
 
 While this is a general rule, we do make exceptions on a case-by-case basis. Please open an issue if you're unsure.
 
