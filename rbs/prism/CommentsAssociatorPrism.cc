@@ -277,9 +277,9 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
         // Handle type alias comments: `#: type foo = String`
         // Creates a constant assignment: `type foo = T.type_alias { String }`
         // This allows using `foo` as a type alias later (e.g., `#: self as foo`)
-        std::smatch matches;
-        auto comment = string(it->second.string);
-        if (std::regex_match(comment, matches, TYPE_ALIAS_PATTERN)) {
+        auto commentString = it->second.string;
+        std::match_results<std::string_view::const_iterator> matches;
+        if (std::regex_match(commentString.begin(), commentString.end(), matches, TYPE_ALIAS_PATTERN)) {
             // Type aliases are only allowed in class/module bodies
             if (!contextAllowingTypeAlias.empty()) {
                 if (auto [allow, loc] = contextAllowingTypeAlias.back(); !allow) {
@@ -1142,8 +1142,9 @@ pm_node_t *CommentsAssociatorPrism::createSyntheticPlaceholder(const CommentNode
 CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
                                                  vector<core::LocOffsets> commentLocations)
     : ctx(ctx), parser(parser), prism(parser), commentLocations(commentLocations), commentByLine() {
+    auto source = ctx.file.data(ctx).source();
     for (auto &loc : commentLocations) {
-        auto commentString = ctx.file.data(ctx).source().substr(loc.beginPos(), loc.endPos() - loc.beginPos());
+        auto commentString = source.substr(loc.beginPos(), loc.endPos() - loc.beginPos());
         auto start32 = static_cast<uint32_t>(loc.beginPos());
         auto end32 = static_cast<uint32_t>(loc.endPos());
         auto comment = CommentNodePrism{core::LocOffsets{start32, end32}, commentString};
