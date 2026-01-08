@@ -1,5 +1,6 @@
 #include "rbs/prism/CommentsAssociatorPrism.h"
 
+#include <algorithm>
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "core/errors/rewriter.h"
@@ -36,25 +37,12 @@ inline constexpr auto prismNodeListFree = [](pm_node_list_t *list) {
 using PrismNodeListPtr = std::unique_ptr<pm_node_list_t, decltype(prismNodeListFree)>;
 
 /**
- * Create a synthetic placeholder node (PM_CONSTANT_READ_NODE) with a marker constant ID.
- * Used to mark locations for bind comments and type aliases.
- */
-pm_node_t *createSyntheticPlaceholder(sorbet::parser::Prism::Parser &parser, const CommentNodePrism &comment,
-                                      pm_constant_id_t marker) {
-    sorbet::parser::Prism::Factory factory{parser};
-    return factory.ConstantReadNode(marker, comment.loc);
-}
-
-/**
  * Insert a node into a pm_node_list_t at a specific index.
- * The node is first appended to the end, then shifted into position.
+ * The node is first appended to the end, then rotated into position.
  */
 void insertNodeAtIndex(pm_node_list_t &nodes, pm_node_t *node, size_t index) {
     pm_node_list_append(&nodes, node);
-    for (size_t i = nodes.size - 1; i > index; i--) {
-        nodes.nodes[i] = nodes.nodes[i - 1];
-    }
-    nodes.nodes[index] = node;
+    std::rotate(&nodes.nodes[index], &nodes.nodes[nodes.size - 1], &nodes.nodes[nodes.size]);
 }
 
 /**
@@ -64,9 +52,9 @@ void insertNodeAtIndex(pm_node_list_t &nodes, pm_node_t *node, size_t index) {
  * Returns nullopt if no heredoc marker is found.
  */
 optional<uint32_t> hasHeredocMarker(const core::Context &ctx, uint32_t fromPos, uint32_t toPos) {
-    string sourceStr(ctx.file.data(ctx).source().substr(fromPos, toPos - fromPos));
-    if (regex_search(sourceStr, HEREDOC_PATTERN)) {
-        return fromPos + sourceStr.length();
+    auto sourceStr = ctx.file.data(ctx).source().substr(fromPos, toPos - fromPos);
+    if (regex_search(sourceStr.begin(), sourceStr.end(), HEREDOC_PATTERN)) {
+        return toPos;
     }
 
     return nullopt;
@@ -273,7 +261,7 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
             continuationFor = nullptr;
 
             // Create placeholder node with special marker constant ID
-            pm_node_t *placeholder = createSyntheticPlaceholder(parser, it->second, RBS_SYNTHETIC_BIND_MARKER);
+            pm_node_t *placeholder = createSyntheticPlaceholder(it->second, RBS_SYNTHETIC_BIND_MARKER);
 
             // Register comment for later processing by AssertionsRewriter
             assertionsForNode[placeholder] = vector<CommentNodePrism>{it->second};
@@ -313,7 +301,7 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
 
             // Create placeholder for the type expression
             // This will be replaced with T.type_alias { Type } by SigsRewriter
-            pm_node_t *placeholder = createSyntheticPlaceholder(parser, it->second, RBS_SYNTHETIC_TYPE_ALIAS_MARKER);
+            pm_node_t *placeholder = createSyntheticPlaceholder(it->second, RBS_SYNTHETIC_TYPE_ALIAS_MARKER);
 
             // Register comment for later processing by SigsRewriter
             signaturesForNode[placeholder] = vector<CommentNodePrism>{it->second};
@@ -357,7 +345,7 @@ void CommentsAssociatorPrism::walkConditionalNode(pm_node_t *node, pm_node_t *pr
     lastLine = posToLine(nodeLoc.beginPos());
 
     pm_node_t *thenBody = up_cast(statements);
-    pm_node_t *thenResult = walkBody(thenBody, thenBody);
+    pm_node_t *thenResult = walkBody(node, thenBody);
     statements = down_cast<pm_statements_node_t>(thenResult);
 
     if (thenResult) {
@@ -365,7 +353,7 @@ void CommentsAssociatorPrism::walkConditionalNode(pm_node_t *node, pm_node_t *pr
         lastLine = posToLine(thenLoc.endPos());
     }
 
-    elsePart = walkBody(elsePart, elsePart);
+    elsePart = walkBody(node, elsePart);
 
     if (beginLine != endLine) {
         associateAssertionCommentsToNode(node);
@@ -1119,7 +1107,7 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
     }
 }
 
-CommentMapPrismNode CommentsAssociatorPrism::run(pm_node_t *node) {
+CommentMapPrism CommentsAssociatorPrism::run(pm_node_t *node) {
     // Remove any comments that don't start with RBS prefixes
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
         if (!absl::StartsWith(it->second.string, RBS_PREFIX) &&
@@ -1143,7 +1131,12 @@ CommentMapPrismNode CommentsAssociatorPrism::run(pm_node_t *node) {
         }
     }
 
-    return CommentMapPrismNode{signaturesForNode, assertionsForNode};
+    return CommentMapPrism{signaturesForNode, assertionsForNode};
+}
+
+pm_node_t *CommentsAssociatorPrism::createSyntheticPlaceholder(const CommentNodePrism &comment,
+                                                               pm_constant_id_t marker) {
+    return prism.ConstantReadNode(marker, comment.loc);
 }
 
 CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, parser::Prism::Parser &parser,

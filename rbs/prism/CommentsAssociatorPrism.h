@@ -26,9 +26,9 @@ struct CommentNodePrism {
     std::string_view string;
 };
 
-struct CommentMapPrismNode {
-    std::unordered_map<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
-    std::unordered_map<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
+struct CommentMapPrism {
+    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
 };
 
 class CommentsAssociatorPrism {
@@ -37,7 +37,7 @@ public:
 
     CommentsAssociatorPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
                             std::vector<core::LocOffsets> commentLocations);
-    CommentMapPrismNode run(pm_node_t *node);
+    CommentMapPrism run(pm_node_t *node);
 
 private:
     static const std::string_view ANNOTATION_PREFIX;
@@ -49,8 +49,8 @@ private:
     parser::Prism::Factory prism;
     std::vector<core::LocOffsets> commentLocations;
     std::map<int, CommentNodePrism> commentByLine;
-    std::unordered_map<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
-    std::unordered_map<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
     std::vector<std::pair<bool, core::LocOffsets>> contextAllowingTypeAlias;
     int lastLine;
 
@@ -75,6 +75,7 @@ private:
     uint32_t posToLine(uint32_t pos);
 
     int maybeInsertStandalonePlaceholders(pm_node_list_t &nodes, int index, int lastLine, int currentLine);
+    pm_node_t *createSyntheticPlaceholder(const CommentNodePrism &comment, pm_constant_id_t marker);
 };
 
 } // namespace sorbet::rbs
