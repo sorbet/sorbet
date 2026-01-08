@@ -95,6 +95,16 @@ public:
     // Fetch the condensation graph for queries.
     const Condensation &condensation() const;
 
+    // Uses symbolsReferencedByFile to compute which symbols are no exported, and returns them in a map indexed by their
+    // owning package.
+    static UnorderedMap<core::packages::MangledName, std::vector<core::SymbolRef>>
+    missingExportsByPackage(const core::GlobalState &gs);
+
+    // Returns an autocorrect that will insert an export for every symbol referenced in fref that is not already
+    // exported.
+    static std::optional<core::AutocorrectSuggestion> aggregateMissingExportsForFile(const core::GlobalState &gs,
+                                                                                     const core::FileRef fref);
+
 private:
     bool enabled_ = false;
     bool genPackages_ = false;

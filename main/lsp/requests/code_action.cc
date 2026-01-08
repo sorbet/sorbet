@@ -192,6 +192,11 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 }
             }
         }
+        auto exportsAutocorrect = gs.packageDB().aggregateMissingExportsForFile(gs, file);
+        if (exportsAutocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(exportsAutocorrect->edits.begin()),
+                            make_move_iterator(exportsAutocorrect->edits.end()));
+        }
     }
 
     // Perform _after_ sorting so these appear at the end of the list.
