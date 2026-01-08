@@ -950,7 +950,6 @@ void validateLayering(core::Context ctx, const Import &i) {
 }
 
 void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Import i) {
-    ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
     ENFORCE(otherPkg.exists());
 
