@@ -446,6 +446,7 @@ NameDef names[] = {
     {"max"},
     {"sum"},
     {"sample"},
+    {"slice"},
     {"at"},
 
     // Argument forwarding

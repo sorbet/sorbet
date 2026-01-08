@@ -4680,6 +4680,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkMatchArray(), &Magic_checkMatchArray},
 
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
+    {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::slice(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::last(), &Tuple_last},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::min(), &Tuple_minMax},
