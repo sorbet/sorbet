@@ -467,6 +467,41 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
     return nullopt;
 }
 
+namespace {
+bool visibilityApplies(const core::GlobalState &gs, const VisibleTo &vt, MangledName name) {
+    if (vt.type == VisibleToType::Wildcard) {
+        // a wildcard will match if it's a proper prefix of the package name
+        auto curPkg = name.owner;
+        auto prefix = vt.mangledName.owner;
+        do {
+            if (curPkg == prefix) {
+                return true;
+            }
+            curPkg = curPkg.data(gs)->owner;
+        } while (curPkg != core::Symbols::root());
+        return false;
+    } else {
+        // otherwise it needs to be the same
+        return vt.mangledName == name;
+    }
+}
+} // namespace
+
+bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const MangledName &importingPkgName,
+                              const ImportType importType) const {
+    if (visibleTo().empty() && !visibleToTests()) {
+        return true;
+    }
+
+    if (visibleToTests() && importType != ImportType::Normal) {
+        return true;
+    }
+
+    return absl::c_any_of(visibleTo(), [&gs, &importingPkgName](const auto &other) {
+        return visibilityApplies(gs, other, importingPkgName);
+    });
+}
+
 void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, PackageReferenceInfo>> &references) {
     packagesReferencedByFile[file].swap(references);
 }

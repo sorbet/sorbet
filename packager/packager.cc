@@ -22,24 +22,6 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-bool visibilityApplies(const core::GlobalState &gs, const VisibleTo &vt, MangledName name) {
-    if (vt.type == VisibleToType::Wildcard) {
-        // a wildcard will match if it's a proper prefix of the package name
-        auto curPkg = name.owner;
-        auto prefix = vt.mangledName.owner;
-        do {
-            if (curPkg == prefix) {
-                return true;
-            }
-            curPkg = curPkg.data(gs)->owner;
-        } while (curPkg != core::Symbols::root());
-        return false;
-    } else {
-        // otherwise it needs to be the same
-        return vt.mangledName == name;
-    }
-}
-
 string buildValidLayersStr(const core::GlobalState &gs) {
     auto validLayers = gs.packageDB().layers();
     ENFORCE(validLayers.size() > 0);
@@ -968,23 +950,11 @@ void validateLayering(core::Context ctx, const Import &i) {
 }
 
 void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Import i) {
-    ENFORCE(ctx.state.packageDB().getPackageInfo(i.mangledName).exists())
     ENFORCE(ctx.state.packageDB().getPackageNameForFile(ctx.file).exists())
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
+    ENFORCE(otherPkg.exists());
 
-    const auto &visibleTo = otherPkg.visibleTo();
-    if (visibleTo.empty() && !otherPkg.visibleToTests()) {
-        return;
-    }
-
-    if (otherPkg.visibleToTests() && i.isTestImport()) {
-        return;
-    }
-
-    bool allowed = absl::c_any_of(
-        visibleTo, [&ctx, &absPkg](const auto &other) { return visibilityApplies(ctx, other, absPkg.mangledName()); });
-
-    if (!allowed) {
+    if (!otherPkg.isVisibleTo(ctx, absPkg.mangledName(), i.type)) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::ImportNotVisible)) {
             e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                         otherPkg.show(ctx), absPkg.show(ctx));
