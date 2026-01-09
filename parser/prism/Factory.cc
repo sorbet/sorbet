@@ -267,6 +267,11 @@ pm_node_t *Factory::SorbetPrivateStatic(core::LocOffsets loc) const {
     return ConstantPathNode(loc, sorbetPrivate, "Static"sv);
 }
 
+pm_node_t *Factory::SorbetPrivateStaticVoid(core::LocOffsets loc) const {
+    // Build a root-anchored constant path ::Sorbet::Private::Static::Void
+    return ConstantPathNode(loc, SorbetPrivateStatic(loc), "Void"sv);
+}
+
 pm_node_t *Factory::TSigWithoutRuntime(core::LocOffsets loc) const {
     // Build a root-anchored constant path ::T::Sig::WithoutRuntime
     pm_node_t *tConst = ConstantPathNode(loc, nullptr, "T"sv);
@@ -506,6 +511,14 @@ pm_node_t *Factory::T_Enumerator(core::LocOffsets loc) const {
     return ConstantPathNode(loc, T(loc), "Enumerator"sv);
 }
 
+pm_node_t *Factory::T_Enumerator_Lazy(core::LocOffsets loc) const {
+    return ConstantPathNode(loc, T_Enumerator(loc), "Lazy"sv);
+}
+
+pm_node_t *Factory::T_Enumerator_Chain(core::LocOffsets loc) const {
+    return ConstantPathNode(loc, T_Enumerator(loc), "Chain"sv);
+}
+
 pm_node_t *Factory::T_Hash(core::LocOffsets loc) const {
     return ConstantPathNode(loc, T(loc), "Hash"sv);
 }
@@ -544,6 +557,18 @@ void *Factory::realloc(void *ptr, size_t size) const {
 void Factory::free(void *ptr) const { // see Prism's `include/prism/defines.h`
     ENFORCE(ptr);
     ::xfree(ptr);
+}
+
+pm_node_list_t Factory::emptyNodeList() const {
+    return {.size = 0, .capacity = 0, .nodes = nullptr};
+}
+
+pm_node_list_t Factory::nodeListWithCapacity(size_t capacity) const {
+    if (capacity == 0) {
+        return emptyNodeList();
+    }
+    auto *nodes = calloc<pm_node_t *>(capacity);
+    return {.size = 0, .capacity = capacity, .nodes = nodes};
 }
 
 } // namespace sorbet::parser::Prism
