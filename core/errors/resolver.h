@@ -88,7 +88,7 @@ constexpr ErrorClass GenericArgumentKeywordArgs{5079, StrictLevel::False};
 constexpr ErrorClass HasAttachedClassInClass{5080, StrictLevel::False};
 constexpr ErrorClass HasAttachedClassModuleNotDeclared{5081, StrictLevel::Strict};
 // TODO(jez) Drop this to false, report for any method with a sig in a non-RBI file
-constexpr ErrorClass UnnamedBlockParameter{5082, StrictLevel::Strict};
+constexpr ErrorClass UnnamedBlockParameter{5082, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
