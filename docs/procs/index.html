@@ -62,7 +62,7 @@
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/procs.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Blocks, Procs and Lambda Types</h1></header><article><div><span><pre><code class="hljs css language-ruby">T.proc.params(<span class="hljs-symbol">arg0:</span> Arg0Type, <span class="hljs-symbol">arg1:</span> Arg1Type, ...).returns(ReturnType)
 </code></pre>
 <p>This is the type of a <code>Proc</code> (such as a block passed to a method as a <code>&amp;blk</code> parameter) that accepts arguments of types <code>Arg0Type</code>, <code>Arg1Type</code>, etc., and returns <code>ReturnType</code>.</p>
-<p>At present, all parameters are assumed to be required positional parameters—<code>T.proc</code> types cannot declare optional nor keyword parameters.</p>
+<p>At present, all parameters are assumed to be required positional parameters—<code>T.proc</code> types cannot declare keyword parameters, optional parameters, repeated/rest parameters, nor block parameters. Code using these features of Ruby must fall back to loosely typed <code>Proc</code> objects, which are compatible with procs, blocks, and lambdas of arbitrary arities and types.</p>
 <p>Types of procs are not checked at all at runtime (whereas methods are), and serve only as hints to Sorbet statically (and for documentation).</p>
 <p>Here’s a larger example:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
