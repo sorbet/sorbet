@@ -10,7 +10,7 @@ T.proc.params(arg0: Arg0Type, arg1: Arg1Type, ...).returns(ReturnType)
 
 This is the type of a `Proc` (such as a block passed to a method as a `&blk` parameter) that accepts arguments of types `Arg0Type`, `Arg1Type`, etc., and returns `ReturnType`.
 
-At present, all parameters are assumed to be required positional parameters—`T.proc` types cannot declare optional nor keyword parameters.
+At present, all parameters are assumed to be required positional parameters—`T.proc` types cannot declare keyword parameters, optional parameters, repeated/rest parameters, nor block parameters. Code using these features of Ruby must fall back to loosely typed `Proc` objects, which are compatible with procs, blocks, and lambdas of arbitrary arities and types.
 
 Types of procs are not checked at all at runtime (whereas methods are), and serve only as hints to Sorbet statically (and for documentation).
 
