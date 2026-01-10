@@ -25,8 +25,9 @@ class A
                                    # ^^^ error: Malformed `sig`. Type not specified for parameter `blk`
 
   sig {void}
-  def test_yield
+  def test_yield # error: does not mention a block parameter
     yield
+  # ^^^^^ error: Method `call` does not exist on `NilClass`
   end
 
   sig {void}

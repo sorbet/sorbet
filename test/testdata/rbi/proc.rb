@@ -8,7 +8,7 @@ T.reveal_type(my_proc) # error: type: `Proc`
 
 sig {params(f: T.proc.params(x: Integer).void).void}
 def example(f)
-  f.call(0) do
+  f.call(0) do # error: `Proc1#call` does not take a block
     puts 'hello'
   end
 end

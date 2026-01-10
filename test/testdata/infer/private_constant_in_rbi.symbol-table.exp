@@ -44,15 +44,15 @@ class ::<root> < ::Object ()
     method ::<Class:Foo>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:3
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
     method ::<Class:Foo>#not_ok_private_usage (<blk>) -> Foo::PrivateClass @ test/testdata/infer/private_constant_in_rbi__1.rbi:39
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
     method ::<Class:Foo>#using_private_class (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant_in_rbi__1.rbi:46
       argument x<> -> Foo::PrivateClass @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=45:16 end=45:17}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
     method ::<Class:Foo>#using_private_ints (x, y, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant_in_rbi__1.rbi:43
       argument x<> -> Integer @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=42:16 end=42:17}
       argument y<> -> Integer @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=42:40 end=42:41}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
     method ::<Class:Foo>#using_private_module (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant_in_rbi__1.rbi:49
       argument x<> -> T.class_of(Foo::PrivateModule) @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=48:16 end=48:17}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
 
