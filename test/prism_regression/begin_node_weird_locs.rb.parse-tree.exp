@@ -1,0 +1,34 @@
+DefMethod {
+  name = <U multi_assign_parens_not_in_location>
+  params = NULL
+  body = Begin {
+    stmts = [
+      Masgn {
+        lhs = Mlhs {
+          exprs = [
+            LVarLhs {
+              name = <U a>
+            }
+            LVarLhs {
+              name = <U b>
+            }
+          ]
+        }
+        rhs = Array {
+          elts = [
+            Integer {
+              val = "1"
+            }
+            Integer {
+              val = "2"
+            }
+          ]
+        }
+      }
+      Const {
+        scope = NULL
+        name = <C <U FILLER_LINE>>
+      }
+    ]
+  }
+}
