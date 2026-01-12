@@ -1,6 +1,6 @@
 # typed: true
 # selective-apply-code-action: quickfix
-# keep-apply-all-quickfix: true
+# omit-apply-all-quickfix: false
 
 x = T.let(1, T.nilable(Integer))
 
