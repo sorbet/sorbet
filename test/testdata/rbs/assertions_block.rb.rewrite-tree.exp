@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:args, ::<root>::<C T>.untyped(), :&, ::<root>::<C T>.proc().params(:arg0, ::<root>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C String>)).returns(::<root>::<C T>.untyped())
   end
 
-  def take_block<<todo method>>(*args, &&$2)
+  def take_block<<todo method>>(*args, &&)
     <emptyTree>
   end
 

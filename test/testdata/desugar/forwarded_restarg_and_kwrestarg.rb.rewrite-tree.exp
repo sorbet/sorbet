@@ -62,7 +62,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def baz<<todo method>>(**, ***$3:, &&$4)
+  def baz<<todo method>>(**, ***$3:, &&)
     begin
       ::<Magic>.<call-with-splat-and-block-pass>(<self>, :all_the_args, [].concat(::T.unsafe(<fwd-args>.to_a())), [begin
             <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))

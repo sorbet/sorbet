@@ -1145,7 +1145,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             unique_ptr<parser::Params> params;
-            std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters, location);
+            std::tie(params, std::ignore) = translateParametersNode(paramsNode->parameters, location, false);
 
             // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's Params node,
             // after all other parameters.
@@ -1366,7 +1366,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                 } else {
                                     unique_ptr<parser::Params> params;
                                     std::tie(params, std::ignore) =
-                                        translateParametersNode(paramsNode->parameters, paramsLoc);
+                                        translateParametersNode(paramsNode->parameters, paramsLoc, false);
 
                                     // Sorbet's legacy parser inserts locals ("Shadowargs") at the end of the block's
                                     // Params node, after all other parameters.
@@ -1473,7 +1473,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         }
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable
-                        // reference, like `f(&<&>)`.
+                        // reference, like `f(&&)`.
                         blockPassArg = MK::Local(blockPassLoc.copyEndWithZeroLength(), core::Names::ampersand());
                         supportedBlock = true;
                     }
@@ -2217,7 +2217,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto loc = translateLoc(pm_location_t{startLoc, endLoc});
                 declLoc = declLoc.join(loc);
 
-                std::tie(params, enclosingBlockParamName) = translateParametersNode(defNode->parameters, loc);
+                std::tie(params, enclosingBlockParamName) = translateParametersNode(defNode->parameters, loc, true);
             } else {
                 if (rparenLoc.start != nullptr) {
                     // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
@@ -4210,7 +4210,7 @@ void Translator::patternTranslateMultiInto(NodeVec &outSorbetNodes, absl::Span<p
 }
 
 pair<unique_ptr<parser::Params>, core::NameRef /* enclosingBlockParamName */>
-Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location) {
+Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location, bool isDef) {
     auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
     auto optionals = absl::MakeSpan(paramsNode->optionals.nodes, paramsNode->optionals.size);
     auto keywords = absl::MakeSpan(paramsNode->keywords.nodes, paramsNode->keywords.size);
@@ -4299,7 +4299,9 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
             // The location doesn't include the `&`, only the name of the block parameter
             constexpr uint32_t length = "&"sv.size();
             blockParamLoc = core::LocOffsets{blockParamLoc.beginPos() + length, blockParamLoc.endPos()};
-        } else { // An anonymous block parameter, like `def foo(&)`
+        } else if (isDef) { // An anonymous block parameter, like `def foo(&)`
+            enclosingBlockParamName = core::Names::ampersand();
+        } else {
             enclosingBlockParamName = nextUniqueParserName(core::Names::ampersand());
         }
 
