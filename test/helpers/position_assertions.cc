@@ -279,6 +279,7 @@ const UnorderedMap<
         {"assert-no-code-action", StringPropertyAssertions::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
+        {"omit-apply-all-quickfix", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
         {"hover-line", HoverLineAssertion::make},
         {"completion", CompletionAssertion::make},

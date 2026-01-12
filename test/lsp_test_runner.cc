@@ -214,7 +214,7 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
                          int &nextId, vector<variant<CodeActionKind, string>> &selectedCodeActionKinds,
                          vector<CodeActionKind> &ignoredCodeActionKinds,
                          vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions,
-                         string codeActionDescription, bool assertAllChanges) {
+                         string codeActionDescription, bool assertAllChanges, bool omitApplyAll) {
     auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
         return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(),
                      variant<CodeActionKind, string>(kind)) != 0;
@@ -249,7 +249,7 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
         }
         // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
         // Source, the other is a Quickfix. This logic strips out the quickfix.
-        if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
+        if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title && omitApplyAll) {
             continue;
         }
 
@@ -348,6 +348,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
 
     auto ignoredCodeActionAssertions =
         StringPropertyAssertions::getValues("assert-no-code-action", assertions).value_or(vector<string>{});
+    bool omitApplyAll = BooleanPropertyAssertion::getValue("omit-apply-all-quickfix", assertions).value_or(true);
     vector<CodeActionKind> ignoredCodeActionKinds;
     transform(ignoredCodeActionAssertions.begin(), ignoredCodeActionAssertions.end(),
               back_inserter(ignoredCodeActionKinds), getCodeActionKind);
@@ -366,7 +367,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
             // Request code actions for each of this file's error.
             for (auto &error : errorsByFilename[filename]) {
                 validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds,
-                                    ignoredCodeActionKinds, applyCodeActionAssertions, error->toString(), false);
+                                    ignoredCodeActionKinds, applyCodeActionAssertions, error->toString(), false,
+                                    omitApplyAll);
             }
 
             // This weird loop is here because `validateCodeActions` erases the elements from
@@ -379,7 +381,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
                 auto codeActionAssertion = applyCodeActionAssertions.at(0);
                 validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId,
                                     selectedCodeActionKinds, ignoredCodeActionKinds, applyCodeActionAssertions,
-                                    codeActionAssertion->toString(), true);
+                                    codeActionAssertion->toString(), true, omitApplyAll);
                 REQUIRE_LT(applyCodeActionAssertions.size(), initialSize);
             }
 
