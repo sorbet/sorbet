@@ -1,3 +1,4 @@
+# -- test/testdata/resolver/sig_arg_types.rb --
 # typed: true
 
 class A
@@ -44,3 +45,4 @@ end
 class A
   def test_block_type_not_specified_later(&my_custom_block_name); end
 end
+# ------------------------------
