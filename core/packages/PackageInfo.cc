@@ -521,7 +521,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             }
         }
     }
-    std::vector<core::AutocorrectSuggestion::Edit> allEdits = computeImportEdits(gs, *this, toImport);
+    auto allEdits = computeImportEdits(gs, *this, toImport);
     if (allEdits.empty()) {
         return nullopt;
     }
@@ -546,7 +546,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImportsF
         toImport[packageName] = importType;
     }
 
-    std::vector<core::AutocorrectSuggestion::Edit> allEdits = computeImportEdits(gs, *this, toImport);
+    auto allEdits = computeImportEdits(gs, *this, toImport);
     if (allEdits.empty()) {
         return nullopt;
     }
