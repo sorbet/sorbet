@@ -4,13 +4,13 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   class ::C < ::Object () @ test/testdata/resolver/final_method.rb:33
     method ::C#foo : final (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/final_method.rb:36
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   class ::<Class:C>[<AttachedClass>] < ::<Class:Object> (Sig) @ test/testdata/resolver/final_method.rb:33
     type-member(+) ::<Class:C>::<AttachedClass> -> T.attached_class (of C) @ test/testdata/resolver/final_method.rb:33
     method ::<Class:C>#<static-init> (<blk>) @ test/testdata/resolver/final_method.rb:33
       argument <blk><block> @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
     method ::<Class:C>#bar : final (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/final_method.rb:38
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   module ::ExtendAgain < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/resolver/final_method.rb:91
   class ::<Class:ExtendAgain>[<AttachedClass>] < ::Module (M1) @ test/testdata/resolver/final_method.rb:91
     type-member(+) ::<Class:ExtendAgain>::<AttachedClass> -> T.attached_class (of ExtendAgain) @ test/testdata/resolver/final_method.rb:91
@@ -23,14 +23,14 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   module ::M1 < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/resolver/final_method.rb:46
     method ::M1#foo : final (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/final_method.rb:49
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   class ::<Class:M1>[<AttachedClass>] < ::Module (Sig) @ test/testdata/resolver/final_method.rb:46
     type-member(+) ::<Class:M1>::<AttachedClass> -> T.attached_class (of M1) @ test/testdata/resolver/final_method.rb:46
     method ::<Class:M1>#<static-init> (<blk>) @ test/testdata/resolver/final_method.rb:46
       argument <blk><block> @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   module ::M2 < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/resolver/final_method.rb:52
     method ::M2#foo : final (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/final_method.rb:55
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   class ::<Class:M2>[<AttachedClass>] < ::Module (Sig) @ test/testdata/resolver/final_method.rb:52
     type-member(+) ::<Class:M2>::<AttachedClass> -> T.attached_class (of M2) @ test/testdata/resolver/final_method.rb:52
     method ::<Class:M2>#<static-init> (<blk>) @ test/testdata/resolver/final_method.rb:52
@@ -77,13 +77,13 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   class ::Redefine < ::Object () @ test/testdata/resolver/final_method.rb:3
     method ::Redefine#foo : final (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/final_method.rb:28
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   class ::<Class:Redefine>[<AttachedClass>] < ::<Class:Object> (Sig) @ test/testdata/resolver/final_method.rb:3
     type-member(+) ::<Class:Redefine>::<AttachedClass> -> T.attached_class (of Redefine) @ test/testdata/resolver/final_method.rb:3
     method ::<Class:Redefine>#<static-init> (<blk>) @ test/testdata/resolver/final_method.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
     method ::<Class:Redefine>#bar : final (<blk>) -> Sorbet::Private::Static::Void @ test/testdata/resolver/final_method.rb:30
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/final_method.rb start=??? end=???}
   module ::Step1 < ::Sorbet::Private::Static::ImplicitModuleSuperclass (M1) @ test/testdata/resolver/final_method.rb:78
   class ::<Class:Step1>[<AttachedClass>] < ::Module () @ test/testdata/resolver/final_method.rb:78
     type-member(+) ::<Class:Step1>::<AttachedClass> -> T.attached_class (of Step1) @ test/testdata/resolver/final_method.rb:78

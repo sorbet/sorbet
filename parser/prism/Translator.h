@@ -41,9 +41,9 @@ class Translator final {
     uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
-    const core::LocOffsets enclosingMethodLoc;   // The location of the method we're in, or `none()`
-    const core::NameRef enclosingMethodName;     // The name of the method we're in, or `noName()`
-    const core::NameRef enclosingBlockParamName; // The name of the block param of the method we're in, or `noName()`
+    const core::LocOffsets enclosingMethodLoc; // The location of the method we're in, or `none()`
+    const core::NameRef enclosingMethodName;   // The name of the method we're in, or `noName()`
+    core::NameRef enclosingBlockParamName;     // The name of the block param of the method we're in, or `noName()`
     const bool isInModule = false;   // True if we're in a Module definition. False for classes and singleton classes
     const bool isInAnyBlock = false; // True if we're in a `{ }`/`do end` block
 

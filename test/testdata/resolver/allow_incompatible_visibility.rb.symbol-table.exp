@@ -4,70 +4,70 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBad < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:10
     method ::ChildBad#some_public_api : private|override (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:12
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBad>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:10
     type-member(+) ::<Class:ChildBad>::<AttachedClass> -> T.attached_class (of ChildBad) @ test/testdata/resolver/allow_incompatible_visibility.rb:10
     method ::<Class:ChildBad>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:10
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBadSymbol < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:26
     method ::ChildBadSymbol#some_public_api : private|override (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:29
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBadSymbol>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:26
     type-member(+) ::<Class:ChildBadSymbol>::<AttachedClass> -> T.attached_class (of ChildBadSymbol) @ test/testdata/resolver/allow_incompatible_visibility.rb:26
     method ::<Class:ChildBadSymbol>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:26
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBadTypes < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:20
     method ::ChildBadTypes#some_public_api : private|override|allow_incompatible(:visibility) (<blk>) -> String @ test/testdata/resolver/allow_incompatible_visibility.rb:22
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBadTypes>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:20
     type-member(+) ::<Class:ChildBadTypes>::<AttachedClass> -> T.attached_class (of ChildBadTypes) @ test/testdata/resolver/allow_incompatible_visibility.rb:20
     method ::<Class:ChildBadTypes>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:20
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBoth1 < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:33
     method ::ChildBoth1#some_public_api : private|override|allow_incompatible (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:36
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBoth1>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:33
     type-member(+) ::<Class:ChildBoth1>::<AttachedClass> -> T.attached_class (of ChildBoth1) @ test/testdata/resolver/allow_incompatible_visibility.rb:33
     method ::<Class:ChildBoth1>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:33
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBoth2 < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:39
     method ::ChildBoth2#some_public_api : private|override|allow_incompatible (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:42
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBoth2>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:39
     type-member(+) ::<Class:ChildBoth2>::<AttachedClass> -> T.attached_class (of ChildBoth2) @ test/testdata/resolver/allow_incompatible_visibility.rb:39
     method ::<Class:ChildBoth2>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:39
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBoth3 < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:45
     method ::ChildBoth3#some_public_api : private|override|allow_incompatible (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:48
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBoth3>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:45
     type-member(+) ::<Class:ChildBoth3>::<AttachedClass> -> T.attached_class (of ChildBoth3) @ test/testdata/resolver/allow_incompatible_visibility.rb:45
     method ::<Class:ChildBoth3>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:45
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBoth4 < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:51
     method ::ChildBoth4#some_public_api : private|override|allow_incompatible(:visibility) (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:54
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBoth4>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:51
     type-member(+) ::<Class:ChildBoth4>::<AttachedClass> -> T.attached_class (of ChildBoth4) @ test/testdata/resolver/allow_incompatible_visibility.rb:51
     method ::<Class:ChildBoth4>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:51
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildBoth5 < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:57
     method ::ChildBoth5#some_public_api : private|override|allow_incompatible(:visibility) (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:61
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildBoth5>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:57
     type-member(+) ::<Class:ChildBoth5>::<AttachedClass> -> T.attached_class (of ChildBoth5) @ test/testdata/resolver/allow_incompatible_visibility.rb:57
     method ::<Class:ChildBoth5>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:57
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::ChildOkay < ::Parent () @ test/testdata/resolver/allow_incompatible_visibility.rb:15
     method ::ChildOkay#some_public_api : private|override|allow_incompatible(:visibility) (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:17
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:ChildOkay>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/allow_incompatible_visibility.rb:15
     type-member(+) ::<Class:ChildOkay>::<AttachedClass> -> T.attached_class (of ChildOkay) @ test/testdata/resolver/allow_incompatible_visibility.rb:15
     method ::<Class:ChildOkay>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:15
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::Parent < ::Object () @ test/testdata/resolver/allow_incompatible_visibility.rb:3
     method ::Parent#some_public_api : overridable (<blk>) -> Integer @ test/testdata/resolver/allow_incompatible_visibility.rb:7
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible_visibility.rb start=??? end=???}
   class ::<Class:Parent>[<AttachedClass>] < ::<Class:Object> (Sig) @ test/testdata/resolver/allow_incompatible_visibility.rb:3
     type-member(+) ::<Class:Parent>::<AttachedClass> -> T.attached_class (of Parent) @ test/testdata/resolver/allow_incompatible_visibility.rb:3
     method ::<Class:Parent>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible_visibility.rb:3

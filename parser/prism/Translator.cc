@@ -2286,6 +2286,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (params != nullptr) {
                 std::tie(paramsStore, statsStore, didDesugarParams) =
                     desugarParametersNode(params->params, attemptToDesugarParams);
+                if (paramsStore.empty() || !ast::isa_tree<ast::BlockParam>(paramsStore.back())) {
+                    auto blkLoc = core::LocOffsets::none();
+                    paramsStore.emplace_back(
+                        MK::BlockParam(blkLoc, MK::Local(blkLoc, methodContext.enclosingBlockParamName)));
+                } else if (enclosingBlockParamName != methodContext.enclosingBlockParamName) {
+                    auto &blockParam = ast::cast_tree_nonnull<ast::BlockParam>(paramsStore.back());
+                    // Desugaring a `yield` to an implicit block param indicates that we should change the block
+                    // parameter name, so that we can detect this case later, in resolver.
+                    ast::cast_tree<ast::UnresolvedIdent>(blockParam.expr)->name = methodContext.enclosingBlockParamName;
+                }
             } else {
                 didDesugarParams = attemptToDesugarParams;
             }
@@ -3671,12 +3681,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             ExpressionPtr recv;
             if (enclosingBlockParamName.exists()) {
                 if (enclosingBlockParamName == core::Names::blkArg()) {
-                    if (auto e =
-                            ctx.beginIndexerError(enclosingMethodLoc, core::errors::Desugar::UnnamedBlockParameter)) {
-                        e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
-                                    enclosingMethodName.show(ctx), "yield");
-                        e.addErrorLine(ctx.locAt(location), "Arising from use of `{}` in method body", "yield");
-                    }
+                    enclosingBlockParamName = core::Names::implicitYield();
                 }
                 recv = MK::Local(location, enclosingBlockParamName);
             } else {

@@ -32,7 +32,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument m<> -> {foo: Integer} @ Loc {file=test/testdata/resolver/sig_bad.rb start=71:7 end=71:8}
       argument n<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=72:7 end=72:8}
       argument o<> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=73:7 end=73:8}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/sig_bad.rb start=??? end=???}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:1 end=10:8}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:1 end=10:8}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/sig_bad.rb start=10:1 end=80:4}

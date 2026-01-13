@@ -70,7 +70,7 @@ ClassDef{
                 flags = {}
                 recv = UnresolvedIdent{
                   kind = Local
-                  name = <U <blk>>
+                  name = <U <implicit yield>>
                 }
                 fun = <U call>
                 block = nullptr
@@ -94,7 +94,7 @@ ClassDef{
                 flags = {}
                 recv = UnresolvedIdent{
                   kind = Local
-                  name = <U <blk>>
+                  name = <U <implicit yield>>
                 }
                 fun = <U call>
                 block = nullptr
@@ -121,7 +121,7 @@ ClassDef{
                 flags = {}
                 recv = UnresolvedIdent{
                   kind = Local
-                  name = <U <blk>>
+                  name = <U <implicit yield>>
                 }
                 fun = <U call>
                 block = nullptr
@@ -149,7 +149,7 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <U <blk>>
+                name = <U <implicit yield>>
               }
               fun = <U call>
               block = nullptr

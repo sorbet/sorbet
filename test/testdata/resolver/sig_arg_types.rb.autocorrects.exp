@@ -1,3 +1,4 @@
+# -- test/testdata/resolver/sig_arg_types.rb --
 # typed: true
 
 class A
@@ -24,8 +25,8 @@ class A
   def test_block_type_not_specified(&blk); end
                                    # ^^^ error: Malformed `sig`. Type not specified for parameter `blk`
 
-  sig {void}
-  def test_yield # error: does not mention a block parameter
+  sig {params("&": T.untyped).void}
+  def test_yield(&) # error: does not mention a block parameter
     yield
   # ^^^^^ error: Method `call` does not exist on `NilClass`
   end
@@ -34,8 +35,8 @@ class A
   def test_block_type_not_specified_later; end
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`. Type not specified for parameter `my_custom_block_name`
 
-  sig { params(x: Integer,).returns(Integer) }
-  def calls_yield_with_params(x) # error: does not mention a block parameter
+  sig { params(x: Integer, "&": T.untyped,).returns(Integer) }
+  def calls_yield_with_params(x, &) # error: does not mention a block parameter
     yield
   # ^^^^^ error: Method `call` does not exist on `NilClass`
   end
@@ -44,3 +45,4 @@ end
 class A
   def test_block_type_not_specified_later(&my_custom_block_name); end
 end
+# ------------------------------

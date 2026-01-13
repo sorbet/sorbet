@@ -23,3 +23,4 @@ required_block(1) {}
 
 no_params()
 no_params() {}
+#           ^^ error: does not take a block
