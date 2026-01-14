@@ -470,10 +470,8 @@ pm_statements_node_t *SigsRewriterPrism::rewriteBody(pm_statements_node_t *stmts
     return down_cast<pm_statements_node_t>(rewriteBody(up_cast(stmts)));
 }
 
-void SigsRewriterPrism::processClassBody(pm_node_t *node, pm_node_t *&body,
-                                         absl::Span<pm_node_t *const> helpers) {
-    auto loc = body ? parser.translateLocation(body->location)
-                    : parser.translateLocation(node->location);
+void SigsRewriterPrism::processClassBody(pm_node_t *node, pm_node_t *&body, absl::Span<pm_node_t *const> helpers) {
+    auto loc = body ? parser.translateLocation(body->location) : parser.translateLocation(node->location);
 
     body = maybeWrapBody(body, loc, parser);
     if (!helpers.empty()) {
