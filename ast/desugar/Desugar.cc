@@ -2090,7 +2090,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 if (dctx.enclosingBlockParamName.exists()) {
                     // we always want to report an error if we're using yield with a synthesized name in strict mode
                     if (dctx.enclosingBlockParamName == core::Names::blkArg()) {
-                        dctx.enclosingBlockParamLoc = ret->loc;
+                        dctx.enclosingBlockParamLoc = loc;
                         dctx.enclosingBlockParamName = core::Names::implicitYield();
                     }
 
