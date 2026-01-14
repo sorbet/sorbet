@@ -67,9 +67,9 @@ class A
   end
 
   sig {params(x: Integer).returns(Integer)}
-  def test_yield_no_block_type(x)
+  def test_yield_no_block_type(x) # error: does not mention a block parameter
     yield x
-
+  # ^^^^^^^ error: Method `call` does not exist on `NilClass`
   end
 
   abstract!
