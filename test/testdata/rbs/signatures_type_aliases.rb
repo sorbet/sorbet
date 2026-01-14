@@ -161,3 +161,37 @@ end
 module EmptyTypeAlias
   #: type a = Integer
 end
+
+#: -> EmptyTypeAlias::a
+def empty_module_type_alias
+  "42"
+# ^^^^ error: Expected `Integer` but found `String("42")` for method result type
+end
+
+class EmptyClass
+  #: type b = String
+end
+
+#: -> EmptyClass::b
+def empty_class_alias_type
+  42
+# ^^ error: Expected `String` but found `Integer(42)` for method result type
+end
+
+#: -> EmptyClass::b
+def self.empty_class_alias_type
+  42
+# ^^ error: Expected `String` but found `Integer(42)` for method result type
+end
+
+class EmptySingleton
+  class << self
+    #: type c = Integer
+
+    #: -> c
+    def foo
+      "42"
+#     ^^^^ error: Expected `Integer` but found `String("42")` for method result type
+    end
+  end
+end

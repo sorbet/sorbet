@@ -179,6 +179,10 @@ void CommentsAssociator::associateSignatureCommentsToNode(parser::Node *node) {
     signaturesForNode[node] = move(comments);
 }
 
+bool CommentsAssociator::typeAliasAllowedInContext() {
+    return !contextAllowingTypeAlias.empty() && contextAllowingTypeAlias.back().first;
+}
+
 int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine,
                                                           int currentLine) {
     if (lastLine == currentLine) {
@@ -226,17 +230,16 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
         std::smatch matches;
         auto str = string(it->second.string);
         if (std::regex_match(str, matches, TYPE_ALIAS_PATTERN)) {
-            if (!contextAllowingTypeAlias.empty()) {
-                if (auto [allow, loc] = contextAllowingTypeAlias.back(); !allow) {
-                    if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
-                        e.setHeader("Unexpected RBS type alias comment");
-                        e.addErrorLine(ctx.locAt(loc),
-                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
-                    }
-
-                    it = commentByLine.erase(it);
-                    continue;
+            if (!typeAliasAllowedInContext()) {
+                auto loc = contextAllowingTypeAlias.back().second;
+                if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                    e.setHeader("Unexpected RBS type alias comment");
+                    e.addErrorLine(ctx.locAt(loc),
+                                   "RBS type aliases are only allowed in class and module bodies. Found in:");
                 }
+
+                it = commentByLine.erase(it);
+                continue;
             }
 
             auto nameStr = "type " + matches[1].str();
@@ -279,6 +282,20 @@ void CommentsAssociator::processTrailingComments(parser::Node *node, parser::Nod
 }
 
 unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique_ptr<parser::Node> body) {
+    if (typeAliasAllowedInContext() && body == nullptr) {
+        int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
+        auto nodes = parser::NodeVec();
+
+        maybeInsertStandalonePlaceholders(nodes, 0, lastLine, endLine);
+        lastLine = endLine;
+
+        if (!nodes.empty()) {
+            return make_unique<parser::Begin>(node->loc, move(nodes));
+        }
+
+        return nullptr;
+    }
+
     if (body == nullptr) {
         auto nodes = parser::NodeVec();
         processTrailingComments(node, nodes);
