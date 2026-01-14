@@ -1,0 +1,4 @@
+root/root.rb:12: `T.class_of(Root)` may not be reopened, as its package has already been processed https://srb.help/5082
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+Errors: 1
