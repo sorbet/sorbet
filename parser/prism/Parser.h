@@ -112,8 +112,8 @@ class ParseResult final {
 public:
     ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors,
                 std::vector<core::LocOffsets> commentLocations)
-        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors},
-          commentLocations{commentLocations} {}
+        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors}, commentLocations{
+                                                                                         commentLocations} {}
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
