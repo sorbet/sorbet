@@ -2892,29 +2892,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Hash>(location, isKwargs, move(kvPairs));
         }
-        case PM_KEYWORD_REST_PARAMETER_NODE: { // A keyword rest parameter, like `def foo(**kwargs)`
-            // This doesn't include `**nil`, which is a `PM_NO_KEYWORDS_PARAMETER_NODE`.
-            auto keywordRestParamNode = down_cast<pm_keyword_rest_parameter_node>(node);
-
-            core::NameRef sorbetName;
-            core::LocOffsets kwrestLoc;
-            if (auto prismName = keywordRestParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
-                // A named keyword rest parameter, like `def foo(**kwargs)`
-                sorbetName = translateConstantName(prismName);
-
-                // The location doesn't include the `**`, only the splatted expression like `kwargs` in `**kwargs`
-                constexpr uint32_t length = "**"sv.size();
-                kwrestLoc = core::LocOffsets{location.beginPos() + length, location.endPos()};
-            } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName = nextUniqueParserName(core::Names::starStar());
-
-                // This location *does* include the whole `**`.
-                kwrestLoc = location;
-            }
-
-            return make_node_with_expr<parser::Kwrestarg>(
-                MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)), kwrestLoc, sorbetName);
-        }
+        case PM_KEYWORD_REST_PARAMETER_NODE:
+            // Handled inline in `translateParametersNode()` because it needs `isDef` context.
+            unreachable("PM_KEYWORD_REST_PARAMETER_NODE should be handled in translateParametersNode()");
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
             auto lambdaNode = down_cast<pm_lambda_node>(node);
 
@@ -4261,9 +4241,25 @@ Translator::translateParametersNode(pm_parameters_node *paramsNode, core::LocOff
     bool hasForwardingParameter = false;
     if (auto *prismKwRestNode = paramsNode->keyword_rest) {
         switch (PM_NODE_TYPE(prismKwRestNode)) {
-            case PM_KEYWORD_REST_PARAMETER_NODE: // `def foo(**kwargs)`
-                params.emplace_back(translate(prismKwRestNode));
+            case PM_KEYWORD_REST_PARAMETER_NODE: { // `def foo(**kwargs)`
+                auto keywordRestParamNode = down_cast<pm_keyword_rest_parameter_node>(prismKwRestNode);
+                auto kwrestLoc = translateLoc(prismKwRestNode->location);
+                core::NameRef sorbetName;
+
+                if (auto prismName = keywordRestParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
+                    sorbetName = translateConstantName(prismName);
+                    constexpr uint32_t length = "**"sv.size();
+                    kwrestLoc = core::LocOffsets{kwrestLoc.beginPos() + length, kwrestLoc.endPos()};
+                } else if (isDef) {
+                    sorbetName = core::Names::starStar();
+                } else {
+                    sorbetName = nextUniqueParserName(core::Names::starStar());
+                }
+
+                params.emplace_back(make_node_with_expr<parser::Kwrestarg>(
+                    MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)), kwrestLoc, sorbetName));
                 break;
+            }
             case PM_FORWARDING_PARAMETER_NODE: { // `def foo(...)`
                 hasForwardingParameter = true;
                 params.emplace_back(translate(prismKwRestNode));
