@@ -4366,7 +4366,7 @@ class Net::IMAP::DataLite < Data
   def init_with(coder); end
 end
 
-class Net::IMAP::CommandData < Net::IMAP::DataLite
+class Net::IMAP::CommandData < ::Data
   def initialize(data); end
 
   def data; end
