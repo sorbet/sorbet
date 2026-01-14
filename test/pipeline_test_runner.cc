@@ -38,10 +38,12 @@
 #include "packager/packager.h"
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
+#include "parser/prism/Translator.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"
 #include "rbs/AssertionsRewriter.h"
 #include "rbs/SigsRewriter.h"
+#include "rbs/prism/RBSRewriterPrism.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -65,6 +67,19 @@ string singleTest;
 
 constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
 constexpr string_view packageFileName = "__package.rb"sv;
+
+parser::ParseResult runPrismWithRBS(core::GlobalState &gs, core::FileRef file, core::MutableContext &ctx) {
+    parser::Prism::Parser prismParser{ctx.file.data(ctx).source()};
+    auto prismResult = prismParser.parseWithoutTranslation(true);
+
+    auto *rewrittenNode = rbs::runPrismRBSRewrite(gs, file, prismResult.getRawNodePointer(),
+                                                  prismResult.getCommentLocations(), ctx, prismParser);
+
+    auto translatedTree = parser::Prism::Translator(prismParser, ctx, prismResult.getParseErrors(), false, false)
+                              .translate(rewrittenNode);
+
+    return {move(translatedTree), prismResult.getCommentLocations()};
+}
 
 class CFGCollectorAndTyper {
 public:
@@ -268,8 +283,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 }
                 case realmain::options::Parser::PRISM: {
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
-                        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
-                        // in `PrismDesugar.cc`. For now, just use the legacy parser for RBS.
+                        legacyParseResult = runPrismWithRBS(gs, file, ctx);
+                        prismParseResult.tree = nullptr;
                     } else {
                         auto directlyDesugar = true;
                         prismParseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
@@ -283,7 +298,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         {
             auto &nodes = parseResult.tree;
 
-            if (gs.cacheSensitiveOptions.rbsEnabled) {
+            if (gs.cacheSensitiveOptions.rbsEnabled && parser == realmain::options::Parser::ORIGINAL) {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
                 core::MutableContext ctx(gs, core::Symbols::root(), file);
                 auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
@@ -308,7 +323,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             ast::ExpressionPtr legacyDesugarAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
 
             if (prismParseResult.tree != nullptr) {
-                // This AST would have been desugared deirectly by Prism::Translator
+                // This AST would have been desugared directly by Prism::Translator
                 auto prismDirectDesugarAST = ast::prismDesugar::node2Tree(ctx, move(prismParseResult.tree));
 
                 if (!legacyDesugarAST.prismDesugarEqual(gs, prismDirectDesugarAST, file)) {
@@ -778,13 +793,17 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                auto directlyDesugar = false;
-                parseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    parseResult = runPrismWithRBS(*gs, f.file, ctx);
+                } else {
+                    auto directlyDesugar = false;
+                    parseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
+                }
                 break;
             }
         }
 
-        if (gs->cacheSensitiveOptions.rbsEnabled) {
+        if (gs->cacheSensitiveOptions.rbsEnabled && parser == realmain::options::Parser::ORIGINAL) {
             auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
             auto commentMap = associator.run(parseResult.tree);
 
