@@ -130,13 +130,6 @@ std::unique_ptr<parser::Node> Translator::make_unsupported_node(TArgs &&...args)
     }
 }
 
-// Indicates that a particular code path should never be reached, with an explanation of why.
-// Throws a `sorbet::SorbetException` when triggered to help with debugging.
-template <typename... TArgs>
-[[noreturn]] void unreachable(fmt::format_string<TArgs...> reasonFormatStr, TArgs &&...args) {
-    Exception::raise(reasonFormatStr, forward<TArgs>(args)...);
-}
-
 // Helper function to check if an AST expression is a string literal
 bool isStringLit(const ast::ExpressionPtr &expr) {
     if (auto lit = ast::cast_tree<ast::Literal>(expr)) {
