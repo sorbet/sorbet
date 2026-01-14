@@ -201,6 +201,20 @@ string_view nodeKindToString(const pm_node_t *node) {
     }
 }
 
+// Get the NameRef for an anonymous parameter node
+core::NameRef anonymousParamName(core::MutableContext ctx, const pm_node_t *node) {
+    switch (PM_NODE_TYPE(node)) {
+        case PM_REST_PARAMETER_NODE:
+            return core::Names::star();
+        case PM_KEYWORD_REST_PARAMETER_NODE:
+            return core::Names::starStar();
+        case PM_BLOCK_PARAMETER_NODE:
+            return core::Names::ampersand();
+        default:
+            unreachable("Unexpected anonymous parameter node type");
+    }
+}
+
 optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, pm_node_t *methodArg, RBSArg arg,
                                                      const parser::Prism::Parser &prismParser,
                                                      const RBSDeclaration &declaration) {
@@ -624,7 +638,13 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
         pm_node_t *methodParam = methodParams[i];
         if (!checkParameterKindMatch(arg, methodParam)) {
             if (auto e = ctx.beginIndexerError(arg.loc, core::errors::Rewriter::RBSIncorrectParameterKind)) {
-                auto methodParamNameStr = prismParser.resolveConstant(getParamName(methodParams[i]));
+                auto paramNameId = getParamName(methodParams[i]);
+                string_view methodParamNameStr;
+                if (paramNameId != PM_CONSTANT_ID_UNSET) {
+                    methodParamNameStr = prismParser.resolveConstant(paramNameId);
+                } else {
+                    methodParamNameStr = anonymousParamName(ctx, methodParam).shortName(ctx.state);
+                }
                 e.setHeader("Argument kind mismatch for `{}`, method declares `{}`, but RBS signature declares `{}`",
                             methodParamNameStr, nodeKindToString(methodParam), argKindToString(arg.kind));
 
@@ -641,11 +661,12 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
             auto *methodParam = methodParams[i];
             auto methodParamName = getParamName(methodParam);
 
-            // Special case: anonymous block parameter (&) should use symbol :&
-            if (arg.kind == RBSArg::Kind::Block && methodParamName == PM_CONSTANT_ID_UNSET) {
-                symbolNode = prism.Symbol(tinyLocOffsets, "&"sv);
-            } else {
+            if (methodParamName != PM_CONSTANT_ID_UNSET) {
                 symbolNode = prism.SymbolFromConstant(tinyLocOffsets, methodParamName);
+            } else {
+                // Anonymous parameter - use the canonical name (*, **, &)
+                auto name = anonymousParamName(ctx, methodParam);
+                symbolNode = prism.Symbol(tinyLocOffsets, name.shortName(ctx.state));
             }
         }
 
