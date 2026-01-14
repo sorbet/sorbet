@@ -205,6 +205,8 @@ This is required even if the block is only ever used by way of `yield`, and neve
 
 **Why?** The distinguishing factor of `# typed: strict` is that every method has an explicit interface with a signature. It's equally important to be explicit about the block argument, if present. For more, see the docs on [strictness levels](static.md#file-level-granularity-strictness-levels).
 
+**Note**: This error code is from an old Sorbet version. In newer versions, it's replaced with [5082](#5082), which extends the logic discussed here to any method with a `sig`, regardless of whether it is in a `# typed: strict` file.
+
 ## 3008
 
 Sorbet does not support the `undef` keyword. Sorbet assumes that the set of all classes, modules, methods, and constants is static throughout the lifetime of a program. It does not attempt to model the way that a Ruby program might mutate itself by deleting constants or methods at runtime.
@@ -2846,6 +2848,30 @@ end
 Sorbet treats the `::Class` and `::Module` classes in the Ruby standard library as generic classes—generic in their [attached class](attached-class.md). For more about this, read [T::Class and T::Module](class-of.md). As a result, code that creates custom subclasses of `::Module` must redeclare this generic type member by writing `has_attached_class!`.
 
 Note that this error is only reported in `# typed: strict` files and above. Downgrading the file that declares an explicit subclass of `Module` to `typed: true` will silence this error. (This also applies to direct subclasses of `Class`, but note that directly subclassing `Class` is rejected by the Ruby VM at runtime.)
+
+## 5082
+
+Using `yield` in a method body means that a method implicitly takes a block argument. Any method with a `sig` that uses `yield` or `block_given?` must explicitly declare a block argument to make the contract clear:
+
+```ruby
+sig { params(blk: T.proc.void).void }
+def foo(&blk)
+  yield # even though `blk` is not mentioned by name here
+end
+```
+
+This is required even if the block is only ever used by way of `yield`, and never with something like `blk.call`. To avoid needing to name the block parameter, consider using Ruby's anonymous block parameter syntax:
+
+```ruby
+sig { params("&": T.proc.void).void }
+def foo(&)
+  yield
+end
+```
+
+**Why?** The distinguishing factor of `# typed: strict` is that every method has an explicit interface with a signature. It's equally important to be explicit about the block argument, if present. For more, see the docs on [strictness levels](static.md#file-level-granularity-strictness-levels).
+
+**Note**: Previously, this requirement was only for `# typed: strict` files (see [3007](#3007)). It is now reported for all methods with `sig`'s on them.
 
 ## 6001
 
