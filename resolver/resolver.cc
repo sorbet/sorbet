@@ -3414,13 +3414,16 @@ private:
                                     "yield");
                         e.addErrorLine(ctx.locAt(local->loc), "Detected implicit block parameter here");
                         if (mdef.params.size() > 1 && !sigParams.empty()) {
+                            auto &beforeBlockParam = mdef.params[mdef.params.size() - 2];
+                            auto mdefInsertLoc = beforeBlockParam.loc().copyEndWithZeroLength();
+                            if (auto optionalParam = ast::cast_tree<ast::OptionalParam>(beforeBlockParam)) {
+                                mdefInsertLoc = optionalParam->default_.loc().copyEndWithZeroLength();
+                            }
                             e.addAutocorrect(core::AutocorrectSuggestion{
                                 "Insert anonymous, untyped block parameter",
                                 {core::AutocorrectSuggestion::Edit{
                                      ctx.locAt(sigParams.back().typeLoc.copyEndWithZeroLength()), ", \"&\": T.untyped"},
-                                 core::AutocorrectSuggestion::Edit{
-                                     ctx.locAt(mdef.params[mdef.params.size() - 2].loc().copyEndWithZeroLength()),
-                                     ", &"}}});
+                                 core::AutocorrectSuggestion::Edit{ctx.locAt(mdefInsertLoc), ", &"}}});
                         } else if (mdef.params.size() == 1 && sigParams.empty() && !sig.seen.params.exists() &&
                                    mdef.declLoc.exists() && !mdef.declLoc.empty() &&
                                    (sig.seen.returns.exists() || sig.seen.void_.exists())) {

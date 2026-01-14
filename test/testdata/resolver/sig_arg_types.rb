@@ -39,6 +39,12 @@ class A
     yield
   # ^^^^^ error: Method `call` does not exist on `NilClass`
   end
+
+  sig { params(x: Integer,).returns(Integer) }
+  def calls_yield_with_params_default(x: 0) # error: does not mention a block parameter
+    yield
+  # ^^^^^ error: Method `call` does not exist on `NilClass`
+  end
 end
 
 class A
