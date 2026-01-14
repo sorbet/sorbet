@@ -3420,25 +3420,25 @@ private:
                                 mdefInsertLoc = optionalParam->default_.loc().copyEndWithZeroLength();
                             }
                             e.addAutocorrect(core::AutocorrectSuggestion{
-                                "Insert anonymous, untyped block parameter",
+                                "Insert untyped block parameter",
                                 {core::AutocorrectSuggestion::Edit{
-                                     ctx.locAt(sigParams.back().typeLoc.copyEndWithZeroLength()), ", \"&\": T.untyped"},
-                                 core::AutocorrectSuggestion::Edit{ctx.locAt(mdefInsertLoc), ", &"}}});
+                                     ctx.locAt(sigParams.back().typeLoc.copyEndWithZeroLength()), ", blk: T.untyped"},
+                                 core::AutocorrectSuggestion::Edit{ctx.locAt(mdefInsertLoc), ", &blk"}}});
                         } else if (mdef.params.size() == 1 && sigParams.empty() && !sig.seen.params.exists() &&
                                    mdef.declLoc.exists() && !mdef.declLoc.empty() &&
                                    (sig.seen.returns.exists() || sig.seen.void_.exists())) {
                             auto paramsLoc = sig.seen.returns.exists() ? sig.seen.returns : sig.seen.void_;
                             auto declLoc = ctx.locAt(mdef.declLoc);
-                            auto declLocStr = "(&)";
+                            auto declLocStr = "(&blk)";
                             if (declLoc.source(ctx)->back() == ')') {
-                                declLocStr = "&";
+                                declLocStr = "&blk";
                                 declLoc = declLoc.adjust(ctx, 0, -1);
                             }
                             declLoc = declLoc.copyEndWithZeroLength();
                             e.addAutocorrect(core::AutocorrectSuggestion{
-                                "Insert anonymous, untyped block parameter",
+                                "Insert untyped block parameter",
                                 {core::AutocorrectSuggestion::Edit{ctx.locAt(paramsLoc.copyWithZeroLength()),
-                                                                   "params(\"&\": T.untyped)."},
+                                                                   "params(blk: T.untyped)."},
                                  core::AutocorrectSuggestion::Edit{declLoc, declLocStr}}});
                         }
                     }
