@@ -69,6 +69,7 @@ class A
   sig {params(x: Integer).returns(Integer)}
   def test_yield_no_block_type(x)
     yield x
+
   end
 
   abstract!
