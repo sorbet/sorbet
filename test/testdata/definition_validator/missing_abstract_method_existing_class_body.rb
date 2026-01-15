@@ -29,3 +29,5 @@ end
     sig {override.void}
     def foo; end
   end
+
+  class Child3 < Parent; include Kernel; end # error: Missing definitions for abstract methods
