@@ -348,6 +348,52 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     return {suggestion};
 }
 
+optional<core::AutocorrectSuggestion> PackageInfo::addVisibleTo(const core::GlobalState &gs,
+                                                                const MangledName &targetPackage) const {
+    auto targetPackageName = targetPackage.owner.show(gs);
+    auto visibleToLine = fmt::format("visible_to {}", targetPackageName);
+    auto pkgFile = this->file;
+    auto insertionLoc = core::Loc::none(pkgFile);
+    if (!visibleTo_.empty()) {
+        core::LocOffsets visibleToInsertAfter;
+        for (auto &v : visibleTo_) {
+            if (visibleToLine > core::Loc(pkgFile, v.loc).source(gs)) {
+                visibleToInsertAfter = v.loc;
+            }
+        }
+        if (!visibleToInsertAfter.exists()) {
+            // Insert before the first visible_to
+            auto beforeVisibleTo = visibleTo_.front().loc;
+            auto [beforeVisibleToLoc, numWhitespace] = core::Loc(pkgFile, beforeVisibleTo).findStartOfIndentation(gs);
+            auto endOfPrevLine = beforeVisibleToLoc.adjust(gs, -numWhitespace - "\n"sv.size(), 0);
+            insertionLoc = endOfPrevLine.copyWithZeroLength();
+        } else {
+            insertionLoc = core::Loc(pkgFile, visibleToInsertAfter.copyEndWithZeroLength());
+        }
+    } else {
+        // if we don't have any visible_to entries, then we can try adding it right before the final `end`
+        uint32_t visibleToLoc = this->locs.loc.endPos() - "end\n"sv.size();
+        // we want to find the end of the last non-empty line, so
+        // let's do something gross: walk backward until we find non-whitespace
+        const auto &file_source = this->file.data(gs).source();
+        while (isspace(file_source[visibleToLoc])) {
+            visibleToLoc--;
+            // this shouldn't happen in a well-formatted
+            // `__package.rb` file, but just to be safe
+            if (visibleToLoc == 0) {
+                return nullopt;
+            }
+        }
+        insertionLoc = {this->file, visibleToLoc + 1, visibleToLoc + 1};
+    }
+    ENFORCE(insertionLoc.exists());
+
+    core::AutocorrectSuggestion suggestion(
+        fmt::format("Add `visible_to {}` in package `{}`", targetPackageName, mangledName_.owner.show(gs)),
+        {{insertionLoc, fmt::format("\n  {}", visibleToLine)}});
+    return {suggestion};
+}
+
 optional<ImportType> PackageInfo::importsPackage(MangledName mangledName) const {
     if (!mangledName.exists()) {
         return nullopt;
