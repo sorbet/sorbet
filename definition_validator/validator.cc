@@ -1,6 +1,4 @@
 #include "absl/strings/match.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
@@ -8,7 +6,6 @@
 #include "core/core.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
-#include "core/source_generator/source_generator.h"
 
 #include "absl/algorithm/container.h"
 
@@ -1160,23 +1157,6 @@ private:
                 }
             }
         }
-    }
-
-    string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::ClassOrModuleRef sym,
-                                         const core::MethodRef abstractMethodRef, const string &classOrModuleIndent) {
-        auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
-        if (sym.data(gs)->attachedClass(gs).exists()) {
-            showOptions = showOptions.withForceSelfPrefix();
-        }
-        auto methodDefinition =
-            core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, showOptions);
-
-        vector<string> indentedLines;
-        absl::c_transform(
-            absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
-            [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
-        auto indentedMethodDefinition = absl::StrJoin(indentedLines, "\n");
-        return indentedMethodDefinition;
     }
 
     void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
