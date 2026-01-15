@@ -57,7 +57,6 @@ insert_method::run(const core::GlobalState &gs, absl::Span<const core::MethodRef
     auto idx = -1;
     for (auto proto : toInsert) {
         idx++;
-        errorBuilder.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
 
         auto indentedMethodDefinition = defineInheritedAbstractMethod(gs, inWhere, proto, classOrModuleIndent);
         if (hasSingleLineDefinition) {
