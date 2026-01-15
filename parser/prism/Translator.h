@@ -41,9 +41,11 @@ class Translator final {
     uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
-    const core::LocOffsets enclosingMethodLoc;   // The location of the method we're in, or `none()`
-    const core::NameRef enclosingMethodName;     // The name of the method we're in, or `noName()`
-    const core::NameRef enclosingBlockParamName; // The name of the block param of the method we're in, or `noName()`
+    const core::LocOffsets enclosingMethodLoc; // The location of the method we're in, or `none()`
+    const core::NameRef enclosingMethodName;   // The name of the method we're in, or `noName()`
+    core::LocOffsets &enclosingBlockParamLoc;  // The loc of the `yield` or `block_given?` that triggered a block param
+                                               // to be created, or else the original location of the block parameter.
+    core::NameRef &enclosingBlockParamName;    // The name of the block param of the method we're in, or `noName()`
     const bool isInModule = false;   // True if we're in a Module definition. False for classes and singleton classes
     const bool isInAnyBlock = false; // True if we're in a `{ }`/`do end` block
 
@@ -53,11 +55,13 @@ class Translator final {
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
     Translator(const Parser &parser, core::MutableContext ctx, absl::Span<const ParseError> parseErrors,
-               bool directlyDesugar, bool preserveConcreteSyntax)
+               bool directlyDesugar, bool preserveConcreteSyntax, core::LocOffsets &enclosingBlockParamLoc,
+               core::NameRef &enclosingBlockParamName)
         : parser(parser), ctx(ctx), parseErrors(parseErrors), directlyDesugar(directlyDesugar),
           preserveConcreteSyntax(preserveConcreteSyntax), parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
           parserUniqueCounter(this->parserUniqueCounterStorage),
-          desugarUniqueCounter(this->desugarUniqueCounterStorage) {}
+          desugarUniqueCounter(this->desugarUniqueCounterStorage), enclosingBlockParamLoc(enclosingBlockParamLoc),
+          enclosingBlockParamName(enclosingBlockParamName) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
@@ -66,8 +70,8 @@ private:
     // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as a dummy value and is never used
     Translator(const Translator &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
-               core::NameRef enclosingMethodName, core::NameRef enclosingBlockParamName, bool isInModule,
-               bool isInAnyBlock)
+               core::NameRef enclosingMethodName, core::LocOffsets &enclosingBlockParamLoc,
+               core::NameRef &enclosingBlockParamName, bool isInModule, bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           directlyDesugar(parent.directlyDesugar), preserveConcreteSyntax(parent.preserveConcreteSyntax),
           parserUniqueCounterStorage(9999), desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
@@ -75,7 +79,8 @@ private:
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName),
-          enclosingBlockParamName(enclosingBlockParamName), isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
+          enclosingBlockParamLoc(enclosingBlockParamLoc), enclosingBlockParamName(enclosingBlockParamName),
+          isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
 
     template <typename SorbetNode, typename... TArgs>
     std::unique_ptr<parser::Node> make_node_with_expr(ast::ExpressionPtr desugaredExpr, TArgs &&...args) const;
@@ -89,7 +94,7 @@ private:
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
-    std::pair<std::unique_ptr<parser::Params>, core::NameRef /* enclosingBlockParamName */>
+    std::tuple<std::unique_ptr<parser::Params>, core::LocOffsets, core::NameRef /* enclosingBlockParamName */>
     translateParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location, bool isDef);
 
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, bool>
@@ -226,10 +231,12 @@ private:
     // Context management helpers. These return a copy of `this` with some change to the context.
     bool isInMethodDef() const;
     Translator enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
-                              core::NameRef enclosingBlockParamName) const;
+                              core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName) const;
     Translator enterBlockContext() const;
-    Translator enterModuleContext() const;
-    Translator enterClassContext() const;
+    Translator enterModuleContext(core::LocOffsets &enclosingBlockParamLoc,
+                                  core::NameRef &enclosingBlockParamName) const;
+    Translator enterClassContext(core::LocOffsets &enclosingBlockParamLoc,
+                                 core::NameRef &enclosingBlockParamName) const;
 
     std::pair<core::LocOffsets, core::LocOffsets> computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver,
                                                                        absl::Span<pm_node_t *> prismArgs,

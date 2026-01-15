@@ -5,7 +5,7 @@ class ::<root> < ::Object ()
   class ::Parent[K] < ::Object () @ test/testdata/infer/bad_child_class.rb:12
     type-member(=) ::Parent::K -> Parent::K @ test/testdata/infer/bad_child_class.rb:15
     method ::Parent#foo (<blk>) -> Parent::K @ test/testdata/infer/bad_child_class.rb:17
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/infer/bad_child_class.rb start=??? end=???}
   class ::<Class:Parent>[<AttachedClass>] < ::<Class:Object> (Generic, Helpers, Sig) @ test/testdata/infer/bad_child_class.rb:12
     type-member(+) ::<Class:Parent>::<AttachedClass> -> T.attached_class (of Parent) @ test/testdata/infer/bad_child_class.rb:12
     method ::<Class:Parent>#<static-init> (<blk>) @ test/testdata/infer/bad_child_class.rb:12

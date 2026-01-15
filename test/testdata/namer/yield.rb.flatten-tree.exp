@@ -2,8 +2,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Main<<C Main>> < (::<todo sym>)
     def yielder(<blk>)
       begin
-        a = <blk>.call(1)
-        <blk>.call(a)
+        a = <implicit yield>.call(1)
+        <implicit yield>.call(a)
       end
     end
 
@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def blockyield(<blk>)
       <self>.yielder() do |i$1|
-        <blk>.call(i$1)
+        <implicit yield>.call(i$1)
       end
     end
 

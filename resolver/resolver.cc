@@ -3408,21 +3408,47 @@ private:
             } else {
                 if (!isBlkArg) {
                     info.hasMissingArgument = true;
+                } else if (treeArgName == core::Names::implicitYield()) {
+                    if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::UnnamedBlockParameter)) {
+                        e.setHeader("Method `{}` uses `{}` but does not mention a block parameter", mdef.name.show(ctx),
+                                    "yield");
+                        e.addErrorLine(ctx.locAt(local->loc), "Detected implicit block parameter here");
+                        if (mdef.params.size() > 1 && !sigParams.empty()) {
+                            auto &beforeBlockParam = mdef.params[mdef.params.size() - 2];
+                            auto mdefInsertLoc = beforeBlockParam.loc().copyEndWithZeroLength();
+                            if (auto optionalParam = ast::cast_tree<ast::OptionalParam>(beforeBlockParam)) {
+                                mdefInsertLoc = optionalParam->default_.loc().copyEndWithZeroLength();
+                            }
+                            e.addAutocorrect(core::AutocorrectSuggestion{
+                                "Insert untyped block parameter",
+                                {core::AutocorrectSuggestion::Edit{
+                                     ctx.locAt(sigParams.back().typeLoc.copyEndWithZeroLength()), ", blk: T.untyped"},
+                                 core::AutocorrectSuggestion::Edit{ctx.locAt(mdefInsertLoc), ", &blk"}}});
+                        } else if (mdef.params.size() == 1 && sigParams.empty() && !sig.seen.params.exists() &&
+                                   mdef.declLoc.exists() && !mdef.declLoc.empty() &&
+                                   (sig.seen.returns.exists() || sig.seen.void_.exists())) {
+                            auto paramsLoc = sig.seen.returns.exists() ? sig.seen.returns : sig.seen.void_;
+                            auto declLoc = ctx.locAt(mdef.declLoc);
+                            auto declLocStr = "(&blk)";
+                            if (declLoc.source(ctx)->back() == ')') {
+                                declLocStr = "&blk";
+                                declLoc = declLoc.adjust(ctx, 0, -1);
+                            }
+                            declLoc = declLoc.copyEndWithZeroLength();
+                            e.addAutocorrect(core::AutocorrectSuggestion{
+                                "Insert untyped block parameter",
+                                {core::AutocorrectSuggestion::Edit{ctx.locAt(paramsLoc.copyWithZeroLength()),
+                                                                   "params(blk: T.untyped)."},
+                                 core::AutocorrectSuggestion::Edit{declLoc, declLocStr}}});
+                        }
+                    }
                 }
 
                 if (param.type == nullptr) {
-                    if (isBlkArg && ctx.file.data(ctx).strictLevel >= core::StrictLevel::Strict) {
-                        // Only in `typed: strict` do we report the "method uses `yield` but does
-                        // not mention a block parameter" error, because we only know for sure that
-                        // there will be a sig on a method in `# typed: strict` files.
-                        //
-                        // If we were to somehow communicate from Desugar to Resolver that the
-                        // method is relying on `yield` despite not mentioning an explicit block
-                        // arg, then we could report that error here and expand the cases where we
-                        // know for sure that the method does not take a block to any method with a
-                        // sig, regardless of the enclosing file's sigil.
-                        //
-                        // Short of that, we can only set this for `# typed: strict` files today.
+                    if (isBlkArg) {
+                        // If we got a sig, and the MethodDef mentions `yield` but did not
+                        // mention a blockArg, and the sig omits a type for the block arg, we
+                        // can assume that this method does not take a block arg.
                         //
                         // We're using `bottom` instead of `nilClass` because `foo(&nil)` is valid.
                         param.type = core::Types::bottom();

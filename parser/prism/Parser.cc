@@ -16,9 +16,11 @@ parser::ParseResult Parser::run(core::MutableContext ctx, bool directlyDesugar, 
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
     Prism::ParseResult parseResult = parser.parseWithoutTranslation(collectComments);
 
-    auto translatedTree =
-        Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar, preserveConcreteSyntax)
-            .translate(parseResult.getRawNodePointer());
+    auto enclosingBlockParamLoc = core::LocOffsets::none();
+    auto enclosingBlockParamName = core::NameRef::noName();
+    auto translatedTree = Prism::Translator(parser, ctx, parseResult.parseErrors, directlyDesugar,
+                                            preserveConcreteSyntax, enclosingBlockParamLoc, enclosingBlockParamName)
+                              .translate(parseResult.getRawNodePointer());
     return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
 }
 

@@ -15,7 +15,8 @@ class A
     A.unary(self) # error: Not enough arguments provided
     A.unary(self, 0)
     A.unary(self, 0) {}
-    A.unary(self, 0) do
+    #        ^^ error: does not take a block
+    A.unary(self, 0) do # error: does not take a block
     end
   end
 
@@ -28,7 +29,7 @@ A.unary(A.new, 0)
 A.unary(
   A.new, 0
 )
-A.unary(A.new, 0) do
+A.unary(A.new, 0) do # error: does not take a block
 end
 
 (T.unsafe(A.new)).unary(0)

@@ -1,17 +1,3 @@
-suggest-sig.rb:74: Method `takesBlock` uses `yield` but does not mention a block parameter https://srb.help/3007
-    74 |def takesBlock
-        ^^^^^^^^^^^^^^
-    suggest-sig.rb:75: Arising from use of `yield` in method body
-    75 |  yield 1
-          ^^^^^^^
-
-suggest-sig.rb:92: Method `with_block` uses `yield` but does not mention a block parameter https://srb.help/3007
-    92 |def with_block
-        ^^^^^^^^^^^^^^
-    suggest-sig.rb:93: Arising from use of `yield` in method body
-    93 |  yield
-          ^^^^^
-
 suggest-sig.rb:124: Malformed `sig`: `generated` is invalid in this context https://srb.help/5003
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -379,7 +365,7 @@ suggest-sig.rb:204: The method `returns_int` does not have a `sig` https://srb.h
     suggest-sig.rb:204: Inserted `sig(:final) { returns(Integer) }`
      204 |  def returns_int; 42; end
             ^
-Errors: 43
+Errors: 41
 
 --------------------------------------------------------------------------
 

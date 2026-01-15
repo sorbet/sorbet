@@ -873,11 +873,14 @@ private:
         if (pos < methodData->parameters.size()) {
             // TODO: check that flags match;
             if (parsedParam.loc.exists()) {
-                methodData->parameters[pos].loc = ctx.locAt(parsedParam.loc);
+                if (parsedParam.local._name != core::Names::implicitYield()) {
+                    methodData->parameters[pos].loc = ctx.locAt(parsedParam.loc);
+                }
             }
             return;
         }
 
+        core::LocOffsets loc = parsedParam.loc;
         core::NameRef name;
         if (parsedParam.flags.isKeyword) {
             if (parsedParam.flags.isRepeated) {
@@ -890,13 +893,24 @@ private:
                 name = parsedParam.local._name;
             }
         } else if (parsedParam.flags.isBlock) {
+            if (parsedParam.local._name == core::Names::implicitYield()) {
+                // The loc of an `implicitYield` Local points at the `yield` or `block_given?` node,
+                // which is not contained in the declLoc of the enclosing method (can cause
+                // confusing errors). Also, the isSyntheticBlockParameter helper looks at whether
+                // the loc exists (because we normalize all block parameter names to blkArg--it
+                // can't branch on the name). Thus the loc we use in the tree (for the "implicit
+                // yield" error) must differ from the loc that we use in the symbol table. The
+                // symbol table needs to still be `none`, like it would have been had we not
+                // explictily set the loc to something when desugaring.
+                loc = core::LocOffsets::none();
+            }
             name = core::Names::blkArg();
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &paramInfo = ctx.state.enterMethodParameter(ctx.locAt(parsedParam.loc), ctx.owner.asMethodRef(), name);
+        auto &paramInfo = ctx.state.enterMethodParameter(ctx.locAt(loc), ctx.owner.asMethodRef(), name);
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodParameter
         ENFORCE(methodData->parameters.size() >= pos + 1);

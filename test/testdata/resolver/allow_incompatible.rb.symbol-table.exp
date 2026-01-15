@@ -4,22 +4,22 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
   class ::AbstractClass < ::Object () @ test/testdata/resolver/allow_incompatible.rb:3
     method ::AbstractClass#bar : abstract (<blk>) -> Object @ test/testdata/resolver/allow_incompatible.rb:12
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
   class ::<Class:AbstractClass>[<AttachedClass>] < ::<Class:Object> (Helpers, Sig) @ test/testdata/resolver/allow_incompatible.rb:3
     type-member(+) ::<Class:AbstractClass>::<AttachedClass> -> T.attached_class (of AbstractClass) @ test/testdata/resolver/allow_incompatible.rb:3
     method ::<Class:AbstractClass>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
     method ::<Class:AbstractClass>#foo : abstract (<blk>) -> Object @ test/testdata/resolver/allow_incompatible.rb:9
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
   class ::ImplEnabling < ::AbstractClass () @ test/testdata/resolver/allow_incompatible.rb:15
     method ::ImplEnabling#bar : override|allow_incompatible (x, <blk>) -> Object @ test/testdata/resolver/allow_incompatible.rb:21
       argument x<> -> Integer @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=20:50 end=20:51}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
   class ::<Class:ImplEnabling>[<AttachedClass>] < ::<Class:AbstractClass> () @ test/testdata/resolver/allow_incompatible.rb:15
     type-member(+) ::<Class:ImplEnabling>::<AttachedClass> -> T.attached_class (of ImplEnabling) @ test/testdata/resolver/allow_incompatible.rb:15
     method ::<Class:ImplEnabling>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible.rb:15
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
     method ::<Class:ImplEnabling>#foo : override (x, <blk>) -> Object @ test/testdata/resolver/allow_incompatible.rb:18
       argument x<> -> Integer @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=16:51 end=16:52}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
 

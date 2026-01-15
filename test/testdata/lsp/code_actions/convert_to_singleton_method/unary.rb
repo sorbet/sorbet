@@ -15,7 +15,8 @@ class A
     unary # error: Not enough arguments provided
     unary(0)
     unary(0) {}
-    unary(0) do
+    #        ^^ error: does not take a block
+    unary(0) do # error: does not take a block
     end
   end
 
@@ -28,7 +29,7 @@ A.new.unary(0)
 A.new.unary(
   0
 )
-A.new.unary(0) do
+A.new.unary(0) do # error: does not take a block
 end
 
 (T.unsafe(A.new)).unary(0)
