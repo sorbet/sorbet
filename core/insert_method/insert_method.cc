@@ -2,9 +2,8 @@
 
 namespace sorbet::core {
 
-vector<core::AutocorrectSuggestion::Edit> insert_method::run() {
-    auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
-    auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
+vector<core::AutocorrectSuggestion::Edit> insert_method::run(core::Loc classOrModuleDeclaredAt,
+                                                             core::Loc classOrModuleEndsAt) {
     auto hasSingleLineDefinition =
         classOrModuleDeclaredAt.toDetails(ctx).first.line == classOrModuleEndsAt.toDetails(ctx).second.line;
 

@@ -1205,7 +1205,10 @@ private:
                                    missingAbstractMethods.front().show(ctx), sym.show(ctx));
         }
 
-        auto edits = core::insert_method::run();
+        auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
+        auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
+        auto edits = core::insert_method::run(classOrModuleDeclaredAt, classOrModuleEndsAt);
+
         if (edits.empty()) {
             return;
         }
