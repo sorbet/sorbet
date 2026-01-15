@@ -1207,7 +1207,8 @@ private:
 
         auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
         auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
-        auto edits = core::insert_method::run(classOrModuleDeclaredAt, classOrModuleEndsAt);
+        auto edits =
+            core::insert_method::run(ctx, missingAbstractMethods, sym, classOrModuleDeclaredAt, classOrModuleEndsAt);
 
         if (edits.empty()) {
             return;

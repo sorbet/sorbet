@@ -9,7 +9,8 @@ namespace sorbet::core {
 class insert_method {
 public:
     static std::vector<core::AutocorrectSuggestion::Edit>
-    run(const core::GlobalState &gs, core::Loc classOrModuleDeclaredAt, core::Loc classOrModuleEndsAt);
+    run(const core::GlobalState &gs, absl::Span<const core::MethodRef> toInsert, core::ClassOrModuleRef inWhere,
+        core::Loc classOrModuleDeclaredAt, core::Loc classOrModuleEndsAt);
 };
 
 } // namespace sorbet::core

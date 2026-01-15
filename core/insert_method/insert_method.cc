@@ -3,7 +3,8 @@
 namespace sorbet::core {
 
 vector<core::AutocorrectSuggestion::Edit>
-insert_method::run(const core::GlobalState &gs, core::Loc classOrModuleDeclaredAt, core::Loc classOrModuleEndsAt) {
+insert_method::run(const core::GlobalState &gs, absl::Span<const core::MethodRef> toInsert,
+                   core::ClassOrModuleRef inWhere, core::Loc classOrModuleDeclaredAt, core::Loc classOrModuleEndsAt) {
     auto hasSingleLineDefinition =
         classOrModuleDeclaredAt.toDetails(gs).first.line == classOrModuleEndsAt.toDetails(gs).second.line;
 
@@ -31,14 +32,14 @@ insert_method::run(const core::GlobalState &gs, core::Loc classOrModuleDeclaredA
     fmt::memory_buffer buf;
 
     auto idx = -1;
-    for (auto proto : missingAbstractMethods) {
+    for (auto proto : toInsert) {
         idx++;
         errorBuilder.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
 
-        auto indentedMethodDefinition = defineInheritedAbstractMethod(gs, sym, proto, classOrModuleIndent);
+        auto indentedMethodDefinition = defineInheritedAbstractMethod(gs, inWhere, proto, classOrModuleIndent);
         if (hasSingleLineDefinition) {
             fmt::format_to(back_inserter(buf), "\n{}", indentedMethodDefinition);
-        } else if (idx + 1 < missingAbstractMethods.size()) {
+        } else if (idx + 1 < toInsert.size()) {
             fmt::format_to(back_inserter(buf), "{}\n", indentedMethodDefinition);
         } else {
             fmt::format_to(back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
