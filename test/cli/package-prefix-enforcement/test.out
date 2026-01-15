@@ -104,15 +104,105 @@ nested/nested.rb:67: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:35: `extend` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
+nested/nested.rb:35: `extend` may only be used on constants in the package that owns them https://srb.help/5084
     35 |  extend T::Sig
                  ^^^^^^
-    __package.rb:3: Package defined here
+    nested/nested.rb:34: Symbol originally defined here
+    34 |module Root
+        ^^^^^^^^^^^
+    nested/__package.rb:3: Package where the `extend` occurs
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package where `T.class_of(Root)` is defined
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    commands/__package.rb:3: First subpackage defined here
-     3 |class Root::Commands::Foo < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:48: Method `sig` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    48 |sig {returns(String)}
+        ^^^
+  Got `T.class_of(<root>)` originating from:
+    nested/nested.rb:3:
+     3 |module Wrong
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    nested/nested.rb:48: Insert `extend T::Sig`
+    48 |sig {returns(String)}
+        ^
+
+nested/nested.rb:48: Method `returns` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    48 |sig {returns(String)}
+             ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    nested/nested.rb:3:
+     3 |module Wrong
+        ^
+
+nested/nested.rb:15: Method `sig` does not exist on `T.class_of(Root::Nested::Inner)` https://srb.help/7003
+    15 |    sig {returns(T::Boolean)}
+            ^^^
+  Got `T.class_of(Root::Nested::Inner)` originating from:
+    nested/nested.rb:12:
+    12 |  class Inner
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    nested/nested.rb:13: Insert `extend T::Sig`
+    13 |    CONST = T.let(1, Integer)
+        ^
+
+nested/nested.rb:15: Method `returns` does not exist on `T.class_of(Root::Nested::Inner)` https://srb.help/7003
+    15 |    sig {returns(T::Boolean)}
+                 ^^^^^^^
+  Got `T.class_of(Root::Nested::Inner)` originating from:
+    nested/nested.rb:12:
+    12 |  class Inner
+          ^
+
+nested/nested.rb:39: Method `sig` does not exist on `T.class_of(Root)` https://srb.help/7003
+    39 |  sig {returns(NilClass)}
+          ^^^
+  Got `T.class_of(Root)` originating from:
+    nested/nested.rb:34:
+    34 |module Root
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    nested/nested.rb:35: Insert `extend T::Sig`
+    35 |  extend T::Sig
+        ^
+
+nested/nested.rb:39: Method `returns` does not exist on `T.class_of(Root)` https://srb.help/7003
+    39 |  sig {returns(NilClass)}
+               ^^^^^^^
+  Got `T.class_of(Root)` originating from:
+    nested/nested.rb:34:
+    34 |module Root
+        ^
+
+nested/nested.rb:61: Method `sig` does not exist on `T.class_of(TopLevel::Foo)` https://srb.help/7003
+    61 |    sig {void}
+            ^^^
+  Got `T.class_of(TopLevel::Foo)` originating from:
+    nested/nested.rb:60:
+    60 |  class Foo
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    nested/nested.rb:61: Insert `extend T::Sig`
+    61 |    sig {void}
+        ^
+
+nested/nested.rb:61: Method `void` does not exist on `T.class_of(TopLevel::Foo)` https://srb.help/7003
+    61 |    sig {void}
+                 ^^^^
+  Got `T.class_of(TopLevel::Foo)` originating from:
+    nested/nested.rb:60:
+    60 |  class Foo
+          ^
+  Did you mean `load`? Use `-a` to autocorrect
+    nested/nested.rb:61: Replace with `load`
+    61 |    sig {void}
+                 ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1664: Defined here
+    1664 |  def load(filename, arg0=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nested/nested.test.rb:19: Cannot initialize the module `Root` by constant assignment https://srb.help/4022
     19 |Test::Root = 1
@@ -191,4 +281,16 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
     __package.rb:3: Must belong to this package, given constant name `Root::Commands::Baz::Ban`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 20
+
+extend_sig.rb:4: `include` may only be used on constants in the package that owns them https://srb.help/5084
+     4 |  include T::Sig
+                  ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L26: Symbol originally defined here
+    26 |class Module < Object
+        ^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Module` is unpackaged, and may be reopened from a package marked `prelude_package`
+Errors: 29

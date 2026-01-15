@@ -8,6 +8,62 @@ root/subpackage/test/test.rb:3: File belongs to package `Test::Root::Subpackage`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+bad_test/subpackage/foo.rb:3: File belongs to package `Test::BadTest::Subpackage` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::BadTest
+               ^^^^^^^^^^^^^
+    bad_test/subpackage/__package.rb:3: Enclosing package declared here
+     3 |class Test::BadTest::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+bad_test/a.rb:17: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
+    17 |  X = type_member
+              ^^^^^^^^^^^
+    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude_package`
+
+bad_test/a.rb:19: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
+    19 |  Y = type_template
+              ^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude_package`
+
+bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::BadTest
+               ^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Enclosing package declared here
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+bad_test/a.rb:15: `include` may only be used on constants in the package that owns them https://srb.help/5084
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+    bad_test/a.rb:3: Symbol originally defined here
+     3 |module Test::BadTest
+        ^^^^^^^^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude_package`
+
+bad_test/a.rb:12: `extend` may only be used on constants in the package that owns them https://srb.help/5084
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+    bad_test/a.rb:3: Symbol originally defined here
+     3 |module Test::BadTest
+        ^^^^^^^^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `T.class_of(Test::BadTest)` is unpackaged, and may be reopened from a package marked `prelude_package`
+
 root/root.rb:17: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
     17 |  X = type_member
               ^^^^^^^^^^^
@@ -28,7 +84,7 @@ root/root.rb:19: `type_template` may not be used in a package namespace for a pa
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:15: `include` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
+root/root.rb:15: `include` may not be used on the package namespace for a package that has subpackages https://srb.help/5083
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -38,7 +94,7 @@ root/root.rb:15: `include` may not be used on the package namespace for a packag
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:12: `extend` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
+root/root.rb:12: `extend` may not be used on the package namespace for a package that has subpackages https://srb.help/5083
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -47,6 +103,38 @@ root/root.rb:12: `extend` may not be used on the package namespace for a package
     root/subpackage/__package.rb:3: First subpackage defined here
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+bad_test/subpackage/__package.rb:5: Cannot export `Test::BadTest::Subpackage::Foo` because it is owned by another package https://srb.help/3721
+     5 |  export Test::BadTest::Subpackage::Foo
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    bad_test/subpackage/foo.rb:5: Defined here
+     5 |    class Foo
+            ^^^^^^^^^
+
+bad_test/a.rbi:4: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
+     4 |  X = type_member
+              ^^^^^^^^^^^
+    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude_package`
+
+bad_test/a.rbi:5: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
+     5 |  Y = type_template
+              ^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude_package`
+
+bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::BadTest
+               ^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Enclosing package declared here
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/root.rbi:4: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
      4 |  X = type_member
@@ -68,25 +156,25 @@ root/root.rbi:5: `type_template` may not be used in a package namespace for a pa
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:17: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+root/test/root.rb:17: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
     17 |  X = type_member
               ^^^^^^^^^^^
-    root/__package.rb:3: Package defined here
+    root/test/__package.rb:3: Package where the `type_member` is defined
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/__package.rb:3: Package where `Test::Root` is defined
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:19: `type_template` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+root/test/root.rb:19: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
     19 |  Y = type_template
               ^^^^^^^^^^^^^
-    root/__package.rb:3: Package defined here
+    root/test/__package.rb:3: Package where the `type_template` is defined
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/__package.rb:3: Package where `Test::Root` is defined
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/test/root.rb:3: File belongs to package `Test::Root` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::Root
@@ -98,25 +186,31 @@ root/test/root.rb:3: File belongs to package `Test::Root` but defines a constant
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:15: `include` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
+root/test/root.rb:15: `include` may only be used on constants in the package that owns them https://srb.help/5084
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
-    root/__package.rb:3: Package defined here
+    root/test/root.rb:3: Symbol originally defined here
+     3 |module Test::Root
+        ^^^^^^^^^^^^^^^^^
+    root/test/__package.rb:3: Package where the `include` occurs
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/__package.rb:3: Package where `Test::Root` is defined
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:12: `extend` may not be used on the package namespace for a package that has subpackages https://srb.help/5082
+root/test/root.rb:12: `extend` may only be used on constants in the package that owns them https://srb.help/5084
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
-    root/__package.rb:3: Package defined here
+    root/test/root.rb:3: Symbol originally defined here
+     3 |module Test::Root
+        ^^^^^^^^^^^^^^^^^
+    root/test/__package.rb:3: Package where the `extend` occurs
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/__package.rb:3: Package where `T.class_of(Test::Root)` is defined
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/test/root.rb:12: `Test::Root::ClassMethods` resolves but is not exported from `Root` and `Root` is not imported https://srb.help/3718
     12 |  extend ClassMethods
@@ -145,4 +239,4 @@ root/test/root.rb:15: `Test::Root::ClassMethods` resolves but is not exported fr
     root/__package.rb:4: Insert `export Test::Root::ClassMethods`
      4 |  import Root::Subpackage
                                  ^
-Errors: 14
+Errors: 24
