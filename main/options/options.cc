@@ -649,6 +649,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
                                  "and `export` directives",
                                  cxxopts::value<vector<string>>(), "<name>");
+    options.add_options(section)("gen-packages-update-visibility-for",
+                                 "Packages for which to generate `visible_to` autocorrects in --gen-packages mode",
+                                 cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)(
         "packager-layers",
         "Valid layer names for packages, ordered lowest to highest. Passing this flag also enables layering checks.",
@@ -1280,7 +1283,7 @@ void readOptions(Options &opts,
 
         opts.genPackages = raw["gen-packages"].as<bool>();
         if (opts.genPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
-            logger->error("--gen-packages can only be used when --sorbet-packages is also enabled");
+            logger->error("--gen-packages can only be can only be used in --sorbet-packages mode");
             throw EarlyReturnWithCode(1);
         }
         if (opts.genPackages && opts.runLSP) {
@@ -1300,6 +1303,26 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.allowRelaxedPackagerChecksFor.emplace_back(ns);
+            }
+        }
+
+        if (raw.count("gen-packages-update-visibility-for")) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--gen-packages-update-visibility-for can only be specified in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            if (!opts.genPackages) {
+                logger->error("--gen-packages-update-visibility-for can only be specified in --gen-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
+            for (const string &ns : raw["gen-packages-update-visibility-for"].as<vector<string>>()) {
+                if (!std::regex_match(ns, nsValid)) {
+                    logger->error("--gen-packages-update-visibility-for must contain items that start with a capital "
+                                  "letter and are alphanumeric.");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.updateVisibilityFor.emplace_back(ns);
             }
         }
 

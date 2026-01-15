@@ -320,6 +320,9 @@ Usage:
       --allow-relaxed-packager-checks-for <name>
                                 Packages which are allowed to ignore the restrictions set
                                 by `visible_to` and `export` directives
+      --gen-packages-update-visibility-for <name>
+                                Packages for which to generate `visible_to` autocorrects
+                                in --gen-packages mode
       --packager-layers [=<layer-name>(=library,application)]
                                 Valid layer names for packages, ordered lowest to
                                 highest. Passing this flag also enables layering checks.

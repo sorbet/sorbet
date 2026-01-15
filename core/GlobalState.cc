@@ -2078,7 +2078,8 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &packagerLayers, string errorHint, bool genPackages) const {
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    bool genPackages) const {
     ENFORCE(fileTableFrozen);
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2096,10 +2097,10 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
+            updateVisibilityFor, packagerLayers, errorHint, genPackages);
     }
 
     return result;
@@ -2110,7 +2111,8 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &packagerLayers, string errorHint, bool genPackages) const {
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    bool genPackages) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2124,10 +2126,10 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
+            updateVisibilityFor, packagerLayers, errorHint, genPackages);
     }
 
     return result;
@@ -2137,7 +2139,8 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
                              const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                              const vector<string> &extraPackageFilesDirectorySlashPrefixes,
                              const vector<string> &packageSkipRBIExportEnforcementDirs,
-                             const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
+                             const vector<string> &allowRelaxedPackagerChecksFor,
+                             const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
                              string errorHint, bool genPackages) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2168,10 +2171,10 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     if (packageDB().enabled()) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
+            updateVisibilityFor, packagerLayers, errorHint, genPackages);
     }
 
     return result;
@@ -2322,7 +2325,8 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
                                      const vector<string> &extraPackageFilesDirectorySlashPrefixes,
                                      const vector<string> &packageSkipRBIExportEnforcementDirs,
                                      const vector<string> &allowRelaxedPackagerChecksFor,
-                                     const vector<string> &packagerLayers, string errorHint, bool genPackages) {
+                                     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
+                                     string errorHint, bool genPackages) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
@@ -2332,6 +2336,7 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
     packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor;
+    packageDB_.updateVisibilityFor_ = updateVisibilityFor;
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
     packageDB_.errorHint_ = errorHint;
