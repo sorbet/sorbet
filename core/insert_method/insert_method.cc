@@ -2,23 +2,23 @@
 
 namespace sorbet::core {
 
-vector<core::AutocorrectSuggestion::Edit> insert_method::run(core::Loc classOrModuleDeclaredAt,
-                                                             core::Loc classOrModuleEndsAt) {
+vector<core::AutocorrectSuggestion::Edit>
+insert_method::run(const core::GlobalState &gs, core::Loc classOrModuleDeclaredAt, core::Loc classOrModuleEndsAt) {
     auto hasSingleLineDefinition =
-        classOrModuleDeclaredAt.toDetails(ctx).first.line == classOrModuleEndsAt.toDetails(ctx).second.line;
+        classOrModuleDeclaredAt.toDetails(gs).first.line == classOrModuleEndsAt.toDetails(gs).second.line;
 
-    auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(ctx);
+    auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(gs);
     string classOrModuleIndent(indentLength, ' ');
-    auto editLoc = endLoc.adjust(ctx, -indentLength, 0);
+    auto editLoc = endLoc.adjust(gs, -indentLength, 0);
 
     vector<core::AutocorrectSuggestion::Edit> edits;
     if (hasSingleLineDefinition) {
-        auto endRange = classOrModuleEndsAt.adjust(ctx, -3, 0);
-        if (endRange.source(ctx) != "end") {
+        auto endRange = classOrModuleEndsAt.adjust(gs, -3, 0);
+        if (endRange.source(gs) != "end") {
             return edits;
         }
-        auto withSemi = endRange.adjust(ctx, -2 /* "; " */, -3 /* "end" */);
-        if (withSemi.source(ctx) == "; ") {
+        auto withSemi = endRange.adjust(gs, -2 /* "; " */, -3 /* "end" */);
+        if (withSemi.source(gs) == "; ") {
             endRange = withSemi.join(endRange);
         }
 
@@ -33,9 +33,9 @@ vector<core::AutocorrectSuggestion::Edit> insert_method::run(core::Loc classOrMo
     auto idx = -1;
     for (auto proto : missingAbstractMethods) {
         idx++;
-        errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
+        errorBuilder.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
 
-        auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
+        auto indentedMethodDefinition = defineInheritedAbstractMethod(gs, sym, proto, classOrModuleIndent);
         if (hasSingleLineDefinition) {
             fmt::format_to(back_inserter(buf), "\n{}", indentedMethodDefinition);
         } else if (idx + 1 < missingAbstractMethods.size()) {
