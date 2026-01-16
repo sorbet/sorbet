@@ -623,15 +623,7 @@ bool ClassOrModuleRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef 
 // Documented in SymbolRef.h
 bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
     auto sym = *this;
-    while (sym.exists() && sym != core::Symbols::root()) {
-        if (sym == core::Symbols::PackageSpecRegistry()) {
-            return true;
-        }
-
-        sym = sym.data(gs)->owner;
-    }
-
-    return false;
+    return sym.exists() && sym.data(gs)->packageRegistryOwner == sym;
 }
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
