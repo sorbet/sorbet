@@ -69,7 +69,7 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
             core::insert_method::run(gs, toInsert, inWhere, declLoc.value(), termLoc.value().copyEndWithZeroLength());
         auto action = move(params);
         action->edit = make_unique<WorkspaceEdit>();
-        action->edit.value()->documentChanges = getQuickfixEdits(config, gs, edits);
+        action->edit.value()->documentChanges = autocorrect2DocumentEdits(config, gs, edits);
         response->result = move(action);
         return response;
     }
