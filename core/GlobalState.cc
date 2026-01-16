@@ -582,6 +582,10 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 
+    // Ensure that we propagate packageRegistryOwner information by making PackageSpecRegistry own itself in the
+    // registry hierarchy.
+    klass.data(*this)->packageRegistryOwner = klass;
+
     // PackageSpec is a class that can be subclassed.
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
     klass.data(*this)->setIsModule(false);
@@ -1169,7 +1173,8 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 
     if (!this->packageDB().enabled()) {
         // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
-        // a package, because we run initEmpty without the package DB enabled.
+        // a package. We manually set it back to Symbols::PackageSpecRegistry() in `initEmpty` to
+        // ensure that the ownership propagates through to package symbols that are entered later.
         data->packageRegistryOwner = Symbols::noClassOrModule();
         return ret;
     }
