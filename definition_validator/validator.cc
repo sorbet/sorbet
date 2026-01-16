@@ -1209,22 +1209,22 @@ private:
         auto hasSingleLineDefinition =
             classOrModuleDeclaredAt.toDetails(ctx).first.line == classOrModuleEndsAt.toDetails(ctx).second.line;
 
-        auto hasEmptyBody = classDef.rhs.empty();
-        if (classDef.rhs.size() == 1) {
-            if (auto mdef = ast::cast_tree<ast::MethodDef>(classDef.rhs[0])) {
-                hasEmptyBody = ast::isa_tree<ast::EmptyTree>(mdef->rhs);
-            }
-        }
-
         auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(ctx);
         string classOrModuleIndent(indentLength, ' ');
         auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
 
         vector<core::AutocorrectSuggestion::Edit> edits;
-        bool singleLineAndNoBody = hasSingleLineDefinition && hasEmptyBody;
-        if (singleLineAndNoBody) {
+        if (hasSingleLineDefinition) {
+            auto endRange = classOrModuleEndsAt.adjust(ctx, -3, 0);
+            if (endRange.source(ctx) != "end") {
+                return;
+            }
+            auto withSemi = endRange.adjust(ctx, -2 /* "; " */, -3 /* "end" */);
+            if (withSemi.source(ctx) == "; ") {
+                endRange = withSemi.join(endRange);
+            }
+
             // First, break the class/module definition up onto multiple lines.
-            auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
             edits.emplace_back(
                 core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
 
@@ -1241,14 +1241,8 @@ private:
             idx++;
             errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
 
-            if (hasSingleLineDefinition && !hasEmptyBody) {
-                // We don't suggest autocorrects for this case because we cannot say for sure how the
-                // class/module has been declared, and so we also can't determine how to modify it.
-                continue;
-            }
-
             auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
-            if (singleLineAndNoBody) {
+            if (hasSingleLineDefinition) {
                 fmt::format_to(std::back_inserter(buf), "\n{}", indentedMethodDefinition);
             } else if (idx + 1 < missingAbstractMethods.size()) {
                 fmt::format_to(std::back_inserter(buf), "{}\n", indentedMethodDefinition);
