@@ -573,6 +573,7 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
+            bool restrictedVisiblity = !pkg.isVisibleTo(ctx, this->package.mangledName(), autocorrectedImportType);
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
@@ -586,7 +587,7 @@ public:
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
             bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
-            if (!hasModularityError) {
+            if (!hasModularityError && !restrictedVisiblity) {
                 if (db.genPackages()) {
                     return;
                 }
@@ -673,6 +674,16 @@ public:
                     }
                 } else {
                     ENFORCE(false);
+                }
+            }
+
+            if (restrictedVisiblity) {
+                referencedPackages[otherPackage].validToImport = false;
+                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::ImportNotVisible)) {
+                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                                pkg.show(ctx), this->package.show(ctx));
+                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                                   "visible_to", pkg.show(ctx));
                 }
             }
 
