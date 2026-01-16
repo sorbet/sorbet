@@ -585,7 +585,8 @@ public:
                 causesCycle =
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
-            if (!causesCycle && !layeringViolation && !strictDependenciesTooLow) {
+            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
+            if (!hasModularityError) {
                 if (db.genPackages()) {
                     return;
                 }
@@ -673,7 +674,9 @@ public:
                 } else {
                     ENFORCE(false);
                 }
-            } else {
+            }
+
+            if (hasModularityError) {
                 referencedPackages[otherPackage].causesModularityError = true;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
