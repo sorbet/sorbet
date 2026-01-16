@@ -1234,7 +1234,11 @@ private:
             insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
         }
 
+        fmt::memory_buffer buf;
+
+        auto idx = -1;
         for (auto proto : missingAbstractMethods) {
+            idx++;
             errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
 
             if (hasSingleLineDefinition && !hasEmptyBody) {
@@ -1245,18 +1249,21 @@ private:
 
             auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
             if (singleLineAndNoBody) {
-                edits.emplace_back(
-                    core::AutocorrectSuggestion::Edit{insertAt, fmt::format("\n{}", indentedMethodDefinition)});
+                fmt::format_to(std::back_inserter(buf), "\n{}", indentedMethodDefinition);
+            } else if (idx + 1 < missingAbstractMethods.size()) {
+                fmt::format_to(std::back_inserter(buf), "{}\n", indentedMethodDefinition);
             } else {
-                edits.emplace_back(core::AutocorrectSuggestion::Edit{
-                    insertAt, fmt::format("{}\n{}", indentedMethodDefinition, classOrModuleIndent)});
+                fmt::format_to(std::back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
             }
         }
 
-        if (edits.empty()) {
+        auto editStr = to_string(buf);
+
+        if (editStr.empty()) {
             return;
         }
 
+        edits.emplace_back(core::AutocorrectSuggestion::Edit{insertAt, editStr});
         errorBuilder.addAutocorrect(core::AutocorrectSuggestion{
             fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""),
             edits,

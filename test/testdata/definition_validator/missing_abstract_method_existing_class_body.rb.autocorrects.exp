@@ -33,5 +33,7 @@ end
     def foo; end
     sig { override.void }
     def bar; end
+    sig { override.void }
+    def baz; end
   end
 # ------------------------------
