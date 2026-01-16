@@ -15,5 +15,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//core",
+        "//core/source_generator",
+        "@com_google_absl//absl/strings",
     ],
 )
