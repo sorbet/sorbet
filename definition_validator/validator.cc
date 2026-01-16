@@ -1243,11 +1243,11 @@ private:
 
             auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
             if (hasSingleLineDefinition) {
-                fmt::format_to(std::back_inserter(buf), "\n{}", indentedMethodDefinition);
+                fmt::format_to(back_inserter(buf), "\n{}", indentedMethodDefinition);
             } else if (idx + 1 < missingAbstractMethods.size()) {
-                fmt::format_to(std::back_inserter(buf), "{}\n", indentedMethodDefinition);
+                fmt::format_to(back_inserter(buf), "{}\n", indentedMethodDefinition);
             } else {
-                fmt::format_to(std::back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
+                fmt::format_to(back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
             }
         }
 
