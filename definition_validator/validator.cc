@@ -1209,29 +1209,25 @@ private:
         auto hasSingleLineDefinition =
             classOrModuleDeclaredAt.toDetails(ctx).first.line == classOrModuleEndsAt.toDetails(ctx).second.line;
 
-        auto hasEmptyBody = classDef.rhs.empty();
-        if (classDef.rhs.size() == 1) {
-            if (auto mdef = ast::cast_tree<ast::MethodDef>(classDef.rhs[0])) {
-                hasEmptyBody = ast::isa_tree<ast::EmptyTree>(mdef->rhs);
-            }
-        }
-
         auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(ctx);
         string classOrModuleIndent(indentLength, ' ');
-        auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
+        auto editLoc = endLoc.adjust(ctx, -indentLength, 0);
 
         vector<core::AutocorrectSuggestion::Edit> edits;
-        bool singleLineAndNoBody = hasSingleLineDefinition && hasEmptyBody;
-        if (singleLineAndNoBody) {
-            // First, break the class/module definition up onto multiple lines.
-            auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
-            edits.emplace_back(
-                core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
+        if (hasSingleLineDefinition) {
+            auto endRange = classOrModuleEndsAt.adjust(ctx, -3, 0);
+            if (endRange.source(ctx) != "end") {
+                return;
+            }
+            auto withSemi = endRange.adjust(ctx, -2 /* "; " */, -3 /* "end" */);
+            if (withSemi.source(ctx) == "; ") {
+                endRange = withSemi.join(endRange);
+            }
 
             // Then, modify our insertion strategy such that we add new methods to the top of the class/module
             // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
             // class/module body that we just created.
-            insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
+            editLoc = endRange;
         }
 
         fmt::memory_buffer buf;
@@ -1241,20 +1237,18 @@ private:
             idx++;
             errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
 
-            if (hasSingleLineDefinition && !hasEmptyBody) {
-                // We don't suggest autocorrects for this case because we cannot say for sure how the
-                // class/module has been declared, and so we also can't determine how to modify it.
-                continue;
-            }
-
             auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
-            if (singleLineAndNoBody) {
-                fmt::format_to(std::back_inserter(buf), "\n{}", indentedMethodDefinition);
+            if (hasSingleLineDefinition) {
+                fmt::format_to(back_inserter(buf), "\n{}", indentedMethodDefinition);
             } else if (idx + 1 < missingAbstractMethods.size()) {
-                fmt::format_to(std::back_inserter(buf), "{}\n", indentedMethodDefinition);
+                fmt::format_to(back_inserter(buf), "{}\n", indentedMethodDefinition);
             } else {
-                fmt::format_to(std::back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
+                fmt::format_to(back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
             }
+        }
+
+        if (hasSingleLineDefinition) {
+            fmt::format_to(back_inserter(buf), "\n{}end", classOrModuleIndent);
         }
 
         auto editStr = to_string(buf);
@@ -1263,7 +1257,7 @@ private:
             return;
         }
 
-        edits.emplace_back(core::AutocorrectSuggestion::Edit{insertAt, editStr});
+        edits.emplace_back(core::AutocorrectSuggestion::Edit{editLoc, editStr});
         errorBuilder.addAutocorrect(core::AutocorrectSuggestion{
             fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""),
             edits,
