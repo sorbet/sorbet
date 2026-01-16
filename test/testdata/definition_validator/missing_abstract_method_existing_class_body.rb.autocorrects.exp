@@ -37,12 +37,12 @@ end
     def baz; end
   end
 
-  class Child3 < Parent
+  class Child3 < Parent; include Kernel
     sig { override.void }
     def bar; end
     sig { override.void }
     def baz; end
     sig { override.void }
-    def foo; end; include Kernel
+    def foo; end
   end # error: Missing definitions for abstract methods
 # ------------------------------

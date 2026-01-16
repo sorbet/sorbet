@@ -1224,14 +1224,10 @@ private:
                 endRange = withSemi.join(endRange);
             }
 
-            // First, break the class/module definition up onto multiple lines.
-            edits.emplace_back(
-                core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
-
             // Then, modify our insertion strategy such that we add new methods to the top of the class/module
             // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
             // class/module body that we just created.
-            editLoc = classOrModuleDeclaredAt.copyEndWithZeroLength();
+            editLoc = endRange;
         }
 
         fmt::memory_buffer buf;
@@ -1249,6 +1245,10 @@ private:
             } else {
                 fmt::format_to(back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
             }
+        }
+
+        if (hasSingleLineDefinition) {
+            fmt::format_to(back_inserter(buf), "\n{}end", classOrModuleIndent);
         }
 
         auto editStr = to_string(buf);
