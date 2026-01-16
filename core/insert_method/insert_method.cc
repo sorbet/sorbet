@@ -10,7 +10,7 @@ namespace sorbet::core {
 namespace {
 string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::ClassOrModuleRef sym,
                                      const core::MethodRef abstractMethodRef, const string &classOrModuleIndent) {
-    auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
+    auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstractOrOverridable();
     if (sym.data(gs)->attachedClass(gs).exists()) {
         showOptions = showOptions.withForceSelfPrefix();
     }

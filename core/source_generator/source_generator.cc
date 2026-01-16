@@ -48,16 +48,18 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (sym->flags.isFinal) {
         sigCall = "sig(:final)";
     }
-    if (sym->flags.isAbstract && options.concretizeIfAbstract) {
+    if (options.concretizeIfAbstractOrOverridable && (sym->flags.isAbstract || sym->flags.isOverridable)) {
         flags.emplace_back("override");
-    } else if (sym->flags.isAbstract) {
-        flags.emplace_back("abstract");
-    }
-    if (sym->flags.isOverridable) {
-        flags.emplace_back("overridable");
-    }
-    if (sym->flags.isOverride) {
-        flags.emplace_back("override");
+    } else {
+        if (sym->flags.isAbstract) {
+            flags.emplace_back("abstract");
+        }
+        if (sym->flags.isOverridable) {
+            flags.emplace_back("overridable");
+        }
+        if (sym->flags.isOverride) {
+            flags.emplace_back("override");
+        }
     }
     for (auto &paramInfo : method.data(gs)->parameters) {
         // Don't display synthetic arguments (like blk).
