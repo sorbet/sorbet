@@ -33,6 +33,12 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
   Note:
     `F::CONSTANT_FROM_F`'s package is not imported
 
+C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+     9 |      puts G::CONSTANT_FROM_G
+                   ^^^^^^^^^^^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `G`
+
 D/__package.rb:3: D is missing exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
@@ -42,7 +48,7 @@ D/__package.rb:3: D is missing exports https://srb.help/3734
       export D::EnumFromD`
      5 |  layer 'util'
                       ^
-Errors: 4
+Errors: 5
 # typed: strict
 
 class C < PackageSpec
