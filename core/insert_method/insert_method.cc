@@ -8,13 +8,13 @@ using namespace std;
 namespace sorbet::core {
 
 namespace {
-string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::ClassOrModuleRef sym,
-                                     const core::MethodRef abstractMethodRef, const string &classOrModuleIndent) {
-    auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstractOrOverridable();
+string defineInheritedAbstractMethod(const GlobalState &gs, const ClassOrModuleRef sym,
+                                     const MethodRef abstractMethodRef, const string &classOrModuleIndent) {
+    auto showOptions = ShowOptions().withUseValidSyntax().withConcretizeIfAbstractOrOverridable();
     if (sym.data(gs)->attachedClass(gs).exists()) {
         showOptions = showOptions.withForceSelfPrefix();
     }
-    auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, showOptions);
+    auto methodDefinition = source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, showOptions);
 
     vector<string> indentedLines;
     absl::c_transform(
@@ -25,9 +25,9 @@ string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::Cl
 }
 } // namespace
 
-vector<core::AutocorrectSuggestion::Edit>
-insert_method::run(const core::GlobalState &gs, absl::Span<const core::MethodRef> toInsert,
-                   core::ClassOrModuleRef inWhere, core::Loc classOrModuleDeclaredAt, core::Loc classOrModuleEndsAt) {
+vector<AutocorrectSuggestion::Edit> insert_method::run(const GlobalState &gs, absl::Span<const MethodRef> toInsert,
+                                                       ClassOrModuleRef inWhere, Loc classOrModuleDeclaredAt,
+                                                       Loc classOrModuleEndsAt) {
     auto hasSingleLineDefinition =
         classOrModuleDeclaredAt.toDetails(gs).first.line == classOrModuleEndsAt.toDetails(gs).second.line;
 
@@ -35,7 +35,7 @@ insert_method::run(const core::GlobalState &gs, absl::Span<const core::MethodRef
     string classOrModuleIndent(indentLength, ' ');
     auto editLoc = endLoc.adjust(gs, -indentLength, 0);
 
-    vector<core::AutocorrectSuggestion::Edit> edits;
+    vector<AutocorrectSuggestion::Edit> edits;
     if (hasSingleLineDefinition) {
         auto endRange = classOrModuleEndsAt.adjust(gs, -3, 0);
         if (endRange.source(gs) != "end") {
@@ -74,7 +74,7 @@ insert_method::run(const core::GlobalState &gs, absl::Span<const core::MethodRef
 
     auto editStr = to_string(buf);
     if (!editStr.empty()) {
-        edits.emplace_back(core::AutocorrectSuggestion::Edit{editLoc, editStr});
+        edits.emplace_back(AutocorrectSuggestion::Edit{editLoc, editStr});
     }
 
     return edits;
