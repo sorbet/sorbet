@@ -15,11 +15,17 @@ class Parent
   def baz; end
 end
 
-  class Child < Parent
-# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
+  class Child1 < Parent
+# ^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
     sig {override.void}
     def foo; end
 
     sig {override.void}
     def baz; end
+  end
+
+  class Child2 < Parent
+# ^^^^^^^^^^^^^^^^^^^^^ error: Missing definitions for abstract methods
+    sig {override.void}
+    def foo; end
   end
