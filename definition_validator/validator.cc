@@ -1,6 +1,4 @@
 #include "absl/strings/match.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
@@ -8,10 +6,10 @@
 #include "core/core.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
-#include "core/source_generator/source_generator.h"
 
 #include "absl/algorithm/container.h"
 
+#include "core/insert_method/insert_method.h"
 #include "core/sig_finder/sig_finder.h"
 #include "definition_validator/variance.h"
 
@@ -1161,23 +1159,6 @@ private:
         }
     }
 
-    string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::ClassOrModuleRef sym,
-                                         const core::MethodRef abstractMethodRef, const string &classOrModuleIndent) {
-        auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
-        if (sym.data(gs)->attachedClass(gs).exists()) {
-            showOptions = showOptions.withForceSelfPrefix();
-        }
-        auto methodDefinition =
-            core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, showOptions);
-
-        vector<string> indentedLines;
-        absl::c_transform(
-            absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
-            [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
-        auto indentedMethodDefinition = absl::StrJoin(indentedLines, "\n");
-        return indentedMethodDefinition;
-    }
-
     void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
         if (sym.data(ctx)->flags.isAbstract) {
             return;
@@ -1206,58 +1187,16 @@ private:
 
         auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
         auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
-        auto hasSingleLineDefinition =
-            classOrModuleDeclaredAt.toDetails(ctx).first.line == classOrModuleEndsAt.toDetails(ctx).second.line;
+        auto edits =
+            core::insert_method::run(ctx, missingAbstractMethods, sym, classOrModuleDeclaredAt, classOrModuleEndsAt);
 
-        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(ctx);
-        string classOrModuleIndent(indentLength, ' ');
-        auto editLoc = endLoc.adjust(ctx, -indentLength, 0);
-
-        vector<core::AutocorrectSuggestion::Edit> edits;
-        if (hasSingleLineDefinition) {
-            auto endRange = classOrModuleEndsAt.adjust(ctx, -3, 0);
-            if (endRange.source(ctx) != "end") {
-                return;
-            }
-            auto withSemi = endRange.adjust(ctx, -2 /* "; " */, -3 /* "end" */);
-            if (withSemi.source(ctx) == "; ") {
-                endRange = withSemi.join(endRange);
-            }
-
-            // Then, modify our insertion strategy such that we add new methods to the top of the class/module
-            // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
-            // class/module body that we just created.
-            editLoc = endRange;
-        }
-
-        fmt::memory_buffer buf;
-
-        auto idx = -1;
-        for (auto proto : missingAbstractMethods) {
-            idx++;
-            errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
-
-            auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
-            if (hasSingleLineDefinition) {
-                fmt::format_to(back_inserter(buf), "\n{}", indentedMethodDefinition);
-            } else if (idx + 1 < missingAbstractMethods.size()) {
-                fmt::format_to(back_inserter(buf), "{}\n", indentedMethodDefinition);
-            } else {
-                fmt::format_to(back_inserter(buf), "{}\n{}", indentedMethodDefinition, classOrModuleIndent);
-            }
-        }
-
-        if (hasSingleLineDefinition) {
-            fmt::format_to(back_inserter(buf), "\n{}end", classOrModuleIndent);
-        }
-
-        auto editStr = to_string(buf);
-
-        if (editStr.empty()) {
+        if (edits.empty()) {
             return;
         }
 
-        edits.emplace_back(core::AutocorrectSuggestion::Edit{editLoc, editStr});
+        for (auto proto : missingAbstractMethods) {
+            errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
+        }
         errorBuilder.addAutocorrect(core::AutocorrectSuggestion{
             fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""),
             edits,

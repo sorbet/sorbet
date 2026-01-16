@@ -1,17 +1,13 @@
 cc_library(
-    name = "definition_validator",
+    name = "insert_method",
     srcs = glob(
         [
             "*.cc",
             "*.h",
         ],
-        exclude = [
-            "*_test.cc",
-            "flycheck_*",
-        ],
     ),
     hdrs = [
-        "validator.h",
+        "insert_method.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -19,12 +15,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//ast",
-        "//ast/desugar",
-        "//ast/treemap",
         "//core",
-        "//core/insert_method",
-        "//core/sig_finder",
         "//core/source_generator",
         "@com_google_absl//absl/strings",
     ],

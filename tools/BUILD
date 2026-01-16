@@ -42,6 +42,7 @@ compilation_database(
         "//core:core_test",
         "//core:generate_names",
         "//core/hashing:hashing",
+        "//core/insert_method:insert_method",
         "//core/proto:proto",
         "//core/serialize:serialize",
         "//core/serialize:serialize_test",
