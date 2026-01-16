@@ -1211,7 +1211,7 @@ private:
 
         auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(ctx);
         string classOrModuleIndent(indentLength, ' ');
-        auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
+        auto editLoc = endLoc.adjust(ctx, -indentLength, 0);
 
         vector<core::AutocorrectSuggestion::Edit> edits;
         if (hasSingleLineDefinition) {
@@ -1231,7 +1231,7 @@ private:
             // Then, modify our insertion strategy such that we add new methods to the top of the class/module
             // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
             // class/module body that we just created.
-            insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
+            editLoc = classOrModuleDeclaredAt.copyEndWithZeroLength();
         }
 
         fmt::memory_buffer buf;
@@ -1257,7 +1257,7 @@ private:
             return;
         }
 
-        edits.emplace_back(core::AutocorrectSuggestion::Edit{insertAt, editStr});
+        edits.emplace_back(core::AutocorrectSuggestion::Edit{editLoc, editStr});
         errorBuilder.addAutocorrect(core::AutocorrectSuggestion{
             fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""),
             edits,
