@@ -97,6 +97,10 @@ std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::stri
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym, bool isAttrBestEffortUIOnly);
 
+std::vector<std::unique_ptr<TextDocumentEdit>>
+getQuickfixEdits(const LSPConfiguration &config, const core::GlobalState &gs,
+                 const std::vector<core::AutocorrectSuggestion::Edit> &edits);
+
 void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
                              core::lsp::Query::Symbol::STORAGE &symbols);
 
