@@ -332,4 +332,23 @@ TEST_SUITE("TrailingObjects") {
     }
 }
 
+TEST_CASE("isPackageSpecSymbol") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    {
+        auto unfrezePackages = gs.packageDB().unfreeze();
+        gs.setPackagerOptions({}, {}, {}, {}, {}, {}, "", false);
+    }
+
+    CHECK_FALSE(Symbols::root().isPackageSpecSymbol(gs));
+
+    {
+        UnfreezeSymbolTable unfreeze(gs);
+        auto testNamespace = gs.enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::Test());
+        REQUIRE(testNamespace.exists());
+        CHECK_FALSE(testNamespace.isPackageSpecSymbol(gs));
+    }
+}
+
 } // namespace sorbet::core
