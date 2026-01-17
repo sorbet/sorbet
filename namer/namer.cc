@@ -2341,7 +2341,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
     }
 }
 
-void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
+void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
                    core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
@@ -2416,7 +2416,7 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
+    defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }
