@@ -84,6 +84,19 @@ const core::lsp::SendResponse *isTUnsafeOrMustResponse(const core::GlobalState &
     return resp;
 }
 
+const core::lsp::ClassDefResponse *isClassDefResponse(const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
+    if (responses.empty()) {
+        return nullptr;
+    }
+
+    if (responses[0] == nullptr) {
+        // Something else stole it
+        return nullptr;
+    }
+
+    return responses[0]->isClassDef();
+}
+
 void accumulateOverridableMethods(const core::GlobalState &gs, core::ClassOrModuleRef original,
                                   core::ClassOrModuleRef current,
                                   UnorderedMap<core::NameRef, core::MethodRef> &overridableMethods) {
@@ -271,7 +284,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::RefactorRewrite;
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));
-            } else if (auto *resp = queryResult.responses[0]->isClassDef()) {
+            } else if (auto *resp = isClassDefResponse(queryResult.responses)) {
                 auto overridableMethods = UnorderedMap<core::NameRef, core::MethodRef>{};
                 auto current = resp->symbol;
                 // Skip BasicObject because `singleton_method_added` is `overridable`, but wanting
