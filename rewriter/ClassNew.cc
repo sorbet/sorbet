@@ -90,9 +90,10 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
     }
 
     auto loc = asgn->loc;
+    auto declLoc = block != nullptr ? core::LocOffsets(asgn->loc.beginPos(), block->loc.beginPos()) : loc;
 
     vector<ast::ExpressionPtr> stats;
-    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
+    stats.emplace_back(ast::MK::Class(loc, declLoc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }
 
