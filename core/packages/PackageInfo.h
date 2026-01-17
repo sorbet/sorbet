@@ -277,7 +277,10 @@ public:
         return this->isPreludePackage_;
     }
 
-    enum class ModifySymbolError : uint8_t {
+    enum class CanModifyResult : uint8_t {
+        // This symbol can be modified.
+        CanModify,
+
         // The symbol is the namespace of a package, and subpackges exist.
         Subpackages,
 
@@ -289,14 +292,6 @@ public:
 
         // The symbol is in the PackageSpecRegistry hierarchy, and cannot be modified.
         PackageSpec,
-    };
-
-    struct CanModifyResult {
-        // Whether or not the symbol in question is modifyable from this package.
-        bool canModify = false;
-
-        // The reason that it's not possible to modify this symbol. Only valid if `canModify` is false.
-        ModifySymbolError err = ModifySymbolError::NotOwner;
     };
 
     // True when it's safe to modify this symbol from the context of a file owned by this package. Modification in this

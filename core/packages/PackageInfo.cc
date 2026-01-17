@@ -605,12 +605,9 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs) 
 PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const {
     ENFORCE(sym.exists());
 
-    PackageInfo::CanModifyResult res;
-
     // Unpackaged code is allowed to modify anything.
     if (!this->exists()) {
-        res.canModify = true;
-        return res;
+        return CanModifyResult::CanModify;
     }
 
     // Ensure we're not working with a singleton class before performing any further checks.
@@ -623,9 +620,7 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
     // It's not okay to modify anything in the package hierarchy, as we don't support packages with generics, or mixins
     // on packages.
     if (symData->packageRegistryOwner == sym) {
-        res.canModify = false;
-        res.err = ModifySymbolError::PackageSpec;
-        return res;
+        return CanModifyResult::PackageSpec;
     }
 
     auto symPackage = symData->package;
@@ -634,23 +629,25 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
     // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
     // work with package-directed type checking.
     if (symPackage == this->mangledName_) {
-        res.canModify = !this->hasSubPackages_ || !symData->isPackageNamespace();
-        res.err = ModifySymbolError::Subpackages;
-        return res;
+        if (!this->hasSubPackages_ || !symData->isPackageNamespace()) {
+            return CanModifyResult::CanModify;
+        } else {
+            return CanModifyResult::Subpackages;
+        }
     }
 
     // Modifying an unpackaged symbol is only allowed from prelude packages.
     if (!symPackage.exists()) {
-        res.canModify = this->isPreludePackage_;
-        res.err = ModifySymbolError::UnpackagedSymbol;
-        return res;
+        if (this->isPreludePackage_) {
+            return CanModifyResult::CanModify;
+        } else {
+            return CanModifyResult::UnpackagedSymbol;
+        }
     }
 
     // At this point, we know we're in a packaged context, trying to modify the symbol of another package, which is not
     // allowed.
-    res.canModify = false;
-    res.err = ModifySymbolError::NotOwner;
-    return res;
+    return CanModifyResult::NotOwner;
 }
 
 } // namespace sorbet::core::packages
