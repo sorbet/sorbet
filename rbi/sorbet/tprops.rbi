@@ -151,7 +151,8 @@ end
 module T::Props::Serializable
   def deserialize(hash, strict = nil); end
   def recursive_stringify_keys(obj); end
-  def serialize(strict = nil); end
+  sig {params(strict: T::Boolean).returns(T::Hash[String, T.untyped])}
+  def serialize(strict = true); end
   sig {params(changed_props: T.untyped).returns(T.self_type)}
   def with(changed_props); end
   def with_existing_hash(changed_props, existing_hash:); end
