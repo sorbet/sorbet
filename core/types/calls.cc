@@ -2487,6 +2487,65 @@ public:
     }
 } Magic_expandSplat;
 
+// Magic_splatSlice: extracts the slice of elements that correspond to a splat variable
+// in a multi-assignment. For example, in `a, *b, c = arr`, after expanding the array,
+// we need to extract just the middle portion for `b`.
+//
+// Args: (expanded_array, left_count, right_count)
+// Returns: elements from index left_count to (size - right_count)
+class Magic_splatSlice : public IntrinsicMethod {
+    static TypePtr sliceType(const GlobalState &gs, const TypePtr &type, int left, int right) {
+        if (auto ot = cast_type<OrType>(type)) {
+            return Types::any(gs, sliceType(gs, ot->left, left, right), sliceType(gs, ot->right, left, right));
+        }
+
+        auto tuple = cast_type<TupleType>(type);
+        if (tuple == nullptr) {
+            // For non-tuple arrays, we can't say anything precise about the slice
+            if (Types::approximateTypeVars(gs, type, TypeConstraint::EmptyFrozenConstraint)
+                    .derivesFrom(gs, Symbols::Array())) {
+                return type;
+            }
+            // For other types, return untyped array
+            return Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
+        }
+
+        int size = tuple->elems.size();
+        int sliceStart = left;
+        int sliceEnd = size - right;
+
+        if (sliceStart >= sliceEnd) {
+            // Empty slice - return empty array type
+            return make_type<TupleType>(vector<TypePtr>{});
+        }
+
+        vector<TypePtr> sliceElems;
+        for (int i = sliceStart; i < sliceEnd; i++) {
+            sliceElems.emplace_back(tuple->elems[i]);
+        }
+
+        return make_type<TupleType>(move(sliceElems));
+    }
+
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 3) {
+            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
+            return;
+        }
+        auto val = args.args.front()->type;
+        if (!(isa_type<IntegerLiteralType>(args.args[1]->type) && isa_type<IntegerLiteralType>(args.args[2]->type))) {
+            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
+            return;
+        }
+        auto &leftLit = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
+        auto &rightLit = cast_type_nonnull<IntegerLiteralType>(args.args[2]->type);
+        int left = (int)leftLit.value;
+        int right = (int)rightLit.value;
+        res.returnType = sliceType(gs, val, left, right);
+    }
+} Magic_splatSlice;
+
 class Magic_callWithSplat : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlockPass;
 
@@ -4664,6 +4723,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splatSlice(), &Magic_splatSlice},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlockPass(), &Magic_callWithBlockPass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlockPass(),
