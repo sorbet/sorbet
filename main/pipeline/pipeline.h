@@ -98,10 +98,10 @@ std::vector<ast::ParsedFile> incrementalResolve(
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
-void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
+void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &&what, const options::Options &opts,
                WorkerPool &workers, bool cancelable = false,
                std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
-               bool presorted = false, bool intentionallyLeakASTs = false);
+               bool intentionallyLeakASTs = false);
 
 // ----- other ----------------------------------------------------------------
 
@@ -112,6 +112,12 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 
 // Create a copy of `from` that has its symbol table reset to the payload.
 std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts);
+
+// Sort files by size, so that larger files appear earlier than smaller files.
+//
+// Makes typechecking more performant, because it becomes less likely a single large file is
+// typechecked last while other workers are idle.
+void sortBySize(const core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
 
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H
