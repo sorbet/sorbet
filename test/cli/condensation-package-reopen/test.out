@@ -18,7 +18,7 @@ bad_test/subpackage/foo.rb:3: File belongs to package `Test::BadTest::Subpackage
 bad_test/a.rb:17: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
     17 |  X = type_member
               ^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+    bad_test/__package.rb:3: Package containing the `type_member` is not a `prelude_package`
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
@@ -27,7 +27,7 @@ bad_test/a.rb:17: `type_member` may only be used on constants in the package tha
 bad_test/a.rb:19: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
     19 |  Y = type_template
               ^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+    bad_test/__package.rb:3: Package containing the `type_template` is not a `prelude_package`
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
@@ -64,7 +64,7 @@ bad_test/a.rb:12: `extend` may only be used on constants in the package that own
   Note:
     `T.class_of(Test::BadTest)` is unpackaged, and may be reopened from a package marked `prelude_package`
 
-root/root.rb:17: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+root/root.rb:17: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
     17 |  X = type_member
               ^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -74,7 +74,7 @@ root/root.rb:17: `type_member` may not be used in a package namespace for a pack
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:19: `type_template` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+root/root.rb:19: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
     19 |  Y = type_template
               ^^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -84,7 +84,7 @@ root/root.rb:19: `type_template` may not be used in a package namespace for a pa
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:15: `include` may not be used on the package namespace for a package that has subpackages https://srb.help/5083
+root/root.rb:15: Package `Root` has subpackages, so its corresponding class must not have ancestors https://srb.help/5083
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -94,7 +94,7 @@ root/root.rb:15: `include` may not be used on the package namespace for a packag
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:12: `extend` may not be used on the package namespace for a package that has subpackages https://srb.help/5083
+root/root.rb:12: Package `Root` has subpackages, so its corresponding class must not have ancestors https://srb.help/5083
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -114,7 +114,7 @@ bad_test/subpackage/__package.rb:5: Cannot export `Test::BadTest::Subpackage::Fo
 bad_test/a.rbi:4: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
      4 |  X = type_member
               ^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+    bad_test/__package.rb:3: Package containing the `type_member` is not a `prelude_package`
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
@@ -123,7 +123,7 @@ bad_test/a.rbi:4: `type_member` may only be used on constants in the package tha
 bad_test/a.rbi:5: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
      5 |  Y = type_template
               ^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not a `prelude_package`
+    bad_test/__package.rb:3: Package containing the `type_template` is not a `prelude_package`
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
@@ -136,7 +136,7 @@ bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rbi:4: `type_member` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+root/root.rbi:4: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
      4 |  X = type_member
               ^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -146,7 +146,7 @@ root/root.rbi:4: `type_member` may not be used in a package namespace for a pack
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rbi:5: `type_template` may not be used in a package namespace for a package that has subpackages https://srb.help/4016
+root/root.rbi:5: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
      5 |  Y = type_template
               ^^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
@@ -159,20 +159,20 @@ root/root.rbi:5: `type_template` may not be used in a package namespace for a pa
 root/test/root.rb:17: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
     17 |  X = type_member
               ^^^^^^^^^^^
-    root/test/__package.rb:3: Package where the `type_member` is defined
+    root/test/__package.rb:3: Package containing the `type_member` defined here
      3 |class Test::Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    root/__package.rb:3: Package where `Test::Root` is defined
+    root/__package.rb:3: Owning package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/test/root.rb:19: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
     19 |  Y = type_template
               ^^^^^^^^^^^^^
-    root/test/__package.rb:3: Package where the `type_template` is defined
+    root/test/__package.rb:3: Package containing the `type_template` defined here
      3 |class Test::Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    root/__package.rb:3: Package where `Test::Root` is defined
+    root/__package.rb:3: Owning package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
