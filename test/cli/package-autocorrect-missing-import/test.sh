@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO(neil): this test is slow because it invokes sorbet a bunch of times. Combine all the invokations into one sorbet invocation.
+
 cwd="$(pwd)"
 
 tmp="$(mktemp -d)"
@@ -69,6 +71,14 @@ echo
 "$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --sorbet-packages --packager-layers=lib,app --max-threads=0 app_false_cycle_package app_false_cycle_package_test use_app_false_cycle_package 2>&1
 
 cat use_app_false_cycle_package/__package.rb
+
+echo
+echo --------------------------------------------------------------------------
+echo
+
+"$cwd/main/sorbet" -a --censor-for-snapshot-tests --silence-dev-message --sorbet-packages --packager-layers=lib,app --max-threads=0 visible_to_package use_visible_to_package 2>&1
+
+cat use_visible_to_package/__package.rb
 
 rm -rf "$tmp"
 
