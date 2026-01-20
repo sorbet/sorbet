@@ -121,11 +121,6 @@ public:
         return visibleToTests_;
     }
 
-    bool hasSubPackages() const {
-        ENFORCE(exists());
-        return hasSubPackages_;
-    }
-
     // The possible path prefixes associated with files in the package, including path separator at end.
     std::vector<std::string> packagePathPrefixes = {};
 
@@ -189,7 +184,7 @@ public:
     // check if the corresponding symbol in the PackageSpecRegistry tree has any members. That approach would aovid
     // maintaining this field as it becomes a property of symbol nesting, but would involve following more memory
     // indirections.
-    bool hasSubPackages_ = false;
+    bool hasSubPackages = false;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;

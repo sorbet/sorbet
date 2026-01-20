@@ -2186,8 +2186,8 @@ public:
 
             case core::packages::PackageInfo::CanModifyResult::Subpackages:
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
-                    e.setHeader("`{}` may not be used in a package namespace for a package that has subpackages",
-                                isTypeTemplate ? "type_template" : "type_member");
+                    e.setHeader("Package `{}` has subpackages, so its corresponding class must not be generic",
+                                filePackage.owner.show(ctx));
 
                     e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
                     auto subpackages = filePackageInfo.directSubPackages(ctx);

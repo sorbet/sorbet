@@ -582,7 +582,7 @@ namespace {
 void addChildren(vector<ClassOrModuleRef> &work, core::ConstClassOrModuleData klass) {
     // This is an overallocation as we'll be skipping some members.
     work.reserve(work.size() + klass->members().size());
-    for (auto [key, sym] : klass->members()) {
+    for (auto &[key, sym] : klass->members()) {
         if (!sym.isClassOrModule()) {
             continue;
         }
@@ -641,9 +641,7 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
     }
 
     // Ensure we're not working with a singleton class before performing any further checks.
-    while (sym.data(gs)->isSingletonClass(gs)) {
-        sym = sym.data(gs)->attachedClass(gs);
-    }
+    sym = sym.data(gs)->topAttachedClass(gs);
 
     auto symData = sym.data(gs);
 
@@ -659,7 +657,7 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
     // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
     // work with package-directed type checking.
     if (symPackage == this->mangledName_) {
-        if (!this->hasSubPackages_ || !symData->isPackageNamespace()) {
+        if (!this->hasSubPackages || !symData->isPackageNamespace()) {
             return CanModifyResult::CanModify;
         } else {
             return CanModifyResult::Subpackages;

@@ -1184,7 +1184,7 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
 
                     // As we're iterating over all packages in this pass, it's sufficient to mark only the parent as
                     // having subpackages.
-                    info.hasSubPackages_ = true;
+                    info.hasSubPackages = true;
                 }
             }
         }

@@ -805,8 +805,8 @@ private:
 
                 case core::packages::PackageInfo::CanModifyResult::Subpackages:
                     if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
-                        e.setHeader("`{}` may not be used on the package namespace for a package that has subpackages",
-                                    job.isInclude ? "include" : "extend");
+                        e.setHeader("Package `{}` has subpackages, so its corresponding class must not have ancestors",
+                                    filePackage.owner.show(ctx));
 
                         e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
 
@@ -835,7 +835,8 @@ private:
                             e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
                                            job.klass.show(ctx));
                         } else {
-                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`", "prelude_package");
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
+                                           "prelude_package");
                             e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
                                            job.klass.show(ctx), "prelude_package");
                         }
