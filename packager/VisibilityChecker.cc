@@ -556,7 +556,7 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {importNeeded, false};
+        referencedPackages[otherPackage] = {importNeeded, true};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
@@ -677,7 +677,7 @@ public:
             }
 
             if (hasModularityError) {
-                referencedPackages[otherPackage].causesModularityError = true;
+                referencedPackages[otherPackage].validToImport = false;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 core::ErrorClass error =

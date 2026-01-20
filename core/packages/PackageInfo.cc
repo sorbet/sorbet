@@ -522,7 +522,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
     for (auto &[file, value] : packagesReferencedByFile) {
         for (auto &[packageName, packageReferenceInfo] : value) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
-            if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
+            if (!packageReferenceInfo.importNeeded || !packageReferenceInfo.validToImport || !pkgInfo.exists()) {
                 continue;
             }
             auto importType = fileToImportType(gs, file);
