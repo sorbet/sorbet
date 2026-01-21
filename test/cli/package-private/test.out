@@ -158,6 +158,18 @@ a/a.rb:33: Method `void` does not exist on `T.class_of(Global)` https://srb.help
     1664 |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+a/a.rbi:3: Superclasses may only be set on constants in the package that owns them https://srb.help/5084
+     3 |class ::Module < Object
+                         ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L26: Symbol originally defined here
+    26 |class Module < Object
+        ^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Module` is unpackaged, and may be reopened from a package marked `prelude_package`
+
 b/b.rb:8: Method `foo` on `T.class_of(A)` is package-private and cannot be called from package `B` https://srb.help/7036
      8 |    A.foo
             ^^^^^
@@ -185,4 +197,4 @@ b/b.rb:19: Method `foo` on `A` is package-private and cannot be called from pack
     a/a.rb:12: Defined in `A` here
     12 |  package_private def foo
                           ^^^^^^^
-Errors: 17
+Errors: 18
