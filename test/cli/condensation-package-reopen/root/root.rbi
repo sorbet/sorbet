@@ -1,6 +1,6 @@
 # typed: true
 
-module Root
+class Root
   X = type_member
   Y = type_template
 end

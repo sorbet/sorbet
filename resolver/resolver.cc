@@ -759,38 +759,87 @@ private:
         }
 
         bool ancestorPresent = true;
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
+        auto canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
         if (job.isSuperclass) {
-            if (resolvedClass == core::Symbols::todo()) {
-                // No superclass specified
-                ancestorPresent = false;
-            } else if (!job.klass.data(ctx)->superClass().exists() ||
-                       job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
-                       job.klass.data(ctx)->superClass() == resolvedClass) {
-                job.klass.data(ctx)->setSuperClass(resolvedClass);
-            } else {
-                auto fileIsPayload = ctx.file.data(ctx).isPayload();
-                auto klassDefinedInPayload = absl::c_any_of(
-                    job.klass.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
-                auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
+            switch (canModify) {
+                // NOTE: we ignore the PackageSpec error here, as it's fine to set the superclass of something in the
+                // package spec registry.
+                case core::packages::PackageInfo::CanModifyResult::CanModify:
+                case core::packages::PackageInfo::CanModifyResult::PackageSpec:
+                    if (resolvedClass == core::Symbols::todo()) {
+                        // No superclass specified
+                        ancestorPresent = false;
+                    } else if (!job.klass.data(ctx)->superClass().exists() ||
+                               job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
+                               job.klass.data(ctx)->superClass() == resolvedClass) {
+                        job.klass.data(ctx)->setSuperClass(resolvedClass);
+                    } else {
+                        auto fileIsPayload = ctx.file.data(ctx).isPayload();
+                        auto klassDefinedInPayload = absl::c_any_of(
+                            job.klass.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
+                        auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
 
-                if (!allowsPayloadParentOverride) {
-                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::RedefinitionOfParents)) {
-                        e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
-                                    job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
-                        if (!fileIsPayload && klassDefinedInPayload) {
-                            e.addErrorNote(
-                                "Pass `{}` at the command line or in the `{}` file to silence this error.\n"
-                                "    Only use this to work around Ruby or gem upgrade incompatibilities.",
-                                fmt::format("--suppress-payload-superclass-redefinition-for={}", job.klass.show(ctx)),
-                                "sorbet/config");
+                        if (!allowsPayloadParentOverride) {
+                            if (auto e = ctx.beginError(job.ancestor->loc(),
+                                                        core::errors::Resolver::RedefinitionOfParents)) {
+                                e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
+                                            job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
+                                if (!fileIsPayload && klassDefinedInPayload) {
+                                    e.addErrorNote(
+                                        "Pass `{}` at the command line or in the `{}` file to silence this error.\n"
+                                        "    Only use this to work around Ruby or gem upgrade incompatibilities.",
+                                        fmt::format("--suppress-payload-superclass-redefinition-for={}",
+                                                    job.klass.show(ctx)),
+                                        "sorbet/config");
+                                }
+                            }
                         }
                     }
-                }
+
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::Subpackages:
+                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
+                        e.setHeader("Package `{}` has subpackages, so its corresponding class must not have ancestors",
+                                    filePackage.owner.show(ctx));
+
+                        e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
+
+                        auto subpackages = filePackageInfo.directSubPackages(ctx);
+                        if (!subpackages.empty()) {
+                            e.addErrorLine(subpackages.front().owner.data(ctx)->loc(), "First subpackage defined here");
+                        }
+                    }
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::NotOwner:
+                case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
+                    if (auto e =
+                            ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ModifyingUnpackagedConstant)) {
+                        e.setHeader("Superclasses may only be set on constants in the package that owns them");
+
+                        e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                        if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
+                                           job.isInclude ? "include" : "extend");
+
+                            auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                            ENFORCE(ownerPackage.exists());
+                            e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                                           job.klass.show(ctx));
+                        } else {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
+                                           "prelude_package");
+                            e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                           job.klass.show(ctx), "prelude_package");
+                        }
+                    }
+                    break;
             }
         } else {
-            auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-            auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
-            auto canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
             switch (canModify) {
                 case core::packages::PackageInfo::CanModifyResult::CanModify:
                     if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
@@ -800,6 +849,16 @@ private:
                             e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
                                            resolvedClass.show(ctx));
                         }
+                    }
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::PackageSpec:
+                    if (auto e =
+                            ctx.beginError(job.ancestor->loc(), core::errors::Resolver::InvalidPackageExpression)) {
+                        e.setHeader("Invalid expression in package: `{}` is not allowed",
+                                    job.isInclude ? "include" : "extend");
+
+                        e.addErrorLine(job.klass.data(ctx)->loc(), "Package defined here");
                     }
                     break;
 
@@ -840,16 +899,6 @@ private:
                             e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
                                            job.klass.show(ctx), "prelude_package");
                         }
-                    }
-                    break;
-
-                case core::packages::PackageInfo::CanModifyResult::PackageSpec:
-                    if (auto e =
-                            ctx.beginError(job.ancestor->loc(), core::errors::Resolver::InvalidPackageExpression)) {
-                        e.setHeader("Invalid expression in package: `{}` is not allowed",
-                                    job.isInclude ? "include" : "extend");
-
-                        e.addErrorLine(job.klass.data(ctx)->loc(), "Package defined here");
                     }
                     break;
             }

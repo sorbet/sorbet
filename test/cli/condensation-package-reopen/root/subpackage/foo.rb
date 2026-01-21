@@ -1,6 +1,6 @@
 # typed: true
 
-module Root
+class Root
   module Subpackage
     class Foo
       def method = puts "method!"
