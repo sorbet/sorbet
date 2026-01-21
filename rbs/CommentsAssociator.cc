@@ -231,11 +231,17 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
         auto str = string(it->second.string);
         if (std::regex_match(str, matches, TYPE_ALIAS_PATTERN)) {
             if (!typeAliasAllowedInContext()) {
-                auto loc = contextAllowingTypeAlias.back().second;
                 if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
                     e.setHeader("Unexpected RBS type alias comment");
-                    e.addErrorLine(ctx.locAt(loc),
-                                   "RBS type aliases are only allowed in class and module bodies. Found in:");
+                    if (!contextAllowingTypeAlias.empty()) {
+                        // Inside a method - show where the method is
+                        auto loc = contextAllowingTypeAlias.back().second;
+                        e.addErrorLine(ctx.locAt(loc),
+                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
+                    } else {
+                        // At top level - no context to show
+                        e.addErrorNote("RBS type aliases are only allowed in class and module bodies");
+                    }
                 }
 
                 it = commentByLine.erase(it);
@@ -282,7 +288,9 @@ void CommentsAssociator::processTrailingComments(parser::Node *node, parser::Nod
 }
 
 unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique_ptr<parser::Node> body) {
-    if (typeAliasAllowedInContext() && body == nullptr) {
+    // When called from If/Rescue handlers with empty branches, both node and body can be nullptr.
+    // We need to check node != nullptr to avoid dereferencing a null pointer.
+    if (typeAliasAllowedInContext() && body == nullptr && node != nullptr) {
         int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
         auto nodes = parser::NodeVec();
 
