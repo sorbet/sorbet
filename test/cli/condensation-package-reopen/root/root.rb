@@ -1,6 +1,6 @@
 # typed: true
 
-module Root
+class Root < Prelude::A
   module ClassMethods
     def test
     end
