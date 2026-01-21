@@ -12,7 +12,6 @@
 extern "C" {
 #include "prism.h"
 }
-#include "rbs/prism/SignatureTranslatorPrism.h"
 
 using namespace std;
 using namespace sorbet::parser::Prism;
