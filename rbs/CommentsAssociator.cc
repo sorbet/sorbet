@@ -231,11 +231,17 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
         auto str = string(it->second.string);
         if (std::regex_match(str, matches, TYPE_ALIAS_PATTERN)) {
             if (!typeAliasAllowedInContext()) {
-                auto loc = contextAllowingTypeAlias.back().second;
                 if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
                     e.setHeader("Unexpected RBS type alias comment");
-                    e.addErrorLine(ctx.locAt(loc),
-                                   "RBS type aliases are only allowed in class and module bodies. Found in:");
+                    if (!contextAllowingTypeAlias.empty()) {
+                        // Inside a method - show where the method is
+                        auto loc = contextAllowingTypeAlias.back().second;
+                        e.addErrorLine(ctx.locAt(loc),
+                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
+                    } else {
+                        // At top level - no context to show
+                        e.addErrorNote("RBS type aliases are only allowed in class and module bodies");
+                    }
                 }
 
                 it = commentByLine.erase(it);
@@ -282,6 +288,8 @@ void CommentsAssociator::processTrailingComments(parser::Node *node, parser::Nod
 }
 
 unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique_ptr<parser::Node> body) {
+    ENFORCE(node != nullptr, "walkBody requires non-null node for location");
+
     if (typeAliasAllowedInContext() && body == nullptr) {
         int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
         auto nodes = parser::NodeVec();
@@ -529,12 +537,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             walkNode(if_->condition.get());
 
             lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            if_->then_ = walkBody(if_->then_.get(), move(if_->then_));
+            auto *locationNode = if_->then_ ? if_->then_.get() : if_;
+            if_->then_ = walkBody(locationNode, move(if_->then_));
 
             if (if_->then_) {
                 lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), if_->then_->loc.endPos()).line;
             }
-            if_->else_ = walkBody(if_->else_.get(), move(if_->else_));
+            locationNode = if_->else_ ? if_->else_.get() : if_;
+            if_->else_ = walkBody(locationNode, move(if_->else_));
 
             if (beginLine != endLine) {
                 associateAssertionCommentsToNode(node);
@@ -621,7 +631,8 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 walkNodes(rescue->rescue);
                 rescue->body = walkBody(rescue, move(rescue->body));
             } else {
-                rescue->body = walkBody(rescue->body.get(), move(rescue->body));
+                auto *locationNode = rescue->body ? rescue->body.get() : rescue;
+                rescue->body = walkBody(locationNode, move(rescue->body));
                 walkNodes(rescue->rescue);
                 rescue->else_ = walkBody(rescue, move(rescue->else_));
             }
