@@ -1063,29 +1063,50 @@ T.absurd(x)
 
 ### `T.bind`
 
-[`T.bind`](type-assertions.md#tbind) can be expressed using RBS comments with the special `self as` construct:
+[`T.bind`](type-assertions.md#tbind) can be expressed using RBS comments with the special `self as` construct.
+
+For example, let's imagine a gem dependency provides a configuration DSL:
 
 ```ruby
-class Foo
-  def foo; end
+module SomeGem
+  def self.configure(&block)
+    config = SomeGem::Configuration.new
+    config.instance_eval(&block)
+  end
 end
+```
 
-def bar
-  #: self as Foo
+In your own annotated code, Sorbet needs your help to understand who is `self` within such configure block:
 
-  foo
+```ruby
+SomeGem.configure do
+  #: self as SomeGem::Configuration
+  ...
 end
 ```
 
 This is equivalent to:
 
 ```ruby
-def bar
-  T.bind(self, Foo)
-
-  foo
+SomeGem.configure do
+  T.bind(self, SomeGem::Configuration)
+  ...
 end
 ```
+
+On the other hand, if the original API was already annotated this way:
+
+```ruby
+module SomeGem
+  #: { () [self: SomeGem::Configuration] -> void } -> void
+  def self.configure(&block)
+    config = SomeGem::Configuration.new
+    config.instance_eval(&block)
+  end
+end
+```
+
+the manual `self as` in client code would be unnecessary.
 
 [Class instance type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type
 [Class singleton type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-singleton-type
