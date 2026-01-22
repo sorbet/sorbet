@@ -1246,21 +1246,7 @@ private:
 
         // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in project) locs!
         if (symbol != core::Symbols::root()) {
-            // If the kind is unknown, it means it was only a FoundClass for a class or static field scope, not
-            // the class def itself. We want to generally treat these as usage locs, not definition locs.
-            //
-            // At best, we only want to keep one loc in the codebase per unknown class for perf reasons. We don't
-            // want to store O(files) locs for something like Opus. So if the existing loc (which would have been
-            // brought into existence by getClassSymbol()) is not from this file, we don't add a new loc.
-            //
-            // If the unknown class loc is from the same file, it's still possible that it is from a real
-            // definition in that file. In which case, we check the declared bit on the class.
-            // We only set the loc if the class is not declared.
-            bool updateLoc =
-                !isUnknown || (!symbol.data(ctx)->isDeclared() && symbol.data(ctx)->loc().file() == ctx.file);
-            if (updateLoc) {
-                symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
-            }
+            symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
 
             if (!isUnknown) {
                 if (klass.definesBehavior) {
