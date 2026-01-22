@@ -132,6 +132,12 @@ TEST_CASE("SymbolRef") {
     gs.initEmpty();
     auto ref = Symbols::Object();
     CHECK_EQ(SymbolRef(ref), ref.data(gs)->ref(gs));
+
+    CHECK_FALSE(SymbolRef().isClassOrModule());
+    CHECK_FALSE(SymbolRef().isMethod());
+    CHECK_FALSE(SymbolRef().isFieldOrStaticField());
+    CHECK_FALSE(SymbolRef().isTypeParameter());
+    CHECK_FALSE(SymbolRef().isTypeMember());
 }
 
 struct FileIsTypedCase {
