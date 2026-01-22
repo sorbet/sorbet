@@ -30,3 +30,35 @@ module EmptyElseInModule
   else
   end
 end
+
+module EmptyRescueBodyInModule
+  #: type c = Float
+
+  # Empty begin body before rescue - rescue->body is nullptr
+  # This crashes when walkBody is called with node=nullptr (multi-line case)
+  begin
+  rescue StandardError
+    STDERR.puts "rescued"
+  end
+end
+
+# `unless` is desugared to `if` with swapped branches, so these test the same code path
+module EmptyUnlessInModule
+  #: type d = Symbol
+
+  # Empty unless body (becomes empty else in the If node)
+  unless ARGV.empty?
+    STDERR.puts "not empty"
+  else
+  end
+end
+
+module EmptyUnlessElseInModule
+  #: type e = Array
+
+  # Empty else in unless (becomes empty then in the If node)
+  unless ARGV.any?
+  else
+    STDERR.puts "any"
+  end
+end

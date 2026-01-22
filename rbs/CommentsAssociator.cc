@@ -288,9 +288,9 @@ void CommentsAssociator::processTrailingComments(parser::Node *node, parser::Nod
 }
 
 unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique_ptr<parser::Node> body) {
-    // When called from If/Rescue handlers with empty branches, both node and body can be nullptr.
-    // We need to check node != nullptr to avoid dereferencing a null pointer.
-    if (typeAliasAllowedInContext() && body == nullptr && node != nullptr) {
+    ENFORCE(node != nullptr, "walkBody requires non-null node for location");
+
+    if (typeAliasAllowedInContext() && body == nullptr) {
         int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
         auto nodes = parser::NodeVec();
 
@@ -537,12 +537,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             walkNode(if_->condition.get());
 
             lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            if_->then_ = walkBody(if_->then_.get(), move(if_->then_));
+            auto *locationNode = if_->then_ ? if_->then_.get() : if_;
+            if_->then_ = walkBody(locationNode, move(if_->then_));
 
             if (if_->then_) {
                 lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), if_->then_->loc.endPos()).line;
             }
-            if_->else_ = walkBody(if_->else_.get(), move(if_->else_));
+            locationNode = if_->else_ ? if_->else_.get() : if_;
+            if_->else_ = walkBody(locationNode, move(if_->else_));
 
             if (beginLine != endLine) {
                 associateAssertionCommentsToNode(node);
@@ -629,7 +631,8 @@ void CommentsAssociator::walkNode(parser::Node *node) {
                 walkNodes(rescue->rescue);
                 rescue->body = walkBody(rescue, move(rescue->body));
             } else {
-                rescue->body = walkBody(rescue->body.get(), move(rescue->body));
+                auto *locationNode = rescue->body ? rescue->body.get() : rescue;
+                rescue->body = walkBody(locationNode, move(rescue->body));
                 walkNodes(rescue->rescue);
                 rescue->else_ = walkBody(rescue, move(rescue->else_));
             }
