@@ -117,6 +117,9 @@ class PropagateVisibility final {
         }
 
         switch (sym.kind()) {
+            case core::SymbolRef::Kind::None:
+                ENFORCE(false, "Exporting symbols from a SymbolRef that doesn't exist");
+                [[fallthrough]];
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
@@ -307,6 +310,9 @@ public:
         string_view kind;
         auto sym = lit->symbol();
         switch (sym.kind()) {
+            case core::SymbolRef::Kind::None:
+                ENFORCE(false, "Propagating visibility from a SymbolRef that doesn't exist");
+                [[fallthrough]];
             case core::SymbolRef::Kind::ClassOrModule: {
                 checkExportPackage(ctx, send.loc, sym);
                 auto setExportedTo = true;

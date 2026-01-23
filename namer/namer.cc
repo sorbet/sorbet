@@ -794,6 +794,9 @@ private:
 
     string_view prettySymbolKind(core::MutableContext ctx, core::SymbolRef::Kind kind) {
         switch (kind) {
+            case core::SymbolRef::Kind::None:
+                ENFORCE(false, "Should not call prettySymbolKind on a symbol that doesn't exist in namer")
+                [[fallthrough]];
             case core::SymbolRef::Kind::ClassOrModule:
                 return "class or module";
             case core::SymbolRef::Kind::FieldOrStaticField: {
@@ -1641,6 +1644,7 @@ private:
                     case core::SymbolRef::Kind::TypeMember:
                         ctx.state.deleteTypeMemberSymbol(oldSymbol.asTypeMemberRef());
                         break;
+                    case core::SymbolRef::Kind::None:
                     case core::SymbolRef::Kind::ClassOrModule:
                     case core::SymbolRef::Kind::TypeParameter:
                         ENFORCE(false);
