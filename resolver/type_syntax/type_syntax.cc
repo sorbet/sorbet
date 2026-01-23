@@ -1194,6 +1194,13 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 if (auto e = ctx.beginError(i.loc(), level)) {
                     e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                 klass.show(ctx));
+                    for (auto tm : klass.data(ctx)->typeMembers()) {
+                        auto tmData = tm.data(ctx);
+                        if (!tmData->flags.isFixed) {
+                            e.addErrorLine(tmData->loc(), "Type argument `{}` defined here",
+                                           tmData->name.show(ctx));
+                        }
+                    }
                     core::TypeErrorDiagnostics::insertTypeArguments(ctx, e, klass, ctx.locAt(i.loc()));
                 }
             }
