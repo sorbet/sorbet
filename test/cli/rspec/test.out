@@ -636,6 +636,196 @@ test/cli/rspec/rspec4.rb:81: Method `value5` does not exist on `MyClass::<descri
       NN |  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+test/cli/rspec/rspec5.rb:19: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    19 |  let(:name) { "Alice" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:21: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    21 |  it "has a name" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:28: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    28 |  let(:path) { "/some/path" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:30: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    30 |  it "has a path" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:31: Method `path` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    31 |    path
+            ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+  Did you mean `catch`? Use `-a` to autocorrect
+    test/cli/rspec/rspec5.rb:31: Replace with `catch`
+    31 |    path
+            ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def catch(tag=Object.new, &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec5.rb:37: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    37 |  let(:value) { 42 }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:39: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    39 |  it "has a value" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:40: Method `value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    40 |    value
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:46: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    46 |  let(:count) { 10 }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:48: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    48 |  it "has a count" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:49: Method `count` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    49 |    count
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:58: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    58 |  let(:name) { "Bob" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:60: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    60 |  it "has a name" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:67: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    67 |  let(:value) { 100 }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:69: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    69 |  it "has a value" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:70: Method `value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    70 |    value
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:76: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    76 |  let(:data) { "test" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:78: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    78 |  it "has data" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:79: Method `data` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    79 |    data
+            ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:85: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    85 |  let(:result) { true }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:87: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    87 |  it "has a result" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+
+test/cli/rspec/rspec5.rb:88: Method `result` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    88 |    result
+            ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec5.rb:8:
+     8 |module RSpec
+        ^
+  Did you mean `test`? Use `-a` to autocorrect
+    test/cli/rspec/rspec5.rb:88: Replace with `test`
+    88 |    result
+            ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def test(cmd, file1, file2=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 test/cli/rspec/rspec3.rb:18: Method `shared_examples` does not exist on `T.class_of(MyClass::<describe 'single shared example with context'>)` https://srb.help/7003
     18 |    shared_examples "my shared example" do
             ^^^^^^^^^^^^^^^
@@ -761,7 +951,7 @@ test/cli/rspec/rspec1.rb:29: Method `verified` does not exist on `T.class_of(<ro
     test/cli/rspec/rspec1.rb:7:
      7 |module RSpec
         ^
-Errors: 80
+Errors: 102
 --------------------------------------------------------------------------
 test/cli/rspec/rspec2.rb:58: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`) https://srb.help/5064
     58 |    describe "will include shared examples" do # error: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`)

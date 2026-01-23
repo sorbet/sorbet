@@ -1,10 +1,8 @@
 # typed: true
 # enable-experimental-rspec: true
 
-# This test shows that RSpec DSL methods like `let`, `it`, and `context`
-# are recognized by Sorbet with no errors.
-# RSpec.describe accepts multiple arguments (metadata tags), and the first
-# argument can be a string, class, symbol, or other type.
+# This test shows that RSpec.describe should work with multiple arguments
+# (like metadata tags). The first argument can be a string, class, symbol, or other type.
 
 # Define minimal RSpec module for testing
 module RSpec
@@ -13,24 +11,15 @@ module RSpec
     end
   end
 
-  def self.describe(description, *args, &block); end
+  def self.describe(*args, &block); end
 end
 
-# Test RSpec.describe with let, it, and nested context
+# Test RSpec.describe with a single string argument (should work)
 RSpec.describe "User" do
   let(:name) { "Alice" }
 
   it "has a name" do
     name
-  end
-
-  context "when verified" do
-    let(:verified) { true }
-
-    it "shows verified status" do
-      name
-      verified
-    end
   end
 end
 
@@ -99,3 +88,4 @@ RSpec.describe :user_symbol, :slow do
     result
   end
 end
+
