@@ -404,6 +404,51 @@ module Annotations
       self.raise
     end
 
+    # @abstract
+    #: -> Integer
+    def method_abstract11 = defined?(super) ? super : raise(NotImplementedError, "Abstract method called")
+
+    # @abstract
+    #: -> Integer
+    def method_abstract12 = defined?(super) ? super : raise
+
+
+    # @abstract
+    #: -> Integer
+    def method_abstract13 = if defined?(super); super else raise NotImplementedError, "Abstract method called"; end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract14
+      defined?(super) ? super : raise(NotImplementedError, "Abstract method called")
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract15
+      if defined?(super)
+        super
+      else
+        raise NotImplementedError, "Abstract method called"
+      end
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract16
+      defined?(super) ? super : raise
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract17
+      if defined?(super)
+        super
+      else
+        raise
+      end
+    end
+
     #: -> bot
     def self.raise
       raise
