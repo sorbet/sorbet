@@ -177,8 +177,7 @@ void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tr
     }
 
     // declLoc == loc usually implies that this class was synthetic in some way (Class.new, <root>, etc.)
-    // TODO(jez) Could probably make this work for Class.new, too.
-    if (lspQuery.matchesLoc(ctx.locAt(classDef.declLoc))) {
+    if (classDef.declLoc != classDef.loc && lspQuery.matchesLoc(ctx.locAt(classDef.declLoc))) {
         core::lsp::QueryResponse::pushQueryResponse(
             ctx, core::lsp::ClassDefResponse(classDef.symbol, ctx.locAt(classDef.loc), ctx.locAt(classDef.declLoc)));
     }
