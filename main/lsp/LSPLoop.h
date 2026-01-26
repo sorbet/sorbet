@@ -99,7 +99,7 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
 
 std::vector<std::unique_ptr<TextDocumentEdit>>
 autocorrect2DocumentEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                 const std::vector<core::AutocorrectSuggestion::Edit> &edits);
+                          const std::vector<core::AutocorrectSuggestion::Edit> &edits);
 
 void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
                              core::lsp::Query::Symbol::STORAGE &symbols);

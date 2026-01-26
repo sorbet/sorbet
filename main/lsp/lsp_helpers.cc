@@ -188,8 +188,9 @@ bool definedByAccessorMethod(const core::GlobalState &gs, AccessorInfo &info) {
 
 } // namespace
 
-vector<unique_ptr<TextDocumentEdit>> autocorrect2DocumentEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                                                      const vector<core::AutocorrectSuggestion::Edit> &edits) {
+vector<unique_ptr<TextDocumentEdit>> autocorrect2DocumentEdits(const LSPConfiguration &config,
+                                                               const core::GlobalState &gs,
+                                                               const vector<core::AutocorrectSuggestion::Edit> &edits) {
     UnorderedMap<core::FileRef, vector<unique_ptr<TextEdit>>> editsByFile;
     for (auto &edit : edits) {
         auto range = Range::fromLoc(gs, edit.loc);
