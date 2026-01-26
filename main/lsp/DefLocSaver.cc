@@ -43,9 +43,9 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
 
         tp.type = symbolData->resultType;
         tp.origins.emplace_back(ctx.locAt(methodDef.declLoc));
-        core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::MethodDefResponse(methodDef.symbol, ctx.file,
-                                                                                      methodDef.loc, methodDef.declLoc,
-                                                                                      methodDef.name, tp));
+        core::lsp::QueryResponse::pushQueryResponse(
+            ctx, core::lsp::MethodDefResponse(methodDef.symbol, ctx.file, methodDef.loc, methodDef.declLoc,
+                                              methodDef.name, methodDef.flags.isAttrBestEffortUIOnly, tp));
     }
 }
 

@@ -120,14 +120,16 @@ CheckSize(FieldResponse, 56, 8);
 class MethodDefResponse final {
 public:
     MethodDefResponse(core::MethodRef symbol, core::FileRef file, core::LocOffsets termLocOffsets,
-                      core::LocOffsets declLocOffsets, core::NameRef name, core::TypeAndOrigins retType)
+                      core::LocOffsets declLocOffsets, core::NameRef name, bool isAttrBestEffortUIOnly,
+                      core::TypeAndOrigins retType)
         : symbol(symbol), file(file), termLocOffsets(termLocOffsets), declLocOffsets(declLocOffsets), name(name),
-          retType(std::move(retType)){};
+          isAttrBestEffortUIOnly(isAttrBestEffortUIOnly), retType(std::move(retType)){};
     const core::MethodRef symbol;
     const core::FileRef file;
     const core::LocOffsets termLocOffsets;
     const core::LocOffsets declLocOffsets;
     const core::NameRef name;
+    const bool isAttrBestEffortUIOnly;
     const core::TypeAndOrigins retType;
 
     core::Loc termLoc() const {
