@@ -492,11 +492,12 @@ unique_ptr<parser::Node> Translator::translateIndexAssignment(pm_node_t *untyped
         lhs = make_unique<parser::Send>(lhsLoc, move(receiver), core::Names::squareBrackets(), lBracketLoc, move(args));
     } else {
         auto receiverExpr = receiver->takeDesugaredExpr();
-        auto args2 = nodeVecToStore<ast::Send::ARGS_store>(args);
+
+        auto argExprs = nodeVecToStore<ast::Send::ARGS_store>(args);
 
         // Desugar `x[i] = y, z` to `x.[]=(i, y, z)`
-        auto send =
-            MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, args.size(), move(args2));
+        auto send = MK::Send(lhsLoc, move(receiverExpr), core::Names::squareBrackets(), lBracketLoc, argExprs.size(),
+                             move(argExprs));
         lhs = make_node_with_expr<parser::Send>(move(send), lhsLoc, move(receiver), core::Names::squareBrackets(),
                                                 lBracketLoc, move(args));
     }
@@ -2704,11 +2705,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             // Build the arguments for the Send expression
-            ast::Send::ARGS_store argExprs;
-            argExprs.reserve(arguments.size());
-            for (auto &arg : arguments) {
-                argExprs.emplace_back(arg->takeDesugaredExpr());
-            }
+            auto argExprs = nodeVecToStore<ast::Send::ARGS_store>(arguments);
 
             auto expr = MK::Send(location, receiver->takeDesugaredExpr(), core::Names::squareBracketsEq(), lBracketLoc,
                                  argExprs.size(), move(argExprs));
@@ -4870,6 +4867,8 @@ ast::ExpressionPtr Translator::desugarHash(core::LocOffsets loc, NodeVec &kvPair
 // or `pm_lambda_node *`, and wrapping it around the given `Send` node.
 unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                             unique_ptr<parser::Node> sendNode) {
+    ENFORCE(parser::NodeWithExpr::isa_node<parser::Send>(sendNode.get()));
+
     pm_node_t *prismParametersNode;
     pm_node_t *prismBodyNode;
     core::LocOffsets blockLoc;
