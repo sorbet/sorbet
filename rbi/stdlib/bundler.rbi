@@ -951,6 +951,9 @@ class Bundler::Definition
   end
   def lock(file, preserve_unknown_sections=T.unsafe(nil)); end
 
+  sig {returns(T.untyped)}
+  def locked_bundler_version(); end
+
   sig {returns(T::Array[Bundler::Dependency])}
   def locked_dependencies(); end
 
