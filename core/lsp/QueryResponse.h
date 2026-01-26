@@ -136,7 +136,7 @@ public:
     const core::Loc termLoc;
     const core::Loc declLoc;
 };
-CheckSize(ClassDefResponse, 16, 4);
+CheckSize(ClassDefResponse, 28, 4);
 
 class EditResponse final {
 public:
