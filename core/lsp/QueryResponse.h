@@ -119,10 +119,12 @@ CheckSize(FieldResponse, 56, 8);
 
 class MethodDefResponse final {
 public:
-    MethodDefResponse(core::MethodRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
-        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+    MethodDefResponse(core::MethodRef symbol, core::Loc termLoc, core::Loc declLoc, core::NameRef name,
+                      core::TypeAndOrigins retType)
+        : symbol(symbol), termLoc(termLoc), declLoc(declLoc), name(name), retType(std::move(retType)){};
     const core::MethodRef symbol;
     const core::Loc termLoc;
+    const core::Loc declLoc;
     const core::NameRef name;
     const core::TypeAndOrigins retType;
 };

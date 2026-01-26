@@ -12,7 +12,7 @@ namespace {
 unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LSPTypecheckerDelegate &typechecker,
                                                  const LSPConfiguration &config,
                                                  const core::lsp::MethodDefResponse &definition) {
-    const auto &maybeSource = definition.termLoc.source(gs);
+    const auto &maybeSource = definition.declLoc.source(gs);
     if (!maybeSource.has_value()) {
         return nullptr;
     }
@@ -21,7 +21,7 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         // Maybe this is an attr_reader or a prop or something. Abort.
         return nullptr;
     }
-    auto file = definition.termLoc.file();
+    auto file = definition.declLoc.file();
 
     auto shortName = definition.name.shortName(gs);
     auto insertAt = source.find(shortName);
@@ -29,12 +29,12 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         return nullptr;
     }
 
-    auto insertSelfLoc = definition.termLoc.adjustLen(gs, insertAt, 0);
+    auto insertSelfLoc = definition.declLoc.adjustLen(gs, insertAt, 0);
     if (!insertSelfLoc.exists()) {
         return nullptr;
     }
 
-    auto insertParamLoc = definition.termLoc.adjustLen(gs, insertAt + shortName.size(), 0);
+    auto insertParamLoc = definition.declLoc.adjustLen(gs, insertAt + shortName.size(), 0);
     if (!insertParamLoc.exists()) {
         return nullptr;
     }
@@ -49,7 +49,7 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
     auto insertParamRange = Range::fromLoc(gs, insertParamLoc);
     ENFORCE(insertParamRange != nullptr);
 
-    auto uri = config.fileRef2Uri(gs, definition.termLoc.file());
+    auto uri = config.fileRef2Uri(gs, definition.declLoc.file());
     auto tdi = make_unique<VersionedTextDocumentIdentifier>(move(uri), JSONNullObject());
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(move(insertSelfRange), "self."));
@@ -66,7 +66,7 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         auto &rootTree = resolvedTree.tree;
 
         auto ctx = core::Context(gs, core::Symbols::root(), file);
-        auto queryLoc = definition.termLoc.copyWithZeroLength();
+        auto queryLoc = definition.declLoc.copyWithZeroLength();
         auto parsedSig = sig_finder::SigFinder::findSignature(ctx, rootTree, queryLoc);
         if (parsedSig.has_value()) {
             if (!parsedSig->sig.argTypes.empty()) {
