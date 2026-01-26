@@ -967,33 +967,46 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
         // However, for exports, we need to look the symbols referenced by other packages, which necessitates a loop
         // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
         auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
-        if (importsAutocorrect && exportsAutocorrect) {
-            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
-                importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
-                                                 make_move_iterator(exportsAutocorrect->edits.begin()),
-                                                 make_move_iterator(exportsAutocorrect->edits.end()));
-                // TODO(neil): for a file with no imports or exports, this will produce something like:
-                //   export MyPkg::Foo
-                //   import OtherPkg
-                // because e < i
-                core::AutocorrectSuggestion::mergeAdjacentEdits(importsAutocorrect->edits);
-                e.addAutocorrect(
-                    core::AutocorrectSuggestion{"Add missing imports and exports", move(importsAutocorrect->edits)});
-                // TODO(neil): we should also delete imports that are unused but have a modularity error here
-            }
-        } else if (importsAutocorrect) {
-            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                e.setHeader("{} is missing imports", pkgInfo.show(gs));
-                e.addAutocorrect(move(importsAutocorrect.value()));
-                // TODO(neil): we should also delete imports that are unused but have a modularity error here
-            }
-        } else if (exportsAutocorrect) {
-            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                e.setHeader("{} is missing exports", pkgInfo.show(gs));
-                e.addAutocorrect(move(exportsAutocorrect.value()));
-            }
+
+        auto autocorrects = vector<core::AutocorrectSuggestion>{};
+        auto missingTypes = vector<string>{};
+
+        if (importsAutocorrect) {
+            autocorrects.push_back(move(importsAutocorrect.value()));
+            missingTypes.push_back("imports");
         }
+
+        if (exportsAutocorrect) {
+            autocorrects.push_back(move(exportsAutocorrect.value()));
+            missingTypes.push_back("exports");
+        }
+
+        if (autocorrects.size() == 1) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("`{}` is missing {}", pkgInfo.show(gs), missingTypes[0]);
+                e.addAutocorrect(move(autocorrects[0]));
+            }
+        } else if (autocorrects.size() == 2) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("`{}` is missing {} and {}", pkgInfo.show(gs), missingTypes[0], missingTypes[1]);
+                auto combinedEdits = vector<core::AutocorrectSuggestion::Edit>{};
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[0].edits.begin()),
+                                     make_move_iterator(autocorrects[0].edits.end()));
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[1].edits.begin()),
+                                     make_move_iterator(autocorrects[1].edits.end()));
+                core::AutocorrectSuggestion::mergeAdjacentEdits(combinedEdits);
+                auto autocorrectTitle = fmt::format("Add missing {} and {}", missingTypes[0], missingTypes[1]);
+                e.addAutocorrect(core::AutocorrectSuggestion{autocorrectTitle, move(combinedEdits)});
+            }
+        } else if (autocorrects.size() > 2) {
+            ENFORCE(false);
+        }
+        // TODO(neil): for a file with no imports or exports, if both imports and exports are missing, we'll produce
+        // something like:
+        //   export MyPkg::Foo
+        //   import OtherPkg
+        // because e < i
+        // TODO(neil): we should also delete imports that are unused but have a modularity error here
     }
 }
 } // namespace
