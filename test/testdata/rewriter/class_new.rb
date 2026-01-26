@@ -34,9 +34,15 @@ end
 D.qux
 
 module Top
-  class Parent; end
+  class Parent
+    extend T::Helpers
+    abstract!
+    sig { abstract.void }
+    def foo; end
+  end
 end
-E = Class.new(Top::Parent) do; end
+  E = Class.new(Top::Parent) do; end
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
 
 T.let(E.new, Top::Parent)
 
