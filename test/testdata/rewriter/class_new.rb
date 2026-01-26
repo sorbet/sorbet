@@ -42,7 +42,7 @@ module Top
   end
 end
   E = Class.new(Top::Parent) do; end
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
 
 T.let(E.new, Top::Parent)
 
