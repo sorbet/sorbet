@@ -23,3 +23,6 @@ class A
     x&.|true
   end
 end
+
+# desugar should allow private calls on self
+self&.can_be_private()

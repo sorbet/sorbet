@@ -1489,16 +1489,27 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                 }
 
-                auto assgn = MK::Assign(zeroLengthRecvLoc, tempRecv, node2TreeImpl(dctx, csend->receiver));
+                auto receiver = node2TreeImpl(dctx, csend->receiver);
+                bool receiverIsSelf = receiver.isSelfReference();
+                auto assgn = MK::Assign(zeroLengthRecvLoc, tempRecv, move(receiver));
 
                 // Just compare with `NilClass` to avoid potentially calling into a class-defined `==`
                 auto cond =
                     MK::Send1(zeroLengthLoc, ast::MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
                               core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
 
-                unique_ptr<parser::Node> sendNode =
-                    make_unique<parser::Send>(loc, make_unique<parser::LVar>(zeroLengthRecvLoc, tempRecv),
-                                              csend->method, csend->methodLoc, move(csend->args));
+                unique_ptr<parser::Node> receiverForActualSend;
+                if (receiverIsSelf) {
+                    // If the receiver is self, we'll emit a Send node that calls the method directly on self,
+                    // rather than the temporary variable (which is also storing self).
+                    // This makes the `isPrivateOk` logic in the `parser::Send *` type case work correctly.
+                    receiverForActualSend = move(csend->receiver);
+                } else {
+                    receiverForActualSend = make_unique<parser::LVar>(zeroLengthRecvLoc, tempRecv);
+                }
+
+                unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
+                    loc, move(receiverForActualSend), csend->method, csend->methodLoc, move(csend->args));
                 auto send = node2TreeImpl(dctx, sendNode);
 
                 ExpressionPtr nil =
