@@ -566,9 +566,16 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
     for (auto &[file, value] : packagesReferencedByFile) {
         for (auto &[packageName, packageReferenceInfo] : value) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
-            if (!packageReferenceInfo.importNeeded || !packageReferenceInfo.validToImport || !pkgInfo.exists()) {
+            if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
                 continue;
             }
+
+            // We should only skip adding the import if we're not going to add a visible_to to the package, since it
+            // will be valid to import the package after the new visible_to is added
+            if (packageReferenceInfo.causesVisibilityError && !gs.packageDB().updateVisibilityFor(packageName)) {
+                continue;
+            }
+
             auto importType = fileToImportType(gs, file);
             auto it = toImport.find(packageName);
             if (it != toImport.end()) {

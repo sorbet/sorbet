@@ -85,7 +85,8 @@ struct VisibleTo {
 
 struct PackageReferenceInfo {
     bool importNeeded;
-    bool validToImport;
+    bool causesModularityError;
+    bool causesVisibilityError;
 };
 
 class PackageInfo {

@@ -556,7 +556,7 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {importNeeded, true};
+        referencedPackages[otherPackage] = {importNeeded, false, false};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
@@ -573,7 +573,8 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
-            bool restrictedVisiblity = !pkg.isVisibleTo(ctx, this->package.mangledName(), autocorrectedImportType);
+            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package.mangledName(), autocorrectedImportType);
+            referencedPackages[otherPackage].causesVisibilityError = causesVisibilityError;
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
@@ -587,7 +588,8 @@ public:
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
             bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
-            if (!hasModularityError && !restrictedVisiblity) {
+            referencedPackages[otherPackage].causesModularityError = hasModularityError;
+            if (!hasModularityError && !causesVisibilityError) {
                 if (db.genPackages()) {
                     return;
                 }
@@ -677,8 +679,9 @@ public:
                 }
             }
 
-            if (restrictedVisiblity) {
-                referencedPackages[otherPackage].validToImport = false;
+            // We should only report a visibility error if we're not going to add a visible_to to the package
+            // Otherwise the error is pointless since it'll go away after the new visible_to is added
+            if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
                 if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::ImportNotVisible)) {
                     e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                                 pkg.show(ctx), this->package.show(ctx));
@@ -688,7 +691,6 @@ public:
             }
 
             if (hasModularityError) {
-                referencedPackages[otherPackage].validToImport = false;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 core::ErrorClass error =
