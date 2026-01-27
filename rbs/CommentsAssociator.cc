@@ -179,10 +179,6 @@ void CommentsAssociator::associateSignatureCommentsToNode(parser::Node *node) {
     signaturesForNode[node] = move(comments);
 }
 
-bool CommentsAssociator::typeAliasAllowedInContext() {
-    return !contextAllowingTypeAlias.empty() && contextAllowingTypeAlias.back().first;
-}
-
 int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine,
                                                           int currentLine) {
     if (lastLine == currentLine) {
@@ -235,7 +231,7 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
                     e.setHeader("Unexpected RBS type alias comment");
                     if (!contextAllowingTypeAlias.empty()) {
                         // Inside a method - show where the method is
-                        auto loc = contextAllowingTypeAlias.back().second;
+                        auto loc = this->nodeLoc;
                         e.addErrorLine(ctx.locAt(loc),
                                        "RBS type aliases are only allowed in class and module bodies. Found in:");
                     } else {
@@ -473,14 +469,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "case");
         },
         [&](parser::Class *cls) {
-            contextAllowingTypeAlias.push_back(make_pair(true, cls->declLoc));
-            associateSignatureCommentsToNode(node);
+            auto childContext = this->enterContextThatAllowsTypeAlias(cls->declLoc);
+
+            childContext.associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            consumeCommentsUntilLine(beginLine);
-            cls->body = walkBody(cls, move(cls->body));
+            childContext.consumeCommentsUntilLine(beginLine);
+            cls->body = childContext.walkBody(cls, move(cls->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsBetweenLines(beginLine, endLine, "class");
-            contextAllowingTypeAlias.pop_back();
+            childContext.consumeCommentsBetweenLines(beginLine, endLine, "class");
         },
         [&](parser::CSend *csend) {
             if (csend->method.isSetter(ctx.state) && csend->args.size() == 1) {
@@ -494,18 +490,18 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "csend");
         },
         [&](parser::DefMethod *def) {
-            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
-            associateSignatureCommentsToNode(node);
-            def->body = walkBody(def, move(def->body));
-            consumeCommentsInsideNode(node, "method");
-            contextAllowingTypeAlias.pop_back();
+            auto childContext = this->enterContextThatDisallowsTypeAlias(def->declLoc);
+
+            childContext.associateSignatureCommentsToNode(node);
+            def->body = childContext.walkBody(def, move(def->body));
+            childContext.consumeCommentsInsideNode(node, "method");
         },
         [&](parser::DefS *def) {
-            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
-            associateSignatureCommentsToNode(node);
-            def->body = walkBody(def, move(def->body));
-            consumeCommentsInsideNode(node, "method");
-            contextAllowingTypeAlias.pop_back();
+            auto childContext = this->enterContextThatDisallowsTypeAlias(def->declLoc);
+
+            childContext.associateSignatureCommentsToNode(node);
+            def->body = childContext.walkBody(def, move(def->body));
+            childContext.consumeCommentsInsideNode(node, "method");
         },
         [&](parser::Ensure *ensure) {
             walkNode(ensure->body.get());
@@ -574,14 +570,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "masgn");
         },
         [&](parser::Module *mod) {
-            contextAllowingTypeAlias.push_back(make_pair(true, mod->declLoc));
-            associateSignatureCommentsToNode(node);
+            auto childContext = this->enterContextThatAllowsTypeAlias(mod->declLoc);
+            
+            childContext.associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            consumeCommentsUntilLine(beginLine);
-            mod->body = walkBody(mod, move(mod->body));
+            childContext.consumeCommentsUntilLine(beginLine);
+            mod->body = childContext.walkBody(mod, move(mod->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsBetweenLines(beginLine, endLine, "module");
-            contextAllowingTypeAlias.pop_back();
+            childContext.consumeCommentsBetweenLines(beginLine, endLine, "module");
         },
         [&](parser::Next *next) {
             // Only associate comments if the last expression is on the same line as the next
@@ -653,14 +649,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "return");
         },
         [&](parser::SClass *sclass) {
-            contextAllowingTypeAlias.push_back(make_pair(true, sclass->declLoc));
-            associateSignatureCommentsToNode(node);
+            auto childContext = this->enterContextThatAllowsTypeAlias(sclass->declLoc);
+            
+            childContext.associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            consumeCommentsUntilLine(beginLine);
-            sclass->body = walkBody(sclass, move(sclass->body));
+            childContext.consumeCommentsUntilLine(beginLine);
+            sclass->body = childContext.walkBody(sclass, move(sclass->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
-            consumeCommentsBetweenLines(beginLine, endLine, "sclass");
-            contextAllowingTypeAlias.pop_back();
+            childContext.consumeCommentsBetweenLines(beginLine, endLine, "sclass");
         },
         [&](parser::Send *send) {
             if (parser::MK::isVisibilitySend(send) || parser::MK::isAttrAccessorSend(send)) {

@@ -36,8 +36,35 @@ private:
     std::map<int, CommentNode> commentByLine;
     std::map<parser::Node *, std::vector<CommentNode>> signaturesForNode;
     std::map<parser::Node *, std::vector<CommentNode>> assertionsForNode;
-    std::vector<std::pair<bool, core::LocOffsets>> contextAllowingTypeAlias;
     int lastLine;
+};
+
+
+class CommentsAssociatorImpl {
+    CommentsAssociator &storage;
+
+    // Context state
+    core::LocOffsets nodeLoc;
+    bool &typeAliasAllowed;
+
+    // First constructor
+    CommentsAssociatorImpl(CommentsAssociator &storage) : storage(storage), nodeLoc(core::LocOffsets::none()), typeAliasAllowed(true) {};
+
+    // Child constructor
+    CommentsAssociatorImpl(CommentsAssociator &storage, core::LocOffsets nodeLoc, bool &typeAliasAllowed) : storage(storage), nodeLoc(nodeLoc), typeAliasAllowed(typeAliasAllowed) {};
+
+    // Context management
+    CommentsAssociatorImpl enterContextThatAllowsTypeAlias(core::LocOffsets nodeLoc) {
+        return CommentsAssociatorImpl(storage, nodeLoc, true);
+    }
+
+    CommentsAssociatorImpl enterContextThatDisallowsTypeAlias(core::LocOffsets nodeLoc) {
+        return CommentsAssociatorImpl(storage, nodeLoc, false);
+    }
+
+    bool typeAliasAllowedInContext() {
+        this->typeAliasAllowed;
+    }
 
     void walkNode(parser::Node *node);
     void walkNodes(parser::NodeVec &nodes);
@@ -52,8 +79,7 @@ private:
     std::optional<uint32_t> locateTargetLine(parser::Node *node);
 
     int maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine, int currentLine);
-    bool typeAliasAllowedInContext();
-};
+}
 
 } // namespace sorbet::rbs
 #endif // SORBET_RBS_COMMENTS_ASSOCIATOR_H
