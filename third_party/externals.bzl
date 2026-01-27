@@ -185,9 +185,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "rules_cc",
-        sha256 = "b6f34b3261ec02f85dbc5a8bdc9414ce548e1f5f67e000d7069571799cb88b25",
-        strip_prefix = "rules_cc-726dd8157557f1456b3656e26ab21a1646653405",
-        urls = ["https://github.com/bazelbuild/rules_cc/archive/726dd8157557f1456b3656e26ab21a1646653405.tar.gz"],
+        sha256 = "a2fdfde2ab9b2176bd6a33afca14458039023edb1dd2e73e6823810809df4027",
+        strip_prefix = "rules_cc-0.2.14",
+        urls = ["https://github.com/bazelbuild/rules_cc/archive/refs/tags/0.2.14.tar.gz"],
     )
 
     # TODO(jez) We keep our changes on the `sorbet` branch of `sorbet/bazel-toolchain`
@@ -195,9 +195,9 @@ def register_sorbet_dependencies():
     # In 2ddd7d791 (#7912) we upgraded the toolchain. Our old toolchain patches are on the `sorbet-old-toolchain` branch
     http_archive(
         name = "toolchains_llvm",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/5ed6d56dd7d2466bda56a6237c5ed70336b95ee5.tar.gz",
-        sha256 = "bdc706dbc33811ce4b2089d52564da106c2afbf3723cffbef301cc64e7615251",
-        strip_prefix = "bazel-toolchain-5ed6d56dd7d2466bda56a6237c5ed70336b95ee5",
+        url = "https://github.com/sorbet/bazel-toolchain/archive/6081a98aa3f8f95ad0e1ae52aaef8fc0c3a10ab4.tar.gz",
+        integrity = "sha256-lYpx1xxkspv0rXIZkaabDd0bXSYEN1Z9JV3OUo+dg64=",
+        strip_prefix = "bazel-toolchain-6081a98aa3f8f95ad0e1ae52aaef8fc0c3a10ab4",
     )
 
     http_archive(
