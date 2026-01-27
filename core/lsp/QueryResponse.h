@@ -119,14 +119,27 @@ CheckSize(FieldResponse, 56, 8);
 
 class MethodDefResponse final {
 public:
-    MethodDefResponse(core::MethodRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
-        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+    MethodDefResponse(core::MethodRef symbol, core::FileRef file, core::LocOffsets termLocOffsets,
+                      core::LocOffsets declLocOffsets, core::NameRef name, bool isAttrBestEffortUIOnly,
+                      core::TypeAndOrigins retType)
+        : symbol(symbol), file(file), termLocOffsets(termLocOffsets), declLocOffsets(declLocOffsets), name(name),
+          isAttrBestEffortUIOnly(isAttrBestEffortUIOnly), retType(std::move(retType)){};
     const core::MethodRef symbol;
-    const core::Loc termLoc;
+    const core::FileRef file;
+    const core::LocOffsets termLocOffsets;
+    const core::LocOffsets declLocOffsets;
     const core::NameRef name;
+    const bool isAttrBestEffortUIOnly;
     const core::TypeAndOrigins retType;
+
+    core::Loc termLoc() const {
+        return core::Loc(file, termLocOffsets);
+    }
+    core::Loc declLoc() const {
+        return core::Loc(file, declLocOffsets);
+    }
 };
-CheckSize(MethodDefResponse, 56, 8);
+CheckSize(MethodDefResponse, 64, 8);
 
 class ClassDefResponse final {
 public:
