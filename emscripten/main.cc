@@ -13,6 +13,8 @@ using namespace std;
 
 namespace {
 
+unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> wrapper;
+
 void runSorbet(int argc, char *argv[]) {
     try {
         sorbet::realmain::realmain(argc, argv);
@@ -65,8 +67,71 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *optionsJson) {
     runSorbet(argCharStars.size(), argCharStars.data());
 }
 
+void EMSCRIPTEN_KEEPALIVE initializeLsp(const char *optionsJson) {
+    if (wrapper) {
+        return;
+    }
+
+    rapidjson::Document options;
+    options.Parse(optionsJson);
+    if (options.HasParseError() || !options.IsArray()) {
+        fmt::print(stderr, "emscripten/main.cc: LSP options were not a valid JSON array: '{}'. Using defaults.\n",
+                   optionsJson);
+        return;
+    }
+
+    auto opts = make_shared<sorbet::realmain::options::Options>();
+    optional<bool> methodModifiersEnabled;
+
+    for (rapidjson::SizeType i = 0; i < options.Size(); i++) {
+        const auto &value = options[i];
+        if (!value.IsString()) {
+            fmt::print(stderr, "emscripten/main.cc: LSP option {} was not a string. Using defaults.\n", i);
+            return;
+        }
+
+        string_view argument = value.GetString();
+        if (argument == "--parser=prism") {
+            opts->cacheSensitiveOptions.usePrismParser = true;
+        } else if (argument == "--parser=original") {
+            opts->cacheSensitiveOptions.usePrismParser = false;
+        } else if (argument == "--parser") {
+            if (++i == options.Size() || !options[i].IsString()) {
+                fmt::print(stderr, "emscripten/main.cc: Missing value for `--parser`. Using defaults.\n");
+                return;
+            }
+
+            string_view parser = options[i].GetString();
+            if (parser == "prism") {
+                opts->cacheSensitiveOptions.usePrismParser = true;
+            } else if (parser == "original") {
+                opts->cacheSensitiveOptions.usePrismParser = false;
+            }
+        } else if (argument == "--enable-experimental-rbs-comments" ||
+                   argument == "--enable-experimental-rbs-comments=true") {
+            opts->cacheSensitiveOptions.rbsEnabled = true;
+        } else if (argument == "--enable-experimental-rbs-comments=false") {
+            opts->cacheSensitiveOptions.rbsEnabled = false;
+        } else if (argument == "--enable-experimental-method-modifiers" ||
+                   argument == "--enable-experimental-method-modifiers=true") {
+            methodModifiersEnabled = true;
+        } else if (argument == "--enable-experimental-method-modifiers=false") {
+            methodModifiersEnabled = false;
+        }
+    }
+
+    opts->experimentalMethodModifiers =
+        methodModifiersEnabled.value_or(static_cast<bool>(opts->cacheSensitiveOptions.rbsEnabled));
+    if (opts->cacheSensitiveOptions.rbsEnabled && !opts->cacheSensitiveOptions.usePrismParser) {
+        fmt::print(stderr, "emscripten/main.cc: RBS mode requires `--parser=prism`. Using defaults.\n");
+        return;
+    }
+
+    wrapper = sorbet::realmain::lsp::SingleThreadedLSPWrapper::create(string_view(), move(opts));
+    wrapper->enableAllExperimentalFeatures();
+}
+
 void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message) {
-    static unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> wrapper;
     if (!wrapper) {
         wrapper = sorbet::realmain::lsp::SingleThreadedLSPWrapper::create();
         wrapper->enableAllExperimentalFeatures();
