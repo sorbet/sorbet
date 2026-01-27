@@ -50,6 +50,10 @@ const MethodDefResponse *QueryResponse::isMethodDef() const {
     return get_if<MethodDefResponse>(&response);
 }
 
+const ClassDefResponse *QueryResponse::isClassDef() const {
+    return get_if<ClassDefResponse>(&response);
+}
+
 const EditResponse *QueryResponse::isEdit() const {
     return get_if<EditResponse>(&response);
 }
@@ -71,6 +75,8 @@ core::Loc QueryResponse::getLoc() const {
             } else if constexpr (is_same_v<T, FieldResponse>) {
                 return res.termLoc;
             } else if constexpr (is_same_v<T, MethodDefResponse>) {
+                return res.termLoc;
+            } else if constexpr (is_same_v<T, ClassDefResponse>) {
                 return res.termLoc;
             } else if constexpr (is_same_v<T, EditResponse>) {
                 return res.loc;
@@ -100,6 +106,8 @@ core::TypePtr QueryResponse::getRetType() const {
                 return res.retType.type;
             } else if constexpr (is_same_v<T, MethodDefResponse>) {
                 return res.retType.type;
+            } else if constexpr (is_same_v<T, ClassDefResponse>) {
+                Exception::raise("QueryResponse is of type that does not have retType");
             } else if constexpr (is_same_v<T, EditResponse>) {
                 Exception::raise("QueryResponse is of type that does not have retType.");
             } else {

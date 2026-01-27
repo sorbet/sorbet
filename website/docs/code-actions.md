@@ -4,6 +4,8 @@ title: Code Actions
 sidebar_label: Code Actions
 ---
 
+<!-- TODO(neil) Document Extract Variable eventually -->
+
 Sorbet supports code actions via LSP.
 
 ![](/img/suggest-sig-code-action-01.png)
@@ -90,4 +92,14 @@ This code action deletes a `T.unsafe`. Sometimes it might be interesting to see 
 
 This code action simply changes `T.unsafe(expr)` to `expr`.
 
-<!-- TODO(neil) Document Extract Variable eventually -->
+### Override `overridable` method
+
+> **Trigger**: Cursor on `class` or `module` keyword in a definition
+
+This code action inserts a empty `override` of an inherited, `overridable` method in the current class. (The corresponding code action for `abstract` methods is attached to the error for failing to override an abstract method).
+
+<video autoplay loop muted playsinline style="max-width: calc(min(813px, 100%));">
+  <source src="/img/lsp/overridable.mp4" type="video/mp4">
+</video>
+
+There will be one code action item for each possible `overridable` method. The inserted method will always be at the bottom of that class definition.

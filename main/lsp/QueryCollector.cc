@@ -27,6 +27,8 @@ uint16_t getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
                 return 3;
             } else if constexpr (is_same_v<T, core::lsp::LiteralResponse>) {
                 return 2;
+            } else if constexpr (is_same_v<T, core::lsp::ClassDefResponse>) {
+                return 1;
             } else {
                 static_assert(always_false_v<T>, "Should never happen, as the above checks should be exhaustive.");
             }
