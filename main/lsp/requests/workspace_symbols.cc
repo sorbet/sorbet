@@ -46,6 +46,9 @@ private:
 
     PartialMatch &getPartialMatch(core::SymbolRef ref) {
         switch (ref.kind()) {
+            case core::SymbolRef::Kind::None:
+                ENFORCE(false, "Matching a SymbolRef that doesn't exist");
+                [[fallthrough]];
             case core::SymbolRef::Kind::ClassOrModule:
                 return classOrModuleMatches[ref.classOrModuleIndex()];
             case core::SymbolRef::Kind::Method:
