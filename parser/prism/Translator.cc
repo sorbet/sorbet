@@ -2279,6 +2279,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     }
 
                 } else {
+                    // Side effect: If method has no explicit block parameter and contains a `yield`, translating it
+                    // will change the `methodContext.enclosingBlockParamName` from `<blk>` to `<implicit yield>`.
+                    // This will modify the local `enclosingBlockParamName` that it references.
+                    // The `methodContext.enclosingBlockParamLoc`/`enclosingBlockParamLoc` are similarly modified.
                     body = methodContext.translate(defNode->body);
                 }
             }
@@ -2297,12 +2301,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     auto blkLoc = core::LocOffsets::none();
                     paramsStore.emplace_back(MK::BlockParam(blkLoc, MK::Local(methodContext.enclosingBlockParamLoc,
                                                                               methodContext.enclosingBlockParamName)));
-                } else if (enclosingBlockParamName != methodContext.enclosingBlockParamName) {
-                    auto &blockParam = ast::cast_tree_nonnull<ast::BlockParam>(paramsStore.back());
-                    // Desugaring a `yield` to an implicit block param indicates that we should change the block
-                    // parameter name, so that we can detect this case later, in resolver.
-                    blockParam.expr =
-                        ast::MK::Local(methodContext.enclosingBlockParamLoc, methodContext.enclosingBlockParamName);
                 }
             } else {
                 didDesugarParams = attemptToDesugarParams;
@@ -3696,12 +3694,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             ExpressionPtr recv;
-            if (enclosingBlockParamName.exists()) {
-                if (enclosingBlockParamName == core::Names::blkArg()) {
-                    enclosingBlockParamLoc = location;
-                    enclosingBlockParamName = core::Names::implicitYield();
+            if (this->enclosingBlockParamName.exists()) {
+                if (this->enclosingBlockParamName == core::Names::blkArg()) {
+                    this->enclosingBlockParamLoc = location;
+                    this->enclosingBlockParamName = core::Names::implicitYield();
                 }
-                recv = MK::Local(location, enclosingBlockParamName);
+                recv = MK::Local(location, this->enclosingBlockParamName);
             } else {
                 recv = MK::RaiseUnimplemented(location);
             }
