@@ -2297,12 +2297,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     auto blkLoc = core::LocOffsets::none();
                     paramsStore.emplace_back(MK::BlockParam(blkLoc, MK::Local(methodContext.enclosingBlockParamLoc,
                                                                               methodContext.enclosingBlockParamName)));
-                } else if (enclosingBlockParamName != methodContext.enclosingBlockParamName) {
-                    auto &blockParam = ast::cast_tree_nonnull<ast::BlockParam>(paramsStore.back());
-                    // Desugaring a `yield` to an implicit block param indicates that we should change the block
-                    // parameter name, so that we can detect this case later, in resolver.
-                    blockParam.expr =
-                        ast::MK::Local(methodContext.enclosingBlockParamLoc, methodContext.enclosingBlockParamName);
                 }
             } else {
                 didDesugarParams = attemptToDesugarParams;
