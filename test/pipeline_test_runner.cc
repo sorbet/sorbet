@@ -784,6 +784,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
         }
 
+        handler.drainErrors(*gs);
+        handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
+        handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return parseResult.tree->toWhitequark(*gs); });
+        handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
+
         if (gs->cacheSensitiveOptions.rbsEnabled) {
             auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
             auto commentMap = associator.run(parseResult.tree);
