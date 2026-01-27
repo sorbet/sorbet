@@ -785,10 +785,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                auto directlyDesugar = false;
-
                 try {
-                    parseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
+                    parseResult = parser::Prism::Parser::run(ctx);
                     usePrismDesugar = true;
                 } catch (parser::Prism::PrismFallback &) {
                     // Hit a fallback case during Prism parsing, fallback to the legacy parser.
