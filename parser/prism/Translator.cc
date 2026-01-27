@@ -3694,12 +3694,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             ExpressionPtr recv;
-            if (enclosingBlockParamName.exists()) {
-                if (enclosingBlockParamName == core::Names::blkArg()) {
-                    enclosingBlockParamLoc = location;
-                    enclosingBlockParamName = core::Names::implicitYield();
+            if (this->enclosingBlockParamName.exists()) {
+                if (this->enclosingBlockParamName == core::Names::blkArg()) {
+                    this->enclosingBlockParamLoc = location;
+                    this->enclosingBlockParamName = core::Names::implicitYield();
                 }
-                recv = MK::Local(location, enclosingBlockParamName);
+                recv = MK::Local(location, this->enclosingBlockParamName);
             } else {
                 recv = MK::RaiseUnimplemented(location);
             }
