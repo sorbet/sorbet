@@ -2279,6 +2279,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                     }
 
                 } else {
+                    // Side effect: If method has no explicit block parameter and contains a `yield`, translating it
+                    // will change the `methodContext.enclosingBlockParamName` from `<blk>` to `<implicit yield>`.
+                    // This will modify the local `enclosingBlockParamName` that it references.
+                    // The `methodContext.enclosingBlockParamLoc`/`enclosingBlockParamLoc` are similarly modified.
                     body = methodContext.translate(defNode->body);
                 }
             }
