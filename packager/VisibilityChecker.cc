@@ -959,6 +959,24 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
         exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
     }
 
+    auto neededVisibleTo = UnorderedMap<core::packages::MangledName, vector<core::packages::MangledName>>{};
+    if (gs.packageDB().anyUpdateVisibilityFor()) {
+        for (auto pkgName : gs.packageDB().packages()) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+            ENFORCE(pkgInfo.exists());
+            // TODO(neil): this loop is similar to what we have in aggregateMissingImports, is there a way to dedup?
+            for (auto &[file, referencedPackages] : pkgInfo.packagesReferencedByFile) {
+                for (auto &[referencedPackageName, packageReferenceInfo] : referencedPackages) {
+                    if (packageReferenceInfo.causesVisibilityError) {
+                        // it is a visibility error for pkgName to reference referencedPackageName,
+                        // so need to add visible_to pkgName to referencedPackageName's __package.db
+                        neededVisibleTo[referencedPackageName].push_back(pkgName);
+                    }
+                }
+            }
+        }
+    }
+
     for (auto pkgName : gs.packageDB().packages()) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
@@ -969,6 +987,10 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
         // However, for exports, we need to look the symbols referenced by other packages, which necessitates a loop
         // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
         auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
+        // Similar idea for visible_to.
+        auto visibleToAutocorrect = gs.packageDB().updateVisibilityFor(pkgName)
+                                        ? pkgInfo.aggregateMissingVisibleTo(gs, neededVisibleTo[pkgName])
+                                        : nullopt;
 
         auto autocorrects = vector<core::AutocorrectSuggestion>{};
         auto missingTypes = vector<string>{};
@@ -981,6 +1003,11 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
         if (exportsAutocorrect) {
             autocorrects.push_back(move(exportsAutocorrect.value()));
             missingTypes.push_back("exports");
+        }
+
+        if (visibleToAutocorrect) {
+            autocorrects.push_back(move(visibleToAutocorrect.value()));
+            missingTypes.push_back(fmt::format("`{}`s", "visible_to"));
         }
 
         if (autocorrects.size() == 1) {
@@ -1000,7 +1027,23 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
                 auto autocorrectTitle = fmt::format("Add missing {} and {}", missingTypes[0], missingTypes[1]);
                 e.addAutocorrect(core::AutocorrectSuggestion{autocorrectTitle, move(combinedEdits)});
             }
-        } else if (autocorrects.size() > 2) {
+        } else if (autocorrects.size() == 3) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("`{}` is missing {}, {} and {}", pkgInfo.show(gs), missingTypes[0], missingTypes[1],
+                            missingTypes[2]);
+                auto combinedEdits = vector<core::AutocorrectSuggestion::Edit>{};
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[0].edits.begin()),
+                                     make_move_iterator(autocorrects[0].edits.end()));
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[1].edits.begin()),
+                                     make_move_iterator(autocorrects[1].edits.end()));
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[2].edits.begin()),
+                                     make_move_iterator(autocorrects[2].edits.end()));
+                core::AutocorrectSuggestion::mergeAdjacentEdits(combinedEdits);
+                auto autocorrectTitle =
+                    fmt::format("Add missing {}, {} and {}", missingTypes[0], missingTypes[1], missingTypes[2]);
+                e.addAutocorrect(core::AutocorrectSuggestion{autocorrectTitle, move(combinedEdits)});
+            }
+        } else if (autocorrects.size() > 3) {
             ENFORCE(false);
         }
         // TODO(neil): for a file with no imports or exports, if both imports and exports are missing, we'll produce
