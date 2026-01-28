@@ -1110,6 +1110,30 @@ where `...` is some expression which computes a class or module. Sorbet can't kn
 
 `type_member` and `type_template` cannot be used at the top-level of a file. Instead, they must be used inside a class or module definition.
 
+When using `--sorbet-packages`, this error also applies to the root module or class of a package whose namespace contains sub-packages. For example, if there are two packages `Foo` and `Foo::Bar`, the module or class `Foo` may not have `type_member` or `type_template` definitions while `Foo::Bar` would be allowed to. To fix this error, you must either move the generic functionality to a class that's exported by the package, or move its sub-packages to a different place in the package hierarchy.
+
+For example, if you have the following definition for the package namespace `A`, and there are subpackages defined underneath `A`:
+
+```ruby
+module A
+  extend T::Generic
+
+  X = type_member # error
+end
+```
+
+Could be refactored into the following, to avoid this error:
+
+```ruby
+module A
+  class C
+    extend T::Generic
+
+    X = type_member
+  end
+end
+```
+
 ## 4019
 
 This error is only reported when running Sorbet with the `--uniquely-defined-behavior` command line flag (formerly called `--stripe-mode`).
@@ -1286,6 +1310,24 @@ end
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Each package must have only one definition. A package definition is the place where there is a line like `class Opus::Foo < PackageSpec` in a `__package.rb` file.
+
+## 4028
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If your package reopens constants from the stdlib or gems to add type members, your package must be marked as a `prelude_package`. This is to ensure that the constant remains in a consistent state throughout typechecking, even when checking in package dependency order. If we allowed type members to be added on stdlib/gem constants in any package, two parts of the codebase may see the constant with or without that type member present--before or after the type member declaration on the reopened constant.
+
+## 4029
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ruby code. The fact that they use Ruby syntax is a convenience so that:
+
+- package declarations get syntax highlighting in all Ruby editors
+- tooling like Sorbet and RuboCop work on `__package.rb` files out of the box
+- Sorbet can support things like jump-to-definition inside `__package.rb` files
+
+But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
 
 ## 5001
 
@@ -2872,6 +2914,48 @@ end
 **Why?** The distinguishing factor of `# typed: strict` is that every method has an explicit interface with a signature. It's equally important to be explicit about the block argument, if present. For more, see the docs on [strictness levels](static.md#file-level-granularity-strictness-levels).
 
 **Note**: Previously, this requirement was only for `# typed: strict` files (see [3007](#3007)). It is now reported for all methods with `sig`'s on them.
+
+## 5083
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If a package contains a sub-package, its namespace module (or class) is required to not have mixins. Alternatively, if a package namespace must have mixins, it may not have sub-packages. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
+
+Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, or moving the sub-package to a different place in the package hierarchy. For example,
+
+```ruby
+module A
+  extend Foo # error
+end
+```
+
+Could be refactored into:
+
+```ruby
+module A
+  class C
+    extend Foo
+  end
+end
+```
+
+## 5084
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If your package reopens constants from the stdlib or gems to add mixins, your package must be must be marked as a `prelude_package`. This ensures that the constant remains consistent throughout type checking, even when checking in package dependency order. If we allowed mixins on stdlib/gem constants to be added in any package, two parts of the codebase may see that constant in different states--before and after the mixin was applied.
+
+## 5085
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ruby code. The fact that they use Ruby syntax is a convenience so that:
+
+- package declarations get syntax highlighting in all Ruby editors
+- tooling like Sorbet and RuboCop work on `__package.rb` files out of the box
+- Sorbet can support things like jump-to-definition inside `__package.rb` files
+
+But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
 
 ## 6001
 

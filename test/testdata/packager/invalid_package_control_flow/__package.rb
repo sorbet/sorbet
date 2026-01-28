@@ -7,6 +7,9 @@ SomeConstant = PackageSpec # error: Invalid expression in package: `Assign`
 #              ^^^^^^^^^^^ error: Unable to resolve constant `PackageSpec`
 
 class MyPackage < PackageSpec
+  # Mark this as a prelude package so that it's allowed to reopen PackageSpec
+  prelude_package
+
   extend T::Helpers # error: Invalid expression in package: `extend` is not allowed
   include T::Helpers # error: Invalid expression in package: `include` is not allowed
 
