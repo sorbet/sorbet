@@ -48,6 +48,7 @@ public:
     pm_node_t *Self(core::LocOffsets loc) const;
     pm_node_t *Nil(core::LocOffsets loc) const;
     pm_node_t *True(core::LocOffsets loc) const;
+    pm_node_t *False(core::LocOffsets loc) const;
     pm_node_t *Symbol(core::LocOffsets nameLoc, std::string_view name) const;
     pm_node_t *SymbolFromConstant(core::LocOffsets nameLoc, pm_constant_id_t nameId) const;
     pm_node_t *String(core::LocOffsets nameLoc, std::string_view name) const;

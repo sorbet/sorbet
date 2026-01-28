@@ -1197,7 +1197,12 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(dstar);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
+            const auto &ctx = driver_->lex.context;
+            nm = ctx.inDef && !ctx.inLambda && !ctx.inBlock
+                     ? core::Names::starStar()
+                     // We still want a unique name for anonymous kwrest params in block parameter lists (vs
+                     // method def parameter lists) so that they don't shadow the method parameter list.
+                     : gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
         }
 
         return make_unique<Kwrestarg>(loc, nm);
