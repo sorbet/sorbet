@@ -97,6 +97,12 @@ private:
         : literalBlockExpr(move(literalBlockExpr)), blockPassExpr(move(blockPassExpr)), blockPassLoc(blockPassLoc) {}
 
 public:
+    // Move-only type
+    DesugaredBlockArgument(DesugaredBlockArgument &&) = default;                // Move constructor
+    DesugaredBlockArgument(const DesugaredBlockArgument &) = delete;            // Copy constructor
+    DesugaredBlockArgument &operator=(DesugaredBlockArgument &&) = default;     // Move assignment
+    DesugaredBlockArgument &operator=(const DesugaredBlockArgument &) = delete; // Copy assignment
+
     static DesugaredBlockArgument none() {
         return DesugaredBlockArgument(nullptr, nullptr, core::LocOffsets::none());
     }
