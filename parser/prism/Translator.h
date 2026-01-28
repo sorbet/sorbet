@@ -108,6 +108,12 @@ private:
     ast::MethodDef::PARAMS_store translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
                                                                  pm_statements_node_t *statements);
 
+    // Method call helpers
+    class DesugaredBlockArgument;
+
+    ast::ExpressionPtr desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
+                                           pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc);
+
     ast::ExpressionPtr desugarSymbolProc(pm_symbol_node *symbol);
 
     template <typename StoreType>

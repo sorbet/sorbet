@@ -70,6 +70,63 @@ public:
     }
 };
 
+// Represents a desugared block argument. Valid cases can have:
+// - Just a block pass (e.g., `foo(&block)`)
+// - Just a literal block (e.g., `foo { }`)
+// - Neither
+//
+// We also need to model the invalid case, where both a block pass and literal block
+// (e.g., `foo(...) { }` or `foo(&block) { }`)
+class Translator::DesugaredBlockArgument {
+public:
+    // The literal block, if any, e.g. `{ ... }` or `do ... end`
+    ast::ExpressionPtr literalBlockExpr;
+
+    // The expression passed as a block, if any, e.g. the `block` in `a.map(&block)`
+    ast::ExpressionPtr blockPassExpr;
+
+    // The location of the entire block pass, including the `&`.
+    //     a.map(&:foo)
+    //           ^^^^^
+    core::LocOffsets blockPassLoc;
+
+private:
+    // Hide the constructor, in favour of named factory methods, so that we can add validation logic if needed.
+    DesugaredBlockArgument(ast::ExpressionPtr literalBlockExpr, ast::ExpressionPtr blockPassExpr,
+                           core::LocOffsets blockPassLoc)
+        : literalBlockExpr(move(literalBlockExpr)), blockPassExpr(move(blockPassExpr)), blockPassLoc(blockPassLoc) {}
+
+public:
+    static DesugaredBlockArgument none() {
+        return DesugaredBlockArgument(nullptr, nullptr, core::LocOffsets::none());
+    }
+
+    static DesugaredBlockArgument blockPass(ast::ExpressionPtr blockPassExpr, core::LocOffsets blockPassLoc) {
+        return DesugaredBlockArgument(nullptr, move(blockPassExpr), blockPassLoc);
+    }
+
+    static DesugaredBlockArgument literalBlock(ast::ExpressionPtr block) {
+        return DesugaredBlockArgument(move(block), nullptr, core::LocOffsets::none());
+    }
+
+    static DesugaredBlockArgument both(ast::ExpressionPtr block, ast::ExpressionPtr blockPassExpr,
+                                       core::LocOffsets blockPassLoc) {
+        return DesugaredBlockArgument(move(block), move(blockPassExpr), blockPassLoc);
+    }
+
+    bool exists() const {
+        return literalBlockExpr || blockPassExpr;
+    }
+
+    bool hasBlockPass() const {
+        return blockPassExpr != nullptr;
+    }
+
+    bool hasLiteralBlock() const {
+        return literalBlockExpr != nullptr;
+    }
+};
+
 // Helper template to convert a pm_node_list to any store type.
 // This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
 // ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
@@ -1588,114 +1645,46 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 throw PrismFallback{}; // TODO: Implement special-case for `block_given?`
             }
 
-            ast::ExpressionPtr blockExpr;
-            ast::ExpressionPtr blockPassArg;
+            auto block = DesugaredBlockArgument::none();
             if (auto *prismBlock = callNode->block) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
-
                     auto blockNode = down_cast<pm_block_node>(prismBlock);
 
-                    auto blockLoc = translateLoc(prismBlock->location);
-
-                    auto blockBody = this->enterBlockContext().desugarNullable(blockNode->body);
-
-                    ast::MethodDef::PARAMS_store blockParamsStore;
-                    if (blockNode->parameters != nullptr) {
-                        switch (PM_NODE_TYPE(blockNode->parameters)) {
-                            case PM_BLOCK_PARAMETERS_NODE: { // The params declared at the top of a PM_BLOCK_NODE
-                                // Like the `|x|` in `foo { |x| ... }`
-                                auto paramsNode = down_cast<pm_block_parameters_node>(blockNode->parameters);
-
-                                auto paramsLoc = translateLoc(paramsNode->base.location);
-
-                                if (paramsNode->parameters) {
-                                    auto blockLocalVariables =
-                                        absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
-
-                                    ast::InsSeq::STATS_store blockStatsStore;
-
-                                    std::tie(blockParamsStore, blockStatsStore, std::ignore, std::ignore) =
-                                        desugarParametersNode(paramsNode->parameters, paramsLoc, blockLocalVariables);
-
-                                    if (!blockStatsStore.empty()) {
-                                        blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
-                                    }
-                                }
-
-                                break;
-                            }
-
-                            case PM_NUMBERED_PARAMETERS_NODE: { // The params in a PM_BLOCK_NODE with numbered params
-                                // Like the implicit `|_1, _2, _3|` in `foo { _3 }`
-                                auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(blockNode->parameters);
-
-                                // Use a 0-length loc just after the `do` or `{` token, as if you had written:
-                                //     do|_1, _2| ... end`
-                                //       ^
-                                //     {|_1, _2| ... }`
-                                //      ^
-
-                                blockParamsStore = translateNumberedParametersNode(
-                                    numberedParamsNode, down_cast<pm_statements_node>(blockNode->body));
-
-                                break;
-                            }
-
-                            case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
-                                // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
-                                auto itParamLoc = translateLoc(blockNode->opening_loc.end, blockNode->opening_loc.end);
-
-                                // Find the actual usage location of 'it' in the block body by walking the AST
-                                auto itUsageLoc = itParamLoc;
-                                if (blockNode->body != nullptr) {
-                                    auto statements = down_cast<pm_statements_node>(blockNode->body);
-                                    auto foundLoc = findItParamUsageLoc(statements);
-                                    if (foundLoc.exists()) {
-                                        itUsageLoc = foundLoc;
-                                    }
-                                }
-
-                                // Single 'it' parameter - use the original name (not a unique one)
-                                // Unlike numbered parameters, 'it' uses the actual name "it" so that
-                                // local variables named 'it' in the same scope can shadow it
-                                blockParamsStore.emplace_back(MK::Local(itUsageLoc, core::Names::it()));
-                                break;
-                            }
-
-                            default: {
-                                unreachable("Found a {} block parameter type, which is not implemented yet ",
-                                            pm_node_type_to_str(PM_NODE_TYPE(blockNode->parameters)));
-                            }
-                        }
-                    }
-
-                    blockExpr = MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
+                    block = DesugaredBlockArgument::literalBlock(
+                        desugarLiteralBlock(blockNode->body, blockNode->parameters, blockNode->base.location,
+                                            blockNode->opening_loc));
                 } else {
                     ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
 
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
+                    // The location of the entire block pass, including the `&`.
+                    auto blockPassLoc = translateLoc(prismBlock->location);
+
                     if (bp->expression) {
                         if (PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
                             auto symbol = down_cast<pm_symbol_node>(bp->expression);
-                            blockExpr = desugarSymbolProc(symbol);
+                            block = DesugaredBlockArgument::literalBlock(desugarSymbolProc(symbol));
                         } else {
-                            blockPassArg = desugar(bp->expression);
+                            block = DesugaredBlockArgument::blockPass(desugar(bp->expression), blockPassLoc);
                         }
                     } else {
                         // Replace an anonymous block pass like `f(&)` with a local variable
                         // reference, like `f(&&)`.
-                        blockPassArg = MK::Local(translateLoc(prismBlock->location).copyEndWithZeroLength(),
-                                                 core::Names::ampersand());
+                        block = DesugaredBlockArgument::blockPass(
+                            MK::Local(translateLoc(prismBlock->location).copyEndWithZeroLength(),
+                                      core::Names::ampersand()),
+                            blockPassLoc);
                     }
                 }
             }
 
             if (hasFwdArgs) { // Desugar a call like `foo(...)` so it has a block argument like `foo(..., &b)`.
-                ENFORCE(blockPassArg == nullptr, "The parser should have rejected a call with both a block pass "
-                                                 "argument and forwarded args (e.g. `foo(&b, ...)`)");
+                ENFORCE(!block.exists(), "The parser should have rejected a call with both a block pass "
+                                         "argument and forwarded args (e.g. `foo(&b, ...)`)");
 
-                blockPassArg = MK::Local(sendWithBlockLoc, core::Names::fwdBlock());
+                block = DesugaredBlockArgument::blockPass(MK::Local(sendWithBlockLoc, core::Names::fwdBlock()),
+                                                          core::LocOffsets::none());
             }
 
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
@@ -1822,22 +1811,21 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 magicSendArgs.emplace_back(move(argsArrayExpr));
                 magicSendArgs.emplace_back(move(kwargsExpr));
 
-                if (blockPassArg) {
+                if (block.hasBlockPass()) {
                     // Desugar a call with a splat, and any other expression as a block pass argument.
                     // E.g. `foo(*splat, &block)`
 
-                    auto blockPassLoc =
-                        hasFwdArgs ? sendLoc.copyEndWithZeroLength() : translateLoc(callNode->block->location);
+                    auto blockPassLoc = hasFwdArgs ? sendLoc.copyEndWithZeroLength() : block.blockPassLoc;
 
-                    magicSendArgs.emplace_back(move(blockPassArg));
+                    magicSendArgs.emplace_back(move(block.blockPassExpr));
                     numPosArgs++;
 
                     return MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
                                     messageLoc, numPosArgs, move(magicSendArgs), flags);
                 }
 
-                if (blockExpr) {
-                    magicSendArgs.emplace_back(move(blockExpr));
+                if (block.hasLiteralBlock()) {
+                    magicSendArgs.emplace_back(move(block.literalBlockExpr));
                     flags.hasBlock = true;
                 }
 
@@ -1851,7 +1839,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             // Grab a copy of the argument count, before we concat in the kwargs key/value pairs. // huh?
             int numPosArgs = prismArgs.size();
 
-            if (blockPassArg) {
+            if (block.hasBlockPass()) {
                 // FIXME: move this comment
                 // Special handling for non-Symbol block pass args, like `a.map(&block)`
                 // Symbol procs like `a.map(:to_s)` are rewritten into literal block arguments,
@@ -1860,13 +1848,13 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 // Desugar a call without a splat, and any other expression as a block pass argument.
                 // E.g. `a.each(&block)`
 
-                auto blockPassLoc = blockPassArg.loc();
+                auto blockPassLoc = block.blockPassLoc;
 
                 ast::Send::ARGS_store magicSendArgs;
                 magicSendArgs.reserve(3 + prismArgs.size());
                 magicSendArgs.emplace_back(move(receiver));
                 magicSendArgs.emplace_back(MK::Symbol(sendLoc0, methodName));
-                magicSendArgs.emplace_back(move(blockPassArg));
+                magicSendArgs.emplace_back(move(block.blockPassExpr));
 
                 numPosArgs += 3;
 
@@ -1896,8 +1884,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, sendArgs);
             }
 
-            if (blockExpr) {
-                sendArgs.emplace_back(move(blockExpr));
+            if (block.hasLiteralBlock()) {
+                sendArgs.emplace_back(move(block.literalBlockExpr));
                 flags.hasBlock = true;
             }
 
@@ -3800,6 +3788,83 @@ Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numbere
     }
 
     return result;
+}
+
+ast::ExpressionPtr Translator::desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
+                                                   pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc) {
+    auto blockBody = this->enterBlockContext().desugarNullable(blockBodyNode);
+    ast::MethodDef::PARAMS_store blockParamsStore;
+    auto blockLoc = translateLoc(blockLocation);
+
+    if (blockParameters != nullptr) {
+        switch (PM_NODE_TYPE(blockParameters)) {
+            case PM_BLOCK_PARAMETERS_NODE: { // The params declared at the top of a PM_BLOCK_NODE
+                // Like the `|x|` in `foo { |x| ... }`
+                auto paramsNode = down_cast<pm_block_parameters_node>(blockParameters);
+
+                auto paramsLoc = translateLoc(paramsNode->base.location);
+
+                if (paramsNode->parameters) {
+                    auto blockLocalVariables = absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
+
+                    ast::InsSeq::STATS_store blockStatsStore;
+
+                    std::tie(blockParamsStore, blockStatsStore, std::ignore, std::ignore) =
+                        desugarParametersNode(paramsNode->parameters, paramsLoc, blockLocalVariables);
+
+                    if (!blockStatsStore.empty()) {
+                        blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
+                    }
+                }
+
+                break;
+            }
+
+            case PM_NUMBERED_PARAMETERS_NODE: { // The params in a PM_BLOCK_NODE with numbered params
+                // Like the implicit `|_1, _2, _3|` in `foo { _3 }`
+                auto numberedParamsNode = down_cast<pm_numbered_parameters_node>(blockParameters);
+
+                // Use a 0-length loc just after the `do` or `{` token, as if you had written:
+                //     do|_1, _2| ... end`
+                //       ^
+                //     {|_1, _2| ... }`
+                //      ^
+
+                blockParamsStore =
+                    translateNumberedParametersNode(numberedParamsNode, down_cast<pm_statements_node>(blockBodyNode));
+
+                break;
+            }
+
+            case PM_IT_PARAMETERS_NODE: { // The 'it' default block parameter, e.g. `a.map { it + 1 }`
+                // Use a 0-length loc just after the `do` or `{` token, similar to numbered params
+                auto itParamLoc = translateLoc(blockNodeOpeningLoc.end, blockNodeOpeningLoc.end);
+
+                // Find the actual usage location of 'it' in the block body by walking the AST
+                auto itUsageLoc = itParamLoc;
+                if (blockBodyNode != nullptr) {
+                    auto statements = down_cast<pm_statements_node>(blockBodyNode);
+                    auto foundLoc = findItParamUsageLoc(statements);
+                    if (foundLoc.exists()) {
+                        itUsageLoc = foundLoc;
+                    }
+                }
+
+                // Single 'it' parameter - use the original name (not a unique one)
+                // Unlike numbered parameters, 'it' uses the actual name "it" so that
+                // local variables named 'it' in the same scope can shadow it
+                blockParamsStore.emplace_back(MK::Local(itUsageLoc, core::Names::it()));
+                break;
+            }
+
+            default: {
+                unreachable("Found a {} block parameter type, which is not implemented yet ",
+                            pm_node_type_to_str(PM_NODE_TYPE(blockParameters)));
+            }
+        }
+    }
+
+    return MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
 }
 
 // Desugar a Symbol block pass argument (like the `&foo` in `m(&:foo)`) into a block literal.
