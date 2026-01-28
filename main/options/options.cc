@@ -1295,6 +1295,7 @@ void readOptions(Options &opts,
                 logger->error("--allow-relaxed-packager-checks-for can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
+            // TODO(neil): should this also be "[A-Z][a-zA-Z0-9:]+" similar to update-visiblity-for?
             std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
             for (const string &ns : raw["allow-relaxed-packager-checks-for"].as<vector<string>>()) {
                 if (!std::regex_match(ns, nsValid)) {
@@ -1315,7 +1316,7 @@ void readOptions(Options &opts,
                 logger->error("--gen-packages-update-visibility-for can only be specified in --gen-packages mode");
                 throw EarlyReturnWithCode(1);
             }
-            std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
+            std::regex nsValid("[A-Z][a-zA-Z0-9:]*");
             for (const string &ns : raw["gen-packages-update-visibility-for"].as<vector<string>>()) {
                 if (!std::regex_match(ns, nsValid)) {
                     logger->error("--gen-packages-update-visibility-for must contain items that start with a capital "
