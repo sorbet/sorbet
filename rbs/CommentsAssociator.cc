@@ -233,15 +233,10 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(parser::NodeVec &nodes
             if (!typeAliasAllowedInContext()) {
                 if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
                     e.setHeader("Unexpected RBS type alias comment");
-                    if (!contextAllowingTypeAlias.empty()) {
-                        // Inside a method - show where the method is
-                        auto loc = contextAllowingTypeAlias.back().second;
-                        e.addErrorLine(ctx.locAt(loc),
-                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
-                    } else {
-                        // At top level - no context to show
-                        e.addErrorNote("RBS type aliases are only allowed in class and module bodies");
-                    }
+                    auto loc = contextAllowingTypeAlias.back().second;
+                    e.addErrorLine(
+                        ctx.locAt(loc),
+                        "RBS type aliases are only allowed in class and module bodies, not in method bodies");
                 }
 
                 it = commentByLine.erase(it);
@@ -290,7 +285,7 @@ void CommentsAssociator::processTrailingComments(parser::Node *node, parser::Nod
 unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique_ptr<parser::Node> body) {
     ENFORCE(node != nullptr, "walkBody requires non-null node for location");
 
-    if (typeAliasAllowedInContext() && body == nullptr) {
+    if (body == nullptr) {
         int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
         auto nodes = parser::NodeVec();
 
@@ -304,16 +299,6 @@ unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique
         return nullptr;
     }
 
-    if (body == nullptr) {
-        auto nodes = parser::NodeVec();
-        processTrailingComments(node, nodes);
-
-        if (!nodes.empty()) {
-            return make_unique<parser::Begin>(node->loc, move(nodes));
-        }
-        return nullptr;
-    }
-
     if (auto *begin = parser::cast_node<parser::Begin>(body.get())) {
         // The body is already a Begin node, so we don't need any wrapping
         walkNode(body.get());
@@ -324,7 +309,7 @@ unique_ptr<parser::Node> CommentsAssociator::walkBody(parser::Node *node, unique
     // The body is a single node, we'll need to wrap it if we find standalone RBS comments
     auto beforeNodes = parser::NodeVec();
 
-    // Visit standalone RBS comments after before the body node
+    // Visit standalone RBS comments before the body node
     auto currentLine = core::Loc::pos2Detail(ctx.file.data(ctx), body->loc.beginPos()).line;
     maybeInsertStandalonePlaceholders(beforeNodes, 0, lastLine, currentLine);
     lastLine = currentLine;
@@ -393,6 +378,10 @@ void CommentsAssociator::walkNode(parser::Node *node) {
         return;
     }
 
+    // All nodes default to disallowing type aliases; Class/Module/SClass override this.
+    // Begin inherits from parent to be transparent.
+    contextAllowingTypeAlias.push_back(make_pair(false, node->loc));
+
     typecase(
         node,
 
@@ -418,6 +407,11 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "assign");
         },
         [&](parser::Begin *begin) {
+            // Begin is a container - inherit parent's type alias permission
+            if (contextAllowingTypeAlias.size() >= 2) {
+                contextAllowingTypeAlias.back() = contextAllowingTypeAlias[contextAllowingTypeAlias.size() - 2];
+            }
+
             // This is a workaround that will be removed once we migrate to prism. We need to differentiate between
             // implicit and explicit begin nodes.
             //
@@ -473,14 +467,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "case");
         },
         [&](parser::Class *cls) {
-            contextAllowingTypeAlias.push_back(make_pair(true, cls->declLoc));
+            // Replace the default false with true - type aliases are allowed in class bodies
+            contextAllowingTypeAlias.back() = make_pair(true, cls->declLoc);
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             cls->body = walkBody(cls, move(cls->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "class");
-            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::CSend *csend) {
             if (csend->method.isSetter(ctx.state) && csend->args.size() == 1) {
@@ -494,18 +488,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "csend");
         },
         [&](parser::DefMethod *def) {
-            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
             associateSignatureCommentsToNode(node);
             def->body = walkBody(def, move(def->body));
             consumeCommentsInsideNode(node, "method");
-            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::DefS *def) {
-            contextAllowingTypeAlias.push_back(make_pair(false, def->declLoc));
             associateSignatureCommentsToNode(node);
             def->body = walkBody(def, move(def->body));
             consumeCommentsInsideNode(node, "method");
-            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Ensure *ensure) {
             walkNode(ensure->body.get());
@@ -537,13 +527,15 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             walkNode(if_->condition.get());
 
             lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
-            auto *locationNode = if_->then_ ? if_->then_.get() : if_;
-            if_->then_ = walkBody(locationNode, move(if_->then_));
-
             if (if_->then_) {
+                if_->then_ = walkBody(if_->then_.get(), move(if_->then_));
                 lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), if_->then_->loc.endPos()).line;
+            } else if (if_->else_) {
+                // For `unless`, then_ is nil - advance lastLine so comments aren't grabbed early
+                lastLine = core::Loc::pos2Detail(ctx.file.data(ctx), if_->else_->loc.beginPos()).line;
             }
-            locationNode = if_->else_ ? if_->else_.get() : if_;
+
+            auto *locationNode = if_->else_ ? if_->else_.get() : if_;
             if_->else_ = walkBody(locationNode, move(if_->else_));
 
             if (beginLine != endLine) {
@@ -574,14 +566,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "masgn");
         },
         [&](parser::Module *mod) {
-            contextAllowingTypeAlias.push_back(make_pair(true, mod->declLoc));
+            // Replace the default false with true - type aliases are allowed in module bodies
+            contextAllowingTypeAlias.back() = make_pair(true, mod->declLoc);
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             mod->body = walkBody(mod, move(mod->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "module");
-            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Next *next) {
             // Only associate comments if the last expression is on the same line as the next
@@ -653,14 +645,14 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             consumeCommentsInsideNode(node, "return");
         },
         [&](parser::SClass *sclass) {
-            contextAllowingTypeAlias.push_back(make_pair(true, sclass->declLoc));
+            // Replace the default false with true - type aliases are allowed in singleton class bodies
+            contextAllowingTypeAlias.back() = make_pair(true, sclass->declLoc);
             associateSignatureCommentsToNode(node);
             auto beginLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.beginPos()).line;
             consumeCommentsUntilLine(beginLine);
             sclass->body = walkBody(sclass, move(sclass->body));
             auto endLine = core::Loc::pos2Detail(ctx.file.data(ctx), node->loc.endPos()).line;
             consumeCommentsBetweenLines(beginLine, endLine, "sclass");
-            contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Send *send) {
             if (parser::MK::isVisibilitySend(send) || parser::MK::isAttrAccessorSend(send)) {
@@ -732,6 +724,8 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             associateAssertionCommentsToNode(node);
             consumeCommentsInsideNode(node, "other");
         });
+
+    contextAllowingTypeAlias.pop_back();
 }
 
 CommentMap CommentsAssociator::run(unique_ptr<parser::Node> &node) {
@@ -747,7 +741,10 @@ CommentMap CommentsAssociator::run(unique_ptr<parser::Node> &node) {
     }
 
     lastLine = 0;
+    // Allow type aliases at the top level
+    contextAllowingTypeAlias.push_back(make_pair(true, core::LocOffsets::none()));
     walkNode(node.get());
+    contextAllowingTypeAlias.pop_back();
 
     // Check for any remaining comments
     for (const auto &[line, comment] : commentByLine) {
