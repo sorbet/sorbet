@@ -165,6 +165,7 @@ struct Options {
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> allowRelaxedPackagerChecksFor;
+    std::vector<std::string> updateVisibilityFor;
     std::vector<std::string> packagerLayers;
     std::string typedSource = "";
     std::string cacheDir = "";
