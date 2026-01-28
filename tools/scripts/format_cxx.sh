@@ -75,12 +75,24 @@ if [ "$mode" = "fix" ]; then
         echo '### END SYNCBACK ###'
     fi
 else
-    echo "Some c++ files need to be formatted!"
-    for src in "${misformatted[@]}"; do
-        echo "* $src"
-    done
+    echo "Some c++ files need to be formatted! Please run:"
     echo ""
-    echo "Run \`./tools/scripts/format_cxx.sh\` to format them"
+    echo '```sh'
+    if [ "${#misformatted[@]}" -eq 1 ]; then
+        # Single file - put everything on one line
+        echo "./tools/scripts/format_cxx.sh ${misformatted[0]}"
+    else
+        # Multiple files - use multi-line format
+        echo "./tools/scripts/format_cxx.sh \\"
+        for i in "${!misformatted[@]}"; do
+            if [ "$i" -eq $((${#misformatted[@]} - 1)) ]; then
+                echo "  ${misformatted[$i]}"
+            else
+                echo "  ${misformatted[$i]} \\"
+            fi
+        done
+    fi
+    echo '```'
 fi
 
 

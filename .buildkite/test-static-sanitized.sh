@@ -49,21 +49,30 @@ if [ "$err" -ne 0 ]; then
   echo 'Run this command to run failing tests locally:' >> "$failing_tests"
   echo >> "$failing_tests"
   echo '```bash' >> "$failing_tests"
-  echo "./bazel test \\" >> "$failing_tests"
 
   # Take the lines that start with target labels.
   # Lines look like "//foo  FAILED in 10s"
-  { ./bazel test --test_summary=terse "${test_args[@]}" || true ; } | \
-    grep '^//' | \
-    sed -e 's/ .*/ \\/' | \
-    sed -e 's/^/  /' >> "$failing_tests"
+  failing_targets=$(
+    { ./bazel test --test_summary=terse "${test_args[@]}" || true ; } | \
+      grep '^//' | \
+      sed -e 's/ .*//'
+  )
 
-  # Put this last as an easy way to not have a `\` on the last line.
-  #
+  num_failing=$(echo "$failing_targets" | wc -l | tr -d ' ')
+
   # Use --config=dbg instead of sanitized because it's more likely that they've
   # already built this config locally, and most test failures reproduce outside
   # of sanitized mode anyways.
-  echo '  --config=dbg --test_output=errors' >> "$failing_tests"
+  if [ "$num_failing" -eq 1 ]; then
+    # Single test - put everything on one line
+    echo "./bazel test --config=dbg --test_output=errors $failing_targets" >> "$failing_tests"
+  else
+    # Multiple tests - use multi-line format
+    echo "./bazel test --config=dbg --test_output=errors \\" >> "$failing_tests"
+    # Add backslash to all but the last line, indent all lines
+    echo "$failing_targets" | sed -e '$!s/$/ \\/' -e 's/^/  /' >> "$failing_tests"
+  fi
+
   echo '```' >> "$failing_tests"
 
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
