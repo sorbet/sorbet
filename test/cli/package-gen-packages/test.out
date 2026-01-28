@@ -1,5 +1,13 @@
 --gen-packages can only be can only be used in --sorbet-packages mode
 --gen-packages can not be used when --lsp is also enabled
+B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    B/__package.rb:9: Inserted `visible_to C`
+     9 |  visible_to A
+                      ^
+
 C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
      7 |  import A
           ^^^^^^^^
@@ -48,7 +56,19 @@ D/__package.rb:3: `D` is missing exports https://srb.help/3734
       export D::EnumFromD`
      5 |  layer 'util'
                       ^
-Errors: 5
+Errors: 6
+# typed: strict
+
+class B < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  export B::CONSTANT_FROM_B
+
+  visible_to A
+  visible_to C
+  visible_to G
+end
 # typed: strict
 
 class C < PackageSpec
