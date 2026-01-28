@@ -108,7 +108,22 @@ private:
     ast::MethodDef::PARAMS_store translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
                                                                  pm_statements_node_t *statements);
 
+    // Method call helpers
+    class DesugaredBlockArgument;
+
+    DesugaredBlockArgument desugarBlock(pm_node_t *block, pm_arguments_node *otherArgs, pm_location_t parentLoc);
+
+    ast::ExpressionPtr desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
+                                           pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc);
+
+    DesugaredBlockArgument desugarBlockPassArgument(pm_block_argument_node *bp);
+
     ast::ExpressionPtr desugarSymbolProc(pm_symbol_node *symbol);
+
+    ast::ExpressionPtr desugarMethodCall(ast::ExpressionPtr receiver, core::NameRef methodName,
+                                         core::LocOffsets methodNameLoc, pm_arguments_node *argumentsNode,
+                                         pm_location_t closingLoc, DesugaredBlockArgument block,
+                                         core::LocOffsets location, bool isPrivateOk);
 
     template <typename StoreType>
     StoreType desugarArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
@@ -271,7 +286,8 @@ private:
 
     std::pair<core::LocOffsets, core::LocOffsets> computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver,
                                                                        absl::Span<pm_node_t *> prismArgs,
-                                                                       pm_location_t closing_loc, pm_node_t *blockNode);
+                                                                       pm_location_t closing_loc,
+                                                                       const Translator::DesugaredBlockArgument &block);
 };
 
 } // namespace sorbet::parser::Prism
