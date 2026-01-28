@@ -773,6 +773,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
 
+        handler.drainErrors(*gs);
+
         // this replicates the logic of pipeline::indexOne
         parser::ParseResult parseResult;
         bool usePrismDesugar = false;
@@ -780,6 +782,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             case realmain::options::Parser::ORIGINAL: {
                 auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
                 parseResult = parser::Parser::run(*gs, f.file, settings);
+
+                handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
+                handler.addObserved(*gs, "parse-tree-whitequark",
+                                    [&]() { return parseResult.tree->toWhitequark(*gs); });
+                handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
+
                 break;
             }
             case realmain::options::Parser::PRISM: {
@@ -795,11 +803,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
         }
-
-        handler.drainErrors(*gs);
-        handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return parseResult.tree->toWhitequark(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
 
         if (gs->cacheSensitiveOptions.rbsEnabled) {
             auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);

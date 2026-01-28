@@ -13,6 +13,8 @@ extern "C" {
 
 namespace sorbet::parser::Prism {
 
+class ExprOnly;
+
 class Translator final {
     const Parser &parser;
     // This context holds a reference to the GlobalState allocated up the call stack, which is why we don't allow

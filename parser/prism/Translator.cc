@@ -21,6 +21,74 @@ using namespace std::literals::string_view_literals;
 using sorbet::ast::MK;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
+class ExprOnly final : public Node {
+    ast::ExpressionPtr desugaredExpr;
+
+public:
+    ExprOnly(ast::ExpressionPtr desugaredExpr, core::LocOffsets loc)
+        : Node(loc), desugaredExpr(std::move(desugaredExpr)) {
+        ENFORCE(this->desugaredExpr != nullptr, "Can't create ExprOnly with a null desugaredExpr.");
+    }
+    virtual ~ExprOnly() = default;
+
+    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const final {
+        Exception::raise("Not implemented");
+    }
+
+    virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) final {
+        Exception::raise("Not implemented");
+    }
+
+    virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) final {
+        Exception::raise("Not implemented");
+    }
+
+    virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) final {
+        Exception::raise("Not implemented");
+    }
+
+    virtual std::string nodeName() const final {
+        Exception::raise("Not implemented");
+    }
+
+    virtual ast::ExpressionPtr takeDesugaredExpr() final {
+        ENFORCE(this->desugaredExpr != nullptr,
+                "Tried to call make a second call to `takeDesugaredExpr()` on a ExprOnly");
+
+        // We know each `NodeAndExpr` object's `takeDesugaredExpr()` will be called at most once, either:
+        // 1. When its parent node is being translated in `prism/Translator.cc`,
+        //    and this value is used to create that parent's expr.
+        // 2. When this node is visted by `node2TreeImpl` in `PrismDesugar.cc`,
+        //    and this value is called from the `ExprOnly` case
+        //
+        // Because of this, we don't need to make any copies here. Just move this value out,
+        // and hand exclusive ownership to the caller.
+        return move(this->desugaredExpr);
+    }
+
+    virtual bool hasDesugaredExpr() final {
+        return this->desugaredExpr != nullptr;
+    }
+
+    virtual const ast::ExpressionPtr &peekDesugaredExpr() const final {
+        return this->desugaredExpr;
+    }
+};
+
+unique_ptr<ExprOnly> expr_only(ast::ExpressionPtr expr, core::LocOffsets loc) {
+    return make_unique<ExprOnly>(move(expr), loc);
+}
+
+unique_ptr<ExprOnly> expr_only(ast::ExpressionPtr expr) {
+    auto loc = expr.loc(); // Grab the loc before moving out of `expr`
+    return expr_only(move(expr), loc);
+}
+
+unique_ptr<ExprOnly> empty_expr() {
+    auto fakeLoc = core::LocOffsets{0, 0};
+    return expr_only(MK::EmptyTree(), fakeLoc);
+}
+
 void enforceHasExpr(const std::unique_ptr<parser::Node> &node) {
     if (node && !node->hasDesugaredExpr()) {
         categoryCounterInc("Prism fallback", "enforceHasExpr(parser::Node) was false");
