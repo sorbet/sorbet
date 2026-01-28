@@ -1650,32 +1650,14 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 if (PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) { // a literal block with `{ ... }` or `do ... end`
                     auto blockNode = down_cast<pm_block_node>(prismBlock);
 
-                    block = DesugaredBlockArgument::literalBlock(
-                        desugarLiteralBlock(blockNode->body, blockNode->parameters, blockNode->base.location,
-                                            blockNode->opening_loc));
+                    block = DesugaredBlockArgument::literalBlock(desugarLiteralBlock(
+                        blockNode->body, blockNode->parameters, blockNode->base.location, blockNode->opening_loc));
                 } else {
                     ENFORCE(PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE)); // the `&b` in `a.map(&b)`
 
                     auto *bp = down_cast<pm_block_argument_node>(prismBlock);
 
-                    // The location of the entire block pass, including the `&`.
-                    auto blockPassLoc = translateLoc(prismBlock->location);
-
-                    if (bp->expression) {
-                        if (PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
-                            auto symbol = down_cast<pm_symbol_node>(bp->expression);
-                            block = DesugaredBlockArgument::literalBlock(desugarSymbolProc(symbol));
-                        } else {
-                            block = DesugaredBlockArgument::blockPass(desugar(bp->expression), blockPassLoc);
-                        }
-                    } else {
-                        // Replace an anonymous block pass like `f(&)` with a local variable
-                        // reference, like `f(&&)`.
-                        block = DesugaredBlockArgument::blockPass(
-                            MK::Local(translateLoc(prismBlock->location).copyEndWithZeroLength(),
-                                      core::Names::ampersand()),
-                            blockPassLoc);
-                    }
+                    block = desugarBlockPassArgument(bp);
                 }
             }
 
@@ -3865,6 +3847,24 @@ ast::ExpressionPtr Translator::desugarLiteralBlock(pm_node *blockBodyNode, pm_no
     }
 
     return MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
+}
+
+Translator::DesugaredBlockArgument Translator::desugarBlockPassArgument(pm_block_argument_node *bp) {
+    auto blockPassLoc = translateLoc(bp->base.location); // The location of the entire block pass, including the `&`.
+
+    if (bp->expression) { // Block pass with an explicit expression, like `f(&block)`
+        if (PM_NODE_TYPE_P(bp->expression, PM_SYMBOL_NODE)) {
+            // Symbol proc, e.g. `&:foo` - desugar to a literal block
+            auto symbol = down_cast<pm_symbol_node>(bp->expression);
+            return DesugaredBlockArgument::literalBlock(desugarSymbolProc(symbol));
+        } else {
+            return DesugaredBlockArgument::blockPass(desugar(bp->expression), blockPassLoc);
+        }
+    } else { // Anonymous block pass, like `f(&)`
+        // Treat it as a block pass of a local variable literally named `&`.
+        auto loc = translateLoc(bp->base.location).copyEndWithZeroLength();
+        return DesugaredBlockArgument::blockPass(MK::Local(loc, core::Names::ampersand()), blockPassLoc);
+    }
 }
 
 // Desugar a Symbol block pass argument (like the `&foo` in `m(&:foo)`) into a block literal.
