@@ -54,8 +54,7 @@ target[] = 17 # Yes, this is valid. You can have `def []=(only_one_param)`.
 
 
 
-### Using a block as an index
-# This is not valid Ruby, but Prism allows it.
+### Error case: using a block as an index
 
 bitwise_and[&blk]     &= 202
 bitwise_or[&blk]      |= 203

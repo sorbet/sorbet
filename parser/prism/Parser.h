@@ -65,8 +65,7 @@ public:
     Parser(Parser &&) = delete;
     Parser &operator=(Parser &&) = delete;
 
-    static parser::ParseResult run(core::MutableContext ctx, bool directlyDesugar = true,
-                                   bool preserveConcreteSyntax = false);
+    static parser::ParseResult run(core::MutableContext ctx, bool preserveConcreteSyntax = false);
 
     ParseResult parseWithoutTranslation(bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
@@ -135,6 +134,8 @@ public:
         return parser;
     }
 };
+
+struct PrismFallback {};
 
 } // namespace sorbet::parser::Prism
 #endif // SORBET_PARSER_PRISM_PARSER_H

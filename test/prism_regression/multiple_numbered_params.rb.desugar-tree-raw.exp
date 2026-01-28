@@ -1,0 +1,118 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U f><<U <todo method>>>
+      params = [UnresolvedIdent{
+          kind = Local
+          name = <U p>
+        }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedConstantLit{
+          cnst = <C <U RATCHET>>
+          scope = EmptyTree
+        }
+        fun = <U any?>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U _1>
+            }
+          ]
+          body = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U ||> $2>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = Send{
+                    flags = {}
+                    recv = UnresolvedIdent{
+                      kind = Local
+                      name = <U p>
+                    }
+                    fun = <U dir>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                  fun = <U ==>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U _1>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = If{
+              cond = UnresolvedIdent{
+                kind = Local
+                name = <D <U ||> $2>
+              }
+              thenp = UnresolvedIdent{
+                kind = Local
+                name = <D <U ||> $2>
+              }
+              elsep = Send{
+                flags = {}
+                recv = Send{
+                  flags = {}
+                  recv = UnresolvedIdent{
+                    kind = Local
+                    name = <U p>
+                  }
+                  fun = <U dir>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+                fun = <U start_with?>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Send{
+                    flags = {}
+                    recv = UnresolvedIdent{
+                      kind = Local
+                      name = <U _1>
+                    }
+                    fun = <U +>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      Literal{ value = "/" }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+  ]
+}

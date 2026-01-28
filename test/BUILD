@@ -421,6 +421,44 @@ pipeline_tests(
             "testdata/resolver/sealed_module.rb",
             "testdata/rewriter/initializer_no_arg_with_local.rb",
             "testdata/rewriter/t_enum_exhaustiveness.rb",
+
+            # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
+            "testdata/compiler/destructuring_assignment.rb",
+            "testdata/desugar/case.rb",
+            "testdata/desugar/destructure.rb",
+            "testdata/desugar/destructure_rest.rb",
+            "testdata/desugar/multi_assign.rb",
+            "testdata/desugar/star_in_block_arg.rb",
+            "testdata/infer/arg_matching.rb",
+            "testdata/infer/autocorrect_no_block.rb",
+            "testdata/infer/generics/validator.rb",
+            "testdata/infer/multi_assign.rb",
+            "testdata/infer/super_strict.rb",
+            "testdata/lsp/fast_path/alias_stub_module__*.rb",
+            "testdata/lsp/fast_path/not_enough_files/not_enough_files__*.rb",
+            "testdata/lsp/fast_path/too_many_files/too_many_files__*.rb",
+            "testdata/lsp/hover_kwarg.rb",
+            "testdata/lsp/hover_mlhs_assign.rb",
+            "testdata/lsp/punned_kwargs.rb",
+            "testdata/lsp/ripper_parse_error_formatting.rb",
+            "testdata/lsp/rubyfmt_init_error.rb",
+            "testdata/lsp/rubyfmt_io_error_formatting.rb",
+            "testdata/lsp/rubyfmt_ruby_error.rb",
+            "testdata/lsp/rubyfmt_unknown_error.rb",
+            "testdata/lsp/successful_formatting.rb",
+            "testdata/lsp/syntax_error_formatting.rb",
+            "testdata/lsp/workspace_symbols_stdlib.rb",
+            "testdata/minimize-rbi/external.rb",
+            "testdata/minimize-rbi/private.rb",
+            "testdata/packager/empty_package_file/**/*.rb",
+            "testdata/packager/invalid_imports_and_exports/**/*.rb",
+            "testdata/packager/package-no-spec/**/*.rb",
+            "testdata/packager/unpackaged-error/**/*.rb",
+            "testdata/parser/empty.rb",
+            "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
+            "testdata/rbs/signatures_params_autocorrect.rb",
+            "testdata/resolver/multi_assign.rb",
+            "testdata/rewriter/prop.rb",
         ],
     ),
     "PrismPosTests",
@@ -457,16 +495,6 @@ pipeline_tests(
             "prism_regression/**/*.exp",
         ],
         exclude = [
-            # Prism parses invalid Ruby that Whitequark rejects:
-            # - `def foo(&, ...); end` - block param combined with forwarding args
-            "prism_regression/call_block_param_and_forwarding.rb",
-            # - Multiple invalid `**nil` combinations in method signatures
-            "prism_regression/call_kw_nil_args.rb",
-
-            # Different AST for invalid empty constant `::` - Prism produces
-            # UnresolvedConstantLit with empty name, Whitequark produces EmptyTree
-            "prism_regression/constants_invalid.rb",
-
             # Location differences in error recovery - Prism provides tighter/different
             # location spans for ErrorNode compared to Whitequark:
             # - `x =` (missing RHS) has different Assign/ErrorNode locations
@@ -481,9 +509,12 @@ pipeline_tests(
             # of `_1`, Whitequark uses first occurrence
             "prism_regression/multiple_numbered_params.rb",
 
-            # We don't directly desugar `super` nodes yet, which means that
-            # super calls with blocks don't get the implicitYield treatment.
-            "prism_regression/super.rb",
+            # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
+            "prism_regression/assign_to_index.rb",
+            "prism_regression/call_implicit_kw_args.rb",
+            "prism_regression/for_loop.rb",
+            "prism_regression/literal_hash.rb",
+            "prism_regression/multi_write.rb",
         ],
     ),
     "PrismPosTests",

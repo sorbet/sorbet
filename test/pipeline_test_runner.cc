@@ -227,7 +227,7 @@ public:
 };
 
 vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, ExpectationHandler &handler,
-                              Expectations &test) {
+                              Expectations &test, const vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<ast::ParsedFile> trees;
     for (auto file : files) {
         auto fileName = FileOps::getFileName(file.data(gs).path());
@@ -268,12 +268,16 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 }
                 case realmain::options::Parser::PRISM: {
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
-                        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
-                        // in `PrismDesugar.cc`. For now, just use the legacy parser for RBS.
-                    } else {
-                        auto directlyDesugar = true;
-                        prismParseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
+                        continue;
                     }
+
+                    try {
+                        prismParseResult = parser::Prism::Parser::run(ctx);
+                    } catch (parser::Prism::PrismFallback &) {
+                        continue;
+                    }
+
+                    break;
                 }
             }
         }
@@ -305,26 +309,34 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             core::MutableContext ctx(gs, core::Symbols::root(), file);
             core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
 
-            ast::ExpressionPtr legacyDesugarAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
+            auto disableParserComparison =
+                BooleanPropertyAssertion::getValue("disable-parser-comparison", assertions).value_or(false);
 
+            ast::ExpressionPtr resultAST;
             if (prismParseResult.tree != nullptr) {
-                // This AST would have been desugared deirectly by Prism::Translator
                 auto prismDirectDesugarAST = ast::prismDesugar::node2Tree(ctx, move(prismParseResult.tree));
 
-                if (!legacyDesugarAST.prismDesugarEqual(gs, prismDirectDesugarAST, file)) {
-                    auto expected = legacyDesugarAST.showRawWithLocs(gs, file);
-                    auto actual = prismDirectDesugarAST.showRawWithLocs(gs, file);
-                    cout << "--- Expected: " << endl;
-                    cout << expected << endl << endl;
-                    cout << "+++ Actual: " << endl;
-                    cout << actual << endl << endl;
-                    cout << "Diff:" << endl;
-                    CHECK_EQ_DIFF(expected, actual,
-                                  fmt::format("Prism desugared tree does not match legacy desugared tree"));
+                if (!disableParserComparison) {
+                    ast::ExpressionPtr legacyDesugarAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
+                    if (!legacyDesugarAST.prismDesugarEqual(gs, prismDirectDesugarAST, file)) {
+                        auto expected = legacyDesugarAST.showRawWithLocs(gs, file);
+                        auto actual = prismDirectDesugarAST.showRawWithLocs(gs, file);
+                        cout << "--- Expected: " << endl;
+                        cout << expected << endl << endl;
+                        cout << "+++ Actual: " << endl;
+                        cout << actual << endl << endl;
+                        cout << "Diff:" << endl;
+                        CHECK_EQ_DIFF(expected, actual,
+                                      fmt::format("Prism desugared tree does not match legacy desugared tree"));
+                    }
                 }
+
+                resultAST = move(prismDirectDesugarAST);
+            } else {
+                resultAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
             }
 
-            desugared = testSerialize(gs, ast::ParsedFile{move(legacyDesugarAST), file});
+            desugared = testSerialize(gs, ast::ParsedFile{move(resultAST), file});
         }
 
         handler.addObserved(gs, "desugar-tree", [&]() { return desugared.tree.toString(gs); });
@@ -478,10 +490,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
 
-        trees = index(*gs, inputPackageFiles, handler, test);
+        trees = index(*gs, inputPackageFiles, handler, test, assertions);
     }
 
-    auto nonPackageTrees = index(*gs, filesSpan, handler, test);
+    auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
     buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
@@ -769,17 +781,33 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
 
+        handler.drainErrors(*gs);
+
         // this replicates the logic of pipeline::indexOne
         parser::ParseResult parseResult;
+        bool usePrismDesugar = false;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
                 auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
                 parseResult = parser::Parser::run(*gs, f.file, settings);
+
+                handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
+                handler.addObserved(*gs, "parse-tree-whitequark",
+                                    [&]() { return parseResult.tree->toWhitequark(*gs); });
+                handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
+
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                auto directlyDesugar = false;
-                parseResult = parser::Prism::Parser::run(ctx, directlyDesugar);
+                try {
+                    parseResult = parser::Prism::Parser::run(ctx);
+                    usePrismDesugar = true;
+                } catch (parser::Prism::PrismFallback &) {
+                    // Hit a fallback case during Prism parsing, fallback to the legacy parser.
+                    auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
+                    parseResult = parser::Parser::run(*gs, f.file, settings);
+                }
+
                 break;
             }
         }
@@ -803,13 +831,18 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         ast::ExpressionPtr ast;
         {
             core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
-            ast = ast::desugar::node2Tree(ctx, move(nodes));
+            ast = usePrismDesugar ? ast::prismDesugar::node2Tree(ctx, move(nodes))
+                                  : ast::desugar::node2Tree(ctx, move(nodes));
         }
 
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{move(ast), f.file});
 
-        handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
-        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
+        if (!usePrismDesugar) {
+            // These expectations match the legacy parser's desugar tree, which can be subtly different
+            // (e.g. the numbering of unique identifiers). Only test these for the legacy parser.
+            handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
+            handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
+        }
 
         // Rewriter pass
         file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
