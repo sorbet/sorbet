@@ -563,8 +563,8 @@ core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::F
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
-    for (auto &[file, value] : packagesReferencedByFile) {
-        for (auto &[packageName, packageReferenceInfo] : value) {
+    for (auto &[file, referencedPackages] : packagesReferencedByFile) {
+        for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
             if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
                 continue;
@@ -620,6 +620,26 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
 
     AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
     return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
+}
+
+std::optional<core::AutocorrectSuggestion>
+PackageInfo::aggregateMissingVisibleTo(const core::GlobalState &gs,
+                                       std::vector<core::packages::MangledName> &visibleTos) const {
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto &pkgName : visibleTos) {
+        auto autocorrect = addVisibleTo(gs, pkgName);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+
+    if (allEdits.empty()) {
+        return nullopt;
+    }
+
+    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
+    return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
