@@ -962,10 +962,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto newName = translate(aliasGlobalVariableNode->new_name);
             auto oldName = translate(aliasGlobalVariableNode->old_name);
 
-            if (!directlyDesugar) {
-                return make_unique<parser::Alias>(location, move(newName), move(oldName));
-            }
-
             auto toExpr = newName->takeDesugaredExpr();
             auto fromExpr = oldName->takeDesugaredExpr();
 
@@ -1243,10 +1239,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // But Sorbet's legacy parser treats both `~[Integer]` and `-[Integer]` as integer literals
             if (constantNameString == "~" && PM_NODE_TYPE_P(callNode->receiver, PM_INTEGER_NODE)) {
                 string valueString(sliceLocation(callNode->base.location));
-
-                if (!directlyDesugar) {
-                    return make_unique<parser::Integer>(sendLoc, move(valueString));
-                }
 
                 // The purely integer part of it, not including the `~`
                 auto integerExpr = receiver->takeDesugaredExpr();
@@ -1857,12 +1849,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto inNodes = patternTranslateMulti(caseMatchNode->conditions);
             auto elseClause = translate(up_cast(caseMatchNode->else_clause));
 
-            // We do not need to check if all the "in" patterns have desugared expressions because they are currently
-            // unused.
-            if (!directlyDesugar) {
-                return make_unique<parser::CaseMatch>(location, move(predicate), move(inNodes), move(elseClause));
-            }
-
             // Build an if ladder similar to CASE_NODE
             core::NameRef tempName;
             core::LocOffsets predicateLoc;
@@ -2316,10 +2302,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto definedNode = down_cast<pm_defined_node>(node);
 
             auto arg = translate(definedNode->value);
-
-            if (!directlyDesugar) {
-                return make_unique<parser::Defined>(location.join(arg->loc), move(arg));
-            }
 
             ENFORCE(arg != nullptr);
             ENFORCE(arg->hasDesugaredExpr());
@@ -3952,12 +3934,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                         break;
                     }
                     case PM_NO_KEYWORDS_PARAMETER_NODE: {
-                        if (!directlyDesugar) {
-                            sorbetElements.emplace_back(make_unique<parser::MatchNilPattern>(loc));
-                        } else {
-                            sorbetElements.emplace_back(
-                                make_node_with_expr<parser::MatchNilPattern>(MK::Nil(loc), loc));
-                        }
+                        sorbetElements.emplace_back(make_node_with_expr<parser::MatchNilPattern>(MK::Nil(loc), loc));
                         break;
                     }
                     default:
@@ -4061,10 +4038,6 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_LOCAL_VARIABLE_TARGET_NODE: { // A variable binding in a pattern, like the `head` in `[head, *tail]`
             auto localVarTargetNode = down_cast<pm_local_variable_target_node>(node);
             auto name = translateConstantName(localVarTargetNode->name);
-
-            if (!directlyDesugar) {
-                return make_unique<MatchVar>(location, name);
-            }
 
             // For a match variable, the desugared expression is a local variable reference
             // This represents what the variable will be bound to when the pattern matches
@@ -5506,10 +5479,6 @@ unique_ptr<parser::Node> Translator::translateRegexpOptions(pm_location_t closin
 
     string_view options = sliceLocation(prismLoc);
 
-    if (!directlyDesugar) {
-        return make_unique<parser::Regopt>(location, options);
-    }
-
     // Desugar options to integer flags
     int flags = 0;
     for (auto &chr : options) {
@@ -5540,23 +5509,14 @@ unique_ptr<parser::Node> Translator::translateRegexp(core::LocOffsets location, 
     parser::NodeVec parts;
     auto source = parser.extractString(&content);
     if (!source.empty()) {
-        if (directlyDesugar) {
-            // Create a String node with its desugared expression
-            auto name = ctx.state.enterNameUTF8(source);
-            auto expr = MK::String(contentLoc, name);
-            auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), contentLoc, name);
-            parts.emplace_back(move(sourceStringNode));
-        } else {
-            auto sourceStringNode = make_unique<parser::String>(location, ctx.state.enterNameUTF8(source));
-            parts.emplace_back(move(sourceStringNode));
-        }
+        // Create a String node with its desugared expression
+        auto name = ctx.state.enterNameUTF8(source);
+        auto expr = MK::String(location, name);
+        auto sourceStringNode = make_node_with_expr<parser::String>(move(expr), contentLoc, name);
+        parts.emplace_back(move(sourceStringNode));
     }
 
     auto options = translateRegexpOptions(closingLoc);
-
-    if (!directlyDesugar) {
-        return make_unique<parser::Regexp>(location, move(parts), move(options));
-    }
 
     ast::ExpressionPtr pattern;
     if (parts.empty()) {

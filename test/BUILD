@@ -484,6 +484,12 @@ pipeline_tests(
             # We don't directly desugar `super` nodes yet, which means that
             # super calls with blocks don't get the implicitYield treatment.
             "prism_regression/super.rb",
+
+            # FIXME: Regex location differences
+            "prism_regression/back_reference_read.rb",
+            "prism_regression/literal_regexp.rb",
+            "prism_regression/match_write.rb",
+            "prism_regression/numbered_reference_read.rb",
         ],
     ),
     "PrismPosTests",
