@@ -85,7 +85,7 @@ struct VisibleTo {
 
 struct PackageReferenceInfo {
     bool importNeeded;
-    bool causesModularityError;
+    bool validToImport;
 };
 
 class PackageInfo {
@@ -259,6 +259,9 @@ public:
     bool isPreludePackage() const {
         return this->isPreludePackage_;
     }
+
+    // Do this package's visible_to rules allow `otherPkg` to import this package, using an import of type `importType`?
+    bool isVisibleTo(const core::GlobalState &gs, const MangledName &otherPkg, const ImportType importType) const;
 
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
