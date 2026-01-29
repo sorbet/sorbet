@@ -1543,6 +1543,16 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             }
 
             if (isCallToBlockGivenP(callNode, methodName, receiver) && isInMethodDef()) {
+                // Workaround to match legacy desugarer behaviour in `Dugar.cc`'s version of `desugarBlock().
+                // https://github.com/sorbet/sorbet/issues/9860
+                if (callNode->block != nullptr && PM_NODE_TYPE_P(callNode->block, PM_BLOCK_NODE)) {
+                    auto blockLoc = translateLoc(callNode->block->location);
+                    if (auto e = ctx.beginIndexerError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
+                        e.setHeader("No body in block");
+                    }
+                    return MK::EmptyTree();
+                }
+
                 // Desugar:
                 //     def foo(&my_block)
                 //       x = block_given?
