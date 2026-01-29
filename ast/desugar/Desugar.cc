@@ -203,6 +203,9 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     } else {
         // This must have been a csend; That will have been desugared
         // into an insseq with an If in the expression.
+        //
+        // Bug: This could also be an `If` created by desugaring a `block_given?` call.
+        // https://github.com/sorbet/sorbet/issues/9860
         res = move(recv);
         auto is = cast_tree<InsSeq>(res);
         if (!is) {
