@@ -6,10 +6,10 @@ namespace sorbet::core {
 // Options for controlling how the various `show` methods work.
 struct ShowOptions final {
     bool useValidSyntax : 1;
-    bool concretizeIfAbstract : 1;
+    bool concretizeIfAbstractOrOverridable : 1;
     bool forceSelfPrefix : 1;
 
-    ShowOptions() : useValidSyntax{false}, concretizeIfAbstract{false}, forceSelfPrefix{false} {}
+    ShowOptions() : useValidSyntax{false}, concretizeIfAbstractOrOverridable{false}, forceSelfPrefix{false} {}
 
     // Only generate generate or suggest syntactically valid code.
     ShowOptions withUseValidSyntax() {
@@ -19,9 +19,9 @@ struct ShowOptions final {
     }
 
     // Replace the `abstract` flag with `override`
-    ShowOptions withConcretizeIfAbstract() {
+    ShowOptions withConcretizeIfAbstractOrOverridable() {
         ShowOptions res{*this};
-        res.concretizeIfAbstract = true;
+        res.concretizeIfAbstractOrOverridable = true;
         return res;
     }
 

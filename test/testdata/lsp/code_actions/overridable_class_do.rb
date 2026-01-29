@@ -1,0 +1,26 @@
+# typed: true
+# selective-apply-code-action: refactor
+
+class Module; include T::Sig; end
+
+class Parent
+  extend T::Helpers
+  abstract!
+  sig { overridable.void }
+  def example1; end
+  sig { overridable.void }
+  def example2; end
+end
+
+Child1 = Class.new(Parent) do
+  #      | apply-code-action: [A] Override `example2` (overridable from Parent)
+  def example1; end
+end
+
+Child2 = Class.new(Parent) {
+  #      | apply-code-action: [B] Override `example2` (overridable from Parent)
+  def example1; end
+}
+
+Child3 = Class.new(Parent) { def example1; end }
+#        | apply-code-action: [C] Override `example2` (overridable from Parent)

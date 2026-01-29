@@ -1071,18 +1071,37 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                        },
                                        classTypes);
 
-    auto CodeAction = makeObject("CodeAction",
-                                 {
-                                     makeField("title", JSONString),
-                                     makeField("kind", makeOptional(CodeActionKind)),
-                                     makeField("diagnostics", makeOptional(makeArray(Diagnostic))),
-                                     makeField("edit", makeOptional(WorkspaceEdit)),
-                                     makeField("command", makeOptional(Command)),
-                                     // The LSP spec defines the `data` field as `LSPAny`,
-                                     // but we use it only to transfer `CodeActionParams`
-                                     makeField("data", makeOptional(CodeActionParams)),
-                                 },
-                                 classTypes);
+    auto InsertOverrideParams = makeObject("InsertOverrideParams",
+                                           {
+                                               makeField("method", JSONInt),
+                                               makeField("inWhere", JSONInt),
+                                               makeField("textDocument", TextDocumentIdentifier),
+                                               makeField("termLocation", Range),
+                                               makeField("declLocation", Range),
+                                           },
+                                           classTypes);
+
+    auto CodeAction = makeObject(
+        "CodeAction",
+        {
+            makeField("title", JSONString),
+            makeField("kind", makeOptional(CodeActionKind)),
+            makeField("diagnostics", makeOptional(makeArray(Diagnostic))),
+            makeField("edit", makeOptional(WorkspaceEdit)),
+            makeField("command", makeOptional(Command)),
+            // The LSP spec defines the `data` field as `LSPAny`, but we type it as the specific
+            // payload(s) we want to pass from codeAction to codeActionResolve.
+            makeField("data",
+                      makeOptional(makeObject("CodeActionData",
+                                              {
+                                                  makeField("params", CodeActionParams),
+                                                  // If we add more code actions that need params, we should switch this
+                                                  // from an optional to a discriminated union.
+                                                  makeField("insertOverride", makeOptional(InsertOverrideParams)),
+                                              },
+                                              classTypes))),
+        },
+        classTypes);
 
     auto CodeActionRegistrationOptions =
         makeObject("CodeActionRegistrationOptions",

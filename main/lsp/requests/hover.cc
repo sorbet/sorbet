@@ -142,6 +142,17 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
 
         typeString = core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, options);
+    } else if (auto d = resp->isClassDef()) {
+        for (auto loc : d->symbol.data(gs)->locs()) {
+            if (loc.exists()) {
+                documentationLocations.emplace_back(loc);
+            }
+        }
+
+        auto symData = d->symbol.data(gs);
+        auto classOrModule = symData->flags.isModule ? "module" : "class";
+        auto superClass = symData->superClass().exists() ? fmt::format("< {}", symData->superClass().show(gs)) : "";
+        typeString = fmt::format("{} {}{}", classOrModule, d->symbol.show(gs), superClass);
     } else if (auto f = resp->isField()) {
         const auto &origins = f->retType.origins;
         for (auto loc : origins) {
