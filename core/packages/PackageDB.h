@@ -82,8 +82,11 @@ public:
     // Expects to be called after packages have been defined, so that string package names provided
     // at the command line can be resolved to actual packages.
     void resolvePackagesWithRelaxedChecks(GlobalState &gs);
+    void resolvePackagesToUpdateVisibilityFor(GlobalState &gs);
 
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
+    bool updateVisibilityFor(const MangledName mangledName) const;
+    bool anyUpdateVisibilityFor() const;
 
     // Overwrite the condensation graph for the current package set. This method is only meant to be used from
     // `ComputePackageSCCs::run`.
@@ -105,6 +108,8 @@ private:
     std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<std::string> allowRelaxedPackagerChecksFor_;
     UnorderedSet<MangledName> packagesWithRelaxedChecks_;
+    std::vector<std::string> updateVisibilityFor_;
+    UnorderedSet<MangledName> packagesToUpdateVisibilityFor_;
     std::vector<core::NameRef> layers_;
 
     // This vector is kept in sync with the size of the file table in the global state by `setPackageNameForFile`.
