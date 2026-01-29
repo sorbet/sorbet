@@ -477,7 +477,7 @@ bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const MangledName &im
         return true;
     }
 
-    for (auto &vt : visibleTo()) {
+    return absl::c_any_of(visibleTo(), [&](const auto &vt) {
         if (vt.type == VisibleToType::Wildcard) {
             // a wildcard will match if it's a proper prefix of the package name
             auto curPkg = importingPkgName.owner;
@@ -488,15 +488,13 @@ bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const MangledName &im
                 }
                 curPkg = curPkg.data(gs)->owner;
             } while (curPkg != core::Symbols::root());
+
+            return false;
         } else {
             // otherwise it needs to be the same
-            if (vt.mangledName == importingPkgName) {
-                return true;
-            }
+            return vt.mangledName == importingPkgName;
         }
-    }
-
-    return false;
+    });
 }
 
 void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, PackageReferenceInfo>> &references) {
