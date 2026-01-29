@@ -492,6 +492,9 @@ public:
             }
         }
         if (parser::isa_node<Mlhs>(body.get())) {
+            if (begin != nullptr) { // If there's parentheses, include them in the location.
+                body->loc = loc;
+            }
             return body;
         }
 
@@ -1370,8 +1373,14 @@ public:
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
         if (parser::isa_node<Mlhs>(item.get())) {
+            if (begin != nullptr) { // If there's parentheses, include them in the location.
+                ENFORCE(end != nullptr, "If there's an open parenthesis, there should otherwise be a closing "
+                                        "parenthesis (otherwise the parser wouldn't end up here)");
+                item->loc = tokLoc(begin, end);
+            }
             return item;
         }
+
         auto args = NodeVec1(std::move(item));
         return make_unique<Mlhs>(collectionLoc(begin, args, end), std::move(args));
     }

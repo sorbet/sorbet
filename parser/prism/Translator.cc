@@ -3324,40 +3324,12 @@ core::LocOffsets Translator::translateLoc(pm_location_t loc) const {
 // This is *usually* the same as the start of Prism's node's location,
 // but there are some exceptions, which get handled here.
 const uint8_t *startLoc(pm_node_t *anyNode) {
-    switch (PM_NODE_TYPE(anyNode)) {
-        case PM_MULTI_TARGET_NODE: {
-            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
-            auto *node = down_cast<pm_multi_target_node>(anyNode);
-            return mlhsLocation(node).start;
-        }
-        case PM_MULTI_WRITE_NODE: {
-            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
-            auto *node = down_cast<pm_multi_write_node>(anyNode);
-            return mlhsLocation(node).start;
-        }
-        default: {
-            return anyNode->location.start;
-        }
-    }
+    return anyNode->location.start;
 }
 
 // End counterpart of `startLoc()`. See its docs for details.
 const uint8_t *endLoc(pm_node_t *anyNode) {
-    switch (PM_NODE_TYPE(anyNode)) {
-        case PM_MULTI_TARGET_NODE: {
-            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
-            auto *node = down_cast<pm_multi_target_node>(anyNode);
-            return mlhsLocation(node).end;
-        }
-        case PM_MULTI_WRITE_NODE: {
-            // TODO: Delete this case when https://github.com/sorbet/sorbet/issues/9630 is fixed
-            auto *node = down_cast<pm_multi_write_node>(anyNode);
-            return endLoc(node->value);
-        }
-        default: {
-            return anyNode->location.end;
-        }
-    }
+    return anyNode->location.end;
 }
 
 // Similar to `desugar()`, but it's used for pattern-matching nodes.
