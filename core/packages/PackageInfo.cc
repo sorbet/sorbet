@@ -467,6 +467,36 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
     return nullopt;
 }
 
+bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const MangledName &importingPkgName,
+                              const ImportType importType) const {
+    if (visibleTo().empty() && !visibleToTests()) {
+        return true;
+    }
+
+    if (visibleToTests() && importType != ImportType::Normal) {
+        return true;
+    }
+
+    return absl::c_any_of(visibleTo(), [&](const auto &vt) {
+        if (vt.type == VisibleToType::Wildcard) {
+            // a wildcard will match if it's a proper prefix of the package name
+            auto curPkg = importingPkgName.owner;
+            auto prefix = vt.mangledName.owner;
+            do {
+                if (curPkg == prefix) {
+                    return true;
+                }
+                curPkg = curPkg.data(gs)->owner;
+            } while (curPkg != core::Symbols::root());
+
+            return false;
+        } else {
+            // otherwise it needs to be the same
+            return vt.mangledName == importingPkgName;
+        }
+    });
+}
+
 void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, PackageReferenceInfo>> &references) {
     packagesReferencedByFile[file].swap(references);
 }
@@ -490,7 +520,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
     for (auto &[file, value] : packagesReferencedByFile) {
         for (auto &[packageName, packageReferenceInfo] : value) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
-            if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
+            if (!packageReferenceInfo.importNeeded || !packageReferenceInfo.validToImport || !pkgInfo.exists()) {
                 continue;
             }
             auto importType = fileToImportType(gs, file);

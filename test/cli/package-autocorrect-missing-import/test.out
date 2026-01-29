@@ -526,3 +526,21 @@ class Foo::MyPackage < PackageSpec
   test_import Foo::Bar::AppFalseCyclePackage, only: "test_rb"
   test_import Foo::Bar::AppFalseCyclePackageTest
 end
+
+--------------------------------------------------------------------------
+
+use_visible_to_package/foo.rb:6: Package `Foo::Bar::OtherPackage` includes explicit visibility modifiers and cannot be imported from `Foo::MyPackage` https://srb.help/3723
+     6 |      Foo::Bar::OtherPackage::OtherClass
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `Foo::Bar::OtherPackage`
+Errors: 1
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Foo::MyPackage < PackageSpec
+  layer 'lib'
+  strict_dependencies 'layered'
+  test_import Foo::Bar::OtherPackage
+end
