@@ -362,8 +362,7 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
     bool hasSplat = lhs->rest && PM_NODE_TYPE_P(lhs->rest, PM_SPLAT_NODE);
     size_t totalSize = lefts.size() + (hasSplat ? 1 : 0) + rights.size();
 
-    auto processTarget = [this, &didSplat, &stats, &i, &after, &before, totalSize, loc, zloc,
-                          tempExpanded](pm_node_t *c) {
+    auto processTarget = [this, &didSplat, &stats, &i, &after, &before, totalSize, zloc, tempExpanded](pm_node_t *c) {
         if (PM_NODE_TYPE_P(c, PM_SPLAT_NODE)) {
             auto *splat = down_cast<pm_splat_node>(c);
             ENFORCE(!didSplat, "did splat already");
@@ -382,7 +381,7 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
                 auto zlhloc = lhloc.copyWithZeroLength();
                 // Calling `to_ary` is not faithful to the runtime behavior,
                 // but that it is faithful to the expected static type-checking behavior.
-                auto ary = MK::Send0(loc, MK::Local(loc, tempExpanded), core::Names::toAry(), zlhloc);
+                auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
                 stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
             }
             i = -right;
