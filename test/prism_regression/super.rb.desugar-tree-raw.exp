@@ -12,7 +12,7 @@ ClassDef{
       name = <U m><<U <todo method>>>
       params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U <implicit yield>>
         } }]
       rhs = InsSeq{
         stats = [

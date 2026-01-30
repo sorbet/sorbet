@@ -1200,7 +1200,7 @@ public:
             checkReservedForNumberedParameters(name->view(), loc);
         } else {
             loc = tokLoc(dstar);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
+            nm = core::Names::starStar();
         }
 
         return make_unique<Kwrestarg>(loc, nm);
