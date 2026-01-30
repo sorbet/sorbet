@@ -56,6 +56,24 @@ bool isRaise(parser::Node *node) {
     return raise->receiver == nullptr || isSelfOrKernel(raise->receiver.get());
 }
 
+bool isIfDefinedSuperRaise(parser::Node *node) {
+    if (auto if_ = parser::cast_node<parser::If>(node)) {
+        if (auto defined_ = parser::cast_node<parser::Defined>(if_->condition.get())) {
+            auto if_defined_super = parser::isa_node<parser::ZSuper>(defined_->value.get());
+            auto then_super = parser::isa_node<parser::ZSuper>(if_->then_.get());
+            auto else_raise = isRaise(if_->else_.get());
+
+            return if_defined_super && then_super && else_raise;
+        }
+    }
+    return false;
+}
+
+// A valid abstract method body is either just a raise or a conditional call to super with a raise in the else branch
+bool isValidAbstractMethodBody(parser::Node *node) {
+    return isRaise(node) || isIfDefinedSuperRaise(node);
+}
+
 core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, parser::Node *method,
                                                     core::LocOffsets method_declLoc, parser::Node *method_body) {
     core::LocOffsets editLoc;
@@ -83,7 +101,7 @@ core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, pa
 
 void ensureAbstractMethodRaises(core::MutableContext ctx, const parser::Node *node) {
     if (auto method = parser::cast_node<parser::DefMethod>((parser::Node *)node)) {
-        if (isRaise(method->body.get())) {
+        if (isValidAbstractMethodBody(method->body.get())) {
             // If the method raises properly, we remove the body the body to not error later (see error 5019)
             method->body = nullptr;
             return;
@@ -95,7 +113,7 @@ void ensureAbstractMethodRaises(core::MutableContext ctx, const parser::Node *no
             e.addAutocorrect(move(autocorrect));
         }
     } else if (auto method = parser::cast_node<parser::DefS>((parser::Node *)node)) {
-        if (isRaise(method->body.get())) {
+        if (isValidAbstractMethodBody(method->body.get())) {
             // If the method raises properly, we remove the body the body to not error later (see error 5019)
             method->body = nullptr;
             return;
