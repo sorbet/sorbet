@@ -379,6 +379,7 @@ class Rational < Numeric
     )
     .returns(Integer)
   end
+  sig { params(arg0: T.anything).returns(NilClass) }
   def <=>(arg0); end
 
   # Returns `true` if `rat` equals `object` numerically.
