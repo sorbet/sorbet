@@ -4,11 +4,17 @@
 # This test validates that various RSpec DSL methods properly support
 # multiple arguments (like metadata tags).
 #
+# NOTE: This file is primarily for rewriter/snapshot coverage. It produces many
+# "Method does not exist" errors when run WITHOUT --enable-experimental-rspec
+# (expected). With the flag, the RSpec rewriter transforms the DSL; some errors
+# may still appear due to the minimal RSpec stub below (e.g. `let`/`it` on the
+# block receiver). The test shell runs Sorbet twice to capture both snapshots.
+#
 # The following RSpec methods commonly accept additional arguments:
 # - it/specify/example (and x/f variants): description + metadata
-# - before/after: scope (:each, :all) + metadata
+# - before/after: scope (:each, :all) + optional metadata filters
 # - shared_examples/shared_context: name + metadata
-# - describe/context (fixed in PR #9807): description + metadata
+# - describe/context: description + metadata (multi-arg in rewriter; see also PR #9807)
 
 # Define minimal RSpec module for testing
 module RSpec
@@ -128,6 +134,50 @@ RSpec.describe MyClass do
 end
 
 # =============================================================================
+# Test: `before` and `after` with metadata filters (RSpec filtering feature)
+# See: https://rspec.info/features/3-13/rspec-core/hooks/filtering
+# =============================================================================
+
+RSpec.describe MyClass do
+  let(:filtered_value) { "filtered" }
+
+  # before with scope + symbol metadata filter
+  # This runs only for examples tagged with :slow
+  before(:each, :slow) do
+    filtered_value
+  end
+
+  # before with scope + hash metadata filter
+  before(:example, authorized: true) do
+    filtered_value
+  end
+
+  # before with scope + multiple metadata filters
+  before(:context, :integration, :needs_db) do
+    filtered_value
+  end
+
+  # after with scope + symbol metadata filter
+  after(:each, :slow) do
+    filtered_value
+  end
+
+  # after with scope + hash metadata filter
+  after(:example, cleanup: true) do
+    filtered_value
+  end
+
+  # after with scope + multiple metadata filters
+  after(:all, :integration, requires_cleanup: true) do
+    filtered_value
+  end
+
+  it "works with filtered hooks", :slow do
+    filtered_value
+  end
+end
+
+# =============================================================================
 # Test: `shared_examples` with metadata
 # =============================================================================
 
@@ -190,13 +240,17 @@ RSpec.describe MyClass do
 end
 
 # =============================================================================
-# Test: `fit` (focused it) with multiple arguments
+# Test: `fit` (focused it) and `focus` with multiple arguments
 # =============================================================================
 
 RSpec.describe MyClass do
   let(:focused) { "focused" }
 
   fit "is focused", :critical do
+    focused
+  end
+
+  focus "focused example", :tag do
     focused
   end
 end

@@ -90,18 +90,19 @@ class MyTest
       end
     end
 
-    # Minitest `specify` should only accept 0 or 1 argument
-    # Multiple arguments (like RSpec metadata) should not be transformed
+    # Minitest `specify` should only accept 0 or 1 argument.
+    # Multiple arguments (e.g. RSpec metadata) are not transformed; the rewriter
+    # leaves the call as-is, and the type checker then reports "Method does not exist".
     specify "test with metadata", :slow do # error: Method `specify` does not exist on `T.class_of(MyTest)`
     end
 
-    # Minitest `before` should only accept 0 arguments
-    # Scope arguments like :each/:all are RSpec-only
+    # Minitest `before` should only accept 0 arguments.
+    # Scope arguments like :each/:all are RSpec-only; rewriter leaves the call unchanged.
     before(:each) do # error: Method `before` does not exist on `T.class_of(MyTest)`
     end
 
-    # Minitest `after` should only accept 0 arguments
-    # Scope arguments like :each/:all are RSpec-only
+    # Minitest `after` should only accept 0 arguments.
+    # Scope arguments like :each/:all are RSpec-only; rewriter leaves the call unchanged.
     after(:all) do # error: Method `after` does not exist on `T.class_of(MyTest)`
     end
 end
