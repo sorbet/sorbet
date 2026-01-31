@@ -4,9 +4,14 @@
 # This test validates that various RSpec DSL methods properly support
 # multiple arguments (like metadata tags).
 #
+# NOTE: This file produces many "Method does not exist" errors when run
+# WITHOUT --enable-experimental-rspec. This is expected behavior - the test
+# shell script runs Sorbet twice: once without the flag (expecting errors)
+# and once with the flag (expecting the RSpec rewriter to transform the DSL).
+#
 # The following RSpec methods commonly accept additional arguments:
 # - it/specify/example (and x/f variants): description + metadata
-# - before/after: scope (:each, :all) + metadata
+# - before/after: scope (:each, :all) + optional metadata filters
 # - shared_examples/shared_context: name + metadata
 # - describe/context (fixed in PR #9807): description + metadata
 
@@ -124,6 +129,50 @@ RSpec.describe MyClass do
 
   it "works" do
     setup_value
+  end
+end
+
+# =============================================================================
+# Test: `before` and `after` with metadata filters (RSpec filtering feature)
+# See: https://rspec.info/features/3-13/rspec-core/hooks/filtering
+# =============================================================================
+
+RSpec.describe MyClass do
+  let(:filtered_value) { "filtered" }
+
+  # before with scope + symbol metadata filter
+  # This runs only for examples tagged with :slow
+  before(:each, :slow) do
+    filtered_value
+  end
+
+  # before with scope + hash metadata filter
+  before(:example, authorized: true) do
+    filtered_value
+  end
+
+  # before with scope + multiple metadata filters
+  before(:context, :integration, :needs_db) do
+    filtered_value
+  end
+
+  # after with scope + symbol metadata filter
+  after(:each, :slow) do
+    filtered_value
+  end
+
+  # after with scope + hash metadata filter
+  after(:example, cleanup: true) do
+    filtered_value
+  end
+
+  # after with scope + multiple metadata filters
+  after(:all, :integration, requires_cleanup: true) do
+    filtered_value
+  end
+
+  it "works with filtered hooks", :slow do
+    filtered_value
   end
 end
 

@@ -277,19 +277,21 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
     auto arity = send.numPosArgs();
     switch (send.fun.rawId()) {
         case core::Names::before().rawId():
-            // For RSpec: allow before() or before(:each), before(:all), etc.
+            // For RSpec: allow before() with optional scope (:each/:all/:context/:suite) and
+            // metadata filters (e.g., before(:each, :slow) or before(:example, :authorized => true))
             // For minitest: only allow before() with no arguments
             if (rspecMode) {
-                return arity <= 1 ? core::Names::beforeAngles() : core::NameRef::noName();
+                return core::Names::beforeAngles();
             } else {
                 return arity == 0 ? core::Names::beforeAngles() : core::NameRef::noName();
             }
 
         case core::Names::after().rawId():
-            // For RSpec: allow after() or after(:each), after(:all), etc.
+            // For RSpec: allow after() with optional scope (:each/:all/:context/:suite) and
+            // metadata filters (e.g., after(:each, :slow) or after(:example, :authorized => true))
             // For minitest: only allow after() with no arguments
             if (rspecMode) {
-                return arity <= 1 ? core::Names::afterAngles() : core::NameRef::noName();
+                return core::Names::afterAngles();
             } else {
                 return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
             }
@@ -667,6 +669,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
             // RSpec mode allows multiple args (description + metadata tags like :slow, focus: true)
             // Minitest mode requires exactly one arg (description only)
+            //
+            // Note: rspecMode includes recvIsRSpec here because top-level RSpec.describe calls
+            // need RSpec treatment even though insideDescribe is false. For it/before/after below,
+            // we only use insideDescribe because those methods should only get RSpec treatment
+            // when nested inside a describe block.
             bool rspecMode = recvIsRSpec || (insideDescribe && ctx.state.cacheSensitiveOptions.rspecRewriterEnabled);
             if (rspecMode) {
                 if (send->numPosArgs() == 0) {
