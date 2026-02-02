@@ -78,14 +78,6 @@ For more information, see [Automatically suggesting method signatures](sig-sugge
 
 ![](/img/suggest-sig-completion-item-01.png)
 
-## Completion to override an `abstract` or `overridable` method
-
-When defining a method that has a name similar to an inherited method which is `abstract` or `overridable`, Sorbet suggests a completion item that expands to a full method definition overriding that method, with a suitable signature.
-
-<video autoplay loop muted playsinline style="max-width: calc(min(820px, 100%));">
-  <source src="/img/lsp/overridable-completion.mp4" type="video/mp4">
-</video>
-
 ## Pre-declared snippets
 
 Snippets expand a pre-defined template and allow pieces of the template to be filled in with values (most language clients allow pressing `TAB` to cycle through the parts of the template that need to be filled in).

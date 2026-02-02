@@ -75,8 +75,6 @@ core::Loc QueryResponse::getLoc() const {
             } else if constexpr (is_same_v<T, FieldResponse>) {
                 return res.termLoc;
             } else if constexpr (is_same_v<T, MethodDefResponse>) {
-                return res.declLoc(); // TODO(jez) Maybe we should have this be termLoc?
-            } else if constexpr (is_same_v<T, ClassDefResponse>) {
                 return res.termLoc;
             } else if constexpr (is_same_v<T, ClassDefResponse>) {
                 return res.termLoc;
