@@ -952,8 +952,12 @@ public:
         return ClassOrModuleRef::fromRaw(73);
     }
 
-    static MethodRef sig() {
+    static MethodRef T_Enum_caseAngles() {
         return MethodRef::fromRaw(4);
+    }
+
+    static MethodRef sig() {
+        return MethodRef::fromRaw(5);
     }
 
     static ClassOrModuleRef Enumerator_Lazy() {
