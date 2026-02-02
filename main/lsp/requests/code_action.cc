@@ -25,25 +25,6 @@ bool isOperator(string_view name) {
     return OPERATORS.contains(name);
 }
 
-vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &config, const core::GlobalState &gs,
-                                                      const vector<core::AutocorrectSuggestion::Edit> &edits) {
-    UnorderedMap<core::FileRef, vector<unique_ptr<TextEdit>>> editsByFile;
-    for (auto &edit : edits) {
-        auto range = Range::fromLoc(gs, edit.loc);
-        if (range != nullptr) {
-            editsByFile[edit.loc.file()].emplace_back(make_unique<TextEdit>(move(range), edit.replacement));
-        }
-    }
-
-    vector<unique_ptr<TextDocumentEdit>> documentEdits;
-    for (auto &[file, edits] : editsByFile) {
-        // TODO: Document version
-        documentEdits.emplace_back(make_unique<TextDocumentEdit>(
-            make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject()), move(edits)));
-    }
-    return documentEdits;
-}
-
 const core::lsp::MethodDefResponse *
 hasLoneMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
     // We want to return the singular `MethodDefResponse` for a non-operator method.
@@ -103,6 +84,37 @@ const core::lsp::SendResponse *isTUnsafeOrMustResponse(const core::GlobalState &
     return resp;
 }
 
+const core::lsp::ClassDefResponse *isClassDefResponse(const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
+    if (responses.empty()) {
+        return nullptr;
+    }
+
+    if (responses[0] == nullptr) {
+        // Something else stole it
+        return nullptr;
+    }
+
+    return responses[0]->isClassDef();
+}
+
+void accumulateOverridableMethods(const core::GlobalState &gs, core::ClassOrModuleRef original,
+                                  core::ClassOrModuleRef current,
+                                  UnorderedMap<core::NameRef, core::MethodRef> &overridableMethods) {
+    for (auto &[nm, sym] : current.data(gs)->members()) {
+        if (!sym.isMethod() || !sym.asMethodRef().data(gs)->flags.isOverridable) {
+            continue;
+        }
+        if (original.data(gs)->findMember(gs, nm).exists()) {
+            // There's already an override of this method in the target class, don't suggest another.
+            continue;
+        }
+        auto &methodForName = overridableMethods[nm];
+        if (!methodForName.exists()) {
+            methodForName = sym.asMethodRef();
+        }
+    }
+}
+
 } // namespace
 
 CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
@@ -155,7 +167,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 auto action = make_unique<CodeAction>(autocorrect.title);
                 action->kind = CodeActionKind::Quickfix;
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
-                workspaceEdit->documentChanges = getQuickfixEdits(config, gs, autocorrect.edits);
+                workspaceEdit->documentChanges = autocorrect2DocumentEdits(config, gs, autocorrect.edits);
                 // TODO(neil): this is specifc to just package files, but the root problem is when a code action edits a
                 // file that the user doesn't have open in their editor. The more generic fix would be to save all files
                 // that this code action edits that are also not open in the editor. This also applies below to "Apply
@@ -190,7 +202,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             auto action = make_unique<CodeAction>("Apply all Sorbet fixes for file");
             action->kind = kind;
             auto workspaceEdit = make_unique<WorkspaceEdit>();
-            workspaceEdit->documentChanges = getQuickfixEdits(config, gs, allEdits);
+            workspaceEdit->documentChanges = autocorrect2DocumentEdits(config, gs, allEdits);
             if (absl::c_any_of(allEdits, [&](auto edit) { return edit.loc.file().isPackage(gs); })) {
                 action->command = make_unique<Command>("Save package files", "sorbet.savePackageFiles");
             }
@@ -216,7 +228,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     action->kind = CodeActionKind::RefactorExtract;
 
                     if (canResolveLazily) {
-                        action->data = move(params);
+                        action->data = make_unique<CodeActionData>(move(params));
                     } else {
                         auto workspaceEdit = make_unique<WorkspaceEdit>();
                         auto edits = getMoveMethodEdits(typechecker, config, *def);
@@ -232,7 +244,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     if (canResolveLazily) {
                         const auto &maybeSource = def->termLoc.source(gs);
                         if (maybeSource.has_value() && absl::StartsWith(maybeSource.value(), "def ")) {
-                            action->data = move(params);
+                            action->data = make_unique<CodeActionData>(move(params));
                             result.emplace_back(move(action));
                         } else {
                             // Maybe this is an attr_reader or a prop or something. Abort.
@@ -272,6 +284,40 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::RefactorRewrite;
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));
+            } else if (auto *resp = isClassDefResponse(queryResult.responses)) {
+                auto overridableMethods = UnorderedMap<core::NameRef, core::MethodRef>{};
+                auto current = resp->symbol;
+                // Skip BasicObject because `singleton_method_added` is `overridable`, but wanting
+                // it is extremely uncommon, and we don't want to train people that there's an
+                // ignorable lightbulb icon on when the cursor is on any class definition.
+                while (current.exists() && current != core::Symbols::BasicObject()) {
+                    auto currentData = current.data(gs);
+                    accumulateOverridableMethods(gs, resp->symbol, current, overridableMethods);
+                    for (auto mixin : currentData->mixins()) {
+                        accumulateOverridableMethods(gs, resp->symbol, mixin, overridableMethods);
+                    }
+                    current = currentData->superClass();
+                }
+                auto sorted = vector<pair<string, core::MethodRef>>{};
+
+                for (auto &[nm, method] : overridableMethods) {
+                    sorted.emplace_back(nm.shortName(gs), method);
+                }
+                fast_sort(sorted, [](auto left, auto right) { return left.first < right.first; });
+                for (auto &[nameStr, method] : sorted) {
+                    auto action = make_unique<CodeAction>(
+                        fmt::format("Override `{}` (overridable from {})", nameStr, method.data(gs)->owner.show(gs)));
+                    action->kind = CodeActionKind::Refactor;
+                    auto data = make_unique<CodeActionData>(make_unique<CodeActionParams>(
+                        make_unique<TextDocumentIdentifier>(params->textDocument->uri), Range::fromLoc(gs, loc),
+                        make_unique<CodeActionContext>(vector<unique_ptr<Diagnostic>>{})));
+                    data->insertOverride = make_unique<InsertOverrideParams>(
+                        method.id(), resp->symbol.id(),
+                        make_unique<TextDocumentIdentifier>(config.fileRef2Uri(gs, resp->termLoc.file())),
+                        Range::fromLoc(gs, resp->termLoc), Range::fromLoc(gs, resp->declLoc));
+                    action->data = move(data);
+                    result.emplace_back(move(action));
+                }
             }
         }
     } else {

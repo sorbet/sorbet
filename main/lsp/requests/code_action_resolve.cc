@@ -1,5 +1,7 @@
 #include "main/lsp/requests/code_action_resolve.h"
+#include "core/insert_method/insert_method.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
 #include "main/lsp/ShowOperation.h"
@@ -15,6 +17,7 @@ bool allowedCodeActionKind(optional<CodeActionKind> codeActionKind) {
     }
 
     switch (*codeActionKind) {
+        case CodeActionKind::Refactor:
         case CodeActionKind::RefactorExtract:
         case CodeActionKind::RefactorRewrite:
             return true;
@@ -36,7 +39,42 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
             make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
         return response;
     }
-    const auto &actualParams = *params->data;
+
+    auto &gs = typechecker.state();
+
+    if (auto &maybeInsertOverride = params->data.value()->insertOverride) {
+        auto &insertOverride = maybeInsertOverride.value();
+        if (insertOverride->method <= 0 || insertOverride->method >= gs.methodsUsed()) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Invalid method ID in code action resolve request");
+            return response;
+        }
+        auto method = core::MethodRef::fromRaw(insertOverride->method);
+        if (insertOverride->inWhere <= 0 || insertOverride->inWhere >= gs.methodsUsed()) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Invalid class-or-module ID in code action resolve request");
+            return response;
+        }
+        auto inWhere = core::ClassOrModuleRef::fromRaw(insertOverride->inWhere);
+        auto fref = config.uri2FileRef(gs, insertOverride->textDocument->uri);
+        auto termLoc = insertOverride->termLocation->toLoc(gs, fref);
+        auto declLoc = insertOverride->declLocation->toLoc(gs, fref);
+        if (!termLoc.has_value() || !declLoc.has_value()) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Failed to convert locations when inserting override methods");
+            return response;
+        }
+        auto toInsert = vector<core::MethodRef>{1, method};
+        auto edits =
+            core::insert_method::run(gs, toInsert, inWhere, declLoc.value(), termLoc.value().copyEndWithZeroLength());
+        auto action = move(params);
+        action->edit = make_unique<WorkspaceEdit>();
+        action->edit.value()->documentChanges = autocorrect2DocumentEdits(config, gs, edits);
+        response->result = move(action);
+        return response;
+    }
+
+    const auto &actualParams = params->data.value()->params;
 
     const auto queryResult = LSPQuery::byLoc(config, typechecker, actualParams->textDocument->uri,
                                              *actualParams->range->start, LSPMethod::CodeActionResolve, false);
@@ -54,8 +92,6 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
         if (def == nullptr) {
             continue;
         }
-
-        auto &gs = typechecker.state();
 
         unique_ptr<CodeAction> action;
         if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
