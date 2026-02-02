@@ -159,7 +159,7 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, con
         fmt::format("{}{}{}\n  ", moduleKeyword, newModuleName, isTSigRequired(gs) ? "\n  extend T::Sig" : "");
     auto moduleEnd = "\nend";
 
-    auto fref = definition.declLoc().file();
+    auto fref = definition.termLoc.file();
 
     auto resolvedTree = typechecker.getResolved({fref});
     auto &rootTree = resolvedTree.tree;
@@ -218,7 +218,7 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &
     }
     auto docEdit =
         make_unique<TextDocumentEdit>(make_unique<VersionedTextDocumentIdentifier>(
-                                          config.fileRef2Uri(gs, definition.declLoc().file()), JSONNullObject()),
+                                          config.fileRef2Uri(gs, definition.termLoc.file()), JSONNullObject()),
                                       move(edits));
 
     res.emplace_back(move(docEdit));

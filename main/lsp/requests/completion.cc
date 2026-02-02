@@ -4,7 +4,6 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "absl/strings/str_replace.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
@@ -924,11 +923,14 @@ struct MethodResults {
 
 const string OPERATOR_CHARS = "+-*/%&|^><=!~[]`:.";
 
-MethodResults computeDedupedMethods(const core::GlobalState &gs, SimilarMethodsByName &similarMethodsByName,
+MethodResults computeDedupedMethods(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                                     bool isPrivateOk, string_view prefix) {
+    ENFORCE(!dispatchResult.main.receiver.isUntyped());
+
     MethodResults result;
 
     Timer timeit(gs.tracer(), LSP_COMPLETION_METRICS_PREFIX ".determine_methods");
+    SimilarMethodsByName similarMethodsByName = allSimilarMethods(gs, dispatchResult, prefix);
     for (auto &[methodName, similarMethods] : similarMethodsByName) {
         fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
             if (left.depth != right.depth) {
@@ -1243,9 +1245,8 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
         if (forMethods.dispatchResult->main.receiver.isUntyped()) {
             receiverIsUntyped = true;
         } else {
-            ENFORCE(!forMethods.dispatchResult->main.receiver.isUntyped());
-            auto similarMethodsByName = allSimilarMethods(gs, *forMethods.dispatchResult, params.prefix);
-            methodResults = computeDedupedMethods(gs, similarMethodsByName, forMethods.isPrivateOk, params.prefix);
+            methodResults =
+                computeDedupedMethods(gs, *forMethods.dispatchResult, forMethods.isPrivateOk, params.prefix);
         }
     }
 
@@ -1542,49 +1543,6 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             // assignment. Let's just toss that away and suggest with an empty prefix.
             auto params = searchParamsForEmptyAssign(gs, queryLoc, identResp->enclosingMethod, {});
             items = this->getCompletionItems(typechecker, params, resolved);
-        }
-    } else if (auto *methodResp = resp->isMethodDef()) {
-        if (!methodResp->symbol.data(gs)->hasSig() && !methodResp->isAttrBestEffortUIOnly) {
-            auto owner = methodResp->symbol.data(gs)->owner;
-            auto prefix = methodResp->name.shortName(gs);
-            auto similarMethodsByName = similarMethodsForClass(gs, owner, prefix);
-            auto similarMethods = computeDedupedMethods(gs, similarMethodsByName, /* isPrivateOk */ true, prefix);
-            for (auto &similarMethod : similarMethods.methods) {
-                const auto &data = similarMethod.method.data(gs);
-                if (data->name == methodResp->name || data->flags.isOverloaded || data->owner == owner) {
-                    continue;
-                }
-
-                string abstractOrOverridable;
-                if (data->flags.isAbstract) {
-                    abstractOrOverridable = "abstract";
-                } else if (data->flags.isOverridable) {
-                    abstractOrOverridable = "overridable";
-                } else {
-                    continue;
-                }
-
-                auto item = make_unique<CompletionItem>(fmt::format("def {}", data->name.shortName(gs)));
-                item->kind = CompletionItemKind::Snippet; // just the icon, not whether it actually has tabstops
-                item->detail = fmt::format("{} inherited method", abstractOrOverridable);
-
-                auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstractOrOverridable();
-                if (owner.data(gs)->attachedClass(gs).exists()) {
-                    showOptions = showOptions.withForceSelfPrefix();
-                }
-                auto methodDefinition =
-                    core::source_generator::prettyTypeForMethod(gs, similarMethod.method, nullptr, showOptions);
-
-                if (config.getClientConfig().clientCompletionItemSnippetSupport) {
-                    methodDefinition = absl::StrReplaceAll(methodDefinition, {{"; end", "\n  ${0}\nend"}});
-                    item->insertTextFormat = InsertTextFormat::Snippet;
-                } else {
-                    item->insertTextFormat = InsertTextFormat::PlainText;
-                }
-                item->textEdit = make_unique<TextEdit>(Range::fromLoc(gs, methodResp->declLoc()), methodDefinition);
-
-                items.emplace_back(move(item));
-            }
         }
     }
 
