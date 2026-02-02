@@ -242,7 +242,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     action->kind = CodeActionKind::RefactorRewrite;
 
                     if (canResolveLazily) {
-                        const auto &maybeSource = def->termLoc.source(gs);
+                        const auto &maybeSource = def->declLoc().source(gs);
                         if (maybeSource.has_value() && absl::StartsWith(maybeSource.value(), "def ")) {
                             action->data = make_unique<CodeActionData>(move(params));
                             result.emplace_back(move(action));

@@ -444,6 +444,7 @@ pipeline_tests(
             "testdata/lsp/completion/method_kwargs_extra.rb",
             "testdata/lsp/completion/missing_assign_rhs.rb",
             "testdata/lsp/completion/operators.rb",
+            "testdata/lsp/completion/overridable.rb",
             "testdata/lsp/completion/setter.rb",
             "testdata/lsp/completion/snippet_before_variable.rb",
             "testdata/lsp/completion/superclass.rb",
