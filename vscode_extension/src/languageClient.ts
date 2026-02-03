@@ -26,6 +26,7 @@ export function createClient(
       context.configuration.typedFalseCompletionNudges,
     highlightUntypedDiagnosticSeverity:
       context.configuration.highlightUntypedDiagnosticSeverity,
+    inlayTypeHints: context.configuration.inlayTypeHints,
   };
 
   context.log.debug(
