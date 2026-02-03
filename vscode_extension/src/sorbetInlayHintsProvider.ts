@@ -100,10 +100,18 @@ export class SorbetInlayHintsProvider implements InlayHintsProvider {
 
     switch (style) {
       case "before_var":
-        position = new Position(
-          serverHint.position.line,
-          serverHint.position.character,
-        );
+        // Use startPosition for C-style type placement before the variable
+        if (serverHint.startPosition) {
+          position = new Position(
+            serverHint.startPosition.line,
+            serverHint.startPosition.character,
+          );
+        } else {
+          position = new Position(
+            serverHint.position.line,
+            serverHint.position.character,
+          );
+        }
         label = `${typeLabel} `;
         break;
       case "after_var":
