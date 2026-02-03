@@ -412,6 +412,18 @@ module Annotations
     class Error < StandardError; end
   end
 
+  class AbstractWithSuperFallback
+    # @abstract
+    #: -> Integer
+    def method_with_super_fallback
+      if defined?(super)
+        super
+      else
+        raise "Abstract method called"
+      end
+    end
+  end
+
   class Final
     extend T::Helpers
 

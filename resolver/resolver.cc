@@ -3811,9 +3811,37 @@ public:
         handleAbstractMethod(ctx, mdef);
     }
 
+    static bool isValidAbstractBody(core::Context ctx, const ast::ExpressionPtr &expr) {
+        if (ast::isa_tree<ast::EmptyTree>(expr)) {
+            return true;
+        }
+
+        auto ifNode = ast::cast_tree<ast::If>(expr);
+        if (!ifNode) {
+            return false;
+        }
+
+        auto definedCall = ast::cast_tree<ast::Send>(ifNode->cond);
+        if (!definedCall || definedCall->fun != core::Names::defined_p()) {
+            return false;
+        }
+
+        auto superCall = ast::cast_tree<ast::Send>(ifNode->thenp);
+        if (!superCall || superCall->fun != core::Names::callWithBlockPass()) {
+            return false;
+        }
+
+        auto raiseCall = ast::cast_tree<ast::Send>(ifNode->elsep);
+        if (!raiseCall || raiseCall->fun != core::Names::raise()) {
+            return false;
+        }
+
+        return true;
+    }
+
     static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
         if (mdef.symbol.data(ctx)->flags.isAbstract) {
-            if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
+            if (!isValidAbstractBody(ctx, mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
                     e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");

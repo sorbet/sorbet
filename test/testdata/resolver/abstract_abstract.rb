@@ -21,3 +21,18 @@ class Child < Parent
   sig {abstract.returns(T.nilable(Integer))}
   def example2; end # error: Return type `T.nilable(Integer)` does not match return type of abstract method `Parent#example2`
 end
+
+module AbstractWithSuperFallback
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  sig {abstract.returns(Integer)}
+  def with_super_fallback
+    if defined?(super)
+      super
+    else
+      raise "Abstract method called"
+    end
+  end
+end
