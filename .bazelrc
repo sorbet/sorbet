@@ -71,6 +71,10 @@ build --cxxopt=-Wno-unqualified-std-cast-call --host_cxxopt=-Wno-unqualified-std
 build:dbg --copt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
+# As of Bazel 7, cached files are not put into the `bazel-bin/` folder unless they're toplevel targets.
+# We want to force files to be downloaded because otherwise clangd won't find them (and possibly lldb, though I haven't checked)
+# TODO(jez) Do newer compile commands generators suffer from this problem? The one we use is archived
+build:dbg --remote_download_outputs=all
 
 build:rubydbg --copt=-DRUBY_DEBUG --copt=-DVM_CHECK_MODE=1 --copt=-DTRANSIENT_HEAP_CHECK_MODE --copt=-DRGENGC_CHECK_MODE --copt=-DENC_DEBUG
 
