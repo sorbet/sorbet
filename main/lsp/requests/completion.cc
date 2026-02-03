@@ -1149,6 +1149,7 @@ CompletionTask::SearchParams CompletionTask::searchParamsForEmptyAssign(const co
         enclosingMethod,    // locals
         core::MethodRef{},  // do not suggest kwargs
         core::LocOffsets{}, // no fun loc available
+        core::LocOffsets{}, // no receiver loc available
         core::lsp::ConstantResponse::Scopes{enclosingMethod.data(gs)->owner},
     };
 }
@@ -1410,6 +1411,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 core::MethodRef{},  // do not suggest locals
                 core::MethodRef{},  // do not suggest kwargs
                 core::LocOffsets{}, // no kwargs send loc available
+                core::LocOffsets{}, // no receiver loc available
                 move(scopes),
             };
             items = this->getCompletionItems(typechecker, params, resolved);
@@ -1458,6 +1460,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 enclosingMethod,
                 kwargsSend.method,
                 kwargsSend.funLoc,
+                sendResp->receiverLocOffsets,
                 core::lsp::ConstantResponse::Scopes{}, // constants don't make sense here
             };
             items = this->getCompletionItems(typechecker, params, resolved);
@@ -1494,6 +1497,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 enclosingMethod,
                 core::MethodRef{},  // do not suggest kwargs
                 core::LocOffsets{}, // no kwargs send available
+                core::LocOffsets{}, // we could pass the scope loc here, but we aren't yet using this for constants
                 move(constantResp->scopes),
             };
         }
@@ -1525,6 +1529,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 identResp->enclosingMethod,
                 kwargsMethod.method,
                 kwargsMethod.funLoc,
+                core::LocOffsets{}, // no reciever loc
                 core::lsp::ConstantResponse::Scopes{identResp->enclosingMethod.data(gs)->owner},
             };
             items = this->getCompletionItems(typechecker, params, resolved);

@@ -40,6 +40,9 @@ class CompletionTask final : public LSPRequestTask {
         // The location of the method in a send, if applicable.
         core::LocOffsets funLoc;
 
+        // The location of a method receiver, if applicable.
+        core::LocOffsets receiverLoc;
+
         // If empty(), won't suggest constants.
         core::lsp::ConstantResponse::Scopes scopes;
     };
