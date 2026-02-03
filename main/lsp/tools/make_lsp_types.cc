@@ -1042,6 +1042,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                     makeField("kind", makeOptional(InlayHintKind)),
                                     makeField("paddingLeft", makeOptional(JSONBool)),
                                     makeField("paddingRight", makeOptional(JSONBool)),
+                                    makeField("startPosition", makeOptional(Position)),
                                 },
                                 classTypes);
 

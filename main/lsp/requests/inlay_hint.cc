@@ -118,6 +118,9 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &ty
                 hint->paddingLeft = false;
                 hint->paddingRight = true;
 
+                // Include start position for styles that need it (e.g., before_var)
+                hint->startPosition = make_unique<Position>(details.first.line - 1, details.first.column - 1);
+
                 hints.push_back(move(hint));
                 break;
             }
