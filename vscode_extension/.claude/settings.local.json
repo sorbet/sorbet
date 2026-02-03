@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvm use:*)",
+      "Bash(yarn compile)",
+      "Bash(yarn prettier)",
+      "mcp__ide__getDiagnostics",
+      "Bash(find:*)",
+      "Bash(./bazel build:*)",
+      "Bash(/Users/jus/workspace/sorbet/bazel-bin/main/sorbet:*)",
+      "Bash(readlink:*)",
+      "Bash(npm run compile)",
+      "Bash(export NVM_DIR=\"$HOME/.nvm\")",
+      "Bash([ -s \"$NVM_DIR/nvm.sh\" ])",
+      "Bash(. \"$NVM_DIR/nvm.sh\")",
+      "Bash(export PATH=\"/Users/jus/.nvm/versions/node/v18.20.0/bin:$PATH\")"
+    ]
+  }
+}
