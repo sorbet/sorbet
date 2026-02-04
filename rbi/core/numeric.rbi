@@ -164,7 +164,7 @@ class Numeric < Object
     )
     .returns(Integer)
   end
-  sig { params(arg0: T.anything).returns(NilClass) }
+  sig { params(arg0: T.anything).returns(T.nilable(Integer)) }
   def <=>(arg0); end
 
   sig do

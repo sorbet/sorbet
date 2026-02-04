@@ -32,9 +32,9 @@ BigDecimal(2).modulo(x)
 BigDecimal(2).power(x)
 BigDecimal(2).quo(x)
 
-# <=> returns Integer for comparable types, NilClass for incomparable types
+# <=> returns Integer for comparable types, T.nilable(Integer) for incomparable types
 T.reveal_type(BigDecimal('1.0') <=> 2) # error: type: `Integer`
 T.reveal_type(BigDecimal('1.0') <=> 2.0) # error: type: `Integer`
 T.reveal_type(BigDecimal('1.0') <=> Rational(1, 2)) # error: type: `Integer`
 T.reveal_type(BigDecimal('1.0') <=> BigDecimal('2.0')) # error: type: `Integer`
-T.reveal_type(BigDecimal('1.0') <=> 'incompatible') # error: type: `NilClass`
+T.reveal_type(BigDecimal('1.0') <=> 'incompatible') # error: type: `T.nilable(Integer)`

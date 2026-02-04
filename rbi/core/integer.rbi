@@ -346,7 +346,7 @@ class Integer < Numeric
     )
     .returns(Integer)
   end
-  sig { params(arg0: T.anything).returns(NilClass) }
+  sig { params(arg0: T.anything).returns(T.nilable(Integer)) }
   def <=>(arg0); end
 
   # Returns `true` if `int` equals `other` numerically. Contrast this with
