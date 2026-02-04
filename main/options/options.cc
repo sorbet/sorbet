@@ -1295,7 +1295,7 @@ void readOptions(Options &opts,
                 logger->error("--allow-relaxed-packager-checks-for can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
-            // TODO(neil): should this also be "[A-Z][a-zA-Z0-9:]+" similar to update-visiblity-for?
+            // TODO(neil): should this also be "[A-Z][a-zA-Z0-9:]*" similar to update-visiblity-for?
             std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
             for (const string &ns : raw["allow-relaxed-packager-checks-for"].as<vector<string>>()) {
                 if (!std::regex_match(ns, nsValid)) {
