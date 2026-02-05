@@ -24,13 +24,6 @@ export const ALL_TRACK_UNTYPED: TrackUntyped[] = [
 
 export type InlayTypeHintsStyle = "off" | "before_var" | "after_var" | "RBS";
 
-export const ALL_INLAY_TYPE_HINTS_STYLES: InlayTypeHintsStyle[] = [
-  "off",
-  "before_var",
-  "after_var",
-  "RBS",
-];
-
 export type DiagnosticSeverityStr =
   | "Error"
   | "Warning"
@@ -67,24 +60,6 @@ export function labelForTrackUntypedSetting(value: TrackUntyped): string {
       return "Everywhere but tests";
     case "everywhere":
       return "Everywhere";
-    default:
-      const unexpected: never = value;
-      throw new Error(`Unexpected value: ${unexpected}`);
-  }
-}
-
-export function labelForInlayTypeHintsStyle(
-  value: InlayTypeHintsStyle,
-): string {
-  switch (value) {
-    case "off":
-      return "Off";
-    case "before_var":
-      return "Before variable";
-    case "after_var":
-      return "After variable";
-    case "RBS":
-      return "RBS style";
     default:
       const unexpected: never = value;
       throw new Error(`Unexpected value: ${unexpected}`);
