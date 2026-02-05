@@ -14,9 +14,9 @@ ClassDef{
       block = nullptr
       pos_args = 1
       args = [
-        UnresolvedConstantLit{
-          cnst = <C <U <ErrorNode>>>
-          scope = EmptyTree
+        ConstantLit{
+          symbol = (static-field ::<ErrorNode>)
+          orig = nullptr
         }
       ]
     }
