@@ -404,6 +404,37 @@ template <typename PrismNode>
 ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, ast::ExpressionPtr rhs) {
     static_assert(is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>);
 
+    auto isValidAssignmentTarget = [](pm_node_t *node) -> bool {
+        switch (PM_NODE_TYPE(node)) {
+            case PM_LOCAL_VARIABLE_TARGET_NODE:
+            case PM_INSTANCE_VARIABLE_TARGET_NODE:
+            case PM_CLASS_VARIABLE_TARGET_NODE:
+            case PM_GLOBAL_VARIABLE_TARGET_NODE:
+            case PM_CONSTANT_TARGET_NODE:
+            case PM_CONSTANT_PATH_TARGET_NODE:
+            case PM_CALL_TARGET_NODE:
+            case PM_INDEX_TARGET_NODE:
+            case PM_MULTI_TARGET_NODE:
+            case PM_REQUIRED_PARAMETER_NODE:
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    auto lefts = absl::MakeSpan(lhs->lefts.nodes, lhs->lefts.size);
+    auto rights = absl::MakeSpan(lhs->rights.nodes, lhs->rights.size);
+    for (auto *c : lefts) {
+        if (!isValidAssignmentTarget(c)) {
+            return MK::EmptyTree();
+        }
+    }
+    for (auto *c : rights) {
+        if (!isValidAssignmentTarget(c)) {
+            return MK::EmptyTree();
+        }
+    }
+
     ast::InsSeq::STATS_store stats;
 
     core::NameRef tempRhs = nextUniqueDesugarName(core::Names::assignTemp());
@@ -414,8 +445,6 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
     bool didSplat = false;
     auto zloc = loc.copyWithZeroLength();
 
-    auto lefts = absl::MakeSpan(lhs->lefts.nodes, lhs->lefts.size);
-    auto rights = absl::MakeSpan(lhs->rights.nodes, lhs->rights.size);
     bool hasSplat = lhs->rest && PM_NODE_TYPE_P(lhs->rest, PM_SPLAT_NODE);
     size_t totalSize = lefts.size() + (hasSplat ? 1 : 0) + rights.size();
 
