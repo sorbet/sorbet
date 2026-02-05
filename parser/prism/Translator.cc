@@ -4390,19 +4390,7 @@ template <typename PrismLhsNode> ast::ExpressionPtr Translator::translateConst(p
             parentExpr = MK::Constant(delimiterLoc, core::Symbols::root());
         }
     } else { // Handle plain constants like `A`, that aren't part of a constant path.
-        static_assert(
-            is_same_v<PrismLhsNode, pm_constant_and_write_node> || is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
-            is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
-            is_same_v<PrismLhsNode, pm_constant_target_node> || is_same_v<PrismLhsNode, pm_constant_read_node> ||
-            is_same_v<PrismLhsNode, pm_constant_write_node>);
-
         // For writes, location should only include the name, like `FOO` in `FOO = 1`.
-        if constexpr (is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
-                      is_same_v<PrismLhsNode, pm_constant_write_node>) {
-            location = translateLoc(node->name_loc);
-        }
         parentExpr = MK::EmptyTree();
     }
 
