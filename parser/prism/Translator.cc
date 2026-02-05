@@ -4571,6 +4571,13 @@ ast::ClassDef::RHS_store Translator::desugarClassOrModule(pm_node *prismBodyNode
         return result;
     }
 
+    if (PM_NODE_TYPE_P(prismBodyNode, PM_BEGIN_NODE)) {
+        auto beginNode = down_cast<pm_begin_node>(prismBodyNode);
+        ast::ClassDef::RHS_store result;
+        result.emplace_back(desugarBegin(beginNode));
+        return result;
+    }
+
     ENFORCE(PM_NODE_TYPE_P(prismBodyNode, PM_STATEMENTS_NODE));
 
     auto body = desugar(prismBodyNode);
