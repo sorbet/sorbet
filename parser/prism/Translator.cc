@@ -4375,8 +4375,6 @@ ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
                           is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
                           is_same_v<PrismLhsNode, pm_constant_or_write_node>) {
                 location = translateLoc(node->name_loc);
-            } else if constexpr (is_same_v<PrismLhsNode, pm_constant_path_node>) {
-                location = translateLoc(node->base.location);
             } else {
                 static_assert(always_false_v<PrismLhsNode>, "Unexpected case");
             }
