@@ -345,7 +345,7 @@
             "Show type hints in RBS style: `user #: String`"
           ],
           "description": "Shows inlay type hints for variable assignments based on method return types. Does not show hints for simple primitive assignments.",
-          "default": "off"
+          "default": "after_var"
         }
       }
     },

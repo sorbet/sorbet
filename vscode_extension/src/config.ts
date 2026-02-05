@@ -139,7 +139,10 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
     this.disposables = [
       this.onDidChangeConfigurationEmitter,
       workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration("sorbet")) {
+        if (
+          e.affectsConfiguration("sorbet") ||
+          e.affectsConfiguration("editor.inlayHints.enabled")
+        ) {
           // update the cached configuration before firing
           this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
           this.onDidChangeConfigurationEmitter.fire(e);
@@ -251,7 +254,7 @@ export class SorbetExtensionConfig implements Disposable {
       DiagnosticSeverity.Information;
     this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
-    this.wrappedInlayTypeHints = "off";
+    this.wrappedInlayTypeHints = "after_var";
 
     // Any workspace with a `…/sorbet/config` file is considered Sorbet-enabled
     // by default. This implementation does not work in the general case with
@@ -495,6 +498,13 @@ export class SorbetExtensionConfig implements Disposable {
   }
 
   public get inlayTypeHints(): InlayTypeHintsStyle {
+    // Respect the standard VS Code setting for disabling all inlay hints
+    const editorInlayHints = workspace
+      .getConfiguration("editor")
+      .get<string>("inlayHints.enabled", "on");
+    if (editorInlayHints === "off") {
+      return "off";
+    }
     return this.wrappedInlayTypeHints;
   }
 
