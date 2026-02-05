@@ -636,22 +636,104 @@ ClassDef{
               name = <U <dynamic-const-assign>>
             }
           }
-        ],
-        expr = If{
-          cond = UnresolvedIdent{
-            kind = Local
-            name = <U <dynamic-const-assign>>
-          }
-          thenp = UnresolvedIdent{
-            kind = Local
-            name = <U <dynamic-const-assign>>
-          }
-          elsep = Assign{
-            lhs = UnresolvedIdent{
+          If{
+            cond = UnresolvedIdent{
               kind = Local
               name = <U <dynamic-const-assign>>
             }
-            rhs = Literal{ value = 14 }
+            thenp = UnresolvedIdent{
+              kind = Local
+              name = <U <dynamic-const-assign>>
+            }
+            elsep = Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              rhs = Literal{ value = 14 }
+            }
+          }
+        ],
+        expr = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $2>
+              }
+              rhs = Array{
+                elems = [
+                  Literal{ value = 15 }
+                  Literal{ value = 16 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $3>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <expand-splat>>
+                block = nullptr
+                pos_args = 3
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $2>
+                  }
+                  Literal{ value = 2 }
+                  Literal{ value = 0 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              rhs = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $3>
+                }
+                fun = <U []>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 0 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              rhs = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $3>
+                }
+                fun = <U []>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 1 }
+                ]
+              }
+            }
+          ],
+          expr = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $2>
           }
         }
       }
@@ -685,8 +767,90 @@ ClassDef{
           EmptyTree
           EmptyTree
           EmptyTree
+          EmptyTree
         ],
-        expr = EmptyTree
+        expr = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $2>
+              }
+              rhs = Array{
+                elems = [
+                  Literal{ value = 15 }
+                  Literal{ value = 16 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $3>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <expand-splat>>
+                block = nullptr
+                pos_args = 3
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $2>
+                  }
+                  Literal{ value = 2 }
+                  Literal{ value = 0 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              rhs = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $3>
+                }
+                fun = <U []>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 0 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              rhs = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $3>
+                }
+                fun = <U []>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 1 }
+                ]
+              }
+            }
+          ],
+          expr = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $2>
+          }
+        }
       }
     }
 
@@ -718,8 +882,90 @@ ClassDef{
           EmptyTree
           EmptyTree
           EmptyTree
+          EmptyTree
         ],
-        expr = EmptyTree
+        expr = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $2>
+              }
+              rhs = Array{
+                elems = [
+                  Literal{ value = 15 }
+                  Literal{ value = 16 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $3>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <expand-splat>>
+                block = nullptr
+                pos_args = 3
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $2>
+                  }
+                  Literal{ value = 2 }
+                  Literal{ value = 0 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              rhs = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $3>
+                }
+                fun = <U []>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 0 }
+                ]
+              }
+            }
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U <dynamic-const-assign>>
+              }
+              rhs = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <assignTemp>> $3>
+                }
+                fun = <U []>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 1 }
+                ]
+              }
+            }
+          ],
+          expr = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $2>
+          }
+        }
       }
     }
   ]

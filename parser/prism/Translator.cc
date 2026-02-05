@@ -1827,14 +1827,16 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         }
         case PM_CONSTANT_PATH_TARGET_NODE: { // Target of an indirect write to a constant path
             // ... like `A::TARGET1, A::TARGET2 = 1, 2`, `rescue => A::TARGET`, etc.
-            return translateConst<pm_constant_path_target_node>(node);
+            constexpr bool checkForDynamicConstAssign = true;
+            return translateConst<pm_constant_path_target_node, checkForDynamicConstAssign>(node);
         }
         case PM_CONSTANT_PATH_WRITE_NODE: { // Regular assignment to a constant path, e.g. `A::B = 1`
             return desugarAssignment<pm_constant_path_write_node>(node);
         }
         case PM_CONSTANT_TARGET_NODE: { // Target of an indirect write to a constant
             // ... like `TARGET1, TARGET2 = 1, 2`, `rescue => TARGET`, etc.
-            return translateConst<pm_constant_target_node>(node);
+            constexpr bool checkForDynamicConstAssign = true;
+            return translateConst<pm_constant_target_node, checkForDynamicConstAssign>(node);
         }
         case PM_CONSTANT_AND_WRITE_NODE: { // And-assignment to a constant, e.g. `C &&= false`
             return desugarConstantOpAssign<pm_constant_and_write_node, OpAssignKind::And>(node);
@@ -4434,7 +4436,9 @@ ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
                           is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
                           is_same_v<PrismLhsNode, pm_constant_or_write_node>) {
                 location = translateLoc(node->name_loc);
-            } else if constexpr (is_same_v<PrismLhsNode, pm_constant_path_node>) {
+            } else if constexpr (is_same_v<PrismLhsNode, pm_constant_path_node> ||
+                                 is_same_v<PrismLhsNode, pm_constant_path_target_node> ||
+                                 is_same_v<PrismLhsNode, pm_constant_target_node>) {
                 location = translateLoc(node->base.location);
             } else {
                 static_assert(always_false_v<PrismLhsNode>, "Unexpected case");
