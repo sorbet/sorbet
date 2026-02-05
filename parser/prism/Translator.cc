@@ -4353,8 +4353,7 @@ ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, 
 //
 // Usually returns the `SorbetLHSNode`, but for constant writes and targets,
 // it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
-template <typename PrismLhsNode, bool checkForDynamicConstAssign>
-ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
+template <typename PrismLhsNode> ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
     auto node = down_cast<PrismLhsNode>(anyNode);
 
     // Constant name might be unset, e.g. `::`.
@@ -4366,26 +4365,6 @@ ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
     // It's important that in all branches `enterNameUTF8` is called, which `translateConstantName` does,
     // so that the name is available for the rest of the pipeline.
     auto name = translateConstantName(node->name);
-
-    if constexpr (checkForDynamicConstAssign) {
-        if (this->isInMethodDef()) {
-            core::LocOffsets location;
-            if constexpr (is_same_v<PrismLhsNode, pm_constant_write_node> ||
-                          is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
-                          is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
-                          is_same_v<PrismLhsNode, pm_constant_or_write_node>) {
-                location = translateLoc(node->name_loc);
-            } else {
-                static_assert(always_false_v<PrismLhsNode>, "Unexpected case");
-            }
-
-            // Check if this is a dynamic constant assignment (SyntaxError at runtime)
-            // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
-            // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
-            return MK::Local(location, core::Names::dynamicConstAssign());
-        }
-    }
-
     auto location = translateLoc(node->base.location);
     auto constantName = ctx.state.enterNameConstant(name);
 
