@@ -47,6 +47,14 @@ InlayHintTask::InlayHintTask(const LSPConfiguration &config, MessageId id, uniqu
 unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentInlayHint);
 
+    const auto &inlayTypeHints = config.getClientConfig().inlayTypeHints;
+
+    // Return empty if inlay hints are disabled
+    if (inlayTypeHints == "off") {
+        response->result = vector<unique_ptr<InlayHint>>();
+        return response;
+    }
+
     const core::GlobalState &gs = typechecker.state();
     const auto &uri = params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
@@ -109,17 +117,45 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &ty
                     continue;
                 }
 
-                // Create the hint position at the end of the variable name (0-indexed)
-                auto hintPos = make_unique<Position>(details.second.line - 1, details.second.column - 1);
+                auto typeStr = retType.show(gs);
+                unique_ptr<Position> hintPos;
+                string label;
+                bool paddingLeft = false;
+                bool paddingRight = false;
 
-                // Create the inlay hint with just the type (client handles formatting)
-                auto hint = make_unique<InlayHint>(move(hintPos), retType.show(gs));
+                if (inlayTypeHints == "before_var") {
+                    // Position at start of variable, label is "TypeName "
+                    hintPos = make_unique<Position>(details.first.line - 1, details.first.column - 1);
+                    label = typeStr + " ";
+                    paddingRight = false;
+                } else if (inlayTypeHints == "after_var") {
+                    // Position at end of variable name, label is ": TypeName"
+                    hintPos = make_unique<Position>(details.second.line - 1, details.second.column - 1);
+                    label = ": " + typeStr;
+                    paddingLeft = false;
+                    paddingRight = true;
+                } else if (inlayTypeHints == "RBS") {
+                    // Position at end of line, label is " #: TypeName"
+                    auto lineNum = details.first.line;
+                    auto lineContent = fref.data(gs).getLine(lineNum);
+                    // Find length excluding trailing newline
+                    auto lineLen = lineContent.length();
+                    if (lineLen > 0 && lineContent[lineLen - 1] == '\n') {
+                        lineLen--;
+                    }
+                    hintPos = make_unique<Position>(lineNum - 1, lineLen);
+                    label = " #: " + typeStr;
+                    paddingLeft = false;
+                    paddingRight = false;
+                } else {
+                    // Unknown style, skip
+                    continue;
+                }
+
+                auto hint = make_unique<InlayHint>(move(hintPos), label);
                 hint->kind = InlayHintKind::Type;
-                hint->paddingLeft = false;
-                hint->paddingRight = true;
-
-                // Include start position for styles that need it (e.g., before_var)
-                hint->startPosition = make_unique<Position>(details.first.line - 1, details.first.column - 1);
+                hint->paddingLeft = paddingLeft;
+                hint->paddingRight = paddingRight;
 
                 hints.push_back(move(hint));
                 break;

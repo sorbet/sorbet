@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, languages, workspace } from "vscode";
+import { commands, ExtensionContext, workspace } from "vscode";
 import * as cmdIds from "./commandIds";
 import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
 import { savePackageFiles } from "./commands/savePackageFiles";
@@ -16,7 +16,6 @@ import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
 import { SorbetExtensionApiImpl } from "./sorbetExtensionApi";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
-import { SorbetInlayHintsProvider } from "./sorbetInlayHintsProvider";
 import { ServerStatus, RestartReason } from "./types";
 
 /**
@@ -47,18 +46,10 @@ export async function activate(context: ExtensionContext) {
   context.subscriptions.push(statusBarEntry);
 
   // Register providers
-  sorbetExtensionContext.log.info(
-    "Registering SorbetInlayHintsProvider for Ruby files",
-  );
-  console.log("[Sorbet] Registering SorbetInlayHintsProvider");
   context.subscriptions.push(
     workspace.registerTextDocumentContentProvider(
       SORBET_SCHEME,
       new SorbetContentProvider(sorbetExtensionContext),
-    ),
-    languages.registerInlayHintsProvider(
-      { language: "ruby", scheme: "file" },
-      new SorbetInlayHintsProvider(sorbetExtensionContext),
     ),
   );
 
