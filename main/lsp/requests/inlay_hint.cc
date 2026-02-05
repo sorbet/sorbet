@@ -64,8 +64,8 @@ unique_ptr<ResponseMessage> InlayHintTask::runRequest(LSPTypecheckerDelegate &ty
         return response;
     }
 
-    // Only show inlay hints for files with some typing (at least typed: false)
-    if (fref.data(gs).strictLevel < core::StrictLevel::False) {
+    // Only show inlay hints for files with typed: true or higher (typed: false doesn't have reliable type info)
+    if (fref.data(gs).strictLevel < core::StrictLevel::True) {
         response->result = vector<unique_ptr<InlayHint>>();
         return response;
     }
