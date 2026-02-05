@@ -169,7 +169,8 @@ private:
     ast::ExpressionPtr translateAndOrAssignment(core::LocOffsets location, ast::ExpressionPtr lhs,
                                                 ast::ExpressionPtr rhs);
 
-    template <typename PrismLhsNode> ast::ExpressionPtr translateConst(pm_node_t *node, bool isConstantPath);
+    ast::ExpressionPtr translateConst(const pm_constant_id_t &nodeName, const pm_location_t &baseLocation,
+                                      bool isConstantPath, pm_node_t *parent, const pm_location_t *nodeDelimLoc);
     core::NameRef translateConstantName(pm_constant_id_t constantId);
 
     // Generates a unique name for a `parser::Node`.
