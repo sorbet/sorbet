@@ -32,9 +32,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->referencesProvider = true;
     serverCap->implementationProvider = true;
     serverCap->documentFormattingProvider = opts.lspDocumentFormatRubyfmtEnabled;
-    // inlayHintProvider capability is not advertised because the VS Code extension
-    // has a custom provider that handles client-side formatting (e.g., RBS style).
-    // The server still responds to textDocument/inlayHint requests.
+    serverCap->inlayHintProvider = true;
     serverCap->sorbetShowSymbolProvider = true;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();

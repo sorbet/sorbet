@@ -1042,7 +1042,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                     makeField("kind", makeOptional(InlayHintKind)),
                                     makeField("paddingLeft", makeOptional(JSONBool)),
                                     makeField("paddingRight", makeOptional(JSONBool)),
-                                    makeField("startPosition", makeOptional(Position)),
                                 },
                                 classTypes);
 
@@ -1311,6 +1310,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("highlightUntyped", makeOptional(makeVariant({JSONBool, JSONString}))),
                        makeField("enableTypedFalseCompletionNudges", makeOptional(JSONBool)),
                        makeField("highlightUntypedDiagnosticSeverity", makeOptional(DiagnosticSeverity)),
+                       // Style for inlay type hints: "off", "before_var", "after_var", "RBS"
+                       makeField("inlayTypeHints", makeOptional(JSONString)),
                    },
                    classTypes);
     auto InitializeParams =
