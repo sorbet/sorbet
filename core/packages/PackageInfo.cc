@@ -594,13 +594,15 @@ void addChildren(vector<ClassOrModuleRef> &work, core::ConstClassOrModuleData kl
 } // namespace
 
 vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs) const {
+    ENFORCE(this->exists());
     vector<MangledName> subpackages;
 
     vector<ClassOrModuleRef> work;
     addChildren(work, this->mangledName_.owner.data(gs));
 
-    // Termination argument: we only have one loop in the hierarchy for root, and as we know we're already calling this
-    // for a valid package and only processing its members, we know we won't find a cycle.
+    // Termination argument: we only have one loop in the hierarchy for root, ignoring the singleton/attached class
+    // cycle for each symbol, and as we know we're already calling this for a valid package and only processing its
+    // non-singleton class members, we know we won't find a cycle.
     while (!work.empty()) {
         auto sym = work.back();
         auto klass = sym.data(gs);
