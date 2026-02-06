@@ -677,7 +677,6 @@ struct PackageSpecBodyWalk {
                 }
             }
         } else if (send.fun == core::Names::sorbet()) {
-            // TODO(neil): enforce the minimum sigil declared here
             if (info.minTypedLevel != core::StrictLevel::None) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
@@ -1054,6 +1053,24 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     }
 
     auto &pkgImpl = PackageInfo::from(ctx, pkg);
+
+    if (file.isPackagedTest() && file.originalSigil < pkgImpl.testsMinTypedLevel) {
+        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::TypedSigilTooLow)) {
+            e.setHeader("All test files in package `{}` must be at least `{}{}`", pkg.owner.show(ctx),
+                        "typed: ", core::SigilTraits<core::StrictLevel>::toString(pkgImpl.testsMinTypedLevel));
+            e.addErrorLine(core::Loc(pkgImpl.file, pkgImpl.locs.testsMinTypedLevel),
+                           "Minimum typed level for test files in this package declared here");
+            // TODO(neil): Autocorrect to update the sigil?
+        }
+    } else if (!file.isPackagedTest() && file.originalSigil < pkgImpl.minTypedLevel) {
+        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::TypedSigilTooLow)) {
+            e.setHeader("All non-test files in package `{}` must be at least `{}{}`", pkg.owner.show(ctx),
+                        "typed: ", core::SigilTraits<core::StrictLevel>::toString(pkgImpl.minTypedLevel));
+            e.addErrorLine(core::Loc(pkgImpl.file, pkgImpl.locs.minTypedLevel),
+                           "Minimum typed level for non-test files this package declared here");
+            // TODO(neil): Autocorrect to update the sigil?
+        }
+    }
 
     EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
