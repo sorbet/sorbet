@@ -2179,7 +2179,7 @@ public:
 
         auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
         auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
-        auto canModify = filePackageInfo.canModifySymbol(ctx, ctx.owner.asClassOrModuleRef());
+        auto canModify = filePackageInfo.canModifySymbol(ctx, onSymbol);
         switch (canModify) {
             case core::packages::PackageInfo::CanModifyResult::CanModify:
                 break;
