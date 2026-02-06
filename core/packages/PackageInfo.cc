@@ -577,4 +577,107 @@ string PackageInfo::show(const core::GlobalState &gs) const {
     return this->mangledName().owner.show(gs);
 }
 
+namespace {
+
+void addChildren(vector<ClassOrModuleRef> &work, core::ConstClassOrModuleData klass) {
+    // This is an overallocation as we'll be skipping some members.
+    work.reserve(work.size() + klass->members().size());
+    for (auto &[key, sym] : klass->members()) {
+        if (!sym.isClassOrModule()) {
+            continue;
+        }
+
+        work.push_back(sym.asClassOrModuleRef());
+    }
+}
+
+} // namespace
+
+vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs) const {
+    ENFORCE(this->exists());
+    vector<MangledName> subpackages;
+
+    vector<ClassOrModuleRef> work;
+    addChildren(work, this->mangledName_.owner.data(gs));
+
+    // Termination argument: we only have one loop in the hierarchy for root, ignoring the singleton/attached class
+    // cycle for each symbol, and as we know we're already calling this for a valid package and only processing its
+    // non-singleton class members, we know we won't find a cycle.
+    while (!work.empty()) {
+        auto sym = work.back();
+        auto klass = sym.data(gs);
+        work.pop_back();
+
+        if (klass->isSingletonClass(gs)) {
+            continue;
+        }
+
+        // This handles cases like:
+        // A < PackageSpec
+        // └─ A::B
+        //    └─ A::B::Subpackage < PackageSpec
+        if (klass->superClass() != core::Symbols::PackageSpec()) {
+            addChildren(work, klass);
+            continue;
+        }
+
+        subpackages.push_back(MangledName(sym));
+    }
+
+    if (subpackages.size() > 1) {
+        // This will sort `A::Z::A` before `A::B`.
+        fast_sort(subpackages, [&gs](MangledName l, MangledName r) {
+            return l.owner.data(gs)->name.shortName(gs) < r.owner.data(gs)->name.shortName(gs);
+        });
+    }
+
+    return subpackages;
+}
+
+PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(sym.exists());
+
+    // Unpackaged code is allowed to modify anything.
+    if (!this->exists()) {
+        return CanModifyResult::CanModify;
+    }
+
+    // Ensure we're not working with a singleton class before performing any further checks.
+    sym = sym.data(gs)->topAttachedClass(gs);
+
+    auto symData = sym.data(gs);
+
+    // It's not okay to modify anything in the package hierarchy, as we don't support packages with generics, or mixins
+    // on packages.
+    if (symData->packageRegistryOwner == sym) {
+        return CanModifyResult::PackageSpec;
+    }
+
+    auto symPackage = symData->package;
+
+    // The symbol is already owned by this package, so we only need to check if the symbol corresponds to the package
+    // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
+    // work with package-directed type checking.
+    if (symPackage == this->mangledName_) {
+        if (!this->hasSubPackages || !symData->isPackageNamespace()) {
+            return CanModifyResult::CanModify;
+        } else {
+            return CanModifyResult::Subpackages;
+        }
+    }
+
+    // Modifying an unpackaged symbol is only allowed from prelude packages.
+    if (!symPackage.exists()) {
+        if (this->isPreludePackage_) {
+            return CanModifyResult::CanModify;
+        } else {
+            return CanModifyResult::UnpackagedSymbol;
+        }
+    }
+
+    // At this point, we know we're in a packaged context, trying to modify the symbol of another package, which is not
+    // allowed.
+    return CanModifyResult::NotOwner;
+}
+
 } // namespace sorbet::core::packages

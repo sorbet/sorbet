@@ -1463,16 +1463,21 @@ private:
         return sym;
     }
 
+    core::SymbolRef insertTypeMemberAsStaticField(core::MutableContext ctx, const State &state,
+                                                  const core::FoundTypeMember &typeMember) {
+        core::FoundStaticField staticField;
+        staticField.owner = typeMember.owner;
+        staticField.name = typeMember.name;
+        staticField.asgnLoc = typeMember.asgnLoc;
+        staticField.lhsLoc = typeMember.asgnLoc;
+        staticField.isTypeAlias = true;
+        return insertStaticField(ctx, state, staticField);
+    }
+
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
                                      const core::FoundTypeMember &typeMember) {
         if (ctx.owner == core::Symbols::root()) {
-            core::FoundStaticField staticField;
-            staticField.owner = typeMember.owner;
-            staticField.name = typeMember.name;
-            staticField.asgnLoc = typeMember.asgnLoc;
-            staticField.lhsLoc = typeMember.asgnLoc;
-            staticField.isTypeAlias = true;
-            return insertStaticField(ctx, state, staticField);
+            return insertTypeMemberAsStaticField(ctx, state, typeMember);
         }
 
         core::Variance variance = core::Variance::Invariant;
@@ -1480,6 +1485,12 @@ private:
 
         auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx)
                                        : ctx.owner.asClassOrModuleRef();
+
+        auto package = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (ctx.state.packageDB().getPackageInfo(package).canModifySymbol(ctx, onSymbol) !=
+            core::packages::PackageInfo::CanModifyResult::CanModify) {
+            return insertTypeMemberAsStaticField(ctx, state, typeMember);
+        }
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -2165,6 +2176,61 @@ public:
         auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx)
                                        : ctx.owner.asClassOrModuleRef();
         ENFORCE(onSymbol.exists());
+
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
+        auto canModify = filePackageInfo.canModifySymbol(ctx, onSymbol);
+        switch (canModify) {
+            case core::packages::PackageInfo::CanModifyResult::CanModify:
+                break;
+
+            case core::packages::PackageInfo::CanModifyResult::Subpackages:
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                    e.setHeader("Package `{}` has subpackages, so its corresponding class must not be generic",
+                                filePackage.owner.show(ctx));
+
+                    e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
+                    auto subpackages = filePackageInfo.directSubPackages(ctx);
+                    if (!subpackages.empty()) {
+                        auto &subpackageInfo = ctx.state.packageDB().getPackageInfo(subpackages[0]);
+                        e.addErrorLine(subpackageInfo.declLoc(), "First subpackage defined here");
+                    }
+                }
+                return ignoreBadTypeMember(ctx, move(tree));
+
+            case core::packages::PackageInfo::CanModifyResult::NotOwner:
+            case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::ModifyingUnpackagedConstant)) {
+                    e.setHeader("`{}` may only be used on constants in the package that owns them",
+                                isTypeTemplate ? "type_template" : "type_member");
+
+                    if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                        e.addErrorLine(filePackageInfo.declLoc(), "Package containing the `{}` defined here",
+                                       isTypeTemplate ? "type_template" : "type_member");
+
+                        auto &ownerPackage = ctx.state.packageDB().getPackageInfo(onSymbol.data(ctx)->package);
+                        ENFORCE(ownerPackage.exists());
+                        e.addErrorLine(ownerPackage.declLoc(), "Owning package defined here", ctx.owner.show(ctx));
+                    } else {
+                        e.addErrorLine(filePackageInfo.declLoc(), "Package containing the `{}` is not a `{}`",
+                                       isTypeTemplate ? "type_template" : "type_member", "prelude_package");
+                        e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                       ctx.owner.show(ctx), "prelude_package");
+                    }
+                }
+                return ignoreBadTypeMember(ctx, move(tree));
+
+            case core::packages::PackageInfo::CanModifyResult::PackageSpec:
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidPackageExpression)) {
+                    e.setHeader("Invalid expression in package: `{}` is not allowed",
+                                isTypeTemplate ? "type_template" : "type_member");
+
+                    e.addErrorLine(onSymbol.data(ctx)->loc(), "Package defined here");
+                }
+
+                return ignoreBadTypeMember(ctx, move(tree));
+        }
+
         core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
         ENFORCE(sym.exists());
 

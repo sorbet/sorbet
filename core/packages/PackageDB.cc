@@ -53,6 +53,23 @@ const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     return this->packageForFile_[file.id()];
 }
 
+MangledName PackageDB::getParentPackage(const GlobalState &gs, MangledName pkg) const {
+    ENFORCE(pkg.exists());
+
+    auto ownerSym = pkg.owner.data(gs)->owner;
+    while (ownerSym.exists() && ownerSym != core::Symbols::PackageSpecRegistry()) {
+        auto &owner = this->getPackageInfo(MangledName(ownerSym));
+
+        if (owner.exists()) {
+            return MangledName(ownerSym);
+        }
+
+        ownerSym = ownerSym.data(gs)->owner;
+    }
+
+    return MangledName();
+}
+
 void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
     if (this->packageForFile_.size() <= file.id()) {
         this->packageForFile_.resize(file.id() + 1, MangledName());
