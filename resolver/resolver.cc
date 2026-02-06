@@ -2677,7 +2677,7 @@ class ResolveTypeMembersAndFieldsWalk {
     static void computeExternalTypes(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "resolver.computeExternalType");
         // Ensure all symbols have `externalType` computed.
-        for (auto ref : gs.newSymbols().classOrModuleRefs(gs)) {
+        for (auto ref : gs.newClassOrModules()) {
             ref.data(gs)->unsafeComputeExternalType(gs);
         }
     }

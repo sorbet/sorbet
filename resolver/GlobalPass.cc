@@ -276,13 +276,13 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int classCount = 0;
     int singletonClassCount = 0;
     int moduleCount = 0;
-    for (const auto ref : gs.newSymbols().methodRefs(gs)) {
+    for (const auto ref : gs.newMethods()) {
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             methodCount++;
         }
     }
-    for (auto ref : gs.newSymbols().classOrModuleRefs(gs)) {
+    for (auto ref : gs.newClassOrModules()) {
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
@@ -291,7 +291,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     }
 
     auto n = gs.classAndModulesUsed();
-    for (auto ref : gs.newSymbols().classOrModuleRefs(gs)) {
+    for (auto ref : gs.newClassOrModules()) {
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (ref.data(gs)->isClass()) {
@@ -361,7 +361,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
     {
         Timer timer(gs.tracer(), "resolver.mix_in_class_methods");
 
-        for (auto sym : gs.newSymbols().classOrModuleRefs(gs)) {
+        for (auto sym : gs.newClassOrModules()) {
             if (sym.data(gs)->flags.isLinearizationComputed) {
                 // Without this, the addMixin below for mixedInClassMethods is not idempotent on the
                 // fast path, and will accidentally mix a `ClassMethods` module into all children (not
@@ -419,7 +419,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
         gs.computeLinearization();
 
         Timer timer(gs.tracer(), "resolver.resolve_type_members");
-        for (auto sym : gs.newSymbols().classOrModuleRefs(gs)) {
+        for (auto sym : gs.newClassOrModules()) {
             resolveTypeMembers(gs, sym, typeAliases, resolved);
 
             if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {

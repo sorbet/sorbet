@@ -686,8 +686,34 @@ public:
 
     bool shouldReportErrorOn(FileRef file, ErrorClass what) const;
 
+    // Symbol table offset information for the current stratum of files.
     const SymbolTableOffsets &newSymbols() const {
         return this->offsets;
+    }
+
+    // ClassOrModules that have been introduced in the current stratum of files.
+    SymbolRange<ClassOrModuleRef> newClassOrModules() const {
+        return this->offsets.classOrModuleRefs(*this);
+    }
+
+    // Methods that have been introduced in the current stratum of files.
+    SymbolRange<MethodRef> newMethods() const {
+        return this->offsets.methodRefs(*this);
+    }
+
+    // Fields that have been introduced in the current stratum of files.
+    SymbolRange<FieldRef> newFields() const {
+        return this->offsets.fieldRefs(*this);
+    }
+
+    // Type members that have been introduced in the current stratum of files.
+    SymbolRange<TypeMemberRef> newTypeMemberRefs() const {
+        return this->offsets.typeMemberRefs(*this);
+    }
+
+    // Type parameters that have been introduced in the current stratum of files.
+    SymbolRange<TypeParameterRef> newTypeParameterRefs() const {
+        return this->offsets.typeParameterRefs(*this);
     }
 
     void updateSymbolTableOffsets() {

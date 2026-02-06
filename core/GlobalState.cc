@@ -995,7 +995,7 @@ void GlobalState::computeLinearization() {
     Timer timer(this->tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
-    for (auto ref : this->newSymbols().classOrModuleRefs(*this)) {
+    for (auto ref : this->newClassOrModules()) {
         computeClassLinearization(*this, ref);
     }
 }
