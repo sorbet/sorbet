@@ -213,7 +213,7 @@ void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol
     AccessorInfo info;
 
     core::SymbolRef owner = symbol.owner(gs);
-    if (!owner.exists() || !owner.isClassOrModule()) {
+    if (!owner.isClassOrModule()) {
         return;
     }
     core::ClassOrModuleRef ownerCls = owner.asClassOrModuleRef();

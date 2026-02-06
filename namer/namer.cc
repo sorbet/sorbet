@@ -1613,7 +1613,7 @@ private:
         // Note: this loop is accidentally quadratic. We run deleteFieldViaFullNameHash once per field
         // previously defined in this file, then in each call look at each member of that field's owner.
         for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
-            if (memberSym.isClassOrModule()) {
+            if (!memberSym.exists() || memberSym.isClassOrModule()) {
                 // Safeguard against a collision function in our `FullNameHash` function (e.g., what
                 // if `foo()` and `::Foo` have the same `FullNameHash`, but were given two different
                 // `NameRef` IDs and thus don't collide in the `members` list?).
