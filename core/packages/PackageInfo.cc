@@ -309,6 +309,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     auto pkgFile = this->file;
     auto insertionLoc = core::Loc::none(pkgFile);
     if (!exports_.empty()) {
+        // TODO(neil): can we use use `absl::c_lower_bound` here?
         core::LocOffsets exportToInsertAfter;
         for (auto &e : exports_) {
             if (exportLine > core::Loc(pkgFile, e.loc).source(gs)) {
@@ -355,6 +356,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addVisibleTo(const core::Glob
     auto pkgFile = this->file;
     auto insertionLoc = core::Loc::none(pkgFile);
     if (!visibleTo_.empty()) {
+        // TODO(neil): can we use use `absl::c_lower_bound` here?
         core::LocOffsets visibleToInsertAfter;
         for (auto &v : visibleTo_) {
             if (visibleToLine > core::Loc(pkgFile, v.loc).source(gs)) {
