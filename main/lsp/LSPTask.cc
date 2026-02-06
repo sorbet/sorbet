@@ -71,6 +71,14 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                     } else {
                         return ResponseMessageStatus::EmptyResult;
                     }
+                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<InlayHint>>>>) {
+                    // textDocument/inlayHint
+                    if (const auto *hintsPtr = get_if<vector<unique_ptr<InlayHint>>>(&res)) {
+                        return hintsPtr->empty() ? ResponseMessageStatus::EmptyResult
+                                                 : ResponseMessageStatus::Succeeded;
+                    } else {
+                        return ResponseMessageStatus::EmptyResult;
+                    }
                 } else if constexpr (is_same_v<T, unique_ptr<CompletionList>>) {
                     // textDocument/completion
                     return res->items.empty() ? ResponseMessageStatus::EmptyResult : ResponseMessageStatus::Succeeded;
@@ -189,6 +197,8 @@ ConstExprStr LSPTask::methodString() const {
             return "textDocument.formatting";
         case LSPMethod::TextDocumentHover:
             return "textDocument.hover";
+        case LSPMethod::TextDocumentInlayHint:
+            return "textDocument.inlayHint";
         case LSPMethod::TextDocumentPrepareRename:
             return "textDocument.prepareRename";
         case LSPMethod::TextDocumentReferences:

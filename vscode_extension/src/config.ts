@@ -22,6 +22,8 @@ export const ALL_TRACK_UNTYPED: TrackUntyped[] = [
   "everywhere",
 ];
 
+export type InlayTypeHintsStyle = "off" | "before_var" | "after_var" | "RBS";
+
 export type DiagnosticSeverityStr =
   | "Error"
   | "Warning"
@@ -233,6 +235,7 @@ export class SorbetExtensionConfig implements Disposable {
   private wrappedHighlightUntypedDiagnosticSeverity: DiagnosticSeverity;
   private wrappedTypedFalseCompletionNudges: boolean;
   private wrappedRevealOutputOnError: boolean;
+  private wrappedInlayTypeHints: InlayTypeHintsStyle;
 
   constructor(sorbetWorkspaceContext: ISorbetWorkspaceContext) {
     this.configFilePatterns = [];
@@ -248,6 +251,7 @@ export class SorbetExtensionConfig implements Disposable {
       DiagnosticSeverity.Information;
     this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
+    this.wrappedInlayTypeHints = "off";
 
     // Any workspace with a `…/sorbet/config` file is considered Sorbet-enabled
     // by default. This implementation does not work in the general case with
@@ -312,6 +316,10 @@ export class SorbetExtensionConfig implements Disposable {
     this.wrappedHighlightUntypedDiagnosticSeverity = this.sorbetWorkspaceContext.get(
       "highlightUntypedDiagnosticSeverity",
       this.highlightUntypedDiagnosticSeverity,
+    );
+    this.wrappedInlayTypeHints = this.sorbetWorkspaceContext.get(
+      "inlayTypeHints",
+      this.inlayTypeHints,
     );
 
     Disposable.from(...this.configFileWatchers).dispose();
@@ -483,6 +491,15 @@ export class SorbetExtensionConfig implements Disposable {
       "typedFalseCompletionNudges",
       enabled,
     );
+    this.refresh();
+  }
+
+  public get inlayTypeHints(): InlayTypeHintsStyle {
+    return this.wrappedInlayTypeHints;
+  }
+
+  public async setInlayTypeHints(style: InlayTypeHintsStyle): Promise<void> {
+    await this.sorbetWorkspaceContext.update("inlayTypeHints", style);
     this.refresh();
   }
 }

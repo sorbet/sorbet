@@ -32,6 +32,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->referencesProvider = true;
     serverCap->implementationProvider = true;
     serverCap->documentFormattingProvider = opts.lspDocumentFormatRubyfmtEnabled;
+    serverCap->inlayHintProvider = true;
     serverCap->sorbetShowSymbolProvider = true;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();

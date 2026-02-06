@@ -254,6 +254,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
             case LSPMethod::TextDocumentHover:
                 return make_unique<HoverTask>(*config, id,
                                               move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
+            case LSPMethod::TextDocumentInlayHint:
+                return make_unique<InlayHintTask>(*config, id,
+                                                  move(get<unique_ptr<InlayHintParams>>(rawParams)));
             case LSPMethod::TextDocumentTypeDefinition:
                 return make_unique<TypeDefinitionTask>(*config, id,
                                                        move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));

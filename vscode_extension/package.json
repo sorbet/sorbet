@@ -324,6 +324,28 @@
             "**/sorbet/config",
             "**/Gemfile.lock"
           ]
+        },
+        "sorbet.inlayTypeHints": {
+          "enum": [
+            "off",
+            "before_var",
+            "after_var",
+            "RBS"
+          ],
+          "enumItemLabels": [
+            "Off",
+            "Before variable",
+            "After variable",
+            "RBS style"
+          ],
+          "markdownEnumDescriptions": [
+            "Do not show inlay type hints",
+            "Show type hints before the variable: `String user =`",
+            "Show type hints after the variable: `user: String =`",
+            "Show type hints in RBS style: `user #: String`"
+          ],
+          "description": "Shows inlay type hints for variable assignments based on method return types. Does not show hints for simple primitive assignments.",
+          "default": "off"
         }
       }
     },

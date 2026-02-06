@@ -128,6 +128,7 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         enableTypedFalseCompletionNudges = initOptions->enableTypedFalseCompletionNudges.value_or(true);
         initialHighlightUntypedDiagnosticSeverity =
             initOptions->highlightUntypedDiagnosticSeverity.value_or(DiagnosticSeverity::Information);
+        inlayTypeHints = initOptions->inlayTypeHints.value_or("off");
     }
 }
 

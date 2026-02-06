@@ -12,6 +12,7 @@
 #include "main/lsp/requests/hover.h"
 #include "main/lsp/requests/implementation.h"
 #include "main/lsp/requests/initialize.h"
+#include "main/lsp/requests/inlay_hint.h"
 #include "main/lsp/requests/prepare_rename.h"
 #include "main/lsp/requests/references.h"
 #include "main/lsp/requests/rename.h"
