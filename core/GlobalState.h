@@ -688,36 +688,36 @@ public:
 
     // Symbol table offset information for the current stratum of files.
     const SymbolTableOffsets &newSymbols() const {
-        return this->offsets;
+        return this->symbolOffsets;
     }
 
     // ClassOrModules that have been introduced in the current stratum of files.
     SymbolRange<ClassOrModuleRef> newClassOrModules() const {
-        return this->offsets.classOrModuleRefs(*this);
+        return this->symbolOffsets.classOrModuleRefs(*this);
     }
 
     // Methods that have been introduced in the current stratum of files.
     SymbolRange<MethodRef> newMethods() const {
-        return this->offsets.methodRefs(*this);
+        return this->symbolOffsets.methodRefs(*this);
     }
 
     // Fields that have been introduced in the current stratum of files.
     SymbolRange<FieldRef> newFields() const {
-        return this->offsets.fieldRefs(*this);
+        return this->symbolOffsets.fieldRefs(*this);
     }
 
     // Type members that have been introduced in the current stratum of files.
     SymbolRange<TypeMemberRef> newTypeMemberRefs() const {
-        return this->offsets.typeMemberRefs(*this);
+        return this->symbolOffsets.typeMemberRefs(*this);
     }
 
     // Type parameters that have been introduced in the current stratum of files.
     SymbolRange<TypeParameterRef> newTypeParameterRefs() const {
-        return this->offsets.typeParameterRefs(*this);
+        return this->symbolOffsets.typeParameterRefs(*this);
     }
 
     void updateSymbolTableOffsets() {
-        this->offsets = SymbolTableOffsets(*this);
+        this->symbolOffsets = SymbolTableOffsets(*this);
     }
 
 private:
@@ -760,7 +760,7 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    SymbolTableOffsets offsets;
+    SymbolTableOffsets symbolOffsets;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.
