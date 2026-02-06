@@ -4421,7 +4421,7 @@ ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
     // Constant name might be unset, e.g. `::`.
     if (node->name == PM_CONSTANT_ID_UNSET) {
         auto location = translateLoc(node->base.location);
-        return MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::empty());
+        return MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::Constants::ConstantNameMissing());
     }
 
     // It's important that in all branches `enterNameUTF8` is called, which `translateConstantName` does,
