@@ -40,6 +40,9 @@ public:
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 
+    // Get the mangled name of the next package up in the hierarchy from `pkg`, if one exists.
+    MangledName getParentPackage(const core::GlobalState &gs, MangledName pkg) const;
+
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.

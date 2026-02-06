@@ -177,6 +177,15 @@ public:
 
     bool isPreludePackage_ = false;
 
+    // Whether or not this package has other packages underneath its namespace.
+    //
+    // We're caching this value for performance, to avoid consulting the symbol hierarchy when deciding if this package
+    // has subpackages. An alternative implementation that wouldn't require keeping this flag up-to-date would be to
+    // check if the corresponding symbol in the PackageSpecRegistry tree has any members. That approach would aovid
+    // maintaining this field as it becomes a property of symbol nesting, but would involve following more memory
+    // indirections.
+    bool hasSubPackages = false;
+
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
@@ -240,6 +249,9 @@ public:
         return visibleTo_;
     }
 
+    // The list of known direct sub-packages of this package.
+    std::vector<MangledName> directSubPackages(const core::GlobalState &gs) const;
+
     std::optional<ImportType> importsPackage(MangledName mangledName) const;
 
     // Is it a layering violation to import otherPkg from this package?
@@ -262,6 +274,28 @@ public:
 
     // Do this package's visible_to rules allow `otherPkg` to import this package, using an import of type `importType`?
     bool isVisibleTo(const core::GlobalState &gs, const MangledName &otherPkg, const ImportType importType) const;
+
+    enum class CanModifyResult : uint8_t {
+        // This symbol can be modified.
+        CanModify,
+
+        // The symbol is in the PackageSpecRegistry hierarchy, and cannot be modified.
+        PackageSpec,
+
+        // The symbol is the namespace of a package, and subpackges exist.
+        Subpackages,
+
+        // The symbol belongs to another package.
+        NotOwner,
+
+        // The symbol is unpackaged, and the context is not a prelude package.
+        UnpackagedSymbol,
+    };
+
+    // True when it's safe to modify this symbol from the context of a file owned by this package. Modification in this
+    // case is something that fundamentally changes the meaning of the symbol (adding type members or mixins, for
+    // example).
+    CanModifyResult canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const;
 
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,

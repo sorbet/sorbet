@@ -19,6 +19,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    <self>.prelude_package()
+
     <self>.extend(<emptyTree>::<C T>::<C Helpers>)
 
     <self>.include(<emptyTree>::<C T>::<C Helpers>)
