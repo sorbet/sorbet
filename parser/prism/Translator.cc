@@ -540,7 +540,6 @@ ast::Send *asTLet(ExpressionPtr &arg) {
     return send;
 }
 
-// widen the type from `parser::OpAsgn` to `parser::Node` to handle `make_node_with_expr` correctly.
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 // The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
@@ -2420,26 +2419,8 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             return desugarKeyValuePairs(location, keywordHashNode->elements);
         }
         case PM_KEYWORD_REST_PARAMETER_NODE: { // A keyword rest parameter, like `def foo(**kwargs)`
-            // This doesn't include `**nil`, which is a `PM_NO_KEYWORDS_PARAMETER_NODE`.
-            auto keywordRestParamNode = down_cast<pm_keyword_rest_parameter_node>(node);
-
-            core::NameRef sorbetName;
-            core::LocOffsets kwrestLoc;
-            if (auto prismName = keywordRestParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
-                // A named keyword rest parameter, like `def foo(**kwargs)`
-                sorbetName = translateConstantName(prismName);
-
-                // The location doesn't include the `**`, only the splatted expression like `kwargs` in `**kwargs`
-                constexpr uint32_t length = "**"sv.size();
-                kwrestLoc = core::LocOffsets{location.beginPos() + length, location.endPos()};
-            } else { // An anonymous keyword rest parameter, like `def foo(**)`
-                sorbetName = core::Names::starStar();
-
-                // This location *does* include the whole `**`.
-                kwrestLoc = location;
-            }
-
-            return MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName));
+            // Handled inline in `translateParametersNode()` because it needs `isDef` context.
+            unreachable("PM_KEYWORD_REST_PARAMETER_NODE should be handled in translateParametersNode()");
         }
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
             categoryCounterInc("Prism fallback", "PM_LAMBDA_NODE");
@@ -3289,10 +3270,30 @@ Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffse
         auto loc = translateLoc(prismKwRestNode->location);
 
         switch (PM_NODE_TYPE(prismKwRestNode)) {
-            case PM_KEYWORD_REST_PARAMETER_NODE: // `def foo(**kwargs)`
-                paramsStore.emplace_back(desugar(prismKwRestNode));
-                // TODO: Inline `case PM_KEYWORD_REST_PARAMETER_NODE` logic here.
+            case PM_KEYWORD_REST_PARAMETER_NODE: { // `def foo(**kwargs)`
+                // This doesn't include `**nil`, which is a `PM_NO_KEYWORDS_PARAMETER_NODE`.
+                auto keywordRestParamNode = down_cast<pm_keyword_rest_parameter_node>(prismKwRestNode);
+
+                core::NameRef sorbetName;
+                core::LocOffsets kwrestLoc;
+                if (auto prismName = keywordRestParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
+                    // A named keyword rest parameter, like `def foo(**kwargs)`
+                    sorbetName = translateConstantName(prismName);
+
+                    // The location doesn't include the `**`, only the splatted expression like `kwargs` in `**kwargs`
+                    constexpr uint32_t length = "**"sv.size();
+                    kwrestLoc = core::LocOffsets{loc.beginPos() + length, loc.endPos()};
+                } else { // An anonymous keyword rest parameter, like `def foo(**)`
+                    sorbetName = core::Names::starStar();
+
+                    // This location *does* include the whole `**`.
+                    kwrestLoc = loc;
+                }
+
+                paramsStore.emplace_back(MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName)));
+
                 break;
+            }
             case PM_FORWARDING_PARAMETER_NODE: { // `def foo(...)`
                 hasForwardingParameter = true;
 
