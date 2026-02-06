@@ -5,4 +5,7 @@ class B < PackageSpec
   layer 'util'
 
   export B::CONSTANT_FROM_B
+
+  visible_to A
+  visible_to G
 end

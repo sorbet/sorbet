@@ -85,7 +85,8 @@ struct VisibleTo {
 
 struct PackageReferenceInfo {
     bool importNeeded;
-    bool validToImport;
+    bool causesModularityError;
+    bool causesVisibilityError;
 };
 
 class PackageInfo {
@@ -245,6 +246,9 @@ public:
     std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                          const core::SymbolRef newExport) const;
 
+    std::optional<core::AutocorrectSuggestion> addVisibleTo(const core::GlobalState &gs,
+                                                            const MangledName &targetPackage) const;
+
     std::vector<VisibleTo> visibleTo() const {
         return visibleTo_;
     }
@@ -304,6 +308,8 @@ public:
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
     std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
                                                                        std::vector<core::SymbolRef> &toExport) const;
+    std::optional<core::AutocorrectSuggestion>
+    aggregateMissingVisibleTo(const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos) const;
 };
 CheckSize(PackageInfo, 240, 8);
 

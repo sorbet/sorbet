@@ -955,9 +955,7 @@ TEST_CASE("Convert test unit import to test helper import") {
         auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
-        gs.tracer().error("before");
         auto addImport = myPkg.addImport(gs, layeredPkgA, core::packages::ImportType::TestHelper);
-        gs.tracer().error("after");
         string expected = "class MyPackage < PackageSpec\n"
                           "  strict_dependencies 'layered'\n"
                           "  layer 'app'\n"
@@ -1002,9 +1000,7 @@ TEST_CASE("Convert test unit import to normal import") {
         auto &layeredPkgA = packageInfoFor(gs, parsedFiles[2].file);
         ENFORCE(layeredPkgA.exists());
 
-        gs.tracer().error("before");
         auto addImport = myPkg.addImport(gs, layeredPkgA, core::packages::ImportType::Normal);
-        gs.tracer().error("after");
         string expected = "class MyPackage < PackageSpec\n"
                           "  strict_dependencies 'layered'\n"
                           "  layer 'app'\n"
@@ -1168,6 +1164,114 @@ TEST_CASE("Adding a test unit import with existing imports, test imports, and te
     auto addImport = myPkg.addImport(gs, examplePkg, core::packages::ImportType::TestUnit);
     ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
     auto replaced = applySuggestion(gs, *addImport);
+    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
+}
+
+TEST_CASE("Add visible_to to package with no existing visible_to entries") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  visible_to ExamplePackage\n"
+                      "end\n";
+
+    auto parsedFiles =
+        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addVisibleTo = myPkg.addVisibleTo(gs, examplePkg.mangledName());
+    ENFORCE(addVisibleTo, "Expected to get an autocorrect from `addVisibleTo`");
+    auto replaced = applySuggestion(gs, *addVisibleTo);
+    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
+}
+
+TEST_CASE("Add visible_to that goes before existing entries") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  visible_to ExamplePackage\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  visible_to AnotherPackage\n"
+                      "  visible_to ExamplePackage\n"
+                      "end\n";
+
+    auto parsedFiles = enterPackages(gs, {{"another_package/__package.rb", "class AnotherPackage < PackageSpec\nend\n"},
+                                          {examplePackagePath, examplePackage},
+                                          {"my_package/__package.rb", pkg_source}});
+    auto &anotherPkg = packageInfoFor(gs, parsedFiles[0].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[2].file);
+    ENFORCE(anotherPkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addVisibleTo = myPkg.addVisibleTo(gs, anotherPkg.mangledName());
+    ENFORCE(addVisibleTo, "Expected to get an autocorrect from `addVisibleTo`");
+    auto replaced = applySuggestion(gs, *addVisibleTo);
+    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
+}
+
+TEST_CASE("Add visible_to that goes after existing entries") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  visible_to AnotherPackage\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  visible_to AnotherPackage\n"
+                      "  visible_to ExamplePackage\n"
+                      "end\n";
+
+    auto parsedFiles = enterPackages(gs, {{"another_package/__package.rb", "class AnotherPackage < PackageSpec\nend\n"},
+                                          {examplePackagePath, examplePackage},
+                                          {"my_package/__package.rb", pkg_source}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[1].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[2].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addVisibleTo = myPkg.addVisibleTo(gs, examplePkg.mangledName());
+    ENFORCE(addVisibleTo, "Expected to get an autocorrect from `addVisibleTo`");
+    auto replaced = applySuggestion(gs, *addVisibleTo);
+    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
+}
+
+TEST_CASE("Add visible_to that goes in the middle of existing entries") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  visible_to AnotherPackage\n"
+                        "  visible_to ZPackage\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  visible_to AnotherPackage\n"
+                      "  visible_to ExamplePackage\n"
+                      "  visible_to ZPackage\n"
+                      "end\n";
+
+    auto parsedFiles = enterPackages(gs, {{"another_package/__package.rb", "class AnotherPackage < PackageSpec\nend\n"},
+                                          {examplePackagePath, examplePackage},
+                                          {"z_package/__package.rb", "class ZPackage < PackageSpec\nend\n"},
+                                          {"my_package/__package.rb", pkg_source}});
+    auto &examplePkg = packageInfoFor(gs, parsedFiles[1].file);
+    auto &myPkg = packageInfoFor(gs, parsedFiles[3].file);
+    ENFORCE(examplePkg.exists());
+    ENFORCE(myPkg.exists());
+
+    auto addVisibleTo = myPkg.addVisibleTo(gs, examplePkg.mangledName());
+    ENFORCE(addVisibleTo, "Expected to get an autocorrect from `addVisibleTo`");
+    auto replaced = applySuggestion(gs, *addVisibleTo);
     CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
 }
 
