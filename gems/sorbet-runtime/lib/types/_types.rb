@@ -148,8 +148,11 @@ module T
   # doesn't match the type.
   def self.let(value, type, checked: true)
     return value unless checked
-
-    Private::Casts.cast(value, type, "T.let")
+    if Configuration.recursively_check_in_tests?
+      Private::Casts.cast_recursive(value, type, "T.let")
+    else
+      Private::Casts.cast(value, type, "T.let")
+    end
   end
 
   # Tells the type checker to treat `self` in the current block as `type`.
