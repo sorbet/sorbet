@@ -556,7 +556,8 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {importNeeded, false, false};
+        referencedPackages[otherPackage] = {
+            .importNeeded = importNeeded, .causesModularityError = false, .causesVisibilityError = false};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
