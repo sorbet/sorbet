@@ -6,7 +6,7 @@ de # error: does not exist
 clas # error: does not exist
 #   ^ apply-completion: [B] item: 0
 
-modulmodule ${1:ModuleName}
+module ${1:ModuleName}
   $0
 end # error: does not exist
 #    ^ apply-completion: [C] item: 0
