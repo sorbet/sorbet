@@ -1627,8 +1627,14 @@ void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core:
         return;
     }
 
-    REQUIRE_NE(completionItem->textEdit, nullopt);
-    auto &textEdit = completionItem->textEdit.value();
+    unique_ptr<TextEdit> textEdit;
+    if (completionItem->textEdit.has_value()) {
+        textEdit = move(completionItem->textEdit.value());
+    } else {
+        textEdit = make_unique<TextEdit>(make_unique<Range>(this->range->start->copy(), this->range->start->copy()),
+                                         completionItem->insertText.value());
+    }
+
     auto reindent = true;
     auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText, reindent);
 

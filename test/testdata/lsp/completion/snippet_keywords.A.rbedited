@@ -1,6 +1,6 @@
 # typed: true
 
-def ${1:method_name}($2)
+dedef ${1:method_name}($2)
   $0
 end # error: does not exist
 # ^ apply-completion: [A] item: 0

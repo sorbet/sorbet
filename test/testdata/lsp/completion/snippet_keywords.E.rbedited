@@ -12,7 +12,7 @@ modul # error: does not exist
 i # error: does not exist
 #^ apply-completion: [D] item: 0
 
-case ${1:expr}
+cascase ${1:expr}
 when ${2:expr}
   $0
 else

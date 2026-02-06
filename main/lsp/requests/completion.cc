@@ -407,11 +407,7 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
         replacementText = rubyKeyword.keyword;
     }
 
-    if (auto replacementRange = replacementRangeForQuery(gs, queryLoc, prefix)) {
-        item->textEdit = make_unique<TextEdit>(std::move(replacementRange), replacementText);
-    } else {
-        item->insertText = replacementText;
-    }
+    item->insertText = replacementText;
 
     if (rubyKeyword.detail.has_value()) {
         item->detail = fmt::format("(sorbet) {}", rubyKeyword.detail.value());

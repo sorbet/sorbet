@@ -9,7 +9,7 @@ clas # error: does not exist
 modul # error: does not exist
 #    ^ apply-completion: [C] item: 0
 
-if ${1:expr}
+iif ${1:expr}
   $0
 end # error: does not exist
 #^ apply-completion: [D] item: 0
