@@ -16,6 +16,7 @@ class InitializedTask final : public LSPTask {
     LSPPreprocessor *preprocessor;
     std::unique_ptr<core::GlobalState> gs;
     std::unique_ptr<KeyValueStore> kvstore;
+    std::vector<std::string> inputFileNames;
 
 public:
     InitializedTask(LSPConfiguration &config);
@@ -26,6 +27,7 @@ public:
 
     void setGlobalState(std::unique_ptr<core::GlobalState> gs);
     void setKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
+    void setInputFileNames(std::vector<std::string> &&inputFileNames);
 
     bool needsMultithreading(const LSPIndexer &indexer) const override;
 };
