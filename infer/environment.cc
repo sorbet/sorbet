@@ -401,13 +401,33 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
     return fnd->second.typeAndOrigins.type != nullptr;
 }
 
-const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+Environment::VariableInfo Environment::getRefInfo(cfg::LocalRef symbol) const {
     auto fnd = _vars.find(symbol);
     if (fnd == _vars.end()) {
-        return uninitialized;
+        return VariableInfo{
+            uninitialized,
+            TestedKnowledge::empty,
+            false,
+            false,
+        };
     }
-    ENFORCE(fnd->second.typeAndOrigins.type != nullptr);
-    return fnd->second.typeAndOrigins;
+
+    return VariableInfo{
+        fnd->second.typeAndOrigins,
+        fnd->second.knowledge,
+        fnd->second.knownTruthy,
+        true,
+    };
+}
+
+const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+    auto info = getRefInfo(symbol);
+
+    if (info.wasFound) {
+        ENFORCE(info.typeAndOrigins.type != nullptr);
+    }
+
+    return info.typeAndOrigins;
 }
 
 const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
@@ -417,11 +437,7 @@ const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUs
 }
 
 bool Environment::getKnownTruthy(cfg::LocalRef var) const {
-    auto fnd = _vars.find(var);
-    if (fnd == _vars.end()) {
-        return false;
-    }
-    return fnd->second.knownTruthy;
+    return getRefInfo(var).knownTruthy;
 }
 
 void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from,
@@ -866,7 +882,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
     this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        const auto &otherTO = other.getTypeAndOrigin(var);
+        const auto &otherInfo = other.getRefInfo(var);
+        const auto &otherTO = otherInfo.typeAndOrigins;
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
@@ -876,22 +893,22 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
                     thisTO.origins.emplace_back(origin);
                 }
             }
-            pair.second.knownTruthy = pair.second.knownTruthy && other.getKnownTruthy(var);
+            pair.second.knownTruthy = pair.second.knownTruthy && otherInfo.knownTruthy;
         } else {
             thisTO = otherTO;
-            pair.second.knownTruthy = other.getKnownTruthy(var);
+            pair.second.knownTruthy = otherInfo.knownTruthy;
         }
 
         if (bb->flags.isLoopHeader && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
-        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
+        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !otherInfo.knownTruthy;
         bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
             auto &thisKnowledge = pair.second.knowledge;
             auto otherTruthy =
-                other.getKnowledge(var, false).truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+                otherInfo.knowledge.truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
                     thisKnowledge.seenTruthyOption = true;
@@ -904,8 +921,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
 
         if (canBeFalsy) {
             auto &thisKnowledge = pair.second.knowledge;
-            auto otherFalsy =
-                other.getKnowledge(var, false).falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+            auto otherFalsy = otherInfo.knowledge.falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;
@@ -963,9 +979,10 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        pair.second.typeAndOrigins = other.getTypeAndOrigin(var);
-        pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
-        pair.second.knownTruthy = other.getKnownTruthy(var);
+        auto info = other.getRefInfo(var);
+        pair.second.typeAndOrigins = info.typeAndOrigins;
+        pair.second.knowledge.replace(var, typeTestsWithVar, info.knowledge);
+        pair.second.knownTruthy = info.knownTruthy;
     }
 
     this->pinnedTypes = other.pinnedTypes;
@@ -1929,13 +1946,13 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
-    auto fnd = _vars.find(symbol);
-    if (fnd == _vars.end()) {
+    auto info = getRefInfo(symbol);
+    if (!info.wasFound) {
         ENFORCE(!shouldFail, "Missing knowledge?");
-        return TestedKnowledge::empty;
+    } else {
+        info.knowledge.sanityCheck();
     }
-    fnd->second.knowledge.sanityCheck();
-    return fnd->second.knowledge;
+    return info.knowledge;
 }
 
 void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
