@@ -1594,6 +1594,92 @@ void ApplyCompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>>
     }
 }
 
+namespace {
+
+struct ColumnSpan {
+    // 0-indexed
+    long startColumn;
+    // 0-indexed
+    long endColumn;
+};
+
+optional<ColumnSpan> findColumnsEnclosingPosition(const regex &wordDefinition, string_view text, int pos, int stopPos) {
+    cmatch match;
+    for (auto searchStart = text.data(), searchEnd = text.data() + text.size();
+         regex_search(searchStart, searchEnd, match, wordDefinition);
+         searchStart += match.position() + match.length()) {
+        auto startColumn = (searchStart - text.data()) + match.position();
+        auto endColumn = startColumn + match.length();
+
+        if (startColumn <= pos && endColumn >= pos) {
+            return ColumnSpan{startColumn, endColumn};
+        } else if (stopPos > 0 && startColumn > stopPos) {
+            return nullopt;
+        }
+    }
+
+    return nullopt;
+}
+
+// This function ported from JavaScript in VS Code to C++. Original code licensed under. MIT License
+// Copyright (c) 2015 - present Microsoft Corporation
+// https://github.com/microsoft/vscode/blob/107a52d8fa5ced7e1/src/vs/editor/common/core/wordHelper.ts#L98
+optional<ColumnSpan> getWordAtText(int column, const regex &wordDefinition, string_view text, int textOffset) {
+    auto pos = column - 1 - textOffset;
+    auto prevRegexIndex = -1;
+    optional<ColumnSpan> match = nullopt;
+
+    const uint32_t windowSize = 15;
+
+    for (auto i = 1;; i++) {
+        // Progressively widen the lookbehind around the cursor on the current line (steps of 15 chars)
+        int regexIndex = pos - windowSize * i;
+        // The substr changes the index at which the regexp should start matching
+        auto thisMatch =
+            findColumnsEnclosingPosition(wordDefinition, text.substr(max(0, regexIndex)), pos, prevRegexIndex);
+
+        if (!thisMatch.has_value() && match.has_value()) {
+            // stop: we have something
+            break;
+        }
+
+        match = thisMatch;
+
+        // stop: searched at start
+        if (regexIndex <= 0) {
+            break;
+        }
+        prevRegexIndex = regexIndex;
+    }
+
+    if (match.has_value()) {
+        return match;
+    }
+
+    return nullopt;
+}
+
+// This function ported from JavaScript in VS Code to C++. Original code licensed under. MIT License
+// Copyright (c) 2015 - present Microsoft Corporation
+// https://github.com/microsoft/vscode/blob/663d4b3a7dac23610/src/vs/workbench/api/common/extHostDocumentData.ts#L247
+unique_ptr<Range> getWordRangeAtPosition(const Position &position, const core::File &file) {
+    // This regex is a crude approximation. I couldn't find the precise regex that VS Code registers
+    // for Ruby. I've only validated that it works well enough to pass our tests, but this should
+    // not be the basis to power a language client implementation.
+    static const regex regexp(R"([^ !"#$%&'()*+,./:;<=>?@\[\\\]\^_`{|}~-]+)");
+
+    auto wordAtText = getWordAtText(position.character + 1, regexp, file.getLine(position.line + 1), 0);
+
+    if (wordAtText.has_value()) {
+        return make_unique<Range>(make_unique<Position>(position.line, wordAtText->startColumn),
+                                  make_unique<Position>(position.line, wordAtText->endColumn));
+    }
+
+    return nullptr;
+}
+
+} // namespace
+
 void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
@@ -1627,8 +1713,13 @@ void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core:
         return;
     }
 
-    REQUIRE_NE(completionItem->textEdit, nullopt);
-    auto &textEdit = completionItem->textEdit.value();
+    unique_ptr<TextEdit> textEdit;
+    if (completionItem->textEdit.has_value()) {
+        textEdit = move(completionItem->textEdit.value());
+    } else if (auto wordRange = getWordRangeAtPosition(*this->range->start, *file)) {
+        textEdit = make_unique<TextEdit>(move(wordRange), completionItem->insertText.value());
+    }
+
     auto reindent = true;
     auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText, reindent);
 
