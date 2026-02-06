@@ -496,8 +496,7 @@ private:
                 }
 
                 auto suggestScope = job.out->resolutionScopes()->front();
-                if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() &&
-                    suggestScope.isClassOrModule()) {
+                if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.isClassOrModule()) {
                     suggestionCount++;
 
                     auto suggested =
@@ -1057,7 +1056,7 @@ private:
 
         if (auto constant = ast::cast_tree<ast::ConstantLit>(block->body)) {
             auto sym = constant->symbol();
-            if (sym.exists() && sym.isClassOrModule()) {
+            if (sym.isClassOrModule()) {
                 symbol = sym.asClassOrModuleRef();
             }
         } else if (isTClassOf(block->body)) {
@@ -1527,7 +1526,7 @@ public:
             }
 
             auto next = current.data(gs)->findMember(gs, partName);
-            if (!next.exists() || !next.isClassOrModule()) {
+            if (!next.isClassOrModule()) {
                 return core::Symbols::noClassOrModule();
             }
             current = next.asClassOrModuleRef();

@@ -66,7 +66,7 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
     auto owner = core::Symbols::PackageSpecRegistry();
     for (auto part = fullNameReversed.rbegin(); part != fullNameReversed.rend(); part++) {
         auto member = owner.data(ctx)->findMember(ctx, *part);
-        if (!member.exists() || !member.isClassOrModule()) {
+        if (!member.isClassOrModule()) {
             owner = core::Symbols::noClassOrModule();
             break;
         }

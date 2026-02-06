@@ -328,6 +328,9 @@ TypeParameterData TypeParameterRef::dataAllowingNone(GlobalState &gs) const {
 
 bool SymbolRef::isSynthetic() const {
     switch (this->kind()) {
+        case Kind::None:
+            ENFORCE(false, "isSynthetic called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case Kind::ClassOrModule:
             return classOrModuleIndex() < Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS;
         case Kind::Method:
@@ -379,6 +382,9 @@ TypeParameterRef::TypeParameterRef(const GlobalState &from, uint32_t id) : _id(i
 
 string SymbolRef::show(const GlobalState &gs, ShowOptions options) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "show called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case Kind::ClassOrModule:
             return asClassOrModuleRef().show(gs, options);
         case Kind::Method:
@@ -1090,6 +1096,9 @@ string toStringFullNameInternal(const GlobalState &gs, core::SymbolRef owner, co
 
 string SymbolRef::showFullName(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "showFullName called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case Kind::ClassOrModule:
             return asClassOrModuleRef().showFullName(gs);
         case Kind::Method:
@@ -1130,6 +1139,9 @@ string TypeMemberRef::showFullName(const GlobalState &gs) const {
 
 string SymbolRef::toStringFullName(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "toStringFullName called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case Kind::ClassOrModule:
             return asClassOrModuleRef().toStringFullName(gs);
         case Kind::Method:
@@ -1213,6 +1225,9 @@ bool TypeParameter::isPrintable(const GlobalState &gs) const {
 
 string_view SymbolRef::showKind(const GlobalState &gs) const {
     switch (this->kind()) {
+        case Kind::None:
+            ENFORCE(false, "showKind called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case Kind::ClassOrModule:
             return asClassOrModuleRef().showKind(gs);
         case Kind::FieldOrStaticField:
@@ -1482,6 +1497,9 @@ string TypeParameterRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
 string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "toStringWithOptions called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().toStringWithOptions(gs, tabs, showFull, showRaw);
         case SymbolRef::Kind::Method:
@@ -1497,6 +1515,9 @@ string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
 NameRef SymbolRef::name(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "name called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->name;
         case SymbolRef::Kind::Method:
@@ -1512,6 +1533,9 @@ NameRef SymbolRef::name(const GlobalState &gs) const {
 
 SymbolRef SymbolRef::owner(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "owner called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->owner;
         case SymbolRef::Kind::Method:
@@ -1527,6 +1551,9 @@ SymbolRef SymbolRef::owner(const GlobalState &gs) const {
 
 Loc SymbolRef::loc(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "loc called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->loc();
         case SymbolRef::Kind::Method:
@@ -1542,6 +1569,9 @@ Loc SymbolRef::loc(const GlobalState &gs) const {
 
 bool SymbolRef::isPrintable(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "isPrintable called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->isPrintable(gs);
         case SymbolRef::Kind::Method:
@@ -1557,6 +1587,9 @@ bool SymbolRef::isPrintable(const GlobalState &gs) const {
 
 absl::Span<const Loc> SymbolRef::locs(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "locs called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->locs();
         case SymbolRef::Kind::Method:
@@ -1572,6 +1605,9 @@ absl::Span<const Loc> SymbolRef::locs(const GlobalState &gs) const {
 
 void SymbolRef::removeLocsForFile(GlobalState &gs, core::FileRef file) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "removeLocsForFile called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->removeLocsForFile(file);
         case SymbolRef::Kind::Method:
@@ -1587,6 +1623,9 @@ void SymbolRef::removeLocsForFile(GlobalState &gs, core::FileRef file) const {
 
 const TypePtr &SymbolRef::resultType(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "resultType called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->resultType;
         case SymbolRef::Kind::Method:
@@ -1602,6 +1641,9 @@ const TypePtr &SymbolRef::resultType(const GlobalState &gs) const {
 
 void SymbolRef::setResultType(GlobalState &gs, const TypePtr &typePtr) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "typePtr called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             asClassOrModuleRef().data(gs)->resultType = typePtr;
             return;
@@ -1622,6 +1664,9 @@ void SymbolRef::setResultType(GlobalState &gs, const TypePtr &typePtr) const {
 
 SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
     switch (kind()) {
+        case Kind::None:
+            ENFORCE(false, "dealias called on a SymbolRef that doesn't exist");
+            [[fallthrough]];
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->dealias(gs);
         case SymbolRef::Kind::Method:
@@ -2279,6 +2324,7 @@ void TypeParameter::sanityCheck(const GlobalState &gs) const {
     if (current != Symbols::root()) {
         SymbolRef current2;
         switch (current.kind()) {
+            case SymbolRef::Kind::None:
             case SymbolRef::Kind::ClassOrModule:
             case SymbolRef::Kind::Method:
             case SymbolRef::Kind::FieldOrStaticField:
@@ -2301,6 +2347,9 @@ void TypeParameter::sanityCheck(const GlobalState &gs) const {
 ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
     core::ClassOrModuleRef result;
     switch (kind()) {
+        case SymbolRef::Kind::None:
+            ENFORCE(false, "enclosingClass called on a SymbolRef that doesn't exist");
+            break;
         case SymbolRef::Kind::ClassOrModule:
             result = asClassOrModuleRef();
             break;

@@ -402,11 +402,12 @@ private:
 public:
     // If you add Symbol Kinds, make sure KIND_BITS is kept in sync!
     enum class Kind : uint8_t {
-        ClassOrModule = 0,
-        Method = 1,
-        FieldOrStaticField = 2,
-        TypeParameter = 3,
-        TypeMember = 4,
+        None = 0,
+        ClassOrModule = 1,
+        Method = 2,
+        FieldOrStaticField = 3,
+        TypeParameter = 4,
+        TypeMember = 5,
     };
 
     // Kind takes up this many bits in _id.
@@ -505,28 +506,28 @@ public:
 
     // If Kind is ClassOrModule, returns a ClassOrModuleRef.
     ClassOrModuleRef asClassOrModuleRef() const {
-        ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
+        ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule || !this->exists());
         return ClassOrModuleRef::fromRaw(unsafeTableIndex());
     }
 
     // If Kind is Method, returns a MethodRef.
     MethodRef asMethodRef() const {
-        ENFORCE_NO_TIMER(kind() == Kind::Method);
+        ENFORCE_NO_TIMER(kind() == Kind::Method || !this->exists());
         return MethodRef::fromRaw(unsafeTableIndex());
     }
 
     FieldRef asFieldRef() const {
-        ENFORCE_NO_TIMER(kind() == Kind::FieldOrStaticField);
+        ENFORCE_NO_TIMER(kind() == Kind::FieldOrStaticField || !this->exists());
         return FieldRef::fromRaw(unsafeTableIndex());
     }
 
     TypeMemberRef asTypeMemberRef() const {
-        ENFORCE_NO_TIMER(kind() == Kind::TypeMember);
+        ENFORCE_NO_TIMER(kind() == Kind::TypeMember || !this->exists());
         return TypeMemberRef::fromRaw(unsafeTableIndex());
     }
 
     TypeParameterRef asTypeParameterRef() const {
-        ENFORCE_NO_TIMER(kind() == Kind::TypeParameter);
+        ENFORCE_NO_TIMER(kind() == Kind::TypeParameter || !this->exists());
         return TypeParameterRef::fromRaw(unsafeTableIndex());
     }
 

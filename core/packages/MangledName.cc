@@ -9,7 +9,7 @@ MangledName MangledName::lookupMangledName(const GlobalState &gs, const vector<s
     auto owner = core::Symbols::PackageSpecRegistry();
     for (auto part : parts) {
         auto member = owner.data(gs)->findMember(gs, gs.lookupNameConstant(part));
-        if (!member.exists() || !member.isClassOrModule()) {
+        if (!member.isClassOrModule()) {
             owner = core::Symbols::noClassOrModule();
             break;
         }
