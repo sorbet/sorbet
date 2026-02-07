@@ -8,7 +8,10 @@ end
 
 sig { params(my_enum: MyEnum).void }
 def example(my_enum)
-  my_enum.cas
+  case my_enum
+  else
+    T.absurd(my_enum)
+  end
   #       ^^^ error: does not exist
   #          ^ apply-completion: [A] item: 0
 end
