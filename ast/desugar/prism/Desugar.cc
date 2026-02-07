@@ -4881,8 +4881,24 @@ ast::Rescue::RESCUE_CASE_store Desugarer::desugarRescueCases(pm_rescue_node *fir
         // Build exception store from exceptions being rescued
         ast::RescueCase::EXCEPTION_store exceptions;
         auto exceptionsNodes = absl::MakeSpan(rescueNode->exceptions.nodes, rescueNode->exceptions.size);
-        for (auto *ex : exceptionsNodes) {
-            exceptions.emplace_back(desugar(ex));
+
+        bool hasSplat = absl::c_any_of(exceptionsNodes, [](auto *ex) { return isa_node<pm_splat_node>(ex); });
+        if (hasSplat) {
+            // When there's a splat, desugar the entire list as an array with concatenations.
+            // This produces: [A].concat(<splat>(B)).concat([C]) for `rescue A, *B, C`
+            ast::Array::ENTRY_store exceptionElements;
+            exceptionElements.reserve(exceptionsNodes.size());
+            for (auto *ex : exceptionsNodes) {
+                exceptionElements.emplace_back(desugar(ex));
+            }
+            auto exceptionsLoc =
+                translateLoc(exceptionsNodes.front()->location.start, exceptionsNodes.back()->location.end);
+            auto concatenatedExceptions = desugarArray(exceptionsLoc, exceptionsNodes, move(exceptionElements));
+            exceptions.emplace_back(move(concatenatedExceptions));
+        } else {
+            for (auto *ex : exceptionsNodes) {
+                exceptions.emplace_back(desugar(ex));
+            }
         }
 
         // Desugar the rescue body
