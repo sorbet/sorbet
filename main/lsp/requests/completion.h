@@ -51,6 +51,18 @@ class CompletionTask final : public LSPRequestTask {
     static SearchParams searchParamsForEmptyAssign(const core::GlobalState &gs, core::Loc queryLoc,
                                                    core::MethodRef enclosingMethod,
                                                    core::lsp::ConstantResponse::Scopes scopes);
+
+public:
+    struct SimilarMethod final {
+        int depth;
+        core::ClassOrModuleRef receiver;
+        core::MethodRef method;
+
+        // Populated later
+        core::TypePtr receiverType = nullptr;
+    };
+
+private:
     std::vector<std::unique_ptr<CompletionItem>>
     getCompletionItems(LSPTypecheckerDelegate &typechecker, SearchParams &params, const ast::ParsedFile &resolved);
 

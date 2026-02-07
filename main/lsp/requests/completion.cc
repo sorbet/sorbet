@@ -121,15 +121,6 @@ vector<core::ClassOrModuleRef> ancestors(const core::GlobalState &gs, core::Clas
     return ancestorsImpl(gs, receiver, vector<core::ClassOrModuleRef>{});
 }
 
-struct SimilarMethod final {
-    int depth;
-    core::ClassOrModuleRef receiver;
-    core::MethodRef method;
-
-    // Populated later
-    core::TypePtr receiverType = nullptr;
-};
-
 bool hasAngleBrackets(string_view haystack) {
     return absl::c_any_of(haystack, [](char c) { return c == '<' || c == '>'; });
 }
@@ -146,6 +137,7 @@ bool hasPrefixedName(const core::GlobalState &gs, core::NameRef name, string_vie
     return absl::StartsWith(view, pattern);
 }
 
+using SimilarMethod = CompletionTask::SimilarMethod;
 using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
 // First of pair is "found at this depth in the ancestor hierarchy"
