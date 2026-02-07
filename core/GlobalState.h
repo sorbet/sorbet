@@ -619,7 +619,7 @@ private:
     };
     std::vector<DeepCloneHistoryEntry> deepCloneHistory;
 
-    static constexpr int STRINGS_PAGE_SIZE = 4096;
+    static constexpr int STRINGS_PAGE_SIZE = 16384;
     StableStringStorage<STRINGS_PAGE_SIZE> strings;
     std::string_view enterString(std::string_view nm);
     std::vector<UTF8Name> utf8Names;
