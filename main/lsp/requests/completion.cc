@@ -1009,7 +1009,7 @@ core::ClassOrModuleRef unwrapSubclassToSymbol(const core::TypePtr &subclass) {
         auto right = core::cast_type_nonnull<core::ClassType>(subclass);
         return right.symbol;
     } else {
-        ENFORCE(false, "Unexpected type in sealedSubclasses!")
+        Exception::raise("Unexpected type in sealedSubclasses!");
     }
 }
 
