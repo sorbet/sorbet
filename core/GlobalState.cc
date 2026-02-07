@@ -995,8 +995,7 @@ void GlobalState::computeLinearization() {
     Timer timer(this->tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
-    for (int i = 1; i < this->classAndModulesUsed(); ++i) {
-        const auto &ref = core::ClassOrModuleRef(*this, i);
+    for (auto ref : this->newClassOrModules()) {
         computeClassLinearization(*this, ref);
     }
 }
@@ -2070,6 +2069,7 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");
         result->creation = timeit2.getFlowEdge();
     }
+    result->symbolOffsets = this->symbolOffsets;
     return result;
 }
 
@@ -2512,6 +2512,30 @@ MethodRef GlobalState::lookupStaticInitForFile(FileRef file) const {
 
 spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
+}
+
+SymbolTableOffsets::SymbolTableOffsets(const core::GlobalState &gs)
+    : classAndModulesOffset{gs.classAndModulesUsed()}, methodsOffset{gs.methodsUsed()}, fieldsOffset{gs.fieldsUsed()},
+      typeMembersOffset{gs.typeMembersUsed()}, typeParametersOffset{gs.typeParametersUsed()} {}
+
+SymbolRange<ClassOrModuleRef> SymbolTableOffsets::classOrModuleRefs(const GlobalState &gs) const {
+    return SymbolRange<ClassOrModuleRef>(this->classAndModulesOffset, gs.classAndModulesUsed());
+}
+
+SymbolRange<MethodRef> SymbolTableOffsets::methodRefs(const GlobalState &gs) const {
+    return SymbolRange<MethodRef>(this->methodsOffset, gs.methodsUsed());
+}
+
+SymbolRange<FieldRef> SymbolTableOffsets::fieldRefs(const GlobalState &gs) const {
+    return SymbolRange<FieldRef>(this->fieldsOffset, gs.fieldsUsed());
+}
+
+SymbolRange<TypeMemberRef> SymbolTableOffsets::typeMemberRefs(const GlobalState &gs) const {
+    return SymbolRange<TypeMemberRef>(this->typeMembersOffset, gs.typeMembersUsed());
+}
+
+SymbolRange<TypeParameterRef> SymbolTableOffsets::typeParameterRefs(const GlobalState &gs) const {
+    return SymbolRange<TypeParameterRef>(this->typeParametersOffset, gs.typeParametersUsed());
 }
 
 } // namespace sorbet::core
