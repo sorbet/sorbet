@@ -44,7 +44,7 @@ Sorbet will only ever return completion items with the kind `method`, `variable`
 
 **Notably**, the "abc" icon (`word`) means the results came either from VS Code’s `editor.wordBasedSuggestions` setting or some other generic autocomplete extension. (Or, if not using VS Code, then from some other plugin.) Sorbet **never** produces `word` completion items.
 
-In specific circumstances (see [Completion for method signatures](#completion-for-method-signatures) and [Completion for YARD snippets](#completion-for-yard-snippets)), Sorbet will also produce `snippet` items. In all other cases, `snippet` items come from some other snippet provider, not Sorbet.
+In specific circumstances (see [Completion for method signatures](#completion-for-method-signatures), [Completing the arms of a T::Enum case expression](#completing-the-arms-of-a-t-enum-case-expression), and [Completion for YARD snippets](#completion-for-yard-snippets)), Sorbet will also produce `snippet` items. In all other cases, `snippet` items come from some other snippet provider, not Sorbet.
 
 If the completion results still look wrong, please [report a bug](https://github.com/sorbet/sorbet/issues/new/choose).
 
@@ -85,6 +85,16 @@ When defining a method that has a name similar to an inherited method which is `
 <video autoplay loop muted playsinline style="max-width: calc(min(820px, 100%));">
   <source src="/img/lsp/overridable-completion.mp4" type="video/mp4">
 </video>
+
+## Completing the arms of a T::Enum `case` expression
+
+Sorbet supports autocompleting a `case` expression covering all the values of a [T::Enum](tenum.md) via a [postfix completion item](https://blog.jetbrains.com/idea/2014/03/postfix-completion/), an idea popularized in IntelliJ:
+
+<video autoplay loop muted playsinline style="max-width: calc(min(820px, 100%));">
+  <source src="/img/lsp/enum-case.mp4" type="video/mp4">
+</video>
+
+Start typing `.case` after an enum-typed expression (like `my_enum` in the video above). There is no `case` method on `T::Enum`, but typing `my_enum.case` prompts Sorbet to produce a completion item anyways. Accepting the completion item replaces `my_enum.case` with an exhaustive `case` expression.
 
 ## Pre-declared snippets
 

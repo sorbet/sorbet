@@ -69,6 +69,10 @@ private:
     std::unique_ptr<CompletionItem> getCompletionItemForUntyped(const core::GlobalState &gs, core::Loc queryLoc,
                                                                 size_t sortIdx, std::string_view message);
 
+    std::unique_ptr<CompletionItem> getCompletionItemForCase(const core::GlobalState &gs, const SearchParams &params,
+                                                             const core::ClassOrModuleRef receiver, core::Loc queryLoc,
+                                                             std::string_view prefix, size_t sortIdx) const;
+
     std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
                                                                const SearchParams &params,
                                                                const SimilarMethod &similarMethod, core::Loc queryLoc,

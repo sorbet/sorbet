@@ -1717,10 +1717,22 @@ void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core:
         textEdit = move(completionItem->textEdit.value());
     } else if (auto wordRange = getWordRangeAtPosition(*this->range->start, *file)) {
         textEdit = make_unique<TextEdit>(move(wordRange), completionItem->insertText.value());
+    } else {
+        // No word at cursor position (likely: cursor something like `x.|`).
+        // Let's insert instead of replace.
+        textEdit = make_unique<TextEdit>(make_unique<Range>(this->range->start->copy(), this->range->start->copy()),
+                                         completionItem->insertText.value());
     }
 
     auto reindent = true;
     auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText, reindent);
+
+    if (completionItem->additionalTextEdits.has_value()) {
+        for (const auto &textEdit : completionItem->additionalTextEdits.value()) {
+            actualEditedFileContents =
+                applyEdit(actualEditedFileContents, *file, *textEdit->range, textEdit->newText, /* false */ false);
+        }
+    }
 
     {
         CHECK_EQ_DIFF(expectedEditedFileContents, actualEditedFileContents,

@@ -1,0 +1,36 @@
+# typed: true
+class Module; include T::Sig; end
+
+class MyEnum < T::Enum
+  enums {
+    X = new
+    Y = new
+    Z = new
+  }
+
+  def example
+    case self
+    when X${0}
+    when Y
+    when Z
+    else
+      T.absurd(self)
+    end
+#   ^^^ error: does not exist
+#      ^ apply-completion: [B] item: 1
+  end
+end
+
+sig { params(my_enum: MyEnum).void }
+def example(my_enum)
+  my_enum.cas
+  #       ^^^ error: does not exist
+  #          ^ apply-completion: [A] item: 0
+
+  x = my_enum.case
+  #           ^^^^ error: does not exist
+  #               ^ apply-completion: [C] item: 0
+
+  my_enum.
+    #     ^ apply-completion: [D] item: 122
+end # error: unexpected token "end"
