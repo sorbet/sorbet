@@ -1598,24 +1598,26 @@ namespace {
 
 struct ColumnSpan {
     // 0-indexed
-    long startColumn;
+    long beginPos;
     // 0-indexed
-    long endColumn;
+    long endPos;
 };
 
-optional<ColumnSpan> findColumnsEnclosingPosition(const regex &wordDefinition, string_view text, int pos, int stopPos) {
+optional<ColumnSpan> findColumnsEnclosingPosition(const regex &wordDefinition, string_view text, int pos, int startPos,
+                                                  int stopPos) {
     cmatch match;
-    for (auto searchStart = text.data(), searchEnd = text.data() + text.size();
-         regex_search(searchStart, searchEnd, match, wordDefinition);
-         searchStart += match.position() + match.length()) {
-        auto startColumn = (searchStart - text.data()) + match.position();
-        auto endColumn = startColumn + match.length();
+    auto beginPos = startPos, endPos = startPos;
+    while (regex_search(text.data() + beginPos, text.data() + text.size(), match, wordDefinition)) {
+        beginPos += match.position();
+        endPos = beginPos + match.length();
 
-        if (startColumn <= pos && endColumn >= pos) {
-            return ColumnSpan{startColumn, endColumn};
-        } else if (stopPos > 0 && startColumn > stopPos) {
+        if (beginPos <= pos && pos <= endPos) {
+            return ColumnSpan{beginPos, endPos};
+        } else if (stopPos > 0 && stopPos < beginPos) {
             return nullopt;
         }
+
+        beginPos = endPos;
     }
 
     return nullopt;
@@ -1624,8 +1626,7 @@ optional<ColumnSpan> findColumnsEnclosingPosition(const regex &wordDefinition, s
 // This function ported from JavaScript in VS Code to C++. Original code licensed under. MIT License
 // Copyright (c) 2015 - present Microsoft Corporation
 // https://github.com/microsoft/vscode/blob/107a52d8fa5ced7e1/src/vs/editor/common/core/wordHelper.ts#L98
-optional<ColumnSpan> getWordAtText(int column, const regex &wordDefinition, string_view text, int textOffset) {
-    auto pos = column - 1 - textOffset;
+optional<ColumnSpan> getWordAtText(int pos, const regex &wordDefinition, string_view text) {
     auto prevRegexIndex = -1;
     optional<ColumnSpan> match = nullopt;
 
@@ -1634,9 +1635,7 @@ optional<ColumnSpan> getWordAtText(int column, const regex &wordDefinition, stri
     for (auto i = 1;; i++) {
         // Progressively widen the lookbehind around the cursor on the current line (steps of 15 chars)
         int regexIndex = pos - windowSize * i;
-        // The substr changes the index at which the regexp should start matching
-        auto thisMatch =
-            findColumnsEnclosingPosition(wordDefinition, text.substr(max(0, regexIndex)), pos, prevRegexIndex);
+        auto thisMatch = findColumnsEnclosingPosition(wordDefinition, text, pos, max(0, regexIndex), prevRegexIndex);
 
         if (!thisMatch.has_value() && match.has_value()) {
             // stop: we have something
@@ -1668,11 +1667,11 @@ unique_ptr<Range> getWordRangeAtPosition(const Position &position, const core::F
     // not be the basis to power a language client implementation.
     static const regex regexp(R"([^ !"#$%&'()*+,./:;<=>?@\[\\\]\^_`{|}~-]+)");
 
-    auto wordAtText = getWordAtText(position.character + 1, regexp, file.getLine(position.line + 1), 0);
+    auto wordAtText = getWordAtText(position.character, regexp, file.getLine(position.line + 1));
 
     if (wordAtText.has_value()) {
-        return make_unique<Range>(make_unique<Position>(position.line, wordAtText->startColumn),
-                                  make_unique<Position>(position.line, wordAtText->endColumn));
+        return make_unique<Range>(make_unique<Position>(position.line, wordAtText->beginPos),
+                                  make_unique<Position>(position.line, wordAtText->endPos));
     }
 
     return nullptr;
