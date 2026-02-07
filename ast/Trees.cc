@@ -313,6 +313,13 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
 UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst)
     : loc(loc), cnst(cnst), scope(std::move(scope)) {
     categoryCounterInc("trees", "constantlit");
+    if (this->scope == nullptr) {
+        histogramInc("trees.unresolvedconstant.scope", 0);
+    } else if (isa_tree<EmptyTree>(this->scope)) {
+        histogramInc("trees.unresolvedconstant.scope", 1);
+    } else {
+        histogramInc("trees.unresolvedconstant.scope", 2);
+    }
     _sanityCheck();
 }
 
