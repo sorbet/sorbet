@@ -97,6 +97,12 @@ private:
         : literalBlockExpr(move(literalBlockExpr)), blockPassExpr(move(blockPassExpr)), blockPassLoc(blockPassLoc) {}
 
 public:
+    // Move-only type
+    DesugaredBlockArgument(DesugaredBlockArgument &&) = default;                // Move constructor
+    DesugaredBlockArgument(const DesugaredBlockArgument &) = delete;            // Copy constructor
+    DesugaredBlockArgument &operator=(DesugaredBlockArgument &&) = default;     // Move assignment
+    DesugaredBlockArgument &operator=(const DesugaredBlockArgument &) = delete; // Copy assignment
+
     static DesugaredBlockArgument none() {
         return DesugaredBlockArgument(nullptr, nullptr, core::LocOffsets::none());
     }
@@ -2449,8 +2455,21 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             return MK::RestParam(kwrestLoc, MK::KeywordArg(kwrestLoc, sorbetName));
         }
         case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
-            categoryCounterInc("Prism fallback", "PM_LAMBDA_NODE");
-            throw PrismFallback{};
+            auto lambdaNode = down_cast<pm_lambda_node>(node);
+
+            auto operatorLoc = translateLoc(lambdaNode->operator_loc); // the `->` arrow
+
+            // `-> { "block" }` or `-> do "block" end`
+            //     ^^^^^^^^^^^         ^^^^^^^^^^^^^^
+            auto blockLoc = pm_location_t{.start = lambdaNode->opening_loc.start, .end = lambdaNode->closing_loc.end};
+
+            auto receiver = MK::Constant(operatorLoc, core::Symbols::Kernel());
+            pm_arguments_node *args = nullptr;
+            auto block = DesugaredBlockArgument::literalBlock(
+                desugarLiteralBlock(lambdaNode->body, lambdaNode->parameters, blockLoc, lambdaNode->operator_loc));
+            auto isPrivateOk = false; // `Kernel.lambda` is not a private call
+            return desugarMethodCall(move(receiver), core::Names::lambda(), operatorLoc, args, lambdaNode->closing_loc,
+                                     move(block), location, isPrivateOk);
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a local variable, e.g. `local &&= false`
             return desugarVariableOpAssign<pm_local_variable_and_write_node, OpAssignKind::And,
@@ -3422,6 +3441,13 @@ Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node
 
             if (varName.length() == 2 && varName[0] == '_' && '1' <= varName[1] && varName[1] <= '9') {
                 auto number = varName[1] - '0';
+
+                // We've already found the first usage of this numbered parameter.
+                // Skip it, and keep searching for the rest.
+                if (activeRegion[number - 1].exists()) {
+                    return true;
+                }
+
                 activeRegion[number - 1] = this->translateLoc(node->location);
             }
 
