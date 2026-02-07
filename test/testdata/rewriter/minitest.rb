@@ -89,6 +89,21 @@ class MyTest
       it "should not work" do
       end
     end
+
+    # Minitest `specify` should only accept 0 or 1 argument
+    # Multiple arguments (like RSpec metadata) should not be transformed
+    specify "test with metadata", :slow do # error: Method `specify` does not exist on `T.class_of(MyTest)`
+    end
+
+    # Minitest `before` should only accept 0 arguments
+    # Scope arguments like :each/:all are RSpec-only
+    before(:each) do # error: Method `before` does not exist on `T.class_of(MyTest)`
+    end
+
+    # Minitest `after` should only accept 0 arguments
+    # Scope arguments like :each/:all are RSpec-only
+    after(:all) do # error: Method `after` does not exist on `T.class_of(MyTest)`
+    end
 end
 
 describe 'extends T::Sig' do

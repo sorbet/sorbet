@@ -152,6 +152,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
     end
+
+    <self>.specify("test with metadata", :slow) do ||
+      <emptyTree>
+    end
+
+    <self>.before(:each) do ||
+      <emptyTree>
+    end
+
+    <self>.after(:all) do ||
+      <emptyTree>
+    end
   end
 
   class <emptyTree>::<C <describe 'extends T::Sig'>><<C <todo sym>>> < (<self>)

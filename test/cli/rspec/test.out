@@ -1,3 +1,814 @@
+test/cli/rspec/rspec6.rb:37: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    37 |  let(:name) { "Alice" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:39: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    39 |  it "has a name" do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:46: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    46 |  let(:value) { 42 }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:48: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    48 |  it "has a value", :slow do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:49: Method `value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    49 |    value
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:55: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    55 |  let(:count) { 10 }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:57: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    57 |  it "has a count", :slow, :needs_macos do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:58: Method `count` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    58 |    count
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:64: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    64 |  let(:result) { true }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:66: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    66 |  it "has a result", :slow, focus: true do
+          ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:67: Method `result` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    67 |    result
+            ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `test`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:67: Replace with `test`
+    67 |    result
+            ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def test(cmd, file1, file2=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:76: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    76 |  let(:data) { "test" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:78: Method `specify` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    78 |  specify "something works", :unit do
+          ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:79: Method `data` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    79 |    data
+            ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:82: Method `specify` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    82 |  specify "another thing", :slow, :integration do
+          ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:83: Method `data` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    83 |    data
+            ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:92: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    92 |  let(:item) { "item" }
+          ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:94: Method `example` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    94 |  example "demonstrates behavior", :smoke do
+          ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:95: Method `item` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    95 |    item
+            ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `gem`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:95: Replace with `gem`
+    95 |    item
+            ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#LCENSORED: Defined here
+      NN |  def gem(dep, *reqs); end
+            ^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:98: Method `example` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    98 |  example "shows feature", :regression, timeout: 10 do
+          ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:99: Method `item` does not exist on `T.class_of(<root>)` https://srb.help/7003
+    99 |    item
+            ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `gem`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:99: Replace with `gem`
+    99 |    item
+            ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#LCENSORED: Defined here
+      NN |  def gem(dep, *reqs); end
+            ^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:108: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     108 |  let(:setup_value) { 1 }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:111: Method `before` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     111 |  before(:each) do
+            ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `refine`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:111: Replace with `refine`
+     111 |  before(:each) do
+            ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def refine(arg0, &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:112: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     112 |    setup_value
+              ^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:116: Method `before` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     116 |  before(:all) do
+            ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `refine`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:116: Replace with `refine`
+     116 |  before(:all) do
+            ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def refine(arg0, &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:117: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     117 |    setup_value
+              ^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:121: Method `after` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     121 |  after(:each) do
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `attr`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:121: Replace with `attr`
+     121 |  after(:each) do
+            ^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr(*arg0); end
+            ^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:122: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     122 |    setup_value
+              ^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:126: Method `after` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     126 |  after(:all) do
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `attr`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:126: Replace with `attr`
+     126 |  after(:all) do
+            ^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr(*arg0); end
+            ^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:127: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     127 |    setup_value
+              ^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:130: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     130 |  it "works" do
+            ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:131: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     131 |    setup_value
+              ^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:141: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     141 |  let(:filtered_value) { "filtered" }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:145: Method `before` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     145 |  before(:each, :slow) do
+            ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `refine`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:145: Replace with `refine`
+     145 |  before(:each, :slow) do
+            ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def refine(arg0, &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:146: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     146 |    filtered_value
+              ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:150: Method `before` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     150 |  before(:example, authorized: true) do
+            ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `refine`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:150: Replace with `refine`
+     150 |  before(:example, authorized: true) do
+            ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def refine(arg0, &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:151: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     151 |    filtered_value
+              ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:155: Method `before` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     155 |  before(:context, :integration, :needs_db) do
+            ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `refine`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:155: Replace with `refine`
+     155 |  before(:context, :integration, :needs_db) do
+            ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def refine(arg0, &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:156: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     156 |    filtered_value
+              ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:160: Method `after` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     160 |  after(:each, :slow) do
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `attr`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:160: Replace with `attr`
+     160 |  after(:each, :slow) do
+            ^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr(*arg0); end
+            ^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:161: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     161 |    filtered_value
+              ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:165: Method `after` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     165 |  after(:example, cleanup: true) do
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `attr`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:165: Replace with `attr`
+     165 |  after(:example, cleanup: true) do
+            ^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr(*arg0); end
+            ^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:166: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     166 |    filtered_value
+              ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:170: Method `after` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     170 |  after(:all, :integration, requires_cleanup: true) do
+            ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `attr`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:170: Replace with `attr`
+     170 |  after(:all, :integration, requires_cleanup: true) do
+            ^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def attr(*arg0); end
+            ^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:171: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     171 |    filtered_value
+              ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:174: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     174 |  it "works with filtered hooks", :slow do
+            ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:175: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     175 |    filtered_value
+              ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:184: Method `shared_examples` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     184 |  shared_examples "reusable examples", :no_api do
+            ^^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:185: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     185 |    it "does something" do
+              ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:190: Method `include_examples` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     190 |  include_examples "reusable examples"
+            ^^^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:190: Replace with `included_modules`
+     190 |  include_examples "reusable examples"
+            ^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:198: Method `shared_context` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     198 |  shared_context "common setup", :needs_network do
+            ^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:199: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     199 |    let(:connection) { "connected" }
+              ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:202: Method `include_context` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     202 |  include_context "common setup"
+            ^^^^^^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `included_modules`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:202: Replace with `included_modules`
+     202 |  include_context "common setup"
+            ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def included_modules(); end
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:204: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     204 |  it "uses the connection" do
+            ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:205: Method `connection` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     205 |    connection
+              ^^^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:214: Method `describe` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     214 |  describe "nested tests" do
+            ^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:215: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     215 |    let(:data) { "test" }
+              ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:217: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     217 |    it "has data", :integration do
+              ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:218: Method `data` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     218 |      data
+                ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:221: Method `context` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     221 |    context "when something", :fast do
+              ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:222: Method `it` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     222 |      it "still works", :unit, timeout: 5 do
+                ^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:223: Method `data` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     223 |        data
+                  ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:234: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     234 |  let(:skipped) { "skipped" }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:236: Method `xit` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     236 |  xit "is pending", :slow do
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `exit`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:236: Replace with `exit`
+     236 |  xit "is pending", :slow do
+            ^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def exit(status=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:237: Method `skipped` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     237 |    skipped
+              ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:246: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     246 |  let(:focused) { "focused" }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:248: Method `fit` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     248 |  fit "is focused", :critical do
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:249: Method `focused` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     249 |    focused
+              ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:258: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     258 |  let(:value) { 123 }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:260: Method `xspecify` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     260 |  xspecify "pending spec", :slow do
+            ^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:261: Method `value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     261 |    value
+              ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:264: Method `fspecify` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     264 |  fspecify "focused spec", :fast do
+            ^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:265: Method `value` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     265 |    value
+              ^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:274: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     274 |  let(:sample) { "sample" }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:276: Method `xexample` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     276 |  xexample "pending example", :slow do
+            ^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:277: Method `sample` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     277 |    sample
+              ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `name`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:277: Replace with `name`
+     277 |    sample
+              ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
+      NN |  def name(); end
+            ^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:280: Method `fexample` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     280 |  fexample "focused example", :fast do
+            ^^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:281: Method `sample` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     281 |    sample
+              ^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `name`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:281: Replace with `name`
+     281 |    sample
+              ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
+      NN |  def name(); end
+            ^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:290: Method `let` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     290 |  let(:item) { "item" }
+            ^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:292: Method `pending` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     292 |  pending "not yet implemented", :future do
+            ^^^^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `binding`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:292: Replace with `binding`
+     292 |  pending "not yet implemented", :future do
+            ^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def binding(); end
+            ^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:293: Method `item` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     293 |    item
+              ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `gem`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:293: Replace with `gem`
+     293 |    item
+              ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#LCENSORED: Defined here
+      NN |  def gem(dep, *reqs); end
+            ^^^^^^^^^^^^^^^^^^^
+
+test/cli/rspec/rspec6.rb:296: Method `skip` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     296 |  skip "temporarily disabled", :broken do
+            ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+
+test/cli/rspec/rspec6.rb:297: Method `item` does not exist on `T.class_of(<root>)` https://srb.help/7003
+     297 |    item
+              ^^^^
+  Got `T.class_of(<root>)` originating from:
+    test/cli/rspec/rspec6.rb:19:
+    19 |module RSpec
+        ^
+  Did you mean `gem`? Use `-a` to autocorrect
+    test/cli/rspec/rspec6.rb:297: Replace with `gem`
+     297 |    item
+              ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#LCENSORED: Defined here
+      NN |  def gem(dep, *reqs); end
+            ^^^^^^^^^^^^^^^^^^^
+
 test/cli/rspec/rspec2.rb:68: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each` https://srb.help/3507
     68 |        include_examples("some examples")
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -951,7 +1762,7 @@ test/cli/rspec/rspec1.rb:29: Method `verified` does not exist on `T.class_of(<ro
     test/cli/rspec/rspec1.rb:7:
      7 |module RSpec
         ^
-Errors: 102
+Errors: 185
 --------------------------------------------------------------------------
 test/cli/rspec/rspec2.rb:58: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`) https://srb.help/5064
     58 |    describe "will include shared examples" do # error: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`)
