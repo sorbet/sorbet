@@ -84,6 +84,8 @@ public:
     bool isVisibilityCall(pm_node_t *node) const;
     bool isAttrAccessorCall(pm_node_t *node) const;
 
+    void destroyNode(pm_node_t *node);
+
 private:
     std::vector<ParseError> collectErrors();
     std::vector<core::LocOffsets> collectCommentLocations();

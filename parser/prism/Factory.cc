@@ -135,6 +135,16 @@ pm_node_t *Factory::True(core::LocOffsets loc) const {
     return up_cast(trueNode);
 }
 
+pm_node_t *Factory::False(core::LocOffsets loc) const {
+    ENFORCE(loc.exists(), "False: location is required");
+
+    pm_false_node_t *falseNode = allocateNode<pm_false_node_t>();
+
+    *falseNode = (pm_false_node_t){.base = initializeBaseNode(PM_FALSE_NODE, parser.convertLocOffsets(loc))};
+
+    return up_cast(falseNode);
+}
+
 pm_node_t *Factory::Nil(core::LocOffsets loc) const {
     ENFORCE(loc.exists(), "Nil: location is required");
 
