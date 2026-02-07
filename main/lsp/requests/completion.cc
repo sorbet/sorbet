@@ -1018,12 +1018,12 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const cor
     return item;
 }
 
-unique_ptr<CompletionItem>
-CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, const SearchParams &params,
-                                           core::MethodRef maybeAlias, const core::TypePtr &receiverType,
-                                           core::Loc queryLoc, const ast::ParsedFile &resolved, string_view prefix,
-                                           size_t sortIdx, uint16_t totalArgs) const {
+unique_ptr<CompletionItem> CompletionTask::getCompletionItemForMethod(
+    LSPTypecheckerDelegate &typechecker, const SearchParams &params, const SimilarMethod &similarMethod,
+    core::Loc queryLoc, const ast::ParsedFile &resolved, string_view prefix, size_t sortIdx, uint16_t totalArgs) const {
     const auto &gs = typechecker.state();
+    auto maybeAlias = similarMethod.method;
+    auto &receiverType = similarMethod.receiverType;
     ENFORCE(maybeAlias.exists());
     auto clientConfig = config.getClientConfig();
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
@@ -1282,14 +1282,14 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
             items.push_back(getCompletionItemForUntyped(gs, params.queryLoc, items.size(), "(call site is T.untyped)"));
         } else {
             for (auto &similarMethod : methodResults.methods) {
-                items.push_back(getCompletionItemForMethod(typechecker, params, similarMethod.method,
-                                                           similarMethod.receiverType, params.queryLoc, resolved,
-                                                           params.prefix, items.size(), params.forMethods->totalArgs));
+                items.push_back(getCompletionItemForMethod(typechecker, params, similarMethod, params.queryLoc,
+                                                           resolved, params.prefix, items.size(),
+                                                           params.forMethods->totalArgs));
             }
             for (auto &similarMethod : methodResults.operators) {
-                items.push_back(getCompletionItemForMethod(typechecker, params, similarMethod.method,
-                                                           similarMethod.receiverType, params.queryLoc, resolved,
-                                                           params.prefix, items.size(), params.forMethods->totalArgs));
+                items.push_back(getCompletionItemForMethod(typechecker, params, similarMethod, params.queryLoc,
+                                                           resolved, params.prefix, items.size(),
+                                                           params.forMethods->totalArgs));
             }
         }
     }
