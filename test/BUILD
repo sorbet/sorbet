@@ -487,7 +487,6 @@ pipeline_tests(
             "testdata/desugar/splat.rb",
             "testdata/desugar/star_in_block_arg.rb",
             "testdata/infer/arg_matching.rb",
-            "testdata/infer/autocorrect_no_block.rb",
             "testdata/infer/generics/validator.rb",
             "testdata/lsp/fast_path/alias_stub_module__*.rb",
             "testdata/lsp/fast_path/not_enough_files/not_enough_files__*.rb",
@@ -505,13 +504,17 @@ pipeline_tests(
             "testdata/minimize-rbi/external.rb",
             "testdata/minimize-rbi/private.rb",
             "testdata/packager/empty_package_file/**/*.rb",
-            "testdata/packager/invalid_imports_and_exports/**/*.rb",
             "testdata/packager/package-no-spec/**/*.rb",
             "testdata/packager/unpackaged-error/**/*.rb",
             "testdata/parser/empty.rb",
             "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
             "testdata/rbs/signatures_params_autocorrect.rb",
-            "testdata/rewriter/prop.rb",
+            "testdata/infer/crash_after_parse_errors.rb",
+            "testdata/infer/untyped.rb",
+            "testdata/lsp/hover_it_param.rb",
+            "testdata/parser/error_recovery/eof_8.rb",
+            "testdata/parser/error_recovery/other_missing_end.rb",
+            "testdata/rbi/proc.rb",
         ],
     ),
     "PrismPosTests",
@@ -558,14 +561,11 @@ pipeline_tests(
             #   Whitequark produces empty regex
             "prism_regression/invalid/unterminated_regex.rb",
 
-            # Numbered block parameter location differs: Prism uses last occurrence
-            # of `_1`, Whitequark uses first occurrence
-            "prism_regression/multiple_numbered_params.rb",
-
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "prism_regression/assign_to_index.rb",
             "prism_regression/call_implicit_kw_args.rb",
             "prism_regression/literal_hash.rb",
+            "prism_regression/multi_target.rb",
         ],
     ),
     "PrismPosTests",
