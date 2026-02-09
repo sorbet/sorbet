@@ -20,7 +20,7 @@ describe 'example' do
   it "outside test_each #{y}" do
     #                     ^ error: Method `y` does not exist
     # No results
-    # ^ hover: null
+    # ^ hover: nulasd
   end
 
   it "outside test_each #{X}" do
