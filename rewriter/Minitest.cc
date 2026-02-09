@@ -706,10 +706,23 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                             /* insideDescribe */ true);
 
             auto testName = fmt::format("<{} '{}'>", send->fun.show(ctx), argString);
-            auto name = ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(testName)});
+            // When the describe argument is a constant (e.g., `RSpec.describe MyClass`),
+            // use a zero-length loc for the synthetic class name so that hovering on
+            // `MyClass` resolves to the real constant, not the synthetic describe class.
+            auto nameLoc = (recvIsRSpec && ast::isa_tree<ast::UnresolvedConstantLit>(arg))
+                               ? arg.loc().copyWithZeroLength()
+                               : arg.loc();
+            auto name = ast::MK::UnresolvedConstantParts(nameLoc, {ctx.state.enterNameConstant(testName)});
             auto declLoc = declLocForSendWithBlock(*send);
-            return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
-                                  flattenDescribeBody(move(rhs)));
+            auto classDef = ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
+                                           flattenDescribeBody(move(rhs)));
+
+            // Preserve the original constant reference in the tree so Sorbet can
+            // resolve it for hover and go-to-definition.
+            if (recvIsRSpec && ast::isa_tree<ast::UnresolvedConstantLit>(arg)) {
+                return ast::MK::InsSeq1(send->loc, arg.deepCopy(), move(classDef));
+            }
+            return classDef;
         }
 
         case core::Names::after().rawId():
