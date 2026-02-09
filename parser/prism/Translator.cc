@@ -2716,7 +2716,44 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 }
             }
 
-            return desugarStatements(programNode->statements);
+            ENFORCE(programNode->statements != nullptr,
+                    "A `PM_STATEMENTS_NODE` should always have non-null statements, even for totally empty programs.");
+
+            ast::ClassDef::RHS_store classBody;
+            // The ClassDef location should be the location of the desugared content, not the program node.
+            // This matches the legacy desugarer behavior from `node2Tree()` in `Desugar.cc`.
+            auto classDefLoc = location;
+            if (programNode->statements->body.size == 1) {
+                auto statement = desugar(programNode->statements->body.nodes[0]);
+
+                // Use the desugared statement's location if it exists
+                if (statement.loc().exists()) {
+                    classDefLoc = statement.loc();
+                }
+
+                // If the one statement desugars into an instruction sequence of multiple statements,
+                // inline it so the statements are directly in the class body, rather than wrapped.
+                if (auto insSeq = ast::cast_tree<ast::InsSeq>(statement)) {
+                    classBody.reserve(insSeq->stats.size() + 1);
+                    for (auto &stat : insSeq->stats) {
+                        classBody.emplace_back(move(stat));
+                    }
+                    classBody.emplace_back(move(insSeq->expr));
+                } else {
+                    classBody.emplace_back(move(statement));
+                }
+            } else {
+                classBody = nodeListToStore<ast::ClassDef::RHS_store>(programNode->statements->body);
+            }
+
+            ast::ClassDef::ANCESTORS_store ancestors;
+            ancestors.emplace_back(MK::Constant(classDefLoc, core::Symbols::todo()));
+
+            auto declLoc = classDefLoc;
+            auto name = MK::EmptyTree();
+
+            return ast::make_expression<ast::ClassDef>(classDefLoc, declLoc, core::Symbols::root(), move(name),
+                                                       move(ancestors), move(classBody), ast::ClassDef::Kind::Class);
         }
         case PM_POST_EXECUTION_NODE: { // The END keyword and body, like `END { ... }`
             return make_unsupported_node(location, "Postexe");
