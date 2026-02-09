@@ -78,28 +78,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C UserClass><<C <todo sym>>> < (::<todo sym>)
   end
 
-  class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def name<<todo method>>(&<blk>)
-      "Bob"
-    end
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def name<<todo method>>(&<blk>)
+        "Bob"
+      end
 
-    def <it 'has a name'><<todo method>>(&<blk>)
-      <self>.name()
-    end
+      def <it 'has a name'><<todo method>>(&<blk>)
+        <self>.name()
+      end
 
-    <runtime method definition of name>
+      <runtime method definition of name>
+    end
   end
 
-  class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def value<<todo method>>(&<blk>)
-      100
-    end
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def value<<todo method>>(&<blk>)
+        100
+      end
 
-    def <it 'has a value'><<todo method>>(&<blk>)
-      <self>.value()
-    end
+      def <it 'has a value'><<todo method>>(&<blk>)
+        <self>.value()
+      end
 
-    <runtime method definition of value>
+      <runtime method definition of value>
+    end
   end
 
   class <emptyTree>::<C <describe 'user_symbol'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)

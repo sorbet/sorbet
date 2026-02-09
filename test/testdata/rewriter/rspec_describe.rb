@@ -66,6 +66,7 @@ class UserClass
 end
 
 RSpec.describe UserClass do
+#              ^^^^^^^^^ hover: T.class_of(UserClass)
   let(:name) { "Bob" }
 
   it "has a name" do
@@ -75,6 +76,7 @@ end
 
 # Test RSpec.describe with a class and metadata
 RSpec.describe UserClass, :needs_macos do
+#              ^^^^^^^^^ hover: T.class_of(UserClass)
   let(:value) { 100 }
 
   it "has a value" do
