@@ -1161,6 +1161,7 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
         Timer timeit(gs.tracer(), "packager.findPackages");
 
         gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
+        gs.packageDB().resolvePackagesToUpdateVisibilityFor(gs);
 
         {
             core::UnfreezeNameTable unfreeze(gs);

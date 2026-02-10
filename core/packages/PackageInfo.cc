@@ -309,6 +309,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     auto pkgFile = this->file;
     auto insertionLoc = core::Loc::none(pkgFile);
     if (!exports_.empty()) {
+        // TODO(neil): can we use use `absl::c_lower_bound` here?
         core::LocOffsets exportToInsertAfter;
         for (auto &e : exports_) {
             if (exportLine > core::Loc(pkgFile, e.loc).source(gs)) {
@@ -345,6 +346,53 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     core::AutocorrectSuggestion suggestion(
         fmt::format("Export `{}` in package `{}`", newExportName, mangledName_.owner.show(gs)),
         {{insertionLoc, fmt::format("\n  {}", exportLine)}});
+    return {suggestion};
+}
+
+optional<core::AutocorrectSuggestion> PackageInfo::addVisibleTo(const core::GlobalState &gs,
+                                                                const MangledName &targetPackage) const {
+    auto targetPackageName = targetPackage.owner.show(gs);
+    auto visibleToLine = fmt::format("visible_to {}", targetPackageName);
+    auto pkgFile = this->file;
+    auto insertionLoc = core::Loc::none(pkgFile);
+    if (!visibleTo_.empty()) {
+        // TODO(neil): can we use use `absl::c_lower_bound` here?
+        core::LocOffsets visibleToInsertAfter;
+        for (auto &v : visibleTo_) {
+            if (visibleToLine > core::Loc(pkgFile, v.loc).source(gs)) {
+                visibleToInsertAfter = v.loc;
+            }
+        }
+        if (!visibleToInsertAfter.exists()) {
+            // Insert before the first visible_to
+            auto beforeVisibleTo = visibleTo_.front().loc;
+            auto [beforeVisibleToLoc, numWhitespace] = core::Loc(pkgFile, beforeVisibleTo).findStartOfIndentation(gs);
+            auto endOfPrevLine = beforeVisibleToLoc.adjust(gs, -numWhitespace - "\n"sv.size(), 0);
+            insertionLoc = endOfPrevLine.copyWithZeroLength();
+        } else {
+            insertionLoc = core::Loc(pkgFile, visibleToInsertAfter.copyEndWithZeroLength());
+        }
+    } else {
+        // if we don't have any visible_to entries, then we can try adding it right before the final `end`
+        uint32_t visibleToLoc = this->locs.loc.endPos() - "end\n"sv.size();
+        // we want to find the end of the last non-empty line, so
+        // let's do something gross: walk backward until we find non-whitespace
+        const auto &file_source = this->file.data(gs).source();
+        while (isspace(file_source[visibleToLoc])) {
+            visibleToLoc--;
+            // this shouldn't happen in a well-formatted
+            // `__package.rb` file, but just to be safe
+            if (visibleToLoc == 0) {
+                return nullopt;
+            }
+        }
+        insertionLoc = {this->file, visibleToLoc + 1, visibleToLoc + 1};
+    }
+    ENFORCE(insertionLoc.exists());
+
+    core::AutocorrectSuggestion suggestion(
+        fmt::format("Add `visible_to {}` in package `{}`", targetPackageName, mangledName_.owner.show(gs)),
+        {{insertionLoc, fmt::format("\n  {}", visibleToLine)}});
     return {suggestion};
 }
 
@@ -517,12 +565,19 @@ core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::F
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
-    for (auto &[file, value] : packagesReferencedByFile) {
-        for (auto &[packageName, packageReferenceInfo] : value) {
+    for (auto &[file, referencedPackages] : packagesReferencedByFile) {
+        for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
-            if (!packageReferenceInfo.importNeeded || !packageReferenceInfo.validToImport || !pkgInfo.exists()) {
+            if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
                 continue;
             }
+
+            // We should only skip adding the import if we're not going to add a visible_to to the package, since it
+            // will be valid to import the package after the new visible_to is added
+            if (packageReferenceInfo.causesVisibilityError && !gs.packageDB().updateVisibilityFor(packageName)) {
+                continue;
+            }
+
             auto importType = fileToImportType(gs, file);
             auto it = toImport.find(packageName);
             if (it != toImport.end()) {
@@ -567,6 +622,26 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
 
     AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
     return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
+}
+
+std::optional<core::AutocorrectSuggestion>
+PackageInfo::aggregateMissingVisibleTo(const core::GlobalState &gs,
+                                       std::vector<core::packages::MangledName> &visibleTos) const {
+    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto &pkgName : visibleTos) {
+        auto autocorrect = addVisibleTo(gs, pkgName);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+
+    if (allEdits.empty()) {
+        return nullopt;
+    }
+
+    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
+    return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
 bool PackageInfo::operator==(const PackageInfo &rhs) const {

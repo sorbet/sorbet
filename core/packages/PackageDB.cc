@@ -169,8 +169,30 @@ void PackageDB::resolvePackagesWithRelaxedChecks(GlobalState &gs) {
     this->packagesWithRelaxedChecks_ = move(packagesWithRelaxedChecks);
 }
 
+void PackageDB::resolvePackagesToUpdateVisibilityFor(GlobalState &gs) {
+    if (updateVisibilityFor_.empty()) {
+        return;
+    }
+
+    UnorderedSet<MangledName> packagesToUpdateVisibilityFor;
+    for (const auto &pkgName : updateVisibilityFor_) {
+        auto pkgNameParts = absl::StrSplit(pkgName, "::");
+        auto mangledName = MangledName::lookupMangledName(gs, pkgNameParts);
+        packagesToUpdateVisibilityFor.emplace(mangledName);
+    }
+    this->packagesToUpdateVisibilityFor_ = move(packagesToUpdateVisibilityFor);
+}
+
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
     return this->packagesWithRelaxedChecks_.contains(mangledName);
+}
+
+bool PackageDB::updateVisibilityFor(MangledName mangledName) const {
+    return this->packagesToUpdateVisibilityFor_.contains(mangledName);
+}
+
+bool PackageDB::anyUpdateVisibilityFor() const {
+    return this->packagesToUpdateVisibilityFor_.size() > 0;
 }
 
 PackageDB PackageDB::deepCopy() const {
@@ -202,6 +224,8 @@ PackageDB PackageDB::deepCopy() const {
     // Likewise, this assumes that we've entered MangledNames in the target GlobalState, but ALSO
     // that we've copied symbols, because MangledNames store ClassOrModuleRef's now
     result.packagesWithRelaxedChecks_ = this->packagesWithRelaxedChecks_;
+    result.updateVisibilityFor_ = this->updateVisibilityFor_;
+    result.packagesToUpdateVisibilityFor_ = this->packagesToUpdateVisibilityFor_;
     result.errorHint_ = this->errorHint_;
 
     return result;

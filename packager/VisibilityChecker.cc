@@ -556,7 +556,8 @@ public:
                                       currentImportType.value() == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {importNeeded, true};
+        referencedPackages[otherPackage] = {
+            .importNeeded = importNeeded, .causesModularityError = false, .causesVisibilityError = false};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
@@ -573,7 +574,8 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
-            bool restrictedVisiblity = !pkg.isVisibleTo(ctx, this->package.mangledName(), autocorrectedImportType);
+            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package.mangledName(), autocorrectedImportType);
+            referencedPackages[otherPackage].causesVisibilityError = causesVisibilityError;
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
@@ -587,7 +589,8 @@ public:
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
             bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
-            if (!hasModularityError && !restrictedVisiblity) {
+            referencedPackages[otherPackage].causesModularityError = hasModularityError;
+            if (!hasModularityError && !causesVisibilityError) {
                 if (db.genPackages()) {
                     return;
                 }
@@ -677,8 +680,9 @@ public:
                 }
             }
 
-            if (restrictedVisiblity) {
-                referencedPackages[otherPackage].validToImport = false;
+            // We should only report a visibility error if we're not going to add a visible_to to the package
+            // Otherwise the error is pointless since it'll go away after the new visible_to is added
+            if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
                 if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::ImportNotVisible)) {
                     e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                                 pkg.show(ctx), this->package.show(ctx));
@@ -688,7 +692,6 @@ public:
             }
 
             if (hasModularityError) {
-                referencedPackages[otherPackage].validToImport = false;
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 core::ErrorClass error =
@@ -957,6 +960,24 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
         exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
     }
 
+    auto neededVisibleTo = UnorderedMap<core::packages::MangledName, vector<core::packages::MangledName>>{};
+    if (gs.packageDB().anyUpdateVisibilityFor()) {
+        for (auto pkgName : gs.packageDB().packages()) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+            ENFORCE(pkgInfo.exists());
+            // TODO(neil): this loop is similar to what we have in aggregateMissingImports, is there a way to dedup?
+            for (auto &[file, referencedPackages] : pkgInfo.packagesReferencedByFile) {
+                for (auto &[referencedPackageName, packageReferenceInfo] : referencedPackages) {
+                    if (packageReferenceInfo.causesVisibilityError) {
+                        // it is a visibility error for pkgName to reference referencedPackageName,
+                        // so need to add visible_to pkgName to referencedPackageName's __package.db
+                        neededVisibleTo[referencedPackageName].push_back(pkgName);
+                    }
+                }
+            }
+        }
+    }
+
     for (auto pkgName : gs.packageDB().packages()) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
@@ -967,33 +988,71 @@ void reportMissingImportExportAutocorrect(const core::GlobalState &gs, const vec
         // However, for exports, we need to look the symbols referenced by other packages, which necessitates a loop
         // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
         auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
-        if (importsAutocorrect && exportsAutocorrect) {
-            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                e.setHeader("{} is missing imports and exports", pkgInfo.show(gs));
-                importsAutocorrect->edits.insert(importsAutocorrect->edits.end(),
-                                                 make_move_iterator(exportsAutocorrect->edits.begin()),
-                                                 make_move_iterator(exportsAutocorrect->edits.end()));
-                // TODO(neil): for a file with no imports or exports, this will produce something like:
-                //   export MyPkg::Foo
-                //   import OtherPkg
-                // because e < i
-                core::AutocorrectSuggestion::mergeAdjacentEdits(importsAutocorrect->edits);
-                e.addAutocorrect(
-                    core::AutocorrectSuggestion{"Add missing imports and exports", move(importsAutocorrect->edits)});
-                // TODO(neil): we should also delete imports that are unused but have a modularity error here
-            }
-        } else if (importsAutocorrect) {
-            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                e.setHeader("{} is missing imports", pkgInfo.show(gs));
-                e.addAutocorrect(move(importsAutocorrect.value()));
-                // TODO(neil): we should also delete imports that are unused but have a modularity error here
-            }
-        } else if (exportsAutocorrect) {
-            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                e.setHeader("{} is missing exports", pkgInfo.show(gs));
-                e.addAutocorrect(move(exportsAutocorrect.value()));
-            }
+        // Similar idea for visible_to.
+        auto visibleToAutocorrect = gs.packageDB().updateVisibilityFor(pkgName)
+                                        ? pkgInfo.aggregateMissingVisibleTo(gs, neededVisibleTo[pkgName])
+                                        : nullopt;
+
+        auto autocorrects = vector<core::AutocorrectSuggestion>{};
+        auto missingTypes = vector<string>{};
+
+        if (importsAutocorrect) {
+            autocorrects.push_back(move(importsAutocorrect.value()));
+            missingTypes.push_back("imports");
         }
+
+        if (exportsAutocorrect) {
+            autocorrects.push_back(move(exportsAutocorrect.value()));
+            missingTypes.push_back("exports");
+        }
+
+        if (visibleToAutocorrect) {
+            autocorrects.push_back(move(visibleToAutocorrect.value()));
+            missingTypes.push_back(fmt::format("`{}`s", "visible_to"));
+        }
+
+        if (autocorrects.size() == 1) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("`{}` is missing {}", pkgInfo.show(gs), missingTypes[0]);
+                e.addAutocorrect(move(autocorrects[0]));
+            }
+        } else if (autocorrects.size() == 2) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("`{}` is missing {} and {}", pkgInfo.show(gs), missingTypes[0], missingTypes[1]);
+                auto combinedEdits = vector<core::AutocorrectSuggestion::Edit>{};
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[0].edits.begin()),
+                                     make_move_iterator(autocorrects[0].edits.end()));
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[1].edits.begin()),
+                                     make_move_iterator(autocorrects[1].edits.end()));
+                core::AutocorrectSuggestion::mergeAdjacentEdits(combinedEdits);
+                auto autocorrectTitle = fmt::format("Add missing {} and {}", missingTypes[0], missingTypes[1]);
+                e.addAutocorrect(core::AutocorrectSuggestion{autocorrectTitle, move(combinedEdits)});
+            }
+        } else if (autocorrects.size() == 3) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("`{}` is missing {}, {} and {}", pkgInfo.show(gs), missingTypes[0], missingTypes[1],
+                            missingTypes[2]);
+                auto combinedEdits = vector<core::AutocorrectSuggestion::Edit>{};
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[0].edits.begin()),
+                                     make_move_iterator(autocorrects[0].edits.end()));
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[1].edits.begin()),
+                                     make_move_iterator(autocorrects[1].edits.end()));
+                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[2].edits.begin()),
+                                     make_move_iterator(autocorrects[2].edits.end()));
+                core::AutocorrectSuggestion::mergeAdjacentEdits(combinedEdits);
+                auto autocorrectTitle =
+                    fmt::format("Add missing {}, {} and {}", missingTypes[0], missingTypes[1], missingTypes[2]);
+                e.addAutocorrect(core::AutocorrectSuggestion{autocorrectTitle, move(combinedEdits)});
+            }
+        } else if (autocorrects.size() > 3) {
+            ENFORCE(false);
+        }
+        // TODO(neil): for a file with no imports or exports, if both imports and exports are missing, we'll produce
+        // something like:
+        //   export MyPkg::Foo
+        //   import OtherPkg
+        // because e < i
+        // TODO(neil): we should also delete imports that are unused but have a modularity error here
     }
 }
 } // namespace

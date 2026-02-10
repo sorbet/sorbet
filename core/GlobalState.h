@@ -438,6 +438,7 @@ public:
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                             const std::vector<std::string> &skipImportVisibilityCheckFor,
+                            const std::vector<std::string> &updateVisibilityFor,
                             const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages);
     packages::UnfreezePackages unfreezePackages();
 
@@ -557,6 +558,7 @@ public:
                        const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                        const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                        const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+                       const std::vector<std::string> &updateVisibilityFor,
                        const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
@@ -567,7 +569,8 @@ public:
         const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
         const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
         const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-        const std::vector<std::string> &allowRelaxedPackagerChecksFor, const std::vector<std::string> &packagerLayers,
+        const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+        const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
         std::string errorHint, bool genPackages) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
@@ -579,7 +582,8 @@ public:
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                     const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                    const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
+                    const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
+                    std::string errorHint, bool genPackages) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
