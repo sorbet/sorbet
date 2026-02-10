@@ -501,7 +501,7 @@ struct PackageSpecBodyWalk {
         }
 
         // Sanity check arguments for unrecognized methods
-        if (!isSpecMethod(send)) {
+        if (!isSpecMethod(ctx, send)) {
             for (auto &arg : send.posArgs()) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -518,6 +518,8 @@ struct PackageSpecBodyWalk {
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
             if (send.numPosArgs() == 1) {
+                Import *imp = nullptr;
+
                 // null indicates an invalid import.
                 if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                     // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
@@ -533,22 +535,53 @@ struct PackageSpecBodyWalk {
                             e.setHeader("Package `{}` cannot {} itself", info.show(ctx), send.fun.show(ctx));
                         }
                     }
-                    info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
+
+                    imp = &info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
                 }
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
-                    if (keyLit->asSymbol() == core::Names::only()) {
-                        auto valLit = ast::cast_tree<ast::Literal>(value);
-                        // if it's not a literal, then it'll get caught elsewhere
-                        if (valLit && (!valLit->isString() || valLit->asString() != core::Names::testRb())) {
-                            if (auto e =
-                                    ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
-                                e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
-                                            "only:", "\"test_rb\"");
+                    switch (keyLit->asSymbol().rawId()) {
+                        // TODO(trevor): this case can go away when we only support test packages.
+                        case core::Names::only().rawId():
+                            if (testPackages) {
+                                break;
                             }
-                        }
+
+                            if (keyLit->asSymbol() == core::Names::only()) {
+                                auto valLit = ast::cast_tree<ast::Literal>(value);
+                                // if it's not a literal, then it'll get caught elsewhere
+                                if (valLit && (!valLit->isString() || valLit->asString() != core::Names::testRb())) {
+                                    if (auto e = ctx.beginError(value.loc(),
+                                                                core::errors::Packager::InvalidPackageExpression)) {
+                                        e.setHeader(
+                                            "Invalid expression in package: the only valid value for `{}` is `{}`",
+                                            "only:", "\"test_rb\"");
+                                    }
+                                }
+                            }
+                            break;
+
+                        case core::Names::usesInternals().rawId():
+                            if (!testPackages) {
+                                break;
+                            }
+
+                            auto valLit = ast::cast_tree<ast::Literal>(value);
+                            if (valLit && valLit->isTrue(ctx)) {
+                                if (imp) {
+                                    imp->usesInternals = true;
+                                }
+                            } else {
+                                if (auto e =
+                                        ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
+                                    e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
+                                                "uses_internals:", "true");
+                                }
+                            }
+
+                            break;
                     }
                 }
             }
@@ -721,6 +754,10 @@ struct PackageSpecBodyWalk {
                     info.locs.testsMinTypedLevel = testsMinTypedLevelLoc;
                 }
             }
+        } else if (send.fun == core::Names::testBang()) {
+            if (send.posArgs().empty() && send.kwArgPairs().span.empty()) {
+                info.locs.testPackage = send.loc;
+            }
         } else {
             // Extra directives
             info.extraDirectives_.push_back(send.loc);
@@ -743,20 +780,27 @@ struct PackageSpecBodyWalk {
         illegalNode(ctx, tree);
     }
 
-    bool isSpecMethod(const sorbet::ast::Send &send) const {
+    bool isSpecMethod(const core::GlobalState &gs, const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-            case core::Names::testImport().rawId():
             case core::Names::export_().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
             case core::Names::preludePackage().rawId():
                 return true;
+
+            case core::Names::testImport().rawId():
+                return !gs.packageDB().testPackages();
+
+            case core::Names::testBang().rawId():
+                return gs.packageDB().testPackages();
+
             default:
                 return false;
         }
     }
 
+    // TODO(trevor) this method can go away once we only support test packages
     ImportType method2ImportType(const ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():

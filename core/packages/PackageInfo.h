@@ -49,6 +49,9 @@ struct Import {
     ImportType type;
     core::LocOffsets loc;
 
+    // This is only valid when `type == ImportType::Normal`.
+    bool usesInternals = false;
+
     Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
         : mangledName(mangledName), type(type), loc(loc) {}
 
@@ -158,6 +161,9 @@ public:
 
         // Set to non-none loc when this package should just export everything
         core::LocOffsets exportAll;
+
+        // Set to non-none loc when this package is marked `test!`
+        core::LocOffsets testPackage;
     } locs;
 
     core::FileRef file;
@@ -274,6 +280,11 @@ public:
     // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
     bool isPreludePackage() const {
         return this->isPreludePackage_;
+    }
+
+    // True if this package was marked as a `test!` package.
+    bool testPackage() const {
+        return this->locs.testPackage.exists();
     }
 
     // Do this package's visible_to rules allow `otherPkg` to import this package, using an import of type `importType`?
