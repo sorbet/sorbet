@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 class Sorbet::Private::Static::PackageSpec
-  sig { params(arg0: T.class_of(Sorbet::Private::Static::PackageSpec)).void }
-  def self.import(arg0); end
+  sig { params(arg0: T.class_of(Sorbet::Private::Static::PackageSpec), uses_internals: T::Boolean).void }
+  def self.import(arg0, uses_internals: false); end
 
   sig { params(arg0: T.class_of(Sorbet::Private::Static::PackageSpec), only: T.nilable(String)).void }
   def self.test_import(arg0, only: nil); end
@@ -26,4 +26,7 @@ class Sorbet::Private::Static::PackageSpec
 
   sig { void }
   def self.prelude_package; end
+
+  sig { void }
+  def self.test!(); end
 end

@@ -49,6 +49,9 @@ struct Import {
     ImportType type;
     core::LocOffsets loc;
 
+    // This is only valid when `type == ImportType::Normal`.
+    bool usesInternals = false;
+
     Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
         : mangledName(mangledName), type(type), loc(loc) {}
 
@@ -186,6 +189,9 @@ public:
     // maintaining this field as it becomes a property of symbol nesting, but would involve following more memory
     // indirections.
     bool hasSubPackages = false;
+
+    // True if this package is marked with `test!`.
+    bool testPackage = false;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
