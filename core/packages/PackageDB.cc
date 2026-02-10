@@ -153,6 +153,10 @@ void PackageDB::resolvePackagesWithRelaxedChecks(GlobalState &gs) {
 }
 
 void PackageDB::resolvePackagesToUpdateVisibilityFor(GlobalState &gs) {
+    if (updateVisibilityFor_.empty()) {
+        return;
+    }
+
     UnorderedSet<MangledName> packagesToUpdateVisibilityFor;
     for (const auto &pkgName : updateVisibilityFor_) {
         auto pkgNameParts = absl::StrSplit(pkgName, "::");
