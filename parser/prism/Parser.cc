@@ -196,4 +196,8 @@ string Parser::prettyPrint(pm_node_t *node) const {
     pm_buffer_free(&buffer);
     return result;
 }
+
+void Parser::destroyNode(pm_node_t *node) {
+    pm_node_destroy(&parser, node);
+}
 }; // namespace sorbet::parser::Prism
