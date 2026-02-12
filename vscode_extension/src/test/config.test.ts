@@ -699,4 +699,87 @@ suite("SorbetExtensionConfig", async () => {
       );
     });
   });
+
+  suite("sorbet.inlayTypeHints", async () => {
+    function stubEditorInlayHints(value: string): void {
+      const getConfigStub = sinon.stub(workspace, "getConfiguration");
+      getConfigStub.withArgs("editor").returns({
+        get: (key: string, defaultValue: any) => {
+          if (key === "inlayHints.enabled") return value;
+          return defaultValue;
+        },
+      } as any);
+      getConfigStub.callThrough();
+    }
+
+    test("defaults to after_var", async () => {
+      stubEditorInlayHints("on");
+      const workspaceConfig = new FakeWorkspaceConfiguration();
+      const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "after_var");
+      sinon.restore();
+    });
+
+    test("respects explicit sorbet.inlayTypeHints setting", async () => {
+      stubEditorInlayHints("on");
+      const workspaceConfig = new FakeWorkspaceConfiguration([
+        ["inlayTypeHints", "RBS"],
+      ]);
+      const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "RBS");
+      sinon.restore();
+    });
+
+    test("returns off when editor.inlayHints.enabled is off", async () => {
+      stubEditorInlayHints("off");
+      const workspaceConfig = new FakeWorkspaceConfiguration([
+        ["inlayTypeHints", "after_var"],
+      ]);
+      const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "off");
+      sinon.restore();
+    });
+
+    test("respects sorbet setting when editor.inlayHints.enabled is onUnlessPressed", async () => {
+      stubEditorInlayHints("onUnlessPressed");
+      const workspaceConfig = new FakeWorkspaceConfiguration([
+        ["inlayTypeHints", "before_var"],
+      ]);
+      const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "before_var");
+      sinon.restore();
+    });
+
+    test("respects sorbet setting when editor.inlayHints.enabled is offUnlessPressed", async () => {
+      // offUnlessPressed still requests hints from the server
+      stubEditorInlayHints("offUnlessPressed");
+      const workspaceConfig = new FakeWorkspaceConfiguration([
+        ["inlayTypeHints", "after_var"],
+      ]);
+      const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "after_var");
+      sinon.restore();
+    });
+
+    test("setInlayTypeHints updates the value", async () => {
+      stubEditorInlayHints("on");
+      const workspaceConfig = new FakeWorkspaceConfiguration([
+        ["inlayTypeHints", "after_var"],
+      ]);
+      const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "after_var");
+      await sorbetConfig.setInlayTypeHints("RBS");
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "RBS");
+      sinon.restore();
+    });
+
+    test("setInlayTypeHints to non-off is overridden by editor.inlayHints.enabled off", async () => {
+      stubEditorInlayHints("off");
+      const workspaceConfig = new FakeWorkspaceConfiguration();
+      const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+      await sorbetConfig.setInlayTypeHints("before_var");
+      assert.strictEqual(sorbetConfig.inlayTypeHints, "off");
+      sinon.restore();
+    });
+  });
 });
