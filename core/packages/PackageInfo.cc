@@ -396,17 +396,17 @@ optional<core::AutocorrectSuggestion> PackageInfo::addVisibleTo(const core::Glob
     return {suggestion};
 }
 
-optional<ImportType> PackageInfo::importsPackage(MangledName mangledName) const {
+const Import *PackageInfo::importsPackage(MangledName mangledName) const {
     if (!mangledName.exists()) {
-        return nullopt;
+        return nullptr;
     }
 
     auto imp = absl::c_find_if(importedPackageNames, [mangledName](auto &i) { return i.mangledName == mangledName; });
     if (imp == importedPackageNames.end()) {
-        return nullopt;
+        return nullptr;
     }
 
-    return imp->type;
+    return &*imp;
 }
 
 // Is it a layering violation to import otherPkg from this package?

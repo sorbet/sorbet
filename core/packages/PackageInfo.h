@@ -256,7 +256,7 @@ public:
     // The list of known direct sub-packages of this package.
     std::vector<MangledName> directSubPackages(const core::GlobalState &gs) const;
 
-    std::optional<ImportType> importsPackage(MangledName mangledName) const;
+    const Import *importsPackage(MangledName mangledName) const;
 
     // Is it a layering violation to import otherPkg from this package?
     bool causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const;
