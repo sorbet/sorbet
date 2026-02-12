@@ -622,5 +622,25 @@ public:
     std::string toString() const override;
 };
 
+// # ^ inlay-hint: label
+class InlayHintAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<InlayHintAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                     int assertionLine, std::string_view assertionContents,
+                                                     std::string_view assertionType);
+    /** Checks all InlayHintAssertions within the assertion vector. Skips over non-InlayHintAssertions. */
+    static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
+                         const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
+
+    InlayHintAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                       std::string_view label, bool isParameterHint);
+
+    const std::string label;
+    const bool isParameterHint;
+
+    std::string toString() const override;
+};
+
 } // namespace sorbet::test
 #endif // TEST_HELPERS_POSITION_ASSERTIONS_H
