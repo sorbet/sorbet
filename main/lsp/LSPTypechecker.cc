@@ -318,7 +318,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
-    if (duration.usec > 1000000) {
+    if (duration.usec > 0) {
         std::string files;
         for (size_t i = 0; i < toTypecheck.size() && i < 10; i++) {
             if (!files.empty()) {
