@@ -545,15 +545,14 @@ public:
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
         bool definesBehavior =
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
-        auto currentImportType = this->package.importsPackage(otherPackage);
-        auto wasImported = currentImportType.has_value();
+        auto *import = this->package.importsPackage(otherPackage);
+        auto wasImported = import != nullptr;
 
         // Is this a test import (whether test helper or not) used in a production context?
-        auto testImportInProd = wasImported && currentImportType.value() != core::packages::ImportType::Normal &&
-                                this->fileType == FileType::ProdFile;
+        auto testImportInProd =
+            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
         // Is this a test import not intended for use in helpers?
-        auto testUnitImportInHelper = wasImported &&
-                                      currentImportType.value() == core::packages::ImportType::TestUnit &&
+        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
         referencedPackages[otherPackage] = {
