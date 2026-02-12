@@ -1317,8 +1317,10 @@ private:
         ENFORCE(ctx.file.data(ctx).isPackage(ctx));
         auto owner = getOwnerSymbol(state, package.owner);
 
-        // Eagerly resolve the superclass, so that we can rely on
-        // TODO(trevor) Finish this comment
+        // Eagerly resolve the superclass, so that we can rely on it being set before we hit the resolver. This is
+        // necessary for package-directed typechecking, as we'll copy the package spec to emulate an application/test
+        // package split, and want to avoid the situation where one has a superclass of PackageSpec while the other has
+        // been defaulted to Object.
         owner.data(ctx)->setSuperClass(core::Symbols::PackageSpec());
 
         auto mangledName = core::packages::MangledName(owner);
