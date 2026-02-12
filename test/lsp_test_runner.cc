@@ -587,6 +587,10 @@ TEST_CASE("LSPTest") {
             BooleanPropertyAssertion::getValue("highlight-untyped-values", assertions).value_or(false);
         sorbetInitOptions->enableTypedFalseCompletionNudges =
             BooleanPropertyAssertion::getValue("enable-typed-false-completion-nudges", assertions).value_or(true);
+        auto inlayTypeHintsStyle = StringPropertyAssertion::getValue("inlay-type-hints", assertions);
+        if (inlayTypeHintsStyle.has_value()) {
+            sorbetInitOptions->inlayTypeHints = *inlayTypeHintsStyle;
+        }
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));
         INFO("Should not receive any response to 'initialized' message.");
@@ -868,6 +872,9 @@ TEST_CASE("LSPTest") {
 
     // Rename assertion
     ApplyRenameAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+
+    // Inlay hint assertions
+    InlayHintAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
     // Workspace Symbol assertions
     SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
