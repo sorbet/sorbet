@@ -197,7 +197,11 @@ public:
         // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
         // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
         scc.tarjan<core::packages::ImportType::Normal>(packageGraph);
-        scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
+
+        // TODO(trevor): once we have fully migrated to test packages, this additional call to scc.tarjan can go away.
+        if (!gs.packageDB().testPackages()) {
+            scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
+        }
 
         return std::move(scc.condensation);
     }

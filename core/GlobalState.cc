@@ -1178,7 +1178,8 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
         return ret;
     }
 
-    if (owner == Symbols::root() && name == packages::PackageDB::TEST_NAMESPACE) {
+    if (owner == Symbols::root() &&
+        (!this->packageDB().testPackages() && name == packages::PackageDB::TEST_NAMESPACE)) {
         // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
         // searching for package names). Leave `package` as the non-existent package name.
         return ret;
