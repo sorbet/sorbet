@@ -3,7 +3,8 @@
 
 # Cases where `&` and `...` appear together in a method definition.
 # This is invalid Ruby syntax - you cannot have both a block param and forwarding.
-# These are error recovery tests for cases 9-12 in test/prism_regression/call_forwarding_permutations.rb.
+# These are error recovery tests for cases 9-12 which could not be tested in
+# test/prism_regression/call_forwarding_permutations.rb. Cases 1-8 are tested in that file.
 #
 # Cases:
 #    9. & + ...                   - def f(&b, ...); bar(...); end
