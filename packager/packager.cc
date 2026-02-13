@@ -1043,13 +1043,22 @@ void validatePackage(core::Context ctx) {
             continue;
         }
 
-        // It's not acceptable to import a test package from application code
+        // It's not acceptable to import a `test!` package from application code
         if (otherPkg.testPackage() && !pkgInfo.testPackage()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::IncorrectImport)) {
                 e.setHeader("Package `{}` may not import `{}` packages", pkgInfo.show(ctx), "test!");
                 e.addErrorLine(pkgInfo.declLoc(), "Defined here");
                 e.addErrorLine(otherPkg.declLoc(), "Imported `{}` package defined here", "test!");
                 e.addErrorNote("Test packages may only be imported by other test packages");
+            }
+        }
+
+        // `uses_internals: true` is only valid from a `test!` package
+        if (i.usesInternals && !pkgInfo.testPackage()) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::IncorrectImport)) {
+                e.setHeader("Package `{}` may not define imports with `{}`", pkgInfo.show(ctx), "uses_internals: true");
+                e.addErrorLine(pkgInfo.declLoc(), "Defined here");
+                e.addErrorNote("Only packages marked `test!` may import with `{}`", "uses_internals: true");
             }
         }
 
