@@ -529,6 +529,11 @@ void GlobalState::initEmpty() {
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Enum());
 
+    // T::Enum#<case>
+    // Synthetic method used to power expanding MyEnum.case into a case statement via completion
+    method = enterMethod(*this, Symbols::T_Enum(), Names::caseAngles()).buildWithResultUntyped();
+    ENFORCE_NO_TIMER(method == Symbols::T_Enum_caseAngles());
+
     // T::Sig#sig
     method = enterMethod(*this, Symbols::T_Sig(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE_NO_TIMER(method == Symbols::sig());

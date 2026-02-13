@@ -361,6 +361,8 @@ NameDef names[] = {
     // on a class to lookup an associated symbol with some extra info.
     {"sealedSubclasses", "sealed_subclasses"},
 
+    {"caseAngles", "<case>"},
+
     // Used to store arguments to a "mixes_in_class_methods()" call
     {"mixedInClassMethods", "<mixed_in_class_methods>"},
     {"mixesInClassMethods", "mixes_in_class_methods"},
