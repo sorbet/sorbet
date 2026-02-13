@@ -249,6 +249,7 @@ void removeCacheDir(const string &path) {
 } // namespace
 
 const string_view SessionCache::SESSION_DIR_PREFIX = "sorbet-session-";
+const string_view SessionCache::OLD_SESSION_DIR_PREFIX = "session-";
 
 SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
@@ -263,22 +264,27 @@ void SessionCache::reapOldCaches(const options::Options &opts) {
 
     for (const auto &dir : FileOps::listSubdirs(opts.cacheDir)) {
         auto pos = dir.find(SESSION_DIR_PREFIX);
-        if (pos != 0) {
+        if (pos == 0) {
+            string_view pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
+            pid_t pid = -1;
+            auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
+            if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
+                continue;
+            }
+
+            if (processExists(pid) != ProcessStatus::Missing) {
+                continue;
+            }
+
+            removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
             continue;
         }
 
-        string_view pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
-        pid_t pid = -1;
-        auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
-        if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
-            continue;
+        // Old format: session-<hex> — unconditionally reap
+        auto oldPos = dir.find(OLD_SESSION_DIR_PREFIX);
+        if (oldPos == 0) {
+            removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
         }
-
-        if (processExists(pid) != ProcessStatus::Missing) {
-            continue;
-        }
-
-        removeCacheDir(fmt::format("{}/{}", opts.cacheDir, dir));
     }
 }
 
