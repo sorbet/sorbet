@@ -928,6 +928,12 @@ This error will be reported on a `__package.rb` file, along with an autocorrect 
 - the `__package.rb` is missing `export`s
 - the `__package.rb` is missing `visible_to`, and `--gen-packages-update-visibility-for` flag is passed.
 
+## 3735
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+`__package.rb` files can optionally declare a minimum `typed` level that all files in that package must follow. This error occurs when a given file has a `typed` level lower than that minimum.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
