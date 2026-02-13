@@ -21,8 +21,8 @@ class Sorbet::Private::Static::PackageSpec
   sig { params(arg0: String).void }
   def self.layer(arg0); end
 
-  sig { params(min_typed_level: String, tests_min_typed_level: String).void }
-  def self.sorbet(min_typed_level:, tests_min_typed_level:); end
+  sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
+  def self.sorbet(min_typed_level:, tests_min_typed_level: nil); end
 
   sig { void }
   def self.prelude_package; end
