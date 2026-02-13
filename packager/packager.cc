@@ -722,15 +722,21 @@ struct PackageSpecBodyWalk {
                 return;
             }
 
-            if (send.numKwArgs() >= 2) {
-                core::StrictLevel minTypedLevel;
+            // TODO(trevor): after we fully commit to test-packages, this can be simplified quite a bit.
+            if (send.numKwArgs() >= 1) {
+                bool testsMinTypedLevelPresent = false;
+                core::StrictLevel minTypedLevel = core::StrictLevel::None;
                 core::LocOffsets minTypedLevelLoc;
-                core::StrictLevel testsMinTypedLevel;
+                core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
                 core::LocOffsets testsMinTypedLevelLoc;
                 for (const auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
                     auto typedLevel = parseTypedLevelOption(ctx, value);
+
+                    testsMinTypedLevelPresent =
+                        testsMinTypedLevelPresent || keyLit->asSymbol() == core::Names::testsMinTypedLevel();
+
                     if (typedLevel == core::StrictLevel::None) {
                         if (keyLit->asSymbol() == core::Names::minTypedLevel() ||
                             keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
@@ -746,17 +752,41 @@ struct PackageSpecBodyWalk {
                         minTypedLevel = typedLevel;
                         minTypedLevelLoc = value.loc();
                     } else if (keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
-                        testsMinTypedLevel = typedLevel;
-                        testsMinTypedLevelLoc = value.loc();
+                        if (testPackages) {
+                            if (auto e = ctx.beginError(keyLit->loc.join(value.loc()),
+                                                        core::errors::Packager::InvalidPackageExpression)) {
+                                e.setHeader("Invalid expression in package: the only valid argument for `{}` is `{}`",
+                                            "sorbet", core::Names::minTypedLevel().shortName(ctx));
+                            }
+                        } else {
+                            testsMinTypedLevel = typedLevel;
+                            testsMinTypedLevelLoc = value.loc();
+                        }
                     } else {
                         // Handled elsewhere
                     }
                 }
-                if (minTypedLevel != core::StrictLevel::None && testsMinTypedLevel != core::StrictLevel::None) {
+
+                if (testPackages) {
                     info.minTypedLevel = minTypedLevel;
-                    info.testsMinTypedLevel = testsMinTypedLevel;
                     info.locs.minTypedLevel = minTypedLevelLoc;
-                    info.locs.testsMinTypedLevel = testsMinTypedLevelLoc;
+                } else {
+                    if (minTypedLevel != core::StrictLevel::None && testsMinTypedLevel != core::StrictLevel::None) {
+                        info.minTypedLevel = minTypedLevel;
+                        info.testsMinTypedLevel = testsMinTypedLevel;
+                        info.locs.minTypedLevel = minTypedLevelLoc;
+                        info.locs.testsMinTypedLevel = testsMinTypedLevelLoc;
+                    }
+
+                    // Catch when we haven't also specified a tests_min_typed_level, as it's nilable during the
+                    // compatibility period.
+                    if (!testsMinTypedLevelPresent) {
+                        if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
+                            e.setHeader("`{}` requires values for both `{}` and `{}` to be specified", "sorbet",
+                                        core::Names::minTypedLevel().shortName(ctx),
+                                        core::Names::testsMinTypedLevel().shortName(ctx));
+                        }
+                    }
                 }
             }
         } else if (send.fun == core::Names::testBang()) {
