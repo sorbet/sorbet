@@ -54,7 +54,7 @@ ClassDef{
 
     MethodDef{
       flags = {}
-      name = <U case2a_anonymous_block_param><<U <todo method>>>
+      name = <U case3_anonymous_block_param><<U <todo method>>>
       params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U &>
@@ -81,7 +81,7 @@ ClassDef{
 
     MethodDef{
       flags = {}
-      name = <U case3_forwarding><<U <todo method>>>
+      name = <U case4_forwarding><<U <todo method>>>
       params = [RestParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <fwd-args>>
@@ -159,7 +159,7 @@ ClassDef{
 
     MethodDef{
       flags = {}
-      name = <U case4_block_literal><<U <todo method>>>
+      name = <U case5_block_literal><<U <todo method>>>
       params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -181,7 +181,7 @@ ClassDef{
 
     MethodDef{
       flags = {}
-      name = <U case5_forwarding_and_literal><<U <todo method>>>
+      name = <U case6_forwarding_and_literal><<U <todo method>>>
       params = [RestParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <fwd-args>>
@@ -263,7 +263,7 @@ ClassDef{
 
     MethodDef{
       flags = {}
-      name = <U case6_block_pass_and_literal><<U <todo method>>>
+      name = <U case7_block_pass_and_literal><<U <todo method>>>
       params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U block>
@@ -294,7 +294,7 @@ ClassDef{
 
     MethodDef{
       flags = {}
-      name = <U case6a_anonymous_block_pass_and_literal><<U <todo method>>>
+      name = <U case8_anonymous_block_pass_and_literal><<U <todo method>>>
       params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U &>
