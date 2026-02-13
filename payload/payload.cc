@@ -57,14 +57,34 @@ void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Op
         "`PAYLOAD_MAX_TYPE_ARGUMENT_COUNT` in `GlobalState`.",
         gs.typeParametersUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
 
-    // We can use the kvstore to read in the cached name table. We read this in after the payload has been initialized,
-    // as the cached name table will extend the payload's existing table when the sorbet versions match.
+    // Mark the payload boundary so that diffs only contain names added after the payload.
+    gs.markNameTableAsCached();
+
+    // We can use the kvstore to read in cached name table diffs. These are appended on top of the payload's name table.
     if (kvstore) {
         auto maybeUUIDBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_UUID_KEY);
-        auto maybeGsBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
-        if (maybeUUIDBytes.data != nullptr && maybeGsBytes.data != nullptr) {
+        auto maybeDiffCountBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY);
+        if (maybeUUIDBytes.data != nullptr && maybeDiffCountBytes.data != nullptr) {
             Timer timeit(gs.tracer(), "read_name_table.kvstore");
-            core::serialize::Serializer::loadAndOverwriteNameTable(gs, maybeUUIDBytes.data, maybeGsBytes.data);
+
+            auto diffCount = core::serialize::Serializer::loadDiffCount(maybeDiffCountBytes.data, gs.tracer());
+            if (diffCount > 0) {
+                // Load UUID
+                ENFORCE(gs.kvstoreUuid == 0, "The name table may only be loaded into a fresh GlobalState");
+                gs.kvstoreUuid = core::serialize::Serializer::loadGlobalStateUUID(gs, maybeUUIDBytes.data);
+
+                // Replay all diffs in order.
+                for (uint32_t i = 0; i < diffCount; i++) {
+                    auto data = kvstore->read(core::serialize::Serializer::nameTableDiffKey(i));
+                    ENFORCE(data.data != nullptr);
+                    core::serialize::Serializer::loadAndAppendNameTableDiff(gs, data.data);
+                }
+
+                // Mark as cached so wasNameTableModified() returns false.
+                gs.markNameTableAsCached();
+                gs.nameTableDiffCount = diffCount;
+            }
+
             if constexpr (debug_mode) {
                 for (unsigned int i = 1; i < gs.filesUsed(); i++) {
                     core::FileRef fref(i);

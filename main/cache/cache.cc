@@ -94,7 +94,16 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
         Timer timeit(gs.tracer(), "retainGlobalState.writeNameTable");
         gs.kvstoreUuid = Random::uniformU4();
         kvstore->write(core::serialize::Serializer::NAME_TABLE_UUID_KEY, core::serialize::Serializer::storeUUID(gs));
-        kvstore->write(core::serialize::Serializer::NAME_TABLE_KEY, core::serialize::Serializer::storeNameTable(gs));
+
+        auto diffIndex = gs.nameTableDiffCount;
+        kvstore->write(core::serialize::Serializer::nameTableDiffKey(diffIndex),
+                       core::serialize::Serializer::storeNameTableDiff(gs));
+
+        gs.nameTableDiffCount = diffIndex + 1;
+        kvstore->write(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY,
+                       core::serialize::Serializer::storeDiffCount(gs.nameTableDiffCount));
+
+        gs.markNameTableAsCached();
     }
 
     return true;
@@ -317,11 +326,11 @@ unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger
 
     auto kvstore = make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
 
-    // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
+    // If the diff count entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
     // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
     // the KeyValueStore created a fresh database when created.
-    const auto nameTableEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
-    if (nameTableEntry.len == 0) {
+    const auto diffCountEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY);
+    if (diffCountEntry.len == 0) {
         return nullptr;
     }
 
