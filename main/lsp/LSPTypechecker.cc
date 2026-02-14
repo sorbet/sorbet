@@ -318,7 +318,18 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
-    config->logger->debug("Running fast path over num_files={} duration={}", toTypecheck.size(), duration.usec);
+    if (duration.usec > 0) {
+        std::string files;
+        for (size_t i = 0; i < toTypecheck.size() && i < 10; i++) {
+            if (!files.empty()) {
+                files += ", ";
+            }
+            files += toTypecheck[i].data(*gs).path();
+        }
+        config->logger->debug("Running fast path over num_files={} duration={} files=[{}]", toTypecheck.size(), duration.usec, files);
+    } else {
+        config->logger->debug("Running fast path over num_files={} duration={}", toTypecheck.size(), duration.usec);
+    }
 
     return toTypecheck;
 }
