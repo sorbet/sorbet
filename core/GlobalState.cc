@@ -1199,7 +1199,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
         registryName = registryName.dataUnique(*this)->original;
     }
     auto packageRegistryOwner = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
-    data->packageRegistryOwner = packageRegistryOwner.exists() && packageRegistryOwner.isClassOrModule()
+    data->packageRegistryOwner = packageRegistryOwner.isClassOrModule()
                                      // Found narrower entry in <PackageSpecRegistry> hierarchy
                                      ? packageRegistryOwner.asClassOrModuleRef()
                                      // Set to `noClassOrModule()` to ensure that we don't keep

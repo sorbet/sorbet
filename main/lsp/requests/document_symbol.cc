@@ -50,8 +50,7 @@ struct Node {
 
         string name;
         auto owner = this->symbol.owner(gs);
-        if (owner.exists() && owner.isClassOrModule() &&
-            owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
+        if (owner.isClassOrModule() && owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()) {
             name = "self.";
         }
         auto symName = this->symbol.name(gs).show(gs);

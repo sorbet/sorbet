@@ -333,7 +333,7 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
         }
         case core::Names::new_().rawId(): {
             auto id = ast::cast_tree<ast::ConstantLit>(s.recv);
-            if (id == nullptr || !id->symbol().exists() || !id->symbol().isClassOrModule()) {
+            if (id == nullptr || !id->symbol().isClassOrModule()) {
                 return nullptr;
             }
 

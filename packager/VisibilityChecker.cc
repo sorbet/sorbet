@@ -33,7 +33,7 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
     ENFORCE(result.exists());
     for (auto it = parts.rbegin(); it != parts.rend(); it++) {
         auto nextScope = result.data(gs)->findMember(gs, *it);
-        if (!nextScope.exists() || !nextScope.isClassOrModule()) {
+        if (!nextScope.isClassOrModule()) {
             return core::Symbols::noClassOrModule();
         }
 
@@ -117,6 +117,9 @@ class PropagateVisibility final {
         }
 
         switch (sym.kind()) {
+            case core::SymbolRef::Kind::None:
+                ENFORCE(false, "Exporting symbols from a SymbolRef that doesn't exist");
+                [[fallthrough]];
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
@@ -191,7 +194,7 @@ class PropagateVisibility final {
         auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
         auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
         core::ClassOrModuleRef testScope;
-        if (testNamespace.exists() && testNamespace.isClassOrModule()) {
+        if (testNamespace.isClassOrModule()) {
             testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
         }
 
@@ -307,6 +310,9 @@ public:
         string_view kind;
         auto sym = lit->symbol();
         switch (sym.kind()) {
+            case core::SymbolRef::Kind::None:
+                ENFORCE(false, "Propagating visibility from a SymbolRef that doesn't exist");
+                [[fallthrough]];
             case core::SymbolRef::Kind::ClassOrModule: {
                 checkExportPackage(ctx, send.loc, sym);
                 auto setExportedTo = true;

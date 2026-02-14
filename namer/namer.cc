@@ -794,6 +794,9 @@ private:
 
     string_view prettySymbolKind(core::MutableContext ctx, core::SymbolRef::Kind kind) {
         switch (kind) {
+            case core::SymbolRef::Kind::None:
+                ENFORCE(false, "Should not call prettySymbolKind on a symbol that doesn't exist in namer")
+                [[fallthrough]];
             case core::SymbolRef::Kind::ClassOrModule:
                 return "class or module";
             case core::SymbolRef::Kind::FieldOrStaticField: {
@@ -1612,7 +1615,7 @@ private:
         // Note: this loop is accidentally quadratic. We run deleteFieldViaFullNameHash once per field
         // previously defined in this file, then in each call look at each member of that field's owner.
         for (const auto &[memberName, memberSym] : owner.data(ctx)->members()) {
-            if (memberSym.isClassOrModule()) {
+            if (!memberSym.exists() || memberSym.isClassOrModule()) {
                 // Safeguard against a collision function in our `FullNameHash` function (e.g., what
                 // if `foo()` and `::Foo` have the same `FullNameHash`, but were given two different
                 // `NameRef` IDs and thus don't collide in the `members` list?).
@@ -1643,6 +1646,7 @@ private:
                     case core::SymbolRef::Kind::TypeMember:
                         ctx.state.deleteTypeMemberSymbol(oldSymbol.asTypeMemberRef());
                         break;
+                    case core::SymbolRef::Kind::None:
                     case core::SymbolRef::Kind::ClassOrModule:
                     case core::SymbolRef::Kind::TypeParameter:
                         ENFORCE(false);
