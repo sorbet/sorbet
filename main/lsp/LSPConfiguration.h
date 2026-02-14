@@ -52,6 +52,12 @@ public:
     DiagnosticSeverity initialHighlightUntypedDiagnosticSeverity = DiagnosticSeverity::Information;
 
     /**
+     * Style for inlay type hints: "off", "before_var", "after_var", "RBS".
+     * Stored as a string to match the client configuration value.
+     */
+    std::string inlayTypeHints = "off";
+
+    /**
      * Whether or not the active client has support for snippets in CompletionItems.
      * Note: There is a generated ClientCapabilities class, but it is cumbersome to work with as most fields are
      * optional.
