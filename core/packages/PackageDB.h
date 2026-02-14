@@ -68,6 +68,11 @@ public:
         return this->genPackages_;
     }
 
+    // Whether we're using separate test packages, or the old-style inline test packages.
+    bool testPackages() const {
+        return this->testPackages_;
+    }
+
     absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
@@ -104,6 +109,7 @@ public:
 private:
     bool enabled_ = false;
     bool genPackages_ = false;
+    bool testPackages_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;

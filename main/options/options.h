@@ -233,6 +233,7 @@ struct Options {
     CacheSensitiveOptions cacheSensitiveOptions;
 
     bool packageDirected = false;
+    bool testPackages = false;
 
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;

@@ -1178,7 +1178,8 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
         return ret;
     }
 
-    if (owner == Symbols::root() && name == packages::PackageDB::TEST_NAMESPACE) {
+    if (owner == Symbols::root() &&
+        (!this->packageDB().testPackages() && name == packages::PackageDB::TEST_NAMESPACE)) {
         // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
         // searching for package names). Leave `package` as the non-existent package name.
         return ret;
@@ -2078,8 +2079,8 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
-    bool genPackages) const {
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint, bool genPackages,
+    bool testPackages) const {
     ENFORCE(fileTableFrozen);
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2100,7 +2101,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
         result->setPackagerOptions(
             extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
             extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
-            updateVisibilityFor, packagerLayers, errorHint, genPackages);
+            updateVisibilityFor, packagerLayers, errorHint, genPackages, testPackages);
     }
 
     return result;
@@ -2111,8 +2112,8 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
-    bool genPackages) const {
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint, bool genPackages,
+    bool testPackages) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2129,7 +2130,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
         result->setPackagerOptions(
             extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
             extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
-            updateVisibilityFor, packagerLayers, errorHint, genPackages);
+            updateVisibilityFor, packagerLayers, errorHint, genPackages, testPackages);
     }
 
     return result;
@@ -2141,7 +2142,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
                              const vector<string> &packageSkipRBIExportEnforcementDirs,
                              const vector<string> &allowRelaxedPackagerChecksFor,
                              const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
-                             string errorHint, bool genPackages) const {
+                             string errorHint, bool genPackages, bool testPackages) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2174,7 +2175,7 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
         result->setPackagerOptions(
             extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
             extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs, allowRelaxedPackagerChecksFor,
-            updateVisibilityFor, packagerLayers, errorHint, genPackages);
+            updateVisibilityFor, packagerLayers, errorHint, genPackages, testPackages);
     }
 
     return result;
@@ -2326,11 +2327,12 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
                                      const vector<string> &packageSkipRBIExportEnforcementDirs,
                                      const vector<string> &allowRelaxedPackagerChecksFor,
                                      const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
-                                     string errorHint, bool genPackages) {
+                                     string errorHint, bool genPackages, bool testPackages) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
     packageDB_.genPackages_ = genPackages;
+    packageDB_.testPackages_ = testPackages;
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
