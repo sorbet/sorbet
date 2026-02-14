@@ -599,6 +599,7 @@ class BigDecimal < Numeric
     )
     .returns(Integer)
   end
+  sig { params(arg0: T.anything).returns(T.nilable(Integer)) }
   def <=>(arg0); end
 
   # Tests for value equality; returns true if the values are equal.
