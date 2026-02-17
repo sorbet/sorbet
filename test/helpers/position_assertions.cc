@@ -2472,6 +2472,13 @@ void ShowSymbolAssertion::check(const UnorderedMap<string, shared_ptr<core::File
                                       errorPrefix, prettyPrintRangeComment(sourceLine, *range, toString()),
                                       prettyPrintRangeComment(sourceLine, *range,
                                                               fmt::format("show-symbol: {}", showSymbolContents))));
+    } else if (holds_alternative<unique_ptr<SymbolInformation>>(showSymbolResponse) &&
+               get<unique_ptr<SymbolInformation>>(showSymbolResponse)->location == nullptr) {
+        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}This `show-symbol` has `nullptr` for `location`:\n{}", errorPrefix,
+                                      prettyPrintRangeComment(sourceLine, *range,
+                                                              fmt::format("show-symbol: {}", showSymbolContents))));
     }
 }
 

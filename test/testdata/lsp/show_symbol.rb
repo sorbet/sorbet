@@ -55,3 +55,13 @@ module Outer
     end
   end
 end
+
+Hello # error: Unable to resolve constant `Hello`
+# ^ show-symbol: null
+Hello:: # error: Unable to resolve constant `Hello`
+#    ^^ error: expected constant name following "::"
+#     ^ show-symbol: null
+module A
+  Goodbye =
+  #        ^ show-symbol: null
+end # error: unexpected token "end"
