@@ -1,0 +1,19 @@
+DefMethod {
+  name = <U test_bad_assign>
+  params = Params {
+    params = [
+      Param {
+        name = <U x>
+      }
+    ]
+  }
+  body = Assign {
+    lhs = LVarLhs {
+      name = <U x>
+    }
+    rhs = Const {
+      scope = NULL
+      name = <C <U <ErrorNode>>>
+    }
+  }
+}

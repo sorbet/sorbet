@@ -1840,7 +1840,7 @@ ClassDef{
       name = <U method_empty><<U <todo method>>>
       params = [UnresolvedIdent{
           kind = Local
-          name = <D <U <destructure>> $51>
+          name = <D <U <destructure>> $2>
         }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -1852,17 +1852,17 @@ ClassDef{
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $52>
+                  name = <D <U <assignTemp>> $3>
                 }
                 rhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <destructure>> $51>
+                  name = <D <U <destructure>> $2>
                 }
               }
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $53>
+                  name = <D <U <assignTemp>> $4>
                 }
                 rhs = Send{
                   flags = {}
@@ -1876,7 +1876,7 @@ ClassDef{
                   args = [
                     UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $52>
+                      name = <D <U <assignTemp>> $3>
                     }
                     Literal{ value = 2 }
                     Literal{ value = 0 }
@@ -1892,7 +1892,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $53>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -1911,7 +1911,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $53>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -1924,7 +1924,7 @@ ClassDef{
             ],
             expr = UnresolvedIdent{
               kind = Local
-              name = <D <U <assignTemp>> $52>
+              name = <D <U <assignTemp>> $3>
             }
           }
         ],
@@ -1937,7 +1937,7 @@ ClassDef{
       name = <U method_single><<U <todo method>>>
       params = [UnresolvedIdent{
           kind = Local
-          name = <D <U <destructure>> $54>
+          name = <D <U <destructure>> $2>
         }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -1949,17 +1949,17 @@ ClassDef{
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $55>
+                  name = <D <U <assignTemp>> $3>
                 }
                 rhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <destructure>> $54>
+                  name = <D <U <destructure>> $2>
                 }
               }
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $56>
+                  name = <D <U <assignTemp>> $4>
                 }
                 rhs = Send{
                   flags = {}
@@ -1973,7 +1973,7 @@ ClassDef{
                   args = [
                     UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $55>
+                      name = <D <U <assignTemp>> $3>
                     }
                     Literal{ value = 2 }
                     Literal{ value = 0 }
@@ -1989,7 +1989,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $56>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2008,7 +2008,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $56>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2021,7 +2021,7 @@ ClassDef{
             ],
             expr = UnresolvedIdent{
               kind = Local
-              name = <D <U <assignTemp>> $55>
+              name = <D <U <assignTemp>> $3>
             }
           }
         ],
@@ -2042,7 +2042,7 @@ ClassDef{
       name = <U method_multi><<U <todo method>>>
       params = [UnresolvedIdent{
           kind = Local
-          name = <D <U <destructure>> $57>
+          name = <D <U <destructure>> $2>
         }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -2054,17 +2054,17 @@ ClassDef{
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $58>
+                  name = <D <U <assignTemp>> $3>
                 }
                 rhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <destructure>> $57>
+                  name = <D <U <destructure>> $2>
                 }
               }
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $59>
+                  name = <D <U <assignTemp>> $4>
                 }
                 rhs = Send{
                   flags = {}
@@ -2078,7 +2078,7 @@ ClassDef{
                   args = [
                     UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $58>
+                      name = <D <U <assignTemp>> $3>
                     }
                     Literal{ value = 2 }
                     Literal{ value = 0 }
@@ -2094,7 +2094,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $59>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2113,7 +2113,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $59>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2126,7 +2126,7 @@ ClassDef{
             ],
             expr = UnresolvedIdent{
               kind = Local
-              name = <D <U <assignTemp>> $58>
+              name = <D <U <assignTemp>> $3>
             }
           }
         ],
@@ -2160,7 +2160,7 @@ ClassDef{
       name = <U method_empty><<U <todo method>>>
       params = [UnresolvedIdent{
           kind = Local
-          name = <D <U <destructure>> $60>
+          name = <D <U <destructure>> $2>
         }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -2172,17 +2172,17 @@ ClassDef{
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $61>
+                  name = <D <U <assignTemp>> $3>
                 }
                 rhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <destructure>> $60>
+                  name = <D <U <destructure>> $2>
                 }
               }
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $62>
+                  name = <D <U <assignTemp>> $4>
                 }
                 rhs = Send{
                   flags = {}
@@ -2196,7 +2196,7 @@ ClassDef{
                   args = [
                     UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $61>
+                      name = <D <U <assignTemp>> $3>
                     }
                     Literal{ value = 2 }
                     Literal{ value = 0 }
@@ -2212,7 +2212,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $62>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2231,7 +2231,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $62>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2244,7 +2244,7 @@ ClassDef{
             ],
             expr = UnresolvedIdent{
               kind = Local
-              name = <D <U <assignTemp>> $61>
+              name = <D <U <assignTemp>> $3>
             }
           }
         ],
@@ -2257,7 +2257,7 @@ ClassDef{
       name = <U method_single><<U <todo method>>>
       params = [UnresolvedIdent{
           kind = Local
-          name = <D <U <destructure>> $63>
+          name = <D <U <destructure>> $2>
         }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -2269,17 +2269,17 @@ ClassDef{
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $64>
+                  name = <D <U <assignTemp>> $3>
                 }
                 rhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <destructure>> $63>
+                  name = <D <U <destructure>> $2>
                 }
               }
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $65>
+                  name = <D <U <assignTemp>> $4>
                 }
                 rhs = Send{
                   flags = {}
@@ -2293,7 +2293,7 @@ ClassDef{
                   args = [
                     UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $64>
+                      name = <D <U <assignTemp>> $3>
                     }
                     Literal{ value = 2 }
                     Literal{ value = 0 }
@@ -2309,7 +2309,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $65>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2328,7 +2328,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $65>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2341,7 +2341,7 @@ ClassDef{
             ],
             expr = UnresolvedIdent{
               kind = Local
-              name = <D <U <assignTemp>> $64>
+              name = <D <U <assignTemp>> $3>
             }
           }
         ],
@@ -2362,7 +2362,7 @@ ClassDef{
       name = <U method_multi><<U <todo method>>>
       params = [UnresolvedIdent{
           kind = Local
-          name = <D <U <destructure>> $66>
+          name = <D <U <destructure>> $2>
         }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>
@@ -2374,17 +2374,17 @@ ClassDef{
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $67>
+                  name = <D <U <assignTemp>> $3>
                 }
                 rhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <destructure>> $66>
+                  name = <D <U <destructure>> $2>
                 }
               }
               Assign{
                 lhs = UnresolvedIdent{
                   kind = Local
-                  name = <D <U <assignTemp>> $68>
+                  name = <D <U <assignTemp>> $4>
                 }
                 rhs = Send{
                   flags = {}
@@ -2398,7 +2398,7 @@ ClassDef{
                   args = [
                     UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $67>
+                      name = <D <U <assignTemp>> $3>
                     }
                     Literal{ value = 2 }
                     Literal{ value = 0 }
@@ -2414,7 +2414,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $68>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2433,7 +2433,7 @@ ClassDef{
                   flags = {}
                   recv = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $68>
+                    name = <D <U <assignTemp>> $4>
                   }
                   fun = <U []>
                   block = nullptr
@@ -2446,7 +2446,7 @@ ClassDef{
             ],
             expr = UnresolvedIdent{
               kind = Local
-              name = <D <U <assignTemp>> $67>
+              name = <D <U <assignTemp>> $3>
             }
           }
         ],
@@ -2483,7 +2483,7 @@ ClassDef{
         params = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <destructure>> $69>
+            name = <D <U <destructure>> $51>
           }
         ]
         body = InsSeq{
@@ -2493,17 +2493,17 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $70>
+                    name = <D <U <assignTemp>> $52>
                   }
                   rhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <destructure>> $69>
+                    name = <D <U <destructure>> $51>
                   }
                 }
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $71>
+                    name = <D <U <assignTemp>> $53>
                   }
                   rhs = Send{
                     flags = {}
@@ -2517,7 +2517,7 @@ ClassDef{
                     args = [
                       UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $70>
+                        name = <D <U <assignTemp>> $52>
                       }
                       Literal{ value = 2 }
                       Literal{ value = 0 }
@@ -2533,7 +2533,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $71>
+                      name = <D <U <assignTemp>> $53>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2552,7 +2552,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $71>
+                      name = <D <U <assignTemp>> $53>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2565,7 +2565,7 @@ ClassDef{
               ],
               expr = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $70>
+                name = <D <U <assignTemp>> $52>
               }
             }
           ],
@@ -2585,7 +2585,7 @@ ClassDef{
         params = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <destructure>> $72>
+            name = <D <U <destructure>> $54>
           }
         ]
         body = InsSeq{
@@ -2595,17 +2595,17 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $73>
+                    name = <D <U <assignTemp>> $55>
                   }
                   rhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <destructure>> $72>
+                    name = <D <U <destructure>> $54>
                   }
                 }
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $74>
+                    name = <D <U <assignTemp>> $56>
                   }
                   rhs = Send{
                     flags = {}
@@ -2619,7 +2619,7 @@ ClassDef{
                     args = [
                       UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $73>
+                        name = <D <U <assignTemp>> $55>
                       }
                       Literal{ value = 2 }
                       Literal{ value = 0 }
@@ -2635,7 +2635,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $74>
+                      name = <D <U <assignTemp>> $56>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2654,7 +2654,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $74>
+                      name = <D <U <assignTemp>> $56>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2667,7 +2667,7 @@ ClassDef{
               ],
               expr = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $73>
+                name = <D <U <assignTemp>> $55>
               }
             }
           ],
@@ -2695,7 +2695,7 @@ ClassDef{
         params = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <destructure>> $75>
+            name = <D <U <destructure>> $57>
           }
         ]
         body = InsSeq{
@@ -2705,17 +2705,17 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $76>
+                    name = <D <U <assignTemp>> $58>
                   }
                   rhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <destructure>> $75>
+                    name = <D <U <destructure>> $57>
                   }
                 }
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $77>
+                    name = <D <U <assignTemp>> $59>
                   }
                   rhs = Send{
                     flags = {}
@@ -2729,7 +2729,7 @@ ClassDef{
                     args = [
                       UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $76>
+                        name = <D <U <assignTemp>> $58>
                       }
                       Literal{ value = 2 }
                       Literal{ value = 0 }
@@ -2745,7 +2745,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $77>
+                      name = <D <U <assignTemp>> $59>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2764,7 +2764,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $77>
+                      name = <D <U <assignTemp>> $59>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2777,7 +2777,7 @@ ClassDef{
               ],
               expr = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $76>
+                name = <D <U <assignTemp>> $58>
               }
             }
           ],
@@ -2821,7 +2821,7 @@ ClassDef{
         params = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <destructure>> $78>
+            name = <D <U <destructure>> $60>
           }
         ]
         body = InsSeq{
@@ -2831,17 +2831,17 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $79>
+                    name = <D <U <assignTemp>> $61>
                   }
                   rhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <destructure>> $78>
+                    name = <D <U <destructure>> $60>
                   }
                 }
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $80>
+                    name = <D <U <assignTemp>> $62>
                   }
                   rhs = Send{
                     flags = {}
@@ -2855,7 +2855,7 @@ ClassDef{
                     args = [
                       UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $79>
+                        name = <D <U <assignTemp>> $61>
                       }
                       Literal{ value = 2 }
                       Literal{ value = 0 }
@@ -2871,7 +2871,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $80>
+                      name = <D <U <assignTemp>> $62>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2890,7 +2890,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $80>
+                      name = <D <U <assignTemp>> $62>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2903,7 +2903,7 @@ ClassDef{
               ],
               expr = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $79>
+                name = <D <U <assignTemp>> $61>
               }
             }
           ],
@@ -2926,7 +2926,7 @@ ClassDef{
         params = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <destructure>> $81>
+            name = <D <U <destructure>> $63>
           }
         ]
         body = InsSeq{
@@ -2936,17 +2936,17 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $82>
+                    name = <D <U <assignTemp>> $64>
                   }
                   rhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <destructure>> $81>
+                    name = <D <U <destructure>> $63>
                   }
                 }
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $83>
+                    name = <D <U <assignTemp>> $65>
                   }
                   rhs = Send{
                     flags = {}
@@ -2960,7 +2960,7 @@ ClassDef{
                     args = [
                       UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $82>
+                        name = <D <U <assignTemp>> $64>
                       }
                       Literal{ value = 2 }
                       Literal{ value = 0 }
@@ -2976,7 +2976,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $83>
+                      name = <D <U <assignTemp>> $65>
                     }
                     fun = <U []>
                     block = nullptr
@@ -2995,7 +2995,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $83>
+                      name = <D <U <assignTemp>> $65>
                     }
                     fun = <U []>
                     block = nullptr
@@ -3008,7 +3008,7 @@ ClassDef{
               ],
               expr = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $82>
+                name = <D <U <assignTemp>> $64>
               }
             }
           ],
@@ -3039,7 +3039,7 @@ ClassDef{
         params = [
           UnresolvedIdent{
             kind = Local
-            name = <D <U <destructure>> $84>
+            name = <D <U <destructure>> $66>
           }
         ]
         body = InsSeq{
@@ -3049,17 +3049,17 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $85>
+                    name = <D <U <assignTemp>> $67>
                   }
                   rhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <destructure>> $84>
+                    name = <D <U <destructure>> $66>
                   }
                 }
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $86>
+                    name = <D <U <assignTemp>> $68>
                   }
                   rhs = Send{
                     flags = {}
@@ -3073,7 +3073,7 @@ ClassDef{
                     args = [
                       UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $85>
+                        name = <D <U <assignTemp>> $67>
                       }
                       Literal{ value = 2 }
                       Literal{ value = 0 }
@@ -3089,7 +3089,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $86>
+                      name = <D <U <assignTemp>> $68>
                     }
                     fun = <U []>
                     block = nullptr
@@ -3108,7 +3108,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $86>
+                      name = <D <U <assignTemp>> $68>
                     }
                     fun = <U []>
                     block = nullptr
@@ -3121,7 +3121,7 @@ ClassDef{
               ],
               expr = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $85>
+                name = <D <U <assignTemp>> $67>
               }
             }
           ],

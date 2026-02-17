@@ -1,0 +1,11 @@
+Regexp {
+  regex = [
+    String {
+      val = <U foo
+>
+    }
+  ]
+  opts = Regopt {
+    opts = ""
+  }
+}
