@@ -320,7 +320,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
 
     auto duration = timeit.setEndTime();
     std::string files;
-    if (duration.usec > 1000000) {
+    if (duration.usec > 1'000'000) {
         auto span = absl::MakeSpan(toTypecheck);
         const auto numFilesToShow = 10;
         files = fmt::format("{}", fmt::map_join(span.size() > numFilesToShow ? span.subspan(0, numFilesToShow) : span,
