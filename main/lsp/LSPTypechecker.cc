@@ -3,6 +3,7 @@
 #include "absl/synchronization/mutex.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
@@ -318,19 +319,20 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
+    std::string files;
     if (duration.usec > 1000000) {
-        std::string files;
-        for (size_t i = 0; i < toTypecheck.size() && i < 10; i++) {
-            if (!files.empty()) {
-                files += ", ";
-            }
-            files += toTypecheck[i].data(*gs).path();
+        auto span = absl::MakeSpan(toTypecheck);
+        const auto numFilesToShow = 10;
+        files = fmt::format("{}", fmt::map_join(span.size() > numFilesToShow ? span.subspan(0, numFilesToShow) : span,
+                                                ", ", [&](const auto fref) { return fref.data(*gs).path(); }));
+        if (span.size() > numFilesToShow) {
+            files += ", ...";
         }
-        config->logger->debug("Running fast path over num_files={} duration={} files=[{}]", toTypecheck.size(),
-                              duration.usec, files);
     } else {
-        config->logger->debug("Running fast path over num_files={} duration={}", toTypecheck.size(), duration.usec);
+        files = "...";
     }
+    config->logger->debug("Running fast path over num_files={} duration={} files=[{}]", toTypecheck.size(),
+                          duration.usec, files);
 
     return toTypecheck;
 }
