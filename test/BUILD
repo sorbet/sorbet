@@ -453,6 +453,7 @@ pipeline_tests(
             "testdata/lsp/completion/untyped_receiver.rb",
             "testdata/lsp/hover_methods_inside_block.rb",
             "testdata/lsp/when_eqeqeq.rb",
+            "testdata/lsp/show_symbol.rb",
             "testdata/namer/duplicate_field_error.rb",
             "testdata/parser/bad_argument_crash.rb",
             "testdata/parser/chained_sends_lots.rb",

@@ -45,6 +45,10 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         // Using symbolBeforeDealias instead of symbol here lets us show the name of the actual
         // constant under the user's cursor, not what it aliases to.
         sym = c->symbolBeforeDealias;
+        if (sym == core::Symbols::StubModule() || sym == core::Symbols::StubSuperClass() ||
+            sym == core::Symbols::StubMixin() || sym == core::Symbols::ErrorNode()) {
+            sym = core::Symbols::noClassOrModule();
+        }
     } else if (auto d = resp->isMethodDef()) {
         sym = d->symbol;
     } else if (auto f = resp->isField()) {
