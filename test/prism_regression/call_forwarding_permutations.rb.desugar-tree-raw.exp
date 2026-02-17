@@ -1,0 +1,326 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U case1_none><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U bar>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U case2_block_param><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U block>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-block-pass>>
+        block = nullptr
+        pos_args = 3
+        args = [
+          Self
+          Literal{ value = :bar }
+          UnresolvedIdent{
+            kind = Local
+            name = <U block>
+          }
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U case3_anonymous_block_param><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U &>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-block-pass>>
+        block = nullptr
+        pos_args = 3
+        args = [
+          Self
+          Literal{ value = :bar }
+          UnresolvedIdent{
+            kind = Local
+            name = <U &>
+          }
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U case4_forwarding><<U <todo method>>>
+      params = [RestParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-args>>
+        } }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-kwargs>>
+        } } }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-block>>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-splat-and-block-pass>>
+        block = nullptr
+        pos_args = 5
+        args = [
+          Self
+          Literal{ value = :bar }
+          Send{
+            flags = {}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <splat>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U <fwd-args>>
+                }
+              ]
+            }
+            fun = <U concat>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Array{
+                elems = [
+                  Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (class ::<Magic>)
+                      orig = nullptr
+                    }
+                    fun = <U <to-hash-dup>>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedIdent{
+                        kind = Local
+                        name = <U <fwd-kwargs>>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+          Literal{ value = nil }
+          UnresolvedIdent{
+            kind = Local
+            name = <U <fwd-block>>
+          }
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U case5_block_literal><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U bar>
+        block = Block {
+          params = [
+          ]
+          body = Literal{ value = "block body" }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U case6_forwarding_and_literal><<U <todo method>>>
+      params = [RestParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-args>>
+        } }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-kwargs>>
+        } } }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <fwd-block>>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-splat-and-block-pass>>
+        block = Block {
+          params = [
+          ]
+          body = Literal{ value = "literal block" }
+        }
+        pos_args = 5
+        args = [
+          Self
+          Literal{ value = :foo }
+          Send{
+            flags = {}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <splat>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U <fwd-args>>
+                }
+              ]
+            }
+            fun = <U concat>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Array{
+                elems = [
+                  Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (class ::<Magic>)
+                      orig = nullptr
+                    }
+                    fun = <U <to-hash-dup>>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedIdent{
+                        kind = Local
+                        name = <U <fwd-kwargs>>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+          Literal{ value = nil }
+          UnresolvedIdent{
+            kind = Local
+            name = <U <fwd-block>>
+          }
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U case7_block_pass_and_literal><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U block>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-block-pass>>
+        block = Block {
+          params = [
+          ]
+          body = Literal{ value = "literal block" }
+        }
+        pos_args = 3
+        args = [
+          Self
+          Literal{ value = :foo }
+          UnresolvedIdent{
+            kind = Local
+            name = <U block>
+          }
+        ]
+      }
+    }
+
+    MethodDef{
+      flags = {}
+      name = <U case8_anonymous_block_pass_and_literal><<U <todo method>>>
+      params = [BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U &>
+        } }]
+      rhs = Send{
+        flags = {privateOk}
+        recv = ConstantLit{
+          symbol = (class ::<Magic>)
+          orig = nullptr
+        }
+        fun = <U <call-with-block-pass>>
+        block = Block {
+          params = [
+          ]
+          body = Literal{ value = "literal block" }
+        }
+        pos_args = 3
+        args = [
+          Self
+          Literal{ value = :foo }
+          UnresolvedIdent{
+            kind = Local
+            name = <U &>
+          }
+        ]
+      }
+    }
+  ]
+}
