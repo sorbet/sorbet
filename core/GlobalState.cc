@@ -1666,6 +1666,13 @@ FileRef GlobalState::reserveFileRef(string path) {
 }
 
 NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
+    // `nextMangledName` can be called from contexts that conceptually need to allocate a new name even if the name table
+    // is currently frozen (e.g., error recovery during naming). Ensure we can allocate the unique name.
+    const bool wasFrozen = nameTableFrozen;
+    if (wasFrozen) {
+        nameTableFrozen = false;
+    }
+
     auto ownerData = owner.data(*this);
     uint32_t collisionCount = 1;
     NameRef name;
@@ -1673,6 +1680,9 @@ NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
         name = freshNameUnique(UniqueNameKind::MangleRename, origName, collisionCount++);
     } while (ownerData->findMember(*this, name).exists());
 
+    if (wasFrozen) {
+        nameTableFrozen = true;
+    }
     return name;
 }
 

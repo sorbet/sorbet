@@ -670,6 +670,10 @@ public:
         // attempt to support RSpec.
         bool rspecRewriterEnabled = false;
 
+        // Whether to infer return types for methods synthesized by ActiveSupport `delegate`.
+        // Guarded behind an experimental flag, because it can surface new type errors.
+        bool delegateReturnTypesEnabled = false;
+
         // So we can know whether we're running in autogen mode.
         // Right now this is only used to turn certain Rewriter passes on or off.
         // Think very hard before looking at this value in namer / resolver!

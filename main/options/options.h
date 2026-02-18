@@ -202,6 +202,9 @@ struct Options {
 
         bool rspecRewriterEnabled : 1;
 
+        // Experimental feature: infer return types for ActiveSupport `delegate`
+        bool delegateReturnTypesEnabled : 1;
+
         bool runningUnderAutogen : 1;
 
         bool sorbetPackages : 1;
@@ -211,20 +214,21 @@ struct Options {
         bool usePrismParser : 1;
 
         // HELLO! adding/removing MUST also change this number!!
-        constexpr static uint8_t NUMBER_OF_FLAGS = 8;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 9;
 
         // In C++20 we can replace this with bit field initializers
         CacheSensitiveOptions()
             : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
-              rspecRewriterEnabled(false), runningUnderAutogen(false), sorbetPackages(false), usePrismParser(false) {}
+              rspecRewriterEnabled(false), delegateReturnTypesEnabled(false), runningUnderAutogen(false),
+              sorbetPackages(false), usePrismParser(false) {}
 
-        constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
+        constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
-        uint8_t serialize() const {
-            static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
+        uint16_t serialize() const {
+            static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint16_t));
             static_assert(sizeof(CacheSensitiveOptions) == sizeof(VALID_BITS_MASK));
             // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
+            auto rawBits = *reinterpret_cast<const uint16_t *>(this);
             static_assert(sizeof(CacheSensitiveOptions) == sizeof(rawBits));
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;

@@ -4061,6 +4061,148 @@ void verifyLinearizationComputed(const core::GlobalState &gs) {
     })
 }
 
+// Extracts the ClassOrModuleRef from a simple type (ClassType or AppliedType),
+// stripping proxy wrappers. Returns noClassOrModule for anything more complex.
+core::ClassOrModuleRef classOfType(const core::GlobalState &gs, core::TypePtr ty) {
+    while (ty != nullptr && is_proxy_type(ty)) {
+        ty = ty.underlying(gs);
+    }
+    if (ty == nullptr) {
+        return core::Symbols::noClassOrModule();
+    }
+    if (core::isa_type<core::ClassType>(ty)) {
+        return core::cast_type_nonnull<core::ClassType>(ty).symbol;
+    }
+    if (auto at = core::cast_type<core::AppliedType>(ty)) {
+        return at->klass;
+    }
+    return core::Symbols::noClassOrModule();
+}
+
+class DelegateReturnTypePropagator final {
+    core::NameRef markerFun;
+
+public:
+    explicit DelegateReturnTypePropagator(const core::GlobalState &gs)
+        : markerFun(gs.lookupNameUTF8("__sorbet_delegate_stub__")) {}
+
+    void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        auto &mdef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        if (!mdef.flags.isRewriterSynthesized) {
+            return;
+        }
+
+        auto marker = ast::cast_tree<ast::Send>(mdef.rhs);
+        if (marker == nullptr || marker->fun != markerFun || marker->numPosArgs() != 3) {
+            return;
+        }
+
+        auto toLit = ast::cast_tree<ast::Literal>(marker->getPosArg(0));
+        auto delegatedMethodLit = ast::cast_tree<ast::Literal>(marker->getPosArg(1));
+        auto allowNilLit = ast::cast_tree<ast::Literal>(marker->getPosArg(2));
+        if (toLit == nullptr || !toLit->isSymbol() ||
+            delegatedMethodLit == nullptr || !delegatedMethodLit->isSymbol() || allowNilLit == nullptr) {
+            return;
+        }
+
+        core::NameRef toName = toLit->asSymbol();
+        core::NameRef delegatedMethodName = delegatedMethodLit->asSymbol();
+
+        // allow_nil: true is not yet supported; leave the method as T.untyped.
+        if (allowNilLit->isTrue(ctx)) {
+            return;
+        }
+
+        const auto owner = mdef.symbol.data(ctx)->owner;
+        if (!owner.exists()) {
+            return;
+        }
+
+        core::TypePtr receiverType;
+        auto toShort = toName.shortName(ctx);
+        if (!toShort.empty() && toShort[0] == '@') {
+            auto field = ctx.state.lookupFieldSymbol(owner, toName);
+            if (!field.exists() || field.data(ctx)->resultType == nullptr) {
+                return;
+            }
+            receiverType = field.data(ctx)->resultType;
+        } else {
+            auto toMethod = ctx.state.lookupMethodSymbol(owner, toName);
+            if (!toMethod.exists() || !toMethod.data(ctx)->hasSig()) {
+                return;
+            }
+            receiverType = toMethod.data(ctx)->resultType;
+        }
+
+        auto receiverClass = classOfType(
+            ctx.state, core::Types::dropSubtypesOf(ctx.state, receiverType, core::Types::falsySymbols()));
+        if (!receiverClass.exists()) {
+            return;
+        }
+
+        auto delegatedMethod = receiverClass.data(ctx)->findMethodTransitive(ctx.state, delegatedMethodName);
+        if (!delegatedMethod.exists() || !delegatedMethod.data(ctx)->hasSig()) {
+            return;
+        }
+
+        // Copy parameter types from the delegated method. We must also rebuild `mdef.params`
+        // because CFGBuilder iterates AST params and symbol params in lockstep.
+        const auto &delegatedParams = delegatedMethod.data(ctx)->parameters;
+        auto paramLoc = mdef.loc;
+        core::Method::ParametersStore newParams;
+        ast::MethodDef::PARAMS_store newAstParams;
+        newParams.reserve(delegatedParams.size());
+        newAstParams.reserve(delegatedParams.size());
+        for (const auto &param : delegatedParams) {
+            core::ParamInfo p;
+            p.flags = param.flags;
+            p.name = param.name;
+            p.rebind = param.rebind;
+            p.loc = param.loc;
+            if (param.type != nullptr) {
+                p.type = core::Types::resultTypeAsSeenFromSelf(ctx.state, param.type, receiverClass);
+            }
+            newParams.emplace_back(std::move(p));
+
+            ast::ExpressionPtr expr =
+                ast::make_expression<ast::Local>(paramLoc, core::LocalVariable(param.name, 0));
+            if (param.flags.isKeyword) {
+                expr = ast::make_expression<ast::KeywordArg>(paramLoc, std::move(expr));
+            }
+            if (param.flags.isRepeated) {
+                expr = ast::make_expression<ast::RestParam>(paramLoc, std::move(expr));
+            }
+            if (param.flags.isDefault) {
+                expr = ast::make_expression<ast::OptionalParam>(paramLoc, std::move(expr), ast::MK::Nil(paramLoc));
+            }
+            if (param.flags.isBlock) {
+                expr = ast::make_expression<ast::BlockParam>(paramLoc, std::move(expr));
+            }
+            if (param.flags.isShadow) {
+                expr = ast::make_expression<ast::ShadowArg>(paramLoc, std::move(expr));
+            }
+            newAstParams.emplace_back(std::move(expr));
+        }
+        mdef.symbol.data(ctx)->parameters = std::move(newParams);
+        mdef.params = std::move(newAstParams);
+
+        mdef.symbol.data(ctx)->resultType =
+            core::Types::resultTypeAsSeenFromSelf(ctx.state, delegatedMethod.data(ctx)->resultType, receiverClass);
+    }
+};
+
+void propagateDelegateReturnTypes(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
+    if (!gs.cacheSensitiveOptions.delegateReturnTypesEnabled) {
+        return;
+    }
+
+    DelegateReturnTypePropagator walk(gs);
+    for (auto &tree : trees) {
+        core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
+        ast::TreeWalk::apply(ctx, walk, tree.tree);
+    }
+}
+
 } // namespace
 
 ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
@@ -4088,6 +4230,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     }
 
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
+    propagateDelegateReturnTypes(gs, result);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
 
@@ -4118,6 +4261,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     }
     auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, symbolsToRecompute);
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
+    propagateDelegateReturnTypes(gs, result);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.

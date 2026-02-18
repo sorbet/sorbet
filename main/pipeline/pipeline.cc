@@ -61,6 +61,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     gs.cacheSensitiveOptions.rbsEnabled = opts.cacheSensitiveOptions.rbsEnabled;
     gs.cacheSensitiveOptions.requiresAncestorEnabled = opts.cacheSensitiveOptions.requiresAncestorEnabled;
     gs.cacheSensitiveOptions.rspecRewriterEnabled = opts.cacheSensitiveOptions.rspecRewriterEnabled;
+    gs.cacheSensitiveOptions.delegateReturnTypesEnabled = opts.cacheSensitiveOptions.delegateReturnTypesEnabled;
     gs.cacheSensitiveOptions.typedSuper = opts.cacheSensitiveOptions.typedSuper;
 
     if (opts.silenceErrors) {

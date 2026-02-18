@@ -1,0 +1,39 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C DelegateReturnTypesExperimental><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def delegated_method<<todo method>>(*arg0, &<blk>)
+      ::T.unsafe(nil).__sorbet_delegate_stub__(:foo, :delegated_method, false)
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C DelegateReturnTypeFoo>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>::<C T>.unsafe(nil)
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of delegated_method>
+
+    <runtime method definition of foo>
+  end
+
+  class <emptyTree>::<C DelegateReturnTypeFoo><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def delegated_method<<todo method>>(&<blk>)
+      <emptyTree>::<C T>.unsafe(nil)
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of delegated_method>
+  end
+end

@@ -746,6 +746,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("enable-experimental-rbs-comments",
                                  "Enable experimental support for RBS signatures and assertions as inline comments");
 
+    options.add_options(section)("enable-experimental-delegate-return-types",
+                                 "Enable experimental inference of return types for ActiveSupport `delegate`");
+
     options.add_options(section)(
         "enable-experimental-rspec",
         "Enables experimental support for RSpec. "
@@ -1004,6 +1007,8 @@ void readOptions(Options &opts,
         }
 
         opts.cacheSensitiveOptions.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
+        opts.cacheSensitiveOptions.delegateReturnTypesEnabled =
+            raw["enable-experimental-delegate-return-types"].as<bool>();
         opts.cacheSensitiveOptions.rspecRewriterEnabled = raw["enable-experimental-rspec"].as<bool>();
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();

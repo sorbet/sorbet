@@ -150,6 +150,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
       needs_experimental_rbs=true
     fi
 
+    needs_delegate_return_types=false
+    if grep -q '^# enable-experimental-delegate-return-types: true' "${srcs[@]}"; then
+      needs_delegate_return_types=true
+    fi
+
     if grep -q '^# typed-super: false' "${srcs[@]}"; then
       needs_typed_super_false=true
     else
@@ -214,10 +219,13 @@ for this_src in "${rb_src[@]}" DUMMY; do
       if $needs_rspec; then
         args+=("--enable-experimental-rspec")
       else
-        args=()
+        args+=()
       fi
       if $needs_experimental_rbs; then
         args+=("--enable-experimental-rbs-comments")
+      fi
+      if $needs_delegate_return_types; then
+        args+=("--enable-experimental-delegate-return-types")
       fi
       if $needs_typed_super_false; then
         args+=("--typed-super=false")
