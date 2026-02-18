@@ -9,14 +9,6 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-namespace {
-
-rbs_string_t makeRBSString(const string &str) {
-    return rbs_string_new(str.data(), str.data() + str.size());
-}
-
-} // namespace
-
 unique_ptr<parser::Node>
 SignatureTranslator::translateAssertionType(vector<pair<core::LocOffsets, core::NameRef>> typeParams,
                                             const rbs::RBSDeclaration &assertion) {
