@@ -287,6 +287,12 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
+            # Prism allows a new line between `.` and `end` as a way to call a method called literally `#end`.
+            # The legacy parser treats this as an incomplete call to `x.<method-name-missing>()`, which is much
+            # nicer behaviour, which we eventually want to support with Prism as well.
+            # https://github.com/Shopify/sorbet/issues/739
+            "testdata/lsp/completion/missing_fun.rb",
+
             # Tests having to do with tree differences in invalid Ruby code; will address later
             "testdata/parser/error_recovery/assign.rb",
             "testdata/parser/error_recovery/begin_1.rb",
@@ -568,6 +574,7 @@ pipeline_tests(
             "prism_regression/call_implicit_kw_args.rb",
             "prism_regression/literal_hash.rb",
             "prism_regression/multi_target.rb",
+            "prism_regression/call_block_param.rb",
         ],
     ),
     "PrismPosTests",
