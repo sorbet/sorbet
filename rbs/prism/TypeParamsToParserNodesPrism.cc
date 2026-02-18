@@ -14,7 +14,7 @@ vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list
 
     for (auto *listNode = rbsTypeParams->head; listNode != nullptr; listNode = listNode->next) {
         auto *rbsTypeParam = rbs_down_cast<rbs_ast_type_param_t>(listNode->node);
-        auto loc = declaration.typeLocFromRange(listNode->node->location->rg);
+        auto loc = declaration.typeLocFromRange(listNode->node->location);
 
         if (rbsTypeParam->unchecked) {
             if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::RBSUnsupported)) {

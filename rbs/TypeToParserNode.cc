@@ -29,7 +29,7 @@ bool isEnumerator(const unique_ptr<parser::Node> &node) {
 
 unique_ptr<parser::Node> TypeToParserNode::namespaceConst(const rbs_namespace_t *rbsNamespace,
                                                           const RBSDeclaration &declaration) {
-    auto loc = declaration.typeLocFromRange(((rbs_node_t *)rbsNamespace)->location->rg);
+    auto loc = declaration.typeLocFromRange(((rbs_node_t *)rbsNamespace)->location);
     rbs_node_list *typePath = rbsNamespace->path;
 
     unique_ptr<parser::Node> parent;
@@ -59,7 +59,7 @@ unique_ptr<parser::Node> TypeToParserNode::namespaceConst(const rbs_namespace_t 
 
 unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
                                                         const RBSDeclaration &declaration) {
-    auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location->rg);
+    auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location);
 
     auto parent = namespaceConst(typeName->rbs_namespace, declaration);
 
@@ -233,7 +233,7 @@ unique_ptr<parser::Node> TypeToParserNode::procType(const rbs_types_proc_t *node
             return function;
         }
         default: {
-            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location);
             if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in proc type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
@@ -264,7 +264,7 @@ unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *no
             return function;
         }
         default: {
-            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location);
             if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
@@ -276,7 +276,7 @@ unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *no
 
     rbs_node_t *selfNode = node->self_type;
     if (selfNode != nullptr) {
-        auto selfLoc = declaration.typeLocFromRange(selfNode->location->rg);
+        auto selfLoc = declaration.typeLocFromRange(selfNode->location);
         auto selfType = toParserNode(selfNode, declaration);
         function = parser::MK::Send1(selfLoc, move(function), core::Names::bind(), selfLoc, move(selfType));
     }
@@ -358,7 +358,7 @@ unique_ptr<parser::Node> TypeToParserNode::variableType(const rbs_types_variable
 }
 
 unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, const RBSDeclaration &declaration) {
-    auto nodeLoc = declaration.typeLocFromRange(((rbs_node_t *)node)->location->rg);
+    auto nodeLoc = declaration.typeLocFromRange(((rbs_node_t *)node)->location);
     switch (node->type) {
         case RBS_TYPES_ALIAS: {
             return aliasType((rbs_types_alias_t *)node, nodeLoc, declaration);

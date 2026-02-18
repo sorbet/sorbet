@@ -20,7 +20,7 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
                 "TypeParam");
 
         auto rbsTypeParam = (rbs_ast_type_param_t *)list_node->node;
-        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
+        auto loc = declaration.typeLocFromRange(list_node->node->location);
 
         if (rbsTypeParam->unchecked) {
             if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::RBSUnsupported)) {
