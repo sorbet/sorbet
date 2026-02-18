@@ -67,7 +67,7 @@ pm_node_t *TypeToParserNodePrism::namespaceConst(const rbs_namespace_t *rbsNames
 
 pm_node_t *TypeToParserNodePrism::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
                                                const RBSDeclaration &declaration) {
-    auto loc = declaration.typeLocFromRange(typeName->base.location->rg);
+    auto loc = declaration.typeLocFromRange(typeName->base.location);
 
     pm_node_t *parent = namespaceConst(typeName->rbs_namespace, declaration, loc);
     bool isAbsolute = typeName->rbs_namespace && typeName->rbs_namespace->absolute;
@@ -222,7 +222,7 @@ pm_node_t *TypeToParserNodePrism::procType(const rbs_types_proc_t *node, core::L
             return prism.TUntyped(loc);
         }
         default: {
-            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location);
             if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in proc type, expected `{}` or `{}`",
                             rbs_node_type_name(functionTypeNode), "Function", "UntypedFunction");
@@ -253,7 +253,7 @@ pm_node_t *TypeToParserNodePrism::blockType(const rbs_types_block_t *node, core:
             return prism.TUntyped(loc);
         }
         default: {
-            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location);
             if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
@@ -263,7 +263,7 @@ pm_node_t *TypeToParserNodePrism::blockType(const rbs_types_block_t *node, core:
     }
 
     if (auto *selfNode = node->self_type) {
-        auto selfLoc = declaration.typeLocFromRange(selfNode->location->rg);
+        auto selfLoc = declaration.typeLocFromRange(selfNode->location);
         auto selfType = toPrismNode(selfNode, declaration);
         function = prism.Call1(selfLoc, function, "bind"sv, selfType);
     }
@@ -339,7 +339,7 @@ vector<pm_node_t *> TypeToParserNodePrism::translateNodeList(rbs_node_list *list
 }
 
 pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSDeclaration &declaration) {
-    auto nodeLoc = declaration.typeLocFromRange(node->location->rg);
+    auto nodeLoc = declaration.typeLocFromRange(node->location);
 
     switch (node->type) {
         case RBS_TYPES_ALIAS:

@@ -17,18 +17,6 @@ namespace sorbet::rbs {
 
 namespace {
 
-core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
-    auto range = node->location->rg;
-
-    auto nameRange = node->location->children->entries[0].rg;
-    if (!NULL_LOC_RANGE_P(nameRange)) {
-        range.start.char_pos = nameRange.start;
-        range.end.char_pos = nameRange.end;
-    }
-
-    return declaration.typeLocFromRange(range);
-}
-
 bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
     if (PM_NODE_TYPE_P(node, PM_SELF_NODE)) {
         return true;
@@ -230,7 +218,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, p
     // In Prism, we cannot pass the converted typeNode because toPrismNode() creates synthesized nodes
     // with new locations for the signature, not nodes that preserve the original RBS source locations.
     // Instead, we extract directly from the RBS source using declaration.typeLocFromRange(arg.type->location->rg).
-    auto typeLoc = declaration.typeLocFromRange(arg.type->location->rg);
+    auto typeLoc = declaration.typeLocFromRange(arg.type->location);
     string typeString = string(source.substr(typeLoc.beginPos(), typeLoc.endPos() - typeLoc.beginPos()));
 
     switch (PM_NODE_TYPE(methodArg)) {
@@ -344,14 +332,14 @@ void collectPositionalParams(const RBSDeclaration &declaration, rbs_node_list_t 
     }
 
     for (auto *list_node = field->head; list_node != nullptr; list_node = list_node->next) {
-        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
-        auto nameLoc = adjustNameLoc(declaration, list_node->node);
-
         ENFORCE(list_node->node->type == RBS_TYPES_FUNCTION_PARAM,
                 "Unexpected node type `{}` in function parameter, expected `{}`", rbs_node_type_name(list_node->node),
                 "FunctionParam");
 
         auto *param = rbs_down_cast<rbs_types_function_param_t>(list_node->node);
+
+        auto loc = declaration.typeLocFromRange(list_node->node->location);
+        auto nameLoc = RBS_LOCATION_NULL_RANGE_P(param->name_range) ? loc : declaration.typeLocFromRange(param->name_range);
         auto arg = RBSArg{.loc = loc, .nameLoc = nameLoc, .name = param->name, .type = param->type, .kind = kind};
         args.emplace_back(arg);
     }
@@ -374,8 +362,8 @@ void collectKeywordParams(const RBSDeclaration &declaration, rbs_hash_t *field, 
                 "Unexpected node type `{}` in keyword argument value, expected `{}`",
                 rbs_node_type_name(hash_node->value), "FunctionParam");
 
-        auto nameLoc = declaration.typeLocFromRange(hash_node->key->location->rg);
-        auto loc = nameLoc.join(declaration.typeLocFromRange(hash_node->value->location->rg));
+        auto nameLoc = declaration.typeLocFromRange(hash_node->key->location);
+        auto loc = nameLoc.join(declaration.typeLocFromRange(hash_node->value->location));
         auto *keyNode = rbs_down_cast<rbs_ast_symbol_t>(hash_node->key);
         auto *valueNode = rbs_down_cast<rbs_types_function_param_t>(hash_node->value);
         params.emplace_back(
@@ -389,9 +377,10 @@ void collectRestParam(const RBSDeclaration &declaration, rbs_node_t *restParam, 
     ENFORCE(restParam->type == RBS_TYPES_FUNCTION_PARAM, "Unexpected node type `{}` in rest argument, expected `{}`",
             rbs_node_type_name(restParam), "FunctionParam");
 
-    auto loc = declaration.typeLocFromRange(restParam->location->rg);
-    auto nameLoc = adjustNameLoc(declaration, restParam);
     auto *param = rbs_down_cast<rbs_types_function_param_t>(restParam);
+    
+    auto loc = declaration.typeLocFromRange(restParam->location);
+    auto nameLoc = RBS_LOCATION_NULL_RANGE_P(param->name_range) ? loc : declaration.typeLocFromRange(param->name_range);
     args.emplace_back(RBSArg{.loc = loc, .nameLoc = nameLoc, .name = param->name, .type = param->type, .kind = kind});
 }
 
@@ -544,7 +533,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
     // Collect type parameters
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
     for (auto *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
-        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
+        auto loc = declaration.typeLocFromRange(list_node->node->location);
 
         ENFORCE(list_node->node->type == RBS_AST_TYPE_PARAM,
                 "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
@@ -557,7 +546,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
 
     // Validate that we have a function type
     if (node.type->type != RBS_TYPES_FUNCTION) {
-        auto errLoc = declaration.typeLocFromRange(node.type->location->rg);
+        auto errLoc = declaration.typeLocFromRange(node.type->location);
         if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node.type),
                         "Function");
@@ -599,7 +588,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
         collectRestParam(declaration, functionType->rest_keywords, args, RBSArg::Kind::RestKeyword);
     }
     if (auto *rbsBlock = node.block) {
-        auto loc = declaration.typeLocFromRange(rbsBlock->base.location->rg);
+        auto loc = declaration.typeLocFromRange(rbsBlock->base.location);
         auto arg = RBSArg{
             .loc = loc, .nameLoc = loc, .name = nullptr, .type = (rbs_node_t *)rbsBlock, .kind = RBSArg::Kind::Block};
         args.emplace_back(arg);
@@ -702,9 +691,9 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
 
     if (functionType->return_type->type == RBS_TYPES_BASES_VOID) {
         blockBody =
-            prism.Call0(declaration.typeLocFromRange(functionType->return_type->location->rg), sigReceiver, "void"sv);
+            prism.Call0(declaration.typeLocFromRange(functionType->return_type->location), sigReceiver, "void"sv);
     } else {
-        auto returnTypeLoc = declaration.typeLocFromRange(functionType->return_type->location->rg);
+        auto returnTypeLoc = declaration.typeLocFromRange(functionType->return_type->location);
         pm_node_t *returnTypeNode = typeToPrismNode.toPrismNode(functionType->return_type, declaration);
         ENFORCE(returnTypeNode, "Failed to create return type node");
         returnTypeNode->location = prismParser.convertLocOffsets(returnTypeLoc);

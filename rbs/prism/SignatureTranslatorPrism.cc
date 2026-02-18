@@ -23,7 +23,7 @@ SignatureTranslatorPrism::translateAssertionType(absl::Span<pair<core::LocOffset
     rbs_node_t *rbsType = rbsParser.parseType();
 
     if (rbsParser.hasError()) {
-        auto loc = assertion.typeLocFromRange(rbsParser.getError()->token.range);
+        auto loc = assertion.typeLocFromTokenRange(rbsParser.getError()->token.range);
         if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS type ({})", rbsParser.getError()->message);
         }
@@ -39,7 +39,7 @@ pm_node_t *SignatureTranslatorPrism::translateType(const RBSDeclaration &declara
     rbs_node_t *rbsType = rbsParser.parseType();
 
     if (rbsParser.hasError()) {
-        auto offset = declaration.typeLocFromRange(rbsParser.getError()->token.range);
+        auto offset = declaration.typeLocFromTokenRange(rbsParser.getError()->token.range);
         if (auto e = ctx.beginIndexerError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS type ({})", rbsParser.getError()->message);
         }
@@ -56,7 +56,7 @@ pm_node_t *SignatureTranslatorPrism::translateAttrSignature(pm_call_node_t *call
     rbs_node_t *rbsType = rbsParser.parseType();
 
     if (rbsParser.hasError()) {
-        auto offset = declaration.typeLocFromRange(rbsParser.getError()->token.range);
+        auto offset = declaration.typeLocFromTokenRange(rbsParser.getError()->token.range);
         // First parse failed, let's check if the user mistakenly used a method signature on an accessor
         auto methodParser = makeParser(declaration.string);
         methodParser.parseMethodType();
@@ -84,7 +84,7 @@ pm_node_t *SignatureTranslatorPrism::translateMethodSignature(pm_node_t *methodD
     rbs_method_type_t *rbsMethodType = rbsParser.parseMethodType();
 
     if (rbsParser.hasError()) {
-        auto offset = declaration.typeLocFromRange(rbsParser.getError()->token.range);
+        auto offset = declaration.typeLocFromTokenRange(rbsParser.getError()->token.range);
         if (auto e = ctx.beginIndexerError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS signature ({})", rbsParser.getError()->message);
         }
@@ -100,7 +100,7 @@ vector<pm_node_t *> SignatureTranslatorPrism::translateTypeParams(const RBSDecla
     rbs_node_list_t *rbsTypeParams = rbsParser.parseTypeParams();
 
     if (rbsParser.hasError()) {
-        auto offset = declaration.typeLocFromRange(rbsParser.getError()->token.range);
+        auto offset = declaration.typeLocFromTokenRange(rbsParser.getError()->token.range);
         if (auto e = ctx.beginIndexerError(offset, core::errors::Rewriter::RBSSyntaxError)) {
             e.setHeader("Failed to parse RBS type parameters ({})", rbsParser.getError()->message);
         }
