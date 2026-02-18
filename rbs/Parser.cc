@@ -21,13 +21,18 @@ rbs_node_list_t *Parser::parseTypeParams() {
 
 rbs_method_type_t *Parser::parseMethodType() {
     rbs_method_type_t *methodType = nullptr;
-    rbs_parse_method_type(parser.get(), &methodType, true);
+    bool require_eof = true;
+    bool classish_allowed = true;
+    rbs_parse_method_type(parser.get(), &methodType, require_eof, classish_allowed);
     return methodType;
 }
 
 rbs_node_t *Parser::parseType() {
     rbs_node_t *type = nullptr;
-    rbs_parse_type(parser.get(), &type, true, true);
+    bool void_allowed = true;
+    bool self_allowed = true;
+    bool classish_allowed = true;
+    rbs_parse_type(parser.get(), &type, void_allowed, self_allowed, classish_allowed);
     return type;
 }
 
