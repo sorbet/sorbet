@@ -437,18 +437,11 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     break;
                 }
                 case options::Parser::PRISM: {
-                    parser::ParseResult parseResult;
-                    try {
-                        parseResult = runPrismParser(lgs, file, print, opts);
+                    auto parseResult = runPrismParser(lgs, file, print, opts);
 
-                        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
-                        // in `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
-                        usePrismDesugar = !lgs.cacheSensitiveOptions.rbsEnabled;
-                        categoryCounterInc("Prism parse kind", "direct");
-                    } catch (parser::Prism::PrismFallback &) {
-                        parseResult = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
-                        categoryCounterInc("Prism parse kind", "fallback");
-                    }
+                    // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
+                    // in `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
+                    usePrismDesugar = !lgs.cacheSensitiveOptions.rbsEnabled;
 
                     // parseResult is null if runPrismParser stopped after an intermediate phase
                     if (parseResult.tree == nullptr) {
