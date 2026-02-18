@@ -4,29 +4,6 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-namespace {
-
-// RBS's parser needs to initialize a global constant pool to host around 26 unique strings
-// that are shared across all parsers.
-// When the process exits, we need to free the constant pool too.
-// This class and the static rbsLibraryInitializer variable leverage C++'s static initialization
-// and destruction semantics to automatically initialize the constant pool at program startup
-// and clean it up at program termination.
-class RBSLibraryInitializer {
-public:
-    RBSLibraryInitializer() {
-        const size_t num_uniquely_interned_strings = 26;
-        rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, num_uniquely_interned_strings);
-    }
-
-    ~RBSLibraryInitializer() {
-        rbs_constant_pool_free(RBS_GLOBAL_CONSTANT_POOL);
-    }
-};
-
-RBSLibraryInitializer rbsLibraryInitializer;
-} // namespace
-
 Parser::Parser(rbs_string_t rbsString, const rbs_encoding_t *encoding)
     : parser(rbs_parser_new(rbsString, encoding, 0, rbsString.end - rbsString.start), rbs_parser_free) {}
 
