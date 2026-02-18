@@ -322,7 +322,7 @@ public:
     std::optional<core::AutocorrectSuggestion>
     aggregateMissingVisibleTo(const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos) const;
 };
-CheckSize(PackageInfo, 240, 8);
+CheckSize(PackageInfo, 248, 8);
 
 } // namespace sorbet::core::packages
 #endif

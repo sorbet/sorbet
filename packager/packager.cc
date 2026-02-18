@@ -505,8 +505,10 @@ struct PackageSpecBodyWalk {
             return;
         }
 
+        const auto testPackages = ctx.state.packageDB().testPackages();
+
         // Sanity check arguments for unrecognized methods
-        if (!isSpecMethod(ctx, send)) {
+        if (!isSpecMethod(testPackages, send)) {
             for (auto &arg : send.posArgs()) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -521,7 +523,7 @@ struct PackageSpecBodyWalk {
                 // null indicates an invalid export.
                 verifyConstant(ctx, core::Names::export_(), send.getPosArg(0));
             }
-        } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
+        } else if ((send.fun == core::Names::import() || (!testPackages && send.fun == core::Names::testImport()))) {
             if (send.numPosArgs() == 1) {
                 Import *imp = nullptr;
 
@@ -789,7 +791,7 @@ struct PackageSpecBodyWalk {
                     }
                 }
             }
-        } else if (send.fun == core::Names::testBang()) {
+        } else if (testPackages && send.fun == core::Names::test_bang()) {
             if (!send.hasNonBlockArgs()) {
                 if (!ctx.file.data(ctx).isTestPath()) {
                     if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
@@ -821,7 +823,7 @@ struct PackageSpecBodyWalk {
         illegalNode(ctx, tree);
     }
 
-    bool isSpecMethod(const core::GlobalState &gs, const sorbet::ast::Send &send) const {
+    bool isSpecMethod(bool testPackages, const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
             case core::Names::export_().rawId():
@@ -831,10 +833,10 @@ struct PackageSpecBodyWalk {
                 return true;
 
             case core::Names::testImport().rawId():
-                return !gs.packageDB().testPackages();
+                return !testPackages;
 
-            case core::Names::testBang().rawId():
-                return gs.packageDB().testPackages();
+            case core::Names::test_bang().rawId():
+                return testPackages;
 
             default:
                 return false;
@@ -1081,20 +1083,19 @@ void validatePackage(core::Context ctx) {
 
         // It's not acceptable to import a `test!` package from application code
         if (otherPkg.testPackage() && !pkgInfo.testPackage()) {
-            if (auto e = ctx.beginError(i.loc, core::errors::Packager::IncorrectImport)) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::TestImportMismatch)) {
                 e.setHeader("Package `{}` may not import `{}` packages", pkgInfo.show(ctx), "test!");
                 e.addErrorLine(pkgInfo.declLoc(), "Defined here");
                 e.addErrorLine(otherPkg.declLoc(), "Imported `{}` package defined here", "test!");
-                e.addErrorNote("Test packages may only be imported by other test packages");
             }
         }
 
         // `uses_internals: true` is only valid from a `test!` package
         if (i.usesInternals && !pkgInfo.testPackage()) {
-            if (auto e = ctx.beginError(i.loc, core::errors::Packager::IncorrectImport)) {
-                e.setHeader("Package `{}` may not define imports with `{}`", pkgInfo.show(ctx), "uses_internals: true");
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::TestImportMismatch)) {
+                e.setHeader("Non-`{}` package `{}` cannot have imports with `{}`", "test!", pkgInfo.show(ctx),
+                            "uses_internals: true");
                 e.addErrorLine(pkgInfo.declLoc(), "Defined here");
-                e.addErrorNote("Only packages marked `test!` may import with `{}`", "uses_internals: true");
             }
         }
 

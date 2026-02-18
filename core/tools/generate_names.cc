@@ -503,7 +503,7 @@ NameDef names[] = {
     {"only"},
     {"testRb", "test_rb"},
     {"preludePackage", "prelude_package"},
-    {"testBang", "test!"},
+    {"test_bang", "test!"},
     {"usesInternals", "uses_internals"},
 
     // GlobalState initEmpty()
