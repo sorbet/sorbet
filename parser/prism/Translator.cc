@@ -2224,24 +2224,38 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             unreachable("PM_FORWARDING_PARAMETER_NODE is handled separately in `desugarParametersNode()`.");
         }
         case PM_FORWARDING_SUPER_NODE: { // A `super` with no explicit arguments
-            // It might have a literal block argument, though.
-
+            // Surprisingly, a forwarding `super` call can still have a literal block argument, like `super { }`.
             auto forwardingSuperNode = down_cast<pm_forwarding_super_node>(node);
 
-            // There's no `keyword_loc` field, so we make it ourselves from the start location.
-            // constexpr uint32_t length = "super"sv.size();
-            // auto keywordLoc = translateLoc(node->location.start, node->location.start + length);
+            if (auto *blockNode = forwardingSuperNode->block) { // always a PM_BLOCK_NODE
+                // Desugar `super { ... }` to `self.<super>(<ZSuperArgs>) { ... }`
 
-            auto expr = MK::ZSuper(location, maybeTypedSuper());
+                // Compute keyword location from the start of the node (since there's no `keyword_loc` field)
+                constexpr uint32_t length = "super"sv.size();
+                auto superKeywordLoc = translateLoc(node->location.start, node->location.start + length);
 
-            auto blockArgumentNode = forwardingSuperNode->block;
+                auto receiver = MK::Self(superKeywordLoc.copyWithZeroLength());
 
-            if (blockArgumentNode != nullptr) { // always a PM_BLOCK_NODE
-                categoryCounterInc("Prism fallback", "PM_FORWARDING_SUPER_NODE with block");
-                throw PrismFallback{}; // TODO: Not implemented yet
+                auto methodName = maybeTypedSuper();
+
+                auto posArgs = 1;
+
+                auto block = desugarLiteralBlock(blockNode->body, blockNode->parameters, blockNode->base.location,
+                                                 blockNode->opening_loc);
+
+                ast::Send::ARGS_store args;
+                args.reserve(2);
+                args.emplace_back(ast::make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength()));
+                args.emplace_back(move(block));
+
+                ast::Send::Flags flags;
+                flags.isPrivateOk = true;
+                flags.hasBlock = true;
+
+                return MK::Send(location, move(receiver), methodName, location, posArgs, move(args), flags);
             }
 
-            return expr;
+            return MK::ZSuper(location, maybeTypedSuper());
         }
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a global variable, e.g. `$g &&= false`
             return desugarVariableOpAssign<pm_global_variable_and_write_node, OpAssignKind::And,
