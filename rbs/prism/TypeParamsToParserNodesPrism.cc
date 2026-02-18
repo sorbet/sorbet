@@ -27,10 +27,10 @@ vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list
 
         absl::InlinedVector<pm_node_t *, 1> args{};
         if (rbsTypeParam->variance) {
-            auto variance = parser.resolveKeyword(rbsTypeParam->variance);
-            if (variance == "covariant") {
+            auto variance = rbsTypeParam->variance;
+            if (variance == RBS_TYPE_PARAM_VARIANCE_COVARIANT) {
                 args.push_back(prism.Symbol(loc, core::Names::covariant().show(ctx.state)));
-            } else if (variance == "contravariant") {
+            } else if (variance == RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT) {
                 args.push_back(prism.Symbol(loc, core::Names::contravariant().show(ctx.state)));
             }
         }
