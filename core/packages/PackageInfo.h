@@ -164,6 +164,9 @@ public:
 
         // Set to non-none loc when this package is marked `test!`
         core::LocOffsets testPackage;
+
+        // Set to non-none loc when this package is marked `prelude_package`
+        core::LocOffsets preludePackage;
     } locs;
 
     core::FileRef file;
@@ -181,8 +184,6 @@ public:
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
-
-    bool isPreludePackage_ = false;
 
     // Whether or not this package has other packages underneath its namespace.
     //
@@ -279,7 +280,7 @@ public:
     // True when the package is marked with a `prelude_package` annotation. This requires that the package only import
     // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
     bool isPreludePackage() const {
-        return this->isPreludePackage_;
+        return this->locs.preludePackage.exists();
     }
 
     // True if this package was marked as a `test!` package.
@@ -322,7 +323,7 @@ public:
     std::optional<core::AutocorrectSuggestion>
     aggregateMissingVisibleTo(const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos) const;
 };
-CheckSize(PackageInfo, 248, 8);
+CheckSize(PackageInfo, 256, 8);
 
 } // namespace sorbet::core::packages
 #endif

@@ -597,7 +597,7 @@ struct PackageSpecBodyWalk {
                 info.locs.exportAll = send.loc;
             }
         } else if (send.fun == core::Names::preludePackage() && !send.hasBlock() && !send.hasNonBlockArgs()) {
-            info.isPreludePackage_ = true;
+            info.locs.preludePackage = send.loc;
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
                 if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {

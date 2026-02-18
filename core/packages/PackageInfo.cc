@@ -743,7 +743,7 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
 
     // Modifying an unpackaged symbol is only allowed from prelude packages.
     if (!symPackage.exists()) {
-        if (this->isPreludePackage_) {
+        if (this->isPreludePackage()) {
             return CanModifyResult::CanModify;
         } else {
             return CanModifyResult::UnpackagedSymbol;
