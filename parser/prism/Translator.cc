@@ -1677,12 +1677,57 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 methodNameLoc = translateLoc(callNode->message_loc);
             }
 
-            auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
-
             if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                categoryCounterInc("Prism fallback", "PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
-                throw PrismFallback{};
+                ENFORCE(receiverNode != nullptr, "Conditional sends should always have a receiver.");
+
+                if (this->preserveConcreteSyntax) {
+                    // Desugaring to a InsSeq + If causes a problem for Extract to Variable; the fake If will be where
+                    // the new variable is inserted, which is incorrect. Instead, desugar to a regular send, so that the
+                    // insertion happens in the correct place (what the csend is inside);
+
+                    // Replace the original method name with a new special one that conveys that this is a CSend, so
+                    // that a&.foo is treated as different from a.foo when checking for structural equality.
+                    auto newFun = ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, methodName, 1);
+
+                    auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
+
+                    return desugarMethodCall(move(receiver), newFun, methodNameLoc, callNode->arguments,
+                                             callNode->closing_loc, move(block), location, isPrivateOk);
+                }
+
+                // Desugar:
+                //     result = receiver&.method()
+                // to:
+                //     result = begin
+                //       $temp = receiver
+                //       if ::NilClass === $temp
+                //         ::<Magic>.<nil-for-safe-navigation>($temp)
+                //       else
+                //         $temp.method()
+                //       end
+                //     end
+
+                // Note: this location can differ from the `receiver.loc()` if the receiver is a parentheses node.
+                // The Prism node's location will include the parenthesis, but not the desugared `receiver.loc()`.
+                auto recvLoc = translateLoc(receiverNode->location);
+
+                auto body = [this, callNode, location](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc,
+                                                       core::NameRef methodName, core::LocOffsets methodNameLoc) {
+                    auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
+
+                    // Workaround for a bug in the legacy desugarer, which never allows `&.` to call private methods.
+                    // https://github.com/sorbet/sorbet/issues/9756
+                    auto isPrivateOk = false;
+
+                    return desugarMethodCall(move(receiverTempLocal), methodName, methodNameLoc, callNode->arguments,
+                                             callNode->closing_loc, move(block), location, isPrivateOk);
+                };
+
+                return desugarConditionalSend(location, move(receiver), recvLoc, callNode->name, callNode->message_loc,
+                                              body);
             }
+
+            auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
 
             return desugarMethodCall(move(receiver), methodName, methodNameLoc, callNode->arguments,
                                      callNode->closing_loc, move(block), location, isPrivateOk);
