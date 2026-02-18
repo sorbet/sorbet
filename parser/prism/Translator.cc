@@ -1244,7 +1244,7 @@ ast::ExpressionPtr Translator::desugarSendOpAssign(pm_node_t *untypedNode) {
 
         // Create the inner send: $temp.b
         auto innerSend =
-            MK::Send(location, MK::Local(zeroLengthRecvLoc, tempRecv), name, messageLoc, 0, ast::Send::ARGS_store{});
+            MK::Send(lhsLoc, MK::Local(zeroLengthRecvLoc, tempRecv), name, messageLoc, 0, ast::Send::ARGS_store{});
 
         auto rhs = desugar(node->value);
 
@@ -1262,7 +1262,7 @@ ast::ExpressionPtr Translator::desugarSendOpAssign(pm_node_t *untypedNode) {
             MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc), core::Names::nilForSafeNavigation(),
                       zeroLengthLoc, MK::Local(ampersandLoc, tempRecv));
         auto ifExpr = MK::If(zeroLengthLoc, move(cond), move(nilValue), move(assignmentExpr));
-        return MK::InsSeq1(location, move(tempAssign), move(ifExpr));
+        return MK::InsSeq1(lhsLoc, move(tempAssign), move(ifExpr));
     }
 
     // Regular send: a.b += 1
