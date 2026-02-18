@@ -635,6 +635,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("workspace", makeOptional(WorkspaceOptions)),
             // Unused in Sorbet.
             // makeField("experimental", makeOptional(JSONAny)),
+            makeField("inlayHintProvider", makeOptional(JSONBool)),
             // -- Sorbet extensions --
             makeField("sorbetShowSymbolProvider", makeOptional(JSONBool)),
         },
@@ -1027,6 +1028,30 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         },
                                         classTypes);
 
+    auto InlayHintKind = makeIntEnum("InlayHintKind",
+                                     {
+                                         {"Type", 1},
+                                         {"Parameter", 2},
+                                     },
+                                     enumTypes);
+
+    auto InlayHint = makeObject("InlayHint",
+                                {
+                                    makeField("position", Position),
+                                    makeField("label", JSONString),
+                                    makeField("kind", makeOptional(InlayHintKind)),
+                                    makeField("paddingLeft", makeOptional(JSONBool)),
+                                    makeField("paddingRight", makeOptional(JSONBool)),
+                                },
+                                classTypes);
+
+    auto InlayHintParams = makeObject("InlayHintParams",
+                                      {
+                                          makeField("textDocument", TextDocumentIdentifier),
+                                          makeField("range", Range),
+                                      },
+                                      classTypes);
+
     auto DocumentSymbolParams = makeObject("DocumentSymbolParams",
                                            {
                                                makeField("textDocument", TextDocumentIdentifier),
@@ -1285,6 +1310,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("highlightUntyped", makeOptional(makeVariant({JSONBool, JSONString}))),
                        makeField("enableTypedFalseCompletionNudges", makeOptional(JSONBool)),
                        makeField("highlightUntypedDiagnosticSeverity", makeOptional(DiagnosticSeverity)),
+                       // Style for inlay type hints: "off", "before_var", "after_var", "RBS"
+                       makeField("inlayTypeHints", makeOptional(JSONString)),
                    },
                    classTypes);
     auto InitializeParams =
@@ -1431,6 +1458,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/documentSymbol",
                                      "textDocument/formatting",
                                      "textDocument/hover",
+                                     "textDocument/inlayHint",
                                      "textDocument/prepareRename",
                                      "textDocument/publishDiagnostics",
                                      "textDocument/references",
@@ -1454,6 +1482,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/definition", TextDocumentPositionParams},
                                                 {"textDocument/typeDefinition", TextDocumentPositionParams},
                                                 {"textDocument/hover", TextDocumentPositionParams},
+                                                {"textDocument/inlayHint", InlayHintParams},
                                                 {"textDocument/completion", CompletionParams},
                                                 {"textDocument/prepareRename", TextDocumentPositionParams},
                                                 {"textDocument/references", ReferenceParams},
@@ -1493,6 +1522,8 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
             {"textDocument/typeDefinition", makeVariant({JSONNull, makeArray(Location)})},
             {"textDocument/hover", makeVariant({JSONNull, Hover})},
+            // InlayHint[] | null
+            {"textDocument/inlayHint", makeVariant({JSONNull, makeArray(InlayHint)})},
             // CompletionItem[] | CompletionList | null
             // Sorbet only sends CompletionList.
             {"textDocument/completion", CompletionList},

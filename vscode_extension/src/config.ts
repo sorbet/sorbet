@@ -22,6 +22,8 @@ export const ALL_TRACK_UNTYPED: TrackUntyped[] = [
   "everywhere",
 ];
 
+export type InlayTypeHintsStyle = "off" | "before_var" | "after_var" | "RBS";
+
 export type DiagnosticSeverityStr =
   | "Error"
   | "Warning"
@@ -137,7 +139,10 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
     this.disposables = [
       this.onDidChangeConfigurationEmitter,
       workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration("sorbet")) {
+        if (
+          e.affectsConfiguration("sorbet") ||
+          e.affectsConfiguration("editor.inlayHints.enabled")
+        ) {
           // update the cached configuration before firing
           this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
           this.onDidChangeConfigurationEmitter.fire(e);
@@ -233,6 +238,7 @@ export class SorbetExtensionConfig implements Disposable {
   private wrappedHighlightUntypedDiagnosticSeverity: DiagnosticSeverity;
   private wrappedTypedFalseCompletionNudges: boolean;
   private wrappedRevealOutputOnError: boolean;
+  private wrappedInlayTypeHints: InlayTypeHintsStyle;
 
   constructor(sorbetWorkspaceContext: ISorbetWorkspaceContext) {
     this.configFilePatterns = [];
@@ -248,6 +254,7 @@ export class SorbetExtensionConfig implements Disposable {
       DiagnosticSeverity.Information;
     this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
+    this.wrappedInlayTypeHints = "after_var";
 
     // Any workspace with a `…/sorbet/config` file is considered Sorbet-enabled
     // by default. This implementation does not work in the general case with
@@ -312,6 +319,10 @@ export class SorbetExtensionConfig implements Disposable {
     this.wrappedHighlightUntypedDiagnosticSeverity = this.sorbetWorkspaceContext.get(
       "highlightUntypedDiagnosticSeverity",
       this.highlightUntypedDiagnosticSeverity,
+    );
+    this.wrappedInlayTypeHints = this.sorbetWorkspaceContext.get(
+      "inlayTypeHints",
+      this.inlayTypeHints,
     );
 
     Disposable.from(...this.configFileWatchers).dispose();
@@ -483,6 +494,22 @@ export class SorbetExtensionConfig implements Disposable {
       "typedFalseCompletionNudges",
       enabled,
     );
+    this.refresh();
+  }
+
+  public get inlayTypeHints(): InlayTypeHintsStyle {
+    // Respect the standard VS Code setting for disabling all inlay hints
+    const editorInlayHints = workspace
+      .getConfiguration("editor")
+      .get<string>("inlayHints.enabled", "on");
+    if (editorInlayHints === "off") {
+      return "off";
+    }
+    return this.wrappedInlayTypeHints;
+  }
+
+  public async setInlayTypeHints(style: InlayTypeHintsStyle): Promise<void> {
+    await this.sorbetWorkspaceContext.update("inlayTypeHints", style);
     this.refresh();
   }
 }

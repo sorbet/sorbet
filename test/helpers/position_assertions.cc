@@ -302,6 +302,9 @@ const UnorderedMap<
         {"hierarchy-ref-set", HierarchyRefSetAssertion::make},
         {"find-hierarchy-refs", FindHierarchyRefsAssertion::make},
         {"hierarchy-ref", HierarchyRefAssertion::make},
+        {"inlay-hint", InlayHintAssertion::make},
+        {"inlay-hint-param", InlayHintAssertion::make},
+        {"inlay-type-hints", StringPropertyAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -2615,6 +2618,121 @@ shared_ptr<HierarchyRefAssertion> HierarchyRefAssertion::make(string_view filena
 
 string HierarchyRefAssertion::toString() const {
     return fmt::format("find-hierarchy-refs: {}", symbol);
+}
+
+// InlayHintAssertion
+
+shared_ptr<InlayHintAssertion> InlayHintAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                        int assertionLine, string_view assertionContents,
+                                                        string_view assertionType) {
+    bool isParameterHint = assertionType == "inlay-hint-param";
+    return make_shared<InlayHintAssertion>(filename, range, assertionLine, assertionContents, isParameterHint);
+}
+
+InlayHintAssertion::InlayHintAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                       string_view label, bool isParameterHint)
+    : RangeAssertion(filename, range, assertionLine), label(string(label)), isParameterHint(isParameterHint) {}
+
+void InlayHintAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                  const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                  LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    // Group assertions by filename
+    UnorderedMap<string, vector<shared_ptr<InlayHintAssertion>>> assertionsByFile;
+    for (auto &assertion : assertions) {
+        if (auto inlayAssertion = dynamic_pointer_cast<InlayHintAssertion>(assertion)) {
+            assertionsByFile[inlayAssertion->filename].push_back(inlayAssertion);
+        }
+    }
+
+    if (assertionsByFile.empty()) {
+        return;
+    }
+
+    const auto &config = wrapper.config();
+
+    for (auto &entry : assertionsByFile) {
+        auto &filename = entry.first;
+        auto &fileAssertions = entry.second;
+        auto uri = filePathToUri(config, filename);
+        // Request inlay hints for the entire file
+        auto lineCount = sourceFileContents.at(filename)->lineCount();
+        auto params = make_unique<InlayHintParams>(
+            make_unique<TextDocumentIdentifier>(uri),
+            make_unique<Range>(make_unique<Position>(0, 0), make_unique<Position>(max(0, lineCount - 1), 0)));
+
+        auto id = nextId++;
+        auto msg = make_unique<LSPMessage>(
+            make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentInlayHint, move(params)));
+        auto responses = getLSPResponsesFor(wrapper, move(msg));
+        REQUIRE_EQ(responses.size(), 1);
+        auto &responseMsg = responses.at(0);
+        REQUIRE(responseMsg->isResponse());
+        auto &response = responseMsg->asResponse();
+        if (response.error.has_value()) {
+            FAIL_CHECK("Inlay hint request returned error: " << response.error.value()->message);
+            continue;
+        }
+        REQUIRE(response.result.has_value());
+
+        auto &inlayHintResult =
+            get<variant<JSONNullObject, vector<unique_ptr<InlayHint>>>>(*response.result);
+
+        vector<InlayHint *> hints;
+        if (auto *hintsVec = get_if<vector<unique_ptr<InlayHint>>>(&inlayHintResult)) {
+            for (auto &hint : *hintsVec) {
+                hints.push_back(hint.get());
+            }
+        }
+        for (auto &assertion : fileAssertions) {
+            bool found = false;
+            for (auto *hint : hints) {
+                // Match by position (start of assertion range) and label content
+                if (hint->position->line == assertion->range->start->line &&
+                    hint->position->character == assertion->range->start->character) {
+                    // Check the hint kind matches
+                    bool kindMatches = assertion->isParameterHint
+                                           ? (hint->kind.has_value() && *hint->kind == InlayHintKind::Parameter)
+                                           : (hint->kind.has_value() && *hint->kind == InlayHintKind::Type);
+                    if (!kindMatches) {
+                        continue;
+                    }
+
+                    if (hint->label.find(assertion->label) != string::npos) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                auto sourceLine = getSourceLine(sourceFileContents, assertion->filename, assertion->range->start->line);
+                string hintsAtLine;
+                for (auto *hint : hints) {
+                    if (hint->position->line == assertion->range->start->line) {
+                        hintsAtLine +=
+                            fmt::format("\n  col {}: {} (kind={})", hint->position->character, hint->label,
+                                        hint->kind.has_value() ? (int)*hint->kind : -1);
+                    }
+                }
+                if (hintsAtLine.empty()) {
+                    hintsAtLine = "\n  (none)";
+                }
+
+                ADD_FAIL_CHECK_AT(
+                    assertion->filename.c_str(), assertion->range->start->line + 1,
+                    fmt::format("{}Expected inlay hint not found:\n{}\nInlay hints on this line:{}", errorPrefix,
+                                prettyPrintRangeComment(sourceLine, *assertion->range, assertion->toString()),
+                                hintsAtLine));
+            }
+        }
+    }
+}
+
+string InlayHintAssertion::toString() const {
+    if (isParameterHint) {
+        return fmt::format("inlay-hint-param: {}", label);
+    }
+    return fmt::format("inlay-hint: {}", label);
 }
 
 } // namespace sorbet::test
