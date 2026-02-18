@@ -315,6 +315,8 @@ public:
     // example).
     CanModifyResult canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const;
 
+    static core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file);
+
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
                                 std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);

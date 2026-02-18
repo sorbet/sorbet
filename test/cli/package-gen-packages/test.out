@@ -4,7 +4,8 @@ B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
      3 |class B < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    B/__package.rb:9: Inserted `visible_to C`
+    B/__package.rb:9: Inserted `visible_to C
+      visible_to D`
      9 |  visible_to A
                       ^
 
@@ -73,6 +74,7 @@ class B < PackageSpec
 
   visible_to A
   visible_to C
+  visible_to D
   visible_to G
 end
 # typed: strict

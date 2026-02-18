@@ -557,8 +557,7 @@ void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, 
     packagesReferencedByFile[file].swap(references);
 }
 
-namespace {
-core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file) {
+core::packages::ImportType PackageInfo::fileToImportType(const core::GlobalState &gs, core::FileRef file) {
     if (file.data(gs).isPackagedTestHelper()) {
         return core::packages::ImportType::TestHelper;
     } else if (file.data(gs).isPackagedTest()) {
@@ -568,12 +567,11 @@ core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::F
     }
 }
 
-}; // namespace
-
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
     for (auto &[file, referencedPackages] : packagesReferencedByFile) {
+        auto importType = fileToImportType(gs, file);
         for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
             if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
@@ -582,11 +580,11 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
 
             // We should only skip adding the import if we're not going to add a visible_to to the package, since it
             // will be valid to import the package after the new visible_to is added
-            if (packageReferenceInfo.causesVisibilityError && !gs.packageDB().updateVisibilityFor(packageName)) {
+            if (!pkgInfo.isVisibleTo(gs, *this, importType) &&
+                !gs.packageDB().updateVisibilityFor(packageName)) {
                 continue;
             }
 
-            auto importType = fileToImportType(gs, file);
             auto it = toImport.find(packageName);
             if (it != toImport.end()) {
                 auto currentBroadestImport = it->second;
