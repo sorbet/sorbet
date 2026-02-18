@@ -125,6 +125,11 @@ private:
                                          pm_location_t closingLoc, DesugaredBlockArgument block,
                                          core::LocOffsets location, bool isPrivateOk);
 
+    template <typename Lambda>
+    ast::ExpressionPtr desugarConditionalSend(core::LocOffsets location, ast::ExpressionPtr receiver,
+                                              core::LocOffsets recvLoc, pm_constant_id_t methodNameID,
+                                              pm_location_t methodNamePrismLoc, Lambda &&body);
+
     template <typename StoreType>
     StoreType desugarArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
 

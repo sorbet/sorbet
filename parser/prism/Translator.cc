@@ -415,6 +415,65 @@ ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list
                     static_cast<uint16_t>(interpArgs.size()), move(interpArgs));
 }
 
+// Desugars a conditional send, like so:
+//
+//     begin
+//       $temp = receiver
+//       if ::NilClass === $temp
+//         ::<Magic>.<nil-for-safe-navigation>($temp)
+//       else
+//         <body>
+//       end
+//     end
+//
+// The content of the body is defined by the given lambda, so this method can be reused among the different places
+// where conditional sends can appear.
+template <typename Lambda>
+ast::ExpressionPtr Translator::desugarConditionalSend(core::LocOffsets location, ast::ExpressionPtr receiver,
+                                                      core::LocOffsets recvLoc, pm_constant_id_t methodNameID,
+                                                      pm_location_t methodNamePrismLoc, Lambda &&body) {
+    auto loc0 = location.copyWithZeroLength();
+
+    auto recvLoc0 = recvLoc.copyWithZeroLength();
+
+    // The arg loc for the synthetic variable created for the purpose of this safe navigation
+    // check is a bit of a hack. It's intentionally one character too short so that for
+    // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
+    auto csendLoc = recvLoc.copyEndWithZeroLength();
+    if (recvLoc.endPos() + 1 <= ctx.file.data(ctx).source().size()) {
+        auto ampersandLoc = core::LocOffsets{recvLoc.endPos(), recvLoc.endPos() + 1};
+        if (ctx.locAt(ampersandLoc).source(ctx) == "&") {
+            csendLoc = ampersandLoc;
+        }
+    }
+
+    auto methodName = translateConstantName(methodNameID);
+    auto methodNameLoc = translateLoc(methodNamePrismLoc);
+
+    // We only want to evaluate the receiver once, so we store the result in a local temporary variable.
+    core::NameRef receiverTempLocalVarName = nextUniqueDesugarName(core::Names::assignTemp());
+
+    // $temp = receiver
+    auto assignment = MK::Assign(recvLoc0, receiverTempLocalVarName, move(receiver));
+
+    // Just compare with `NilClass` to avoid potentially calling into a class-defined `==`
+    auto cond = MK::Send1(loc0, ast::MK::Constant(recvLoc0, core::Symbols::NilClass()), core::Names::tripleEq(),
+                          recvLoc0, MK::Local(recvLoc0, receiverTempLocalVarName));
+
+    // ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$temp)
+    auto nilForSafeNav =
+        MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(loc0), core::Names::nilForSafeNavigation(), loc0,
+                  MK::Local(csendLoc, receiverTempLocalVarName));
+
+    auto receiverTempLocal = MK::Local(recvLoc0, receiverTempLocalVarName);
+
+    auto elseBody = body(move(receiverTempLocal), location, methodName, methodNameLoc);
+
+    auto if_ = MK::If(loc0, move(cond), move(nilForSafeNav), move(elseBody));
+
+    return MK::InsSeq1(location, move(assignment), move(if_));
+}
+
 // Desugar multiple left hand side assignments into a sequence of assignments
 //
 // Considering this example:
@@ -1227,42 +1286,38 @@ ast::ExpressionPtr Translator::desugarSendOpAssign(pm_node_t *untypedNode) {
     auto lhsLoc = core::LocOffsets{location.beginPos(), messageLoc.endPos()};
 
     if (PM_NODE_FLAG_P(untypedNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-        // Handle safe navigation: a&.b += 1
-        // Creates pattern: { $temp = a; if $temp == nil then nil else $temp.b += 1 }
-        auto tempRecv = nextUniqueDesugarName(core::Names::assignTemp());
-        auto recvLoc = receiverExpr.loc();
-        auto zeroLengthLoc = location.copyWithZeroLength();
-        auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
+        // Handle safe navigation on the LHS, like: a&.b += 1
 
-        // The `&` in `a&.b = 1`
-        constexpr auto len = "&"sv.size();
-        auto ampersandLoc = translateLoc(node->call_operator_loc.start, node->call_operator_loc.start + len);
+        // Desugar:
+        //     receiver&.b += 1
+        // to:
+        //     begin
+        //       $temp = receiver()
+        //       if ::NilClass === $temp
+        //         nil
+        //       else
+        //         $temp.b += 1
+        //       end
+        //     end
+        auto body = [&](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc, core::NameRef methodName,
+                        core::LocOffsets methodNameLoc) -> ast::ExpressionPtr {
+            // Use `lhsLoc` (e.g. `foo&.bar`) for the inner send, not `parentLoc` (e.g. `foo&.bar += 5`).
+            auto innerSend = MK::Send0(lhsLoc, move(receiverTempLocal), methodName, methodNameLoc);
 
-        auto tempAssign = MK::Assign(zeroLengthRecvLoc, tempRecv, move(receiverExpr));
-        auto cond = MK::Send1(zeroLengthLoc, MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
-                              core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
+            auto rhs = desugar(node->value);
 
-        // Create the inner send: $temp.b
-        auto innerSend =
-            MK::Send(lhsLoc, MK::Local(zeroLengthRecvLoc, tempRecv), name, messageLoc, 0, ast::Send::ARGS_store{});
+            if constexpr (Kind == OpAssignKind::Operator) {
+                auto opLoc = translateLoc(node->binary_operator_loc);
+                auto op = translateConstantName(node->binary_operator);
+                return desugarAnyOpAssign<Kind>(location, move(innerSend), move(rhs), op, opLoc, false);
+            } else {
+                return desugarAnyOpAssign<Kind>(location, move(innerSend), move(rhs), core::NameRef::noName(),
+                                                core::LocOffsets::none(), false);
+            }
+        };
 
-        auto rhs = desugar(node->value);
-
-        ast::ExpressionPtr assignmentExpr;
-        if constexpr (Kind == OpAssignKind::Operator) {
-            auto opLoc = translateLoc(node->binary_operator_loc);
-            auto op = translateConstantName(node->binary_operator);
-            assignmentExpr = desugarAnyOpAssign<Kind>(location, move(innerSend), move(rhs), op, opLoc, false);
-        } else {
-            assignmentExpr = desugarAnyOpAssign<Kind>(location, move(innerSend), move(rhs), core::NameRef::noName(),
-                                                      core::LocOffsets::none(), false);
-        }
-
-        auto nilValue =
-            MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc), core::Names::nilForSafeNavigation(),
-                      zeroLengthLoc, MK::Local(ampersandLoc, tempRecv));
-        auto ifExpr = MK::If(zeroLengthLoc, move(cond), move(nilValue), move(assignmentExpr));
-        return MK::InsSeq1(lhsLoc, move(tempAssign), move(ifExpr));
+        auto recvLoc = translateLoc(node->receiver->location);
+        return desugarConditionalSend(lhsLoc, move(receiverExpr), recvLoc, node->read_name, node->message_loc, body);
     }
 
     // Regular send: a.b += 1
