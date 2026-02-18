@@ -928,6 +928,21 @@ This error will be reported on a `__package.rb` file, along with an autocorrect 
 - the `__package.rb` is missing `export`s
 - the `__package.rb` is missing `visible_to`, and `--gen-packages-update-visibility-for` flag is passed.
 
+## 3735
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error occurs when an invalid import was detected. There are two different scenarios that will produce this error, let's consider the following set of packages:
+
+- `A` - An application package that exports one constant `A::Pub` and keeps `A::Priv` private
+- `B` - A package that imports `A`
+- `Test::A` - A `test!` package, containing tests for the package `A`.
+
+The cases where this error can show up in this set of packages are:
+
+1. If `B` imports `A` with the `uses_internals: true` annotation, as only `test!` packages are allowed to import with `uses_internals: true`.
+2. If `B` imports `Test::A`, as only `test!` packages can import other packages marked `test!`.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.

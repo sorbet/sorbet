@@ -43,6 +43,11 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
+    // If test packages are enabled, this is determined by the package having a `test!` annotation.
+    if (gs.packageDB().testPackages()) {
+        return pkg.testPackage();
+    }
+
     return pkg.file.data(gs).isPackagedTest();
 }
 
@@ -500,8 +505,10 @@ struct PackageSpecBodyWalk {
             return;
         }
 
+        const auto testPackages = ctx.state.packageDB().testPackages();
+
         // Sanity check arguments for unrecognized methods
-        if (!isSpecMethod(send)) {
+        if (!isSpecMethod(testPackages, send)) {
             for (auto &arg : send.posArgs()) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -516,8 +523,10 @@ struct PackageSpecBodyWalk {
                 // null indicates an invalid export.
                 verifyConstant(ctx, core::Names::export_(), send.getPosArg(0));
             }
-        } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
+        } else if ((send.fun == core::Names::import() || (!testPackages && send.fun == core::Names::testImport()))) {
             if (send.numPosArgs() == 1) {
+                Import *imp = nullptr;
+
                 // null indicates an invalid import.
                 if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                     // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
@@ -533,22 +542,53 @@ struct PackageSpecBodyWalk {
                             e.setHeader("Package `{}` cannot {} itself", info.show(ctx), send.fun.show(ctx));
                         }
                     }
-                    info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
+
+                    imp = &info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
                 }
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
-                    if (keyLit->asSymbol() == core::Names::only()) {
-                        auto valLit = ast::cast_tree<ast::Literal>(value);
-                        // if it's not a literal, then it'll get caught elsewhere
-                        if (valLit && (!valLit->isString() || valLit->asString() != core::Names::testRb())) {
-                            if (auto e =
-                                    ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
-                                e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
-                                            "only:", "\"test_rb\"");
+                    switch (keyLit->asSymbol().rawId()) {
+                        // TODO(trevor): this case can go away when we only support test packages.
+                        case core::Names::only().rawId():
+                            if (testPackages) {
+                                break;
                             }
-                        }
+
+                            if (keyLit->asSymbol() == core::Names::only()) {
+                                auto valLit = ast::cast_tree<ast::Literal>(value);
+                                // if it's not a literal, then it'll get caught elsewhere
+                                if (valLit && (!valLit->isString() || valLit->asString() != core::Names::testRb())) {
+                                    if (auto e = ctx.beginError(value.loc(),
+                                                                core::errors::Packager::InvalidPackageExpression)) {
+                                        e.setHeader(
+                                            "Invalid expression in package: the only valid value for `{}` is `{}`",
+                                            "only:", "\"test_rb\"");
+                                    }
+                                }
+                            }
+                            break;
+
+                        case core::Names::usesInternals().rawId():
+                            if (!testPackages) {
+                                break;
+                            }
+
+                            auto valLit = ast::cast_tree<ast::Literal>(value);
+                            if (valLit && valLit->isTrue(ctx)) {
+                                if (imp) {
+                                    imp->usesInternals = true;
+                                }
+                            } else {
+                                if (auto e =
+                                        ctx.beginError(value.loc(), core::errors::Packager::InvalidPackageExpression)) {
+                                    e.setHeader("Invalid expression in package: the only valid value for `{}` is `{}`",
+                                                "uses_internals:", "true");
+                                }
+                            }
+
+                            break;
                     }
                 }
             }
@@ -684,15 +724,21 @@ struct PackageSpecBodyWalk {
                 return;
             }
 
-            if (send.numKwArgs() >= 2) {
-                core::StrictLevel minTypedLevel;
+            // TODO(trevor): after we fully commit to test-packages, this can be simplified quite a bit.
+            if (send.numKwArgs() >= 1) {
+                bool testsMinTypedLevelPresent = false;
+                core::StrictLevel minTypedLevel = core::StrictLevel::None;
                 core::LocOffsets minTypedLevelLoc;
-                core::StrictLevel testsMinTypedLevel;
+                core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
                 core::LocOffsets testsMinTypedLevelLoc;
                 for (const auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
                     auto typedLevel = parseTypedLevelOption(ctx, value);
+
+                    testsMinTypedLevelPresent =
+                        testsMinTypedLevelPresent || keyLit->asSymbol() == core::Names::testsMinTypedLevel();
+
                     if (typedLevel == core::StrictLevel::None) {
                         if (keyLit->asSymbol() == core::Names::minTypedLevel() ||
                             keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
@@ -708,18 +754,52 @@ struct PackageSpecBodyWalk {
                         minTypedLevel = typedLevel;
                         minTypedLevelLoc = value.loc();
                     } else if (keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
-                        testsMinTypedLevel = typedLevel;
-                        testsMinTypedLevelLoc = value.loc();
+                        if (testPackages) {
+                            if (auto e = ctx.beginError(keyLit->loc.join(value.loc()),
+                                                        core::errors::Packager::InvalidPackageExpression)) {
+                                e.setHeader("Invalid expression in package: the only valid argument for `{}` is `{}`",
+                                            "sorbet", core::Names::minTypedLevel().shortName(ctx));
+                            }
+                        } else {
+                            testsMinTypedLevel = typedLevel;
+                            testsMinTypedLevelLoc = value.loc();
+                        }
                     } else {
                         // Handled elsewhere
                     }
                 }
-                if (minTypedLevel != core::StrictLevel::None && testsMinTypedLevel != core::StrictLevel::None) {
+
+                if (testPackages) {
                     info.minTypedLevel = minTypedLevel;
-                    info.testsMinTypedLevel = testsMinTypedLevel;
                     info.locs.minTypedLevel = minTypedLevelLoc;
-                    info.locs.testsMinTypedLevel = testsMinTypedLevelLoc;
+                } else {
+                    if (minTypedLevel != core::StrictLevel::None && testsMinTypedLevel != core::StrictLevel::None) {
+                        info.minTypedLevel = minTypedLevel;
+                        info.testsMinTypedLevel = testsMinTypedLevel;
+                        info.locs.minTypedLevel = minTypedLevelLoc;
+                        info.locs.testsMinTypedLevel = testsMinTypedLevelLoc;
+                    }
+
+                    // Catch when we haven't also specified a tests_min_typed_level, as it's nilable during the
+                    // compatibility period.
+                    if (!testsMinTypedLevelPresent) {
+                        if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
+                            e.setHeader("`{}` requires values for both `{}` and `{}` to be specified", "sorbet",
+                                        core::Names::minTypedLevel().shortName(ctx),
+                                        core::Names::testsMinTypedLevel().shortName(ctx));
+                        }
+                    }
                 }
+            }
+        } else if (testPackages && send.fun == core::Names::test_bang()) {
+            if (!send.hasNonBlockArgs()) {
+                if (!ctx.file.data(ctx).isTestPath()) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
+                        e.setHeader("`{}` is only valid for packages with `{}` in their path", "test!", "/test/");
+                    }
+                }
+
+                info.locs.testPackage = send.loc;
             }
         } else {
             // Extra directives
@@ -743,20 +823,27 @@ struct PackageSpecBodyWalk {
         illegalNode(ctx, tree);
     }
 
-    bool isSpecMethod(const sorbet::ast::Send &send) const {
+    bool isSpecMethod(bool testPackages, const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-            case core::Names::testImport().rawId():
             case core::Names::export_().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
             case core::Names::preludePackage().rawId():
                 return true;
+
+            case core::Names::testImport().rawId():
+                return !testPackages;
+
+            case core::Names::test_bang().rawId():
+                return testPackages;
+
             default:
                 return false;
         }
     }
 
+    // TODO(trevor) this method can go away once we only support test packages
     ImportType method2ImportType(const ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
@@ -992,6 +1079,24 @@ void validatePackage(core::Context ctx) {
         // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
             continue;
+        }
+
+        // It's not acceptable to import a `test!` package from application code
+        if (otherPkg.testPackage() && !pkgInfo.testPackage()) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::TestImportMismatch)) {
+                e.setHeader("Package `{}` may not import `{}` packages", pkgInfo.show(ctx), "test!");
+                e.addErrorLine(pkgInfo.declLoc(), "Defined here");
+                e.addErrorLine(otherPkg.declLoc(), "Imported `{}` package defined here", "test!");
+            }
+        }
+
+        // `uses_internals: true` is only valid from a `test!` package
+        if (i.usesInternals && !pkgInfo.testPackage()) {
+            if (auto e = ctx.beginError(i.loc, core::errors::Packager::TestImportMismatch)) {
+                e.setHeader("Non-`{}` package `{}` cannot have imports with `{}`", "test!", pkgInfo.show(ctx),
+                            "uses_internals: true");
+                e.addErrorLine(pkgInfo.declLoc(), "Defined here");
+            }
         }
 
         if (pkgIsPrelude) {

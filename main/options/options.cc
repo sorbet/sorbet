@@ -662,6 +662,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-package-directed",
                                  "Enable support for checking by package, instead of processing all files at once",
                                  cxxopts::value<bool>());
+    options.add_options(section)("experimental-test-packages", "Enable support for tests as their own packages",
+                                 cxxopts::value<bool>());
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1239,6 +1241,12 @@ void readOptions(Options &opts,
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
         opts.cacheSensitiveOptions.sorbetPackages =
             raw["sorbet-packages"].as<bool>() || raw["stripe-packages"].as<bool>();
+
+        opts.testPackages = raw["experimental-test-packages"].as<bool>();
+        if (opts.testPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
+            logger->error("--experimental-test-packages can only be specified in --sorbet-packages mode");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.packageDirected = raw["experimental-package-directed"].as<bool>();
         if (opts.packageDirected && !opts.cacheSensitiveOptions.sorbetPackages) {

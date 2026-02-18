@@ -503,6 +503,8 @@ NameDef names[] = {
     {"only"},
     {"testRb", "test_rb"},
     {"preludePackage", "prelude_package"},
+    {"test_bang", "test!"},
+    {"usesInternals", "uses_internals"},
 
     // GlobalState initEmpty()
     {"Top", "T.anything", true},

@@ -547,6 +547,9 @@ public:
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
+        if (db.testPackages()) {
+            isExported = isExported || (wasImported && import->usesInternals);
+        }
 
         // Is this a test import (whether test helper or not) used in a production context?
         auto testImportInProd =
