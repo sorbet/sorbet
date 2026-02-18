@@ -405,22 +405,6 @@ public:
     }
 };
 
-enum class FileType {
-    ProdFile,
-    TestHelperFile,
-    TestUnitFile,
-};
-
-const FileType fileTypeFromCtx(const core::Context ctx) {
-    if (ctx.file.data(ctx).isPackagedTestHelper()) {
-        return FileType::TestHelperFile;
-    } else if (ctx.file.data(ctx).isPackagedTest()) {
-        return FileType::TestUnitFile;
-    } else {
-        return FileType::ProdFile;
-    }
-}
-
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
@@ -461,7 +445,7 @@ class VisibilityCheckerPass final {
 
 public:
     const core::packages::PackageInfo &package;
-    const FileType fileType;
+    const core::File::FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
     UnorderedSet<core::SymbolRef> referencedSymbols;
 
@@ -471,10 +455,10 @@ public:
     UnorderedSet<void *> constantAssignmentDefinitions;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
+        : package{package}, fileType{ctx.file.data(ctx).fileType()} {}
 
     bool isAnyTestFile() const {
-        return fileType != FileType::ProdFile;
+        return fileType != core::File::FileType::ProdFile;
     }
 
     void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -550,19 +534,19 @@ public:
 
         // Is this a test import (whether test helper or not) used in a production context?
         auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
+            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == core::File::FileType::ProdFile;
         // Is this a test import not intended for use in helpers?
         auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      this->fileType != FileType::TestUnitFile;
+                                      this->fileType != core::File::FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
         referencedPackages[otherPackage] = {
             .importNeeded = importNeeded, .causesModularityError = false, .causesVisibilityError = false};
 
         if (importNeeded || !isExported) {
-            bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
+            bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != core::File::FileType::ProdFile;
             core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
             if (isTestImport) {
-                if (this->fileType == FileType::TestHelperFile) {
+                if (this->fileType == core::File::FileType::TestHelperFile) {
                     autocorrectedImportType = core::packages::ImportType::TestHelper;
                 } else {
                     autocorrectedImportType = core::packages::ImportType::TestUnit;

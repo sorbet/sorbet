@@ -298,6 +298,17 @@ bool File::isPackageRBI() const {
     return flags.hasPackageRBIPath;
 }
 
+File::FileType File::fileType() const {
+    if (isPackagedTestHelper()) {
+        return File::FileType::TestHelperFile;
+    } else if (isPackagedTest()) {
+        return File::FileType::TestUnitFile;
+    } else {
+        return File::FileType::ProdFile;
+    }
+}
+
+
 bool File::hasIndexErrors() const {
     return flags.hasIndexErrors;
 }

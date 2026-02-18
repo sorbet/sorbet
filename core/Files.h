@@ -26,6 +26,12 @@ public:
         TombStone,
     };
 
+    enum class FileType {
+        ProdFile,
+        TestHelperFile,
+        TestUnitFile,
+    };
+
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.
     // TODO(jvilk): Delurk epoch usage and use something like pointer equality to check if a file has changed.
     const uint32_t epoch;
@@ -62,6 +68,8 @@ public:
     // flag accessors
     bool isPackagedTest() const;
     bool isPackagedTestHelper() const;
+
+    FileType fileType() const;
 
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
