@@ -1739,8 +1739,37 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         }
         case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
             // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
-            categoryCounterInc("Prism fallback", "PM_CALL_TARGET_NODE");
-            throw PrismFallback{};
+            auto callTargetNode = down_cast<pm_call_target_node>(node);
+            auto receiverNode = callTargetNode->receiver;
+
+            if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+                categoryCounterInc("Prism fallback", "PM_CALL_TARGET_NODE with PM_CALL_NODE_FLAGS_SAFE_NAVIGATION");
+                throw PrismFallback{};
+            }
+
+            ast::ExpressionPtr receiver;
+            if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
+                receiver = MK::Self(location.copyWithZeroLength());
+            } else {
+                receiver = desugar(receiverNode);
+            }
+
+            // Unsupported nodes are desugared to an empty tree.
+            // Treat them as if they were `self` to match `Desugar.cc`.
+            // TODO: Clean up after direct desugaring is complete.
+            // https://github.com/Shopify/sorbet/issues/671
+            ast::Send::Flags flags;
+            if (ast::isa_tree<ast::EmptyTree>(receiver)) {
+                receiver = MK::Self(location.copyWithZeroLength());
+                flags.isPrivateOk = true;
+            } else {
+                flags.isPrivateOk = PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+            }
+
+            auto methodName = translateConstantName(callTargetNode->name);
+            auto methodNameLoc = translateLoc(callTargetNode->message_loc);
+            ast::Send::ARGS_store emptyArgs;
+            return MK::Send(location, move(receiver), methodName, methodNameLoc, 0, move(emptyArgs), flags);
         }
         case PM_CASE_MATCH_NODE: { // A pattern-matching `case` statement that only uses `in` (and not `when`)
             auto caseMatchNode = down_cast<pm_case_match_node>(node);

@@ -628,8 +628,6 @@ pipeline_tests(
             "prism_regression/multi_target.rb",
             "prism_regression/call_block_param.rb",
 
-            # Triggers a fallback because it has a PM_CALL_TARGET_NODE
-            "prism_regression/assign_to_method_result.rb",
             # Triggers a fallback because it has a PM_CALL_TARGET_NODE with safe navigation
             "prism_regression/invalid/multi_assign_to_csend_target.rb",
         ],
