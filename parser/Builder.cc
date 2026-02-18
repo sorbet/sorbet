@@ -108,7 +108,6 @@ public:
 
     GlobalState &gs_;
     core::FileRef file_;
-    uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
     ruby_parser::base_driver *driver_;
 
@@ -625,18 +624,13 @@ public:
         core::LocOffsets loc;
         core::NameRef nm;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named block parameter, like `def foo(&block)`
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
-        } else {
+        } else { // An anonymous block parameter, like `def foo(&)`
             loc = tokLoc(amper);
-            const auto &ctx = driver_->lex.context;
-            nm = ctx.inDef && !ctx.inLambda && !ctx.inBlock
-                     ? core::Names::ampersand()
-                     // We still want a unique name for anonymous block params in block parameter lists (vs
-                     // method def parameter lists) so that they don't shadow the method parameter list.
-                     : gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
+            nm = core::Names::ampersand();
         }
 
         return make_unique<BlockParam>(loc, nm);
@@ -1194,11 +1188,11 @@ public:
         core::LocOffsets loc;
         core::NameRef nm;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named keyword rest parameter, like `def foo(**kwargs)`
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
-        } else {
+        } else { // An anonymous keyword rest parameter, like `def foo(**)`
             loc = tokLoc(dstar);
             nm = core::Names::starStar();
         }
@@ -1566,13 +1560,12 @@ public:
         core::NameRef nm;
         core::LocOffsets nameLoc = loc;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named rest parameter, like `def m(*rest)`
             nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), nameLoc);
-        } else {
-            // case like 'def m(*); end'
+        } else { // Anonymous rest parameter, like `def m(*)`
             nm = core::Names::star();
         }
 
