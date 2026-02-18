@@ -742,8 +742,6 @@ end
 # A [`DNS`](https://docs.ruby-lang.org/en/2.7.0/Resolv/DNS.html) resource
 # abstract class.
 class Resolv::DNS::Resource < ::Resolv::DNS::Query
-  ClassHash = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
-
   ClassInsensitiveTypes = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   def ==(other); end
@@ -763,6 +761,10 @@ class Resolv::DNS::Resource < ::Resolv::DNS::Query
   def self.decode_rdata(msg); end
 
   def self.get_class(type_value, class_value); end
+end
+
+module Resolv::DNS::Resource::ClassHash
+  module_function def []=(type_class_value, klass); end
 end
 
 # A Query type requesting any RR.
@@ -1566,4 +1568,3 @@ class Resolv::ResolvError < ::StandardError; end
 
 # Indicates a timeout resolving a name or address.
 class Resolv::ResolvTimeout < ::Timeout::Error; end
-
