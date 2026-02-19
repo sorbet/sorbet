@@ -909,10 +909,10 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
             ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
                     "All packages must be present in the condensation graph");
             auto &info = stratumMapping[pkgName];
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                fileToStratum[ix] = info.testStratum;
-            } else {
+            if (file->fileType() == core::File::FileType::ProdFile) {
                 fileToStratum[ix] = info.applicationStratum;
+            } else {
+                fileToStratum[ix] = info.testStratum;
             }
         }
 

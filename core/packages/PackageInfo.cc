@@ -551,12 +551,13 @@ void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, 
 
 namespace {
 core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file) {
-    if (file.data(gs).isPackagedTestHelper()) {
-        return core::packages::ImportType::TestHelper;
-    } else if (file.data(gs).isPackagedTest()) {
-        return core::packages::ImportType::TestUnit;
-    } else {
-        return core::packages::ImportType::Normal;
+    switch (file.data(gs).fileType()) {
+        case core::File::FileType::ProdFile:
+            return core::packages::ImportType::Normal;
+        case core::File::FileType::TestHelperFile:
+            return core::packages::ImportType::TestHelper;
+        case core::File::FileType::TestUnitFile:
+            return core::packages::ImportType::TestUnit;
     }
 }
 
