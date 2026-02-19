@@ -40,6 +40,9 @@ class CompletionTask final : public LSPRequestTask {
         // The location of the method in a send, if applicable.
         core::LocOffsets funLoc;
 
+        // The location of a method receiver, if applicable.
+        core::LocOffsets receiverLoc;
+
         // If empty(), won't suggest constants.
         core::lsp::ConstantResponse::Scopes scopes;
     };
@@ -48,18 +51,33 @@ class CompletionTask final : public LSPRequestTask {
     static SearchParams searchParamsForEmptyAssign(const core::GlobalState &gs, core::Loc queryLoc,
                                                    core::MethodRef enclosingMethod,
                                                    core::lsp::ConstantResponse::Scopes scopes);
+
+public:
+    struct SimilarMethod final {
+        int depth;
+        core::ClassOrModuleRef receiver;
+        core::MethodRef method;
+
+        // Populated later
+        core::TypePtr receiverType = nullptr;
+    };
+
+private:
     std::vector<std::unique_ptr<CompletionItem>>
     getCompletionItems(LSPTypecheckerDelegate &typechecker, SearchParams &params, const ast::ParsedFile &resolved);
 
     std::unique_ptr<CompletionItem> getCompletionItemForUntyped(const core::GlobalState &gs, core::Loc queryLoc,
                                                                 size_t sortIdx, std::string_view message);
 
+    std::unique_ptr<CompletionItem> getCompletionItemForCase(const core::GlobalState &gs, const SearchParams &params,
+                                                             const core::ClassOrModuleRef receiver, core::Loc queryLoc,
+                                                             std::string_view prefix, size_t sortIdx) const;
+
     std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
-                                                               core::DispatchResult &dispatchResult,
-                                                               core::MethodRef what, const core::TypePtr &receiverType,
-                                                               core::Loc queryLoc, const ast::ParsedFile &resolved,
-                                                               std::string_view prefix, size_t sortIdx,
-                                                               uint16_t totalArgs) const;
+                                                               const SearchParams &params,
+                                                               const SimilarMethod &similarMethod, core::Loc queryLoc,
+                                                               const ast::ParsedFile &resolved, std::string_view prefix,
+                                                               size_t sortIdx, uint16_t totalArgs) const;
 
 public:
     CompletionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CompletionParams> params);
