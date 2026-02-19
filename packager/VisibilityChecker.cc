@@ -191,10 +191,11 @@ class PropagateVisibility final {
         auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
         auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
         core::ClassOrModuleRef testScope;
-        if (testNamespace.exists() && testNamespace.isClassOrModule()) {
+        if (!gs.packageDB().testPackages() && testNamespace.exists() && testNamespace.isClassOrModule()) {
             testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
         }
 
+        // TODO(trevor): we can remove the returned test scope after switching to test packages.
         return {nonTestScope, testScope};
     }
 
