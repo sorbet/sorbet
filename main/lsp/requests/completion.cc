@@ -1079,14 +1079,14 @@ std::unique_ptr<CompletionItem> CompletionTask::getCompletionItemForCase(const c
 
     fmt::memory_buffer buf;
     fmt::format_to(back_inserter(buf), "case {}\n", receiverText);
-    bool first = true;
+    bool needsTabStop = item->insertTextFormat == InsertTextFormat::Snippet;
     auto abbreviate = receiverLoc.exists() && receiverLoc.empty();
     for (auto value = values.rbegin(); value != values.rend(); value++) {
         auto attachedClass = value->data(gs)->attachedClass(gs);
         fmt::format_to(back_inserter(buf), "when {}{}\n",
                        abbreviate ? attachedClass.data(gs)->name.show(gs) : attachedClass.show(gs),
-                       first ? "${0}" : "");
-        first = false;
+                       needsTabStop ? "${0}" : "");
+        needsTabStop = false;
     }
     fmt::format_to(back_inserter(buf),
                    "else\n"
@@ -1138,7 +1138,7 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForMethod(
         }
     }
 
-    if (what == core::Symbols::T_Enum_caseAngles() && params.receiverLoc.exists()) {
+    if (what == core::Symbols::T_Enum_caseAngles()) {
         return getCompletionItemForCase(gs, params, similarMethod.receiver, queryLoc, prefix, sortIdx);
     }
 
