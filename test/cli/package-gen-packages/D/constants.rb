@@ -7,6 +7,8 @@ module D
     CONSTANT_FROM_D_CLASS = "Hello from ClassFromD"
   end
 
+  puts B::CONSTANT_FROM_B
+
   class EnumFromD < T::Enum
     enums do
       Variant = new
