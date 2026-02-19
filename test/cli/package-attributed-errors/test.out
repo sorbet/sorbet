@@ -8,9 +8,9 @@
     app/__package.rb:3: Insert `import Lib::Nested`
      3 |class App < PackageSpec
                                ^
-    lib/nested/__package.rb:3: Insert `export Lib::Nested::SomeClass`
-     3 |class Lib::Nested < PackageSpec
-                                       ^
+    lib/nested/__package.rb:4: Insert `export Lib::Nested::SomeClass`
+     4 |  bad
+             ^
 
 [Lib::Nested] lib/nested/some_class.rb:4: The method `foo` does not have a `sig` https://srb.help/7017
      4 |  def foo; end
@@ -21,6 +21,14 @@
           ^
     lib/nested/some_class.rb:4: Insert `extend T::Sig`
      4 |  def foo; end
+        ^
+
+[<none>] lib/nested/__package.rb:4: Method `bad` does not exist on `T.class_of(Lib::Nested)` https://srb.help/7003
+     4 |  bad
+          ^^^
+  Got `T.class_of(Lib::Nested)` originating from:
+    lib/nested/__package.rb:3:
+     3 |class Lib::Nested < PackageSpec
         ^
 
 [<none>] unpackaged.rb:1: File `./unpackaged.rb` does not belong to a package; add a `__package.rb` file to one of its parent directories https://srb.help/3705
@@ -38,4 +46,4 @@
     unpackaged.rb:4:
      4 |  1 + ""
               ^^
-Errors: 4
+Errors: 5
