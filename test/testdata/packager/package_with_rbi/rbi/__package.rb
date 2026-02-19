@@ -2,7 +2,7 @@
 # typed: strict
 
 class RBI < PackageSpec
-  prelude_package
+  prelude!
 
   export RBI::Foo
   export RBI::Bar
