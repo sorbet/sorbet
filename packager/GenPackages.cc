@@ -119,6 +119,7 @@ void GenPackages::run(core::GlobalState &gs) {
 
     auto neededVisibleTo = UnorderedMap<core::packages::MangledName, vector<core::packages::MangledName>>{};
     if (gs.packageDB().anyUpdateVisibilityFor()) {
+        Timer timeit(gs.tracer(), "gen_packages.run.build_needed_visible_to");
         for (auto pkgName : gs.packageDB().packages()) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
             ENFORCE(pkgInfo.exists());
