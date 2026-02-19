@@ -1779,7 +1779,7 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
             if (!pkg.exists()) {
                 writer.String("<none>");
             } else {
-                writer.String(gs.packageDB().getPackageInfo(pkg).show(gs));
+                writer.String(pkg.owner.show(gs));
             }
 
         } else {
