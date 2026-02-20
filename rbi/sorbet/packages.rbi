@@ -28,5 +28,8 @@ class Sorbet::Private::Static::PackageSpec
   def self.prelude_package; end
 
   sig { void }
+  def self.prelude!; end
+
+  sig { void }
   def self.test!(); end
 end
