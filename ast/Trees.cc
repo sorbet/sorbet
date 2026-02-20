@@ -4,6 +4,7 @@
 #include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
+#include <algorithm>
 #include <utility>
 
 using namespace std;
@@ -314,6 +315,159 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     : loc(loc), cnst(cnst), scope(std::move(scope)) {
     categoryCounterInc("trees", "constantlit");
     _sanityCheck();
+}
+
+// Get the root scope (outermost non-UnresolvedConstantLit)
+const ExpressionPtr &UnresolvedConstantLit::rootScope() const {
+    const UnresolvedConstantLit *current = this;
+
+    while (auto next = cast_tree<UnresolvedConstantLit>(current->scope)) {
+        current = next.get();
+    }
+
+    return current->scope;
+}
+
+// Helper function to collect segments from linked list
+static std::vector<UnresolvedConstantLit::SegmentType> collectSegments(const UnresolvedConstantLit *node) {
+    if (!node) {
+        return {};
+    }
+
+    // Walk the linked list from leaf to root, collecting segments
+    std::vector<UnresolvedConstantLit::SegmentType> segments;
+    const UnresolvedConstantLit *current = node;
+
+    while (current != nullptr) {
+        segments.emplace_back(current->cnst, current->loc);
+
+        // Move to the next node in the chain
+        if (auto next = ast::cast_tree<UnresolvedConstantLit>(current->scope)) {
+            current = next.get();
+        } else {
+            // Reached a non-UnresolvedConstantLit scope
+            break;
+        }
+    }
+
+    // Reverse to get root-to-leaf order
+    std::reverse(segments.begin(), segments.end());
+    return segments;
+}
+
+// ForwardRange implementation
+UnresolvedConstantLit::ForwardRange::ForwardRange(const UnresolvedConstantLit *node)
+    : segments_(collectSegments(node)) {}
+
+UnresolvedConstantLit::ForwardRange::iterator UnresolvedConstantLit::ForwardRange::begin() const {
+    return iterator(&segments_, 0);
+}
+
+UnresolvedConstantLit::ForwardRange::iterator UnresolvedConstantLit::ForwardRange::end() const {
+    return iterator(&segments_, segments_.size());
+}
+
+// ForwardRange::iterator implementation
+UnresolvedConstantLit::ForwardRange::iterator::iterator(const std::vector<SegmentType> *segments, size_t index)
+    : segments_(segments), index_(index) {}
+
+UnresolvedConstantLit::ForwardRange::iterator::reference
+UnresolvedConstantLit::ForwardRange::iterator::operator*() const {
+    return (*segments_)[index_];
+}
+
+UnresolvedConstantLit::ForwardRange::iterator::pointer
+UnresolvedConstantLit::ForwardRange::iterator::operator->() const {
+    return &(*segments_)[index_];
+}
+
+UnresolvedConstantLit::ForwardRange::iterator &UnresolvedConstantLit::ForwardRange::iterator::operator++() {
+    ++index_;
+    return *this;
+}
+
+UnresolvedConstantLit::ForwardRange::iterator UnresolvedConstantLit::ForwardRange::iterator::operator++(int) {
+    iterator tmp = *this;
+    ++index_;
+    return tmp;
+}
+
+bool UnresolvedConstantLit::ForwardRange::iterator::operator==(const iterator &other) const {
+    return segments_ == other.segments_ && index_ == other.index_;
+}
+
+bool UnresolvedConstantLit::ForwardRange::iterator::operator!=(const iterator &other) const {
+    return !(*this == other);
+}
+
+// ReverseRange implementation
+UnresolvedConstantLit::ReverseRange::ReverseRange(const UnresolvedConstantLit *node) : node_(node) {}
+
+UnresolvedConstantLit::ReverseRange::iterator UnresolvedConstantLit::ReverseRange::begin() const {
+    return iterator(node_);
+}
+
+UnresolvedConstantLit::ReverseRange::iterator UnresolvedConstantLit::ReverseRange::end() const {
+    return iterator(nullptr);
+}
+
+// ReverseRange::iterator implementation
+UnresolvedConstantLit::ReverseRange::iterator::iterator(const UnresolvedConstantLit *node) : current_(node) {
+    if (current_) {
+        currentSegment_ = {current_->cnst, current_->loc};
+    }
+}
+
+void UnresolvedConstantLit::ReverseRange::iterator::advance() {
+    if (!current_) {
+        return;
+    }
+
+    if (auto next = ast::cast_tree<UnresolvedConstantLit>(current_->scope)) {
+        current_ = next.get();
+        currentSegment_ = {current_->cnst, current_->loc};
+    } else {
+        // Reached non-UnresolvedConstantLit scope, we're done
+        current_ = nullptr;
+    }
+}
+
+UnresolvedConstantLit::ReverseRange::iterator::reference
+UnresolvedConstantLit::ReverseRange::iterator::operator*() const {
+    return currentSegment_;
+}
+
+UnresolvedConstantLit::ReverseRange::iterator::pointer
+UnresolvedConstantLit::ReverseRange::iterator::operator->() const {
+    return &currentSegment_;
+}
+
+UnresolvedConstantLit::ReverseRange::iterator &UnresolvedConstantLit::ReverseRange::iterator::operator++() {
+    advance();
+    return *this;
+}
+
+UnresolvedConstantLit::ReverseRange::iterator UnresolvedConstantLit::ReverseRange::iterator::operator++(int) {
+    iterator tmp = *this;
+    advance();
+    return tmp;
+}
+
+bool UnresolvedConstantLit::ReverseRange::iterator::operator==(const iterator &other) const {
+    return current_ == other.current_;
+}
+
+bool UnresolvedConstantLit::ReverseRange::iterator::operator!=(const iterator &other) const {
+    return !(*this == other);
+}
+
+// Create range objects
+UnresolvedConstantLit::ForwardRange UnresolvedConstantLit::parts() const {
+    return ForwardRange(this);
+}
+
+UnresolvedConstantLit::ReverseRange UnresolvedConstantLit::partsReverse() const {
+    return ReverseRange(this);
 }
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
