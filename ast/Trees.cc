@@ -461,6 +461,61 @@ bool UnresolvedConstantLit::ReverseRange::iterator::operator!=(const iterator &o
     return !(*this == other);
 }
 
+// MutableReverseRange implementation
+UnresolvedConstantLit::MutableReverseRange::MutableReverseRange(UnresolvedConstantLit* node)
+    : node_(node) {}
+
+UnresolvedConstantLit::MutableReverseRange::iterator UnresolvedConstantLit::MutableReverseRange::begin() const {
+    return iterator(node_);
+}
+
+UnresolvedConstantLit::MutableReverseRange::iterator UnresolvedConstantLit::MutableReverseRange::end() const {
+    return iterator(nullptr);
+}
+
+// MutableReverseRange::iterator implementation
+UnresolvedConstantLit::MutableReverseRange::iterator::iterator(UnresolvedConstantLit* node)
+    : current_(node) {}
+
+void UnresolvedConstantLit::MutableReverseRange::iterator::advance() {
+    if (!current_) {
+        return;
+    }
+
+    if (auto next = ast::cast_tree<UnresolvedConstantLit>(current_->scope)) {
+        current_ = next.get();
+    } else {
+        // Reached non-UnresolvedConstantLit scope, we're done
+        current_ = nullptr;
+    }
+}
+
+UnresolvedConstantLit::MutableReverseRange::MutableSegment
+UnresolvedConstantLit::MutableReverseRange::iterator::operator*() const {
+    return MutableSegment(current_->cnst, const_cast<core::LocOffsets&>(current_->loc));
+}
+
+UnresolvedConstantLit::MutableReverseRange::iterator&
+UnresolvedConstantLit::MutableReverseRange::iterator::operator++() {
+    advance();
+    return *this;
+}
+
+UnresolvedConstantLit::MutableReverseRange::iterator
+UnresolvedConstantLit::MutableReverseRange::iterator::operator++(int) {
+    iterator tmp = *this;
+    advance();
+    return tmp;
+}
+
+bool UnresolvedConstantLit::MutableReverseRange::iterator::operator==(const iterator& other) const {
+    return current_ == other.current_;
+}
+
+bool UnresolvedConstantLit::MutableReverseRange::iterator::operator!=(const iterator& other) const {
+    return !(*this == other);
+}
+
 // Create range objects
 UnresolvedConstantLit::ForwardRange UnresolvedConstantLit::parts() const {
     return ForwardRange(this);
@@ -468,6 +523,10 @@ UnresolvedConstantLit::ForwardRange UnresolvedConstantLit::parts() const {
 
 UnresolvedConstantLit::ReverseRange UnresolvedConstantLit::partsReverse() const {
     return ReverseRange(this);
+}
+
+UnresolvedConstantLit::MutableReverseRange UnresolvedConstantLit::partsMutable() {
+    return MutableReverseRange(this);
 }
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
