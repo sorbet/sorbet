@@ -948,7 +948,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
-    if (gs.packageDB().enforceLayering()) {
+    if (gs.packageDB().enforceLayering() && !info.testPackage()) {
         if (!bodyWalk.foundLayerDeclaration) {
             if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidLayer)) {
                 e.setHeader("This package does not declare a `{}`", "layer");

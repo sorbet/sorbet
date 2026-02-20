@@ -175,7 +175,7 @@ class ComputePackageSCCs {
         for (auto package : gs.packageDB().packages()) {
             // We skip test-only packages when we're processing application edges.
             if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                if (gs.packageDB().getPackageInfo(package).file.isTestPackage(gs)) {
+                if (!gs.packageDB().testPackages() && gs.packageDB().getPackageInfo(package).file.isTestPackage(gs)) {
                     continue;
                 }
             }
@@ -198,8 +198,15 @@ public:
         // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
         scc.tarjan<core::packages::ImportType::Normal>(packageGraph);
 
-        // TODO(trevor): once we have fully migrated to test packages, this additional call to scc.tarjan can go away.
-        if (!gs.packageDB().testPackages()) {
+        if (gs.packageDB().testPackages()) {
+            // TODO(trevor): once we have fully migrated to test packages, we can remove the testSCCId. For now, we make
+            // sure the two match.
+            for (auto pkg : gs.packageDB().packages()) {
+                packageGraph.setTestSCCId(pkg, packageGraph.getSCCId(pkg));
+            }
+        } else {
+            // TODO(trevor): once we have fully migrated to test packages, this additional call to scc.tarjan can go
+            // away.
             scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
         }
 

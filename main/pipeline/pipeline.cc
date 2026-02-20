@@ -942,7 +942,9 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
         {
             auto start = packageFiles.size();
             for (auto &scc : stratum) {
-                if (scc.isTest) {
+                // TODO(trevor): this can be simplified when we switch to test-packages, as we won't need to emulate the
+                // behavior by copying package files anymore.
+                if (scc.isTest || gs.packageDB().testPackages()) {
                     for (auto member : scc.members) {
                         packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
                     }
