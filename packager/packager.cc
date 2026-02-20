@@ -596,7 +596,8 @@ struct PackageSpecBodyWalk {
             if (send.numPosArgs() == 0) {
                 info.locs.exportAll = send.loc;
             }
-        } else if (send.fun == core::Names::preludePackage() && !send.hasBlock() && !send.hasNonBlockArgs()) {
+        } else if ((send.fun == core::Names::preludePackage() || send.fun == core::Names::prelude_bang()) &&
+                   !send.hasBlock() && !send.hasNonBlockArgs()) {
             info.locs.preludePackage = send.loc;
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
@@ -830,6 +831,7 @@ struct PackageSpecBodyWalk {
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
             case core::Names::preludePackage().rawId():
+            case core::Names::prelude_bang().rawId():
                 return true;
 
             case core::Names::testImport().rawId():
