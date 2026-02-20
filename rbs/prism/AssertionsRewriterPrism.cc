@@ -127,35 +127,34 @@ extractTypeParamsPrism(core::MutableContext ctx, const parser::Prism::Parser &pa
  * Handles both PM_CONSTANT_READ_NODE (e.g., `G2`) and PM_CONSTANT_PATH_NODE (e.g., `T::Array`).
  */
 bool sameConstant(parser::Prism::Parser &parser, pm_node_t *a, pm_node_t *b) {
-    if (a == nullptr || b == nullptr) {
+    while (a != nullptr && b != nullptr) {
+        pm_node_type aType = PM_NODE_TYPE(a);
+        pm_node_type bType = PM_NODE_TYPE(b);
+
+        if (aType == PM_CONSTANT_READ_NODE && bType == PM_CONSTANT_READ_NODE) {
+            auto *aConst = down_cast<pm_constant_read_node_t>(a);
+            auto *bConst = down_cast<pm_constant_read_node_t>(b);
+            return aConst->name == bConst->name;
+        }
+
+        if (aType == PM_CONSTANT_PATH_NODE && bType == PM_CONSTANT_PATH_NODE) {
+            auto *aPath = down_cast<pm_constant_path_node_t>(a);
+            auto *bPath = down_cast<pm_constant_path_node_t>(b);
+
+            if (aPath->name != bPath->name) {
+                return false;
+            }
+
+            if (aPath->parent == nullptr && bPath->parent == nullptr) {
+                return true;
+            }
+
+            a = aPath->parent;
+            b = bPath->parent;
+            continue;
+        }
+
         return false;
-    }
-
-    pm_node_type aType = PM_NODE_TYPE(a);
-    pm_node_type bType = PM_NODE_TYPE(b);
-
-    // Case 1: Both are PM_CONSTANT_READ_NODE (simple constants like `G2`)
-    if (aType == PM_CONSTANT_READ_NODE && bType == PM_CONSTANT_READ_NODE) {
-        auto *aConst = down_cast<pm_constant_read_node_t>(a);
-        auto *bConst = down_cast<pm_constant_read_node_t>(b);
-        return aConst->name == bConst->name;
-    }
-
-    // Case 2: Both are PM_CONSTANT_PATH_NODE (scoped constants like `T::Array`)
-    if (aType == PM_CONSTANT_PATH_NODE && bType == PM_CONSTANT_PATH_NODE) {
-        auto *aPath = down_cast<pm_constant_path_node_t>(a);
-        auto *bPath = down_cast<pm_constant_path_node_t>(b);
-
-        if (aPath->name != bPath->name) {
-            return false;
-        }
-
-        // If both parents are null, we've matched the entire path
-        if (aPath->parent == nullptr && bPath->parent == nullptr) {
-            return true;
-        }
-
-        return sameConstant(parser, aPath->parent, bPath->parent);
     }
 
     return false;
@@ -317,7 +316,7 @@ bool AssertionsRewriterPrism::saveMethodTypeParams(pm_node_t *call) {
 
     // Check if this is a sig() call
     auto methodName = parser.resolveConstant(callNode->name);
-    if (methodName != "sig") {
+    if (methodName != "sig"sv) {
         return false;
     }
 
