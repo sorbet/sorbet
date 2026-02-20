@@ -1275,9 +1275,54 @@ public:
         const UnresolvedConstantLit* node_;
     };
 
+    // Mutable reverse range: yields mutable references to segments in leaf-to-root order (C, B, A)
+    // Allows mutation of cnst and loc fields
+    // No materialization needed, walks linked list directly and provides mutable access
+    class MutableReverseRange {
+    public:
+        // Provides mutable references to the cnst and loc fields of a node
+        struct MutableSegment {
+            core::NameRef& cnst;
+            core::LocOffsets& loc;
+
+            MutableSegment(core::NameRef& c, core::LocOffsets& l)
+                : cnst(c), loc(l) {}
+        };
+
+        class iterator {
+        public:
+            using value_type = MutableSegment;
+            using difference_type = std::ptrdiff_t;
+            using pointer = MutableSegment*;
+            using reference = MutableSegment;
+            using iterator_category = std::forward_iterator_tag;
+
+            explicit iterator(UnresolvedConstantLit* node);
+
+            MutableSegment operator*() const;
+            iterator& operator++();
+            iterator operator++(int);
+            bool operator==(const iterator& other) const;
+            bool operator!=(const iterator& other) const;
+
+        private:
+            UnresolvedConstantLit* current_;
+            void advance();
+        };
+
+        explicit MutableReverseRange(UnresolvedConstantLit* node);
+
+        iterator begin() const;
+        iterator end() const;
+
+    private:
+        UnresolvedConstantLit* node_;
+    };
+
     // Create range objects for iteration
     ForwardRange parts() const;
     ReverseRange partsReverse() const;
+    MutableReverseRange partsMutable();  // Non-const - allows mutation
 
     // Helper: Get the root scope (EmptyTree, ConstantLit, etc.)
     const ExpressionPtr& rootScope() const;
