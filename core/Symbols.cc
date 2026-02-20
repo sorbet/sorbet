@@ -2326,7 +2326,7 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
     return result;
 }
 
-uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) const {
+uint32_t ClassOrModule::hash(const GlobalState &gs, bool shapeHash) const {
     uint32_t result = _hash(name.shortName(gs));
 
     // Bit of a hack to ensure that the isBehaviorDefining flag is not serialized.
@@ -2375,7 +2375,7 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) co
                 }
             }
 
-            if (skipTypeMemberNames && e.second.isTypeMember()) {
+            if (shapeHash && e.second.isTypeMember()) {
                 // skipTypeMemberNames is currently the difference between `hash` and `classOrModuleShapeHash`
                 // (It felt wasteful to dupe this whole method.) Type member names have to be in the
                 // full hash so that a change to a type member name causes the right downstream
