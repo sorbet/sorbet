@@ -45,10 +45,14 @@ core::lsp::Query::Symbol::STORAGE getSymsToCheckWithinPackage(const core::Global
     }
 
     core::lsp::Query::Symbol::STORAGE result;
-    vector<core::SymbolRef> namespacesToCheck = {
-        core::Symbols::root(),
-        core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE),
-    };
+    vector<core::SymbolRef> namespacesToCheck(2);
+    namespacesToCheck.emplace_back(core::Symbols::root());
+
+    // TODO(trevor): we can remove this case once we have switched to test-packages
+    if (!gs.packageDB().testPackages()) {
+        namespacesToCheck.emplace_back(
+            core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE));
+    }
 
     for (auto &namespaceToCheck : namespacesToCheck) {
         if (!namespaceToCheck.exists()) {
@@ -177,7 +181,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //    ...
                 //
                 //    import Bar
-                //          ^^^
+                //           ^^^
                 //  Returns all usages of `Bar` or `Test::Bar` *within* the Foo package only.
                 //
                 // Case 3. get-refs on an export statement
