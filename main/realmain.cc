@@ -33,6 +33,7 @@
 #include "main/cache/cache.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
+#include "packager/GenPackages.h"
 #include "payload/payload.h"
 #include "resolver/resolver.h"
 #include "sorbet_version/sorbet_version.h"
@@ -685,6 +686,14 @@ int realmain(int argc, char *argv[]) {
             // Update offsets for the next stratum. We do this at the end of the loop to ensure that the first
             // iteration of the loop includes all of the payload symbols.
             gs->updateSymbolTableOffsets();
+        }
+
+        if (opts.genPackages) {
+            // One of the things this pass does is insert missing exports. Because of this, it needs to run after
+            // VisibilityChecker has been run for all strata; a symbol might be used in a strata after the strata for
+            // the package that owns that symbol, and we need to be able to see that use to know that a export should be
+            // generated for that symbol. Because of that, we need to put this pass outside of the loop above.
+            packager::GenPackages::run(*gs);
         }
 
         // getAndClearHistogram ensures that we don't accidentally submit a high-cardinality histogram to statsd
