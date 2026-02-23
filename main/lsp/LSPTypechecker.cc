@@ -331,8 +331,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     } else {
         files = "...";
     }
-    config->logger->debug("Running fast path over num_files={} incrementalNamer={} duration={} files=[{}]",
-                          toTypecheck.size(), shouldRunIncrementalNamer, duration.usec, files);
+    auto isPreemption = gs->epochManager->getStatus().slowPathRunning;
+    config->logger->debug(
+        "Running fast path over num_files={} incrementalNamer={} preemption={} duration={} files=[{}]",
+        toTypecheck.size(), shouldRunIncrementalNamer, isPreemption, duration.usec, files);
 
     return toTypecheck;
 }
