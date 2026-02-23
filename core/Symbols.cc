@@ -148,6 +148,9 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
             } else if (tmData->flags.isFixed || tmData->flags.isCovariant) {
                 // Default fixed or covariant parameters to their upper bound.
                 targs.emplace_back(lambdaParam->upperBound);
+            } else if (lambdaParam->lowerBound == lambdaParam->upperBound) {
+                // If the lower and upper bounds are reference equal (cheap), then default to the upperBound
+                targs.emplace_back(lambdaParam->upperBound);
             } else if (tmData->flags.isInvariant) {
                 // We instantiate Invariant type members as T.untyped as this will behave a bit like
                 // a unification variable with Types::glb.
