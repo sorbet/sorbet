@@ -274,6 +274,9 @@ private:
     // Desugar a class, singleton class or module body.
     ast::ClassDef::RHS_store desugarClassOrModule(pm_node *prismBodyNode);
 
+    // Handle invalid or missing constant paths in class/module declarations.
+    ast::ExpressionPtr desugarClassOrModuleName(pm_node_t *constantPath, pm_location_t keywordLoc);
+
     void reportError(core::LocOffsets loc, const std::string &message) const;
 
     // Helper to determine whether to use super or untypedSuper based on context
