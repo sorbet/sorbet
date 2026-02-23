@@ -331,8 +331,8 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     } else {
         files = "...";
     }
-    config->logger->debug("Running fast path over num_files={} duration={} files=[{}]", toTypecheck.size(),
-                          duration.usec, files);
+    config->logger->debug("Running fast path over num_files={} incrementalNamer={} duration={} files=[{}]",
+                          toTypecheck.size(), shouldRunIncrementalNamer, duration.usec, files);
 
     return toTypecheck;
 }
