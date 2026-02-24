@@ -65,6 +65,7 @@ class T::Props::Decorator
   # checked(:never) - Rules hash is expensive to check
   sig { params(name: Symbol, rules: Rules).void.checked(:never) }
   def add_prop_definition(name, rules)
+    # `rules[:override]` here is unelaborated, so the falsy case will be `nil` or `false.
     override = rules.delete(:override)
 
     if props.include?(name) && !override
@@ -338,15 +339,28 @@ class T::Props::Decorator
   private def validate_overrides(name, rules)
     override = elaborate_override(name, rules[:override])
 
-    return if rules[:without_accessors]
+    return if rules[:without_accessors] || rules[:clobber_existing_method!]
+
+    # We could check if the prop is already defined here, but it's easier to check in `add_prop_definition`
+    if method_defined_on_ancestor?(name) && !override[:reader]
+      raise ArgumentError.new("The reader for prop #{name.inspect} overrides the method `#{name}`, but is not marked as `override: :reader`.")
+    end
 
     if override[:reader] && !method_defined_on_ancestor?(name) && !props.include?(name)
-      raise ArgumentError.new("You marked the getter for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
+      raise ArgumentError.new("You marked the reader for prop #{name.inspect} as `override`, but the method `#{name}` doesn't exist to be overridden.")
     end
 
     # Properly, we should also check whether `props[name]` is immutable, but the old code didn't either.
-    if !rules[:immutable] && override[:writer] && !method_defined_on_ancestor?("#{name}=".to_sym) && !props.include?(name)
-      raise ArgumentError.new("You marked the setter for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
+    if !rules[:immutable]
+      wname = "#{name}=".to_sym
+
+      if method_defined_on_ancestor?(wname) && !override[:writer]
+        raise ArgumentError.new("The writer for prop #{name.inspect} overrides the method `#{name}=`, but is not marked as `override: :writer`.")
+      end
+
+      if override[:writer] && !method_defined_on_ancestor?(wname) && !props.include?(name)
+        raise ArgumentError.new("You marked the writer for prop #{name.inspect} as `override`, but the method `#{name}=` doesn't exist to be overridden.")
+      end
     end
   end
 

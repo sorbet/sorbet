@@ -398,7 +398,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         end
       end
 
-      assert(error.message.include?("You marked the getter for prop :b as `override`, but the method `b` doesn't exist to be overridden."))
+      assert(error.message.include?("You marked the reader for prop :b as `override`, but the method `b` doesn't exist to be overridden."))
     end
 
     module ManualGetter
@@ -503,5 +503,41 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     end
 
     assert(err.message.include?("doesn't exist to be overridden"))
+  end
+
+  it "errors if override isn't specified" do
+    err = assert_raises(ArgumentError) do
+      module Parent
+        extend T::Sig
+        extend T::Helpers
+        abstract!
+        sig { abstract.returns(Integer) }
+        def foo
+        end
+      end
+
+      class Child < T::Struct
+        include Parent
+        const :foo, Integer
+      end
+    end
+
+    assert(err.message.include?("not marked as `override: :reader`"))
+  end
+
+  it "allows implicitly overriding a non-`overridable` supermethod" do
+    module NoOverridableParent
+      extend T::Sig
+      # no `overridable`
+      sig { returns(Integer) }
+      def foo
+        1
+      end
+    end
+
+    class UnmarkedChild < T::Struct
+      include NoOverridableParent
+      const :foo, Integer # no override
+    end
   end
 end
