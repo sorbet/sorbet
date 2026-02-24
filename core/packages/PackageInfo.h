@@ -288,8 +288,10 @@ public:
         return this->locs.testPackage.exists();
     }
 
-    // Do this package's visible_to rules allow `otherPkg` to import this package, using an import of type `importType`?
-    bool isVisibleTo(const core::GlobalState &gs, const MangledName &otherPkg, const ImportType importType) const;
+    // Do this package's visible_to rules allow `importingPkg` to import this package, using an import of type
+    // `importType`?
+    bool isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo,
+                     const ImportType importType) const;
 
     enum class CanModifyResult : uint8_t {
         // This symbol can be modified.
