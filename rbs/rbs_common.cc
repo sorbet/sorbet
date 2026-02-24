@@ -2,6 +2,10 @@
 
 namespace sorbet::rbs {
 
+rbs_string_t makeRBSString(std::string_view str) {
+    return rbs_string_new(str.data(), str.data() + str.size());
+}
+
 core::LocOffsets RBSDeclaration::commentLoc() const {
     return comments.front().commentLoc.join(comments.back().commentLoc);
 }
