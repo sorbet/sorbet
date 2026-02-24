@@ -577,7 +577,7 @@ public:
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
-            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package.mangledName(), autocorrectedImportType);
+            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package, autocorrectedImportType);
             referencedPackages[otherPackage].causesVisibilityError = causesVisibilityError;
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {

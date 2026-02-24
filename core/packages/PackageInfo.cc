@@ -515,15 +515,23 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
     return nullopt;
 }
 
-bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const MangledName &importingPkgName,
+bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo,
                               const ImportType importType) const {
     if (visibleTo().empty() && !visibleToTests()) {
         return true;
     }
 
-    if (visibleToTests() && importType != ImportType::Normal) {
-        return true;
+    if (gs.packageDB().testPackages()) {
+        if (visibleToTests() && importingPkgInfo.testPackage()) {
+            return true;
+        }
+    } else {
+        if (visibleToTests() && importType != ImportType::Normal) {
+            return true;
+        }
     }
+
+    auto importingPkgName = importingPkgInfo.mangledName();
 
     return absl::c_any_of(visibleTo(), [&](const auto &vt) {
         if (vt.type == VisibleToType::Wildcard) {

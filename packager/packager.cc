@@ -1039,7 +1039,7 @@ void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Impo
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
     ENFORCE(otherPkg.exists());
 
-    if (!otherPkg.isVisibleTo(ctx, absPkg.mangledName(), i.type)) {
+    if (!otherPkg.isVisibleTo(ctx, absPkg, i.type)) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::ImportNotVisible)) {
             e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                         otherPkg.show(ctx), absPkg.show(ctx));
