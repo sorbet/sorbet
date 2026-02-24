@@ -1,0 +1,18 @@
+a/test/__package.rb:7: Package `Root` includes explicit visibility modifiers and cannot be imported from `Test::A` https://srb.help/3723
+     7 |  import Root
+          ^^^^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `Root`
+
+root/test/__package.rb:6: Package `Root` includes explicit visibility modifiers and cannot be imported from `Test::Root` https://srb.help/3723
+     6 |  import Root, uses_internals: true
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `Root`
+
+a/__package.rb:4: Package `Root` includes explicit visibility modifiers and cannot be imported from `A` https://srb.help/3723
+     4 |  import Root
+          ^^^^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `Root`
+Errors: 3
