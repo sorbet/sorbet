@@ -565,9 +565,10 @@ int realmain(int argc, char *argv[]) {
 
         // ----- build the package DB -----
 
+        auto inputPackageFiles = absl::Span<core::FileRef>{};
         if (opts.cacheSensitiveOptions.sorbetPackages) {
             auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
-            auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
+            inputPackageFiles = inputFilesSpan.first(numPackageFiles);
             inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
             if (!opts.storeState.empty() || opts.forceHashing) {
@@ -663,17 +664,9 @@ int realmain(int argc, char *argv[]) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
 
-                if (opts.genPackages) {
+                if (!opts.genPackages) {
                     // In --gen-packages mode, we skip typecheck because we only want to show packaging related errors,
                     // and skipping typecheck saves a significant amount of time.
-                    // However, one thing typecheck does is call flushErrorsForFile, which provides a consistent
-                    // ordering for errors when running in single threaded mode. To replicate that behaviour, we loop
-                    // over all files and call it manually here, instead of waiting for the flushAllErrors call later.
-
-                    for (auto &parsedFile : stratumFiles) {
-                        gs->errorQueue->flushErrorsForFile(*gs, parsedFile.file);
-                    }
-                } else {
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
                                         /* presorted */ false, intentionallyLeakASTs);
 
@@ -694,6 +687,17 @@ int realmain(int argc, char *argv[]) {
             // the package that owns that symbol, and we need to be able to see that use to know that a export should be
             // generated for that symbol. Because of that, we need to put this pass outside of the loop above.
             packager::GenPackages::run(*gs);
+
+            // One thing typecheck does is call flushErrorsForFile, which provides a consistent
+            // ordering for errors when running in single threaded mode. To replicate that behaviour, we loop
+            // over all files and call it manually here, instead of waiting for the flushAllErrors call later.
+            for (auto &fileRef : inputPackageFiles) {
+                gs->errorQueue->flushErrorsForFile(*gs, fileRef);
+            }
+
+            for (auto &fileRef : inputFilesSpan) {
+                gs->errorQueue->flushErrorsForFile(*gs, fileRef);
+            }
         }
 
         // getAndClearHistogram ensures that we don't accidentally submit a high-cardinality histogram to statsd
