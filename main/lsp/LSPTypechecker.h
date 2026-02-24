@@ -118,13 +118,18 @@ public:
     ~LSPTypechecker();
 
     /**
-     * Conducts the first typechecking pass of the session, and initializes `gs` and `index`
-     * variables. Must be called before typecheck and other functions work.
+     * Conducts the first typechecking pass of the session, and initializes `gs`. Must be called before any operations
+     * that require a populated global state.
+     *
+     * NOTE: we consume the inputFileNames here instead of read them from the config, as we can free them after
+     * initialization. However, we can't free them through a const ref to the config, so we instead move them out when
+     * the LSP threads are being setup to allow us to terminate their lifetime here.
      *
      * Writes all diagnostic messages to LSPOutput.
      */
     void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore,
-                    WorkerPool &workers, const LSPConfiguration &currentConfig);
+                    WorkerPool &workers, const LSPConfiguration &currentConfig,
+                    std::vector<std::string> &&inputFileNames);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
@@ -224,7 +229,8 @@ public:
     virtual ~LSPTypecheckerDelegate() = default;
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                    std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig);
+                    std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig,
+                    std::vector<std::string> &&inputFileNames);
 
     void resumeTaskQueue(InitializedTask &task);
 

@@ -28,8 +28,8 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
       preprocessor(config, taskQueue),
       typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers,
                        taskQueue),
-      indexer(config, move(initialGS), move(kvstore)), emptyWorkers(WorkerPool::create(0, *config->logger)),
-      lastMetricUpdateTime(chrono::steady_clock::now()) {}
+      indexer(config, move(initialGS), move(kvstore), move(config->opts.inputFileNames)),
+      emptyWorkers(WorkerPool::create(0, *config->logger)), lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
 

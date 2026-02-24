@@ -64,7 +64,7 @@ LSPTypechecker::~LSPTypechecker() {}
 
 void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> initialGS,
                                 unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
-                                const LSPConfiguration &currentConfig) {
+                                const LSPConfiguration &currentConfig, vector<string> &&inputFileNames) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
 
@@ -87,6 +87,11 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
+
+        // NOTE: pipeline::reserveFiles doesn't raise errors, which is why it's fine to call it before we've swapped out
+        // the error queue in `this->gs`.
+        this->workspaceFiles = pipeline::reserveFiles(*this->gs, inputFileNames);
+
         auto committed = runSlowPath(updates, cache::ownIfUnchanged(*this->gs, std::move(kvstore)), workers,
                                      errorFlusher, SlowPathMode::Init);
         ENFORCE(committed);
@@ -385,8 +390,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 case SlowPathMode::Init: {
                     ENFORCE(!this->initialized);
                     timeit.emplace(this->config->logger, "initial_index");
-
-                    this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
                     break;
                 }
 
@@ -865,8 +868,10 @@ LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &wor
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
 void LSPTypecheckerDelegate::initialize(InitializedTask &task, unique_ptr<core::GlobalState> gs,
-                                        unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig) {
-    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers, currentConfig);
+                                        unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig,
+                                        vector<string> &&inputFileNames) {
+    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers, currentConfig,
+                                  move(inputFileNames));
 }
 
 void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
