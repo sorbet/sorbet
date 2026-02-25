@@ -18,6 +18,19 @@ bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
            ast::MK::isTApproximate(send->recv);
 }
 
+bool isAbstract(ast::Send *sharedSig) {
+    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
+
+    auto *block = sharedSig->block();
+    auto body = ast::cast_tree<ast::Send>(block->body);
+
+    while (body != nullptr && body->fun != core::Names::abstract()) {
+        body = ast::cast_tree<ast::Send>(body->recv);
+    }
+
+    return body != nullptr;
+}
+
 ast::Send *findReturnSpecSend(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
@@ -199,6 +212,8 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
     bool usedPrevSig = false;
 
+    auto skipBody = sig != nullptr && isAbstract(sig);
+
     if (makeReader) {
         for (auto &arg : send->posArgs()) {
             auto [name, argLoc] = ASTUtil::getAttrName(ctx, send->fun, arg);
@@ -217,7 +232,8 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            auto reader = ast::MK::Method0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
+            auto body = skipBody ? ast::MK::EmptyTree() : ast::MK::Instance(argLoc, varName);
+            auto reader = ast::MK::Method0(loc, loc, name, move(body), flags);
             stats.emplace_back(std::move(reader));
         }
     }
@@ -245,7 +261,9 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
             }
 
             ast::ExpressionPtr body;
-            if (declareIvars) {
+            if (skipBody) {
+                body = ast::MK::EmptyTree();
+            } else if (declareIvars) {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName),
                                        ast::MK::Let(loc, ast::MK::Local(loc, name), dupReturnsType(sig)));
             } else {
