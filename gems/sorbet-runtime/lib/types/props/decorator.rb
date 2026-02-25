@@ -378,7 +378,16 @@ class T::Props::Decorator
     end
     type_object = smart_coerce(type, enum: rules[:enum])
 
-    prop_validate_definition!(name, cls, rules, type_object)
+    begin
+      prop_validate_definition!(name, cls, rules, type_object)
+    rescue => e
+      T::Configuration.prop_validation_error_handler(
+        e,
+        name: name,
+        cls: cls,
+        rules: rules,
+        type_object: type_object)
+    end
 
     # Retrieve the possible underlying object with T.nilable.
     type = T::Utils::Nilable.get_underlying_type(type)
@@ -427,8 +436,17 @@ class T::Props::Decorator
     rules[:setter_proc] = setter_proc
     rules[:value_validate_proc] = value_validate_proc
 
-    validate_overrides(name, rules)
-    add_prop_definition(name, rules)
+    begin
+      validate_overrides(name, rules)
+      add_prop_definition(name, rules)
+    rescue => e
+      T::Configuration.prop_validation_error_handler(
+        e,
+        name: name,
+        cls: cls,
+        rules: rules,
+        type_object: type_object)
+    end
 
     # NB: using `without_accessors` doesn't make much sense unless you also define some other way to
     # get at the property (e.g., Chalk::ODM::Document exposes `get` and `set`).

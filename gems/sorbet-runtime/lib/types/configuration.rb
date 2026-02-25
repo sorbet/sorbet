@@ -255,6 +255,24 @@ module T::Configuration
     nil
   end
 
+  @prop_validation_error_handler = nil
+
+  def self.prop_validation_error_handler=(value)
+    @prop_validation_error_handler = value
+  end
+
+  private_class_method def self.prop_validation_error_handler_default(error, opts)
+    raise error
+  end
+
+  def self.prop_validation_error_handler(error, opts={})
+    if @prop_validation_error_handler
+      @prop_validation_error_handler.call(error, opts)
+    else
+      prop_validation_error_handler_default(error, opts)
+    end
+  end
+
   @call_validation_error_handler = nil
   # Set a handler for type errors that result from calling a method.
   #
