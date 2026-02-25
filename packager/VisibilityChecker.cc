@@ -109,6 +109,13 @@ class PropagateVisibility final {
         }
     }
 
+    bool isDefinedByThisPackage(const core::GlobalState &gs, core::SymbolRef sym) const {
+        auto &db = gs.packageDB();
+        return absl::c_any_of(sym.locs(gs), [&db, name = this->package.mangledName()](auto &loc) {
+            return db.getPackageNameForFile(loc.file()) == name;
+        });
+    }
+
     void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef currentExportLineSym,
                                 core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Stop recursing at package boundary
@@ -305,8 +312,18 @@ public:
             return;
         }
 
-        string_view kind;
         auto sym = lit->symbol();
+
+        // The symbol being exported must be defined in a file owned by this package.
+        if (!this->isDefinedByThisPackage(ctx, sym)) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
+                e.setHeader("Symbol `{}` is not defined in a file owned by package `{}`", sym.show(ctx),
+                            this->package.show(ctx));
+                e.addErrorLine(sym.loc(ctx), "Defined here");
+            }
+        }
+
+        string_view kind;
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
                 checkExportPackage(ctx, send.loc, sym);
