@@ -183,6 +183,12 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
 
         visited[bb->id] = true;
+
+        cfg::InstructionPtr *unreachableInstruction = nullptr;
+        core::Loc locForUnreachable;
+        bool dueToSafeNavigation = false;
+        bool deadButTypecheckAnyways = false;
+
         if (current.isDead) {
             bb->firstDeadInstructionIdx = 0;
             // this block is unreachable.
@@ -208,12 +214,13 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 continue;
             }
 
-            cfg::InstructionPtr *unreachableInstruction = nullptr;
-            core::Loc locForUnreachable;
-            bool dueToSafeNavigation = false;
-
             for (auto &expr : bb->exprs) {
-                if (silenceDeadCodeError(expr.value)) {
+                if (expr.value.isSynthetic()) {
+                    continue;
+                }
+
+                if (cfg::isa_instruction<cfg::TAbsurd>(expr.value)) {
+                    deadButTypecheckAnyways = true;
                     continue;
                 }
 
@@ -242,125 +249,48 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
 
             if (unreachableInstruction == nullptr) {
+                // would not have reported error, would not have type checked
+                continue;
+            } else if (deadButTypecheckAnyways) {
+                // don't continue
+            } else {
+                // would report error, would not have type checked
                 continue;
             }
-
-            auto send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
-            if (dueToSafeNavigation && send != nullptr) {
-                if (auto e = ctx.state.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
-                    const auto &ty = current.getAndFillTypeAndOrigin(send->args[0]);
-
-                    e.setHeader("Used `{}` operator on `{}`, which can never be nil", "&.", ty.type.show(ctx));
-                    e.addErrorSection(ty.explainGot(ctx, current.locForUninitialized()));
-                    if (locForUnreachable.source(ctx) == "&.") {
-                        e.replaceWith("Replace with `.`", locForUnreachable, ".");
-                    }
-                }
-            } else if (auto e = ctx.state.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
-                auto ident = cfg::cast_instruction<cfg::Ident>(*unreachableInstruction);
-
-                bool andAndOrOr = false;
-                if (ident != nullptr) {
-                    auto name = ident->what.data(*cfg)._name;
-                    if (name.isUniqueNameOf(ctx, core::Names::andAnd())) {
-                        e.setHeader("Left side of `{}` condition was always `{}`", "&&", "truthy");
-                        andAndOrOr = true;
-                    } else if (name.isUniqueNameOf(ctx, core::Names::orOr())) {
-                        e.setHeader("Left side of `{}` condition was always `{}`", "||", "falsy");
-                        andAndOrOr = true;
-                    }
-                }
-                if (!andAndOrOr) {
-                    e.setHeader("This code is unreachable");
-                }
-
-                for (const auto &prevBasicBlock : bb->backEdges) {
-                    const auto &prevEnv = outEnvironments[prevBasicBlock->id];
-                    if (prevEnv.isDead) {
-                        // This previous block doesn't actually matter, because it was dead
-                        // (never got to evaluating its jump condition), so don't clutter
-                        // the error message.
-                        continue;
-                    }
-
-                    const auto &cond = prevBasicBlock->bexit.cond;
-                    if (cond.type == nullptr) {
-                        // This previous block is actually a future block we haven't processed yet.
-                        // (Remember: our inference pass is an approximate forwards toposort
-                        // of a graph that can have cycles). It can't have been a block that
-                        // caused the current error.
-                        continue;
-                    }
-
-                    auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
-                    auto bexitLoc = ctx.locAt(prevBasicBlock->bexit.loc);
-
-                    auto bexitVar = cond.variable.data(*cfg)._name;
-                    if ((bexitVar.isUniqueNameOf(ctx, core::Names::andAnd()) ||
-                         bexitVar.isUniqueNameOf(ctx, core::Names::orOr())) &&
-                        !prevBasicBlock->exprs.empty() && prevBasicBlock->exprs.back().bind.variable == cond.variable) {
-                        // ^ This condition is a hack that hardcodes the most common structure of the CFG
-                        // we'd need to handle. If we had SSA form in Sorbet's CFG, we wouldn't have to pray
-                        // that the bexit var's initializer is the .back() of the expression in the block
-                        // (despite how rare it is for that to _not_ be the case).
-
-                        // We want to show one location for the "Conditional branch on untyped" warning/error,
-                        // but setting that location clobbers the location we need for this autocorrect to work.
-                        // So we have to claw back what the LHS of the || or && would have been.
-                        bexitLoc = ctx.locAt(prevBasicBlock->exprs.back().loc);
-                    }
-
-                    e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat, cond.type.show(ctx));
-
-                    if (ctx.state.suggestUnsafe.has_value() && bexitLoc.exists()) {
-                        e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), bexitLoc, "{}({})",
-                                      *ctx.state.suggestUnsafe, bexitLoc.source(ctx).value());
-                    }
-
-                    const auto &ty = prevEnv.getTypeAndOrigin(cond.variable);
-                    e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
-                }
-
-                if (andAndOrOr) {
-                    e.addErrorNote("If this is intentional, either delete the redundant code or restructure\n"
-                                   "    it to use `{}` so that Sorbet can check for exhaustiveness.",
-                                   "T.absurd");
-                }
-            }
-
-            continue;
         }
 
         core::Loc madeBlockDead;
-        int i = 0;
-        for (cfg::Binding &bind : bb->exprs) {
-            i++;
-            if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
-                bind.bind.type =
-                    current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
-                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
-                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
-                    totalSendCount++;
-                    if (bind.bind.type && !bind.bind.type.isUntyped()) {
-                        typedSendCount++;
+        if (unreachableInstruction == nullptr || deadButTypecheckAnyways) {
+            int i = 0;
+            for (cfg::Binding &bind : bb->exprs) {
+                i++;
+                if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
+                    bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
+                                                            bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
+                                                            methodReturnType, parentUpdateKnowledgeReceiver);
+                    if (cfg::isa_instruction<cfg::Send>(bind.value)) {
+                        totalSendCount++;
+                        if (bind.bind.type && !bind.bind.type.isUntyped()) {
+                            typedSendCount++;
+                        }
                     }
+                    ENFORCE(bind.bind.type);
+                    bind.bind.type.sanityCheck(ctx);
+                    if (bind.bind.type.isBottom()) {
+                        current.isDead = true;
+                        madeBlockDead = ctx.locAt(bind.loc);
+                    }
+                    if (current.isDead && bb->firstDeadInstructionIdx == -1) {
+                        // this can also be result of evaluating an instruction, e.g. an always false hard_assert
+                        bb->firstDeadInstructionIdx = i;
+                    }
+                } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
+                    if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
+                        e.setHeader("This code is unreachable");
+                        e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
+                    }
+                    break;
                 }
-                ENFORCE(bind.bind.type);
-                bind.bind.type.sanityCheck(ctx);
-                if (bind.bind.type.isBottom()) {
-                    current.isDead = true;
-                    madeBlockDead = ctx.locAt(bind.loc);
-                }
-                if (current.isDead && bb->firstDeadInstructionIdx == -1) {
-                    // this can also be result of evaluating an instruction, e.g. an always false hard_assert
-                    bb->firstDeadInstructionIdx = i;
-                }
-            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
-                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
-                    e.setHeader("This code is unreachable");
-                    e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
-                }
-                break;
             }
         }
         if (!current.isDead) {
@@ -384,6 +314,95 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
         } else {
             ENFORCE(bb->firstDeadInstructionIdx != -1);
+
+            if (unreachableInstruction != nullptr) {
+                auto send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
+                if (dueToSafeNavigation && send != nullptr) {
+                    if (auto e =
+                            ctx.state.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
+                        const auto &ty = current.getAndFillTypeAndOrigin(send->args[0]);
+
+                        e.setHeader("Used `{}` operator on `{}`, which can never be nil", "&.", ty.type.show(ctx));
+                        e.addErrorSection(ty.explainGot(ctx, current.locForUninitialized()));
+                        if (locForUnreachable.source(ctx) == "&.") {
+                            e.replaceWith("Replace with `.`", locForUnreachable, ".");
+                        }
+                    }
+                } else if (auto e =
+                               ctx.state.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
+                    auto ident = cfg::cast_instruction<cfg::Ident>(*unreachableInstruction);
+
+                    bool andAndOrOr = false;
+                    if (ident != nullptr) {
+                        auto name = ident->what.data(*cfg)._name;
+                        if (name.isUniqueNameOf(ctx, core::Names::andAnd())) {
+                            e.setHeader("Left side of `{}` condition was always `{}`", "&&", "truthy");
+                            andAndOrOr = true;
+                        } else if (name.isUniqueNameOf(ctx, core::Names::orOr())) {
+                            e.setHeader("Left side of `{}` condition was always `{}`", "||", "falsy");
+                            andAndOrOr = true;
+                        }
+                    }
+                    if (!andAndOrOr) {
+                        e.setHeader("This code is unreachable");
+                    }
+
+                    for (const auto &prevBasicBlock : bb->backEdges) {
+                        const auto &prevEnv = outEnvironments[prevBasicBlock->id];
+                        if (prevEnv.isDead) {
+                            // This previous block doesn't actually matter, because it was dead
+                            // (never got to evaluating its jump condition), so don't clutter
+                            // the error message.
+                            continue;
+                        }
+
+                        const auto &cond = prevBasicBlock->bexit.cond;
+                        if (cond.type == nullptr) {
+                            // This previous block is actually a future block we haven't processed yet.
+                            // (Remember: our inference pass is an approximate forwards toposort
+                            // of a graph that can have cycles). It can't have been a block that
+                            // caused the current error.
+                            continue;
+                        }
+
+                        auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
+                        auto bexitLoc = ctx.locAt(prevBasicBlock->bexit.loc);
+
+                        auto bexitVar = cond.variable.data(*cfg)._name;
+                        if ((bexitVar.isUniqueNameOf(ctx, core::Names::andAnd()) ||
+                             bexitVar.isUniqueNameOf(ctx, core::Names::orOr())) &&
+                            !prevBasicBlock->exprs.empty() &&
+                            prevBasicBlock->exprs.back().bind.variable == cond.variable) {
+                            // ^ This condition is a hack that hardcodes the most common structure of the CFG
+                            // we'd need to handle. If we had SSA form in Sorbet's CFG, we wouldn't have to pray
+                            // that the bexit var's initializer is the .back() of the expression in the block
+                            // (despite how rare it is for that to _not_ be the case).
+
+                            // We want to show one location for the "Conditional branch on untyped" warning/error,
+                            // but setting that location clobbers the location we need for this autocorrect to work.
+                            // So we have to claw back what the LHS of the || or && would have been.
+                            bexitLoc = ctx.locAt(prevBasicBlock->exprs.back().loc);
+                        }
+
+                        e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
+                                       cond.type.show(ctx));
+
+                        if (ctx.state.suggestUnsafe.has_value() && bexitLoc.exists()) {
+                            e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), bexitLoc, "{}({})",
+                                          *ctx.state.suggestUnsafe, bexitLoc.source(ctx).value());
+                        }
+
+                        const auto &ty = prevEnv.getTypeAndOrigin(cond.variable);
+                        e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
+                    }
+
+                    if (andAndOrOr) {
+                        e.addErrorNote("If this is intentional, either delete the redundant code or restructure\n"
+                                       "    it to use `{}` so that Sorbet can check for exhaustiveness.",
+                                       "T.absurd");
+                    }
+                }
+            }
         }
         histogramInc("infer.environment.size", current.vars().size());
         for (auto &pair : current.vars()) {
