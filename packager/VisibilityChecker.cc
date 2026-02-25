@@ -305,17 +305,32 @@ public:
             return;
         }
 
-        string_view kind;
         auto sym = lit->symbol();
+
+        string_view kind;
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
+                auto klassData = sym.asClassOrModuleRef().data(ctx);
+
+                // The symbol being exported must have an actual declaration, being part of a path that's present for
+                // other declarations isn't sufficient.
+                if (!klassData->isDeclared()) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
+                        e.setHeader("Constant `{}` lacks a declaration and cannot be exported", sym.show(ctx));
+
+                        if (klassData->package == this->package.mangledName() && klassData->isPackageNamespace()) {
+                            e.replaceWith("Use export_all! instead", ctx.locAt(send.loc), "export_all!");
+                        }
+                    }
+                }
+
                 checkExportPackage(ctx, send.loc, sym);
                 auto setExportedTo = true;
                 recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
 
                 // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
                 // be great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, sym.asClassOrModuleRef().data(ctx)->owner);
+                exportParentNamespace(ctx, klassData->owner);
                 return;
             }
 
