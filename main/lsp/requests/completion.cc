@@ -1048,8 +1048,16 @@ std::unique_ptr<CompletionItem> CompletionTask::getCompletionItemForCase(const c
     }
 
     const auto &enumSingleton = receiver.data(gs)->lookupSingletonClass(gs).data(gs);
-    auto sealedSubclassesRes = enumSingleton->findMethod(gs, core::Names::sealedSubclasses()).data(gs)->resultType;
-    auto sealedSubclassesSet = core::cast_type<core::AppliedType>(sealedSubclassesSet);
+    auto sealedSubclasses = enumSingleton->findMethod(gs, core::Names::sealedSubclasses());
+    if (!sealedSubclasses.exists()) {
+        // Given `MyEnum::X.`, the singleton will not be the `T.class_of(MyEnum)` but rather
+        // `T.class_of(MyEnum::X)`, which will not have a `sealed_subclasses` method on it.
+        //
+        // If we don't have a `sealed_subclasses` method directly on our singleton class, then it
+        // doesn't make sense to show a `.case` completion.
+        return nullptr;
+    }
+    auto sealedSubclassesSet = core::cast_type<core::AppliedType>(sealedSubclasses.data(gs)->resultType);
     if (sealedSubclassesSet == nullptr || sealedSubclassesSet->targs.empty()) {
         // User could manually redefine the signature of this method; can't assume anything about it
         return nullptr;
@@ -1388,14 +1396,18 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
             items.push_back(getCompletionItemForUntyped(gs, params.queryLoc, items.size(), "(call site is T.untyped)"));
         } else {
             for (auto &similarMethod : methodResults.methods) {
-                items.push_back(getCompletionItemForMethod(typechecker, params, similarMethod, params.queryLoc,
-                                                           resolved, params.prefix, items.size(),
-                                                           params.forMethods->totalArgs));
+                auto item = getCompletionItemForMethod(typechecker, params, similarMethod, params.queryLoc, resolved,
+                                                       params.prefix, items.size(), params.forMethods->totalArgs);
+                if (item != nullptr) {
+                    items.push_back(move(item));
+                }
             }
             for (auto &similarMethod : methodResults.operators) {
-                items.push_back(getCompletionItemForMethod(typechecker, params, similarMethod, params.queryLoc,
-                                                           resolved, params.prefix, items.size(),
-                                                           params.forMethods->totalArgs));
+                auto item = getCompletionItemForMethod(typechecker, params, similarMethod, params.queryLoc, resolved,
+                                                       params.prefix, items.size(), params.forMethods->totalArgs);
+                if (item != nullptr) {
+                    items.push_back(move(item));
+                }
             }
         }
     }
