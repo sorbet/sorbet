@@ -4,6 +4,8 @@
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/Parallel.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
 
@@ -305,17 +307,81 @@ public:
             return;
         }
 
-        string_view kind;
         auto sym = lit->symbol();
+
+        string_view kind;
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
+                auto klass = sym.asClassOrModuleRef();
+                auto klassData = klass.data(ctx);
+
+                // The symbol being exported must have an actual declaration, being part of a path that's present for
+                // other declarations isn't sufficient.
+                if (!klassData->isDeclared()) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
+                        e.setHeader("Constant `{}` lacks a declaration and cannot be exported", sym.show(ctx));
+
+                        // Generate exports for all declared symbols underneath the one we're interested in.
+                        vector<core::ClassOrModuleRef> work{klass};
+                        vector<string> lines;
+
+                        while (!work.empty()) {
+                            auto sym = work.back();
+                            work.pop_back();
+
+                            for (auto [name, member] : sym.data(ctx)->members()) {
+                                // We only export classes, modules, or fields.
+                                if (member.isClassOrModule()) {
+                                    auto klass = member.asClassOrModuleRef();
+
+                                    if (klass.data(ctx)->package != this->package.mangledName()) {
+                                        continue;
+                                    }
+
+                                    if (klass.data(ctx)->isSingletonClass(ctx)) {
+                                        continue;
+                                    }
+
+                                    // If we encounter another namespace with no real declaration, continue exporting
+                                    // its members.
+                                    if (!klass.data(ctx)->flags.isDeclared) {
+                                        work.push_back(klass);
+                                        continue;
+                                    }
+                                } else if (member.isFieldOrStaticField()) {
+                                    auto memberPkg = member.enclosingClass(ctx).data(ctx)->package;
+                                    if (memberPkg != this->package.mangledName()) {
+                                        continue;
+                                    }
+                                } else {
+                                    continue;
+                                }
+
+                                // We can't export symbols that are only defined in RBI files
+                                if (absl::c_all_of(member.locs(ctx),
+                                                   [ctx](auto loc) { return loc.file().data(ctx).isRBI(); })) {
+                                    continue;
+                                }
+
+                                lines.emplace_back(fmt::format("export {}", member.show(ctx)));
+                            }
+                        }
+
+                        // We don't replace conditionally, as if there were no exportable symbols underneath the
+                        // constant, we'll remove the export instead.
+                        fast_sort(lines);
+                        e.replaceWith("Export all child symbols", ctx.locAt(send.loc), "{}",
+                                      fmt::map_join(lines, "\n  ", [](auto line) { return line; }));
+                    }
+                }
+
                 checkExportPackage(ctx, send.loc, sym);
                 auto setExportedTo = true;
                 recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
 
                 // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
                 // be great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, sym.asClassOrModuleRef().data(ctx)->owner);
+                exportParentNamespace(ctx, klassData->owner);
                 return;
             }
 
