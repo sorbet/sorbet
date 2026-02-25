@@ -1,4 +1,5 @@
 # typed: strict
+extend T::Sig
 
 # initializing with array
 T.assert_type!(T::Array[String].new(['a', 'b', 'c']), T::Array[String])
@@ -79,3 +80,18 @@ x = [[3.4], [1, "a"]]
 T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
 x = [[3.4, "a"], [:a, 5]]
 T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[T.any(Float, Symbol)], T::Array[T.any(Integer, String)]] (2-tuple)`
+
+# concat
+sig {params(x: T::Array[Integer], y: T::Array[String]).void}
+def concat_test(x, y)
+  T.reveal_type(x + y) # error: `T::Array[T.any(Integer, String)]`
+
+  # mutates receiver type:
+  x.concat(y) # error: Expected `T::Array[Integer]` but found `T::Array[String]` for argument `arrays`
+
+  T.reveal_type(x) # error: `T::Array[Integer]`
+
+  x += y
+  T.reveal_type(x) # error: `T::Array[T.any(Integer, String)]`
+end
+
