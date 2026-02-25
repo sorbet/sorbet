@@ -1048,8 +1048,13 @@ std::unique_ptr<CompletionItem> CompletionTask::getCompletionItemForCase(const c
     }
 
     const auto &enumSingleton = receiver.data(gs)->lookupSingletonClass(gs).data(gs);
-    auto sealedSubclassesSet = enumSingleton->findMethod(gs, core::Names::sealedSubclasses()).data(gs)->resultType;
-    auto sealedSubclassesUnion = core::cast_type<core::AppliedType>(sealedSubclassesSet)->targs[0];
+    auto sealedSubclassesRes = enumSingleton->findMethod(gs, core::Names::sealedSubclasses()).data(gs)->resultType;
+    auto sealedSubclassesSet = core::cast_type<core::AppliedType>(sealedSubclassesSet);
+    if (sealedSubclassesSet == nullptr || sealedSubclassesSet->targs.empty()) {
+        // User could manually redefine the signature of this method; can't assume anything about it
+        return nullptr;
+    }
+    auto sealedSubclassesUnion = sealedSubclassesSet->targs[0];
 
     auto values = vector<core::ClassOrModuleRef>{};
     const auto *iter = &sealedSubclassesUnion;
