@@ -38,8 +38,5 @@ core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_range_t &range) cons
     }
     return comments.front().typeLoc;
 }
-rbs_string_t makeRBSString(const std::string_view str) {
-    return rbs_string_new(str.data(), str.data() + str.size());
-}
 
 } // namespace sorbet::rbs
