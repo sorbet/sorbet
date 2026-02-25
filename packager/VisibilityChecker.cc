@@ -321,7 +321,6 @@ public:
                     if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
                         e.setHeader("Constant `{}` lacks a declaration and cannot be exported", sym.show(ctx));
 
-                        // Generate exports for all declared symbols underneath the one we're interested in.
                         vector<core::ClassOrModuleRef> work{klass};
                         vector<string> lines;
 
