@@ -801,6 +801,12 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
         return empty;
     }
 
+    // TODO(jez) This sanityCheck is load bearing: removing it makes our test suite flaky
+    //
+    // We should figure out why that is, because it likely indicates a source of flakiness in
+    // production as well.
+    //
+    // See https://github.com/sorbet/sorbet/pull/8058 for more
     gs.sanityCheck();
 
     if (files.size() < 3) {
