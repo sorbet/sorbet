@@ -1,6 +1,6 @@
 # typed: true
 
-class Root::A
+class Root::A::Subpackage
   def fun
   end
 end

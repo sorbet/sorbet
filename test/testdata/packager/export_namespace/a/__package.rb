@@ -1,8 +1,7 @@
 # typed: strict
+# enable-packager: true
 
 class Root::A < PackageSpec
-  # Ensure that Root goes first in a package-directed scenario.
-  import Root
-
   export Root::A
+# ^^^^^^^^^^^^^^ error: Symbol `Root` is not defined in a file owned by package `Root`
 end
