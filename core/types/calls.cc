@@ -4215,6 +4215,25 @@ public:
     }
 } Array_compact;
 
+class Hash_compact : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        TypePtr element;
+
+        auto *ap = cast_type<AppliedType>(args.thisType);
+        ENFORCE(ap->klass == Symbols::Hash() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Hash()));
+        ENFORCE(ap->targs.size() >= 3);
+        auto nillableValueType = ap->targs[1];
+
+        auto valueType = Types::dropNil(gs, nillableValueType);
+
+        // not using Types::hashOf here because it defaults to Symbol for key type
+        vector<TypePtr> tupleArgs{ap->targs[0], valueType};
+        vector<TypePtr> targs{ap->targs[0], valueType, make_type<TupleType>(move(tupleArgs))};
+        res.returnType = make_type<AppliedType>(Symbols::Hash(), move(targs));
+    }
+} Hash_compact;
+
 class Array_zip : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4697,6 +4716,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toH(), &Shape_to_h},
 
     {Symbols::Hash(), Intrinsic::Kind::Instance, Names::dig(), &Hash_dig},
+    {Symbols::Hash(), Intrinsic::Kind::Instance, Names::compact(), &Hash_compact},
 
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::dig(), &Array_dig},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
