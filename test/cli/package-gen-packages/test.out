@@ -47,6 +47,14 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
      8 |  import D
                   ^
 
+E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
+     3 |class E < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    E/__package.rb:7: Inserted `visible_to C`
+     7 |  export E::CONSTANT_FROM_E
+                                   ^
+
 D/__package.rb:3: `D` is missing exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
@@ -56,6 +64,130 @@ D/__package.rb:3: `D` is missing exports https://srb.help/3734
       export D::EnumFromD`
      7 |  import B
                   ^
+
+C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+     8 |      puts F::CONSTANT_FROM_F
+                   ^^^^^^^^^^^^^^^^^^
+    C/__package.rb:3: Enclosing package declared here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+    F/__package.rb:4: `F` must be at least `strict_dependencies 'dag'` but is currently `strict_dependencies 'layered'`
+     4 |  strict_dependencies 'layered'
+                              ^^^^^^^^^
+  Note:
+    `F::CONSTANT_FROM_F`'s package is not imported
+
+C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+     9 |      puts G::CONSTANT_FROM_G
+                   ^^^^^^^^^^^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `G`
+Errors: 9
+# typed: strict
+
+class B < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  export B::CONSTANT_FROM_B
+
+  visible_to A
+  visible_to C
+  visible_to D
+  visible_to G
+end
+# typed: strict
+
+class C < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  import A
+  import B
+  import D
+  import E
+end
+# typed: strict
+
+class D < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  import B
+  export D::CONSTANT_FROM_D
+  export D::ClassFromD
+  export D::EnumFromD
+end
+# typed: strict
+
+class E < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  export E::CONSTANT_FROM_E
+  visible_to C
+end
+------- Package directed -------
+B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    B/__package.rb:9: Inserted `visible_to C
+      visible_to D`
+     9 |  visible_to A
+                      ^
+
+C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
+     7 |  import A
+          ^^^^^^^^
+    C/__package.rb:5: `C`'s `layer` declared here
+     5 |  layer 'util'
+                ^^^^^^
+    A/__package.rb:5: `A`'s `layer` declared here
+     5 |  layer 'app'
+                ^^^^^
+
+C/__package.rb:3: `C` is missing imports https://srb.help/3734
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    C/__package.rb:7: Inserted `import B`
+     7 |  import A
+                  ^
+    C/__package.rb:8: Inserted `import E`
+     8 |  import D
+                  ^
+
+E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
+     3 |class E < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    E/__package.rb:7: Inserted `visible_to C`
+     7 |  export E::CONSTANT_FROM_E
+                                   ^
+
+D/__package.rb:3: `D` is missing exports https://srb.help/3734
+     3 |class D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/__package.rb:7: Inserted `export D::CONSTANT_FROM_D
+      export D::ClassFromD
+      export D::EnumFromD`
+     7 |  import B
+                  ^
+
+A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
+     5 |  puts G::ANOTHER_CONSTANT_FROM_G
+               ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
+    16 |module T
+        ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/gc.rbi#L12: `GC` defined here
+    12 |module GC
+        ^^^^^^^^^
+    A/constants.rb:3: `A` defined here
+     3 |module A
+        ^^^^^^^^
 
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
@@ -110,110 +242,12 @@ class D < PackageSpec
   export D::ClassFromD
   export D::EnumFromD
 end
-------- Package directed -------
-B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
-     3 |class B < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    B/__package.rb:9: Inserted `visible_to C
-      visible_to D`
-     9 |  visible_to A
-                      ^
-
-C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
-     7 |  import A
-          ^^^^^^^^
-    C/__package.rb:5: `C`'s `layer` declared here
-     5 |  layer 'util'
-                ^^^^^^
-    A/__package.rb:5: `A`'s `layer` declared here
-     5 |  layer 'app'
-                ^^^^^
-
-C/__package.rb:3: `C` is missing imports https://srb.help/3734
-     3 |class C < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    C/__package.rb:7: Inserted `import B`
-     7 |  import A
-                  ^
-    C/__package.rb:8: Inserted `import E`
-     8 |  import D
-                  ^
-
-D/__package.rb:3: `D` is missing exports https://srb.help/3734
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/__package.rb:7: Inserted `export D::CONSTANT_FROM_D
-      export D::ClassFromD
-      export D::EnumFromD`
-     7 |  import B
-                  ^
-
-A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
-     5 |  puts G::ANOTHER_CONSTANT_FROM_G
-               ^
-    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
-    16 |module T
-        ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/gc.rbi#L12: `GC` defined here
-    12 |module GC
-        ^^^^^^^^^
-    A/constants.rb:3: `A` defined here
-     3 |module A
-        ^^^^^^^^
-
-C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
-     8 |      puts F::CONSTANT_FROM_F
-                   ^^^^^^^^^^^^^^^^^^
-    C/__package.rb:3: Enclosing package declared here
-     3 |class C < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-    F/__package.rb:4: `F` must be at least `strict_dependencies 'dag'` but is currently `strict_dependencies 'layered'`
-     4 |  strict_dependencies 'layered'
-                              ^^^^^^^^^
-  Note:
-    `F::CONSTANT_FROM_F`'s package is not imported
-
-C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
-     9 |      puts G::CONSTANT_FROM_G
-                   ^^^^^^^^^^^^^^^^^^
-  Note:
-    Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 7
 # typed: strict
 
-class B < PackageSpec
+class E < PackageSpec
   strict_dependencies 'dag'
   layer 'util'
 
-  export B::CONSTANT_FROM_B
-
-  visible_to A
+  export E::CONSTANT_FROM_E
   visible_to C
-  visible_to D
-  visible_to G
-end
-# typed: strict
-
-class C < PackageSpec
-  strict_dependencies 'dag'
-  layer 'util'
-
-  import A
-  import B
-  import D
-  import E
-end
-# typed: strict
-
-class D < PackageSpec
-  strict_dependencies 'dag'
-  layer 'util'
-
-  import B
-  export D::CONSTANT_FROM_D
-  export D::ClassFromD
-  export D::EnumFromD
 end
