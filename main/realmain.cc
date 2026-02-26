@@ -673,8 +673,9 @@ int realmain(int argc, char *argv[]) {
                         gs->errorQueue->flushErrorsForFile(*gs, parsedFile.file);
                     }
                 } else {
+                    pipeline::sortBySize(*gs, stratumFiles);
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
-                                        /* presorted */ false, intentionallyLeakASTs);
+                                        intentionallyLeakASTs);
 
                     if (gs->hadCriticalError()) {
                         gs->errorQueue->flushAllErrors(*gs);
