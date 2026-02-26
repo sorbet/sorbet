@@ -329,6 +329,9 @@ Usage:
       --package-skip-rbi-export-enforcement <dir>
                                 Constants defined in RBIs in these directories (and no
                                 others) can be exported
+      --package-attributed-errors
+                                Attribute errors to their enclosing package in the error
+                                output
       --experimental-package-directed
                                 Enable support for checking by package, instead of
                                 processing all files at once

@@ -232,6 +232,7 @@ struct Options {
     };
     CacheSensitiveOptions cacheSensitiveOptions;
 
+    bool packageAttributedErrors = false;
     bool packageDirected = false;
     bool testPackages = false;
 
