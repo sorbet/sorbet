@@ -2941,13 +2941,13 @@ module Kernel
   sig {returns(T.noreturn)}
   sig do
     params(
-        arg0: T.any(T::Class[T.anything], Exception, String),
+        arg0: T.any(T.class_of(Exception), Exception, String),
     )
     .returns(T.noreturn)
   end
   sig do
     params(
-        arg0: T.any(T::Class[T.anything], Exception),
+        arg0: T.any(T.class_of(Exception), Exception),
         arg1: T.untyped,
         arg2: T.nilable(T::Array[String]),
     )
