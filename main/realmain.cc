@@ -686,6 +686,8 @@ int realmain(int argc, char *argv[]) {
             // VisibilityChecker has been run for all strata; a symbol might be used in a strata after the strata for
             // the package that owns that symbol, and we need to be able to see that use to know that a export should be
             // generated for that symbol. Because of that, we need to put this pass outside of the loop above.
+            //
+            // A similar principle applies for inserting `visible_to`s with --gen-packages-update-visiblity-for
             packager::GenPackages::run(*gs);
 
             // One thing typecheck does is call flushErrorsForFile, which provides a consistent
