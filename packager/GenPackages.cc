@@ -128,11 +128,19 @@ void GenPackages::run(core::GlobalState &gs) {
                 for (auto &[referencedPackageName, packageReferenceInfo] : referencedPackages) {
                     auto &referencedPackageInfo = gs.packageDB().getPackageInfo(referencedPackageName);
                     ENFORCE(referencedPackageInfo.exists());
-                    if (!referencedPackageInfo.isVisibleTo(gs, pkgInfo,
-                                                           core::packages::PackageInfo::fileToImportType(gs, file))) {
-                        // it is a visibility error for pkgName to reference referencedPackageName,
-                        // so need to add visible_to pkgName to referencedPackageName's __package.db
-                        neededVisibleTo[referencedPackageName].push_back(pkgName);
+                    if (gs.packageDB().updateVisibilityFor(referencedPackageName)) {
+                        if (!referencedPackageInfo.isVisibleTo(
+                                gs, pkgInfo, core::packages::PackageInfo::fileToImportType(gs, file)) ||
+                            (referencedPackageInfo.visibleTo().empty() && !referencedPackageInfo.visibleToTests())) {
+                            // either:
+                            // - it is a visibility error for pkgName to reference referencedPackageName, and we want to
+                            // silence the error
+                            // - referencedPackage has no visible_to restrictions, and we want to ratchet
+                            // referencedPackage's `visible_to`s
+                            //
+                            // In either case, we'll add `visible_to pkgName` to referencedPackage's __package.db
+                            neededVisibleTo[referencedPackageName].push_back(pkgName);
+                        }
                     }
                 }
             }

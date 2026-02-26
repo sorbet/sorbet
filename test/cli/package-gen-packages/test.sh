@@ -15,10 +15,12 @@ cd "$tmp" || exit 1
 
 "$cwd/main/sorbet" --max-threads=0 --silence-dev-message --lsp --sorbet-packages --gen-packages --packager-layers=util,app -a . 2>&1
 
-"$cwd/main/sorbet" --max-threads=0 --silence-dev-message --sorbet-packages --gen-packages --packager-layers=util,app  --gen-packages-update-visibility-for=B -a . 2>&1
+"$cwd/main/sorbet" --max-threads=0 --silence-dev-message --sorbet-packages --gen-packages --packager-layers=util,app  --gen-packages-update-visibility-for=B --gen-packages-update-visibility-for=E -a . 2>&1
 
 cat B/__package.rb
 
 cat C/__package.rb
 
 cat D/__package.rb
+
+cat E/__package.rb
