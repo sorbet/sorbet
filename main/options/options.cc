@@ -1246,6 +1246,10 @@ void readOptions(Options &opts,
             raw["sorbet-packages"].as<bool>() || raw["stripe-packages"].as<bool>();
 
         opts.packageAttributedErrors = raw["package-attributed-errors"].as<bool>();
+        if (opts.packageAttributedErrors && !opts.cacheSensitiveOptions.sorbetPackages) {
+            logger->error("--package-attributed-errors can only be specified in --sorbet-packages mode");
+            throw EarlyReturnWithCode(1);
+        }
         opts.testPackages = raw["experimental-test-packages"].as<bool>();
         if (opts.testPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
             logger->error("--experimental-test-packages can only be specified in --sorbet-packages mode");
