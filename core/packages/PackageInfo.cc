@@ -517,7 +517,7 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
 
 bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo,
                               const ImportType importType) const {
-    if (visibleTo().empty() && !visibleToTests()) {
+    if (visibleToEverything()) {
         return true;
     }
 

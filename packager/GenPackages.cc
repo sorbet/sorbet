@@ -131,7 +131,7 @@ void GenPackages::run(core::GlobalState &gs) {
                     if (gs.packageDB().updateVisibilityFor(referencedPackageName)) {
                         if (!referencedPackageInfo.isVisibleTo(
                                 gs, pkgInfo, core::packages::PackageInfo::fileToImportType(gs, file)) ||
-                            (referencedPackageInfo.visibleTo().empty() && !referencedPackageInfo.visibleToTests())) {
+                            referencedPackageInfo.visibleToEverything()) {
                             // either:
                             // - it is a visibility error for pkgName to reference referencedPackageName, and we want to
                             // silence the error
