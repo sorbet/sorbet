@@ -119,13 +119,17 @@ void GenPackages::run(core::GlobalState &gs) {
 
     auto neededVisibleTo = UnorderedMap<core::packages::MangledName, vector<core::packages::MangledName>>{};
     if (gs.packageDB().anyUpdateVisibilityFor()) {
+        Timer timeit(gs.tracer(), "gen_packages.run.build_needed_visible_to");
         for (auto pkgName : gs.packageDB().packages()) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
             ENFORCE(pkgInfo.exists());
             // TODO(neil): this loop is similar to what we have in aggregateMissingImports, is there a way to dedup?
             for (auto &[file, referencedPackages] : pkgInfo.packagesReferencedByFile) {
                 for (auto &[referencedPackageName, packageReferenceInfo] : referencedPackages) {
-                    if (packageReferenceInfo.causesVisibilityError) {
+                    auto &referencedPackageInfo = gs.packageDB().getPackageInfo(referencedPackageName);
+                    ENFORCE(referencedPackageInfo.exists());
+                    if (!referencedPackageInfo.isVisibleTo(gs, pkgInfo,
+                                                           core::packages::PackageInfo::fileToImportType(gs, file))) {
                         // it is a visibility error for pkgName to reference referencedPackageName,
                         // so need to add visible_to pkgName to referencedPackageName's __package.db
                         neededVisibleTo[referencedPackageName].push_back(pkgName);

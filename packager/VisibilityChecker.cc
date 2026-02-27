@@ -559,8 +559,7 @@ public:
         auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {
-            .importNeeded = importNeeded, .causesModularityError = false, .causesVisibilityError = false};
+        referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
@@ -578,7 +577,6 @@ public:
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
             bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package, autocorrectedImportType);
-            referencedPackages[otherPackage].causesVisibilityError = causesVisibilityError;
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&

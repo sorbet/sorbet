@@ -89,7 +89,6 @@ struct VisibleTo {
 struct PackageReferenceInfo {
     bool importNeeded;
     bool causesModularityError;
-    bool causesVisibilityError;
 };
 
 class PackageInfo {
@@ -314,6 +313,8 @@ public:
     // case is something that fundamentally changes the meaning of the symbol (adding type members or mixins, for
     // example).
     CanModifyResult canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const;
+
+    static core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file);
 
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
