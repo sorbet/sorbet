@@ -908,18 +908,6 @@ public:
         return ClassOrModuleRef::fromRaw(62);
     }
 
-    static ClassOrModuleRef Net() {
-        return ClassOrModuleRef::fromRaw(63);
-    }
-
-    static ClassOrModuleRef Net_IMAP() {
-        return ClassOrModuleRef::fromRaw(64);
-    }
-
-    static ClassOrModuleRef Net_Protocol() {
-        return ClassOrModuleRef::fromRaw(65);
-    }
-
     static ClassOrModuleRef T_Sig_WithoutRuntime() {
         return ClassOrModuleRef::fromRaw(66);
     }

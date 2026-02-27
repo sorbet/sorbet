@@ -495,16 +495,6 @@ void GlobalState::initEmpty() {
     klass = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::DeclBuilderForProcsSingleton());
 
-    // Ruby 2.5 Hack
-    klass = synthesizeClass(core::Names::Constants::Net(), 0, true);
-    ENFORCE_NO_TIMER(klass == Symbols::Net());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::IMAP());
-    Symbols::Net_IMAP().data(*this)->setIsModule(false);
-    ENFORCE_NO_TIMER(klass == Symbols::Net_IMAP());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::Protocol());
-    ENFORCE_NO_TIMER(klass == Symbols::Net_Protocol());
-    Symbols::Net_Protocol().data(*this)->setIsModule(false);
-
     klass = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig_WithoutRuntime());
