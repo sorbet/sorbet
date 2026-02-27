@@ -323,6 +323,9 @@ Usage:
       --gen-packages-update-visibility-for <name>
                                 Packages for which to generate `visible_to` autocorrects
                                 in --gen-packages mode
+      --gen-packages-allow-relaxing-test-visibility
+                                Allow adding `visible_to 'tests'` for packages with
+                                visibility updates
       --packager-layers [=<layer-name>(=library,application)]
                                 Valid layer names for packages, ordered lowest to
                                 highest. Passing this flag also enables layering checks.

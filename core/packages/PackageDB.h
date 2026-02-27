@@ -68,6 +68,11 @@ public:
         return this->genPackages_;
     }
 
+    // Whether --gen-packages-allow-relaxing-test-visibility is active.
+    bool allowRelaxingTestVisibility() const {
+        return this->allowRelaxingTestVisibility_;
+    }
+
     // Whether to attribute errors to a package in the command line error output
     bool packageAttributedErrors() const {
         return this->packageAttributedErrors_;
@@ -114,6 +119,7 @@ public:
 private:
     bool enabled_ = false;
     bool genPackages_ = false;
+    bool allowRelaxingTestVisibility_ = false;
     bool packageAttributedErrors_ = false;
     bool testPackages_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
