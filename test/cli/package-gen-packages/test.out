@@ -30,6 +30,14 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
      8 |  import D
                   ^
 
+E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
+     3 |class E < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    E/__package.rb:7: Inserted `visible_to C`
+     7 |  export E::CONSTANT_FROM_E
+                                   ^
+
 D/__package.rb:7: Package `B` includes explicit visibility modifiers and cannot be imported from `D` https://srb.help/3723
      7 |  import B
           ^^^^^^^^
@@ -63,7 +71,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 7
+Errors: 8
 # typed: strict
 
 class B < PackageSpec
@@ -98,4 +106,13 @@ class D < PackageSpec
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
+end
+# typed: strict
+
+class E < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+
+  export E::CONSTANT_FROM_E
+  visible_to C
 end

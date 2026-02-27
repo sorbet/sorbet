@@ -124,6 +124,11 @@ public:
         return visibleToTests_;
     }
 
+    bool visibleToEverything() const {
+        ENFORCE(exists());
+        return visibleTo().empty() && !visibleToTests();
+    }
+
     // The possible path prefixes associated with files in the package, including path separator at end.
     std::vector<std::string> packagePathPrefixes = {};
 
