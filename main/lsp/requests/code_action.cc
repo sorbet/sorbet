@@ -151,6 +151,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             // Collect all autocorrects regardless of range to compile into a "source" autocorrect whose scope is
             // the whole file.
             for (auto &autocorrect : error->autocorrects) {
+                if (autocorrect.shouldSkipWhenAggregated) {
+                    continue;
+                }
                 allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
             }
 
@@ -188,6 +191,20 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     auto last =
         unique(result.begin(), result.end(), [](const auto &l, const auto &r) -> bool { return l->title == r->title; });
     result.erase(last, result.end());
+
+    if (config.opts.cacheSensitiveOptions.sorbetPackages) {
+        auto packageName = gs.packageDB().getPackageNameForFile(file);
+        if (packageName.exists()) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
+            if (pkgInfo.exists()) {
+                auto importsAutocorrect = pkgInfo.aggregateMissingImportsForFile(gs, file);
+                if (importsAutocorrect.has_value()) {
+                    allEdits.insert(allEdits.end(), make_move_iterator(importsAutocorrect->edits.begin()),
+                                    make_move_iterator(importsAutocorrect->edits.end()));
+                }
+            }
+        }
+    }
 
     // Perform _after_ sorting so these appear at the end of the list.
     if (!allEdits.empty()) {
