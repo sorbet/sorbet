@@ -787,6 +787,7 @@ private:
                                 e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                             job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
                                 if (!fileIsPayload && klassDefinedInPayload) {
+                                    e.addErrorLine(job.klass.data(ctx)->loc(), "Originally defined here");
                                     e.addErrorNote(
                                         "Pass `{}` at the command line or in the `{}` file to silence this error.\n"
                                         "    Only use this to work around Ruby or gem upgrade incompatibilities.",
