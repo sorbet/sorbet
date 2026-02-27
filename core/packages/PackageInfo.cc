@@ -580,8 +580,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
 
             // We should only skip adding the import if we're not going to add a visible_to to the package, since it
             // will be valid to import the package after the new visible_to is added
-            if (!pkgInfo.isVisibleTo(gs, *this, importType) &&
-                !gs.packageDB().updateVisibilityFor(packageName)) {
+            if (!pkgInfo.isVisibleTo(gs, *this, importType) && !gs.packageDB().updateVisibilityFor(packageName)) {
                 continue;
             }
 
