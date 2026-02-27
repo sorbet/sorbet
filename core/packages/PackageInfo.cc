@@ -659,12 +659,19 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
     return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
 }
 
-std::optional<core::AutocorrectSuggestion>
-PackageInfo::aggregateMissingVisibleTo(const core::GlobalState &gs,
-                                       std::vector<core::packages::MangledName> &visibleTos) const {
+std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleTo(
+    const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos, bool visibleToTests) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &pkgName : visibleTos) {
         auto autocorrect = addVisibleTo(gs, pkgName);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+
+    if (visibleToTests) {
+        auto autocorrect = addVisibleToTests(gs);
         if (autocorrect.has_value()) {
             allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
                             make_move_iterator(autocorrect.value().edits.end()));
