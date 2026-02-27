@@ -331,7 +331,8 @@ public:
     std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
                                                                        std::vector<core::SymbolRef> &toExport) const;
     std::optional<core::AutocorrectSuggestion>
-    aggregateMissingVisibleTo(const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos) const;
+    aggregateMissingVisibleTo(const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos,
+                              bool visibleToTests) const;
 };
 CheckSize(PackageInfo, 256, 8);
 
