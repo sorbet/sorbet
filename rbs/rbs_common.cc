@@ -38,4 +38,5 @@ core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_range_t &range) cons
     }
     return comments.front().typeLoc;
 }
+
 } // namespace sorbet::rbs

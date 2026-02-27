@@ -272,14 +272,29 @@ bool requiresSecondFactor(core::NameRef fun) {
 
 // Returns a method name for the method definition to create, or no name if this is not a valid
 // method-defining test helper.
-core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send &send) {
+// rspecMode: if true, allows RSpec-style multi-argument calls (metadata tags)
+core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send &send, bool rspecMode) {
     auto arity = send.numPosArgs();
     switch (send.fun.rawId()) {
         case core::Names::before().rawId():
-            return arity == 0 ? core::Names::beforeAngles() : core::NameRef::noName();
+            // For RSpec: allow before() with optional scope (:each/:all/:context/:suite) and
+            // metadata filters (e.g., before(:each, :slow) or before(:example, :authorized => true))
+            // For minitest: only allow before() with no arguments
+            if (rspecMode) {
+                return core::Names::beforeAngles();
+            } else {
+                return arity == 0 ? core::Names::beforeAngles() : core::NameRef::noName();
+            }
 
         case core::Names::after().rawId():
-            return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
+            // For RSpec: allow after() with optional scope (:each/:all/:context/:suite) and
+            // metadata filters (e.g., after(:each, :slow) or after(:example, :authorized => true))
+            // For minitest: only allow after() with no arguments
+            if (rspecMode) {
+                return core::Names::afterAngles();
+            } else {
+                return arity == 0 ? core::Names::afterAngles() : core::NameRef::noName();
+            }
 
         case core::Names::it().rawId():
         case core::Names::xit().rawId():
@@ -293,15 +308,15 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
         case core::Names::focus().rawId():
         case core::Names::pending().rawId():
         case core::Names::skip().rawId(): {
-            switch (arity) {
-                case 0:
-                    return core::Names::itAngles();
-                case 1: {
-                    auto name = fmt::format("<{} '{}'>", send.fun.show(ctx), to_s(ctx, send.getPosArg(0)));
-                    return ctx.state.enterNameUTF8(name);
-                }
-                default:
-                    return core::NameRef::noName();
+            // For RSpec: allow multiple arguments (description + optional metadata tags)
+            // For minitest: only allow 0 or 1 argument
+            if (arity == 0) {
+                return core::Names::itAngles();
+            } else if (arity == 1 || rspecMode) {
+                auto name = fmt::format("<{} '{}'>", send.fun.show(ctx), to_s(ctx, send.getPosArg(0)));
+                return ctx.state.enterNameUTF8(name);
+            } else {
+                return core::NameRef::noName();
             }
         }
 
@@ -372,7 +387,8 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
         return invalidUnderParameterizedBody(ctx, eachName, move(stmt));
     }
 
-    auto maybeName = nameForTestHelperMethod(ctx, *send);
+    // test_each is a Sorbet-specific DSL, not RSpec, so use minitest-style strict arity
+    auto maybeName = nameForTestHelperMethod(ctx, *send, /* rspecMode */ false);
     if (maybeName.exists() && send->hasBlock()) {
         auto name = maybeName;
 
@@ -646,10 +662,21 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
-            // For RSpec, allow one or more arguments (description + optional metadata tags)
-            // For minitest, require exactly one argument
-            if (recvIsRSpec) {
-                if (send->numPosArgs() == 0 || !ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
+            // RSpec.describe requires the RSpec rewriter to be enabled
+            if (recvIsRSpec && !ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
+                return nullptr;
+            }
+
+            // RSpec mode allows multiple args (description + metadata tags like :slow, focus: true)
+            // Minitest mode requires exactly one arg (description only)
+            //
+            // Note: rspecMode includes recvIsRSpec here because top-level RSpec.describe calls
+            // need RSpec treatment even though insideDescribe is false. For it/before/after below,
+            // we only use insideDescribe because those methods should only get RSpec treatment
+            // when nested inside a describe block.
+            bool rspecMode = recvIsRSpec || (insideDescribe && ctx.state.cacheSensitiveOptions.rspecRewriterEnabled);
+            if (rspecMode) {
+                if (send->numPosArgs() == 0) {
                     return nullptr;
                 }
             } else {
@@ -744,7 +771,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
-            auto name = nameForTestHelperMethod(ctx, *send);
+            // Use RSpec mode if we're inside a describe block and RSpec rewriter is enabled
+            bool rspecMode = insideDescribe && ctx.state.cacheSensitiveOptions.rspecRewriterEnabled;
+            auto name = nameForTestHelperMethod(ctx, *send, rspecMode);
             if (!name.exists()) {
                 return nullptr;
             }
@@ -846,7 +875,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
             ENFORCE(isSharedExamplesName(send->fun));
-            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || block == nullptr || send->numPosArgs() != 1) {
+            // Allow one or more arguments (name + optional metadata tags)
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || block == nullptr || send->numPosArgs() < 1) {
                 return nullptr;
             }
 

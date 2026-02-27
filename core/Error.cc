@@ -156,7 +156,25 @@ optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
 
 string Error::toString(const GlobalState &gs) const {
     stringstream buf;
-    buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
+    buf << RESET_STYLE;
+
+    if (gs.packageDB().enabled() && gs.packageDB().packageAttributedErrors()) {
+        auto pkgName = "<none>"s;
+        if (loc.file().exists() && !loc.file().isPackage(gs)) {
+            // If there are errors in `__package.rb` files themselves, it's not clear whether we
+            // have a fully-functional package graph or whether we've somehow recovered from an
+            // error, giving a false appearance that we do. Let's be defensive, and say that errors
+            // in __package.rb files equate to "unpackaged" (`<none>`) errors.
+            auto pkg = gs.packageDB().getPackageNameForFile(loc.file());
+            if (pkg.exists()) {
+                pkgName = pkg.owner.show(gs);
+            }
+        }
+
+        buf << "[" << pkgName << "] ";
+    }
+
+    buf << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
         << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " " << gs.errorUrlBase << what.code
         << RESET_COLOR;
     if (loc.exists()) {

@@ -659,6 +659,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("package-skip-rbi-export-enforcement",
                                  "Constants defined in RBIs in these directories (and no others) can be exported",
                                  cxxopts::value<vector<string>>(), "<dir>");
+    options.add_options(section)("package-attributed-errors",
+                                 "Attribute errors to their enclosing package in the error output",
+                                 cxxopts::value<bool>());
     options.add_options(section)("experimental-package-directed",
                                  "Enable support for checking by package, instead of processing all files at once",
                                  cxxopts::value<bool>());
@@ -1242,6 +1245,11 @@ void readOptions(Options &opts,
         opts.cacheSensitiveOptions.sorbetPackages =
             raw["sorbet-packages"].as<bool>() || raw["stripe-packages"].as<bool>();
 
+        opts.packageAttributedErrors = raw["package-attributed-errors"].as<bool>();
+        if (opts.packageAttributedErrors && !opts.cacheSensitiveOptions.sorbetPackages) {
+            logger->error("--package-attributed-errors can only be specified in --sorbet-packages mode");
+            throw EarlyReturnWithCode(1);
+        }
         opts.testPackages = raw["experimental-test-packages"].as<bool>();
         if (opts.testPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
             logger->error("--experimental-test-packages can only be specified in --sorbet-packages mode");

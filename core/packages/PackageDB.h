@@ -68,6 +68,11 @@ public:
         return this->genPackages_;
     }
 
+    // Whether to attribute errors to a package in the command line error output
+    bool packageAttributedErrors() const {
+        return this->packageAttributedErrors_;
+    }
+
     // Whether we're using separate test packages, or the old-style inline test packages.
     bool testPackages() const {
         return this->testPackages_;
@@ -109,6 +114,7 @@ public:
 private:
     bool enabled_ = false;
     bool genPackages_ = false;
+    bool packageAttributedErrors_ = false;
     bool testPackages_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;

@@ -440,7 +440,7 @@ public:
                             const std::vector<std::string> &skipImportVisibilityCheckFor,
                             const std::vector<std::string> &updateVisibilityFor,
                             const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages,
-                            bool testPackages);
+                            bool packageAttributedErrors, bool testPackages);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
@@ -559,7 +559,7 @@ public:
         const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, bool genPackages, bool testPackages) const;
+        std::string errorHint, bool genPackages, bool packageAttributedErrors, bool testPackages) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
@@ -583,7 +583,7 @@ public:
                     const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-                    std::string errorHint, bool genPackages, bool testPackages) const;
+                    std::string errorHint, bool genPackages, bool packageAttributedErrors, bool testPackages) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
