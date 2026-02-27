@@ -652,6 +652,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("gen-packages-update-visibility-for",
                                  "Packages for which to generate `visible_to` autocorrects in --gen-packages mode",
                                  cxxopts::value<vector<string>>(), "<name>");
+    options.add_options(section)("gen-packages-allow-relaxing-test-visibility",
+                                 "Allow adding `visible_to 'tests'` for packages with visibility updates",
+                                 cxxopts::value<bool>());
     options.add_options(section)(
         "packager-layers",
         "Valid layer names for packages, ordered lowest to highest. Passing this flag also enables layering checks.",
@@ -1340,6 +1343,18 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.updateVisibilityFor.emplace_back(ns);
+            }
+        }
+        opts.allowRelaxingTestVisibility = raw["gen-packages-allow-relaxing-test-visibility"].as<bool>();
+        if (opts.allowRelaxingTestVisibility) {
+            if (!opts.genPackages) {
+                logger->error("--gen-packages-allow-relaxing-test-visibility can only be used in --gen-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            if (opts.updateVisibilityFor.empty()) {
+                logger->error("--gen-packages-allow-relaxing-test-visibility can only be used with "
+                              "--gen-packages-update-visibility-for");
+                throw EarlyReturnWithCode(1);
             }
         }
 
