@@ -17,6 +17,10 @@ module T::Configuration
     T::Private::RuntimeLevels.enable_checking_in_tests
   end
 
+  def self.recursively_check_in_tests?
+    T::Private::RuntimeLevels.recursively_check_in_tests?
+  end
+
   # Announce to Sorbet that we would like the final checks to be enabled when
   # including and extending modules. Iff this is not called, then the following
   # example will not raise an error.

@@ -90,5 +90,52 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe 'set_enable_recursive_checking_in_tests_from_environment' do
+      before do
+        @orig_wrapped_tests_with_validation = T::Private::RuntimeLevels.instance_variable_get(:@wrapped_tests_with_validation)
+        @orig_check_tests = T::Private::RuntimeLevels.instance_variable_get(:@check_tests)
+        @orig_recursively_check_in_tests = T::Private::RuntimeLevels.instance_variable_get(:@recursively_check_in_tests)
+        @orig_env_recursively_check_in_tests = ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS']
+
+        # Within these specs pretend we haven't yet read this value and checked_tests is false
+        T::Private::RuntimeLevels.instance_variable_set(:@wrapped_tests_with_validation, false)
+        T::Private::RuntimeLevels.instance_variable_set(:@check_tests, false)
+        T::Private::RuntimeLevels.instance_variable_set(:@recursively_check_in_tests, false)
+      end
+
+      after do
+        T::Private::RuntimeLevels.instance_variable_set(:@check_tests, @orig_check_tests)
+        T::Private::RuntimeLevels.instance_variable_set(:@wrapped_tests_with_validation, @orig_wrapped_tests_with_validation)
+        T::Private::RuntimeLevels.instance_variable_set(:@recursively_check_in_tests, @orig_recursively_check_in_tests)
+        ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS'] = @orig_env_recursively_check_in_tests
+      end
+
+      describe 'when SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS env variable is not set' do
+        before do
+          ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS'] = nil
+        end
+
+        it 'does not change check_tests' do
+          # Reaching into a private method for testing purposes
+          T::Private::RuntimeLevels.send(:set_enable_recursive_checking_in_tests_from_environment)
+
+          assert_equal(false, T::Private::RuntimeLevels.recursively_check_in_tests?)
+        end
+      end
+
+      describe 'when SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS env variable is set' do
+        before do
+          ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS'] = '1'
+        end
+
+        it 'updates check_tests' do
+          # Reaching into a private method for testing purposes
+          T::Private::RuntimeLevels.send(:set_enable_recursive_checking_in_tests_from_environment)
+
+          assert_equal(true, T::Private::RuntimeLevels.recursively_check_in_tests?)
+        end
+      end
+    end
   end
 end
