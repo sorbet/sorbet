@@ -80,14 +80,14 @@ The pipeline has three major stages:
 
 | Phase | Folder | IR In → IR Out | Key job |
 |-------|--------|----------------|---------|
-| Parser | `parser/` | source → `parser::Node` | Parse Ruby via whitequark-derived yacc grammar |
-| Desugar | `ast/desugar/` | `parser::Node` → `ast::Expression` | Reduce ~98 node types to ~34; canonicalize syntax |
-| Rewriter | `rewriter/` | `ast::Expression` → `ast::Expression` | Expand DSLs (`attr_reader`, etc.) |
-| LocalVars | `local_vars/` | `ast::Expression` → `ast::Expression` | Resolve local variable identifiers |
-| Namer | `namer/` | `ast::Expression` → `ast::Expression` | Create `Symbol`s for classes/methods/args in `GlobalState` |
-| Resolver | `resolver/` | `ast::Expression` → `ast::Expression` | Resolve constants; fill in type info on `Symbol`s |
-| DefinitionValidator | `definition_validator/` | `ast::Expression` | Emit errors about invalid definitions |
-| CFG | `cfg/` | `ast::Expression` → `cfg::CFG` | Build control flow graph (basic blocks) |
+| Parser | `parser/` | source → `parser::Node` | Parse Ruby (whitequark or Prism) |
+| Desugar | `ast/desugar/` | `parser::Node` → `ast::ExpressionPtr` | Reduce ~127 parser node types to ~31 AST types; canonicalize syntax |
+| Rewriter | `rewriter/` | `ast::ExpressionPtr` → `ast::ExpressionPtr` | Expand DSLs (`attr_reader`, etc.) |
+| LocalVars | `local_vars/` | `ast::ExpressionPtr` → `ast::ExpressionPtr` | Resolve local variable identifiers |
+| Namer | `namer/` | `ast::ExpressionPtr` → `ast::ExpressionPtr` | Create `Symbol`s for classes/methods/args in `GlobalState` |
+| Resolver | `resolver/` | `ast::ExpressionPtr` → `ast::ExpressionPtr` | Resolve constants; fill in type info on `Symbol`s |
+| DefinitionValidator | `definition_validator/` | `ast::ExpressionPtr` | Emit errors about invalid definitions |
+| CFG | `cfg/` | `ast::ExpressionPtr` → `cfg::CFG` | Build control flow graph (basic blocks) |
 | Infer | `infer/` | `cfg::CFG` | Type-check method bodies; annotate bindings with types |
 
 Use `-p <phase>` (e.g., `-p desugar-tree`, `-p symbol-table`, `-p cfg`) to print the IR at any phase. Use `--stop-after <phase>` to halt early.
@@ -99,13 +99,13 @@ Use `-p <phase>` (e.g., `-p desugar-tree`, `-p symbol-table`, `-p cfg`) to print
 - **`Name` / `NameRef`** — Interned strings. Two `NameRef`s with the same ID are equal; comparison is fast.
 - **`File` / `FileRef`** — Source files tracked in GlobalState.
 - **`core::Loc`** — Source location (pronounced "lohk"). Compact bit-packed representation. Use `beginError` which lazily builds error messages only if they'll be reported.
-- **`ast::Expression`** — AST nodes using tagged pointers; avoid virtual dispatch. Use `typecase` for pattern matching over node types.
+- **`ast::ExpressionPtr`** — AST nodes using tagged pointers; avoid virtual dispatch. Use `typecase` for pattern matching over node types.
 - **`cfg::CFG`** — Control flow graph: a vector of `BasicBlock`s, each containing `Binding`s (instruction → local variable assignment). Not SSA.
 
 ### Type System (`core/types/`)
 
 - Types live in `core/Types.h`; method call checking is in `core/types/calls.cc`
-- Inference is single-pass (no backsolving, no fixed-point iteration)
+- Inference is single-pass forward (processes CFG in topological order; no backsolving)
 - `lub` = type union ("or"), `glb` = type intersection ("and")
 - Intrinsics: methods whose return types are computed in C++ rather than via sigs
 
@@ -123,7 +123,7 @@ The LSP server reuses the same pipeline with incremental updates. File changes t
 - `test/testdata/` — test_corpus tests (`.rb` files with `# error:` annotations)
 - `test/cli/` — CLI tests (`test.sh` + `test.out`)
 - `test/testdata/lsp/` — LSP tests with `def:`, `usage:`, `hover:`, `completion:` annotations
-- `third_party/parser/` — Whitequark-derived Ruby parser (yacc/C++)
+- `parser/` — Ruby parsers: `parser/parser/` (whitequark-derived yacc/C++), `parser/prism/` (Prism-based)
 
 ## Writing Tests
 
@@ -133,7 +133,7 @@ The LSP server reuses the same pipeline with incremental updates. File changes t
 
 2. **Expectation tests**: Add `<name>.rb.<phase>.exp` alongside a testdata file. Must exactly match `sorbet -p <phase> <name>.rb`.
 
-3. **LSP tests** (`test/testdata/lsp/`): Use `def:`, `usage:`, `hover:`, `completion:`, `apply-completion:`, `apply-rename:`, `symbol-search:`, `type:`, `type-def:`, `find-implementation:`, `implementation:` annotations. Run with `bazel test //test:test_LSPTests/testdata/lsp/<name>`.
+3. **LSP tests** (`test/testdata/lsp/`): Use annotations like `def:`, `usage:`, `hover:`, `completion:`, `apply-completion:`, `apply-code-action:`, `apply-rename:`, `symbol-search:`, `type:`, `type-def:`, `find-implementation:`, `implementation:`, `show-symbol:` (see `test/helpers/position_assertions.cc` for the full list). Run with `bazel test //test:test_LSPTests/testdata/lsp/<name>`.
 
 4. **CLI tests** (`test/cli/<name>/`): Add `test.sh` (executable) + `test.out`. Run with `bazel test //test/cli:test_<name>`.
 
