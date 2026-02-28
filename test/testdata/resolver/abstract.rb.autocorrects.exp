@@ -71,7 +71,7 @@ class NeedsTHelpersAndAbstract2
 
   sig {abstract.returns(T.untyped)}
   def self.f; end
-# ^^^^^ error: you must mark your class/module as abstract
+# ^^^^^^^^^^ error: you must mark your class/module as abstract
 end
 
 class NeedsTHelpersAndAbstract3
