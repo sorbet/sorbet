@@ -69,8 +69,8 @@ class NeedsTHelpersAndAbstract3
 
     sig {abstract.returns(T.untyped)}
     def f; end
+  # ^^^^^ error: you must mark your class/module as abstract
   end
-# ^^^^^ error: you must mark your class/module as abstract
 end
 
 module InterfaceModule
@@ -93,4 +93,5 @@ class AbstractAttrReader
 
   sig { abstract.returns(Integer) }
   attr_reader :foo
+  #            ^^^ error: Abstract methods must not contain any code in their body
 end
