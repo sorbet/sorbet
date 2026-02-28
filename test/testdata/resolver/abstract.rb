@@ -85,3 +85,12 @@ module InterfaceModule
     0
   end
 end
+
+class AbstractAttrReader
+  extend T::Sig, T::Helpers
+
+  abstract!
+
+  sig { abstract.returns(Integer) }
+  attr_reader :foo
+end
