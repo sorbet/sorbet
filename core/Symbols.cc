@@ -2334,6 +2334,9 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool shapeHash) const {
     auto flagsCopy = this->flags;
     flagsCopy.isBehaviorDefining = false;
     if (shapeHash && this->locs().size() == 1) {
+        // TODO(jez) This doesn't work because in the local GlobalState, of course we only have a single file...
+        // We'll need to do something more special here.
+        //
         // Ignore isAbstract in shape hash, so that marking a class abstract can take the fast path
         // Only applies to classes defined in a single file, because we can't use the loc "reference
         // counting" in incremental namer to delete and recreate the class when the count reaches zero.
