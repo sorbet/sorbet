@@ -1,0 +1,16 @@
+# typed: strict
+# assert-slow-path: true
+
+class AbstractClass
+  extend T::Sig, T::Helpers
+  abstract!
+
+  sig { abstract.void }
+  def example
+  end
+end
+
+class ChildClass < AbstractClass # error: Missing definition for abstract method
+end
+
+AbstractClass.new # error: to instantiate abstract class

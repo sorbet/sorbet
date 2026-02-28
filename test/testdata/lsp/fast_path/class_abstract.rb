@@ -1,0 +1,14 @@
+# typed: strict
+
+class AbstractClass
+  extend T::Sig, T::Helpers
+
+  sig { abstract.void }
+  def example # error: Before declaring an abstract method
+  end
+end
+
+class ChildClass < AbstractClass
+end
+
+AbstractClass.new
