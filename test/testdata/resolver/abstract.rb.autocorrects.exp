@@ -107,6 +107,6 @@ class AbstractAttrReader
   abstract!
 
   sig { abstract.returns(Integer) }
-  attr_reader :
+  def foo; end
 end
 # ------------------------------

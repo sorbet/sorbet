@@ -3924,7 +3924,16 @@ public:
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
-                    e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
+                    if (mdef.flags.isAttrBestEffortUIOnly) {
+                        // This isAttrBestEffortUIOnly is fine because we're not using it to compute
+                        // a load-bearing semantic property (e.g., the error itself is still
+                        // reported by checking whether the body is empty). Referencing it here to
+                        // generate an autocorrect is fine, because autocorrects are already best effort.
+                        e.replaceWith("Define via `def`", ctx.locAt(mdef.loc), "def {}; end",
+                                      mdef.symbol.data(ctx)->name.show(ctx));
+                    } else {
+                        e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
+                    }
                 }
             }
             if (!mdef.symbol.data(ctx)->owner.data(ctx)->flags.isAbstract) {
