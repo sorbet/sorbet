@@ -3794,7 +3794,7 @@ private:
 
                     lastSigs.clear();
                 } else {
-                    handleAbstractMethod(ctx, mdef);
+                    handleAbstractMethod(ctx, mdef, nullptr);
                 }
             },
 
@@ -3908,17 +3908,18 @@ public:
                 }
             }
         }
-        handleAbstractMethod(ctx, mdef);
+        handleAbstractMethod(ctx, mdef, nullptr);
     }
     static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
         fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
-        handleAbstractMethod(ctx, mdef);
+        handleAbstractMethod(ctx, mdef, &job.sig);
     }
 
-    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
+    // `sig == nullptr` implies overloaded sig or no sig
+    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef, const ParsedSig *sig) {
         if (mdef.symbol.data(ctx)->flags.isAbstract) {
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
@@ -3935,6 +3936,15 @@ public:
         } else if (mdef.symbol.data(ctx)->owner.data(ctx)->flags.isInterface) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
+                if (sig != nullptr) {
+                    auto insertLoc = sig->seen.params.exists()  ? sig->seen.params
+                                     : sig->seen.void_.exists() ? sig->seen.void_
+                                                                : sig->seen.returns;
+                    insertLoc = insertLoc.copyWithZeroLength();
+                    if (insertLoc.exists()) {
+                        e.replaceWith("Make abstract", ctx.locAt(insertLoc), "abstract.");
+                    }
+                }
             }
         }
     }
