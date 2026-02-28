@@ -135,7 +135,50 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
 
         typeString = prettyTypeForConstant(gs, c->symbolBeforeDealias);
     } else if (auto d = resp->isMethodDef()) {
-        for (auto loc : d->symbol.data(gs)->locs()) {
+        auto data = d->symbol.data(gs);
+        auto name = data->name;
+        core::MethodRef abstractMethod;
+        // TODO(froydnj): this should probably be replaced by a newly-written
+        // ClassOrModule::findAbstractMethodTransitive so we don't get confused by
+        // two mixins that both declare concrete overrides.
+        auto declaringClass = data->owner;
+        auto flags = data->flags;
+        while (true) {
+            if (!flags.isOverride || !declaringClass.exists()) {
+                break;
+            }
+
+            core::MethodRef maybeAbstract;
+            for (auto mixin : declaringClass.data(gs)->mixins()) {
+                maybeAbstract = mixin.data(gs)->findMethod(gs, name);
+                if (maybeAbstract.exists() && maybeAbstract.data(gs)->flags.isAbstract) {
+                    break;
+                }
+            }
+
+            if (maybeAbstract.exists()) {
+                abstractMethod = maybeAbstract;
+                break;
+            }
+
+            auto superClass = declaringClass.data(gs)->superClass();
+            if (!superClass.exists()) {
+                break;
+            }
+            declaringClass = superClass;
+        }
+        // Put any abstract method documentation first, so people can hover on
+        // the override they are currently writing and see the documentation for
+        // the abstract method they are supposed to be implementing.
+        if (abstractMethod.exists()) {
+            for (auto loc : abstractMethod.data(gs)->locs()) {
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
+                }
+            }
+        }
+
+        for (auto loc : data->locs()) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
             }
