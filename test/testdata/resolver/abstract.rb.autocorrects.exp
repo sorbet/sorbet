@@ -44,6 +44,36 @@ class AbstractMethodNotClass
 # ^^^^^ error: you must mark your class/module as abstract
 end
 
+class NeedsTHelpersAndAbstract
+  extend T::Sig
+
+  def some_other_method; end
+
+  sig {abstract.returns(T.untyped)}
+  def f; end
+# ^^^^^ error: you must mark your class/module as abstract
+end
+
+class NeedsTHelpersAndAbstract2
+  extend T::Sig
+
+  def some_other_method; end
+
+  sig {abstract.returns(T.untyped)}
+  def self.f; end
+# ^^^^^ error: you must mark your class/module as abstract
+end
+
+class NeedsTHelpersAndAbstract3
+  class << self
+    extend T::Sig
+
+    sig {abstract.returns(T.untyped)}
+    def f; end
+  end
+# ^^^^^ error: you must mark your class/module as abstract
+end
+
 module InterfaceModule
   extend T::Sig
   extend T::Helpers
