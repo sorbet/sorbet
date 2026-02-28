@@ -1,0 +1,12 @@
+# typed: strict
+# assert-slow-path: true
+
+class AbstractClass
+  extend T::Helpers
+
+  abstract!
+
+  T.unsafe(self).some_dsl
+end
+
+AbstractClass.new # error: to instantiate abstract class
