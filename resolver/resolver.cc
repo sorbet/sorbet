@@ -3928,13 +3928,13 @@ public:
                 }
             }
             if (!mdef.symbol.data(ctx)->owner.data(ctx)->flags.isAbstract) {
-                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                     e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                 "as abstract using `abstract!` or `interface!`");
                 }
             }
         } else if (mdef.symbol.data(ctx)->owner.data(ctx)->flags.isInterface) {
-            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+            if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
                 if (sig != nullptr) {
                     auto insertLoc = sig->seen.params.exists()  ? sig->seen.params

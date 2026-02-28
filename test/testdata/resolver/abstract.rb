@@ -39,7 +39,8 @@ class AbstractMethodNotClass
   extend T::Helpers
 
   sig {returns(T.untyped).abstract}
-  def f; end # error: you must mark your class/module as abstract
+  def f; end
+# ^^^^^ error: you must mark your class/module as abstract
 end
 
 module InterfaceModule
@@ -49,7 +50,8 @@ module InterfaceModule
   interface!
 
   sig {returns(T.untyped)}
-  def f # error: must be declared abstract
+  def f
+# ^^^^^ error: must be declared abstract
     0
   end
 end
