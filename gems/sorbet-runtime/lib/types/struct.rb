@@ -5,6 +5,30 @@ class T::InexactStruct
   include T::Props
   include T::Props::Serializable
   include T::Props::Constructor
+
+  def deconstruct_keys(keys)
+    h = serialize
+
+    return h.to_h { |k, v| [k.to_sym, v] } if keys.nil?
+    raise TypeError, "wrong argument type #{keys.class} (expected Array or nil)" unless keys.is_a?(Array)
+    return {} if h.count < keys.count
+
+    result = {}
+
+    keys.each do |k, v|
+      case k
+      when String then  result[k] = h.fetch(k)
+      when Symbol then  result[k] = h.fetch(k.to_s)
+      when Integer then result[k] = h.values.fetch(k)
+      end
+    rescue KeyError, IndexError
+      break
+    end
+
+    result
+  end
+
+  def deconstruct = serialize.values
 end
 
 class T::Struct < T::InexactStruct
