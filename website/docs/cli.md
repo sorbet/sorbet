@@ -256,11 +256,12 @@ foo.rb:3: Expected `String` but found `Symbol(:"symbol")` for argument `arg0`
 
 Sorbet can cache the result of parsing files. If only a few files change between consecutive runs of Sorbet, Sorbet can skip substantial amounts of work creating abstract syntax trees from files, which speeds up `srb tc` at the command line and the "Indexing..." operation in editors.
 
-To enable `--cache-dir`, simply pass `--cache-dir=...` when invoking `srb tc` (or add this option to the project's [config file](#config-file)). Replace `...` with a path to where Sorbet should write cached data to disk. This `...` can either be:
+`--cache-dir` is disabled by default. To enable it, simply pass `--cache-dir=...` when invoking `srb tc` (or add this option to the project's [config file](#config-file)). Replace `...` with a path to where Sorbet should write cached data to disk. This `...` can either be:
 
 - a path to a directory that doesn't exist (will be created by Sorbet)
 - a path to an empty directory
 - a path to a cache directory populated by a previous run of Sorbet
+- `""` to explicitly disable caching (which is the disabled by default, anyway)
 
 For example:
 
@@ -276,6 +277,8 @@ srb tc --cache-dir=/tmp/sorbet-cache
 Under the hood, Sorbet creates two files in this folder (`data.mdb` and `lock.mdb`).
 
 We strongly recommend setting `--cache-dir`, especially in medium- to large-sized codebases. The parsing and AST rewriting phases of Sorbet are some of the least optimized parts of Sorbet, because historically this caching strategy has been so effective.
+
+If the path contains spaces, it must be quoted, like `--cache-dir="/a/b/sorbet cache"`.
 
 ### What is cached? What is evicted?
 

@@ -576,8 +576,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<string>()->default_value(empty.webTraceFile), "<file>");
     options.add_options(section)("web-trace-file-strict", "Whether to close the toplevel array in `--web-trace-file`",
                                  cxxopts::value<bool>());
-    options.add_options(section)("cache-dir", "Use <dir> to cache certain data. Will create <dir> if it does not exist",
-                                 cxxopts::value<string>()->default_value(empty.cacheDir), "<dir>");
+    options.add_options(section)(
+        "cache-dir",
+        "Use <dir> to cache certain data. Will create <dir> if it does not exist. Caching is off by default.",
+        cxxopts::value<string>()->default_value(empty.cacheDir), "<dir>");
     options.add_options(section)("max-cache-size-bytes",
                                  "Must be a multiple of OS page size (usually 4096). Subject to restrictions on "
                                  "mdb_env_set_mapsize function in LMDB API docs.",
