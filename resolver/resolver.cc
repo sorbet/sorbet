@@ -3794,7 +3794,7 @@ private:
 
                     lastSigs.clear();
                 } else {
-                    handleAbstractMethod(ctx, mdef);
+                    handleAbstractMethod(ctx, mdef, nullptr);
                 }
             },
 
@@ -3908,33 +3908,69 @@ public:
                 }
             }
         }
-        handleAbstractMethod(ctx, mdef);
+        handleAbstractMethod(ctx, mdef, nullptr);
     }
     static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
         fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
-        handleAbstractMethod(ctx, mdef);
+        handleAbstractMethod(ctx, mdef, &job.sig);
     }
 
-    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
+    // `sig == nullptr` implies overloaded sig or no sig
+    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef, const ParsedSig *sig) {
         if (mdef.symbol.data(ctx)->flags.isAbstract) {
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
-                    e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
+                    if (mdef.flags.isAttrBestEffortUIOnly) {
+                        // This isAttrBestEffortUIOnly is fine because we're not using it to compute
+                        // a load-bearing semantic property (e.g., the error itself is still
+                        // reported by checking whether the body is empty). Referencing it here to
+                        // generate an autocorrect is fine, because autocorrects are already best effort.
+                        e.replaceWith("Define via `def`", ctx.locAt(mdef.loc), "def {}; end",
+                                      mdef.symbol.data(ctx)->name.show(ctx));
+                    } else {
+                        e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
+                    }
                 }
             }
             if (!mdef.symbol.data(ctx)->owner.data(ctx)->flags.isAbstract) {
-                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                     e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                 "as abstract using `abstract!` or `interface!`");
+                    if (sig != nullptr && sig->seen.sig.exists()) {
+                        auto sigLoc = ctx.locAt(sig->seen.sig);
+                        auto [insertLoc, padding] = sigLoc.findStartOfIndentation(ctx);
+                        auto spaces = string(padding, ' ');
+                        auto needsExtendTHelpers = false;
+                        if (ctx.owner.isClassOrModule()) {
+                            // Defensive, if it's not a class or module don't bother checking hierarchy
+                            auto singletonClass = ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+                            if (singletonClass.exists()) {
+                                needsExtendTHelpers =
+                                    !singletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Helpers());
+                            }
+                        }
+                        e.replaceWith("Insert `abstract!`", insertLoc, "{}abstract!\n\n{}",
+                                      needsExtendTHelpers ? fmt::format("extend T::Helpers\n\n{}", spaces) : "",
+                                      spaces);
+                    }
                 }
             }
         } else if (mdef.symbol.data(ctx)->owner.data(ctx)->flags.isInterface) {
-            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+            if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
+                if (sig != nullptr) {
+                    auto insertLoc = sig->seen.params.exists()  ? sig->seen.params
+                                     : sig->seen.void_.exists() ? sig->seen.void_
+                                                                : sig->seen.returns;
+                    insertLoc = insertLoc.copyWithZeroLength();
+                    if (insertLoc.exists()) {
+                        e.replaceWith("Make abstract", ctx.locAt(insertLoc), "abstract.");
+                    }
+                }
             }
         }
     }

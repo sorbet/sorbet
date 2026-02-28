@@ -1,3 +1,4 @@
+# -- test/testdata/resolver/abstract.rb --
 # typed: true
 
 class HasAbstract
@@ -15,7 +16,7 @@ class HasAbstract
 
   sig {params(x: Integer).abstract.returns(String)}
   def abstract_with_body(x)
-    14 # error: Abstract methods must not contain any code in their body
+     # error: Abstract methods must not contain any code in their body
   end
 
   sig {abstract.params(x: T.untyped).void}
@@ -31,12 +32,14 @@ class InterfaceClass
   extend T::Sig
   extend T::Helpers
 
-  interface! # error: Classes can't be interfaces
+  abstract! # error: Classes can't be interfaces
 end
 
 class AbstractMethodNotClass
   extend T::Sig
   extend T::Helpers
+
+  abstract!
 
   sig {returns(T.untyped).abstract}
   def f; end
@@ -48,6 +51,10 @@ class NeedsTHelpersAndAbstract
 
   def some_other_method; end
 
+  extend T::Helpers
+
+  abstract!
+
   sig {abstract.returns(T.untyped)}
   def f; end
 # ^^^^^ error: you must mark your class/module as abstract
@@ -58,6 +65,10 @@ class NeedsTHelpersAndAbstract2
 
   def some_other_method; end
 
+  extend T::Helpers
+
+  abstract!
+
   sig {abstract.returns(T.untyped)}
   def self.f; end
 # ^^^^^^^^^^ error: you must mark your class/module as abstract
@@ -66,6 +77,10 @@ end
 class NeedsTHelpersAndAbstract3
   class << self
     extend T::Sig
+
+    extend T::Helpers
+
+    abstract!
 
     sig {abstract.returns(T.untyped)}
     def f; end
@@ -79,7 +94,7 @@ module InterfaceModule
 
   interface!
 
-  sig {returns(T.untyped)}
+  sig {abstract.returns(T.untyped)}
   def f
 # ^^^^^ error: must be declared abstract
     0
@@ -92,6 +107,7 @@ class AbstractAttrReader
   abstract!
 
   sig { abstract.returns(Integer) }
-  attr_reader :foo
+  def foo; end
   #            ^^^ error: Abstract methods must not contain any code in their body
 end
+# ------------------------------
