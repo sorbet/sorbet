@@ -3931,6 +3931,23 @@ public:
                 if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                     e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                 "as abstract using `abstract!` or `interface!`");
+                    if (sig != nullptr && sig->seen.sig.exists()) {
+                        auto sigLoc = ctx.locAt(sig->seen.sig);
+                        auto [insertLoc, padding] = sigLoc.findStartOfIndentation(ctx);
+                        auto spaces = string(padding, ' ');
+                        auto needsExtendTHelpers = false;
+                        if (ctx.owner.isClassOrModule()) {
+                            // Defensive, if it's not a class or module don't bother checking hierarchy
+                            auto singletonClass = ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+                            if (singletonClass.exists()) {
+                                needsExtendTHelpers =
+                                    !singletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Helpers());
+                            }
+                        }
+                        e.replaceWith("Insert `abstract!`", insertLoc, "{}abstract!\n\n{}",
+                                      needsExtendTHelpers ? fmt::format("extend T::Helpers\n\n{}", spaces) : "",
+                                      spaces);
+                    }
                 }
             }
         } else if (mdef.symbol.data(ctx)->owner.data(ctx)->flags.isInterface) {

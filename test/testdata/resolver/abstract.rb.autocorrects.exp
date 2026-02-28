@@ -39,6 +39,8 @@ class AbstractMethodNotClass
   extend T::Sig
   extend T::Helpers
 
+  abstract!
+
   sig {returns(T.untyped).abstract}
   def f; end
 # ^^^^^ error: you must mark your class/module as abstract
@@ -48,6 +50,10 @@ class NeedsTHelpersAndAbstract
   extend T::Sig
 
   def some_other_method; end
+
+  extend T::Helpers
+
+  abstract!
 
   sig {abstract.returns(T.untyped)}
   def f; end
@@ -59,6 +65,10 @@ class NeedsTHelpersAndAbstract2
 
   def some_other_method; end
 
+  extend T::Helpers
+
+  abstract!
+
   sig {abstract.returns(T.untyped)}
   def self.f; end
 # ^^^^^ error: you must mark your class/module as abstract
@@ -67,6 +77,10 @@ end
 class NeedsTHelpersAndAbstract3
   class << self
     extend T::Sig
+
+    extend T::Helpers
+
+    abstract!
 
     sig {abstract.returns(T.untyped)}
     def f; end
