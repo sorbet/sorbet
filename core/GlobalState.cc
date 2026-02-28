@@ -2494,10 +2494,44 @@ MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass, bool all
     return ref;
 }
 
+namespace {
+
+template <typename GS> ClassOrModuleRef getStaticInitRootSingleton(GS &gs, FileRef file) {
+    auto &db = gs.packageDB();
+    if (!db.enabled()) {
+        return core::Symbols::rootSingleton();
+    }
+
+    // When we're processing package files, the package db isn't necessarily fully built yet, so we won't be able to
+    // reliably associate the file with a package. To avoid this problem, we stash all package file static-init methods
+    // on the rootSingleton.
+    if (file.data(gs).isPackage(gs)) {
+        return core::Symbols::rootSingleton();
+    }
+
+    auto pkgName = db.getPackageNameForFile(file);
+    if (!pkgName.exists()) {
+        return core::Symbols::rootSingleton();
+    }
+
+    if constexpr (std::is_const_v<GS>) {
+        auto root = pkgName.owner.data(gs)->lookupSingletonClass(gs);
+        ENFORCE(root.exists());
+        return root;
+    } else {
+        return pkgName.owner.data(gs)->singletonClass(gs);
+    }
+}
+
+} // namespace
+
 MethodRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->methodsUsed();
-    auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
+
+    auto root = getStaticInitRootSingleton(*this, loc.file());
+
+    auto sym = enterMethodSymbol(loc, root, nm);
     if (prevCount != this->methodsUsed()) {
         auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = this->enterMethodParameter(blkLoc, sym, core::Names::blkArg());
@@ -2511,7 +2545,8 @@ MethodRef GlobalState::staticInitForFile(Loc loc) {
 
 MethodRef GlobalState::lookupStaticInitForFile(FileRef file) const {
     auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), file.id());
-    auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
+    auto root = getStaticInitRootSingleton(*this, file);
+    auto ref = root.data(*this)->findMember(*this, nm);
     ENFORCE_NO_TIMER(ref.exists(), "looking up non-existent <static-init> for {}", file.data(*this).path());
     return ref.asMethodRef();
 }
