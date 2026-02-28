@@ -2569,6 +2569,11 @@ class ResolveTypeMembersAndFieldsWalk {
         core::MethodRef toMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(job.toName);
         if (toMethod.exists()) {
             toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
+        } else {
+            auto member = ctx.owner.asClassOrModuleRef().data(ctx)->findMemberTransitive(ctx, job.toName);
+            if (member.isMethod()) {
+                toMethod = member.asMethodRef();
+            }
         }
 
         if (!toMethod.exists()) {
