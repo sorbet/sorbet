@@ -1,0 +1,5 @@
+# typed: strict
+# exclude-from-file-update: true
+
+class GrandchildClass < ChildClass2
+end

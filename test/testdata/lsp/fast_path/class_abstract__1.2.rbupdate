@@ -1,5 +1,5 @@
 # typed: strict
-# assert-fast-path: class_abstract.rb
+# assert-fast-path: class_abstract__1.rb,class_abstract__2.rb
 
 class AbstractClass
   extend T::Sig, T::Helpers

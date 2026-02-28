@@ -1,0 +1,5 @@
+# typed: strict
+# exclude-from-file-update: true
+
+class ChildClass2 < AbstractClass
+end
