@@ -729,6 +729,62 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract11<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract12<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract13<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract14<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract15<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract16<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract17<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
         <self>.returns(::<root>::<C T>.noreturn())
       end
 
@@ -757,6 +813,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of method_abstract9>
 
       <runtime method definition of method_abstract10>
+
+      <runtime method definition of method_abstract11>
+
+      <runtime method definition of method_abstract12>
+
+      <runtime method definition of method_abstract13>
+
+      <runtime method definition of method_abstract14>
+
+      <runtime method definition of method_abstract15>
+
+      <runtime method definition of method_abstract16>
+
+      <runtime method definition of method_abstract17>
 
       <runtime method definition of self.raise>
 
