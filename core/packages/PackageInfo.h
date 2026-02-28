@@ -257,6 +257,8 @@ public:
     std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                          const core::SymbolRef newExport) const;
 
+    std::optional<core::AutocorrectSuggestion> addVisibleToTests(const core::GlobalState &gs) const;
+
     std::optional<core::AutocorrectSuggestion> addVisibleTo(const core::GlobalState &gs,
                                                             const MangledName &targetPackage) const;
 
