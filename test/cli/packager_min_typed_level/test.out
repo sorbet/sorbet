@@ -1,0 +1,7 @@
+test/test_too_low.rb:1: All test files in package `Project::MyPackage` must be at least `typed: true` https://srb.help/3736
+     1 |# typed: false
+        ^
+    __package.rb:5: Minimum typed level for test files in this package declared here
+     5 |  sorbet min_typed_level: 'strict', tests_min_typed_level: 'true'
+                                                                   ^^^^^^
+Errors: 1
