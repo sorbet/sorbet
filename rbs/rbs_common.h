@@ -140,7 +140,27 @@ public:
      *       ^ ends here
      * ```
      */
-    core::LocOffsets typeLocFromRange(const rbs_range_t &range) const;
+    core::LocOffsets typeLocFromRange(const rbs_location_range &range) const;
+
+    /**
+     * Returns the type location of the RBS declaration that covers the given token range.
+     *
+     * ```
+     * #: (Integer) ->
+     *    v starts from here
+     * #| void
+     *       ^ ends here
+     * ```
+     */
+    core::LocOffsets typeLocFromTokenRange(const rbs_range_t &range) const {
+        rbs_location_range locRange = {
+            .start_char = range.start.char_pos,
+            .start_byte = range.start.byte_pos,
+            .end_char = range.end.char_pos,
+            .end_byte = range.end.byte_pos
+        };
+        return typeLocFromRange(locRange);
+    }
 
 private:
     std::vector<Comment> comments;

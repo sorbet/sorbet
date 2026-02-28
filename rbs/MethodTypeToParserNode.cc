@@ -17,18 +17,6 @@ namespace sorbet::rbs {
 
 namespace {
 
-core::LocOffsets adjustNameLoc(const RBSDeclaration &declaration, rbs_node_t *node) {
-    auto range = node->location->rg;
-
-    auto nameRange = node->location->children->entries[0].rg;
-    if (nameRange.start != -1 && nameRange.end != -1) {
-        range.start.char_pos = nameRange.start;
-        range.end.char_pos = nameRange.end;
-    }
-
-    return declaration.typeLocFromRange(range);
-}
-
 bool isSelfOrKernel(parser::Node *node) {
     if (parser::isa_node<parser::Self>(node)) {
         return true;
@@ -302,9 +290,10 @@ void collectArgs(const RBSDeclaration &declaration, rbs_node_list_t *field, vect
                 "Unexpected node type `{}` in function parameter list, expected `{}`",
                 rbs_node_type_name(list_node->node), "FunctionParam");
 
-        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
-        auto nameLoc = adjustNameLoc(declaration, list_node->node);
         auto node = (rbs_types_function_param_t *)list_node->node;
+
+        auto loc = declaration.typeLocFromRange(node->base.location);
+        auto nameLoc = declaration.typeLocFromRange(node->name_range);
         auto arg = RBSArg{loc, nameLoc, node->name, node->type, kind};
         args.emplace_back(arg);
     }
@@ -324,10 +313,10 @@ void collectKeywords(const RBSDeclaration &declaration, rbs_hash_t *field, vecto
                 "Unexpected node type `{}` in keyword argument value, expected `{}`",
                 rbs_node_type_name(hash_node->value), "FunctionParam");
 
-        auto nameLoc = declaration.typeLocFromRange(hash_node->key->location->rg);
-        auto loc = nameLoc.join(declaration.typeLocFromRange(hash_node->value->location->rg));
-        rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
-        rbs_types_function_param_t *valueNode = (rbs_types_function_param_t *)hash_node->value;
+        auto nameLoc = declaration.typeLocFromRange(hash_node->key->location);
+        auto loc = nameLoc.join(declaration.typeLocFromRange(hash_node->value->location));
+        auto keyNode = (rbs_ast_symbol_t *)hash_node->key;
+        auto valueNode = (rbs_types_function_param_t *)hash_node->value;
         auto arg = RBSArg{loc, nameLoc, keyNode, valueNode->type, kind};
         args.emplace_back(arg);
     }
@@ -355,7 +344,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
     auto commentLoc = declaration.commentLoc();
 
     if (node.type->type != RBS_TYPES_FUNCTION) {
-        auto errLoc = declaration.typeLocFromRange(node.type->location->rg);
+        auto errLoc = declaration.typeLocFromRange(node.type->location);
         if (auto e = ctx.beginIndexerError(errLoc, core::errors::Rewriter::RBSUnsupported)) {
             e.setHeader("Unexpected node type `{}` in method signature, expected `{}`", rbs_node_type_name(node.type),
                         "Function");
@@ -369,7 +358,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
     for (rbs_node_list_node_t *list_node = node.type_params->head; list_node != nullptr; list_node = list_node->next) {
-        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
+        auto loc = declaration.typeLocFromRange(list_node->node->location);
 
         ENFORCE(list_node->node->type == RBS_AST_TYPE_PARAM,
                 "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
@@ -393,9 +382,10 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 "Unexpected node type `{}` in rest positional argument, expected `{}`",
                 rbs_node_type_name(restPositionals), "FunctionParam");
 
-        auto loc = declaration.typeLocFromRange(restPositionals->location->rg);
-        auto nameLoc = adjustNameLoc(declaration, restPositionals);
         auto node = (rbs_types_function_param_t *)restPositionals;
+        
+        auto loc = declaration.typeLocFromRange(restPositionals->location);
+        auto nameLoc = declaration.typeLocFromRange(node->name_range);
         auto arg = RBSArg{loc, nameLoc, node->name, node->type, RBSArg::Kind::RestPositional};
         args.emplace_back(arg);
     }
@@ -413,9 +403,10 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
                 "Unexpected node type `{}` in rest keyword argument, expected `{}`", rbs_node_type_name(restKeywords),
                 "FunctionParam");
 
-        auto loc = declaration.typeLocFromRange(restKeywords->location->rg);
-        auto nameLoc = adjustNameLoc(declaration, restKeywords);
         auto node = (rbs_types_function_param_t *)restKeywords;
+
+        auto loc = declaration.typeLocFromRange(restKeywords->location);
+        auto nameLoc = declaration.typeLocFromRange(node->name_range);
         auto arg = RBSArg{loc, nameLoc, node->name, node->type, RBSArg::Kind::RestKeyword};
         args.emplace_back(arg);
     }
@@ -424,7 +415,7 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     auto *block = node.block;
     if (block) {
-        auto loc = declaration.typeLocFromRange(block->base.location->rg);
+        auto loc = declaration.typeLocFromRange(block->base.location);
         auto arg = RBSArg{loc, loc, nullptr, (rbs_node_t *)block, RBSArg::Kind::Block};
         args.emplace_back(arg);
     }
@@ -497,10 +488,10 @@ unique_ptr<parser::Node> MethodTypeToParserNode::methodSignature(const parser::N
 
     rbs_node_t *returnValue = functionType->return_type;
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
-        auto loc = declaration.typeLocFromRange(returnValue->location->rg);
+        auto loc = declaration.typeLocFromRange(returnValue->location);
         sigBuilder = parser::MK::Send0(fullTypeLoc, move(sigBuilder), core::Names::void_(), loc);
     } else {
-        auto nameLoc = declaration.typeLocFromRange(returnValue->location->rg);
+        auto nameLoc = declaration.typeLocFromRange(returnValue->location);
         auto returnType = typeToParserNode.toParserNode(returnValue, declaration);
         sigBuilder =
             parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::returns(), nameLoc, move(returnType));
