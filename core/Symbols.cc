@@ -2333,6 +2333,12 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool shapeHash) const {
     // We do not want behavior changes to trigger the slow path.
     auto flagsCopy = this->flags;
     flagsCopy.isBehaviorDefining = false;
+    if (shapeHash && this->locs().size() == 1) {
+        // Ignore isAbstract in shape hash, so that marking a class abstract can take the fast path
+        // Only applies to classes defined in a single file, because we can't use the loc "reference
+        // counting" in incremental namer to delete and recreate the class when the count reaches zero.
+        flagsCopy.isAbstract = false;
+    }
     result = mix(result, std::move(flagsCopy).serialize());
 
     result = mix(result, this->packageRegistryOwner.id());

@@ -1234,6 +1234,13 @@ private:
             symbol.data(ctx)->setSuperClass(core::Symbols::todo());
         }
 
+        // Fast path: make sure that we reset the abstract flag, so it can get re-processed.
+        // Note that we only allow incremental updates to abstract flag on fast path when that class
+        // has exactly one definition (e.g., can't have RBI loc)
+        if (symbol.data(ctx)->locs().size() == 1) {
+            symbol.data(ctx)->flags.isAbstract = false;
+        }
+
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
 
