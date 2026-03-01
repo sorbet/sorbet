@@ -142,19 +142,28 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
     ENFORCE(absl::StartsWith(filePath, rootPath));
     assertHasClientConfig();
     string_view relativeUri = filePath.substr(rootPath.length());
-    if (relativeUri.at(0) == '/') {
+    if (!relativeUri.empty() && relativeUri.at(0) == '/') {
         relativeUri = relativeUri.substr(1);
     }
 
     // Special case: Root uri is '' (happens in Monaco)
     if (clientConfig->rootUri.length() == 0) {
+        if (!opts.sorbetRoot.empty()) {
+            return absl::StrCat(opts.sorbetRoot, "/", relativeUri);
+        }
         return string(relativeUri);
     }
 
     // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
     if (clientConfig->enableSorbetURIs &&
         FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
+        if (!opts.sorbetRoot.empty()) {
+            return absl::StrCat(sorbetScheme, opts.sorbetRoot, "/", relativeUri);
+        }
         return absl::StrCat(sorbetScheme, relativeUri);
+    }
+    if (!opts.sorbetRoot.empty()) {
+        return absl::StrCat(clientConfig->rootUri, "/", opts.sorbetRoot, "/", relativeUri);
     }
     return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
 }
@@ -201,7 +210,18 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
                          path[httpsScheme.length()] == ':';
     if (isHttps) {
         return path;
-    } else if (rootPath.length() > 0) {
+    }
+
+    // Strip the root path prefix: it fills the gap between rootUri and rootPath in URI space,
+    // but is not part of Sorbet's internal file paths.
+    if (!isSorbetURI && !opts.sorbetRoot.empty()) {
+        string prefixWithSlash = opts.sorbetRoot + "/";
+        if (absl::StartsWith(path, prefixWithSlash)) {
+            path = path.substr(prefixWithSlash.length());
+        }
+    }
+
+    if (rootPath.length() > 0) {
         return absl::StrCat(rootPath, "/", path);
     } else {
         // Special case: Folder is '' (current directory)

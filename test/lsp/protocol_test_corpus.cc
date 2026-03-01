@@ -745,6 +745,34 @@ TEST_CASE_FIXTURE(ProtocolTest, "MatchesFilesWithUrlEncodedNames") {
     REQUIRE_EQ(rbi, rbiURLEncoded);
 }
 
+// Tests that --sorbet-root correctly adjusts URIs when the editor's workspace root is an
+// ancestor of Sorbet's input directory (e.g., Homebrew's sorbet dir at Library/Homebrew/sorbet).
+TEST_CASE_FIXTURE(ProtocolTest, "SorbetDirAdjustsUris") {
+    // Simulate: editor opens "/Users/jvilk/stripe" (rootUri = file:///Users/jvilk/stripe)
+    // but Sorbet runs against "/Users/jvilk/stripe/pay-server" (a subdirectory).
+    // --sorbet-root=pay-server fills the gap.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->sorbetRoot = "pay-server";
+    resetState(opts);
+
+    auto parentRootUri = fmt::format("file://{}", rootPath.substr(0, rootPath.rfind('/')));
+    auto initResponses =
+        sorbet::test::initializeLSP(rootPath, parentRootUri, *lspWrapper, nextId, false, false, std::nullopt);
+    updateDiagnostics(initResponses);
+
+    // Open a file; with the prefix, Sorbet maps the URI to the correct internal path.
+    string fileContents = "# typed: true\n"
+                          "def myMethod; end;\n";
+    assertErrorDiagnostics(send(*openFile("pay-server/foo.rb", fileContents)), {});
+
+    // "Go to definition" on `myMethod` should return a URI that includes the "pay-server/" prefix.
+    auto definitions = getDefinitions("pay-server/foo.rb", 1, 5);
+    REQUIRE_EQ(definitions.size(), 1);
+    auto &loc = definitions.at(0);
+    // URI must include the prefix so the editor can open the correct file.
+    REQUIRE(absl::StartsWith(loc->uri, fmt::format("{}/pay-server/", parentRootUri)));
+}
+
 // Tests that Sorbet does not crash when a file URI falls outside of the workspace.
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
     const bool supportsMarkdown = false;
