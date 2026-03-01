@@ -540,13 +540,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "as `sorbet:` URIs to clients that understand them.",
         cxxopts::value<vector<string>>(), "<path>");
     options.add_options(section)(
-        "sorbet-root",
-        "Relative path from the project/repository root to Sorbet's input directory. "
-        "Set this when the editor's workspace root is an ancestor of Sorbet's input directory "
-        "(e.g., if the editor opens `/proj` but Sorbet runs against `/proj/Library/Homebrew`, "
-        "pass `--sorbet-root=Library/Homebrew`).",
-        cxxopts::value<string>()->default_value(empty.sorbetRoot), "<path>");
-    options.add_options(section)(
         "forcibly-silence-lsp-multiple-dir-error",
         "Allow the LSP to start with multiple `--dir` options by silencing the error. (WARNING: This flag does not "
         "address the known issues with multiple directory support in LSP mode. You are likely to encounter unexpected "
@@ -1049,12 +1042,6 @@ void readOptions(Options &opts,
                 }
                 opts.lspDirsMissingFromClient.push_back(pNormalized);
             }
-        }
-
-        opts.sorbetRoot = raw["sorbet-root"].as<string>();
-        // Normalize: strip any trailing slashes
-        while (!opts.sorbetRoot.empty() && opts.sorbetRoot.back() == '/') {
-            opts.sorbetRoot.pop_back();
         }
 
         opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
