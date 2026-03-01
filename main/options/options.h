@@ -294,6 +294,11 @@ struct Options {
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
     std::vector<std::string> lspDirsMissingFromClient;
+    // Relative path from the project/repository root to Sorbet's input directory.
+    // Set this when the editor opens an ancestor directory of Sorbet's working directory
+    // (e.g., if the editor opens `/proj` but Sorbet runs against `/proj/Library/Homebrew`,
+    // pass `--sorbet-root=Library/Homebrew`).
+    std::string sorbetRoot;
     // Path to the executable used for document formatting
     std::string rubyfmtPath = "rubyfmt";
     // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
