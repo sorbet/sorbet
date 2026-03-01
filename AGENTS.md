@@ -25,10 +25,10 @@ bazel test //... --config=dbg --test_output=errors
 bazel test //test:test_PosTests/testdata/path/to/<name>
 bazel test //test:test_LSPTests/testdata/lsp/<name>
 
-# Format C++ files
+# Lint/format C++ files (run after editing any .cc/.h files)
 tools/scripts/format_cxx.sh
 
-# Format Bazel BUILD files
+# Lint/format Bazel BUILD files (run after editing any BUILD files)
 tools/scripts/format_build_files.sh
 
 # Generate compile_commands.json for editor tooling
