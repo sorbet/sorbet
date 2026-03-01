@@ -745,17 +745,15 @@ TEST_CASE_FIXTURE(ProtocolTest, "MatchesFilesWithUrlEncodedNames") {
     REQUIRE_EQ(rbi, rbiURLEncoded);
 }
 
-// Tests that --sorbet-root correctly adjusts URIs when the editor's workspace root is an
+// Tests that Sorbet automatically adjusts URIs when the editor's workspace root is an
 // ancestor of Sorbet's input directory (e.g., Homebrew's sorbet dir at Library/Homebrew/sorbet).
 TEST_CASE_FIXTURE(ProtocolTest, "SorbetDirAdjustsUris") {
     // Simulate: editor opens "/Users/jvilk/stripe" (rootUri = file:///Users/jvilk/stripe)
     // but Sorbet runs against "/Users/jvilk/stripe/pay-server" (a subdirectory).
-    // --sorbet-root=pay-server fills the gap.
-    auto opts = make_shared<realmain::options::Options>();
-    opts->sorbetRoot = "pay-server";
-    resetState(opts);
-
-    auto parentRootUri = fmt::format("file://{}", rootPath.substr(0, rootPath.rfind('/')));
+    // Sorbet auto-detects the "pay-server" prefix from the rootUri vs rootPath relationship.
+    auto slashPos = rootPath.rfind('/');
+    REQUIRE_NE(slashPos, string::npos);
+    auto parentRootUri = fmt::format("file://{}", rootPath.substr(0, slashPos));
     auto initResponses =
         sorbet::test::initializeLSP(rootPath, parentRootUri, *lspWrapper, nextId, false, false, std::nullopt);
     updateDiagnostics(initResponses);
@@ -771,6 +769,42 @@ TEST_CASE_FIXTURE(ProtocolTest, "SorbetDirAdjustsUris") {
     auto &loc = definitions.at(0);
     // URI must include the prefix so the editor can open the correct file.
     REQUIRE(absl::StartsWith(loc->uri, fmt::format("{}/pay-server/", parentRootUri)));
+
+    // Round-trip: the returned URI should be resolvable back to the file's contents,
+    // confirming that remoteName2Local correctly strips the prefix on the way in.
+    REQUIRE_EQ(readFile(loc->uri), fileContents);
+}
+
+// Tests that sorbet: URIs also include the sorbetRootPrefix, and that remoteName2Local
+// correctly strips it (regression for the !isSorbetURI guard bug).
+TEST_CASE_FIXTURE(ProtocolTest, "SorbetDirAdjustsUrisForSorbetScheme") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+
+    // No resetState(): we need to modify opts on the existing wrapper before initialization.
+    lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
+
+    auto slashPos = rootPath.rfind('/');
+    REQUIRE_NE(slashPos, string::npos);
+    auto parentRootUri = fmt::format("file://{}", rootPath.substr(0, slashPos));
+    assertErrorDiagnostics(sorbet::test::initializeLSP(rootPath, parentRootUri, *lspWrapper, nextId, false, false,
+                                                       make_optional(move(initOptions))),
+                           {});
+
+    string fileContents = "# typed: true\n"
+                          "def myMethod; end;\n";
+    assertErrorDiagnostics(send(*openFile("pay-server/folder/foo.rb", fileContents)), {});
+
+    // Definition of myMethod is in a lspDirsMissingFromClient directory, so the URI should
+    // use the sorbet: scheme AND include the "pay-server/" prefix.
+    auto definitions = getDefinitions("pay-server/folder/foo.rb", 1, 5);
+    REQUIRE_EQ(definitions.size(), 1);
+    auto &loc = definitions.at(0);
+    REQUIRE_EQ(loc->uri, "sorbet:pay-server/folder/foo.rb");
+
+    // Round-trip via readFile: exercises remoteName2Local for sorbet: URIs with the prefix.
+    // Without the bug fix this would return empty because the prefix would be doubled.
+    REQUIRE_EQ(readFile(loc->uri), fileContents);
 }
 
 // Tests that Sorbet does not crash when a file URI falls outside of the workspace.
