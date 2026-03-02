@@ -546,9 +546,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.drainErrors(*gs);
     }
 
-    handler.addObserved(*gs, "symbol-table", [&]() { return gs->toString(); });
-    handler.addObserved(*gs, "symbol-table-raw", [&]() { return gs->showRaw(); });
-
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
@@ -701,6 +698,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             },
             addNewline);
     }
+
+    handler.addObserved(*gs, "symbol-table", [&]() { return gs->toString(); });
+    handler.addObserved(*gs, "symbol-table-raw", [&]() { return gs->showRaw(); });
 
     handler.checkExpectations();
 
