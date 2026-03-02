@@ -1,6 +1,22 @@
 --gen-packages can only be can only be used in --sorbet-packages mode
 --gen-packages can not be used when --lsp is also enabled
 ------- Non package directed -------
+A/__package.rb:3: `A` is missing imports https://srb.help/3734
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    A/__package.rb:5: Inserted `import G`
+     5 |  layer 'app'
+                     ^
+
+G/__package.rb:3: `G` is missing exports https://srb.help/3734
+     3 |class G < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    G/__package.rb:8: Inserted `export G::ANOTHER_CONSTANT_FROM_G`
+     8 |
+        ^
+
 B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
      3 |class B < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
@@ -64,7 +80,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 7
+Errors: 9
 # typed: strict
 
 class B < PackageSpec
@@ -147,6 +163,19 @@ D/__package.rb:3: `D` is missing exports https://srb.help/3734
      7 |  import B
                   ^
 
+A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
+     5 |  puts G::ANOTHER_CONSTANT_FROM_G
+               ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
+    16 |module T
+        ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/gc.rbi#L12: `GC` defined here
+    12 |module GC
+        ^^^^^^^^^
+    A/constants.rb:3: `A` defined here
+     3 |module A
+        ^^^^^^^^
+
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
@@ -164,7 +193,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 7
+Errors: 8
 # typed: strict
 
 class B < PackageSpec
