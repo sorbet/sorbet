@@ -531,6 +531,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     }
 
+    vector<ast::ParsedFile> stratumFiles;
+    for (auto &stratum : realmain::pipeline::computePackageStrata(*gs, trees, filesSpan, opts)) {
+        stratumFiles.clear();
+        stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
+        absl::c_move(stratum.packageFiles, back_inserter(stratumFiles));
+
     auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers, handler);
     validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
@@ -650,6 +656,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             resolvedTree.tree.reset();
             handler.drainErrors(*gs);
         }
+    }
+
     }
 
     for (auto &extension : gs->semanticExtensions) {
