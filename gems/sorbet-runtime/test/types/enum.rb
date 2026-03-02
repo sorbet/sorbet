@@ -133,6 +133,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
         CardSuit.from_serialized('whoopsies')
       end
     end
+
+    it 'allows deserialized enum values to be used' do
+      assert_equal(CardSuit::HEART, CardSuit.from_serialized(CardSuit::HEART))
+    end
   end
 
   describe 'has_serialized?' do
@@ -161,6 +165,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     it 'returns nil for an invalid serialization' do
       suit = CardSuit.try_deserialize('blerg')
       assert_nil(suit)
+    end
+
+    it 'allows deserialized enum values to be used' do
+      assert_equal(CardSuit::HEART, CardSuit.try_deserialize(CardSuit::HEART))
     end
   end
 
