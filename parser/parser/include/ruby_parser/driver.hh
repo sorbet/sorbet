@@ -392,6 +392,12 @@ public:
 
     const char *const token_name(token_type type);
 
+    // Find the latest diagnostic reported at `location` with `type` and update it to include the
+    // specified `extra_location`.
+    void enrich_diagnostic_at(dclass type, diagnostic::range location, diagnostic::range extra_location);
+
+    void enrich_rparen_diagnostic(ruby_parser::token_t rparen, ruby_parser::location extra_location);
+
     // We've patched the lexer to break compatibility with Ruby w.r.t. method calls
     // for methods sharing names with ruby reserved words. See this PR:
     //   https://github.com/sorbet/sorbet/pull/1993
