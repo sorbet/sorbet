@@ -382,7 +382,6 @@ void buildPackageDB(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl
         return;
     }
 
-    // Packager runs over all trees.
     packager::Packager::buildPackageDB(gs, *workers, trees, nonPackageFiles);
     if (handler.hasExpectation("package-tree")) {
         fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
@@ -402,7 +401,6 @@ void validatePackagedFiles(core::GlobalState &gs, unique_ptr<WorkerPool> &worker
         return;
     }
 
-    // Packager runs over all trees.
     packager::Packager::validatePackagedFiles(gs, *workers, trees);
     if (handler.hasExpectation("package-tree")) {
         fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
@@ -491,11 +489,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(*gs, inputPackageFiles, handler, test, assertions);
+        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
+        buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     }
 
     auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
-    name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
-    buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
