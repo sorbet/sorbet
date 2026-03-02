@@ -104,6 +104,7 @@ enum class Phase {
     NAMER,
     PACKAGER,
     RESOLVER,
+    VISIBILITY_CHECKER,
     CFG,
     INFERENCER,
 };
