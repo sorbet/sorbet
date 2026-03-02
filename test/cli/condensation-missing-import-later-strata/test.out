@@ -1,0 +1,25 @@
+a/foo.rb:4: Unable to resolve constant `C` https://srb.help/5002
+     4 |  puts C::Foo
+               ^
+  Did you mean `T`? Use `-a` to autocorrect
+    a/foo.rb:4: Replace with `T`
+     4 |  puts C::Foo
+               ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
+    16 |module T
+        ^^^^^^^^
+  Did you mean `GC`? Use `-a` to autocorrect
+    a/foo.rb:4: Replace with `GC`
+     4 |  puts C::Foo
+               ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/gc.rbi#L12: `GC` defined here
+    12 |module GC
+        ^^^^^^^^^
+  Did you mean `A`? Use `-a` to autocorrect
+    a/foo.rb:4: Replace with `A`
+     4 |  puts C::Foo
+               ^
+    a/foo.rb:3: `A` defined here
+     3 |class A::Foo
+              ^
+Errors: 1
