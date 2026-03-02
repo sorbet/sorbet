@@ -702,8 +702,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     handler.addObserved(*gs, "symbol-table", [&]() { return gs->toString(); });
     handler.addObserved(*gs, "symbol-table-raw", [&]() { return gs->showRaw(); });
 
-    handler.checkExpectations();
-
     if (!test.minimizeRBI.empty()) {
         auto gsForMinimize = emptyGs->deepCopyGlobalState();
         auto opts = realmain::options::Options{};
@@ -720,6 +718,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(
             *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
+
+    handler.checkExpectations();
 
     // Check warnings and errors
     {
