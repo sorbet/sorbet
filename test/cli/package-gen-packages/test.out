@@ -30,12 +30,6 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
      8 |  import D
                   ^
 
-D/__package.rb:7: Package `B` includes explicit visibility modifiers and cannot be imported from `D` https://srb.help/3723
-     7 |  import B
-          ^^^^^^^^
-  Note:
-    Please consult with the owning team before adding a `visible_to` line to the package `B`
-
 D/__package.rb:3: `D` is missing exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
@@ -63,7 +57,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 7
+Errors: 6
 # typed: strict
 
 class B < PackageSpec
