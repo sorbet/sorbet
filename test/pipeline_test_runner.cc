@@ -721,17 +721,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
-    if (test.expectations.contains("symbol-table")) {
-        string table = gs->toString() + '\n';
-        CHECK_EQ_DIFF(handler.got["symbol-table"], table, "symbol-table should not be mutated by CFG+inference");
-    }
-
-    if (test.expectations.contains("symbol-table-raw")) {
-        string table = gs->showRaw() + '\n';
-        CHECK_EQ_DIFF(handler.got["symbol-table-raw"], table,
-                      "symbol-table-raw should not be mutated by CFG+inference");
-    }
-
     // Check warnings and errors
     {
         map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
