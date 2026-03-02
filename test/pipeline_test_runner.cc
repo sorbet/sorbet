@@ -554,23 +554,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
     }
 
-    if (!test.minimizeRBI.empty()) {
-        auto gsForMinimize = emptyGs->deepCopyGlobalState();
-        auto opts = realmain::options::Options{};
-        opts.cacheSensitiveOptions.usePrismParser = (parser == realmain::options::Parser::PRISM);
-        auto minimizeRBI = test.folder + test.minimizeRBI;
-        realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
-        auto printerConfig = realmain::options::PrinterConfig{};
-        printerConfig.enabled = true;
-        printerConfig.outputPath = "/dev/null"; // tricks PrinterConfig::print into buffering
-        printerConfig.supportsFlush = true;
-        realmain::Minimize::writeDiff(*gs, *gsForMinimize, printerConfig);
-
-        auto addNewline = false;
-        handler.addObserved(
-            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
-    }
-
     // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better work
     // distribution
     fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
@@ -720,6 +703,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     handler.checkExpectations();
+
+    if (!test.minimizeRBI.empty()) {
+        auto gsForMinimize = emptyGs->deepCopyGlobalState();
+        auto opts = realmain::options::Options{};
+        opts.cacheSensitiveOptions.usePrismParser = (parser == realmain::options::Parser::PRISM);
+        auto minimizeRBI = test.folder + test.minimizeRBI;
+        realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
+        auto printerConfig = realmain::options::PrinterConfig{};
+        printerConfig.enabled = true;
+        printerConfig.outputPath = "/dev/null"; // tricks PrinterConfig::print into buffering
+        printerConfig.supportsFlush = true;
+        realmain::Minimize::writeDiff(*gs, *gsForMinimize, printerConfig);
+
+        auto addNewline = false;
+        handler.addObserved(
+            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
+    }
 
     if (test.expectations.contains("symbol-table")) {
         string table = gs->toString() + '\n';
