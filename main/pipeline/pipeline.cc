@@ -1698,7 +1698,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
 
 // ----- other ----------------------------------------------------------------
 
-void printFileTable(core::GlobalState &gs, const options::Options &opts,
+void printGlobalTables(core::GlobalState &gs, const options::Options &opts,
                     const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
