@@ -86,5 +86,114 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe 'T::Utils.unload_const' do
+      it 'releases const references from T::Private::Methods' do
+        foo_module = Module.new do
+          extend T::Sig
+
+          sig { void }
+          def self.method_1; end
+
+          sig { void }
+          private_class_method def self.method_2; end
+
+          sig { void }
+          def method_3; end
+
+          protected
+
+          sig { void }
+          def method_4; end
+
+          private
+
+          sig { void }
+          def method_5; end
+        end
+        bar_class = Class.new do
+          extend T::Sig
+
+          class << self
+            extend T::Sig
+
+            sig { void }
+            def method_6; end
+          end
+
+          sig { void }
+          def self.method_7; end
+
+          sig { void }
+          private_class_method def self.method_8; end
+
+          sig { void }
+          def method_9; end
+
+          private
+
+          sig { returns(T.untyped) }
+          def method_10; end
+
+          protected
+
+          sig { void }
+          def method_11; end
+        end
+        self.class.const_set(:Foo, foo_module)
+        foo_module.const_set(:Bar, bar_class)
+
+        mod = self.class::Foo
+        inner_class = self.class::Foo::Bar
+
+        mod_id = mod.object_id
+        mod_singleton_class_id = mod.singleton_class.object_id
+        inner_class_id = inner_class.object_id
+        inner_class_singleton_class_id = inner_class.singleton_class.object_id
+
+        method_ids = [
+          "#{mod_singleton_class_id}#method_1",
+          "#{mod_singleton_class_id}#method_2",
+          "#{mod_id}#method_3",
+          "#{mod_id}#method_4",
+          "#{mod_id}#method_5",
+          "#{inner_class_singleton_class_id}#method_6",
+          "#{inner_class_singleton_class_id}#method_7",
+          "#{inner_class_singleton_class_id}#method_8",
+          "#{inner_class_id}#method_9",
+          "#{inner_class_id}#method_10",
+          "#{inner_class_id}#method_11",
+        ]
+        inner_singleton_class = inner_class.singleton_class
+
+        installed_hooks_mods = T::Private::Methods.instance_variable_get(:@installed_hooks)[mod]
+        installed_hooks_inner_classes = T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_class]
+        installed_hooks_inner_singleton_classes = T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_singleton_class]
+
+        assert(!installed_hooks_mods.nil?)
+        assert(!installed_hooks_inner_classes.nil?)
+        assert(!installed_hooks_inner_singleton_classes.nil?)
+        method_ids.each do |method_id|
+          sig_wrappers = T::Private::Methods.instance_variable_get(:@sig_wrappers)[method_id]
+          assert(!sig_wrappers.nil?, "Expected to find sig wrapper for #{method_id}")
+        end
+
+        T::Utils.unload_const(self.class::Foo)
+
+        installed_hooks_mods = T::Private::Methods.instance_variable_get(:@installed_hooks)[mod]
+        installed_hooks_inner_classes = T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_class]
+        installed_hooks_inner_singleton_classes = T::Private::Methods.instance_variable_get(:@installed_hooks)[inner_singleton_class]
+
+        assert_nil(installed_hooks_mods)
+        assert_nil(installed_hooks_inner_classes)
+        assert_nil(installed_hooks_inner_singleton_classes)
+        method_ids.each do |method_id|
+          sig_wrappers = T::Private::Methods.instance_variable_get(:@sig_wrappers)[method_id]
+          assert_nil(sig_wrappers)
+        end
+        # Clean up the constant to avoid polluting the test environment
+        self.class.send(:remove_const, :Foo) if self.class.const_defined?(:Foo)
+      end
+    end
   end
 end

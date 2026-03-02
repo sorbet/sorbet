@@ -165,6 +165,20 @@ module T::Utils
     end
   end
 
+  #
+  # Unload a constant and remove all associated sigs/hooks.
+  # Avoiding leaking memory when reloading code in development mode when
+  # using Zeitwerk or other code reloader.
+  #
+  # @param [Module] mod the module to unload
+  # @return [void]
+  #
+  # @example T::Utils.unload_const(Foo)
+  #
+  def self.unload_const(mod)
+    T::Private::Methods.unload_const(mod)
+  end
+
   module Nilable
     # :is_union_type, T::Boolean: whether the type is an T::Types::Union type
     # :non_nilable_type, Class: if it is an T.nilable type, the corresponding underlying type; otherwise, nil.
