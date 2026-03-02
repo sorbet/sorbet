@@ -28,6 +28,7 @@ public:
     // [:Foo, :Bar] => :Foo_Bar
     // (might not exist)
     static MangledName lookupMangledName(const core::GlobalState &gs, const std::vector<std::string> &parts);
+    static MangledName lookupMangledName2(const core::GlobalState &gs, const std::vector<std::string> &parts);
 
     bool operator==(const MangledName &rhs) const {
         return owner == rhs.owner;

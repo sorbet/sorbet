@@ -22,4 +22,16 @@ a/foo.rb:4: Unable to resolve constant `C` https://srb.help/5002
     a/foo.rb:3: `A` defined here
      3 |class A::Foo
               ^
-Errors: 1
+
+a/foo.rb:4: `Sorbet::Private::Static::<StubModule>` resolves but is not exported from `C` and `C` is not imported https://srb.help/3718
+     4 |  puts C::Foo
+               ^^^^^^
+  `Sorbet::Private::Static::<StubModule>` does not define behavior and thus will not be automatically exported
+    ???:
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+  Autocorrect: Use `-a` to autocorrect
+    a/__package.rb:3: Insert `import C`
+     3 |class A < PackageSpec
+                             ^
+Errors: 2

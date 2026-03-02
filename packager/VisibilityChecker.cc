@@ -514,6 +514,25 @@ public:
         auto loc = litSymbol.loc(ctx);
 
         auto otherFile = loc.file();
+        auto mangledName = core::packages::MangledName(core::Symbols::noClassOrModule());
+        if (litSymbol == core::Symbols::StubModule()) {
+            auto parts = vector<string>{};
+            auto *curr = &lit;
+            while (true) {
+                auto placeholder = curr->original()->cnst.show(ctx);
+                parts.insert(parts.begin(), placeholder);
+                if (ast::isa_tree<ast::EmptyTree>(curr->original()->scope)) {
+                    break;
+                }
+
+                curr = ast::cast_tree<ast::ConstantLit>(curr->original()->scope);
+            }
+            mangledName = core::packages::MangledName::lookupMangledName2(ctx, parts);
+            if (mangledName.exists()) {
+                otherFile = ctx.state.packageDB().getPackageInfo(mangledName).file;
+            }
+        }
+
         if (!otherFile.exists()) {
             return;
         }
@@ -532,6 +551,9 @@ public:
 
         // no need to check visibility for these cases
         auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
+        if (mangledName.exists()) {
+            otherPackage = mangledName;
+        }
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }

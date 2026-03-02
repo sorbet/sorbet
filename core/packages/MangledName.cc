@@ -23,4 +23,20 @@ MangledName MangledName::lookupMangledName(const GlobalState &gs, const vector<s
     return MangledName(owner);
 }
 
+MangledName MangledName::lookupMangledName2(const GlobalState &gs, const vector<string> &parts) {
+    auto owner = core::Symbols::PackageSpecRegistry();
+    for (auto part : parts) {
+        auto member = owner.data(gs)->findMember(gs, gs.lookupNameConstant(part));
+        if (!member.exists() || !member.isClassOrModule()) {
+            if (owner == core::Symbols::PackageSpecRegistry()) {
+                return core::packages::MangledName(core::Symbols::noClassOrModule());
+            } else {
+                return MangledName(owner);
+            }
+        }
+        owner = member.asClassOrModuleRef();
+    }
+    return MangledName(owner);
+}
+
 } // namespace sorbet::core::packages
