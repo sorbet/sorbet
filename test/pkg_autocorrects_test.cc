@@ -1275,4 +1275,75 @@ TEST_CASE("Add visible_to that goes in the middle of existing entries") {
     CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
 }
 
+TEST_CASE("Add visible_to tests to package with no existing visible_to entries") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  visible_to 'tests'\n"
+                      "end\n";
+
+    auto parsedFiles = enterPackages(gs, {{"my_package/__package.rb", pkg_source}});
+    auto &myPkg = packageInfoFor(gs, parsedFiles[0].file);
+    ENFORCE(myPkg.exists());
+
+    auto addVisibleToTests = myPkg.addVisibleToTests(gs);
+    ENFORCE(addVisibleToTests, "Expected to get an autocorrect from `addVisibleToTests`");
+    auto replaced = applySuggestion(gs, *addVisibleToTests);
+    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
+}
+
+TEST_CASE("Add visible_to tests to package with existing visible_to entries") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  visible_to ExamplePackage\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  visible_to ExamplePackage\n"
+                      "  visible_to 'tests'\n"
+                      "end\n";
+
+    auto parsedFiles =
+        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(myPkg.exists());
+
+    auto addVisibleToTests = myPkg.addVisibleToTests(gs);
+    ENFORCE(addVisibleToTests, "Expected to get an autocorrect from `addVisibleToTests`");
+    auto replaced = applySuggestion(gs, *addVisibleToTests);
+    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
+}
+
+TEST_CASE("Add visible_to tests to package with imports and exports but no visible_to") {
+    core::GlobalState gs(errorQueue);
+    makeDefaultPackagerGlobalState(gs);
+
+    string pkg_source = "class MyPackage < PackageSpec\n"
+                        "  import ExamplePackage\n"
+                        "  export MyPackage::Foo\n"
+                        "end\n";
+
+    string expected = "class MyPackage < PackageSpec\n"
+                      "  import ExamplePackage\n"
+                      "  export MyPackage::Foo\n"
+                      "  visible_to 'tests'\n"
+                      "end\n";
+
+    auto parsedFiles =
+        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
+    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
+    ENFORCE(myPkg.exists());
+
+    auto addVisibleToTests = myPkg.addVisibleToTests(gs);
+    ENFORCE(addVisibleToTests, "Expected to get an autocorrect from `addVisibleToTests`");
+    auto replaced = applySuggestion(gs, *addVisibleToTests);
+    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
+}
+
 } // namespace sorbet::test

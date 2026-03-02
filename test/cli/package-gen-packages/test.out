@@ -34,7 +34,8 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
      3 |class E < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    E/__package.rb:7: Inserted `visible_to C`
+    E/__package.rb:7: Inserted `visible_to 'tests'
+      visible_to C`
      7 |  export E::CONSTANT_FROM_E
                                    ^
 
@@ -44,13 +45,14 @@ D/__package.rb:7: Package `B` includes explicit visibility modifiers and cannot 
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `B`
 
-D/__package.rb:3: `D` is missing exports https://srb.help/3734
+D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     D/__package.rb:7: Inserted `export D::CONSTANT_FROM_D
       export D::ClassFromD
-      export D::EnumFromD`
+      export D::EnumFromD
+      test_import E`
      7 |  import B
                   ^
 
@@ -106,6 +108,7 @@ class D < PackageSpec
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
+  test_import E
 end
 # typed: strict
 
@@ -114,5 +117,6 @@ class E < PackageSpec
   layer 'util'
 
   export E::CONSTANT_FROM_E
+  visible_to 'tests'
   visible_to C
 end
