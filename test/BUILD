@@ -411,17 +411,12 @@ pipeline_tests(
             # Additional failing Prism tests - various location and desugaring differences
             "testdata/compiler/block_iseq_names.rb",
             "testdata/compiler/exceptions/raise_across_interop__*.rb",
-            "testdata/compiler/exceptions/raise_across_interop.rb",
             "testdata/compiler/exceptions/rescue_in_block.rb",
             "testdata/compiler/intrinsics/array_compact.rb",
             "testdata/compiler/intrinsics/array_compact_bang.rb",
             "testdata/compiler/intrinsics/array_reject_bang.rb",
             "testdata/compiler/intrinsics/hash_merge.rb",
             "testdata/compiler/intrinsics/hash_merge_bang.rb",
-            "testdata/compiler/regression/finalizer__*.rb",
-            "testdata/compiler/regression/finalizer.rb",
-            "testdata/compiler/string_interpolate_space.rb",
-            "testdata/compiler/t_enum_absurd.rb",
             "testdata/core/fuzz_unparsable.rb",
             "testdata/desugar/fuzz_block_pass.rb",
             "testdata/desugar/fuzz_break_do_end.rb",
@@ -429,12 +424,9 @@ pipeline_tests(
             "testdata/desugar/pattern_matching_pins.rb",
             "testdata/infer/exhaustiveness.rb",
             "testdata/infer/fuzz_uninitialized_vars.rb",
-            "testdata/infer/generics/option.rb",
-            "testdata/infer/isa_bug.rb",
             "testdata/infer/missing_method_name.rb",
             "testdata/infer/no_when_t_forwarder.rb",
             "testdata/infer/or_and_conditional_branch.rb",
-            "testdata/infer/t_class_any.rb",
             "testdata/infer/t_proc_metatype.rb",
             "testdata/lsp/code_actions/extract_variable_multiple/case.rb",
             "testdata/lsp/code_actions/extract_variable_single/invalid.rb",
@@ -458,7 +450,6 @@ pipeline_tests(
             "testdata/lsp/show_symbol.rb",
             "testdata/namer/duplicate_field_error.rb",
             "testdata/parser/bad_argument_crash.rb",
-            "testdata/parser/chained_sends_lots.rb",
             "testdata/parser/compare_overload_parse_error.rb",
             "testdata/parser/crash_case_empty_var.rb",
             "testdata/parser/curly_braces_block_pass.rb",
@@ -472,12 +463,7 @@ pipeline_tests(
             "testdata/resolver/bad_sealed_class_absurd__*.rb",
             "testdata/resolver/it_param_rspec_method.rb",
             "testdata/resolver/sig_misc.rb",
-            "testdata/resolver/empty_sealed.rb",
-            "testdata/resolver/sealed_class.rb",
-            "testdata/resolver/sealed_concrete_parent_class.rb",
-            "testdata/resolver/sealed_module.rb",
             "testdata/rewriter/initializer_no_arg_with_local.rb",
-            "testdata/rewriter/t_enum_exhaustiveness.rb",
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "testdata/desugar/case.rb",
@@ -553,19 +539,8 @@ pipeline_tests(
             "prism_regression/**/*.exp",
         ],
         exclude = [
-            # Location differences in error recovery - Prism provides tighter/different
-            # location spans for ErrorNode compared to Whitequark:
-            # - `x =` (missing RHS) has different Assign/ErrorNode locations
-            "prism_regression/error_recovery/assign.rb",
-            # - `1 +` (missing operand) has different Send/ErrorNode locations
-            "prism_regression/invalid/missing_node.rb",
-            # - `/foo` (unterminated regex) - Prism includes content up to EOF,
-            #   Whitequark produces empty regex
-            "prism_regression/invalid/unterminated_regex.rb",
-
-            # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
+            # related to ruby 3.4 syntax changes
             "prism_regression/assign_to_index.rb",
-            "prism_regression/literal_hash.rb",
             "prism_regression/multi_target.rb",
             "prism_regression/call_block_param.rb",
         ],
