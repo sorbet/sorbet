@@ -353,7 +353,7 @@ BasicBlock *CFGBuilder::handleSpecialMethods(CFGContext cctx, BasicBlock *curren
             if (method_new.data(cctx.ctx)->owner == core::Symbols::Class()) {
                 if (auto e = cctx.ctx.beginError(s.loc, core::errors::CFG::AbstractClassInstantiated)) {
                     auto symbolName = id->symbol().show(cctx.ctx);
-                    e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
+                    e.setHeader("Attempting to instantiate abstract class `{}`", symbolName);
                     e.addErrorLine(id->symbol().loc(cctx.ctx), "`{}` defined here", symbolName);
                 }
             }
