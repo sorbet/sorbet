@@ -478,25 +478,22 @@ public:
         return fileType != FileType::ProdFile;
     }
 
-    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+    void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
             constantAssignmentDefinitions.insert(lhs.get());
         }
     }
 
-    void postTransformAssign(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+    void postTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
             constantAssignmentDefinitions.erase(lhs.get());
         }
     }
 
-    void postTransformConstantLit(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
-        if (constantAssignmentDefinitions.contains(tree.get())) {
+    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
+        if (constantAssignmentDefinitions.contains(&lit)) {
             return;
         }
 
@@ -771,8 +768,7 @@ public:
         }
     }
 
-    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
         if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             auto &superClass = original.ancestors[0];
             ast::ConstTreeWalk::apply(ctx, *this, superClass);
