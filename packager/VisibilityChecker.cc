@@ -219,10 +219,10 @@ class PropagateVisibility final {
         explicitlyExported.clear();
     }
 
-    bool ignoreRBIExportEnforcement(core::MutableContext ctx, core::FileRef file) {
-        const auto path = file.data(ctx).path();
+    bool ignoreRBIExportEnforcement(const core::GlobalState &gs, core::FileRef file) {
+        const auto path = file.data(gs).path();
 
-        return absl::c_any_of(ctx.state.packageDB().skipRBIExportEnforcementDirs(),
+        return absl::c_any_of(gs.packageDB().skipRBIExportEnforcementDirs(),
                               [&](const string &dir) { return absl::StartsWith(path, dir); });
     }
 
@@ -276,6 +276,59 @@ class PropagateVisibility final {
         }
     }
 
+    vector<string> computeRecursiveExports(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
+        vector<core::ClassOrModuleRef> work{klass};
+        vector<string> lines;
+
+        while (!work.empty()) {
+            auto sym = work.back();
+            work.pop_back();
+
+            for (auto [name, member] : sym.data(gs)->members()) {
+                // We only export classes, modules, or fields.
+                if (member.isClassOrModule()) {
+                    auto klass = member.asClassOrModuleRef();
+
+                    if (klass.data(gs)->package != this->package.mangledName()) {
+                        continue;
+                    }
+
+                    if (klass.data(gs)->isSingletonClass(gs)) {
+                        continue;
+                    }
+
+                    // If we encounter another namespace with no real declaration, continue exporting
+                    // its members.
+                    if (!klass.data(gs)->flags.isDeclared) {
+                        work.push_back(klass);
+                        continue;
+                    }
+                } else if (member.isFieldOrStaticField()) {
+                    auto memberPkg = member.enclosingClass(gs).data(gs)->package;
+                    if (memberPkg != this->package.mangledName()) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+
+                // We can't export symbols that are only defined in RBI files
+                bool allRBI = absl::c_all_of(member.locs(gs), [&gs, this](const core::Loc &loc) {
+                    return loc.file().data(gs).isRBI() && !ignoreRBIExportEnforcement(gs, loc.file());
+                });
+                if (allRBI) {
+                    continue;
+                }
+
+                lines.emplace_back(fmt::format("export {}", member.show(gs)));
+            }
+        }
+
+        fast_sort(lines);
+
+        return lines;
+    }
+
     PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
 
 public:
@@ -321,56 +374,10 @@ public:
                     if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
                         e.setHeader("Constant `{}` lacks a declaration and cannot be exported", sym.show(ctx));
 
-                        vector<core::ClassOrModuleRef> work{klass};
-                        vector<string> lines;
-
-                        while (!work.empty()) {
-                            auto sym = work.back();
-                            work.pop_back();
-
-                            for (auto [name, member] : sym.data(ctx)->members()) {
-                                // We only export classes, modules, or fields.
-                                if (member.isClassOrModule()) {
-                                    auto klass = member.asClassOrModuleRef();
-
-                                    if (klass.data(ctx)->package != this->package.mangledName()) {
-                                        continue;
-                                    }
-
-                                    if (klass.data(ctx)->isSingletonClass(ctx)) {
-                                        continue;
-                                    }
-
-                                    // If we encounter another namespace with no real declaration, continue exporting
-                                    // its members.
-                                    if (!klass.data(ctx)->flags.isDeclared) {
-                                        work.push_back(klass);
-                                        continue;
-                                    }
-                                } else if (member.isFieldOrStaticField()) {
-                                    auto memberPkg = member.enclosingClass(ctx).data(ctx)->package;
-                                    if (memberPkg != this->package.mangledName()) {
-                                        continue;
-                                    }
-                                } else {
-                                    continue;
-                                }
-
-                                // We can't export symbols that are only defined in RBI files
-                                if (absl::c_all_of(member.locs(ctx),
-                                                   [ctx](auto loc) { return loc.file().data(ctx).isRBI(); })) {
-                                    continue;
-                                }
-
-                                lines.emplace_back(fmt::format("export {}", member.show(ctx)));
-                            }
-                        }
-
-                        // We don't replace conditionally, as if there were no exportable symbols underneath the
-                        // constant, we'll remove the export instead.
-                        fast_sort(lines);
-                        e.replaceWith("Export all child symbols", ctx.locAt(send.loc), "{}",
-                                      fmt::map_join(lines, "\n  ", [](auto line) { return line; }));
+                        auto lines = computeRecursiveExports(ctx, klass);
+                        e.replaceWith(lines.empty() ? "Remove this export" : "Export all child symbols",
+                                      ctx.locAt(send.loc), "{}",
+                                      fmt::map_join(lines, "\n  ", [](string_view line) { return line; }));
                     }
                 }
 
