@@ -761,8 +761,43 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             // add entries here, without consulting the "node.*" counters from a
             // run over a representative code base.
             [&](parser::Const *const_) {
-                auto scope = node2TreeImpl(dctx, const_->scope);
-                ExpressionPtr res = MK::UnresolvedConstant(loc, move(scope), const_->name);
+                // Walk the Const/ConstLhs chain iteratively to build a flat UCL.
+                // Both Const (RHS) and ConstLhs (LHS) can appear in the same chain,
+                // e.g. `class Foo::Bar::Baz` gives ConstLhs(scope=Const(scope=Const(nil,Foo),Bar),Baz).
+                std::vector<core::NameRef> names;
+                std::vector<core::LocOffsets> locs;
+                // lastScopeRef: pointer to the unique_ptr<Node> that owns the current node,
+                // used to call node2TreeImpl on the root scope if it's not Cbase/nil.
+                unique_ptr<parser::Node> *lastScopeRef = nullptr;
+                parser::Node *cur = const_;
+                while (cur != nullptr) {
+                    if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        names.push_back(c->name);
+                        locs.push_back(c->loc);
+                        lastScopeRef = &c->scope;
+                        cur = c->scope.get();
+                    } else if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        names.push_back(cl->name);
+                        locs.push_back(cl->loc);
+                        lastScopeRef = &cl->scope;
+                        cur = cl->scope.get();
+                    } else {
+                        break; // Cbase or a dynamic scope (e.g. a method call)
+                    }
+                }
+                ExpressionPtr rootScope;
+                if (cur == nullptr) {
+                    rootScope = MK::EmptyTree();
+                } else if (parser::isa_node<parser::Cbase>(cur)) {
+                    rootScope = MK::Constant(cur->loc, core::Symbols::root());
+                } else {
+                    // Dynamic root (e.g. `foo()::Bar`): lastScopeRef owns cur.
+                    ENFORCE(lastScopeRef != nullptr);
+                    rootScope = node2TreeImpl(dctx, *lastScopeRef);
+                }
+                std::reverse(names.begin(), names.end());
+                std::reverse(locs.begin(), locs.end());
+                ExpressionPtr res = MK::UnresolvedConstant(move(rootScope), names, locs);
                 result = move(res);
             },
             [&](parser::Send *send) {
@@ -1559,8 +1594,43 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::ConstLhs *constLhs) {
-                auto scope = node2TreeImpl(dctx, constLhs->scope);
-                ExpressionPtr res = MK::UnresolvedConstant(loc, move(scope), constLhs->name);
+                // Walk the ConstLhs/Const chain iteratively to build a flat UCL.
+                // Both ConstLhs (LHS) and Const (RHS) can appear in the same chain,
+                // e.g. `class Foo::Bar::Baz` gives ConstLhs(scope=Const(scope=Const(nil,Foo),Bar),Baz).
+                std::vector<core::NameRef> names;
+                std::vector<core::LocOffsets> locs;
+                // lastScopeRef: pointer to the unique_ptr<Node> that owns the current node,
+                // used to call node2TreeImpl on the root scope if it's not Cbase/nil.
+                unique_ptr<parser::Node> *lastScopeRef = nullptr;
+                parser::Node *cur = constLhs;
+                while (cur != nullptr) {
+                    if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        names.push_back(cl->name);
+                        locs.push_back(cl->loc);
+                        lastScopeRef = &cl->scope;
+                        cur = cl->scope.get();
+                    } else if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        names.push_back(c->name);
+                        locs.push_back(c->loc);
+                        lastScopeRef = &c->scope;
+                        cur = c->scope.get();
+                    } else {
+                        break; // Cbase or a dynamic scope (e.g. a method call)
+                    }
+                }
+                ExpressionPtr rootScope;
+                if (cur == nullptr) {
+                    rootScope = MK::EmptyTree();
+                } else if (parser::isa_node<parser::Cbase>(cur)) {
+                    rootScope = MK::Constant(cur->loc, core::Symbols::root());
+                } else {
+                    // Dynamic root (e.g. `foo()::Bar`): lastScopeRef owns cur.
+                    ENFORCE(lastScopeRef != nullptr);
+                    rootScope = node2TreeImpl(dctx, *lastScopeRef);
+                }
+                std::reverse(names.begin(), names.end());
+                std::reverse(locs.begin(), locs.end());
+                ExpressionPtr res = MK::UnresolvedConstant(move(rootScope), names, locs);
                 result = move(res);
             },
             [&](parser::Cbase *cbase) {

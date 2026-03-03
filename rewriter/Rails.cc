@@ -1,4 +1,5 @@
 #include "rewriter/Rails.h"
+#include "absl/container/inlined_vector.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -47,9 +48,23 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     snprintf(version, sizeof(version), "V%.1f", f.value);
     absl::c_replace(version, '.', '_');
 
+    auto versionName = ctx.state.enterNameConstant(version);
+    // send->recv is already a UCL (e.g. ActiveRecord::Migration). Flatten it with the
+    // new segments instead of nesting UCLs (which would violate the ENFORCE).
+    auto recvUcl = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
+    ENFORCE(recvUcl != nullptr);
+    absl::InlinedVector<core::NameRef, 4> names;
+    absl::InlinedVector<core::LocOffsets, 4> locs;
+    for (auto &[n, l] : recvUcl->parts()) {
+        names.push_back(n);
+        locs.push_back(l);
+    }
+    names.push_back(core::Names::Constants::Compatibility());
+    locs.push_back(arg->loc);
+    names.push_back(versionName);
+    locs.push_back(arg->loc);
     cdef->ancestors.emplace_back(ast::MK::UnresolvedConstant(
-        arg->loc, ast::MK::UnresolvedConstant(arg->loc, std::move(send->recv), core::Names::Constants::Compatibility()),
-        ctx.state.enterNameConstant(version)));
+        std::move(recvUcl->rootScope_), names, locs));
     cdef->ancestors.erase(cdef->ancestors.begin(), cdef->ancestors.begin() + 1);
 }
 

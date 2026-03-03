@@ -1153,7 +1153,7 @@ private:
         } else if (ancestor.isSelfReference()) {
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
-            auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
+            auto nw = ast::MK::UnresolvedConstant(std::move(ancestor), {enclosingClass.data(ctx)->name}, {loc});
             auto out =
                 ast::make_expression<ast::ConstantLit>(enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
