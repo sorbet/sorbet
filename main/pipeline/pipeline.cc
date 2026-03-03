@@ -1176,7 +1176,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 #ifndef SORBET_REALMAIN_MIN
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
-                what = packager::VisibilityChecker::run(gs, workers, std::move(what));
+                packager::VisibilityChecker::run(gs, workers, what);
             }
 #endif
 
@@ -1396,7 +1396,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.cacheSensitiveOptions.sorbetPackages) {
-            what = packager::VisibilityChecker::run(gs, workers, std::move(what));
+            packager::VisibilityChecker::run(gs, workers, what);
         }
 #endif
 
