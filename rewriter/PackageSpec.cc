@@ -27,28 +27,27 @@ void mustContainPackageDef(core::MutableContext ctx, core::LocOffsets loc) {
 
 [[nodiscard]] bool validatePackageName(core::MutableContext ctx, const ast::UnresolvedConstantLit *constLit) {
     bool valid = true;
-    while (constLit != nullptr) {
-        if (absl::StrContains(constLit->cnst.shortName(ctx), "_")) {
+    for (auto [name, loc] : constLit->partsReverse()) {
+        if (absl::StrContains(name.shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between
             // mangled names and unmangled names by replacing `_` with `::`.
             //
             // Even with packages into the symbol table this restriction is useful, because we have
             // a lot of tooling that will create directory structures like Foo_Bar to store
             // generated files associated with package Foo::Bar
-            if (auto e = ctx.beginIndexerError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
+            if (auto e = ctx.beginIndexerError(loc, core::errors::Packager::InvalidPackageName)) {
                 e.setHeader("Package names cannot contain an underscore");
-                auto replacement = absl::StrReplaceAll(constLit->cnst.shortName(ctx), {{"_", ""}});
-                auto nameLoc = constLit->loc;
+                auto replacement = absl::StrReplaceAll(name.shortName(ctx), {{"_", ""}});
+                auto nameLoc = loc;
                 // cnst is the last characters in the constant literal
-                nameLoc.beginLoc = nameLoc.endLoc - constLit->cnst.shortName(ctx).size();
+                nameLoc.beginLoc = nameLoc.endLoc - name.shortName(ctx).size();
 
                 e.addAutocorrect(core::AutocorrectSuggestion{
-                    fmt::format("Replace `{}` with `{}`", constLit->cnst.shortName(ctx), replacement),
+                    fmt::format("Replace `{}` with `{}`", name.shortName(ctx), replacement),
                     {core::AutocorrectSuggestion::Edit{ctx.locAt(nameLoc), replacement}}});
             }
             valid = false;
         }
-        constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
     }
 
     return valid;

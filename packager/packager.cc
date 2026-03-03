@@ -1216,19 +1216,18 @@ bool isTestExport(const ast::ExpressionPtr &expr) {
     }
 
     auto sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
-    while (sym) {
-        if (ast::isa_tree<ast::EmptyTree>(sym->scope)) {
-            return sym->cnst == core::Names::Constants::Test();
-        }
-
-        if (auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope)) {
-            sym = parent;
-        } else {
-            break;
-        }
+    if (sym == nullptr) {
+        return false;
     }
-
-    return false;
+    if (!ast::isa_tree<ast::EmptyTree>(sym->rootScope())) {
+        return false;
+    }
+    auto range = sym->parts();
+    auto it = range.begin();
+    if (it == range.end()) {
+        return false;
+    }
+    return it->first == core::Names::Constants::Test();
 }
 
 } // namespace
