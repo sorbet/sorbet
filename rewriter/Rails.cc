@@ -64,7 +64,7 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     names.push_back(versionName);
     locs.push_back(arg->loc);
     cdef->ancestors.emplace_back(ast::MK::UnresolvedConstant(
-        std::move(recvUcl->rootScope_), names, locs));
+        std::move(recvUcl->scope_), names, locs));
     cdef->ancestors.erase(cdef->ancestors.begin(), cdef->ancestors.begin() + 1);
 }
 

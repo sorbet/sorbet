@@ -147,7 +147,7 @@ class SymbolFinder {
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             // Resolve root scope first, then build FoundClass entries root-to-leaf.
-            auto current = defineScope(owner, constLit->rootScope());
+            auto current = defineScope(owner, constLit->scope());
             for (auto [name, loc] : constLit->parts()) {
                 core::FoundClass found;
                 found.owner = current;
@@ -188,8 +188,8 @@ public:
         } else {
             if (klass.symbol == core::Symbols::todo()) {
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
-                // Process rootScope_ + all segments except the last to get the owner
-                auto owner = defineScope(getOwner(), constLit.rootScope_);
+                // Process scope_ + all segments except the last to get the owner
+                auto owner = defineScope(getOwner(), constLit.scope_);
                 for (size_t i = 0; i + 1 < constLit.segments_.size(); ++i) {
                     auto [name, loc] = constLit.segments_[i];
                     core::FoundClass fclass;
@@ -321,7 +321,7 @@ public:
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->rootScope());
+            return isValidAncestor(lit->scope());
         }
         return false;
     }
@@ -541,8 +541,8 @@ public:
     core::FoundDefinitionRef fillAssign(core::Context ctx, const ast::Assign &asgn) {
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        // Process rootScope_ + all segments except the last to get the owner
-        auto owner = defineScope(getOwner(), lhs.rootScope_);
+        // Process scope_ + all segments except the last to get the owner
+        auto owner = defineScope(getOwner(), lhs.scope_);
         for (size_t i = 0; i + 1 < lhs.segments_.size(); ++i) {
             auto [name, loc] = lhs.segments_[i];
             core::FoundClass fclass;
@@ -692,7 +692,7 @@ public:
             fillAssign(ctx, asgn);
         } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             handleAssignment(ctx, asgn);
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->rootScope_) || lhs->segments_.size() > 1) {
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope_) || lhs->segments_.size() > 1) {
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun.rawId()) {
@@ -1951,14 +1951,14 @@ class TreeSymbolizer {
             return owner;
         }
 
-        // Process rootScope_ to get the initial owner (never a UCL, so hits base case immediately)
+        // Process scope_ to get the initial owner (never a UCL, so hits base case immediately)
         const bool firstNameRecursive = false;
-        auto newOwner = squashNamesInner(ctx, owner, constLit->rootScope_, firstNameRecursive);
+        auto newOwner = squashNamesInner(ctx, owner, constLit->scope_, firstNameRecursive);
         ENFORCE(newOwner.exists());
 
-        // Copy segments and move rootScope_ (after squashNamesInner may have modified it).
+        // Copy segments and move scope_ (after squashNamesInner may have modified it).
         auto segments = constLit->segments_;
-        ast::ExpressionPtr currentScope = std::move(constLit->rootScope_);
+        ast::ExpressionPtr currentScope = std::move(constLit->scope_);
 
         // Build a chain of single-segment ConstantLits, mirroring walkUnresolvedConstantLit
         // in the resolver. This preserves the chain structure that matchesQuery in
@@ -2097,8 +2097,8 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        // Process rootScope_ first (squash any resolved ConstantLit chain)
-        auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.rootScope_);
+        // Process scope_ first (squash any resolved ConstantLit chain)
+        auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope_);
         ENFORCE(maybeScope.exists());
 
         // Process all segments except the last to build up the scope
@@ -2388,7 +2388,7 @@ public:
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             tree = handleAssignment(ctx, std::move(tree));
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->rootScope_) || lhs->segments_.size() > 1) {
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope_) || lhs->segments_.size() > 1) {
             tree = handleAssignment(ctx, std::move(tree));
         } else {
             switch (send->fun.rawId()) {

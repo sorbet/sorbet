@@ -632,7 +632,7 @@ public:
                                              const core::ClassOrModuleRef symbol) {
         if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
             return c->segments_.size() == 1 && c->segments_[0].first == name &&
-                   ast::MK::isRootScope(c->rootScope_);
+                   ast::MK::isRootScope(c->scope_);
         } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
             return c->symbol() == symbol;
         }
