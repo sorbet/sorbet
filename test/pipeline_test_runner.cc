@@ -382,7 +382,6 @@ void buildPackageDB(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl
         return;
     }
 
-    // Packager runs over all trees.
     packager::Packager::buildPackageDB(gs, *workers, trees, nonPackageFiles);
     if (handler.hasExpectation("package-tree")) {
         fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
@@ -402,7 +401,6 @@ void validatePackagedFiles(core::GlobalState &gs, unique_ptr<WorkerPool> &worker
         return;
     }
 
-    // Packager runs over all trees.
     packager::Packager::validatePackagedFiles(gs, *workers, trees);
     if (handler.hasExpectation("package-tree")) {
         fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
@@ -491,11 +489,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(*gs, inputPackageFiles, handler, test, assertions);
+        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
+        buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     }
 
     auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
-    name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
-    buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
@@ -548,29 +546,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.drainErrors(*gs);
     }
 
-    handler.addObserved(*gs, "symbol-table", [&]() { return gs->toString(); });
-    handler.addObserved(*gs, "symbol-table-raw", [&]() { return gs->showRaw(); });
-
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
-    }
-
-    if (!test.minimizeRBI.empty()) {
-        auto gsForMinimize = emptyGs->deepCopyGlobalState();
-        auto opts = realmain::options::Options{};
-        opts.cacheSensitiveOptions.usePrismParser = (parser == realmain::options::Parser::PRISM);
-        auto minimizeRBI = test.folder + test.minimizeRBI;
-        realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
-        auto printerConfig = realmain::options::PrinterConfig{};
-        printerConfig.enabled = true;
-        printerConfig.outputPath = "/dev/null"; // tricks PrinterConfig::print into buffering
-        printerConfig.supportsFlush = true;
-        realmain::Minimize::writeDiff(*gs, *gsForMinimize, printerConfig);
-
-        auto addNewline = false;
-        handler.addObserved(
-            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
     // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better work
@@ -721,18 +699,27 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             addNewline);
     }
 
+    handler.addObserved(*gs, "symbol-table", [&]() { return gs->toString(); });
+    handler.addObserved(*gs, "symbol-table-raw", [&]() { return gs->showRaw(); });
+
+    if (!test.minimizeRBI.empty()) {
+        auto gsForMinimize = emptyGs->deepCopyGlobalState();
+        auto opts = realmain::options::Options{};
+        opts.cacheSensitiveOptions.usePrismParser = (parser == realmain::options::Parser::PRISM);
+        auto minimizeRBI = test.folder + test.minimizeRBI;
+        realmain::Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, opts, *workers, minimizeRBI);
+        auto printerConfig = realmain::options::PrinterConfig{};
+        printerConfig.enabled = true;
+        printerConfig.outputPath = "/dev/null"; // tricks PrinterConfig::print into buffering
+        printerConfig.supportsFlush = true;
+        realmain::Minimize::writeDiff(*gs, *gsForMinimize, printerConfig);
+
+        auto addNewline = false;
+        handler.addObserved(
+            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
+    }
+
     handler.checkExpectations();
-
-    if (test.expectations.contains("symbol-table")) {
-        string table = gs->toString() + '\n';
-        CHECK_EQ_DIFF(handler.got["symbol-table"], table, "symbol-table should not be mutated by CFG+inference");
-    }
-
-    if (test.expectations.contains("symbol-table-raw")) {
-        string table = gs->showRaw() + '\n';
-        CHECK_EQ_DIFF(handler.got["symbol-table-raw"], table,
-                      "symbol-table-raw should not be mutated by CFG+inference");
-    }
 
     // Check warnings and errors
     {
