@@ -431,7 +431,6 @@ pipeline_tests(
             "testdata/infer/fuzz_uninitialized_vars.rb",
             "testdata/infer/generics/option.rb",
             "testdata/infer/isa_bug.rb",
-            "testdata/infer/kwsplat_nil.rb",
             "testdata/infer/missing_method_name.rb",
             "testdata/infer/no_when_t_forwarder.rb",
             "testdata/infer/or_and_conditional_branch.rb",
@@ -566,7 +565,6 @@ pipeline_tests(
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "prism_regression/assign_to_index.rb",
-            "prism_regression/call_implicit_kw_args.rb",
             "prism_regression/literal_hash.rb",
             "prism_regression/multi_target.rb",
             "prism_regression/call_block_param.rb",
