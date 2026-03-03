@@ -335,10 +335,17 @@ void Translator::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &
         if (PM_NODE_TYPE_P(assoc->key, PM_SYMBOL_NODE)) {
             auto *symbolNode = down_cast<pm_symbol_node>(assoc->key);
 
-            // If opening_loc is null, the symbol has a trailing colon - drop it from the location
+            // If opening_loc is null, the symbol has a trailing colon syntax (e.g., `k5:` not `:k5 =>`)
             if (symbolNode->opening_loc.start == nullptr) {
-                auto symbolLoc = translateLoc(symbolNode->base.location.start, symbolNode->base.location.end - 1);
                 auto [symbolContent, _] = translateSymbol(symbolNode);
+
+                // For shorthand kwargs like `foo(k5:)` where the value is implicit, keep the colon in the location
+                // to match Whitequark behavior. For regular kwargs like `foo(k5: v)`, drop the colon.
+                bool isImplicitValue = PM_NODE_TYPE_P(assoc->value, PM_IMPLICIT_NODE);
+                auto symbolLoc = isImplicitValue
+                                     ? translateLoc(symbolNode->base.location)
+                                     : translateLoc(symbolNode->base.location.start, symbolNode->base.location.end - 1);
+
                 destination.emplace_back(MK::Symbol(symbolLoc, symbolContent));
                 destination.emplace_back(desugar(assoc->value));
                 continue;
@@ -4080,7 +4087,8 @@ ast::ExpressionPtr Translator::desugarMethodCall(ast::ExpressionPtr receiver, co
         sendLoc = sendWithBlockLoc;
     }
 
-    auto sendLoc0 = sendLoc.copyWithZeroLength();
+    // Zero-length location at START of full expression (matches Whitequark's locZeroLen)
+    auto sendLoc0 = sendWithBlockLoc.copyWithZeroLength();
 
     if (methodName == core::Names::squareBrackets() || methodName == core::Names::squareBracketsEq()) {
         // Empty funLoc implies that errors should use the callLoc
@@ -4844,7 +4852,9 @@ ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, 
         auto prismStatements = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
 
         // Cover the locations spanned from the first to the last statements.
-        beginNodeLoc = translateLoc(prismStatements.front()->location.start, prismStatements.back()->location.end);
+        // This can be different from the `stmtsNode->base.location`,
+        // because of the special case (handled by `startLoc()` and `endLoc()`).
+        beginNodeLoc = translateLoc(startLoc(prismStatements.front()), endLoc(prismStatements.back()));
     }
 
     auto statements = nodeListToStore<ast::InsSeq::STATS_store>(stmtsNode->body);
