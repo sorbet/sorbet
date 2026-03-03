@@ -97,38 +97,61 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
 
 void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
-    // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
+    // Iterate through the ConstantLit chain (for root-scoped constants like ::Foo).
+    // For each ConstantLit wrapping an UnresolvedConstantLit, also iterate the UCL's
+    // segments to match intermediate segments in qualified paths like Foo::Bar::Baz.
+    // (Namer wraps flat multi-segment UCLs in a single ConstantLit; the resolver creates
+    // single-segment ConstantLit chains. This handles both cases uniformly.)
     auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original()) {
         auto &unresolved = *lit->original();
-        if (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
-            lspQuery.matchesSymbol(symbolBeforeDealias)) {
-            // This basically approximates the cfg::Alias case from Environment::processBinding.
-            core::TypeAndOrigins tp;
-            tp.origins.emplace_back(symbol.loc(ctx));
 
-            if (symbol.isClassOrModule()) {
-                tp.type = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
-            } else {
-                auto resultType = symbol.resultType(ctx);
-                tp.type = resultType == nullptr ? core::Types::untyped(symbol) : resultType;
+        // Walk segments leaf-to-root, finding each segment's symbol by following the owner
+        // chain upward from the leaf symbol.
+        auto segCount = unresolved.segments_.size();
+        auto currentSymBeforeDealias = symbolBeforeDealias;
+        auto currentSym = symbol;
+        for (int i = (int)segCount - 1; i >= 0; --i) {
+            auto [segName, segLoc] = unresolved.segments_[i];
+            bool isLeaf = (i == (int)segCount - 1);
+            if (lspQuery.matchesLoc(ctx.locAt(segLoc)) || lspQuery.matchesSymbol(currentSym) ||
+                lspQuery.matchesSymbol(currentSymBeforeDealias)) {
+                // This basically approximates the cfg::Alias case from Environment::processBinding.
+                core::TypeAndOrigins tp;
+                tp.origins.emplace_back(currentSym.loc(ctx));
+
+                if (currentSym.isClassOrModule()) {
+                    tp.type =
+                        currentSym.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
+                } else {
+                    auto resultType = currentSym.resultType(ctx);
+                    tp.type = resultType == nullptr ? core::Types::untyped(currentSymBeforeDealias) : resultType;
+                }
+
+                core::lsp::ConstantResponse::Scopes scopes;
+                if (isLeaf && currentSymBeforeDealias == core::Symbols::StubModule()) {
+                    // If the symbol is an alias to a stub symbol, it actually resolved, and so it
+                    // won't have resolutionScopes.
+                    auto *resolutionScopes = lit->resolutionScopes();
+                    scopes.insert(scopes.end(), resolutionScopes->begin(), resolutionScopes->end());
+                } else {
+                    scopes = {currentSym.owner(ctx)};
+                }
+
+                auto enclosingMethod = enclosingMethodFromContext(ctx);
+                auto resp = core::lsp::ConstantResponse(currentSymBeforeDealias, ctx.locAt(segLoc), scopes, segName,
+                                                        tp, enclosingMethod);
+                core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
             }
-
-            core::lsp::ConstantResponse::Scopes scopes;
-            if (symbolBeforeDealias == core::Symbols::StubModule()) {
-                // If the symbol is an alias to a stub symbol, it actually resolved, and so it won't
-                // have resolutionScopes.
-                auto *resolutionScopes = lit->resolutionScopes();
-                scopes.insert(scopes.end(), resolutionScopes->begin(), resolutionScopes->end());
-            } else {
-                scopes = {symbol.owner(ctx)};
+            if (i > 0) {
+                if (currentSymBeforeDealias == core::Symbols::StubModule()) {
+                    break; // Can't walk the owner chain for an unresolved constant
+                }
+                currentSymBeforeDealias = currentSym.owner(ctx);
+                currentSym = currentSymBeforeDealias.dealias(ctx);
             }
-
-            auto enclosingMethod = enclosingMethodFromContext(ctx);
-            auto resp = core::lsp::ConstantResponse(symbolBeforeDealias, ctx.locAt(lit->loc()), scopes, unresolved.cnst(),
-                                                    tp, enclosingMethod);
-            core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
+
         lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope_);
         if (lit) {
             symbolBeforeDealias = lit->symbol();
