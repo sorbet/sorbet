@@ -14,23 +14,17 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
-    if (!scopeCnst) {
-        if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
-            return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
-        }
-        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
-        if (id == nullptr) {
+    // With the vectorized UCL, rootScope_ is never a UCL itself.
+    ast::ExpressionPtr dupedScope;
+    if (ast::isa_tree<ast::EmptyTree>(cons->rootScope_)) {
+        dupedScope = ast::MK::EmptyTree();
+    } else {
+        dupedScope = ASTUtil::dupType(cons->rootScope_);
+        if (dupedScope == nullptr) {
             return nullptr;
         }
-        ENFORCE(id->symbol() == core::Symbols::root());
-        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
     }
-    auto scope = ASTUtil::dupType(cons->scope);
-    if (scope == nullptr) {
-        return nullptr;
-    }
-    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
+    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(dupedScope), cons->segments_);
 }
 } // namespace
 

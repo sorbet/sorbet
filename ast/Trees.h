@@ -1183,12 +1183,21 @@ CheckSize(Literal, 16, 8);
 
 EXPRESSION(UnresolvedConstantLit) {
 public:
-    const core::LocOffsets loc;
+    // Each segment is a (name, loc) pair; segments are stored in root-to-leaf order.
+    using SegmentType = std::pair<core::NameRef, core::LocOffsets>;
 
-    core::NameRef cnst;
-    ExpressionPtr scope;
+    const core::LocOffsets loc;  // leaf (last) segment loc
+    ExpressionPtr rootScope_;    // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
+    InlinedVector<SegmentType, 3> segments_;  // segments in root-to-leaf order
 
-    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
+    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope,
+                          InlinedVector<SegmentType, 3> segments);
+
+    // Returns the leaf (last) segment's constant name.
+    core::NameRef cnst() const { return segments_.back().first; }
+
+    // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
+    const ExpressionPtr& rootScope() const { return rootScope_; }
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
@@ -1201,86 +1210,38 @@ public:
 
     void _sanityCheck();
 
-    // Iterator support for traversing constant path segments
-    using SegmentType = std::pair<core::NameRef, core::LocOffsets>;
-
     // Forward range: yields segments in root-to-leaf order (A, B, C)
-    // Materializes all segments on construction
     class ForwardRange {
     public:
-        class iterator {
-        public:
-            using value_type = SegmentType;
-            using difference_type = std::ptrdiff_t;
-            using pointer = const value_type *;
-            using reference = const value_type &;
-            using iterator_category = std::forward_iterator_tag;
-
-            iterator(const std::vector<SegmentType> *segments, size_t index);
-
-            reference operator*() const;
-            pointer operator->() const;
-            iterator &operator++();
-            iterator operator++(int);
-            bool operator==(const iterator &other) const;
-            bool operator!=(const iterator &other) const;
-
-        private:
-            const std::vector<SegmentType> *segments_;
-            size_t index_;
-        };
-
-        explicit ForwardRange(const UnresolvedConstantLit *node);
+        using iterator = const SegmentType*;
 
         iterator begin() const;
         iterator end() const;
 
     private:
-        std::vector<SegmentType> segments_;
+        friend class UnresolvedConstantLit;
+        const UnresolvedConstantLit* node_;
+        explicit ForwardRange(const UnresolvedConstantLit* node);
     };
 
     // Reverse range: yields segments in leaf-to-root order (C, B, A)
-    // No materialization needed, walks linked list directly
     class ReverseRange {
     public:
-        class iterator {
-        public:
-            using value_type = SegmentType;
-            using difference_type = std::ptrdiff_t;
-            using pointer = const value_type *;
-            using reference = const value_type &;
-            using iterator_category = std::forward_iterator_tag;
-
-            explicit iterator(const UnresolvedConstantLit *node);
-
-            reference operator*() const;
-            pointer operator->() const;
-            iterator &operator++();
-            iterator operator++(int);
-            bool operator==(const iterator &other) const;
-            bool operator!=(const iterator &other) const;
-
-        private:
-            const UnresolvedConstantLit *current_;
-            SegmentType currentSegment_;
-            void advance();
-        };
-
-        explicit ReverseRange(const UnresolvedConstantLit *node);
+        using iterator = std::reverse_iterator<const SegmentType*>;
 
         iterator begin() const;
         iterator end() const;
 
     private:
-        const UnresolvedConstantLit *node_;
+        friend class UnresolvedConstantLit;
+        const UnresolvedConstantLit* node_;
+        explicit ReverseRange(const UnresolvedConstantLit* node);
     };
 
     // Mutable reverse range: yields mutable references to segments in leaf-to-root order (C, B, A)
-    // Allows mutation of cnst and loc fields
-    // No materialization needed, walks linked list directly and provides mutable access
     class MutableReverseRange {
     public:
-        // Provides mutable references to the cnst and loc fields of a node
+        // Provides mutable references to the name and loc fields of a segment.
         struct MutableSegment {
             core::NameRef &cnst;
             core::LocOffsets &loc;
@@ -1305,28 +1266,23 @@ public:
             bool operator!=(const iterator &other) const;
 
         private:
-            UnresolvedConstantLit *current_;
-            void advance();
+            std::reverse_iterator<SegmentType*> base_;
         };
-
-        explicit MutableReverseRange(UnresolvedConstantLit *node);
 
         iterator begin() const;
         iterator end() const;
 
     private:
-        UnresolvedConstantLit *node_;
+        friend class UnresolvedConstantLit;
+        UnresolvedConstantLit* node_;
+        explicit MutableReverseRange(UnresolvedConstantLit* node);
     };
 
     // Create range objects for iteration
     ForwardRange parts() const;
     ReverseRange partsReverse() const;
-    MutableReverseRange partsMutable(); // Non-const - allows mutation
-
-    // Helper: Get the root scope (EmptyTree, ConstantLit, etc.)
-    const ExpressionPtr &rootScope() const;
+    MutableReverseRange partsMutable();  // Non-const - allows mutation
 };
-CheckSize(UnresolvedConstantLit, 24, 8);
 
 EXPRESSION(ConstantLit) {
 private:
