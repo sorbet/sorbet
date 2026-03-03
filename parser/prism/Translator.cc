@@ -533,75 +533,60 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
 
     int i = 0;
     int before = 0, after = 0;
-    bool didSplat = false;
     auto zloc = loc.copyWithZeroLength();
 
     bool hasSplat = lhs->rest && PM_NODE_TYPE_P(lhs->rest, PM_SPLAT_NODE);
-    size_t totalSize = lefts.size() + (hasSplat ? 1 : 0) + rights.size();
 
-    auto processTarget = [this, &didSplat, &stats, &i, &after, &before, totalSize, zloc, tempExpanded](pm_node_t *c) {
-        if (PM_NODE_TYPE_P(c, PM_SPLAT_NODE)) {
-            auto *splat = down_cast<pm_splat_node>(c);
-            ENFORCE(!didSplat, "did splat already");
-            didSplat = true;
+    auto processTarget = [this, &stats, &i, zloc, tempExpanded](pm_node_t *c) {
+        ENFORCE(!PM_NODE_TYPE_P(c, PM_SPLAT_NODE), "splat already handled");
 
-            int left = i;
-            int right = totalSize - left - 1;
+        auto cloc = translateLoc(c->location);
+        auto zcloc = cloc.copyWithZeroLength();
+        auto val =
+            MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
 
-            if (splat->expression) {
-                ast::ExpressionPtr lh = desugar(splat->expression);
-
-                if (right == 0) {
-                    right = 1;
-                }
-                auto lhloc = lh.loc();
-                auto zlhloc = lhloc.copyWithZeroLength();
-                // Calling `to_ary` is not faithful to the runtime behavior,
-                // but that it is faithful to the expected static type-checking behavior.
-                auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
-                stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
-            }
-            i = -right;
+        if (PM_NODE_TYPE_P(c, PM_MULTI_TARGET_NODE)) {
+            auto *mlhs = down_cast<pm_multi_target_node>(c);
+            stats.emplace_back(desugarMlhs(cloc, mlhs, move(val)));
         } else {
-            if (didSplat) {
-                ++after;
-            } else {
-                ++before;
-            }
-
-            auto cloc = translateLoc(c->location);
-            auto zcloc = cloc.copyWithZeroLength();
-            auto val =
-                MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
-
-            if (PM_NODE_TYPE_P(c, PM_MULTI_TARGET_NODE)) {
-                auto *mlhs = down_cast<pm_multi_target_node>(c);
-                stats.emplace_back(desugarMlhs(cloc, mlhs, move(val)));
-            } else {
-                ast::ExpressionPtr lh = desugar(c);
-                if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
-                    if (auto e =
-                            ctx.beginIndexerError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
-                        e.setHeader("Unsupported rest args in destructure");
-                    }
-                    lh = move(restParam->expr);
+            ast::ExpressionPtr lh = desugar(c);
+            if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
+                if (auto e = ctx.beginIndexerError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
+                    e.setHeader("Unsupported rest args in destructure");
                 }
-
-                auto lhloc = lh.loc();
-                stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
+                lh = move(restParam->expr);
             }
 
-            i++;
+            auto lhloc = lh.loc();
+            stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
         }
+
+        i++;
     };
 
     for (auto *c : lefts) {
+        ++before;
         processTarget(c);
     }
     if (hasSplat) {
-        processTarget(lhs->rest);
+        // Handle splat separately - use to_ary to capture remaining elements
+        auto *splat = down_cast<pm_splat_node>(lhs->rest);
+        size_t totalSize = lefts.size() + 1 + rights.size();
+        int right = totalSize - i - 1;
+        if (right == 0) {
+            right = 1;
+        }
+        if (splat->expression) {
+            ast::ExpressionPtr lh = desugar(splat->expression);
+            auto lhloc = lh.loc();
+            auto zlhloc = lhloc.copyWithZeroLength();
+            auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
+            stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
+        }
+        i = -right;
     }
     for (auto *c : rights) {
+        ++after;
         processTarget(c);
     }
 
