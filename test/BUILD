@@ -436,8 +436,6 @@ pipeline_tests(
             "testdata/infer/missing_method_name.rb",
             "testdata/infer/no_when_t_forwarder.rb",
             "testdata/infer/or_and_conditional_branch.rb",
-            "testdata/infer/singleton_case_exhaustiveness.rb",
-            "testdata/infer/singleton_enum_case.rb",
             "testdata/infer/t_class_any.rb",
             "testdata/infer/t_proc_metatype.rb",
             "testdata/lsp/code_actions/extract_variable_multiple/case.rb",
