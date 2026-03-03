@@ -8,7 +8,7 @@ namespace sorbet::ast::packager {
 ExpressionPtr prependRegistry(ExpressionPtr scope) {
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     ENFORCE(constLit != nullptr);
-    auto &root = const_cast<ast::ExpressionPtr &>(constLit->rootScope());
+    auto &root = const_cast<ast::ExpressionPtr &>(constLit->scope());
     root = ast::MK::Constant(root.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
     return scope;
 }

@@ -293,7 +293,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
                     return false;
                 }
             }
-            return Comparator::compareNodes(gs, avoid, a->rootScope_, b->rootScope_, file);
+            return Comparator::compareNodes(gs, avoid, a->scope_, b->scope_, file);
         }
 
         case Tag::ConstantLit: {
@@ -308,7 +308,7 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
                 if (alit.cnst() != blit.cnst()) {
                     return false;
                 }
-                return Comparator::compareNodes(gs, avoid, alit.rootScope_, blit.rootScope_, file);
+                return Comparator::compareNodes(gs, avoid, alit.scope_, blit.scope_, file);
             } else if (!a->original() && !b->original()) {
                 // This occurs when the constant is created using MK::Constant instead of MK::UnresolvedConstant
                 // (original points to the UnresolvedConstantLit that created this ConstantLit)

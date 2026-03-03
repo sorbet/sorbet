@@ -60,13 +60,13 @@ class AutogenWalk {
             auto &original = *cnst->original();
             // Iterate segments in reverse (leaf-to-root) order; we reverse the whole vector at the end.
             // This handles both single-segment UCLs (from walkUnresolvedConstantLit, where the scope
-            // chain is encoded as a ConstantLit chain via rootScope_) and multi-segment UCLs (created
+            // chain is encoded as a ConstantLit chain via scope_) and multi-segment UCLs (created
             // by Namer's squashNamesInner, which wraps the entire UCL in one ConstantLit with
-            // rootScope_ = EmptyTree).
+            // scope_ = EmptyTree).
             for (auto it = original.segments_.rbegin(); it != original.segments_.rend(); ++it) {
                 out.emplace_back(it->first);
             }
-            cnst = ast::cast_tree<ast::ConstantLit>(original.rootScope_);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope_);
 
             // If any part of the constant literal scope is a class alias, the final name should be scoped
             // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
@@ -220,7 +220,7 @@ public:
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original() != nullptr) {
             auto &original = *cnst->original();
-            cnst = ast::cast_tree<ast::ConstantLit>(original.rootScope_);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope_);
         }
         if (cnst && cnst->symbol() == core::Symbols::root()) {
             return true;

@@ -1201,7 +1201,7 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
 
 void SerializerImpl::pickle(Pickler &p, const File &f, const ast::UnresolvedConstantLit &lit) {
     pickle(p, lit.loc);
-    pickle(p, lit.rootScope_);
+    pickle(p, lit.scope_);
     p.putU4(lit.segments_.size());
     for (auto &[name, segLoc] : lit.segments_) {
         p.putU4(name.rawId());

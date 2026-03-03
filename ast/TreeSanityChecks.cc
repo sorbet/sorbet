@@ -96,7 +96,7 @@ void ClassDef::_sanityCheck() {
 }
 
 void UnresolvedConstantLit::_sanityCheck() {
-    ENFORCE(rootScope_);
+    ENFORCE(scope_);
     ENFORCE(!segments_.empty());
     ENFORCE(cnst().exists());
 }

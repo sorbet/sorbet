@@ -327,9 +327,9 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
     _sanityCheck();
 }
 
-UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope,
+UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope,
                                              InlinedVector<SegmentType, 3> segments)
-    : loc(loc), rootScope_(std::move(rootScope)), segments_(std::move(segments)) {
+    : loc(loc), scope_(std::move(scope)), segments_(std::move(segments)) {
     categoryCounterInc("trees", "constantlit");
     _sanityCheck();
 }
@@ -862,7 +862,7 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "{}", this->rootScope_.toStringWithTabs(gs, tabs));
+    fmt::format_to(std::back_inserter(buf), "{}", this->scope_.toStringWithTabs(gs, tabs));
     for (auto &[name, loc] : this->segments_) {
         fmt::format_to(std::back_inserter(buf), "::{}", name.toString(gs));
     }
@@ -878,7 +878,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) con
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
     absl::Span<const SegmentType> scopeSegs(this->segments_.data(), this->segments_.size() - 1);
-    showRawSegmentChain(buf, gs, this->rootScope_, scopeSegs, tabs + 1);
+    showRawSegmentChain(buf, gs, this->scope_, scopeSegs, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
@@ -1915,7 +1915,7 @@ string UnresolvedConstantLit::showRawWithLocs(const core::GlobalState &gs, core:
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
     absl::Span<const SegmentType> scopeSegs(this->segments_.data(), this->segments_.size() - 1);
-    showRawWithLocsSegmentChain(buf, gs, file, this->rootScope_, scopeSegs, tabs + 1);
+    showRawWithLocsSegmentChain(buf, gs, file, this->scope_, scopeSegs, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
