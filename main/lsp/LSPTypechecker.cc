@@ -470,7 +470,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         }
 
         auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
-        vector<ast::ParsedFile> indexed, nonPackagedIndexed;
+        vector<ast::ParsedFile> indexed;
 
         // ----- build the package DB -----
 
@@ -517,130 +517,142 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                                      workers);
         }
 
-        // ----- index -----
+        auto strata = pipeline::computePackageStrata(*this->gs, indexed, workspaceFilesSpan, this->config->opts);
+        for (auto &stratum : strata) {
+            vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
 
-        {
-            optional<Timer> timeit;
-            switch (mode) {
-                case SlowPathMode::Init:
-                    timeit.emplace(this->config->logger, "initial_index");
-                    break;
+            // When we unpartition the package and non-package files, we'll realloc stratumFiles to hold everything.
+            stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
 
-                case SlowPathMode::Cancelable:
-                    timeit.emplace(this->config->logger, "slow_path_reindex");
-                    break;
-            }
+            absl::c_move(stratum.packageFiles, back_inserter(stratumFiles));
+
+            // ----- index -----
 
             {
-                auto result =
-                    hashing::Hashing::indexAndComputeFileHashes(*this->gs, this->config->opts, *this->config->logger,
-                                                                workspaceFilesSpan, workers, ownedKvstore, cancelable);
-                if (!result.hasResult()) {
-                    ast::ParsedFilesOrCancelled::cancel(std::move(indexed), workers);
+                optional<Timer> timeit;
+                switch (mode) {
+                    case SlowPathMode::Init:
+                        timeit.emplace(this->config->logger, "initial_index");
+                        break;
+
+                    case SlowPathMode::Cancelable:
+                        timeit.emplace(this->config->logger, "slow_path_reindex");
+                        break;
+                }
+
+                {
+                    auto result = hashing::Hashing::indexAndComputeFileHashes(
+                        *this->gs, this->config->opts, *this->config->logger, stratum.sourceFiles, workers,
+                        ownedKvstore, cancelable);
+                    if (!result.hasResult()) {
+                        ast::ParsedFilesOrCancelled::cancel(std::move(stratumFiles), workers);
+                        return;
+                    }
+                    nonPackagedIndexed = std::move(result.result());
+                    this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
+                }
+
+                // Only write the cache during initialization to avoid unbounded growth.
+                if (mode == SlowPathMode::Init) {
+                    // Cache these before any packager rewrites, so that the cache is still usable
+                    // regardless of whether `--sorbet-packages` was passed.
+                    ownedKvstore = cache::ownIfUnchanged(
+                        *this->gs, cache::maybeCacheGlobalStateAndFiles(
+                                       OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
+                                       *this->gs, workers, nonPackagedIndexed));
+
+                    // Close and copy the global kvstore, so that we have unique access for the rest of the session.
+                    this->sessionCache =
+                        cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
+
+                    this->initialized = true;
+                } else {
+                    // We don't write in the cancelable slow path, and all our read operations have completed.
+                    OwnedKeyValueStore::abort(std::move(ownedKvstore));
+                }
+
+                // Second namer run: all the other files (the packageDB shouldn't change)
+                auto foundHashes = nullptr;
+                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts,
+                                               workers, foundHashes);
+                if (canceled) {
+                    ast::ParsedFilesOrCancelled::cancel(move(stratumFiles), workers);
+                    ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
                     return;
                 }
-                nonPackagedIndexed = std::move(result.result());
-                this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
+                pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
+                                                workers);
             }
 
-            // Only write the cache during initialization to avoid unbounded growth.
-            if (mode == SlowPathMode::Init) {
-                // Cache these before any packager rewrites, so that the cache is still usable
-                // regardless of whether `--sorbet-packages` was passed.
-                ownedKvstore = cache::ownIfUnchanged(
-                    *this->gs,
-                    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
-                                                         this->config->opts, *this->gs, workers, nonPackagedIndexed));
+            // Indexing+namer is done at this point, so we can clear the indexing message.
+            // TODO(trevor): this isn't quite right in package-directed mode, as the next iteration will go back to
+            // indexing again; the indexing/typechecking status states don't really translate to package-directed mode.
+            indexingOp.reset();
 
-                // Close and copy the global kvstore, so that we have unique access for the rest of the session.
-                this->sessionCache =
-                    cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
-
-                this->initialized = true;
-            } else {
-                // We don't write in the cancelable slow path, and all our read operations have completed.
-                OwnedKeyValueStore::abort(std::move(ownedKvstore));
-            }
-
-            // Second namer run: all the other files (the packageDB shouldn't change)
-            auto foundHashes = nullptr;
-            auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts, workers,
-                                           foundHashes);
-            if (canceled) {
-                ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-                ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+            if (epochManager.wasTypecheckingCanceled()) {
                 return;
             }
-            pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts, workers);
-        }
 
-        // Indexing+namer is done at this point, so we can clear the indexing message.
-        indexingOp.reset();
+            pipeline::unpartitionPackageFiles(stratumFiles, std::move(nonPackagedIndexed));
 
-        if (epochManager.wasTypecheckingCanceled()) {
-            return;
-        }
+            auto maybeResolved = pipeline::resolve(*gs, move(stratumFiles), config->opts, workers);
+            if (!maybeResolved.hasResult()) {
+                return;
+            }
 
-        pipeline::unpartitionPackageFiles(indexed, std::move(nonPackagedIndexed));
-        // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
-
-        auto maybeResolved = pipeline::resolve(*gs, move(indexed), config->opts, workers);
-        if (!maybeResolved.hasResult()) {
-            return;
-        }
-
-        if (gs->sleepInSlowPathSeconds.has_value()) {
-            auto sleepDuration = gs->sleepInSlowPathSeconds.value();
-            for (int i = 0; i < sleepDuration * 10; i++) {
-                Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
-                if (epochManager.wasTypecheckingCanceled()) {
-                    break;
+            if (gs->sleepInSlowPathSeconds.has_value()) {
+                auto sleepDuration = gs->sleepInSlowPathSeconds.value();
+                for (int i = 0; i < sleepDuration * 10; i++) {
+                    Timer::timedSleep(100ms, *logger, "slow_path.resolve.sleep");
+                    if (epochManager.wasTypecheckingCanceled()) {
+                        break;
+                    }
                 }
             }
-        }
 
-        // Inform the fast path that this global state is OK for typechecking as resolution has completed.
-        gs->lspTypecheckCount++;
-        // TODO(jvilk): Remove conditional once initial typecheck is preemptible.
-        if (cancelable) {
-            // Inform users that Sorbet should be responsive now.
-            // Explicitly end previous operation before beginning next operation.
-            slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
-        }
-        // Report how long the slow path blocks preemption.
-        timeit.clone("slow_path.blocking_time");
-
-        // [Test only] Wait for a preemption if one is expected.
-        while (updates.preemptionsExpected > 0) {
-            auto loopStartTime = Timer::clock_gettime_coarse();
-            auto coarseThreshold = Timer::get_clock_threshold_coarse();
-            while (!preemptManager->tryRunScheduledPreemptionTask(*gs)) {
-                auto curTime = Timer::clock_gettime_coarse();
-                if (curTime.usec - loopStartTime.usec > 20'000'000) {
-                    Exception::raise("Slow path timed out waiting for preemption edit");
-                }
-                Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_preemption.sleep");
+            // Inform the fast path that this global state is OK for typechecking as resolution has completed.
+            gs->lspTypecheckCount++;
+            // TODO(jvilk): Remove conditional once initial typecheck is preemptible.
+            if (cancelable) {
+                // Inform users that Sorbet should be responsive now.
+                // Explicitly end previous operation before beginning next operation.
+                slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
             }
-            updates.preemptionsExpected--;
-        }
+            // Report how long the slow path blocks preemption.
+            timeit.clone("slow_path.blocking_time");
 
-        // [Test only] Wait for a cancellation if one is expected.
-        if (updates.cancellationExpected) {
-            auto loopStartTime = Timer::clock_gettime_coarse();
-            auto coarseThreshold = Timer::get_clock_threshold_coarse();
-            while (!epochManager.wasTypecheckingCanceled()) {
-                auto curTime = Timer::clock_gettime_coarse();
-                if (curTime.usec - loopStartTime.usec > 20'000'000) {
-                    Exception::raise("Slow path timed out waiting for cancellation edit");
+            // [Test only] Wait for a preemption if one is expected.
+            while (updates.preemptionsExpected > 0) {
+                auto loopStartTime = Timer::clock_gettime_coarse();
+                auto coarseThreshold = Timer::get_clock_threshold_coarse();
+                while (!preemptManager->tryRunScheduledPreemptionTask(*gs)) {
+                    auto curTime = Timer::clock_gettime_coarse();
+                    if (curTime.usec - loopStartTime.usec > 20'000'000) {
+                        Exception::raise("Slow path timed out waiting for preemption edit");
+                    }
+                    Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_preemption.sleep");
                 }
-                Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_cancellation.sleep");
+                updates.preemptionsExpected--;
             }
-            return;
-        }
 
-        auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
-        const auto presorted = true;
-        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
+            // [Test only] Wait for a cancellation if one is expected.
+            if (updates.cancellationExpected) {
+                auto loopStartTime = Timer::clock_gettime_coarse();
+                auto coarseThreshold = Timer::get_clock_threshold_coarse();
+                while (!epochManager.wasTypecheckingCanceled()) {
+                    auto curTime = Timer::clock_gettime_coarse();
+                    if (curTime.usec - loopStartTime.usec > 20'000'000) {
+                        Exception::raise("Slow path timed out waiting for cancellation edit");
+                    }
+                    Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_cancellation.sleep");
+                }
+                return;
+            }
+
+            auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
+            const auto presorted = true;
+            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
+        }
     });
 
     gs->lspQuery = core::lsp::Query::noQuery();
