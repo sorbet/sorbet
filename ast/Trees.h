@@ -1186,18 +1186,21 @@ public:
     // Each segment is a (name, loc) pair; segments are stored in root-to-leaf order.
     using SegmentType = std::pair<core::NameRef, core::LocOffsets>;
 
-    const core::LocOffsets loc;  // leaf (last) segment loc
-    ExpressionPtr rootScope_;    // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
-    InlinedVector<SegmentType, 3> segments_;  // segments in root-to-leaf order
+    const core::LocOffsets loc;              // leaf (last) segment loc
+    ExpressionPtr rootScope_;                // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
+    InlinedVector<SegmentType, 3> segments_; // segments in root-to-leaf order
 
-    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope,
-                          InlinedVector<SegmentType, 3> segments);
+    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope, InlinedVector<SegmentType, 3> segments);
 
     // Returns the leaf (last) segment's constant name.
-    core::NameRef cnst() const { return segments_.back().first; }
+    core::NameRef cnst() const {
+        return segments_.back().first;
+    }
 
     // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
-    const ExpressionPtr& rootScope() const { return rootScope_; }
+    const ExpressionPtr &rootScope() const {
+        return rootScope_;
+    }
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
@@ -1213,29 +1216,29 @@ public:
     // Forward range: yields segments in root-to-leaf order (A, B, C)
     class ForwardRange {
     public:
-        using iterator = const SegmentType*;
+        using iterator = const SegmentType *;
 
         iterator begin() const;
         iterator end() const;
 
     private:
         friend class UnresolvedConstantLit;
-        const UnresolvedConstantLit* node_;
-        explicit ForwardRange(const UnresolvedConstantLit* node);
+        const UnresolvedConstantLit *node_;
+        explicit ForwardRange(const UnresolvedConstantLit *node);
     };
 
     // Reverse range: yields segments in leaf-to-root order (C, B, A)
     class ReverseRange {
     public:
-        using iterator = std::reverse_iterator<const SegmentType*>;
+        using iterator = std::reverse_iterator<const SegmentType *>;
 
         iterator begin() const;
         iterator end() const;
 
     private:
         friend class UnresolvedConstantLit;
-        const UnresolvedConstantLit* node_;
-        explicit ReverseRange(const UnresolvedConstantLit* node);
+        const UnresolvedConstantLit *node_;
+        explicit ReverseRange(const UnresolvedConstantLit *node);
     };
 
     // Mutable reverse range: yields mutable references to segments in leaf-to-root order (C, B, A)
@@ -1266,7 +1269,7 @@ public:
             bool operator!=(const iterator &other) const;
 
         private:
-            std::reverse_iterator<SegmentType*> base_;
+            std::reverse_iterator<SegmentType *> base_;
         };
 
         iterator begin() const;
@@ -1274,14 +1277,14 @@ public:
 
     private:
         friend class UnresolvedConstantLit;
-        UnresolvedConstantLit* node_;
-        explicit MutableReverseRange(UnresolvedConstantLit* node);
+        UnresolvedConstantLit *node_;
+        explicit MutableReverseRange(UnresolvedConstantLit *node);
     };
 
     // Create range objects for iteration
     ForwardRange parts() const;
     ReverseRange partsReverse() const;
-    MutableReverseRange partsMutable();  // Non-const - allows mutation
+    MutableReverseRange partsMutable(); // Non-const - allows mutation
 };
 
 EXPRESSION(ConstantLit) {

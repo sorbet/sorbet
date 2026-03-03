@@ -28,7 +28,8 @@ ast::ExpressionPtr elemFixedUntyped(core::LocOffsets loc) {
         ast::MK::Block0(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)));
     auto typeMember =
         ast::MK::Send0Block(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength(), move(block));
-    return ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
+    return ast::MK::Assign(loc,
+                           ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::Elem()}, {loc}),
                            std::move(typeMember));
 }
 
@@ -164,8 +165,8 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     // class Foo$1 < ::Struct
     {
         ast::ClassDef::ANCESTORS_store ancestors;
-        ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
-                                                           core::Names::Constants::Struct()));
+        ancestors.emplace_back(ast::MK::UnresolvedConstant(ast::MK::Constant(loc, core::Symbols::root()),
+                                                           {core::Names::Constants::Struct()}, {loc}));
 
         stats.emplace_back(
             ast::MK::Class(loc, loc, structUniqueName.deepCopy(), std::move(ancestors), std::move(body)));

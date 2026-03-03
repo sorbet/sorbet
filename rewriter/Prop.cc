@@ -207,8 +207,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.name = send->fun == core::Names::createdProp() ? core::Names::created() : core::Names::updated();
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
-            ret.type = ASTUtil::mkNilable(send->loc, ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(),
-                                                                                 core::Names::Constants::Numeric()));
+            ret.type = ASTUtil::mkNilable(
+                send->loc,
+                ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::Numeric()}, {send->loc}));
             break;
         }
         case core::Names::merchantTokenProp().rawId():

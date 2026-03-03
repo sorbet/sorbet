@@ -85,6 +85,9 @@ private:
           enclosingMethodName(enclosingMethodName), enclosingBlockParamLoc(enclosingBlockParamLoc),
           enclosingBlockParamName(enclosingBlockParamName), isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
 
+    ast::ExpressionPtr buildConstantPath(pm_node_t *parentNullable, core::LocOffsets outerLoc,
+                                         core::NameRef outerConstName, core::LocOffsets nullParentRootLoc);
+
     ast::ExpressionPtr make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const;
 
     core::LocOffsets translateLoc(pm_location_t loc) const;
@@ -1444,7 +1447,7 @@ ast::ExpressionPtr Desugarer::desugarConstantOpAssign(pm_node_t *untypedNode) {
         }
     }
 
-    auto lhs = MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), name);
+    auto lhs = MK::UnresolvedConstant(MK::EmptyTree(), {name}, {nameLoc});
     auto rhs = desugar(node->value);
 
     if constexpr (Kind == OpAssignKind::Operator) {
@@ -1472,16 +1475,9 @@ ast::ExpressionPtr Desugarer::desugarConstantPathOpAssign(pm_node_t *untypedNode
     auto nameLoc = translateLoc(target->name_loc);
     auto name = translateConstantName(target->name);
 
-    // Translate the constant path to an UnresolvedConstantLit
-    ast::ExpressionPtr scope;
-    if (target->parent == nullptr) {
-        // `::Constant` - top level constant
-        scope = MK::Constant(location, core::Symbols::root());
-    } else {
-        scope = desugar(target->parent);
-    }
-
-    auto lhs = MK::UnresolvedConstant(nameLoc, move(scope), name);
+    // Translate the constant path to a flat UnresolvedConstantLit (no nested UCLs).
+    auto outerConstName = ctx.state.enterNameConstant(name);
+    auto lhs = buildConstantPath(target->parent, nameLoc, outerConstName, location);
     auto rhs = desugar(node->value);
 
     if constexpr (Kind == OpAssignKind::Operator) {
@@ -1635,7 +1631,7 @@ ast::ExpressionPtr Desugarer::desugarAssignment(pm_node_t *untypedNode) {
             } else {
                 constantName = ctx.state.enterNameConstant(translateConstantName(node->name));
             }
-            lhs = MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), constantName);
+            lhs = MK::UnresolvedConstant(MK::EmptyTree(), {constantName}, {nameLoc});
         }
     } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_path_write_node>) {
         // Handle regular assignment to a constant path, like `A::B::C = 1` or `::C = 1`
@@ -1646,21 +1642,14 @@ ast::ExpressionPtr Desugarer::desugarAssignment(pm_node_t *untypedNode) {
         if (this->isInMethodDef()) {
             lhs = MK::Local(pathLoc, core::Names::dynamicConstAssign());
         } else {
-            ast::ExpressionPtr scope;
-            if (target->parent == nullptr) {
-                // `::Constant` - top level constant
-                auto delimiterLoc = translateLoc(target->delimiter_loc);
-                scope = MK::Constant(delimiterLoc, core::Symbols::root());
-            } else {
-                scope = desugar(target->parent);
-            }
             core::NameRef constantName;
             if (target->name == PM_CONSTANT_ID_UNSET) {
                 constantName = core::Names::Constants::ConstantNameMissing();
             } else {
                 constantName = ctx.state.enterNameConstant(translateConstantName(target->name));
             }
-            lhs = MK::UnresolvedConstant(pathLoc, move(scope), constantName);
+            auto nullParentRootLoc = translateLoc(target->delimiter_loc);
+            lhs = buildConstantPath(target->parent, pathLoc, constantName, nullParentRootLoc);
         }
     } else {
         // Handle regular assignment to local, instance, class, or global variable
@@ -5138,6 +5127,58 @@ ast::ExpressionPtr Desugarer::desugarStatements(pm_statements_node *stmtsNode, b
 // Handles any one of the Prism nodes that models any kind of constant or constant path.
 //
 // Dynamic constant assignment inside of a method definition will raise a SyntaxError at runtime. In the
+// Walk a pm_constant_path_node chain iteratively, building a flat UnresolvedConstantLit
+// without nested UCLs. This avoids O(N^2) construction and the ENFORCE that
+// MK::UnresolvedConstant's scope must not itself be an UnresolvedConstantLit.
+ast::ExpressionPtr Desugarer::buildConstantPath(pm_node_t *parentNullable, core::LocOffsets outerLoc,
+                                                core::NameRef outerConstName, core::LocOffsets nullParentRootLoc) {
+    absl::InlinedVector<core::NameRef, 4> names;
+    absl::InlinedVector<core::LocOffsets, 4> locs;
+    names.push_back(outerConstName);
+    locs.push_back(outerLoc);
+
+    ast::ExpressionPtr rootScope;
+    auto *current = parentNullable;
+
+    if (current == nullptr) {
+        rootScope = MK::Constant(nullParentRootLoc, core::Symbols::root());
+    } else {
+        while (true) {
+            if (PM_NODE_TYPE_P(current, PM_CONSTANT_PATH_NODE)) {
+                auto *pathNode = down_cast<pm_constant_path_node>(current);
+                core::NameRef pathConstName;
+                if (pathNode->name != PM_CONSTANT_ID_UNSET) {
+                    pathConstName = ctx.state.enterNameConstant(translateConstantName(pathNode->name));
+                } else {
+                    pathConstName = core::Names::Constants::ConstantNameMissing();
+                }
+                names.push_back(pathConstName);
+                locs.push_back(translateLoc(pathNode->base.location));
+                if (pathNode->parent == nullptr) {
+                    rootScope = MK::Constant(translateLoc(pathNode->delimiter_loc), core::Symbols::root());
+                    break;
+                }
+                current = pathNode->parent;
+            } else if (PM_NODE_TYPE_P(current, PM_CONSTANT_READ_NODE)) {
+                auto *readNode = down_cast<pm_constant_read_node>(current);
+                names.push_back(ctx.state.enterNameConstant(translateConstantName(readNode->name)));
+                locs.push_back(translateLoc(readNode->base.location));
+                rootScope = MK::EmptyTree();
+                break;
+            } else {
+                // Non-constant parent (e.g. a method call or self): desugar it directly.
+                // desugar() will not return a UCL for these non-constant node types.
+                rootScope = desugar(current);
+                break;
+            }
+        }
+    }
+
+    absl::c_reverse(names);
+    absl::c_reverse(locs);
+    return MK::UnresolvedConstant(move(rootScope), names, locs);
+}
+
 // Sorbet validator, there is a check that will crash Sorbet if this is detected statically.
 // To work around this, we substitute dynamic constant assignments with a write to a fake local variable
 // called `dynamicConstAssign`.
@@ -5157,7 +5198,7 @@ ast::ExpressionPtr Desugarer::translateConst(pm_node_t *anyNode) {
     // Constant name might be unset, e.g. `::`.
     if (node->name == PM_CONSTANT_ID_UNSET) {
         auto location = translateLoc(node->base.location);
-        return MK::UnresolvedConstant(location, MK::EmptyTree(), core::Names::Constants::ConstantNameMissing());
+        return MK::UnresolvedConstant(MK::EmptyTree(), {core::Names::Constants::ConstantNameMissing()}, {location});
     }
 
     // It's important that in all branches `enterNameUTF8` is called, which `translateConstantName` does,
@@ -5193,8 +5234,6 @@ ast::ExpressionPtr Desugarer::translateConst(pm_node_t *anyNode) {
     auto constexpr isConstantPath = is_same_v<PrismLhsNode, pm_constant_path_target_node> ||
                                     is_same_v<PrismLhsNode, pm_constant_path_write_node> ||
                                     is_same_v<PrismLhsNode, pm_constant_path_node>;
-
-    ast::ExpressionPtr parentExpr;
 
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
         // Resolve well-known root-anchored constant paths that the RBS rewriter injects.
@@ -5253,20 +5292,9 @@ ast::ExpressionPtr Desugarer::translateConst(pm_node_t *anyNode) {
             }
         }
 
-        if (auto *prismParentNode = node->parent) {
-            // This constant reference is chained onto another constant reference.
-            // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the
-            // `name`.
-            //   A::B::C
-            //    /    \
-            //  A::B   ::C
-            //  /  \
-            // A   ::B
-            parentExpr = desugarNullable(prismParentNode);
-        } else { // This is the root of a fully qualified constant reference, like `::A`.
-            auto delimiterLoc = translateLoc(node->delimiter_loc); // The location of the `::`
-            parentExpr = MK::Constant(delimiterLoc, core::Symbols::root());
-        }
+        // Walk the pm_constant_path_node chain iteratively to build a flat UCL without nested UCLs.
+        auto nullParentRootLoc = translateLoc(node->delimiter_loc);
+        return buildConstantPath(node->parent, location, constantName, nullParentRootLoc);
     } else { // Handle plain constants like `A`, that aren't part of a constant path.
         static_assert(
             is_same_v<PrismLhsNode, pm_constant_and_write_node> || is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
@@ -5281,10 +5309,8 @@ ast::ExpressionPtr Desugarer::translateConst(pm_node_t *anyNode) {
                       is_same_v<PrismLhsNode, pm_constant_write_node>) {
             location = translateLoc(node->name_loc);
         }
-        parentExpr = MK::EmptyTree();
+        return MK::UnresolvedConstant(MK::EmptyTree(), {constantName}, {location});
     }
-
-    return MK::UnresolvedConstant(location, move(parentExpr), constantName);
 }
 
 core::NameRef Desugarer::translateConstantName(pm_constant_id_t constant_id) {
@@ -5371,7 +5397,7 @@ ast::ExpressionPtr Desugarer::desugarClassOrModuleName(pm_node_t *constantPath, 
     if (constantPath == nullptr || (!PM_NODE_TYPE_P(constantPath, PM_CONSTANT_PATH_NODE) &&
                                     !PM_NODE_TYPE_P(constantPath, PM_CONSTANT_READ_NODE))) {
         auto nameLoc = translateLoc(keywordLoc);
-        return MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), core::Names::Constants::ConstantNameMissing());
+        return MK::UnresolvedConstant(MK::EmptyTree(), {core::Names::Constants::ConstantNameMissing()}, {nameLoc});
     }
 
     return desugar(constantPath);
