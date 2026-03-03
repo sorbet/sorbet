@@ -468,6 +468,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+    // TODO(jez) Make sure we add an assertion for `package-directed: true`
+    // Right now, `opts.packageDirected` is always false
     auto opts = RangeAssertion::parseOptions(assertions);
     opts.censorForSnapshotTests = true;
     opts.sorbetPackagesHint = "PACKAGE_ERROR_HINT";
