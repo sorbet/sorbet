@@ -118,7 +118,7 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
             // even though the option is called instance_predicate, setting it to false also prevents the class method
             // from being generated.
             auto sig = ast::MK::Sig0(
-                loc, ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean()));
+                loc, ast::MK::UnresolvedConstant(ast::MK::T(loc), {core::Names::Constants::Boolean()}, {loc}));
             auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol().addQuestion(ctx), ast::MK::False(loc));
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceReader && instancePredicate) {

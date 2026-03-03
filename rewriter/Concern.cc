@@ -103,8 +103,8 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     } else {
                         rhs.emplace_back(std::move(block->body));
                     }
-                    auto name =
-                        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
+                    auto name = ast::MK::UnresolvedConstant(ast::MK::EmptyTree(),
+                                                            {core::Names::Constants::ClassMethods()}, {loc});
                     classMethodsNode = ast::MK::Module(loc, loc, std::move(name), std::move(rhs));
                 }
                 continue;
@@ -134,7 +134,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
         // Generate a Send { Magic.mixes_in_class_methods(ClassMethods) }
         auto magic = ast::MK::Magic(klass->loc);
         auto classMethods =
-            ast::MK::UnresolvedConstant(klass->loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
+            ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::ClassMethods()}, {klass->loc});
         auto sendForMixes =
             ast::MK::Send2(klass->loc, std::move(magic), core::Names::mixesInClassMethods(),
                            klass->loc.copyWithZeroLength(), ast::MK::Self(klass->loc), std::move(classMethods));

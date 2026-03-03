@@ -148,7 +148,7 @@ optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef 
 
     auto statLocZero = stat.loc().copyWithZeroLength();
     auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst(), 1));
-    auto classCnst = ast::MK::UnresolvedConstant(statLocZero, ast::MK::EmptyTree(), name);
+    auto classCnst = ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {name}, {statLocZero});
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name.deepCopy());
     ast::ClassDef::RHS_store classRhs;

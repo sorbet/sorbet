@@ -207,8 +207,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.name = send->fun == core::Names::createdProp() ? core::Names::created() : core::Names::updated();
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
-            ret.type = ASTUtil::mkNilable(send->loc, ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(),
-                                                                                 core::Names::Constants::Numeric()));
+            ret.type = ASTUtil::mkNilable(
+                send->loc,
+                ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::Numeric()}, {send->loc}));
             break;
         }
         case core::Names::merchantProp().rawId():
@@ -219,16 +220,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
-            ret.foreign = ast::MK::UnresolvedConstant(
-                send->loc,
-                ast::MK::UnresolvedConstant(
-                    send->loc,
-                    ast::MK::UnresolvedConstant(
-                        send->loc,
-                        ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(), core::Names::Constants::Opus()),
-                        core::Names::Constants::Account()),
-                    core::Names::Constants::Model()),
-                core::Names::Constants::Merchant());
+            ret.foreign = ast::MK::UnresolvedConstantParts(
+                send->loc, {core::Names::Constants::Opus(), core::Names::Constants::Account(),
+                            core::Names::Constants::Model(), core::Names::Constants::Merchant()});
             break;
         case core::Names::merchantTokenProp().rawId():
             ret.isImmutable = true;
@@ -238,19 +232,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
 
-            ret.type = ast::MK::UnresolvedConstant(
+            ret.type = ast::MK::UnresolvedConstantParts(
                 send->loc,
-                ast::MK::UnresolvedConstant(
-                    send->loc,
-                    ast::MK::UnresolvedConstant(
-                        send->loc,
-                        ast::MK::UnresolvedConstant(send->loc,
-                                                    ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(),
-                                                                                core::Names::Constants::Opus()),
-                                                    core::Names::Constants::Autogen()),
-                        core::Names::Constants::Tokens()),
-                    core::Names::Constants::AccountModelMerchant()),
-                core::Names::Constants::Token());
+                {core::Names::Constants::Opus(), core::Names::Constants::Autogen(), core::Names::Constants::Tokens(),
+                 core::Names::Constants::AccountModelMerchant(), core::Names::Constants::Token()});
             break;
 
         default:
