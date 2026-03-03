@@ -364,7 +364,7 @@ private:
         // like `A::B::Foo = T.type_alias {...}`), return it directly.  In the old linked-list
         // UnresolvedConstantLit structure, a qualified constant's nested UCL scope chain would
         // fall through to "dynamic constant" handling and set resolutionFailed.  With the new
-        // flat vectorized UCL, rootScope() is always EmptyTree for these Namer-created nodes, so
+        // flat vectorized UCL, scope() is always EmptyTree for these Namer-created nodes, so
         // resolveLhs would only look up the leaf segment name and may not find the constant.
         // Returning the existing symbol avoids a spurious ENFORCE failure and preserves the
         // correct type-alias handling path in resolveConstantJob / constantResolutionFailed.
@@ -374,12 +374,12 @@ private:
         }
 
         auto &c = *job.out->original();
-        if (ast::isa_tree<ast::EmptyTree>(c.rootScope())) {
+        if (ast::isa_tree<ast::EmptyTree>(c.scope())) {
             auto result = resolveLhs(ctx, job.scope, c.cnst());
 
             return result;
         }
-        if (auto id = ast::cast_tree<ast::ConstantLit>(c.rootScope())) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope())) {
             auto sym = id->symbol();
             if (!sym.exists()) {
                 // Still waiting for scope to be resolved. Don't mark resolutionFailed yet, just
@@ -463,7 +463,7 @@ private:
         bool alreadyReported = false;
         job.out->markUnresolved();
         auto &original = *job.out->original();
-        if (auto id = ast::cast_tree<ast::ConstantLit>(original.rootScope())) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope())) {
             auto originalScope = id->symbol().dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
@@ -498,7 +498,7 @@ private:
             if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst().show(ctx));
                 auto foundCommonTypo = false;
-                if (ast::isa_tree<ast::EmptyTree>(original.rootScope())) {
+                if (ast::isa_tree<ast::EmptyTree>(original.scope())) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
                         if (from == original.cnst()) {
                             e.didYouMean(to, ctx.locAt(job.out->loc()));
@@ -1143,8 +1143,8 @@ private:
                 }
                 return;
             }
-            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->rootScope_) ||
-                    ast::isa_tree<ast::EmptyTree>(cnst->original()->rootScope_));
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope_) ||
+                    ast::isa_tree<ast::EmptyTree>(cnst->original()->scope_));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
                 return;
@@ -1170,13 +1170,13 @@ private:
     void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             // Process the root scope first (never a UCL by invariant, so no recursion needed there)
-            walkUnresolvedConstantLit(ctx, c->rootScope_);
-            // c->rootScope_ is now EmptyTree, ConstantLit, or dynamic (error)
+            walkUnresolvedConstantLit(ctx, c->scope_);
+            // c->scope_ is now EmptyTree, ConstantLit, or dynamic (error)
 
             // Build a chain of single-segment ConstantLits for each segment.
             // Copy segments before we start moving things out of the UCL.
             auto segments = c->segments_;
-            ast::ExpressionPtr currentScope = std::move(c->rootScope_);
+            ast::ExpressionPtr currentScope = std::move(c->scope_);
             // tree still holds the (partially moved) UCL; we'll overwrite it at the end.
 
             for (size_t i = 0; i < segments.size(); ++i) {
@@ -1538,7 +1538,7 @@ public:
         int depth = 0;
         ast::ConstantLit *scope = exp;
         while (auto original = scope->original()) {
-            scope = ast::cast_tree<ast::ConstantLit>(original->rootScope_);
+            scope = ast::cast_tree<ast::ConstantLit>(original->scope_);
             if (!scope) {
                 break;
             }

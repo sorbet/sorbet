@@ -26,7 +26,7 @@ bool isTStruct(const ast::ExpressionPtr &expr) {
     return struct_ != nullptr && struct_->segments_.size() == 2 &&
            struct_->segments_[0].first == core::Names::Constants::T() &&
            struct_->segments_.back().first == core::Names::Constants::Struct() &&
-           ast::MK::isRootScope(struct_->rootScope_);
+           ast::MK::isRootScope(struct_->scope_);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {
@@ -34,7 +34,7 @@ bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     return struct_ != nullptr && struct_->segments_.size() == 2 &&
            struct_->segments_[0].first == core::Names::Constants::T() &&
            struct_->segments_.back().first == core::Names::Constants::InexactStruct() &&
-           ast::MK::isRootScope(struct_->rootScope_);
+           ast::MK::isRootScope(struct_->scope_);
 }
 
 bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
@@ -42,7 +42,7 @@ bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
     return struct_ != nullptr && struct_->segments_.size() == 2 &&
            struct_->segments_[0].first == core::Names::Constants::T() &&
            struct_->segments_.back().first == core::Names::Constants::ImmutableStruct() &&
-           ast::MK::isRootScope(struct_->rootScope_);
+           ast::MK::isRootScope(struct_->scope_);
 }
 
 enum class SyntacticSuperClass {

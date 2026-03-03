@@ -244,7 +244,7 @@ bool isRSpec(core::Context ctx, const ast::ExpressionPtr &recv) {
         return false;
     }
 
-    return cnst->cnst() == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->rootScope());
+    return cnst->cnst() == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope());
 }
 
 // Some RSpec methods are relatively common method names where we really want to make sure that

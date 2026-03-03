@@ -23,7 +23,7 @@ private:
         for (auto segment : constLit->partsMutable()) {
             segment.cnst = subst.substituteSymbolName(segment.cnst);
         }
-        auto &root = const_cast<ExpressionPtr &>(constLit->rootScope());
+        auto &root = const_cast<ExpressionPtr &>(constLit->scope());
         if (!isa_tree<EmptyTree>(root)) {
             TreeWalk::apply(ctx, *this, root);
         }

@@ -129,7 +129,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                                                     unresolved.cnst(), tp, enclosingMethod);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
-        lit = ast::cast_tree<ast::ConstantLit>(unresolved.rootScope_);
+        lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope_);
         if (lit) {
             symbolBeforeDealias = lit->symbol();
             symbol = symbolBeforeDealias.dealias(ctx);

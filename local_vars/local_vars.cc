@@ -503,7 +503,7 @@ class LocalNameInserter {
             }
             return;
         }
-        auto &root = const_cast<ast::ExpressionPtr &>(lit->rootScope());
+        auto &root = const_cast<ast::ExpressionPtr &>(lit->scope());
         if (!ast::isa_tree<ast::EmptyTree>(root) && !ast::isa_tree<ast::ConstantLit>(root)) {
             // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
             // Still want to do our best to recover (for e.g., LSP queries)

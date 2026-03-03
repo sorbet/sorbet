@@ -1187,7 +1187,7 @@ public:
     using SegmentType = std::pair<core::NameRef, core::LocOffsets>;
 
     const core::LocOffsets loc;              // leaf (last) segment loc
-    ExpressionPtr rootScope_;                // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
+    ExpressionPtr scope;                     // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
     InlinedVector<SegmentType, 3> segments_; // segments in root-to-leaf order
 
     UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope, InlinedVector<SegmentType, 3> segments);
@@ -1198,9 +1198,7 @@ public:
     }
 
     // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
-    const ExpressionPtr &rootScope() const {
-        return rootScope_;
-    }
+    const ExpressionPtr& scope() const { return scope_; }
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;

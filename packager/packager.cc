@@ -61,7 +61,7 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
         for (auto [name, loc] : constantLit->partsReverse()) {
             fullNameReversed.emplace_back(name);
         }
-        auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->rootScope());
+        auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope());
         constantLit = resolvedLit != nullptr ? resolvedLit->original() : nullptr;
     }
     ENFORCE(!fullNameReversed.empty());
@@ -110,7 +110,7 @@ bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::Ex
         return false;
     }
 
-    return recursiveVerifyConstant(ctx, fun, root, target->rootScope_);
+    return recursiveVerifyConstant(ctx, fun, root, target->scope_);
 }
 
 const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &expr) {
@@ -122,7 +122,7 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
         return nullptr;
     }
 
-    if (recursiveVerifyConstant(ctx, fun, expr, target->rootScope_)) {
+    if (recursiveVerifyConstant(ctx, fun, expr, target->scope_)) {
         return target;
     }
 
@@ -131,7 +131,7 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
 
 bool isRootScopedDefinition(const ast::ConstantLit *lit) {
     while (lit != nullptr && lit->original() != nullptr) {
-        lit = ast::cast_tree<ast::ConstantLit>(lit->original()->rootScope_);
+        lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope_);
         if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
             return true;
         }
@@ -1222,7 +1222,7 @@ bool isTestExport(const ast::ExpressionPtr &expr) {
     if (sym == nullptr) {
         return false;
     }
-    if (!ast::isa_tree<ast::EmptyTree>(sym->rootScope())) {
+    if (!ast::isa_tree<ast::EmptyTree>(sym->scope())) {
         return false;
     }
     auto range = sym->parts();
