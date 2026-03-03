@@ -84,7 +84,7 @@ void PackageSpec::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
         auto &superClass = packageSpecClass->ancestors[0];
         auto superClassLit = ast::cast_tree<ast::UnresolvedConstantLit>(superClass);
-        if (superClassLit == nullptr || superClassLit->cnst != core::Names::Constants::PackageSpec()) {
+        if (superClassLit == nullptr || superClassLit->cnst() != core::Names::Constants::PackageSpec()) {
             mustContainPackageDef(ctx, superClass.loc());
             reportedError = true;
             continue;

@@ -158,8 +158,8 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
     auto structUniqueName = asgn->lhs.deepCopy();
     auto &structUniqueNameUnresolvedConst = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(structUniqueName);
-    structUniqueNameUnresolvedConst.cnst =
-        ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::Struct, lhs->cnst, 1));
+    structUniqueNameUnresolvedConst.segments_.back().first =
+        ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::Struct, lhs->cnst(), 1));
 
     // class Foo$1 < ::Struct
     {

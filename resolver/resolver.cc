@@ -360,13 +360,26 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
+        // If the ConstantLit already has a symbol set (e.g., by Namer for qualified constants
+        // like `A::B::Foo = T.type_alias {...}`), return it directly.  In the old linked-list
+        // UnresolvedConstantLit structure, a qualified constant's nested UCL scope chain would
+        // fall through to "dynamic constant" handling and set resolutionFailed.  With the new
+        // flat vectorized UCL, rootScope() is always EmptyTree for these Namer-created nodes, so
+        // resolveLhs would only look up the leaf segment name and may not find the constant.
+        // Returning the existing symbol avoids a spurious ENFORCE failure and preserves the
+        // correct type-alias handling path in resolveConstantJob / constantResolutionFailed.
+        auto existingSym = job.out->symbol();
+        if (existingSym.exists()) {
+            return existingSym;
+        }
+
         auto &c = *job.out->original();
-        if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto result = resolveLhs(ctx, job.scope, c.cnst);
+        if (ast::isa_tree<ast::EmptyTree>(c.rootScope())) {
+            auto result = resolveLhs(ctx, job.scope, c.cnst());
 
             return result;
         }
-        if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(c.rootScope())) {
             auto sym = id->symbol();
             if (!sym.exists()) {
                 // Still waiting for scope to be resolved. Don't mark resolutionFailed yet, just
@@ -385,7 +398,7 @@ private:
             auto resolved = sym.dealias(ctx);
             core::SymbolRef result;
             if (resolved.isClassOrModule()) {
-                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst);
+                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst());
             }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
@@ -451,7 +464,7 @@ private:
         bool alreadyReported = false;
         job.out->markUnresolved();
         auto &original = *job.out->original();
-        if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
+        if (auto id = ast::cast_tree<ast::ConstantLit>(original.rootScope())) {
             auto originalScope = id->symbol().dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
@@ -481,14 +494,14 @@ private:
 
         // This name is an artifact of parser recovery--no need to leak the parser implementation to the user,
         // because an error will have already been reported.
-        auto constantNameMissing = original.cnst == core::Names::Constants::ConstantNameMissing();
+        auto constantNameMissing = original.cnst() == core::Names::Constants::ConstantNameMissing();
         if (!constantNameMissing && !alreadyReported) {
             if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
-                e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
+                e.setHeader("Unable to resolve constant `{}`", original.cnst().show(ctx));
                 auto foundCommonTypo = false;
-                if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+                if (ast::isa_tree<ast::EmptyTree>(original.rootScope())) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
-                        if (from == original.cnst) {
+                        if (from == original.cnst()) {
                             e.didYouMean(to, ctx.locAt(job.out->loc()));
                             foundCommonTypo = true;
                             break;
@@ -502,7 +515,7 @@ private:
                     suggestionCount++;
 
                     auto suggested =
-                        suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
+                        suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst());
 
                     if (ctx.file.data(ctx).isPackage(gs) &&
                         !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state)) {
@@ -1131,8 +1144,8 @@ private:
                 }
                 return;
             }
-            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope) ||
-                    ast::isa_tree<ast::EmptyTree>(cnst->original()->scope));
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->rootScope_) ||
+                    ast::isa_tree<ast::EmptyTree>(cnst->original()->rootScope_));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
                 return;
@@ -1157,31 +1170,51 @@ private:
 
     void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            walkUnresolvedConstantLit(ctx, c->scope);
-            auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
-                                                              tree.toUnique<ast::UnresolvedConstantLit>());
-            auto constant = ast::cast_tree<ast::ConstantLit>(out);
-            ConstantResolutionItem job{nesting_, constant};
-            if (resolveConstantJob(ctx, job)) {
-                categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
-                                              constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
-                    // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
-                    // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
-                    // Sorbet should be taught to emit errors when these references are not actually defined,
-                    // matching Ruby's behavior. Then the reference order checks will be able to check all
-                    // references against their definitions, and not limit them to only isDeclared symbols here.
+            // Process the root scope first (never a UCL by invariant, so no recursion needed there)
+            walkUnresolvedConstantLit(ctx, c->rootScope_);
+            // c->rootScope_ is now EmptyTree, ConstantLit, or dynamic (error)
 
-                    // (Historically, Stripe's custom autoloader used static analysis to predeclare these
-                    // intermediate namespaces, so they would always be defined at the right time. As Stripe's
-                    // codebase moves away from this legacy autoloader, it will be easier to introduce such
-                    // changes into Sorbet.)
-                    checkReferenceOrder(ctx, constant->symbol(), *c, firstDefinitionLocs);
+            // Build a chain of single-segment ConstantLits for each segment.
+            // Copy segments before we start moving things out of the UCL.
+            auto segments = c->segments_;
+            ast::ExpressionPtr currentScope = std::move(c->rootScope_);
+            // tree still holds the (partially moved) UCL; we'll overwrite it at the end.
+
+            for (size_t i = 0; i < segments.size(); ++i) {
+                auto [segName, segLoc] = segments[i];
+
+                // Create a single-segment UCL for this level
+                InlinedVector<ast::UnresolvedConstantLit::SegmentType, 3> singleSeg;
+                singleSeg.emplace_back(segName, segLoc);
+                auto singleUCL =
+                    make_unique<ast::UnresolvedConstantLit>(segLoc, std::move(currentScope), std::move(singleSeg));
+                auto *uclPtr = singleUCL.get();
+
+                auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(), std::move(singleUCL));
+                auto constant = ast::cast_tree<ast::ConstantLit>(out);
+                ConstantResolutionItem job{nesting_, constant};
+                if (resolveConstantJob(ctx, job)) {
+                    categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+                    if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
+                                                  constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
+                        // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
+                        // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
+                        // Sorbet should be taught to emit errors when these references are not actually defined,
+                        // matching Ruby's behavior. Then the reference order checks will be able to check all
+                        // references against their definitions, and not limit them to only isDeclared symbols here.
+
+                        // (Historically, Stripe's custom autoloader used static analysis to predeclare these
+                        // intermediate namespaces, so they would always be defined at the right time. As Stripe's
+                        // codebase moves away from this legacy autoloader, it will be easier to introduce such
+                        // changes into Sorbet.)
+                        checkReferenceOrder(ctx, constant->symbol(), *uclPtr, firstDefinitionLocs);
+                    }
+                } else {
+                    todo_.emplace_back(std::move(job));
                 }
-            } else {
-                todo_.emplace_back(std::move(job));
+                currentScope = std::move(out);
             }
-            tree = std::move(out);
+            tree = std::move(currentScope);
             return;
         }
         if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
@@ -1506,7 +1539,7 @@ public:
         int depth = 0;
         ast::ConstantLit *scope = exp;
         while (auto original = scope->original()) {
-            scope = ast::cast_tree<ast::ConstantLit>(original->scope);
+            scope = ast::cast_tree<ast::ConstantLit>(original->rootScope_);
             if (!scope) {
                 break;
             }

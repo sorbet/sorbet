@@ -125,11 +125,11 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
 
             auto enclosingMethod = enclosingMethodFromContext(ctx);
-            auto resp = core::lsp::ConstantResponse(symbolBeforeDealias, ctx.locAt(lit->loc()), scopes, unresolved.cnst,
+            auto resp = core::lsp::ConstantResponse(symbolBeforeDealias, ctx.locAt(lit->loc()), scopes, unresolved.cnst(),
                                                     tp, enclosingMethod);
             core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
         }
-        lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
+        lit = ast::cast_tree<ast::ConstantLit>(unresolved.rootScope_);
         if (lit) {
             symbolBeforeDealias = lit->symbol();
             symbol = symbolBeforeDealias.dealias(ctx);

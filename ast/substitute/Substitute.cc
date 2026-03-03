@@ -159,9 +159,7 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ExpressionPtr &tree) {
-        auto &original = cast_tree_nonnull<UnresolvedConstantLit>(tree);
-        original.cnst = subst.substituteSymbolName(original.cnst);
-        substClassName(ctx, original.scope);
+        substClassName(ctx, tree);
     }
 
     void postTransformRuntimeMethodDefinition(core::Context ctx, ExpressionPtr &original) {

@@ -105,7 +105,7 @@ bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::Ex
         return false;
     }
 
-    return recursiveVerifyConstant(ctx, fun, root, target->scope);
+    return recursiveVerifyConstant(ctx, fun, root, target->rootScope_);
 }
 
 const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &expr) {
@@ -117,7 +117,7 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
         return nullptr;
     }
 
-    if (recursiveVerifyConstant(ctx, fun, expr, target->scope)) {
+    if (recursiveVerifyConstant(ctx, fun, expr, target->rootScope_)) {
         return target;
     }
 
@@ -126,7 +126,7 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
 
 bool isRootScopedDefinition(const ast::ConstantLit *lit) {
     while (lit != nullptr && lit->original() != nullptr) {
-        lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
+        lit = ast::cast_tree<ast::ConstantLit>(lit->original()->rootScope_);
         if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
             return true;
         }
