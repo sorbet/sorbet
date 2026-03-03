@@ -234,15 +234,24 @@ public:
     }
 
     static ExpressionPtr UnresolvedConstant(core::LocOffsets loc, ExpressionPtr scope, core::NameRef name) {
-        return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
+        // If scope is already a UCL, merge it into a flat vectorized UCL.
+        if (auto ucl = cast_tree<UnresolvedConstantLit>(scope)) {
+            auto segments = std::move(ucl->segments_);
+            segments.emplace_back(name, loc);
+            auto rootScope = std::move(ucl->rootScope_);
+            return make_expression<UnresolvedConstantLit>(loc, std::move(rootScope), std::move(segments));
+        }
+        InlinedVector<UnresolvedConstantLit::SegmentType, 3> segments;
+        segments.emplace_back(name, loc);
+        return make_expression<UnresolvedConstantLit>(loc, std::move(scope), std::move(segments));
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
-        auto result = EmptyTree();
+        InlinedVector<UnresolvedConstantLit::SegmentType, 3> segments;
         for (const auto part : parts) {
-            result = UnresolvedConstant(loc, std::move(result), part);
+            segments.emplace_back(part, loc);
         }
-        return result;
+        return make_expression<UnresolvedConstantLit>(loc, EmptyTree(), std::move(segments));
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
@@ -621,7 +630,8 @@ public:
     static bool isRootConstantLitApproximate(const ast::ExpressionPtr &expr, const core::NameRef name,
                                              const core::ClassOrModuleRef symbol) {
         if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
-            return c->cnst == name && ast::MK::isRootScope(c->scope);
+            return c->segments_.size() == 1 && c->segments_[0].first == name &&
+                   ast::MK::isRootScope(c->rootScope_);
         } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
             return c->symbol() == symbol;
         }
