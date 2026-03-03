@@ -58,12 +58,11 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
 
     vector<core::NameRef> fullNameReversed;
     while (constantLit != nullptr) {
-        fullNameReversed.emplace_back(constantLit->cnst);
-        if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
-            constantLit = resolvedLit->original();
-        } else {
-            constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
+        for (auto [name, loc] : constantLit->partsReverse()) {
+            fullNameReversed.emplace_back(name);
         }
+        auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->rootScope());
+        constantLit = resolvedLit != nullptr ? resolvedLit->original() : nullptr;
     }
     ENFORCE(!fullNameReversed.empty());
 

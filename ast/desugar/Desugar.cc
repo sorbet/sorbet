@@ -2313,16 +2313,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 Send::ARGS_store args;
-                while (!isa_tree<EmptyTree>(value)) {
-                    auto lit = cast_tree<UnresolvedConstantLit>(value);
-                    if (lit == nullptr) {
-                        args.clear();
-                        break;
+                if (auto lit = cast_tree<UnresolvedConstantLit>(value)) {
+                    if (isa_tree<EmptyTree>(lit->rootScope())) {
+                        for (auto [name, segLoc] : lit->parts()) {
+                            args.emplace_back(MK::String(segLoc, name));
+                        }
                     }
-                    args.emplace_back(MK::String(lit->loc, lit->cnst));
-                    value = move(lit->scope);
+                    // else: dynamic constant path (non-EmptyTree root scope) → args stays empty
                 }
-                absl::c_reverse(args);
+                // else: non-UCL value or EmptyTree → args stays empty
 
                 auto numPosArgs = args.size();
                 auto res = MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, move(args));
