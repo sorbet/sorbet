@@ -1966,30 +1966,39 @@ class TreeSymbolizer {
         auto newOwner = squashNamesInner(ctx, owner, constLit->rootScope_, firstNameRecursive);
         ENFORCE(newOwner.exists());
 
-        // Process all segments except the last without firstName logic
-        for (size_t i = 0; i + 1 < constLit->segments_.size(); ++i) {
-            auto segName = constLit->segments_[i].first;
+        // Copy segments and move rootScope_ (after squashNamesInner may have modified it).
+        auto segments = constLit->segments_;
+        ast::ExpressionPtr currentScope = std::move(constLit->rootScope_);
+
+        // Build a chain of single-segment ConstantLits, mirroring walkUnresolvedConstantLit
+        // in the resolver. This preserves the chain structure that matchesQuery in
+        // DefLocSaver.cc uses to traverse qualified constant paths for LSP queries.
+        ENFORCE(!segments.empty());
+        for (size_t i = 0; i < segments.size(); ++i) {
+            auto [segName, segLoc] = segments[i];
+            bool isLast = (i + 1 == segments.size());
+
             core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), segName);
+            if (isLast && firstName && !existing.exists() && newOwner.isClassOrModule()) {
+                existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), segName);
+                if (existing.exists()) {
+                    existing = existing.dealias(ctx.state);
+                }
+            }
+
+            // NameInserter should have created this symbol
             ENFORCE(existing.exists());
             newOwner = existing;
+
+            InlinedVector<ast::UnresolvedConstantLit::SegmentType, 3> singleSeg;
+            singleSeg.emplace_back(segName, segLoc);
+            auto singleUCL =
+                make_unique<ast::UnresolvedConstantLit>(segLoc, std::move(currentScope), std::move(singleSeg));
+            currentScope = ast::make_expression<ast::ConstantLit>(existing, std::move(singleUCL));
         }
 
-        // Look up the last segment with firstName logic
-        ENFORCE(!constLit->segments_.empty());
-        auto lastSegName = constLit->segments_.back().first;
-        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), lastSegName);
-        if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
-            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), lastSegName);
-            if (existing.exists()) {
-                existing = existing.dealias(ctx.state);
-            }
-        }
-
-        // NameInserter should have created this symbol
-        ENFORCE(existing.exists());
-
-        node = ast::make_expression<ast::ConstantLit>(existing, node.toUnique<ast::UnresolvedConstantLit>());
-        return existing;
+        node = std::move(currentScope);
+        return newOwner;
     }
 
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
