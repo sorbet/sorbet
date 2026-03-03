@@ -494,14 +494,20 @@ class LocalNameInserter {
     }
 
     void walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            walkConstantLit(ctx, lit->scope);
-        } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            // Do nothing.
-        } else {
+        auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(tree);
+        if (lit == nullptr) {
+            if (!ast::isa_tree<ast::EmptyTree>(tree) && !ast::isa_tree<ast::ConstantLit>(tree)) {
+                // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+                // Still want to do our best to recover (for e.g., LSP queries)
+                ast::TreeWalk::apply(ctx, *this, tree);
+            }
+            return;
+        }
+        auto &root = const_cast<ast::ExpressionPtr &>(lit->rootScope());
+        if (!ast::isa_tree<ast::EmptyTree>(root) && !ast::isa_tree<ast::ConstantLit>(root)) {
             // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
             // Still want to do our best to recover (for e.g., LSP queries)
-            ast::TreeWalk::apply(ctx, *this, tree);
+            ast::TreeWalk::apply(ctx, *this, root);
         }
     }
 

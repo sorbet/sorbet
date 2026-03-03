@@ -53,12 +53,11 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
 
     vector<core::NameRef> fullNameReversed;
     while (constantLit != nullptr) {
-        fullNameReversed.emplace_back(constantLit->cnst);
-        if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
-            constantLit = resolvedLit->original();
-        } else {
-            constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
+        for (auto [name, loc] : constantLit->partsReverse()) {
+            fullNameReversed.emplace_back(name);
         }
+        auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->rootScope());
+        constantLit = resolvedLit != nullptr ? resolvedLit->original() : nullptr;
     }
     ENFORCE(!fullNameReversed.empty());
 
@@ -1256,19 +1255,18 @@ bool isTestExport(const ast::ExpressionPtr &expr) {
     }
 
     auto sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
-    while (sym) {
-        if (ast::isa_tree<ast::EmptyTree>(sym->scope)) {
-            return sym->cnst == core::Names::Constants::Test();
-        }
-
-        if (auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope)) {
-            sym = parent;
-        } else {
-            break;
-        }
+    if (sym == nullptr) {
+        return false;
     }
-
-    return false;
+    if (!ast::isa_tree<ast::EmptyTree>(sym->rootScope())) {
+        return false;
+    }
+    auto range = sym->parts();
+    auto it = range.begin();
+    if (it == range.end()) {
+        return false;
+    }
+    return it->first == core::Names::Constants::Test();
 }
 
 } // namespace

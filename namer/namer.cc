@@ -146,13 +146,18 @@ class SymbolFinder {
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
-            core::FoundClass found;
-            found.owner = defineScope(owner, constLit->scope);
-            found.name = constLit->cnst;
-            found.loc = constLit->loc;
-            found.declLoc = constLit->loc;
-            found.classKind = core::FoundClass::Kind::Unknown;
-            return foundDefs->addClass(move(found));
+            // Resolve root scope first, then build FoundClass entries root-to-leaf.
+            auto current = defineScope(owner, constLit->rootScope());
+            for (auto [name, loc] : constLit->parts()) {
+                core::FoundClass found;
+                found.owner = current;
+                found.name = name;
+                found.loc = loc;
+                found.declLoc = loc;
+                found.classKind = core::FoundClass::Kind::Unknown;
+                current = foundDefs->addClass(move(found));
+            }
+            return current;
         } else {
             // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
             // Fall back to just using `owner`.

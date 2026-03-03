@@ -478,8 +478,7 @@ bool UnresolvedConstantLit::ReverseRange::iterator::operator!=(const iterator &o
 }
 
 // MutableReverseRange implementation
-UnresolvedConstantLit::MutableReverseRange::MutableReverseRange(UnresolvedConstantLit* node)
-    : node_(node) {}
+UnresolvedConstantLit::MutableReverseRange::MutableReverseRange(UnresolvedConstantLit *node) : node_(node) {}
 
 UnresolvedConstantLit::MutableReverseRange::iterator UnresolvedConstantLit::MutableReverseRange::begin() const {
     return iterator(node_);
@@ -490,8 +489,7 @@ UnresolvedConstantLit::MutableReverseRange::iterator UnresolvedConstantLit::Muta
 }
 
 // MutableReverseRange::iterator implementation
-UnresolvedConstantLit::MutableReverseRange::iterator::iterator(UnresolvedConstantLit* node)
-    : current_(node) {}
+UnresolvedConstantLit::MutableReverseRange::iterator::iterator(UnresolvedConstantLit *node) : current_(node) {}
 
 void UnresolvedConstantLit::MutableReverseRange::iterator::advance() {
     if (!current_) {
@@ -508,10 +506,10 @@ void UnresolvedConstantLit::MutableReverseRange::iterator::advance() {
 
 UnresolvedConstantLit::MutableReverseRange::MutableSegment
 UnresolvedConstantLit::MutableReverseRange::iterator::operator*() const {
-    return MutableSegment(current_->cnst, const_cast<core::LocOffsets&>(current_->loc));
+    return MutableSegment(current_->cnst, const_cast<core::LocOffsets &>(current_->loc));
 }
 
-UnresolvedConstantLit::MutableReverseRange::iterator&
+UnresolvedConstantLit::MutableReverseRange::iterator &
 UnresolvedConstantLit::MutableReverseRange::iterator::operator++() {
     advance();
     return *this;
@@ -524,11 +522,11 @@ UnresolvedConstantLit::MutableReverseRange::iterator::operator++(int) {
     return tmp;
 }
 
-bool UnresolvedConstantLit::MutableReverseRange::iterator::operator==(const iterator& other) const {
+bool UnresolvedConstantLit::MutableReverseRange::iterator::operator==(const iterator &other) const {
     return current_ == other.current_;
 }
 
-bool UnresolvedConstantLit::MutableReverseRange::iterator::operator!=(const iterator& other) const {
+bool UnresolvedConstantLit::MutableReverseRange::iterator::operator!=(const iterator &other) const {
     return !(*this == other);
 }
 
