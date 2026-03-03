@@ -540,7 +540,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
 
         if (opts.cacheSensitiveOptions.sorbetPackages) {
-            trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
+            packager::VisibilityChecker::run(*gs, *workers, trees);
         }
 
         handler.drainErrors(*gs);
@@ -891,7 +891,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     if (opts.cacheSensitiveOptions.sorbetPackages) {
-        trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
+        packager::VisibilityChecker::run(*gs, *workers, trees);
     }
 
     for (auto &resolvedTree : trees) {
