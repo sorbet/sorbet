@@ -1062,8 +1062,8 @@ public:
     }
 };
 
-vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts,
-                                              vector<ast::ParsedFile> what) {
+void printMissingConstants(core::GlobalState &gs, const options::Options &opts,
+                           absl::Span<const ast::ParsedFile> what) {
     Timer timeit(gs.tracer(), "printMissingConstants");
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
@@ -1075,7 +1075,6 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     missing.erase(unique(missing.begin(), missing.end()), missing.end());
 
     opts.print.MissingConstants.fmt("{}\n", fmt::join(missing, "\n"));
-    return what;
 }
 
 class DefinitionLinesDenylistEnforcer {
@@ -1224,7 +1223,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
     }
 
     if (opts.print.MissingConstants.enabled) {
-        what = printMissingConstants(gs, opts, move(what));
+        printMissingConstants(gs, opts, what);
     }
 
     return ast::ParsedFilesOrCancelled(move(what));
