@@ -1,0 +1,53 @@
+a/__package.rb:5: Constant `Root::A` lacks a declaration and cannot be exported https://srb.help/3721
+     5 |  export Root::A
+          ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    a/__package.rb:5: Delete
+     5 |  export Root::A
+          ^^^^^^^^^^^^^^
+
+b/__package.rb:4: Constant `Root::B` lacks a declaration and cannot be exported https://srb.help/3721
+     4 |  export Root::B
+          ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    b/__package.rb:4: Replace with `export Root::B::A`
+     4 |  export Root::B
+          ^^^^^^^^^^^^^^
+
+c/__package.rb:4: Constant `Root::C` lacks a declaration and cannot be exported https://srb.help/3721
+     4 |  export Root::C
+          ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    c/__package.rb:4: Replace with `export Root::C::Helper
+      export Root::C::Util::A
+      export Root::C::Util::B`
+     4 |  export Root::C
+          ^^^^^^^^^^^^^^
+Errors: 3
+a/__package.rb:5: Constant `Root::A` lacks a declaration and cannot be exported https://srb.help/3721
+     5 |  export Root::A
+          ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    a/__package.rb:5: Deleted
+     5 |  export Root::A
+          ^^^^^^^^^^^^^^
+
+b/__package.rb:4: Constant `Root::B` lacks a declaration and cannot be exported https://srb.help/3721
+     4 |  export Root::B
+          ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    b/__package.rb:4: Replaced with `export Root::B::A`
+     4 |  export Root::B
+          ^^^^^^^^^^^^^^
+
+c/__package.rb:4: Constant `Root::C` lacks a declaration and cannot be exported https://srb.help/3721
+     4 |  export Root::C
+          ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    c/__package.rb:4: Replaced with `export Root::C::Helper
+      export Root::C::Util::A
+      export Root::C::Util::B`
+     4 |  export Root::C
+          ^^^^^^^^^^^^^^
+Errors: 3
+No errors! Great job.
