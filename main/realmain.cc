@@ -675,10 +675,6 @@ int realmain(int argc, char *argv[]) {
                     }
                 }
             }
-
-            // Update offsets for the next stratum. We do this at the end of the loop to ensure that the first
-            // iteration of the loop includes all of the payload symbols.
-            gs->updateSymbolTableOffsets();
         }
 
         if (opts.genPackages) {
