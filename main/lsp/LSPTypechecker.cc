@@ -374,82 +374,92 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
     auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
         vector<ast::ParsedFile> indexed, nonPackagedIndexed;
 
-        {
-            // Replace error queue with one that is owned by this thread.
-            this->gs->errorQueue =
-                make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
+        // Replace error queue with one that is owned by this thread.
+        this->gs->errorQueue =
+            make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
 
-            optional<Timer> timeit;
-            ShowOperation op(*config, ShowOperation::Kind::Indexing);
+        switch (mode) {
+            // Initialization fetches the list of files to index from the options
+            case SlowPathMode::Init: {
+                Timer timeit(this->config->logger, "initial_init");
 
-            switch (mode) {
-                // Initialization fetches the list of files to index from the options
-                case SlowPathMode::Init: {
-                    ENFORCE(!this->initialized);
-                    timeit.emplace(this->config->logger, "initial_index");
-
-                    this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
-                    break;
-                }
-
-                // Reindexing on the slow path derives the list of inputs files from the file table
-                case SlowPathMode::Cancelable: {
-                    timeit.emplace(this->config->logger, "slow_path_reindex");
-
-                    // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the
-                    // file table to point to the updated files.
-                    if (!updates.updatedFiles.empty()) {
-                        core::UnfreezeFileTable updateFileTable{*this->gs};
-
-                        for (auto &file : updates.updatedFiles) {
-                            auto fref = this->gs->findFileByPath(file->path());
-                            if (!fref.exists()) {
-                                fref = this->gs->enterFile(std::move(file));
-                            } else {
-                                this->gs->replaceFile(fref, std::move(file));
-                            }
-
-                            // Not all files present in the update set will be from open files--some could be watchman
-                            // update events, and others will be the result of a `textDocument/didClose` notification.
-                            // As a result, we may need to remove entries from the set that was eagerly cloned from
-                            // `indexedFinalGS`
-                            if (fref.data(*this->gs).isOpenInClient()) {
-                                openFiles.insert(fref);
-                            } else {
-                                openFiles.erase(fref);
-                            }
-                        }
-
-                        updates.updatedFiles.clear();
-                    }
-
-                    this->workspaceFiles.clear();
-                    this->workspaceFiles.reserve(this->gs->filesUsed());
-
-                    // Rebuild the set of filerefs we're going to index. We're explicitly skipping the `0` file, as
-                    // that's always a nullptr.
-                    auto ix = 0;
-                    for (const auto &file : this->gs->getFiles().subspan(1)) {
-                        ++ix;
-
-                        ENFORCE(file != nullptr);
-
-                        switch (file->sourceType) {
-                            case core::File::Type::NotYetRead:
-                            case core::File::Type::Normal:
-                                this->workspaceFiles.emplace_back(ix);
-                                break;
-
-                            case core::File::Type::PayloadGeneration:
-                            case core::File::Type::Payload:
-                            case core::File::Type::TombStone:
-                                break;
-                        }
-                    }
-
-                    break;
-                }
+                ENFORCE(!this->initialized);
+                this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
+                break;
             }
+
+            // Reindexing on the slow path derives the list of inputs files from the file table
+            case SlowPathMode::Cancelable: {
+                Timer timeit(this->config->logger, "slow_path_init");
+
+                // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the
+                // file table to point to the updated files.
+                if (!updates.updatedFiles.empty()) {
+                    core::UnfreezeFileTable updateFileTable{*this->gs};
+
+                    for (auto &file : updates.updatedFiles) {
+                        auto fref = this->gs->findFileByPath(file->path());
+                        if (!fref.exists()) {
+                            fref = this->gs->enterFile(std::move(file));
+                        } else {
+                            this->gs->replaceFile(fref, std::move(file));
+                        }
+
+                        // Not all files present in the update set will be from open files--some could be watchman
+                        // update events, and others will be the result of a `textDocument/didClose` notification.
+                        // As a result, we may need to remove entries from the set that was eagerly cloned from
+                        // `indexedFinalGS`
+                        if (fref.data(*this->gs).isOpenInClient()) {
+                            openFiles.insert(fref);
+                        } else {
+                            openFiles.erase(fref);
+                        }
+                    }
+
+                    updates.updatedFiles.clear();
+                }
+
+                this->workspaceFiles.clear();
+                this->workspaceFiles.reserve(this->gs->filesUsed());
+
+                // Rebuild the set of filerefs we're going to index. We're explicitly skipping the `0` file, as
+                // that's always a nullptr.
+                auto ix = 0;
+                for (const auto &file : this->gs->getFiles().subspan(1)) {
+                    ++ix;
+
+                    ENFORCE(file != nullptr);
+
+                    switch (file->sourceType) {
+                        case core::File::Type::NotYetRead:
+                        case core::File::Type::Normal:
+                            this->workspaceFiles.emplace_back(ix);
+                            break;
+
+                        case core::File::Type::PayloadGeneration:
+                        case core::File::Type::Payload:
+                        case core::File::Type::TombStone:
+                            break;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        {
+            optional<Timer> timeit;
+            switch (mode) {
+                case SlowPathMode::Init:
+                    timeit.emplace(this->config->logger, "initial_index");
+                    break;
+
+                case SlowPathMode::Cancelable:
+                    timeit.emplace(this->config->logger, "slow_path_reindex");
+                    break;
+            }
+
+            ShowOperation op(*config, ShowOperation::Kind::Indexing);
 
             ENFORCE(updates.updatedFiles.empty());
             ENFORCE(gs->lspQuery.isEmpty());
