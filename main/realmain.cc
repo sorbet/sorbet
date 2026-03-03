@@ -728,6 +728,9 @@ int realmain(int argc, char *argv[]) {
             pipeline::setGlobalStateOptions(*gsForMinimize, optsForMinimize);
 
             Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
+            UnorderedMap<long, long> untypedUsagesForMinimize;
+            // Use `opts` not `optsForMinimize` so that the print outputs go to the same spot.
+            pipeline::printGlobalTables(*gsForMinimize, opts, untypedUsagesForMinimize);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 
             if (gsForMinimize->hadCriticalError()) {
