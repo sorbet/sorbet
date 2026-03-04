@@ -120,6 +120,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
+  if <emptyTree>::<C ARGV>.first().==("foo")
+    [].each() do ||
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    end
+  else
+    [].each() do ||
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
+    end
+  end
+
   begin
     <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
     <emptyTree>::<C T>.reveal_type(<self>)

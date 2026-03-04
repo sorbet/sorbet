@@ -79,6 +79,18 @@ else
   T.reveal_type(self) # error: Revealed type: `T.untyped`
 end
 
+if ARGV.first == "foo"
+  [].each do
+    #: self as Foo
+    T.reveal_type(self) # error: Revealed type: `Foo`
+  end
+else
+  [].each do
+    #: self as Foo
+    T.reveal_type(self) # error: Revealed type: `Foo`
+  end
+end
+
 begin
   #: self as Foo
   T.reveal_type(self) # error: Revealed type: `Foo`

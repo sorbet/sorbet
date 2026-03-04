@@ -1,5 +1,11 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  def method_with_only_ensure<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+
   <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C Integer>)
 ensure
   <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
+
+  <runtime method definition of method_with_only_ensure>
 end

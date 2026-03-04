@@ -7,6 +7,11 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "core/FileHash.h"
 #include "main/options/options.h"
+#include "parser/prism/Parser.h"
+
+extern "C" {
+#include "prism.h"
+}
 
 namespace sorbet::core::lsp {
 class PreemptionTaskManager;
@@ -115,4 +120,5 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts);
 
 } // namespace sorbet::realmain::pipeline
+
 #endif // RUBY_TYPER_PIPELINE_H

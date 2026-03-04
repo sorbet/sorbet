@@ -1,0 +1,22 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  lam1 = <emptyTree>::<C Kernel>.lambda() do ||
+    <cast:cast>(42, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(lam1)
+
+  lam2 = <emptyTree>::<C Kernel>.lambda() do ||
+    begin
+      x = 1
+      <cast:cast>(x, <todo sym>, <emptyTree>::<C String>)
+    end
+  end
+
+  <emptyTree>::<C T>.reveal_type(lam2)
+
+  lam3 = <self>.lambda() do ||
+    <cast:cast>(42, <todo sym>, <emptyTree>::<C String>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(lam3)
+end

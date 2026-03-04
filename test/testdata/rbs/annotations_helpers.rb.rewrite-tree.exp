@@ -146,4 +146,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Multiple1>::<C Multiple2>
     end
   end
+
+  class <emptyTree>::<C UnknownAnnotation><<C <todo sym>>> < (::<todo sym>)
+  end
 end

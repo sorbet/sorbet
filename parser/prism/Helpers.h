@@ -1,8 +1,13 @@
 #ifndef SORBET_PARSER_PRISM_HELPERS_H
 #define SORBET_PARSER_PRISM_HELPERS_H
 
+#include "ast/Trees.h"
+#include "common/common.h"
+#include "core/LocOffsets.h"
+#include "parser/Node.h"
 #include <string_view>
 #include <type_traits>
+#include <vector>
 extern "C" {
 #include "prism.h"
 }
@@ -213,28 +218,6 @@ inline std::string_view cast_prism_string(const uint8_t *source, size_t length) 
     return std::string_view(reinterpret_cast<const char *>(source), length);
 }
 
-template <typename SorbetLHSType> struct IdentKindHelper {};
-
-template <> struct IdentKindHelper<parser::IVarLhs> {
-    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Instance;
-};
-
-template <> struct IdentKindHelper<parser::CVarLhs> {
-    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Class;
-};
-
-template <> struct IdentKindHelper<parser::GVarLhs> {
-    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Global;
-};
-
-template <> struct IdentKindHelper<parser::LVarLhs> {
-    static constexpr ast::UnresolvedIdent::Kind Kind = ast::UnresolvedIdent::Kind::Local;
-};
-
-template <typename SorbetLHSType> constexpr ast::UnresolvedIdent::Kind getIdentKind() {
-    return IdentKindHelper<SorbetLHSType>::Kind;
-}
-
 // A C++ friendly wrapper around `pm_visit_node`, which lets you use a capturing lambda as the visitor.
 template <typename Visitor> void walkPrismAST(const pm_node_t *node, Visitor &&visitor) {
     // Ensure the visitor is callable with const pm_node_t * and returns bool
@@ -254,6 +237,41 @@ template <typename Visitor> void walkPrismAST(const pm_node_t *node, Visitor &&v
     pm_visit_node(node, callback, &visitor);
 }
 
+// Forward declarations
+class Parser;
+
 } // namespace sorbet::parser::Prism
+
+// Forward declarations for parser LHS types
+namespace sorbet::parser {
+class IVarLhs;
+class CVarLhs;
+class GVarLhs;
+class LVarLhs;
+} // namespace sorbet::parser
+
+// Helper templates for mapping Sorbet LHS types to ast::UnresolvedIdent::Kind
+// These are defined outside the sorbet::parser::Prism namespace to avoid ordering issues
+template <typename SorbetLHSType> struct IdentKindHelper {};
+
+template <> struct IdentKindHelper<sorbet::parser::IVarLhs> {
+    static constexpr sorbet::ast::UnresolvedIdent::Kind Kind = sorbet::ast::UnresolvedIdent::Kind::Instance;
+};
+
+template <> struct IdentKindHelper<sorbet::parser::CVarLhs> {
+    static constexpr sorbet::ast::UnresolvedIdent::Kind Kind = sorbet::ast::UnresolvedIdent::Kind::Class;
+};
+
+template <> struct IdentKindHelper<sorbet::parser::GVarLhs> {
+    static constexpr sorbet::ast::UnresolvedIdent::Kind Kind = sorbet::ast::UnresolvedIdent::Kind::Global;
+};
+
+template <> struct IdentKindHelper<sorbet::parser::LVarLhs> {
+    static constexpr sorbet::ast::UnresolvedIdent::Kind Kind = sorbet::ast::UnresolvedIdent::Kind::Local;
+};
+
+template <typename SorbetLHSType> constexpr sorbet::ast::UnresolvedIdent::Kind getIdentKind() {
+    return IdentKindHelper<SorbetLHSType>::Kind;
+}
 
 #endif // SORBET_PARSER_PRISM_HELPERS_H

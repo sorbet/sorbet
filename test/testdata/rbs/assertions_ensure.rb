@@ -6,3 +6,7 @@ begin
 ensure
   ARGV.first #: as String
 end
+
+def method_with_only_ensure
+ensure
+end

@@ -70,3 +70,28 @@ brackets_assign[
 
 self #: as untyped
   .unexisting_method = 42
+
+# call op assign
+
+let6 = Let.new
+let6.foo &&= "foo" #: as String # error: `T.cast` is useless
+let6.foo ||= "foo" #: as String # error: `T.cast` is useless
+let6.foo += "foo" #: as String # error: `T.cast` is useless
+
+# index op assign
+
+class BracketsOpAssign
+  #: (*untyped) -> void
+  def []=(*args); end
+
+  #: (*untyped) -> untyped
+  def [](*args); end
+end
+
+brackets_op_assign = BracketsOpAssign.new
+brackets_op_assign[:a] &&= "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[:a] ||= "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[:a] += "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[
+  :a, #: as String
+] &&= "foo" #: as String # error: `T.cast` is useless

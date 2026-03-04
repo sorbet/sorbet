@@ -80,4 +80,94 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   brackets_assign.[]=(<cast:cast>(:a, <todo sym>, <emptyTree>::<C String>), <cast:cast>(:b, <todo sym>, <emptyTree>::<C String>), ::<root>::<C T>.unsafe(["bar", "foo"]))
 
   ::<root>::<C T>.unsafe(<self>).unexisting_method=(42)
+
+  let6 = <emptyTree>::<C Let>.new()
+
+  begin
+    foo$2 = let6
+    foo$3 = foo$2.foo()
+    if foo$3
+      foo$2.foo=(<cast:cast>("foo", <todo sym>, <emptyTree>::<C String>))
+    else
+      foo$3
+    end
+  end
+
+  begin
+    foo$4 = let6
+    foo$5 = foo$4.foo()
+    if foo$5
+      foo$5
+    else
+      foo$4.foo=(<cast:cast>("foo", <todo sym>, <emptyTree>::<C String>))
+    end
+  end
+
+  begin
+    foo$6 = let6
+    foo$6.foo=(foo$6.foo().+(<cast:cast>("foo", <todo sym>, <emptyTree>::<C String>)))
+  end
+
+  class <emptyTree>::<C BracketsOpAssign><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:args, ::<root>::<C T>.untyped()).void()
+    end
+
+    def []=<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:args, ::<root>::<C T>.untyped()).returns(::<root>::<C T>.untyped())
+    end
+
+    def []<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of []=>
+
+    <runtime method definition of []>
+  end
+
+  brackets_op_assign = <emptyTree>::<C BracketsOpAssign>.new()
+
+  begin
+    []$7 = brackets_op_assign
+    []$8 = :a
+    []$9 = []$7.[]([]$8)
+    if []$9
+      []$7.[]=([]$8, <cast:cast>("foo", <todo sym>, <emptyTree>::<C String>))
+    else
+      []$9
+    end
+  end
+
+  begin
+    []$10 = brackets_op_assign
+    []$11 = :a
+    []$12 = []$10.[]([]$11)
+    if []$12
+      []$12
+    else
+      []$10.[]=([]$11, <cast:cast>("foo", <todo sym>, <emptyTree>::<C String>))
+    end
+  end
+
+  begin
+    []$13 = brackets_op_assign
+    []$14 = :a
+    []$13.[]=([]$14, []$13.[]([]$14).+(<cast:cast>("foo", <todo sym>, <emptyTree>::<C String>)))
+  end
+
+  begin
+    []$15 = brackets_op_assign
+    []$16 = <cast:cast>(:a, <todo sym>, <emptyTree>::<C String>)
+    []$17 = []$15.[]([]$16)
+    if []$17
+      []$15.[]=([]$16, <cast:cast>("foo", <todo sym>, <emptyTree>::<C String>))
+    else
+      []$17
+    end
+  end
 end

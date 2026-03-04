@@ -43,3 +43,7 @@ end
 begin
 rescue #: as String # error: Unexpected RBS assertion comment found after `rescue`
 end
+
+def method_with_only_rescue
+rescue StandardError
+end

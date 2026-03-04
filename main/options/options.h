@@ -45,6 +45,7 @@ struct Printers {
     PrinterConfig ParseTreeJson;
     PrinterConfig ParseTreeJsonWithLocs;
     PrinterConfig ParseTreeWhitequark;
+    PrinterConfig ParseTreePrism;
     PrinterConfig RBSRewriteTree;
     PrinterConfig DesugarTree;
     PrinterConfig DesugarTreeRaw;

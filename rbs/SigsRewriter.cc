@@ -31,8 +31,8 @@ parser::Node *signaturesTarget(parser::Node *node) {
 /**
  * Extracts and parses the argument from the annotation string.
  *
- * Considering an annotation like `@mixes_in_class_methods: ClassMethods`,
- * this function will extract and parse `ClassMethods` as a type then return the corresponding parser::Node.
+ * Considering an annotation like `@requires_ancestor: SomeModule`,
+ * this function will extract and parse `SomeModule` as a type then return the corresponding parser::Node.
  *
  * We do not error if the node is not a constant, we just insert it as is and let the pipeline error down the line.
  */
