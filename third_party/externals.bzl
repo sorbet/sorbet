@@ -202,9 +202,9 @@ def register_sorbet_dependencies():
     # )
     http_archive(
         name = "toolchains_llvm",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/b9c2f11092c90377d4bfc64c406766573545af47.tar.gz",
-        sha256 = "723ebe8994d754acb3ef81a271ad645a0a3ee4a8680f0499b3c24f537b16cfcc",
-        strip_prefix = "bazel-toolchain-b9c2f11092c90377d4bfc64c406766573545af47",
+        url = "https://github.com/sorbet/bazel-toolchain/archive/3f912e338d79ea29ad35f20321f24d551d7d89ad.tar.gz",
+        sha256 = "4c998dc3f3b0c7b31a66aa4e262191b94da93cf31698eb6ac5a751267afbe26a",
+        strip_prefix = "bazel-toolchain-3f912e338d79ea29ad35f20321f24d551d7d89ad",
     )
 
     http_archive(
