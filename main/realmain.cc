@@ -229,6 +229,9 @@ vector<ast::ParsedFile> runAutogen(core::GlobalState &gs, options::Options &opts
     if (opts.cacheSensitiveOptions.sorbetPackages) {
         Exception::raise("Sorbet cannot run under `--sorbet-packages` when running for autogen");
     }
+    if (opts.autocorrect) {
+        Exception::raise("Autogen ignores `--autocorrect`");
+    }
 
     auto inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
 
@@ -384,8 +387,6 @@ vector<ast::ParsedFile> runAutogen(core::GlobalState &gs, options::Options &opts
 
         opts.print.AutogenSubclasses.fmt("{}\n", fmt::join(serializedDescendantsMap, "\n"));
     }
-
-    gs.errorQueue->flushAllErrors(gs);
 
     return indexed;
 }
@@ -569,6 +570,11 @@ int realmain(int argc, char *argv[]) {
     } else if (gs->cacheSensitiveOptions.runningUnderAutogen) {
         Timer timeall(logger, "wall_time");
         auto indexed = runAutogen(*gs, opts, *workers, move(kvstore));
+
+        gs->errorQueue->flushAllErrors(*gs);
+        if (!opts.noErrorCount) {
+            errorFlusher->flushErrorCount(gs->errorQueue->logger, gs->errorQueue->nonSilencedErrorCount);
+        }
 #endif
     } else {
         Timer timeall(logger, "wall_time");
