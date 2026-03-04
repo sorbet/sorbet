@@ -238,8 +238,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         // if a file is typed: ignore, then we shouldn't try to parse
         // it or do anything with it at all
         if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
-            ast::ParsedFile pf{ast::make_expression<ast::EmptyTree>(), file};
-            trees.emplace_back(move(pf));
+            trees.emplace_back(ast::make_expression<ast::EmptyTree>(), file);
             continue;
         }
 
@@ -757,19 +756,18 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto symbolsBefore = gs->symbolsUsedTotal();
 
     vector<ast::ParsedFile> newTrees;
-    for (auto &f : trees) {
-        if (f.file.data(*gs).strictLevel == core::StrictLevel::Ignore) {
-            newTrees.emplace_back(move(f));
+    for (auto &f : files) {
+        if (f.data(*gs).strictLevel == core::StrictLevel::Ignore) {
+            newTrees.emplace_back(ast::make_expression<ast::EmptyTree>(), f);
             continue;
         }
 
-        const int prohibitedLines = f.file.data(*gs).source().size();
-        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
-        auto newFile =
-            make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
-        gs->replaceFile(f.file, move(newFile));
+        const int prohibitedLines = f.data(*gs).source().size();
+        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.data(*gs).source());
+        auto newFile = make_shared<core::File>(string(f.data(*gs).path()), move(newSource), f.data(*gs).sourceType);
+        gs->replaceFile(f, move(newFile));
 
-        core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
+        core::MutableContext ctx(*gs, core::Symbols::root(), f);
 
         handler.drainErrors(*gs);
 
@@ -779,7 +777,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
                 auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
-                parseResult = parser::Parser::run(*gs, f.file, settings);
+                parseResult = parser::Parser::run(*gs, f, settings);
 
                 handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
                 handler.addObserved(*gs, "parse-tree-whitequark",
@@ -795,7 +793,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 } catch (parser::Prism::PrismFallback &) {
                     // Hit a fallback case during Prism parsing, fallback to the legacy parser.
                     auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
-                    parseResult = parser::Parser::run(*gs, f.file, settings);
+                    parseResult = parser::Parser::run(*gs, f, settings);
                 }
 
                 break;
@@ -821,7 +819,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto ast = usePrismDesugar ? ast::prismDesugar::node2Tree(ctx, move(nodes))
                                    : ast::desugar::node2Tree(ctx, move(nodes));
 
-        auto file = ast::ParsedFile{move(ast), f.file};
+        auto file = ast::ParsedFile{move(ast), f};
 
         if (!usePrismDesugar) {
             // These expectations match the legacy parser's desugar tree, which can be subtly different
