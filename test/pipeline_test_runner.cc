@@ -539,35 +539,35 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
         absl::c_move(stratum.packageFiles, back_inserter(stratumFiles));
 
-        auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
+        auto nonPackageTrees = index(*gs, stratum.sourceFiles, handler, test, assertions);
         name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers, handler);
         validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
-        realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
+        realmain::pipeline::unpartitionPackageFiles(stratumFiles, move(nonPackageTrees));
 
         {
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-            trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
+            stratumFiles = move(resolver::Resolver::run(*gs, move(stratumFiles), *workers).result());
 
             if (opts.cacheSensitiveOptions.sorbetPackages) {
-                packager::VisibilityChecker::run(*gs, *workers, trees);
+                packager::VisibilityChecker::run(*gs, *workers, stratumFiles);
             }
 
             handler.drainErrors(*gs);
         }
 
-        for (auto &resolvedTree : trees) {
+        for (auto &resolvedTree : stratumFiles) {
             handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
             handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
         }
 
         // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better
         // work distribution
-        fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+        fast_sort(stratumFiles, [&](const auto &lhs, const auto &rhs) -> bool {
             return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
         });
 
-        for (auto &resolvedTree : trees) {
+        for (auto &resolvedTree : stratumFiles) {
             auto file = resolvedTree.file;
 
             core::Context ctx(*gs, core::Symbols::root(), file);
