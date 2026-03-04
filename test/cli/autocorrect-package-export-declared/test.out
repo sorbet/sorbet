@@ -23,7 +23,22 @@ c/__package.rb:4: Constant `Root::C` lacks a declaration and cannot be exported 
       export Root::C::Util::B`
      4 |  export Root::C
           ^^^^^^^^^^^^^^
-Errors: 3
+
+d/__package.rb:4: Constant `Root::D` lacks a declaration and cannot be exported https://srb.help/3721
+     4 |  export Root::D
+          ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    d/__package.rb:4: Delete
+     4 |  export Root::D
+          ^^^^^^^^^^^^^^
+
+d/__package.rb:4: Cannot export `Root::D` because it is only defined in an RBI file https://srb.help/3721
+     4 |  export Root::D
+          ^^^^^^^^^^^^^^
+    d/util.rbi:3: Defined here
+     3 |class Root::D::Util
+              ^^^^^^^
+Errors: 5
 a/__package.rb:5: Constant `Root::A` lacks a declaration and cannot be exported https://srb.help/3721
      5 |  export Root::A
           ^^^^^^^^^^^^^^
@@ -49,5 +64,20 @@ c/__package.rb:4: Constant `Root::C` lacks a declaration and cannot be exported 
       export Root::C::Util::B`
      4 |  export Root::C
           ^^^^^^^^^^^^^^
-Errors: 3
+
+d/__package.rb:4: Constant `Root::D` lacks a declaration and cannot be exported https://srb.help/3721
+     4 |  export Root::D
+          ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    d/__package.rb:4: Deleted
+     4 |  export Root::D
+          ^^^^^^^^^^^^^^
+
+d/__package.rb:4: Cannot export `Root::D` because it is only defined in an RBI file https://srb.help/3721
+     4 |  export Root::D
+          ^^^^^^^^^^^^^^
+    d/util.rbi:3: Defined here
+     3 |class Root::D::Util
+              ^^^^^^^
+Errors: 5
 No errors! Great job.

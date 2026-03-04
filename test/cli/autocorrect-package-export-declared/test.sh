@@ -7,7 +7,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 dir="$(mktemp -d)"
 trap 'rm -rf "$dir"' EXIT
 
-sources=(a b c)
+sources=(a b c d)
 
 cp -r "${sources[@]}" "$dir"
 
