@@ -791,6 +791,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     // Hit a fallback case during Prism parsing, fallback to the legacy parser.
                     auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
                     parseResult = parser::Parser::run(*gs, f, settings);
+                    // For parity with the non-incremental part of the runner, where prism parse
+                    // failures are skipped.
+                    continue;
                 }
 
                 break;
