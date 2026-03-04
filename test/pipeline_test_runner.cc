@@ -559,8 +559,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
         }
 
-        // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better work
-        // distribution
+        // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better
+        // work distribution
         fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
             return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
         });
@@ -591,8 +591,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 if (file.data(*gs).strictLevel < core::StrictLevel::True) {
                     auto path = file.data(*gs).path();
                     ADD_FAIL_CHECK_AT(path.begin(), 1,
-                                      "Missing `# typed:` pragma. Sources with ." << ext
-                                                                                  << ".exp files must specify # typed:");
+                                      "Missing `# typed:` pragma. Sources with ."
+                                          << ext << ".exp files must specify # typed:");
                 }
             };
 
@@ -657,7 +657,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 handler.drainErrors(*gs);
             }
         }
-
     }
 
     for (auto &extension : gs->semanticExtensions) {
