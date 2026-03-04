@@ -528,15 +528,15 @@ pipeline_tests(
 
             # Fixing a bug in pipeline_test_runner.cc revealed that these tests
             # were not actually running because they use MLHS
-            "testdata/cfg/rescue_var_expression",
-            "testdata/desugar/for",
-            "testdata/parser/error_recovery/csend_masgn",
-            "testdata/parser/misc",
+            "testdata/cfg/rescue_var_expression.rb",
+            "testdata/desugar/for.rb",
+            "testdata/parser/error_recovery/csend_masgn.rb",
+            "testdata/parser/misc.rb",
 
             # Fixing a bug in pipeline_test_runner.cc revealed that these tests
             # were not actually running because they have RBS support enabled
-            "testdata/lsp/hover_rbs",
-            "testdata/lsp/hover_rbs_assertions_let",
+            "testdata/lsp/hover_rbs.rb",
+            "testdata/lsp/hover_rbs_assertions_let.rb",
             "testdata/rbs/annotations_helpers.rb",
             "testdata/rbs/assertions_absurd.rb",
             "testdata/rbs/assertions_and_assign.rb",
@@ -640,6 +640,7 @@ pipeline_tests(
             # Fixing a bug in pipeline_test_runner.cc revealed that these tests
             # were not actually running because they use MLHS
             "prism_regression/call_block_param.rb",
+            "prism_regression/assign_to_method_result.rb",
         ],
     ),
     "PrismPosTests",
