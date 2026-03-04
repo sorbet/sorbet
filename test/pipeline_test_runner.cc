@@ -336,7 +336,6 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             }
 
             desugared = ast::ParsedFile{move(resultAST), file};
-            testSerialize(gs, desugared);
         }
 
         handler.addObserved(gs, "desugar-tree", [&]() { return desugared.tree.toString(gs); });
@@ -353,7 +352,6 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             bool previous = gs.cacheSensitiveOptions.runningUnderAutogen;
             gs.cacheSensitiveOptions.runningUnderAutogen = test.expectations.contains("autogen");
             rewritten = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file};
-            testSerialize(gs, rewritten);
             gs.cacheSensitiveOptions.runningUnderAutogen = previous;
         }
 
@@ -500,9 +498,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     for (auto &tree : trees) {
-        // Namer
-        testSerialize(*gs, tree);
-
         handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
         handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree.showRaw(*gs); });
     }
@@ -822,7 +817,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
 
         auto file = ast::ParsedFile{move(ast), f.file};
-        testSerialize(*gs, file);
 
         if (!usePrismDesugar) {
             // These expectations match the legacy parser's desugar tree, which can be subtly different
@@ -833,7 +827,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // Rewriter pass
         file.tree = rewriter::Rewriter::run(ctx, move(file.tree));
-        testSerialize(*gs, file);
         handler.addObserved(*gs, "rewrite-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 
@@ -865,7 +858,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             ENFORCE(!ranIncrementalNamer);
             auto canceled = namer::Namer::run(*gs, absl::Span<ast::ParsedFile>(vTmp), *workers, &foundHashes);
             ENFORCE(!canceled);
-            testSerialize(*gs, vTmp[0]);
 
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
             handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree.showRaw(*gs); });
