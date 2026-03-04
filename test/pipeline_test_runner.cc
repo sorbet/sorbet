@@ -855,8 +855,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         // namer
         for (auto &tree : trees) {
             core::UnfreezeSymbolTable symbolTableAccess(*gs);
-            vector<ast::ParsedFile> vTmp;
-            vTmp.emplace_back(move(tree));
             core::FoundDefHashesResult foundHashes; // out param, compute this just for test coverage
             // The lsp_test_runner will turn every testdata test into a test of
             // Namer::runIncremental by way of creating a file update with leading whitespace.
@@ -865,7 +863,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
             ENFORCE(!ranIncrementalNamer);
-            auto canceled = namer::Namer::run(*gs, absl::Span<ast::ParsedFile>(vTmp), *workers, &foundHashes);
+            auto canceled = namer::Namer::run(*gs, absl::MakeSpan(&tree, 1), *workers, &foundHashes);
             ENFORCE(!canceled);
 
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
