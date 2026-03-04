@@ -17,7 +17,7 @@ sudo apt-get install -y autoconf build-essential cmake parallel mc chrpath ninja
 llvm/utils/release/test-release.sh \
   -no-test-suite \
   -no-compare-files \
-  -release 15.0.7 \
+  -release 17.0.6 \
   -final \
   -triple x86_64-linux-gnu-ubuntu-20.04 \
   -j 16 \
@@ -28,7 +28,7 @@ llvm/utils/release/test-release.sh \
 llvm/utils/release/test-release.sh \
   -no-test-suite \
   -no-compare-files \
-  -release 15.0.7 \
+  -release 17.0.6 \
   -final \
   -triple aarch64-linux-gnu \
   -j 16 \
@@ -130,7 +130,7 @@ To publish a new release:
     ```
     git checkout --track origin/release/15.x
     git push sorbet release/15.x     # release branch
-    git push sorbet llvm-org-15.0.7  # release tag
+    git push sorbet llvm-org-17.0.6  # release tag
     ```
 
 1.  Create a release in Sorbet's fork with the upstream tag.
@@ -139,7 +139,7 @@ To publish a new release:
     places.
 
     ```
-    (LLVM=15.0.7; open "https://github.com/sorbet/llvm-project/releases/new?tag=llvmorg-$LLVM&title=LLVM%20$LLVM&body=LLVM%20$LLVM%20release%20builds%20created%20by%20the%20Sorbet%20team,%20for%20use%20when%20building%20Sorbet")
+    (LLVM=17.0.6; open "https://github.com/sorbet/llvm-project/releases/new?tag=llvmorg-$LLVM&title=LLVM%20$LLVM&body=LLVM%20$LLVM%20release%20builds%20created%20by%20the%20Sorbet%20team,%20for%20use%20when%20building%20Sorbet")
     ```
 
     Make sure that the release notes look good, and attach any binaries that you
