@@ -218,7 +218,35 @@ struct AutogenResult {
     vector<pair<int, Serialized>> prints;
 };
 
-void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+vector<ast::ParsedFile> runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &workers,
+                                   std::unique_ptr<const OwnedKeyValueStore> kvstore) {
+    if (!opts.inlineInput.empty()) {
+        Exception::raise("Autogen ignores `-e`");
+    }
+    if (!opts.inlineRBIInput.empty()) {
+        Exception::raise("Autogen ignores `--e-rbi`");
+    }
+    if (opts.cacheSensitiveOptions.sorbetPackages) {
+        Exception::raise("Sorbet cannot run under `--sorbet-packages` when running for autogen");
+    }
+
+    auto inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
+
+    auto indexResult = pipeline::index(gs, inputFiles, opts, workers, kvstore);
+    ENFORCE(indexResult.hasResult(), "There's no cancellation in autogen");
+    auto indexed = move(indexResult.result());
+
+    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, gs, workers, indexed);
+
+    // Only need to compute hashes when running to compute a FileHash
+    auto foundHashes = nullptr;
+    auto canceled = pipeline::name(gs, absl::MakeSpan(indexed), opts, workers, foundHashes);
+    ENFORCE(!canceled, "There's no cancellation in batch mode");
+
+    if (gs.hadCriticalError()) {
+        gs.errorQueue->flushAllErrors(gs);
+    }
+
     {
         core::UnfreezeNameTable nameTableAccess(gs);
         core::UnfreezeSymbolTable symbolAccess(gs);
@@ -356,6 +384,10 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
 
         opts.print.AutogenSubclasses.fmt("{}\n", fmt::join(serializedDescendantsMap, "\n"));
     }
+
+    gs.errorQueue->flushAllErrors(gs);
+
+    return indexed;
 }
 
 #endif
@@ -534,6 +566,9 @@ int realmain(int argc, char *argv[]) {
         lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger),
                           OwnedKeyValueStore::abort(move(kvstore)));
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
+    } else if (gs->cacheSensitiveOptions.runningUnderAutogen) {
+        Timer timeall(logger, "wall_time");
+        auto indexed = runAutogen(*gs, opts, *workers, move(kvstore));
 #endif
     } else {
         Timer timeall(logger, "wall_time");
@@ -656,9 +691,7 @@ int realmain(int argc, char *argv[]) {
                 }
             }
 
-            if (gs->cacheSensitiveOptions.runningUnderAutogen) {
-                runAutogen(*gs, opts, *workers, stratumFiles);
-            } else {
+            {
                 stratumFiles = move(pipeline::resolve(*gs, move(stratumFiles), opts, *workers).result());
                 if (gs->hadCriticalError()) {
                     gs->errorQueue->flushAllErrors(*gs);
@@ -675,10 +708,6 @@ int realmain(int argc, char *argv[]) {
                     }
                 }
             }
-
-            // Update offsets for the next stratum. We do this at the end of the loop to ensure that the first
-            // iteration of the loop includes all of the payload symbols.
-            gs->updateSymbolTableOffsets();
         }
 
         if (opts.genPackages) {

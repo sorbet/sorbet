@@ -4119,6 +4119,20 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
 
+    // TODO(jez) Ideally, we would be able to mark the symbol table frozen and call updateSymbolTableOffsets() here.
+    //
+    // `symbolTableFrozen` is only checked when entering/deleting symbols (not any other mutable
+    // symbol table operations.) updateSymbolTableOffsets makes GlobalState remember the new count
+    // of all symbol kinds. Since we're not going to call `finalizeAncestors`/`finalizeSymbols`
+    // again for this strata, we need it to be the case that we don't introduce new symbols which
+    // would need to be finalized.
+    //
+    // That is not true today: both `ResolveTypeMembersAndFieldsWalk::run` and `resolveSigs` enter
+    // symbols (method overloads, type parameters, and method aliases at time of writing). Today it
+    // just so happens that those symbol kinds are not the symbols that we care about in
+    // `finalizeAncestors` / `finalizeSymbols`. But it would be ideal to be able to ENFORCE (via
+    // gs.freezeSymbolTable()) that no errant symbols are entered via those (and future) phases.
+
     auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, computeAllSymbols);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(rtmafResult.trees), workers);
@@ -4127,6 +4141,9 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
+
+    // Update offsets for the next stratum.
+    gs.updateSymbolTableOffsets();
 
     return result;
 }

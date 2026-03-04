@@ -1039,7 +1039,9 @@ void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Impo
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.mangledName);
     ENFORCE(otherPkg.exists());
 
-    if (!otherPkg.isVisibleTo(ctx, absPkg, i.type)) {
+    // We should only report a visibility error if we're not going to add a visible_to to the package
+    // Otherwise the error is pointless since it'll go away after the new visible_to is added
+    if (!otherPkg.isVisibleTo(ctx, absPkg, i.type) && !ctx.state.packageDB().updateVisibilityFor(i.mangledName)) {
         if (auto e = ctx.beginError(i.loc, core::errors::Packager::ImportNotVisible)) {
             e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                         otherPkg.show(ctx), absPkg.show(ctx));

@@ -3049,7 +3049,7 @@ class Abstract
   def foo; end
 end
 
-Abstract.new # error: Attempt to instantiate abstract class `Abstract`
+Abstract.new # error: Attempting to instantiate abstract class `Abstract`
 ```
 
 To fix this error, there are some options:

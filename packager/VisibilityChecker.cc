@@ -351,7 +351,7 @@ public:
         }
     }
 
-    static void run(core::GlobalState &gs, ast::ParsedFile &f) {
+    static void run(core::GlobalState &gs, const ast::ParsedFile &f) {
         if (!f.file.data(gs).isPackage(gs)) {
             return;
         }
@@ -469,7 +469,7 @@ public:
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
     // ConstantLit was a definition.
-    UnorderedSet<void *> constantAssignmentDefinitions;
+    UnorderedSet<const void *> constantAssignmentDefinitions;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, fileType{fileTypeFromCtx(ctx)} {}
@@ -478,25 +478,22 @@ public:
         return fileType != FileType::ProdFile;
     }
 
-    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+    void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
             constantAssignmentDefinitions.insert(lhs.get());
         }
     }
 
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+    void postTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
             constantAssignmentDefinitions.erase(lhs.get());
         }
     }
 
-    void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
-        if (constantAssignmentDefinitions.contains(tree.get())) {
+    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
+        if (constantAssignmentDefinitions.contains(&lit)) {
             return;
         }
 
@@ -771,16 +768,14 @@ public:
         }
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
         if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             auto &superClass = original.ancestors[0];
-            ast::TreeWalk::apply(ctx, *this, superClass);
+            ast::ConstTreeWalk::apply(ctx, *this, superClass);
         }
     }
 
-    static vector<ast::ParsedFile> run(core::GlobalState &nonConstGs, WorkerPool &workers,
-                                       vector<ast::ParsedFile> files) {
+    static void run(core::GlobalState &nonConstGs, WorkerPool &workers, absl::Span<const ast::ParsedFile> filesSpan) {
         const core::GlobalState &gs = nonConstGs;
         core::packages::PackageDB &nonConstPackageDB = nonConstGs.packageDB();
         struct ThreadResult {
@@ -788,9 +783,8 @@ public:
             UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
             UnorderedSet<core::SymbolRef> referencedSymbols;
         };
-        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<ThreadResult>>>(files.size());
+        auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<ThreadResult>>>(filesSpan.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
-        auto filesSpan = absl::MakeSpan(files);
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(filesSpan.size());
         for (size_t i = 0; i < filesSpan.size(); ++i) {
             taskq->push(i, 1);
@@ -817,7 +811,7 @@ public:
                 }
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
-                ast::TreeWalk::apply(ctx, pass, f.tree);
+                ast::ConstTreeWalk::apply(ctx, pass, f.tree);
                 resultq->push(
                     ThreadResult{f.file, std::move(pass.referencedPackages), std::move(pass.referencedSymbols)}, 1);
             }
@@ -850,14 +844,11 @@ public:
             }
         }
         barrier.Wait();
-
-        return files;
     }
 };
 } // namespace
 
-vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers,
-                                               vector<ast::ParsedFile> files) {
+void VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
 
     {
@@ -866,7 +857,7 @@ vector<ast::ParsedFile> VisibilityChecker::run(core::GlobalState &gs, WorkerPool
             PropagateVisibility::run(gs, f);
         }
     }
-    return VisibilityCheckerPass::run(gs, workers, std::move(files));
+    VisibilityCheckerPass::run(gs, workers, files);
 }
 
 } // namespace sorbet::packager
