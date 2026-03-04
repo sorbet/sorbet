@@ -433,27 +433,27 @@ void autogen(core::GlobalState &gs, vector<core::FileRef> files, ExpectationHand
     auto trees = index(gs, filesSpan, handler, test, assertions);
     name(gs, absl::Span<ast::ParsedFile>(trees), workers, handler);
 
-        {
-            core::UnfreezeNameTable nameTableAccess(gs);
-            core::UnfreezeSymbolTable symbolAccess(gs);
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        core::UnfreezeSymbolTable symbolAccess(gs);
 
-            trees = resolver::Resolver::runConstantResolution(gs, move(trees), workers);
-        }
-        handler.addObserved(
-            gs, "autogen",
-            [&]() {
-                stringstream payload;
-                auto crcBuilder = autogen::CRCBuilder::create();
-                for (auto &tree : trees) {
-                    core::Context ctx(gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder);
-                    payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
-                }
-                return payload.str();
-            },
-            false);
+        trees = resolver::Resolver::runConstantResolution(gs, move(trees), workers);
+    }
+    handler.addObserved(
+        gs, "autogen",
+        [&]() {
+            stringstream payload;
+            auto crcBuilder = autogen::CRCBuilder::create();
+            for (auto &tree : trees) {
+                core::Context ctx(gs, core::Symbols::root(), tree.file);
+                auto pf = autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder);
+                payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
+            }
+            return payload.str();
+        },
+        false);
 
-        handler.checkExpectations();
+    handler.checkExpectations();
 }
 
 TEST_CASE("PerPhaseTest") { // NOLINT
