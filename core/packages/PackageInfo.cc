@@ -349,6 +349,36 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     return {suggestion};
 }
 
+optional<core::AutocorrectSuggestion> PackageInfo::addVisibleToTests(const core::GlobalState &gs) const {
+    auto visibleToLine = "visible_to 'tests'";
+    auto pkgFile = this->file;
+    auto insertionLoc = core::Loc::none(pkgFile);
+    if (!visibleTo_.empty()) {
+        insertionLoc = core::Loc(pkgFile, visibleTo_.back().loc.copyEndWithZeroLength());
+    } else {
+        // if we don't have any visible_to entries, then we can try adding it right before the final `end`
+        uint32_t visibleToLoc = this->locs.loc.endPos() - "end\n"sv.size();
+        // we want to find the end of the last non-empty line, so
+        // let's do something gross: walk backward until we find non-whitespace
+        const auto &file_source = this->file.data(gs).source();
+        while (isspace(file_source[visibleToLoc])) {
+            visibleToLoc--;
+            // this shouldn't happen in a well-formatted
+            // `__package.rb` file, but just to be safe
+            if (visibleToLoc == 0) {
+                return nullopt;
+            }
+        }
+        insertionLoc = {this->file, visibleToLoc + 1, visibleToLoc + 1};
+    }
+    ENFORCE(insertionLoc.exists());
+
+    core::AutocorrectSuggestion suggestion(
+        fmt::format("Add `visible_to 'tests'` in package `{}`", mangledName_.owner.show(gs)),
+        {{insertionLoc, fmt::format("\n  {}", visibleToLine)}});
+    return {suggestion};
+}
+
 optional<core::AutocorrectSuggestion> PackageInfo::addVisibleTo(const core::GlobalState &gs,
                                                                 const MangledName &targetPackage) const {
     auto targetPackageName = targetPackage.owner.show(gs);
@@ -629,12 +659,19 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
     return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
 }
 
-std::optional<core::AutocorrectSuggestion>
-PackageInfo::aggregateMissingVisibleTo(const core::GlobalState &gs,
-                                       std::vector<core::packages::MangledName> &visibleTos) const {
+std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleTo(
+    const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos, bool visibleToTests) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &pkgName : visibleTos) {
         auto autocorrect = addVisibleTo(gs, pkgName);
+        if (autocorrect.has_value()) {
+            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                            make_move_iterator(autocorrect.value().edits.end()));
+        }
+    }
+
+    if (visibleToTests) {
+        auto autocorrect = addVisibleToTests(gs);
         if (autocorrect.has_value()) {
             allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
                             make_move_iterator(autocorrect.value().edits.end()));
