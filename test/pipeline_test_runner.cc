@@ -815,12 +815,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
 
         // Desugarer
-        ast::ExpressionPtr ast;
-        {
-            core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
-            ast = usePrismDesugar ? ast::prismDesugar::node2Tree(ctx, move(nodes))
-                                  : ast::desugar::node2Tree(ctx, move(nodes));
-        }
+        auto ast = usePrismDesugar ? ast::prismDesugar::node2Tree(ctx, move(nodes))
+                                   : ast::desugar::node2Tree(ctx, move(nodes));
 
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{move(ast), f.file});
 
