@@ -34,6 +34,8 @@ class LSPIndexer final {
     std::unique_ptr<core::GlobalState> gs;
     /** Key-value store used during initialization. */
     std::unique_ptr<KeyValueStore> kvstore;
+    /** Files to be processed during initialization */
+    std::vector<std::string> inputFileNames;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
     /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to ensure
@@ -68,7 +70,7 @@ class LSPIndexer final {
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> gs,
-               std::unique_ptr<KeyValueStore> kvstore);
+               std::unique_ptr<KeyValueStore> kvstore, std::vector<std::string> inputFileNames);
     ~LSPIndexer();
 
     /**
