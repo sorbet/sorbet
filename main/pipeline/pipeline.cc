@@ -1062,8 +1062,8 @@ public:
     }
 };
 
-vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts,
-                                              vector<ast::ParsedFile> what) {
+void printMissingConstants(core::GlobalState &gs, const options::Options &opts,
+                           absl::Span<const ast::ParsedFile> what) {
     Timer timeit(gs.tracer(), "printMissingConstants");
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
@@ -1075,7 +1075,6 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     missing.erase(unique(missing.begin(), missing.end()), missing.end());
 
     opts.print.MissingConstants.fmt("{}\n", fmt::join(missing, "\n"));
-    return what;
 }
 
 class DefinitionLinesDenylistEnforcer {
@@ -1223,100 +1222,8 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
         }
     }
 
-    if (opts.print.SymbolTable.enabled) {
-        opts.print.SymbolTable.fmt("{}\n", gs.toString());
-    }
-    if (opts.print.SymbolTableRaw.enabled) {
-        opts.print.SymbolTableRaw.fmt("{}\n", gs.showRaw());
-    }
-
-#ifndef SORBET_REALMAIN_MIN
-    if (opts.print.SymbolTableJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.SymbolTableProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
-    }
-    if (opts.print.SymbolTableFullJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.SymbolTableFullProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableFullProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableFullProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableFullMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
-    }
-#endif
-    if (opts.print.SymbolTableFull.enabled) {
-        opts.print.SymbolTableFull.fmt("{}\n", gs.toStringFull());
-    }
-    if (opts.print.SymbolTableFullRaw.enabled) {
-        opts.print.SymbolTableFullRaw.fmt("{}\n", gs.showRawFull());
-    }
-
     if (opts.print.MissingConstants.enabled) {
-        what = printMissingConstants(gs, opts, move(what));
+        printMissingConstants(gs, opts, what);
     }
 
     return ast::ParsedFilesOrCancelled(move(what));
@@ -1698,8 +1605,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
 
 // ----- other ----------------------------------------------------------------
 
-void printFileTable(core::GlobalState &gs, const options::Options &opts,
-                    const UnorderedMap<long, long> &untypedUsages) {
+void printGlobalTables(const core::GlobalState &gs, const options::Options &opts,
+                       const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
         if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
@@ -1749,6 +1656,98 @@ void printFileTable(core::GlobalState &gs, const options::Options &opts,
         }
     }
 #endif
+
+    if (opts.print.SymbolTable.enabled) {
+        opts.print.SymbolTable.fmt("{}\n", gs.toString());
+    }
+    if (opts.print.SymbolTableRaw.enabled) {
+        opts.print.SymbolTableRaw.fmt("{}\n", gs.showRaw());
+    }
+
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.print.SymbolTableJson.enabled) {
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
+        if (opts.print.SymbolTableJson.outputPath.empty()) {
+            core::Proto::toJSON(root, cout);
+        } else {
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            opts.print.SymbolTableJson.print(buf.str());
+        }
+    }
+    if (opts.print.SymbolTableProto.enabled) {
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
+        if (opts.print.SymbolTableProto.outputPath.empty()) {
+            root.SerializeToOstream(&cout);
+        } else {
+            string buf;
+            root.SerializeToString(&buf);
+            opts.print.SymbolTableProto.print(buf);
+        }
+    }
+    if (opts.print.SymbolTableMessagePack.enabled) {
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
+        stringstream buf;
+        core::Proto::toJSON(root, buf);
+        auto str = buf.str();
+        rapidjson::Document document;
+        document.Parse(str);
+        mpack_writer_t writer;
+        if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
+            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+        } else {
+            mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
+        }
+        json2msgpack::json2msgpack(document, &writer);
+        if (mpack_writer_destroy(&writer)) {
+            Exception::raise("failed to write msgpack");
+        }
+    }
+    if (opts.print.SymbolTableFullJson.enabled) {
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
+        if (opts.print.SymbolTableJson.outputPath.empty()) {
+            core::Proto::toJSON(root, cout);
+        } else {
+            stringstream buf;
+            core::Proto::toJSON(root, buf);
+            opts.print.SymbolTableJson.print(buf.str());
+        }
+    }
+    if (opts.print.SymbolTableFullProto.enabled) {
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
+        if (opts.print.SymbolTableFullProto.outputPath.empty()) {
+            root.SerializeToOstream(&cout);
+        } else {
+            string buf;
+            root.SerializeToString(&buf);
+            opts.print.SymbolTableFullProto.print(buf);
+        }
+    }
+    if (opts.print.SymbolTableFullMessagePack.enabled) {
+        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
+        stringstream buf;
+        core::Proto::toJSON(root, buf);
+        auto str = buf.str();
+        rapidjson::Document document;
+        document.Parse(str);
+        mpack_writer_t writer;
+        if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
+            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+        } else {
+            mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
+        }
+        json2msgpack::json2msgpack(document, &writer);
+        if (mpack_writer_destroy(&writer)) {
+            Exception::raise("failed to write msgpack");
+        }
+    }
+#endif
+    if (opts.print.SymbolTableFull.enabled) {
+        opts.print.SymbolTableFull.fmt("{}\n", gs.toStringFull());
+    }
+    if (opts.print.SymbolTableFullRaw.enabled) {
+        opts.print.SymbolTableFullRaw.fmt("{}\n", gs.showRawFull());
+    }
 }
 
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,

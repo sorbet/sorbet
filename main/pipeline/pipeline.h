@@ -105,7 +105,8 @@ void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, c
 
 // ----- other ----------------------------------------------------------------
 
-void printFileTable(core::GlobalState &gs, const options::Options &opts, const UnorderedMap<long, long> &untypedUsages);
+void printGlobalTables(const core::GlobalState &gs, const options::Options &opts,
+                       const UnorderedMap<long, long> &untypedUsages);
 
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts);

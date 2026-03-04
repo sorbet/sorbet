@@ -739,7 +739,7 @@ int realmain(int argc, char *argv[]) {
 
         // getAndClearHistogram ensures that we don't accidentally submit a high-cardinality histogram to statsd
         auto untypedUsages = getAndClearHistogram("untyped.usages");
-        pipeline::printFileTable(*gs, opts, untypedUsages);
+        pipeline::printGlobalTables(*gs, opts, untypedUsages);
 
         if (!opts.minimizeRBI.empty()) {
 #ifdef SORBET_REALMAIN_MIN
@@ -763,6 +763,9 @@ int realmain(int argc, char *argv[]) {
             pipeline::setGlobalStateOptions(*gsForMinimize, optsForMinimize);
 
             Minimize::indexAndResolveForMinimize(*gs, *gsForMinimize, optsForMinimize, *workers, opts.minimizeRBI);
+            UnorderedMap<long, long> untypedUsagesForMinimize;
+            // Use `opts` not `optsForMinimize` so that the print outputs go to the same spot.
+            pipeline::printGlobalTables(*gsForMinimize, opts, untypedUsagesForMinimize);
             Minimize::writeDiff(*gs, *gsForMinimize, opts.print.MinimizeRBI);
 
             if (gsForMinimize->hadCriticalError()) {
