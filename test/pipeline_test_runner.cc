@@ -537,126 +537,126 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
         absl::c_move(stratum.packageFiles, back_inserter(stratumFiles));
 
-    auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
-    name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers, handler);
-    validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
-    realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
+        auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
+        name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers, handler);
+        validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+        realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
-    {
-        core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
-        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
-        trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
+            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
+            trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
 
-        if (opts.cacheSensitiveOptions.sorbetPackages) {
-            packager::VisibilityChecker::run(*gs, *workers, trees);
-        }
-
-        handler.drainErrors(*gs);
-    }
-
-    for (auto &resolvedTree : trees) {
-        handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
-        handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
-    }
-
-    // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better work
-    // distribution
-    fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
-    });
-
-    for (auto &resolvedTree : trees) {
-        auto file = resolvedTree.file;
-
-        core::Context ctx(*gs, core::Symbols::root(), file);
-
-        definition_validator::runOne(ctx, resolvedTree);
-        handler.drainErrors(*gs);
-
-        handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree.toString(*gs); });
-        handler.addObserved(*gs, "flatten-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
-
-        // Don't run typecheck on RBI files.
-        if (resolvedTree.file.data(ctx).isRBI()) {
-            continue;
-        }
-
-        auto checkTree = [&]() {
-            if (resolvedTree.tree == nullptr) {
-                auto path = file.data(*gs).path();
-                ADD_FAIL_CHECK_AT(path.begin(), 1, "Already used tree. You can only have 1 CFG-ish .exp file");
+            if (opts.cacheSensitiveOptions.sorbetPackages) {
+                packager::VisibilityChecker::run(*gs, *workers, trees);
             }
-        };
-        auto checkPragma = [&](string ext) {
-            if (file.data(*gs).strictLevel < core::StrictLevel::True) {
-                auto path = file.data(*gs).path();
-                ADD_FAIL_CHECK_AT(path.begin(), 1,
-                                  "Missing `# typed:` pragma. Sources with ." << ext
-                                                                              << ".exp files must specify # typed:");
-            }
-        };
 
-        // CFG
-        if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw") ||
-            test.expectations.contains("cfg-text")) {
-            checkTree();
-            checkPragma("cfg");
-            CFGCollectorAndTyper collector;
-            core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
-            for (auto &extension : ctx.state.semanticExtensions) {
-                extension->finishTypecheckFile(ctx, file);
-            }
-            resolvedTree.tree.reset();
-
-            handler.addObserved(*gs, "cfg", [&]() {
-                stringstream dot;
-                dot << "digraph \"" << rbName << "\" {" << '\n';
-                for (auto &cfg : collector.cfgs) {
-                    dot << cfg->toString(ctx) << '\n' << '\n';
-                }
-                dot << "}" << '\n';
-                return dot.str();
-            });
-
-            handler.addObserved(*gs, "cfg-raw", [&]() {
-                stringstream dot;
-                dot << "digraph \"" << rbName << "\" {" << '\n';
-                dot << "  graph [fontname = \"Courier\"];\n";
-                dot << "  node [fontname = \"Courier\"];\n";
-                dot << "  edge [fontname = \"Courier\"];\n";
-                for (auto &cfg : collector.cfgs) {
-                    dot << cfg->showRaw(ctx) << '\n' << '\n';
-                }
-                dot << "}" << '\n';
-                return dot.str();
-            });
-
-            handler.addObserved(
-                *gs, "cfg-text",
-                [&]() {
-                    stringstream dot;
-                    for (auto &cfg : collector.cfgs) {
-                        dot << cfg->toTextualString(ctx) << '\n' << '\n';
-                    }
-                    return dot.str();
-                },
-                false);
-        }
-
-        // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree.tree != nullptr && file.data(*gs).originalSigil >= core::StrictLevel::True) {
-            checkTree();
-            CFGCollectorAndTyper collector;
-            core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
-            ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
-            for (auto &extension : ctx.state.semanticExtensions) {
-                extension->finishTypecheckFile(ctx, file);
-            }
-            resolvedTree.tree.reset();
             handler.drainErrors(*gs);
         }
-    }
+
+        for (auto &resolvedTree : trees) {
+            handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
+            handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
+        }
+
+        // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better work
+        // distribution
+        fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+        });
+
+        for (auto &resolvedTree : trees) {
+            auto file = resolvedTree.file;
+
+            core::Context ctx(*gs, core::Symbols::root(), file);
+
+            definition_validator::runOne(ctx, resolvedTree);
+            handler.drainErrors(*gs);
+
+            handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree.toString(*gs); });
+            handler.addObserved(*gs, "flatten-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
+
+            // Don't run typecheck on RBI files.
+            if (resolvedTree.file.data(ctx).isRBI()) {
+                continue;
+            }
+
+            auto checkTree = [&]() {
+                if (resolvedTree.tree == nullptr) {
+                    auto path = file.data(*gs).path();
+                    ADD_FAIL_CHECK_AT(path.begin(), 1, "Already used tree. You can only have 1 CFG-ish .exp file");
+                }
+            };
+            auto checkPragma = [&](string ext) {
+                if (file.data(*gs).strictLevel < core::StrictLevel::True) {
+                    auto path = file.data(*gs).path();
+                    ADD_FAIL_CHECK_AT(path.begin(), 1,
+                                      "Missing `# typed:` pragma. Sources with ." << ext
+                                                                                  << ".exp files must specify # typed:");
+                }
+            };
+
+            // CFG
+            if (test.expectations.contains("cfg") || test.expectations.contains("cfg-raw") ||
+                test.expectations.contains("cfg-text")) {
+                checkTree();
+                checkPragma("cfg");
+                CFGCollectorAndTyper collector;
+                core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
+                ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
+                for (auto &extension : ctx.state.semanticExtensions) {
+                    extension->finishTypecheckFile(ctx, file);
+                }
+                resolvedTree.tree.reset();
+
+                handler.addObserved(*gs, "cfg", [&]() {
+                    stringstream dot;
+                    dot << "digraph \"" << rbName << "\" {" << '\n';
+                    for (auto &cfg : collector.cfgs) {
+                        dot << cfg->toString(ctx) << '\n' << '\n';
+                    }
+                    dot << "}" << '\n';
+                    return dot.str();
+                });
+
+                handler.addObserved(*gs, "cfg-raw", [&]() {
+                    stringstream dot;
+                    dot << "digraph \"" << rbName << "\" {" << '\n';
+                    dot << "  graph [fontname = \"Courier\"];\n";
+                    dot << "  node [fontname = \"Courier\"];\n";
+                    dot << "  edge [fontname = \"Courier\"];\n";
+                    for (auto &cfg : collector.cfgs) {
+                        dot << cfg->showRaw(ctx) << '\n' << '\n';
+                    }
+                    dot << "}" << '\n';
+                    return dot.str();
+                });
+
+                handler.addObserved(
+                    *gs, "cfg-text",
+                    [&]() {
+                        stringstream dot;
+                        for (auto &cfg : collector.cfgs) {
+                            dot << cfg->toTextualString(ctx) << '\n' << '\n';
+                        }
+                        return dot.str();
+                    },
+                    false);
+            }
+
+            // If there is a tree left with a typed: pragma, run the inferencer
+            if (resolvedTree.tree != nullptr && file.data(*gs).originalSigil >= core::StrictLevel::True) {
+                checkTree();
+                CFGCollectorAndTyper collector;
+                core::Context ctx(*gs, core::Symbols::root(), resolvedTree.file);
+                ast::ConstShallowWalk::apply(ctx, collector, resolvedTree.tree);
+                for (auto &extension : ctx.state.semanticExtensions) {
+                    extension->finishTypecheckFile(ctx, file);
+                }
+                resolvedTree.tree.reset();
+                handler.drainErrors(*gs);
+            }
+        }
 
     }
 
