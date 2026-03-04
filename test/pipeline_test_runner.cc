@@ -413,13 +413,18 @@ void validatePackagedFiles(core::GlobalState &gs, unique_ptr<WorkerPool> &worker
     }
 }
 
-void name(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
+void name(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers, ExpectationHandler &handler) {
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
     auto packagesAccess = gs.unfreezePackages();
     auto foundHashes = nullptr;
     auto canceled = namer::Namer::run(gs, trees, workers, foundHashes);
     ENFORCE(!canceled);
+
+    for (auto &tree : trees) {
+        handler.addObserved(gs, "name-tree", [&]() { return tree.tree.toString(gs); });
+        handler.addObserved(gs, "name-tree-raw", [&]() { return tree.tree.showRaw(gs); });
+    }
 }
 
 TEST_CASE("PerPhaseTest") { // NOLINT
@@ -488,19 +493,14 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(*gs, inputPackageFiles, handler, test, assertions);
-        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
+        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers, handler);
         buildPackageDB(*gs, workers, absl::Span<ast::ParsedFile>(trees), filesSpan, handler, assertions);
     }
 
     auto nonPackageTrees = index(*gs, filesSpan, handler, test, assertions);
-    name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
+    name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers, handler);
     validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
-
-    for (auto &tree : trees) {
-        handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
-        handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree.showRaw(*gs); });
-    }
 
     if (test.expectations.contains("autogen")) {
         {
