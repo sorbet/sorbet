@@ -427,6 +427,35 @@ void name(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &
     }
 }
 
+void autogen(core::GlobalState &gs, vector<core::FileRef> files, ExpectationHandler &handler, Expectations &test,
+             WorkerPool &workers, vector<shared_ptr<RangeAssertion>> &assertions) {
+    auto filesSpan = absl::Span<core::FileRef>(files);
+    auto trees = index(gs, filesSpan, handler, test, assertions);
+    name(gs, absl::Span<ast::ParsedFile>(trees), workers, handler);
+
+        {
+            core::UnfreezeNameTable nameTableAccess(gs);
+            core::UnfreezeSymbolTable symbolAccess(gs);
+
+            trees = resolver::Resolver::runConstantResolution(gs, move(trees), workers);
+        }
+        handler.addObserved(
+            gs, "autogen",
+            [&]() {
+                stringstream payload;
+                auto crcBuilder = autogen::CRCBuilder::create();
+                for (auto &tree : trees) {
+                    core::Context ctx(gs, core::Symbols::root(), tree.file);
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder);
+                    payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
+                }
+                return payload.str();
+            },
+            false);
+
+        handler.checkExpectations();
+}
+
 TEST_CASE("PerPhaseTest") { // NOLINT
     Expectations test = Expectations::getExpectations(singleTest);
 
@@ -485,6 +514,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     ExpectationHandler handler(test, errorQueue, errorCollector);
 
+    if (test.expectations.contains("autogen")) {
+        autogen(*gs, files, handler, test, *workers, assertions);
+        // Autogen forces you to to put --stop-after=namer so lets not run anything else
+        return;
+    }
+
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (opts.cacheSensitiveOptions.sorbetPackages) {
@@ -502,33 +537,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     validatePackagedFiles(*gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
-    if (test.expectations.contains("autogen")) {
-        {
-            core::UnfreezeNameTable nameTableAccess(*gs);
-            core::UnfreezeSymbolTable symbolAccess(*gs);
-
-            trees = resolver::Resolver::runConstantResolution(*gs, move(trees), *workers);
-        }
-        handler.addObserved(
-            *gs, "autogen",
-            [&]() {
-                stringstream payload;
-                auto crcBuilder = autogen::CRCBuilder::create();
-                for (auto &tree : trees) {
-                    core::Context ctx(*gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder);
-                    payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
-                }
-                return payload.str();
-            },
-            false);
-
-        handler.checkExpectations();
-
-        // Autogen forces you to to put --stop-after=namer so lets not run
-        // anything else
-        return;
-    } else {
+    {
         core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
         trees = move(resolver::Resolver::run(*gs, move(trees), *workers).result());
