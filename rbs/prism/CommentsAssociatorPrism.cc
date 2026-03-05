@@ -224,6 +224,10 @@ void CommentsAssociatorPrism::associateSignatureCommentsToNode(pm_node_t *node) 
     signaturesForNode[node] = move(comments);
 }
 
+bool CommentsAssociatorPrism::typeAliasAllowedInContext() {
+    return !contextAllowingTypeAlias.empty() && contextAllowingTypeAlias.back().first;
+}
+
 // Finds standalone RBS comments (not attached to any Ruby code) between lastLine and currentLine,
 // and inserts synthetic placeholder nodes into the AST. 2 types of placeholders are created:
 // 1. Bind comments (#: self as Type): placeholders later replaced with T.bind(self, Type)
@@ -281,18 +285,20 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
         std::match_results<std::string_view::const_iterator> matches;
         if (std::regex_match(commentString.begin(), commentString.end(), matches, TYPE_ALIAS_PATTERN)) {
             // Type aliases are only allowed in class/module bodies
-            if (!contextAllowingTypeAlias.empty()) {
-                if (auto [allow, loc] = contextAllowingTypeAlias.back(); !allow) {
-                    if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
-                        e.setHeader("Unexpected RBS type alias comment");
-                        e.addErrorLine(
-                            ctx.locAt(loc),
-                            "RBS type aliases are only allowed in class and module bodies, not in method bodies");
+            if (!typeAliasAllowedInContext()) {
+                if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                    e.setHeader("Unexpected RBS type alias comment");
+                    if (!contextAllowingTypeAlias.empty()) {
+                        auto loc = contextAllowingTypeAlias.back().second;
+                        e.addErrorLine(ctx.locAt(loc),
+                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
+                    } else {
+                        e.addErrorNote("RBS type aliases are only allowed in class and module bodies");
                     }
-
-                    it = commentByLine.erase(it);
-                    continue;
                 }
+
+                it = commentByLine.erase(it);
+                continue;
             }
 
             // Register the constant name (e.g., "type foo") in the symbol table
@@ -374,6 +380,20 @@ void CommentsAssociatorPrism::processTrailingComments(pm_node_t *node, pm_node_l
 }
 
 pm_node_t *CommentsAssociatorPrism::walkBody(pm_node_t *node, pm_node_t *body) {
+    if (typeAliasAllowedInContext() && body == nullptr) {
+        auto loc = translateLocation(node->location);
+        int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), loc.endPos()).line;
+        pm_node_list_t nodes = {0, 0, NULL};
+
+        maybeInsertStandalonePlaceholders(nodes, 0, lastLine, endLine);
+        lastLine = endLine;
+
+        if (nodes.size > 0) {
+            return prism.StatementsNode(loc, absl::MakeSpan(nodes.nodes, nodes.size));
+        }
+        return nullptr;
+    }
+
     if (body == nullptr) {
         pm_node_list_t nodes = {0, 0, NULL};
         processTrailingComments(node, nodes);

@@ -74,6 +74,7 @@ private:
     core::LocOffsets translateLocation(pm_location_t location);
     uint32_t posToLine(uint32_t pos);
 
+    bool typeAliasAllowedInContext();
     int maybeInsertStandalonePlaceholders(pm_node_list_t &nodes, int index, int lastLine, int currentLine);
     pm_node_t *createSyntheticPlaceholder(const CommentNodePrism &comment, pm_constant_id_t marker);
 };
