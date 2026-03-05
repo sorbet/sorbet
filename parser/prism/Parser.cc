@@ -142,7 +142,7 @@ bool Parser::isSafeNavigationCall(pm_node_t *node) const {
     return PM_NODE_TYPE_P(node, PM_CALL_NODE) && PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION);
 }
 
-bool Parser::isVisibilityCall(pm_node_t *node) const {
+bool Parser::isMethodDefModifierCall(pm_node_t *node) const {
     if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
         return false;
     }
