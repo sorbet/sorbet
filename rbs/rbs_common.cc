@@ -19,8 +19,8 @@ core::LocOffsets RBSDeclaration::fullTypeLoc() const {
 }
 
 core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_location_range &range) const {
-    int rangeOffset = range.start_char;
-    int rangeLength = range.end_char - range.start_char;
+    int rangeOffset = range.start_byte;
+    int rangeLength = range.end_byte - range.start_byte;
 
     for (const auto &comment : comments) {
         int commentTypeLength = comment.typeLoc.endLoc - comment.typeLoc.beginLoc;
