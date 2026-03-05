@@ -108,6 +108,12 @@ basename=
 srcs=()
 
 for this_src in "${rb_src[@]}" DUMMY; do
+  if grep -q "${this_src#test/}" test/BUILD; then
+    # If the test is directly mentioned in test/BULID, it's probably mentioned
+    # in an `exclude` line. Let's skip updating.
+    continue
+  fi
+
   # Packager tests are folder based.
   if [[ "$this_src" =~ (.*/packager/([^/]+)/).* ]]; then
     # Basename for all .exp files in packager folder is "pass.$pass.exp"
@@ -122,44 +128,66 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ -n "$basename" ]; then
+    args=()
+
     case "${srcs[0]}" in
       test/prism_regression/*)
-        uses_prism=true
+        args+=("--parser=prism")
         ;;
-      *)
-        uses_prism=false
     esac
 
-    needs_stripe_packages=false
     if grep -q '^# enable-packager: true' "${srcs[@]}"; then
-      needs_stripe_packages=true
+      args+=("--sorbet-packages")
+
+      extra_underscore_prefixes=()
+      while IFS='' read -r prefix; do
+        extra_underscore_prefixes+=("$prefix")
+      done < <(grep '# extra-package-files-directory-prefix-underscore: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+      if [ "${#extra_underscore_prefixes[@]}" -gt 0 ]; then
+        for prefix in "${extra_underscore_prefixes[@]}"; do
+          args+=("--extra-package-files-directory-prefix-underscore" "${prefix}")
+        done
+      fi
+
+      extra_slash_prefixes_deprecated=()
+      while IFS='' read -r prefix; do
+        extra_slash_prefixes_deprecated+=("$prefix")
+      done < <(grep '# extra-package-files-directory-prefix-slash-deprecated: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+      if [ "${#extra_slash_prefixes_deprecated[@]}" -gt 0 ]; then
+        for prefix in "${extra_slash_prefixes_deprecated[@]}"; do
+          args+=("--extra-package-files-directory-prefix-slash-deprecated" "${prefix}")
+        done
+      fi
+
+      extra_slash_prefixes=()
+      while IFS='' read -r prefix; do
+        extra_slash_prefixes+=("$prefix")
+      done < <(grep '# extra-package-files-directory-prefix-slash: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+      if [ "${#extra_slash_prefixes[@]}" -gt 0 ]; then
+        for prefix in "${extra_slash_prefixes[@]}"; do
+          args+=("--extra-package-files-directory-prefix-slash" "${prefix}")
+        done
+      fi
     fi
 
-    needs_requires_ancestor=false
     if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
-      needs_requires_ancestor=true
+      args+=("--enable-experimental-requires-ancestor")
     fi
 
-    needs_rspec=false
     if grep -q '^# enable-experimental-rspec: true' "${srcs[@]}"; then
-      needs_rspec=true
+      args+=("--enable-experimental-rspec")
     fi
 
-    needs_experimental_rbs=false
     if grep -q '^# enable-experimental-rbs-comments: true' "${srcs[@]}"; then
-      needs_experimental_rbs=true
+      args+=("--enable-experimental-rbs-comments")
     fi
 
     if grep -q '^# typed-super: false' "${srcs[@]}"; then
-      needs_typed_super_false=true
-    else
-      needs_typed_super_false=false
+      args+=("--typed-super=false")
     fi
 
     if grep -q '^# enable-suggest-unsafe: true' "${srcs[@]}"; then
-      needs_suggest_unsafe=true
-    else
-      needs_suggest_unsafe=false
+      args+=("--suggest-unsafe")
     fi
 
     for pass in "${passes[@]}"; do
@@ -206,71 +234,12 @@ for this_src in "${rb_src[@]}" DUMMY; do
           continue
         fi
       fi
-      if $needs_requires_ancestor; then
-        args=("--enable-experimental-requires-ancestor")
-      else
-        args=()
-      fi
-      if $needs_rspec; then
-        args+=("--enable-experimental-rspec")
-      else
-        args=()
-      fi
-      if $needs_experimental_rbs; then
-        args+=("--enable-experimental-rbs-comments")
-      fi
-      if $needs_typed_super_false; then
-        args+=("--typed-super=false")
-      else
-        args+=()
-      fi
-      if $needs_suggest_unsafe; then
-        args+=("--suggest-unsafe")
-      else
-        args+=()
-      fi
+
+      pass_args=()
       if [ "$pass" = "autogen" ]; then
-        args=("--stop-after=namer")
+        pass_args=("--stop-after=namer")
       elif [ "$pass" = "minimized-rbi" ]; then
-        args=("--minimize-to-rbi=$basename.minimize.rbi")
-      fi
-
-      if $needs_stripe_packages; then
-        args+=("--sorbet-packages")
-
-        extra_underscore_prefixes=()
-        while IFS='' read -r prefix; do
-          extra_underscore_prefixes+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix-underscore: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-        if [ "${#extra_underscore_prefixes[@]}" -gt 0 ]; then
-          for prefix in "${extra_underscore_prefixes[@]}"; do
-            args+=("--extra-package-files-directory-prefix-underscore" "${prefix}")
-          done
-        fi
-
-        extra_slash_prefixes_deprecated=()
-        while IFS='' read -r prefix; do
-          extra_slash_prefixes_deprecated+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix-slash-deprecated: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-        if [ "${#extra_slash_prefixes_deprecated[@]}" -gt 0 ]; then
-          for prefix in "${extra_slash_prefixes_deprecated[@]}"; do
-            args+=("--extra-package-files-directory-prefix-slash-deprecated" "${prefix}")
-          done
-        fi
-
-        extra_slash_prefixes=()
-        while IFS='' read -r prefix; do
-          extra_slash_prefixes+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix-slash: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-        if [ "${#extra_slash_prefixes[@]}" -gt 0 ]; then
-          for prefix in "${extra_slash_prefixes[@]}"; do
-            args+=("--extra-package-files-directory-prefix-slash" "${prefix}")
-          done
-        fi
-      fi
-
-      if $uses_prism; then
-        args+=("--parser=prism")
+        pass_args=("--minimize-to-rbi=$basename.minimize.rbi")
       fi
 
       case "$pass" in
@@ -288,7 +257,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           ;;
         autocorrects)
           echo tools/scripts/print_autocorrects_exp.sh \
-            "${args[@]}" "${srcs[@]}" \
+            "${args[@]+"${args[@]}"}" "${pass_args[@]+"${pass_args[@]}"}" "${srcs[@]}" \
             \> "$candidate" \
             2\> /dev/null \
             >>"$COMMAND_FILE"
@@ -297,7 +266,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           echo bazel-bin/main/sorbet \
             --silence-dev-message --suppress-non-critical --censor-for-snapshot-tests \
             --print "$pass" --max-threads 0 \
-            "${args[@]}" "${srcs[@]}" \
+            "${args[@]+"${args[@]}"}" "${pass_args[@]+"${pass_args[@]}"}" "${srcs[@]}" \
             \> "$candidate" \
             2\>/dev/null \
             >>"$COMMAND_FILE"
