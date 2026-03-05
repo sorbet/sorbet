@@ -4909,7 +4909,7 @@ ast::ExpressionPtr Translator::desugarClassOrModuleName(pm_node_t *constantPath,
     if (constantPath == nullptr || (!PM_NODE_TYPE_P(constantPath, PM_CONSTANT_PATH_NODE) &&
                                     !PM_NODE_TYPE_P(constantPath, PM_CONSTANT_READ_NODE))) {
         auto nameLoc = translateLoc(keywordLoc);
-        return MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), core::Names::Constants::ConstantNameMissing());
+        return MK::UnresolvedConstant(MK::EmptyTree(), {core::Names::Constants::ConstantNameMissing()}, {nameLoc});
     }
 
     return desugar(constantPath);
