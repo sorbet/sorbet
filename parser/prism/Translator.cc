@@ -585,8 +585,8 @@ for (auto *c : lefts) {
         }
         i = -right;
     }
-    for (auto *c : rights) {
-        ++after;
+after = rights.size();
+for (auto *c : rights) {
         processTarget(c);
     }
 
