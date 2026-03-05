@@ -108,6 +108,12 @@ basename=
 srcs=()
 
 for this_src in "${rb_src[@]}" DUMMY; do
+  if grep -q "${this_src#test/}" test/BUILD; then
+    # If the test is directly mentioned in test/BULID, it's probably mentioned
+    # in an `exclude` line. Let's skip updating.
+    continue
+  fi
+
   # Packager tests are folder based.
   if [[ "$this_src" =~ (.*/packager/([^/]+)/).* ]]; then
     # Basename for all .exp files in packager folder is "pass.$pass.exp"
@@ -206,28 +212,21 @@ for this_src in "${rb_src[@]}" DUMMY; do
           continue
         fi
       fi
+      args=()
       if $needs_requires_ancestor; then
         args=("--enable-experimental-requires-ancestor")
-      else
-        args=()
       fi
       if $needs_rspec; then
         args+=("--enable-experimental-rspec")
-      else
-        args=()
       fi
       if $needs_experimental_rbs; then
         args+=("--enable-experimental-rbs-comments")
       fi
       if $needs_typed_super_false; then
         args+=("--typed-super=false")
-      else
-        args+=()
       fi
       if $needs_suggest_unsafe; then
         args+=("--suggest-unsafe")
-      else
-        args+=()
       fi
       if [ "$pass" = "autogen" ]; then
         args=("--stop-after=namer")
@@ -288,7 +287,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           ;;
         autocorrects)
           echo tools/scripts/print_autocorrects_exp.sh \
-            "${args[@]}" "${srcs[@]}" \
+            "${args[@]+"${args[@]}"}" "${srcs[@]}" \
             \> "$candidate" \
             2\> /dev/null \
             >>"$COMMAND_FILE"
@@ -297,7 +296,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           echo bazel-bin/main/sorbet \
             --silence-dev-message --suppress-non-critical --censor-for-snapshot-tests \
             --print "$pass" --max-threads 0 \
-            "${args[@]}" "${srcs[@]}" \
+            "${args[@]+"${args[@]}"}" "${srcs[@]}" \
             \> "$candidate" \
             2\>/dev/null \
             >>"$COMMAND_FILE"

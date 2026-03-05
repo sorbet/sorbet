@@ -639,7 +639,6 @@ pipeline_tests(
 
             # Fixing a bug in pipeline_test_runner.cc revealed that these tests
             # were not actually running because they use MLHS
-            "prism_regression/call_block_param.rb",
             "prism_regression/assign_to_method_result.rb",
         ],
     ),
