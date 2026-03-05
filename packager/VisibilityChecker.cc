@@ -4,6 +4,8 @@
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/Parallel.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
 
@@ -217,10 +219,10 @@ class PropagateVisibility final {
         explicitlyExported.clear();
     }
 
-    bool ignoreRBIExportEnforcement(core::MutableContext ctx, core::FileRef file) {
-        const auto path = file.data(ctx).path();
+    bool ignoreRBIExportEnforcement(const core::GlobalState &gs, core::FileRef file) {
+        const auto path = file.data(gs).path();
 
-        return absl::c_any_of(ctx.state.packageDB().skipRBIExportEnforcementDirs(),
+        return absl::c_any_of(gs.packageDB().skipRBIExportEnforcementDirs(),
                               [&](const string &dir) { return absl::StartsWith(path, dir); });
     }
 
@@ -274,6 +276,59 @@ class PropagateVisibility final {
         }
     }
 
+    vector<string> computeRecursiveExports(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
+        vector<core::ClassOrModuleRef> work{klass};
+        vector<string> lines;
+
+        while (!work.empty()) {
+            auto sym = work.back();
+            work.pop_back();
+
+            for (auto [name, member] : sym.data(gs)->members()) {
+                // We only export classes, modules, or fields.
+                if (member.isClassOrModule()) {
+                    auto klass = member.asClassOrModuleRef();
+
+                    if (klass.data(gs)->package != this->package.mangledName()) {
+                        continue;
+                    }
+
+                    if (klass.data(gs)->isSingletonClass(gs)) {
+                        continue;
+                    }
+
+                    // If we encounter another namespace with no real declaration, continue exporting
+                    // its members.
+                    if (!klass.data(gs)->flags.isDeclared) {
+                        work.push_back(klass);
+                        continue;
+                    }
+                } else if (member.isFieldOrStaticField()) {
+                    auto memberPkg = member.enclosingClass(gs).data(gs)->package;
+                    if (memberPkg != this->package.mangledName()) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+
+                // We can't export symbols that are only defined in RBI files
+                bool allRBI = absl::c_all_of(member.locs(gs), [&gs, this](const core::Loc &loc) {
+                    return loc.file().data(gs).isRBI() && !ignoreRBIExportEnforcement(gs, loc.file());
+                });
+                if (allRBI) {
+                    continue;
+                }
+
+                lines.emplace_back(fmt::format("export {}", member.show(gs)));
+            }
+        }
+
+        fast_sort(lines);
+
+        return lines;
+    }
+
     PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
 
 public:
@@ -305,17 +360,34 @@ public:
             return;
         }
 
-        string_view kind;
         auto sym = lit->symbol();
+
+        string_view kind;
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
+                auto klass = sym.asClassOrModuleRef();
+                auto klassData = klass.data(ctx);
+
+                // The symbol being exported must have an actual declaration, being part of a path that's present for
+                // other declarations isn't sufficient.
+                if (!klassData->isDeclared()) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
+                        e.setHeader("Constant `{}` lacks a declaration and cannot be exported", sym.show(ctx));
+
+                        auto lines = computeRecursiveExports(ctx, klass);
+                        e.replaceWith(lines.empty() ? "Remove this export" : "Export all child symbols",
+                                      ctx.locAt(send.loc), "{}",
+                                      fmt::map_join(lines, "\n  ", [](string_view line) { return line; }));
+                    }
+                }
+
                 checkExportPackage(ctx, send.loc, sym);
                 auto setExportedTo = true;
                 recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
 
                 // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
                 // be great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, sym.asClassOrModuleRef().data(ctx)->owner);
+                exportParentNamespace(ctx, klassData->owner);
                 return;
             }
 
