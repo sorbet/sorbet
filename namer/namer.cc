@@ -406,6 +406,18 @@ public:
                     addMethodModifiers(ctx, original.fun, original.posArgs());
                 }
                 break;
+            case core::Names::abstract().rawId(): {
+                if (!ctx.state.experimentalMethodModifiers) {
+                    break;
+                }
+                if (ownerIsMethod) {
+                    break;
+                }
+
+                addMethodModifiers(ctx, original.fun, original.posArgs());
+
+                break;
+            }
             case core::Names::privateConstant().rawId(): {
                 if (ownerIsMethod) {
                     break;
@@ -526,6 +538,9 @@ public:
             // - `private abstract def foo` (`private(abstract(def foo; end))`)
             // - `abstract private def foo` (`abstract(private(def foo; end))`)
             if (send->numPosArgs() == 1 && send->fun.isMethodDefModifierName()) {
+                // Note: `ctx.state.experimentalMethodModifiers` is intentionally not checked here,
+                // so that the `private` in `private abstract def foo` is always parsed as a method def modifier,
+                // even if the `abstract` is later ignored by the resolver.
                 return unwrapLiteralToMethodName(ctx, send->getPosArg(0));
             }
 
@@ -1165,6 +1180,7 @@ private:
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
             switch (mod.name.rawId()) {
+                // Visibility modifiers
                 case core::Names::private_().rawId():
                 case core::Names::privateClassMethod().rawId():
                     method.data(ctx)->flags.isPrivate = true;
@@ -1190,6 +1206,13 @@ private:
                 case core::Names::publicClassMethod().rawId():
                     method.data(ctx)->setMethodPublic();
                     break;
+
+                // Other modifiers
+                case core::Names::abstract().rawId():
+                    ENFORCE(ctx.state.experimentalMethodModifiers, "How did we get here, if this was off?");
+                    method.data(ctx)->flags.isAbstract = true;
+                    break;
+
                 default:
                     break;
             }
