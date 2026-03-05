@@ -564,8 +564,8 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
         i++;
     };
 
-    for (auto *c : lefts) {
-        ++before;
+before = lefts.size();
+for (auto *c : lefts) {
         processTarget(c);
     }
     if (hasSplat) {
