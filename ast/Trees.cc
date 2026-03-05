@@ -118,6 +118,12 @@ template <typename T> struct LocGetter {
     }
 };
 
+template <> struct LocGetter<UnresolvedConstantLit> {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<UnresolvedConstantLit *>(ptr)->loc();
+    }
+};
+
 template <> struct LocGetter<ConstantLit> {
     static core::LocOffsets loc(void *ptr) {
         return reinterpret_cast<ConstantLit *>(ptr)->loc();
@@ -327,37 +333,35 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
     _sanityCheck();
 }
 
-UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, uint32_t numSegs)
-    : numSegs_(numSegs), loc(loc), scope_(std::move(scope)) {
+UnresolvedConstantLit::UnresolvedConstantLit(ExpressionPtr scope, uint32_t numSegs)
+    : numSegs_(numSegs), scope_(std::move(scope)) {
     categoryCounterInc("trees", "constantlit");
     // Do NOT call _sanityCheck() here — trailing arrays are not yet initialized.
 }
 
-ExpressionPtr UnresolvedConstantLit::create(core::LocOffsets loc, ExpressionPtr &&scope,
-                                             absl::Span<const core::NameRef> names,
-                                             absl::Span<const core::LocOffsets> locs) {
+ExpressionPtr UnresolvedConstantLit::create(ExpressionPtr &&scope, absl::Span<const core::NameRef> names,
+                                            absl::Span<const core::LocOffsets> locs) {
     ENFORCE(names.size() == locs.size());
     ENFORCE(!names.empty());
     auto numSegs = static_cast<uint32_t>(names.size());
     size_t sz = totalSizeToAlloc<core::NameRef, core::LocOffsets>(numSegs, numSegs);
     void *raw = ::operator new(sz);
-    auto *ucl = new (raw) UnresolvedConstantLit(loc, std::move(scope), numSegs);
+    auto *ucl = new (raw) UnresolvedConstantLit(std::move(scope), numSegs);
     std::uninitialized_copy(names.begin(), names.end(), ucl->getTrailingObjects<core::NameRef>());
     std::uninitialized_copy(locs.begin(), locs.end(), ucl->getTrailingObjects<core::LocOffsets>());
     ucl->_sanityCheck();
     return ExpressionPtr::fromUnique(std::unique_ptr<UnresolvedConstantLit>(ucl));
 }
 
-std::unique_ptr<UnresolvedConstantLit>
-UnresolvedConstantLit::createUnique(core::LocOffsets loc, ExpressionPtr &&scope,
-                                     absl::Span<const core::NameRef> names,
-                                     absl::Span<const core::LocOffsets> locs) {
+std::unique_ptr<UnresolvedConstantLit> UnresolvedConstantLit::createUnique(ExpressionPtr &&scope,
+                                                                           absl::Span<const core::NameRef> names,
+                                                                           absl::Span<const core::LocOffsets> locs) {
     ENFORCE(names.size() == locs.size());
     ENFORCE(!names.empty());
     auto numSegs = static_cast<uint32_t>(names.size());
     size_t sz = totalSizeToAlloc<core::NameRef, core::LocOffsets>(numSegs, numSegs);
     void *raw = ::operator new(sz);
-    auto *ucl = new (raw) UnresolvedConstantLit(loc, std::move(scope), numSegs);
+    auto *ucl = new (raw) UnresolvedConstantLit(std::move(scope), numSegs);
     std::uninitialized_copy(names.begin(), names.end(), ucl->getTrailingObjects<core::NameRef>());
     std::uninitialized_copy(locs.begin(), locs.end(), ucl->getTrailingObjects<core::LocOffsets>());
     ucl->_sanityCheck();
@@ -510,8 +514,7 @@ void printArgs(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span<
 // names/locs are in root-to-leaf order [A, B, C].
 // Emits the "scope" value for segments[0..size-1], which in the old format
 // was a nested UnresolvedConstantLit chain: { cnst=C, scope={ cnst=B, scope={ cnst=A, scope=rootScope } } }
-void showRawSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs,
-                         const ExpressionPtr &rootScope,
+void showRawSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs, const ExpressionPtr &rootScope,
                          absl::Span<const core::NameRef> names, int tabs) {
     if (names.empty()) {
         fmt::format_to(std::back_inserter(buf), "{}", rootScope.showRaw(gs, tabs));
@@ -530,17 +533,15 @@ void showRawSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs,
 
 // Same as showRawSegmentChain but for showRawWithLocs.
 void showRawWithLocsSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs, core::FileRef file,
-                                  const ExpressionPtr &rootScope,
-                                  absl::Span<const core::NameRef> names,
-                                  absl::Span<const core::LocOffsets> locs, int tabs) {
+                                 const ExpressionPtr &rootScope, absl::Span<const core::NameRef> names,
+                                 absl::Span<const core::LocOffsets> locs, int tabs) {
     if (names.empty()) {
         fmt::format_to(std::back_inserter(buf), "{}", rootScope.showRawWithLocs(gs, file, tabs));
         return;
     }
     fmt::format_to(std::back_inserter(buf), "UnresolvedConstantLit{{\n");
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "loc = {}\n",
-                   core::Loc(file, locs.back()).fileShortPosToString(gs));
+    fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, locs.back()).fileShortPosToString(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "cnst = {}\n", names.back().showRaw(gs));
     printTabs(buf, tabs + 1);
@@ -1865,7 +1866,7 @@ string UnresolvedConstantLit::showRawWithLocs(const core::GlobalState &gs, core:
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, this->loc).fileShortPosToString(gs));
+    fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, this->loc()).fileShortPosToString(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst().showRaw(gs));
     printTabs(buf, tabs + 1);

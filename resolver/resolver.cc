@@ -393,7 +393,7 @@ private:
                 }
                 // Check type alias on intermediate (non-leaf) segment.
                 if (firstSym.isTypeAlias(ctx) && !job.resolutionFailed) {
-                    if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
                         e.setHeader("Resolving constants through type aliases is not supported");
                     }
                     job.resolutionFailed = true;
@@ -414,7 +414,7 @@ private:
                     return core::Symbols::noSymbol();
                 }
                 if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
-                    if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
                         e.setHeader("Resolving constants through type aliases is not supported");
                     }
                     job.resolutionFailed = true;
@@ -428,7 +428,7 @@ private:
                 startIdx = 0;
             } else {
                 if (!job.resolutionFailed) {
-                    if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
+                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::DynamicConstant)) {
                         e.setHeader("Dynamic constant references are unsupported");
                     }
                 }
@@ -474,7 +474,7 @@ private:
 
             // Intermediate segment: type-alias check, then dealias for next lookup.
             if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
                 job.resolutionFailed = true;
@@ -511,7 +511,7 @@ private:
                 auto loc = resolvedField.data(ctx)->loc();
                 if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                     e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                    e.addErrorLine(ctx.locAt(job.out->original()->loc), "Type alias used here");
+                    e.addErrorLine(ctx.locAt(job.out->original()->loc()), "Type alias used here");
                 }
 
                 resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
@@ -536,7 +536,7 @@ private:
 
         // Determine which segment failed to resolve and its location.
         // failedSegIdx is the index of the first unresolved segment.
-        int failedSegIdx = job.resolvedUpToSegment + 1;  // 0 if nothing resolved yet
+        int failedSegIdx = job.resolvedUpToSegment + 1; // 0 if nothing resolved yet
         ENFORCE(failedSegIdx < (int)original.segCount());
         core::NameRef failedSegName = original.names()[failedSegIdx];
         core::LocOffsets failedSegLoc = original.locs()[failedSegIdx];
@@ -567,8 +567,7 @@ private:
                 // we just put a single entry in the resolutionScopes list.
                 job.out->resolutionScopes()->emplace_back(originalScope);
             }
-        } else if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope()) &&
-                   original.segCount() > 1) {
+        } else if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope()) && original.segCount() > 1) {
             // Multi-segment flat UCL with EmptyTree scope where nothing resolved.
             // Segment 0 may have been found via nesting lookup but was not followable
             // (e.g., it's a class alias field whose AliasType hasn't been set yet by

@@ -561,7 +561,7 @@ public:
         found.owner = owner;
         found.name = lhs.cnst();
         found.asgnLoc = asgn.loc;
-        found.lhsLoc = lhs.loc;
+        found.lhsLoc = lhs.loc();
         return foundDefs->addStaticField(move(found));
     }
 
@@ -575,7 +575,7 @@ public:
         core::FoundTypeMember found;
         found.owner = getOwner();
         found.asgnLoc = asgn.loc;
-        found.nameLoc = typeName->loc;
+        found.nameLoc = typeName->loc();
         found.name = typeName->cnst();
         // Store name rather than core::Variance type so that we can defer reporting an error until later.
         found.varianceName = core::NameRef();

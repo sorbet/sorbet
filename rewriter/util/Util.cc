@@ -24,7 +24,7 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
             return nullptr;
         }
     }
-    return ast::UnresolvedConstantLit::createUnique(cons->loc, std::move(dupedScope), cons->names(), cons->locs());
+    return ast::UnresolvedConstantLit::createUnique(std::move(dupedScope), cons->names(), cons->locs());
 }
 } // namespace
 

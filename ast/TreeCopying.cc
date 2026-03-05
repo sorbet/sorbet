@@ -155,17 +155,15 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::UnresolvedConstantLit: {
             auto *exp = reinterpret_cast<const UnresolvedConstantLit *>(tree);
-            return UnresolvedConstantLit::create(exp->loc, deepCopy(avoid, exp->scope_),
-                                                 exp->names(), exp->locs());
+            return UnresolvedConstantLit::create(deepCopy(avoid, exp->scope_), exp->names(), exp->locs());
         }
 
         case Tag::ConstantLit: {
             auto *exp = reinterpret_cast<const ConstantLit *>(tree);
             unique_ptr<UnresolvedConstantLit> originalC;
             if (auto *original = exp->original()) {
-                originalC = UnresolvedConstantLit::createUnique(original->loc,
-                                                                deepCopy(avoid, original->scope_),
-                                                                original->names(), original->locs());
+                originalC = UnresolvedConstantLit::createUnique(deepCopy(avoid, original->scope_), original->names(),
+                                                                original->locs());
                 return make_expression<ConstantLit>(exp->symbol(), move(originalC));
             }
 

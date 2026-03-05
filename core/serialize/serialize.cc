@@ -1200,8 +1200,7 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
 }
 
 void SerializerImpl::pickle(Pickler &p, const File &f, const ast::UnresolvedConstantLit &lit) {
-    pickle(p, lit.loc);
-    pickle(p, lit.scope_);
+    pickle(p, f, lit.scope_);
     p.putU4(lit.segCount());
     auto ns = lit.names();
     auto ls = lit.locs();
@@ -1542,7 +1541,6 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
 
 unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstantLit(UnPickler &p,
                                                                                      const GlobalState &gs) {
-    auto loc = unpickleLocOffsets(p);
     auto rootScope = unpickleExpr(p, gs);
     auto segCount = p.getU4();
     InlinedVector<core::NameRef, 4> names;
@@ -1555,7 +1553,7 @@ unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstan
         names.emplace_back(name);
         locs.emplace_back(segLoc);
     }
-    return ast::UnresolvedConstantLit::createUnique(loc, std::move(rootScope), names, locs);
+    return ast::UnresolvedConstantLit::createUnique(std::move(rootScope), names, locs);
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {

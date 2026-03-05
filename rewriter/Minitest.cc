@@ -44,7 +44,7 @@ public:
                 tree = ast::MK::EmptyTree();
                 return;
             }
-            auto name = ast::MK::Symbol(cnst->loc, cnst->cnst());
+            auto name = ast::MK::Symbol(cnst->loc(), cnst->cnst());
 
             // if the constant is already in a T.let, preserve it, otherwise decay it to unsafe
             movedConstants.emplace_back(createConstAssign(*asgn));
@@ -168,7 +168,7 @@ string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {
-        return string(ctx.locAt(argConstant->loc).source(ctx).value_or("<unknown>"));
+        return string(ctx.locAt(argConstant->loc()).source(ctx).value_or("<unknown>"));
     }
     return arg.toString(ctx);
 }
@@ -334,8 +334,7 @@ ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const as
     // defined. This matches RSpec's semantics: shared example names are stored in a global registry
     // and must be unique across the entire test suite.
     auto rootScope = ast::MK::Constant(arg.loc(), core::Symbols::root());
-    return ast::make_expression<ast::UnresolvedConstantLit>(arg.loc(), move(rootScope),
-                                                            ctx.state.enterNameConstant(name));
+    return ast::MK::UnresolvedConstant(move(rootScope), {ctx.state.enterNameConstant(name)}, {arg.loc()});
 }
 
 // Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)
