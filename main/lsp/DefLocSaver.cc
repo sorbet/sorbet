@@ -114,8 +114,14 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
         for (int i = (int)segCount - 1; i >= 0; --i) {
             auto [segName, segLoc] = unresolved.segments_[i];
             bool isLeaf = (i == (int)segCount - 1);
-            if (lspQuery.matchesLoc(ctx.locAt(segLoc)) || lspQuery.matchesSymbol(currentSym) ||
-                lspQuery.matchesSymbol(currentSymBeforeDealias)) {
+            // Skip response push for non-leaf segments in the failed zone (currentSym=StubModule).
+            // Intermediate phantom segments have wide segLoc spans (covering the entire
+            // prefix up to that segment) that cause spurious completion/hover responses.
+            // For symbol queries (find-references), matchesSymbol(StubModule) is always
+            // false anyway, so this guard only affects loc queries (hover, completion).
+            bool inPhantomZone = currentSymBeforeDealias == core::Symbols::StubModule() && !isLeaf;
+            if (!inPhantomZone && (lspQuery.matchesLoc(ctx.locAt(segLoc)) || lspQuery.matchesSymbol(currentSym) ||
+                lspQuery.matchesSymbol(currentSymBeforeDealias))) {
                 // This basically approximates the cfg::Alias case from Environment::processBinding.
                 core::TypeAndOrigins tp;
                 tp.origins.emplace_back(currentSym.loc(ctx));
@@ -133,7 +139,25 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                     // If the symbol is an alias to a stub symbol, it actually resolved, and so it
                     // won't have resolutionScopes.
                     auto *resolutionScopes = lit->resolutionScopes();
-                    scopes.insert(scopes.end(), resolutionScopes->begin(), resolutionScopes->end());
+                    // For flat UCLs (EmptyTree scope) with partial resolution, the stored
+                    // resolutionScopes is the scope for the FIRST failing segment only. Use it
+                    // only when the cursor falls within the first failing segment's span, meaning
+                    // the user is completing right after the last-resolved segment's "::".
+                    // If the cursor is past the first failure's identifier, use noSymbol instead.
+                    bool useResolutionScopes = true;
+                    int ruts = lit->resolvedUpToSegmentForFlatUCL();
+                    if (ruts >= 0 && ast::isa_tree<ast::EmptyTree>(unresolved.scope_)) {
+                        // segments_[ruts+1] is the first failing segment. Its wide segLoc spans
+                        // from the start of the expression to the end of that segment's name.
+                        // The cursor is "before or at" the first failure iff it's within this span.
+                        auto firstFailSegLoc = unresolved.segments_[ruts + 1].second;
+                        useResolutionScopes = lspQuery.matchesLoc(ctx.locAt(firstFailSegLoc));
+                    }
+                    if (useResolutionScopes) {
+                        scopes.insert(scopes.end(), resolutionScopes->begin(), resolutionScopes->end());
+                    } else {
+                        scopes.emplace_back(core::Symbols::noSymbol());
+                    }
                 } else {
                     scopes = {currentSym.owner(ctx)};
                 }
@@ -145,6 +169,27 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
             if (i > 0) {
                 if (currentSymBeforeDealias == core::Symbols::StubModule()) {
+                    // For flat UCLs (EmptyTree scope) with partial resolution, we can recover
+                    // the symbol for the last resolved segment from resolutionScopes, then
+                    // continue walking owner() backwards for earlier segments.
+                    int ruts = lit->resolvedUpToSegmentForFlatUCL();
+                    if (ruts >= 0 && ast::isa_tree<ast::EmptyTree>(unresolved.scope_)) {
+                        if (i - 1 > ruts) {
+                            // Still in the failed/phantom zone; keep StubModule and continue.
+                            currentSymBeforeDealias = core::Symbols::StubModule();
+                            currentSym = core::Symbols::StubModule();
+                            continue;
+                        } else if (i - 1 == ruts) {
+                            // About to visit the last resolved segment; substitute its symbol.
+                            auto *rScopes = lit->resolutionScopes();
+                            if (!rScopes->empty() && rScopes->front().exists() &&
+                                rScopes->front().dealias(ctx) != core::Symbols::StubModule()) {
+                                currentSymBeforeDealias = rScopes->front();
+                                currentSym = currentSymBeforeDealias.dealias(ctx);
+                                continue;
+                            }
+                        }
+                    }
                     break; // Can't walk the owner chain for an unresolved constant
                 }
                 currentSymBeforeDealias = currentSym.owner(ctx);
