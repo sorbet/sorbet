@@ -523,9 +523,9 @@ bb23[firstDead=11](<block-pre-call-temp>$74: Sorbet::Private::Static::Void, <sel
     <cfgAlias>$89: T.class_of(T) = alias <C T>
     <statTemp>$84: T.class_of(B) = <self>: T.class_of(B).extend(<cfgAlias>$87: T.class_of(T::Sig))
     <statTemp>$94: Symbol(:takes_self_private) = :takes_self_private
-    <statTemp>$92: T.class_of(B) = <self>: T.class_of(B).private(<statTemp>$94: Symbol(:takes_self_private))
+    <statTemp>$92: Symbol = <self>: T.class_of(B).private(<statTemp>$94: Symbol(:takes_self_private))
     <statTemp>$98: Symbol(:takes_self_or_integer) = :takes_self_or_integer
-    <statTemp>$96: T.class_of(B) = <self>: T.class_of(B).private(<statTemp>$98: Symbol(:takes_self_or_integer))
+    <statTemp>$96: Symbol = <self>: T.class_of(B).private(<statTemp>$98: Symbol(:takes_self_or_integer))
     <returnMethodTemp>$2: Symbol(:==) = :==
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:==)
     <unconditional> -> bb1
