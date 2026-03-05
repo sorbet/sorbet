@@ -178,6 +178,12 @@ int PackageInfo::orderByAlphabetical(const core::GlobalState &gs, const PackageI
 
 optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalState &gs, const PackageInfo &info,
                                                              ImportType importType) const {
+    if (gs.packageDB().testPackages()) {
+        if (importType != ImportType::Normal) {
+            ENFORCE(false, "addImport called to add test_import when --test-packages is enabled");
+            return nullopt;
+        }
+    }
     auto insertionLoc = core::Loc::none(this->file);
     optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
 
@@ -522,6 +528,7 @@ bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const PackageInfo &im
     }
 
     if (gs.packageDB().testPackages()) {
+        ENFORCE(importType == ImportType::Normal);
         if (visibleToTests() && importingPkgInfo.testPackage()) {
             return true;
         }
