@@ -53,12 +53,8 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     // new segments instead of nesting UCLs (which would violate the ENFORCE).
     auto recvUcl = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
     ENFORCE(recvUcl != nullptr);
-    absl::InlinedVector<core::NameRef, 4> names;
-    absl::InlinedVector<core::LocOffsets, 4> locs;
-    for (auto &[n, l] : recvUcl->parts()) {
-        names.push_back(n);
-        locs.push_back(l);
-    }
+    absl::InlinedVector<core::NameRef, 4> names(recvUcl->names().begin(), recvUcl->names().end());
+    absl::InlinedVector<core::LocOffsets, 4> locs(recvUcl->locs().begin(), recvUcl->locs().end());
     names.push_back(core::Names::Constants::Compatibility());
     locs.push_back(arg->loc);
     names.push_back(versionName);

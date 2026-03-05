@@ -312,87 +312,11 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
 }
 
 UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope,
-                                             InlinedVector<SegmentType, 3> segments)
-    : loc(loc), scope_(std::move(scope)), segments_(std::move(segments)) {
+                                              InlinedVector<core::NameRef, 4> names,
+                                              InlinedVector<core::LocOffsets, 2> locs)
+    : loc(loc), scope_(std::move(scope)), names_(std::move(names)), locs_(std::move(locs)) {
     categoryCounterInc("trees", "constantlit");
     _sanityCheck();
-}
-
-// ForwardRange implementation
-UnresolvedConstantLit::ForwardRange::ForwardRange(const UnresolvedConstantLit *node) : node_(node) {}
-
-UnresolvedConstantLit::ForwardRange::iterator UnresolvedConstantLit::ForwardRange::begin() const {
-    return node_->segments_.data();
-}
-
-UnresolvedConstantLit::ForwardRange::iterator UnresolvedConstantLit::ForwardRange::end() const {
-    return node_->segments_.data() + node_->segments_.size();
-}
-
-// ReverseRange implementation
-UnresolvedConstantLit::ReverseRange::ReverseRange(const UnresolvedConstantLit *node) : node_(node) {}
-
-UnresolvedConstantLit::ReverseRange::iterator UnresolvedConstantLit::ReverseRange::begin() const {
-    return std::make_reverse_iterator(node_->segments_.data() + node_->segments_.size());
-}
-
-UnresolvedConstantLit::ReverseRange::iterator UnresolvedConstantLit::ReverseRange::end() const {
-    return std::make_reverse_iterator(node_->segments_.data());
-}
-
-// MutableReverseRange implementation
-UnresolvedConstantLit::MutableReverseRange::MutableReverseRange(UnresolvedConstantLit *node) : node_(node) {}
-
-UnresolvedConstantLit::MutableReverseRange::iterator UnresolvedConstantLit::MutableReverseRange::begin() const {
-    return iterator(std::make_reverse_iterator(node_->segments_.data() + node_->segments_.size()));
-}
-
-UnresolvedConstantLit::MutableReverseRange::iterator UnresolvedConstantLit::MutableReverseRange::end() const {
-    return iterator(std::make_reverse_iterator(node_->segments_.data()));
-}
-
-// MutableReverseRange::iterator implementation
-UnresolvedConstantLit::MutableReverseRange::iterator::iterator(std::reverse_iterator<SegmentType *> base)
-    : base_(base) {}
-
-UnresolvedConstantLit::MutableReverseRange::MutableSegment
-UnresolvedConstantLit::MutableReverseRange::iterator::operator*() const {
-    SegmentType &seg = *base_;
-    return MutableSegment(seg.first, seg.second);
-}
-
-UnresolvedConstantLit::MutableReverseRange::iterator &
-UnresolvedConstantLit::MutableReverseRange::iterator::operator++() {
-    ++base_;
-    return *this;
-}
-
-UnresolvedConstantLit::MutableReverseRange::iterator
-UnresolvedConstantLit::MutableReverseRange::iterator::operator++(int) {
-    iterator tmp = *this;
-    ++base_;
-    return tmp;
-}
-
-bool UnresolvedConstantLit::MutableReverseRange::iterator::operator==(const iterator &other) const {
-    return base_ == other.base_;
-}
-
-bool UnresolvedConstantLit::MutableReverseRange::iterator::operator!=(const iterator &other) const {
-    return !(*this == other);
-}
-
-// Create range objects
-UnresolvedConstantLit::ForwardRange UnresolvedConstantLit::parts() const {
-    return ForwardRange(this);
-}
-
-UnresolvedConstantLit::ReverseRange UnresolvedConstantLit::partsReverse() const {
-    return ReverseRange(this);
-}
-
-UnresolvedConstantLit::MutableReverseRange UnresolvedConstantLit::partsMutable() {
-    return MutableReverseRange(this);
 }
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
@@ -535,21 +459,22 @@ void printArgs(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span<
 }
 
 // Helper to emit old-style nested UCL format for `showRaw`.
-// segments are in root-to-leaf order [A, B, C].
+// names/locs are in root-to-leaf order [A, B, C].
 // Emits the "scope" value for segments[0..size-1], which in the old format
 // was a nested UnresolvedConstantLit chain: { cnst=C, scope={ cnst=B, scope={ cnst=A, scope=rootScope } } }
-void showRawSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs, const ExpressionPtr &rootScope,
-                         absl::Span<const UnresolvedConstantLit::SegmentType> segs, int tabs) {
-    if (segs.empty()) {
+void showRawSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs,
+                         const ExpressionPtr &rootScope,
+                         absl::Span<const core::NameRef> names, int tabs) {
+    if (names.empty()) {
         fmt::format_to(std::back_inserter(buf), "{}", rootScope.showRaw(gs, tabs));
         return;
     }
     fmt::format_to(std::back_inserter(buf), "UnresolvedConstantLit{{\n");
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", segs.back().first.showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", names.back().showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
-    showRawSegmentChain(buf, gs, rootScope, segs.subspan(0, segs.size() - 1), tabs + 1);
+    showRawSegmentChain(buf, gs, rootScope, names.subspan(0, names.size() - 1), tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
@@ -557,20 +482,23 @@ void showRawSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs, c
 
 // Same as showRawSegmentChain but for showRawWithLocs.
 void showRawWithLocsSegmentChain(fmt::memory_buffer &buf, const core::GlobalState &gs, core::FileRef file,
-                                 const ExpressionPtr &rootScope,
-                                 absl::Span<const UnresolvedConstantLit::SegmentType> segs, int tabs) {
-    if (segs.empty()) {
+                                  const ExpressionPtr &rootScope,
+                                  absl::Span<const core::NameRef> names,
+                                  absl::Span<const core::LocOffsets> locs, int tabs) {
+    if (names.empty()) {
         fmt::format_to(std::back_inserter(buf), "{}", rootScope.showRawWithLocs(gs, file, tabs));
         return;
     }
     fmt::format_to(std::back_inserter(buf), "UnresolvedConstantLit{{\n");
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, segs.back().second).fileShortPosToString(gs));
+    fmt::format_to(std::back_inserter(buf), "loc = {}\n",
+                   core::Loc(file, locs.back()).fileShortPosToString(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", segs.back().first.showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", names.back().showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
-    showRawWithLocsSegmentChain(buf, gs, file, rootScope, segs.subspan(0, segs.size() - 1), tabs + 1);
+    showRawWithLocsSegmentChain(buf, gs, file, rootScope, names.subspan(0, names.size() - 1),
+                                locs.subspan(0, locs.size() - 1), tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
@@ -844,7 +772,7 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}", this->scope_.toStringWithTabs(gs, tabs));
-    for (auto &[name, loc] : this->segments_) {
+    for (auto name : this->names_) {
         fmt::format_to(std::back_inserter(buf), "::{}", name.toString(gs));
     }
     return fmt::to_string(buf);
@@ -858,8 +786,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) con
     fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst().showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
-    absl::Span<const SegmentType> scopeSegs(this->segments_.data(), this->segments_.size() - 1);
-    showRawSegmentChain(buf, gs, this->scope_, scopeSegs, tabs + 1);
+    showRawSegmentChain(buf, gs, this->scope_, this->names().subspan(0, this->names_.size() - 1), tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
@@ -1895,8 +1822,9 @@ string UnresolvedConstantLit::showRawWithLocs(const core::GlobalState &gs, core:
     fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst().showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
-    absl::Span<const SegmentType> scopeSegs(this->segments_.data(), this->segments_.size() - 1);
-    showRawWithLocsSegmentChain(buf, gs, file, this->scope_, scopeSegs, tabs + 1);
+    auto scopeNames = this->names().subspan(0, this->names_.size() - 1);
+    auto scopeLocs = this->locs().subspan(0, this->locs_.size() - 1);
+    showRawWithLocsSegmentChain(buf, gs, file, this->scope_, scopeNames, scopeLocs, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");

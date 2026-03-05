@@ -108,11 +108,12 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
 
         // Walk segments leaf-to-root, finding each segment's symbol by following the owner
         // chain upward from the leaf symbol.
-        auto segCount = unresolved.segments_.size();
+        auto segCount = unresolved.segCount();
         auto currentSymBeforeDealias = symbolBeforeDealias;
         auto currentSym = symbol;
         for (int i = (int)segCount - 1; i >= 0; --i) {
-            auto [segName, segLoc] = unresolved.segments_[i];
+            auto segName = unresolved.names()[i];
+            auto segLoc = unresolved.locs()[i];
             bool isLeaf = (i == (int)segCount - 1);
             // Skip response push for non-leaf segments in the failed zone (currentSym=StubModule).
             // Intermediate phantom segments have wide segLoc spans (covering the entire
@@ -150,7 +151,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                         // segments_[ruts+1] is the first failing segment. Its wide segLoc spans
                         // from the start of the expression to the end of that segment's name.
                         // The cursor is "before or at" the first failure iff it's within this span.
-                        auto firstFailSegLoc = unresolved.segments_[ruts + 1].second;
+                        auto firstFailSegLoc = unresolved.locs()[ruts + 1];
                         useResolutionScopes = lspQuery.matchesLoc(ctx.locAt(firstFailSegLoc));
                     }
                     if (useResolutionScopes) {

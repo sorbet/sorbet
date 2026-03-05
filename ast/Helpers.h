@@ -240,19 +240,16 @@ public:
         // Scope must never be an UnresolvedConstantLit — callers must resolve the full segment
         // list and pass the outermost non-UCL scope directly.
         ENFORCE(!cast_tree<UnresolvedConstantLit>(scope));
-        InlinedVector<UnresolvedConstantLit::SegmentType, 3> segments;
-        for (size_t i = 0; i < names.size(); ++i) {
-            segments.emplace_back(names[i], locs[i]);
-        }
-        return make_expression<UnresolvedConstantLit>(locs.back(), std::move(scope), std::move(segments));
+        InlinedVector<core::NameRef, 4> nameVec(names.begin(), names.end());
+        InlinedVector<core::LocOffsets, 2> locVec(locs.begin(), locs.end());
+        return make_expression<UnresolvedConstantLit>(locs.back(), std::move(scope),
+                                                      std::move(nameVec), std::move(locVec));
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
-        InlinedVector<UnresolvedConstantLit::SegmentType, 3> segments;
-        for (const auto part : parts) {
-            segments.emplace_back(part, loc);
-        }
-        return make_expression<UnresolvedConstantLit>(loc, EmptyTree(), std::move(segments));
+        InlinedVector<core::NameRef, 4> nameVec(parts.begin(), parts.end());
+        InlinedVector<core::LocOffsets, 2> locVec(parts.size(), loc);
+        return make_expression<UnresolvedConstantLit>(loc, EmptyTree(), std::move(nameVec), std::move(locVec));
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
@@ -631,7 +628,8 @@ public:
     static bool isRootConstantLitApproximate(const ast::ExpressionPtr &expr, const core::NameRef name,
                                              const core::ClassOrModuleRef symbol) {
         if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
-            return c->segments_.size() == 1 && c->segments_[0].first == name && ast::MK::isRootScope(c->scope_);
+            return c->segCount() == 1 && c->names()[0] == name &&
+                   ast::MK::isRootScope(c->scope_);
         } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
             return c->symbol() == symbol;
         }

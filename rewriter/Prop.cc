@@ -23,24 +23,25 @@ bool isTNilableTUntyped(const ast::ExpressionPtr &expr) {
 
 bool isTStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->segments_.size() == 2 &&
-           struct_->segments_[0].first == core::Names::Constants::T() &&
-           struct_->segments_.back().first == core::Names::Constants::Struct() && ast::MK::isRootScope(struct_->scope_);
+    return struct_ != nullptr && struct_->segCount() == 2 &&
+           struct_->names()[0] == core::Names::Constants::T() &&
+           struct_->cnst() == core::Names::Constants::Struct() &&
+           ast::MK::isRootScope(struct_->scope_);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->segments_.size() == 2 &&
-           struct_->segments_[0].first == core::Names::Constants::T() &&
-           struct_->segments_.back().first == core::Names::Constants::InexactStruct() &&
+    return struct_ != nullptr && struct_->segCount() == 2 &&
+           struct_->names()[0] == core::Names::Constants::T() &&
+           struct_->cnst() == core::Names::Constants::InexactStruct() &&
            ast::MK::isRootScope(struct_->scope_);
 }
 
 bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->segments_.size() == 2 &&
-           struct_->segments_[0].first == core::Names::Constants::T() &&
-           struct_->segments_.back().first == core::Names::Constants::ImmutableStruct() &&
+    return struct_ != nullptr && struct_->segCount() == 2 &&
+           struct_->names()[0] == core::Names::Constants::T() &&
+           struct_->cnst() == core::Names::Constants::ImmutableStruct() &&
            ast::MK::isRootScope(struct_->scope_);
 }
 

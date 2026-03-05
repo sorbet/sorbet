@@ -373,7 +373,7 @@ private:
         }
 
         auto &c = *job.out->original();
-        auto segCount = (int)c.segments_.size();
+        auto segCount = (int)c.segCount();
         ENFORCE(segCount >= 1);
 
         core::ClassOrModuleRef currentOwner;
@@ -384,10 +384,10 @@ private:
             if (ast::isa_tree<ast::EmptyTree>(c.scope_)) {
                 // Single-segment fast path: look up the only segment via nesting scope.
                 if (segCount == 1) {
-                    return resolveLhs(ctx, job.scope, c.segments_[0].first);
+                    return resolveLhs(ctx, job.scope, c.names()[0]);
                 }
-                // Multi-segment: look up segments_[0] via nesting scope.
-                auto firstSym = resolveLhs(ctx, job.scope, c.segments_[0].first);
+                // Multi-segment: look up names()[0] (first segment) via nesting scope.
+                auto firstSym = resolveLhs(ctx, job.scope, c.names()[0]);
                 if (!firstSym.exists()) {
                     return core::Symbols::noSymbol();
                 }
@@ -443,7 +443,8 @@ private:
 
         // Walk segments from startIdx to segCount-1.
         for (int i = startIdx; i < segCount; ++i) {
-            auto [segName, segLoc] = c.segments_[i];
+            auto segName = c.names()[i];
+            auto segLoc = c.locs()[i];
             auto sym = currentOwner.data(ctx)->findMemberNoDealias(segName);
             if (!sym.exists()) {
                 // Can't resolve this segment yet; progress already saved, retry later.
@@ -451,7 +452,7 @@ private:
             }
 
             // Private constants are not allowed when scope is explicit (i.e. not a nesting lookup).
-            // Nesting lookup applies only to segments_[0] when scope_ is EmptyTree; all others are
+            // Nesting lookup applies only to names()[0] when scope_ is EmptyTree; all others are
             // explicit scope. The scope_ ConstantLit path is always explicit scope.
             bool isExplicitScope = !ast::isa_tree<ast::EmptyTree>(c.scope_) || i > 0;
             if (isExplicitScope && sym.exists() &&
@@ -534,10 +535,10 @@ private:
 
         // Determine which segment failed to resolve and its location.
         // failedSegIdx is the index of the first unresolved segment.
-        int failedSegIdx = job.resolvedUpToSegment + 1; // 0 if nothing resolved yet
-        ENFORCE(failedSegIdx < (int)original.segments_.size());
-        core::NameRef failedSegName = original.segments_[failedSegIdx].first;
-        core::LocOffsets failedSegLoc = original.segments_[failedSegIdx].second;
+        int failedSegIdx = job.resolvedUpToSegment + 1;  // 0 if nothing resolved yet
+        ENFORCE(failedSegIdx < (int)original.segCount());
+        core::NameRef failedSegName = original.names()[failedSegIdx];
+        core::LocOffsets failedSegLoc = original.locs()[failedSegIdx];
 
         if (job.resolvedUpToSegment >= 0) {
             // Some segments resolved before failure: scope is the last resolved owner.
@@ -566,18 +567,18 @@ private:
                 job.out->resolutionScopes()->emplace_back(originalScope);
             }
         } else if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope()) &&
-                   original.segments_.size() > 1) {
+                   original.segCount() > 1) {
             // Multi-segment flat UCL with EmptyTree scope where nothing resolved.
             // Segment 0 may have been found via nesting lookup but was not followable
             // (e.g., it's a class alias field whose AliasType hasn't been set yet by
             // resolveClassAliasJob, which runs after constantResolutionFailed). Try to
             // find segment 0 to identify the actual failing segment.
-            auto seg0Sym = resolveLhs(ctx, job.scope, original.segments_[0].first);
+            auto seg0Sym = resolveLhs(ctx, job.scope, original.names()[0]);
             if (seg0Sym.exists()) {
                 // Segment 0 was found; the actual failing segment is 1.
                 failedSegIdx = 1;
-                failedSegName = original.segments_[1].first;
-                failedSegLoc = original.segments_[1].second;
+                failedSegName = original.names()[1];
+                failedSegLoc = original.locs()[1];
                 if (seg0Sym.dealias(ctx) == core::Symbols::StubModule()) {
                     alreadyReported = true;
                     job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
@@ -1320,10 +1321,11 @@ private:
                     // time. As Stripe's codebase moves away from this legacy autoloader, it will be
                     // easier to introduce such changes into Sorbet.)
                     auto &orig = *constant->original();
-                    auto segCount = (int)orig.segments_.size();
+                    auto segCount = (int)orig.segCount();
                     core::ClassOrModuleRef owner;
                     for (int i = 0; i < segCount; ++i) {
-                        auto [segName, segLoc] = orig.segments_[i];
+                        auto segName = orig.names()[i];
+                        auto segLoc = orig.locs()[i];
                         core::SymbolRef sym;
                         if (i == 0 && ast::isa_tree<ast::EmptyTree>(orig.scope_)) {
                             sym = resolveLhs(ctx, nesting_, segName);
@@ -1682,7 +1684,7 @@ public:
         int depth = 0;
         if (auto original = exp->original()) {
             // Number of segments minus one: A=0, A::B=1, A::B::C=2
-            depth += (int)original->segments_.size() - 1;
+            depth += (int)original->segCount() - 1;
             // Walk any ConstantLit scope chain (e.g. the ConstantLit(root) in ::A::B)
             const ast::ExpressionPtr *scopePtr = &original->scope_;
             while (scopePtr != nullptr) {
@@ -1691,7 +1693,7 @@ public:
                     break;
                 }
                 if (auto scopeOrig = scopeLit->original()) {
-                    depth += (int)scopeOrig->segments_.size();
+                    depth += (int)scopeOrig->segCount();
                     scopePtr = &scopeOrig->scope_;
                 } else {
                     break;

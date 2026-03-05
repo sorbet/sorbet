@@ -2385,8 +2385,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 Send::ARGS_store args;
                 if (auto lit = cast_tree<UnresolvedConstantLit>(value)) {
                     if (isa_tree<EmptyTree>(lit->scope())) {
-                        for (auto [name, segLoc] : lit->parts()) {
-                            args.emplace_back(MK::String(segLoc, name));
+                        auto ns = lit->names();
+                        auto ls = lit->locs();
+                        for (size_t i = 0; i < ns.size(); ++i) {
+                            args.emplace_back(MK::String(ls[i], ns[i]));
                         }
                     }
                     // else: dynamic constant path (non-EmptyTree root scope) → args stays empty
