@@ -406,6 +406,14 @@ public:
                     addMethodModifiers(ctx, original.fun, original.posArgs());
                 }
                 break;
+            case core::Names::abstract().rawId():
+                if (ownerIsMethod) {
+                    break;
+                }
+                if (original.hasPosArgs()) {
+                    addMethodModifiers(ctx, original.fun, original.posArgs());
+                }
+                break;
             case core::Names::privateConstant().rawId(): {
                 if (ownerIsMethod) {
                     break;
@@ -519,6 +527,15 @@ public:
             return sym->asSymbol();
         } else if (auto def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
             return def->name;
+        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            // Handles combinations of modifiers like
+            // - `private abstract def foo` (`private(abstract(def foo; end))`)
+            // - `abstract private def foo` (`abstract(private(def foo; end))`)
+            if (send->fun.isMethodDefModifierName()) {
+                return unwrapLiteralToMethodName(ctx, send->getPosArg(0));
+            }
+
+            return core::NameRef::noName();
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
@@ -1159,6 +1176,9 @@ private:
                 case core::Names::public_().rawId():
                 case core::Names::publicClassMethod().rawId():
                     method.data(ctx)->setMethodPublic();
+                    break;
+                case core::Names::abstract().rawId():
+                    method.data(ctx)->flags.isAbstract = true;
                     break;
                 default:
                     break;

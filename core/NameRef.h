@@ -220,7 +220,7 @@ public:
     bool isUpdateKnowledgeName() const;
 
     // Returns true if this name is one of the "keywords" that can modify a method `def`,
-    // like private/protected/public, etc.
+    // like private/protected/public, abstract, etc.
     bool isMethodDefModifierName() const;
 
     std::string_view shortName(const GlobalState &gs) const;

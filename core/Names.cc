@@ -325,6 +325,9 @@ bool NameRef::isMethodDefModifierName() const {
         case core::Names::privateClassMethod().rawId():
         case core::Names::publicClassMethod().rawId():
         case core::Names::packagePrivateClassMethod().rawId():
+
+        // Other method def modifiers
+        case core::Names::abstract().rawId():
             return true;
 
         default:

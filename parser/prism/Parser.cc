@@ -160,7 +160,8 @@ bool Parser::isMethodDefModifierCall(pm_node_t *node) const {
     auto methodName = resolveConstant(call->name);
     return methodName == "private"sv || methodName == "protected"sv || methodName == "public"sv ||
            methodName == "private_class_method"sv || methodName == "public_class_method"sv ||
-           methodName == "package_private"sv || methodName == "package_private_class_method"sv;
+           methodName == "package_private"sv || methodName == "package_private_class_method"sv ||
+           methodName == "abstract"sv;
 }
 
 bool Parser::isAttrAccessorCall(pm_node_t *node) const {
