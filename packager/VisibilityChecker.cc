@@ -588,6 +588,7 @@ public:
         }
 
         // If the imported symbol comes from the test namespace, we must also be in the test namespace.
+        // TODO(neil): is this check valid in --test-packages mode?
         if ((otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
             !this->isAnyTestFile()) {
             if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
@@ -605,6 +606,16 @@ public:
             return;
         }
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+
+        if (db.testPackages()) {
+            if (pkg.testPackage() && !this->package.testPackage()) {
+                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::TestImportMismatch)) {
+                    e.setHeader("Package `{}` may not reference `{}` packages", this->package.show(ctx), "test!");
+                    e.addErrorLine(this->package.declLoc(), "Defined here");
+                    e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
+                }
+            }
+        }
 
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
