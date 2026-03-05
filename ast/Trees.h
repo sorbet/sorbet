@@ -7,6 +7,7 @@
 #include "core/KwPair.h"
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
+#include "core/TrailingObjects.h"
 #include "core/Types.h"
 #include "core/UntaggedPtr.h"
 #include "core/ZippedPair.h"
@@ -1181,30 +1182,50 @@ public:
 };
 CheckSize(Literal, 16, 8);
 
-EXPRESSION(UnresolvedConstantLit) {
+EXPRESSION(UnresolvedConstantLit) : private core::TrailingObjects<UnresolvedConstantLit, core::NameRef, core::LocOffsets> {
+    friend TrailingObjects;
+
+    // Private constructor — initializes base fields only. Does NOT call _sanityCheck()
+    // because the trailing NameRef/LocOffsets arrays are not yet initialized at this point.
+    // Use the static factory functions instead.
+    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope, uint32_t numSegs);
+
+    const uint32_t numSegs_;
+    size_t numTrailingObjects(OverloadToken<core::NameRef>) const {
+        return numSegs_;
+    }
+
 public:
+    // Memory layout (variable-size allocation via TrailingObjects):
+    //   [loc: 8][scope_: 8][numSegs_: 4][pad: 4]  = 24 bytes base
+    //   [NameRef[0..N-1]]                           = N * 4 bytes
+    //   [LocOffsets[0..N-1]]                        = N * 8 bytes
+    // Total: 24 + N*12 bytes per UCL.  N=1: 36B, N=2: 48B, N=3: 60B.
     const core::LocOffsets loc;  // leaf (last) segment loc
     ExpressionPtr scope_;        // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
-    // Parallel arrays: names_[i] and locs_[i] form the i-th segment (root-to-leaf order).
-    // N=4 for names: 4×4=16 bytes fills the InlinedVector heap-union exactly — free inline slots.
-    // N=2 for locs:  2×8=16 bytes fills the InlinedVector heap-union exactly — free inline slots.
-    InlinedVector<core::NameRef, 4>    names_;
-    InlinedVector<core::LocOffsets, 2> locs_;
 
-    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope,
-                          InlinedVector<core::NameRef, 4> names,
-                          InlinedVector<core::LocOffsets, 2> locs);
+    // operator delete is needed because TrailingObjects allocates more than sizeof(*this),
+    // so we must call ::operator delete(void*) rather than a sized delete.
+    void operator delete(void *p) { ::operator delete(p); }
+
+    // Factory functions — must be used instead of direct construction.
+    static ExpressionPtr create(core::LocOffsets loc, ExpressionPtr &&scope,
+                                absl::Span<const core::NameRef> names,
+                                absl::Span<const core::LocOffsets> locs);
+    static std::unique_ptr<UnresolvedConstantLit> createUnique(core::LocOffsets loc, ExpressionPtr &&scope,
+                                                               absl::Span<const core::NameRef> names,
+                                                               absl::Span<const core::LocOffsets> locs);
 
     // Returns the leaf (last) segment's constant name.
-    core::NameRef cnst() const { return names_.back(); }
+    core::NameRef cnst() const { return getTrailingObjects<core::NameRef>()[numSegs_ - 1]; }
 
     // Returns the number of segments.
-    size_t segCount() const { return names_.size(); }
+    size_t segCount() const { return numSegs_; }
 
-    // Span accessors (zero-overhead views into the parallel arrays).
-    absl::Span<const core::NameRef>    names() const { return absl::MakeConstSpan(names_); }
-    absl::Span<const core::LocOffsets> locs()  const { return absl::MakeConstSpan(locs_); }
-    absl::Span<core::NameRef>          mutableNames()  { return absl::MakeSpan(names_); }
+    // Span accessors (zero-overhead views into trailing arrays).
+    absl::Span<const core::NameRef>    names() const { return {getTrailingObjects<core::NameRef>(), numSegs_}; }
+    absl::Span<const core::LocOffsets> locs()  const { return {getTrailingObjects<core::LocOffsets>(), numSegs_}; }
+    absl::Span<core::NameRef>          mutableNames() { return {getTrailingObjects<core::NameRef>(), numSegs_}; }
 
     // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
     const ExpressionPtr &scope() const {

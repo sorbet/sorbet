@@ -1555,7 +1555,7 @@ unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstan
         names.emplace_back(name);
         locs.emplace_back(segLoc);
     }
-    return make_unique<ast::UnresolvedConstantLit>(loc, std::move(rootScope), std::move(names), std::move(locs));
+    return ast::UnresolvedConstantLit::createUnique(loc, std::move(rootScope), names, locs);
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {

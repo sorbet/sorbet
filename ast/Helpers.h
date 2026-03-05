@@ -240,16 +240,12 @@ public:
         // Scope must never be an UnresolvedConstantLit — callers must resolve the full segment
         // list and pass the outermost non-UCL scope directly.
         ENFORCE(!cast_tree<UnresolvedConstantLit>(scope));
-        InlinedVector<core::NameRef, 4> nameVec(names.begin(), names.end());
-        InlinedVector<core::LocOffsets, 2> locVec(locs.begin(), locs.end());
-        return make_expression<UnresolvedConstantLit>(locs.back(), std::move(scope),
-                                                      std::move(nameVec), std::move(locVec));
+        return UnresolvedConstantLit::create(locs.back(), std::move(scope), names, locs);
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
-        InlinedVector<core::NameRef, 4> nameVec(parts.begin(), parts.end());
-        InlinedVector<core::LocOffsets, 2> locVec(parts.size(), loc);
-        return make_expression<UnresolvedConstantLit>(loc, EmptyTree(), std::move(nameVec), std::move(locVec));
+        InlinedVector<core::LocOffsets, 4> locVec(parts.size(), loc);
+        return UnresolvedConstantLit::create(loc, EmptyTree(), parts, locVec);
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
