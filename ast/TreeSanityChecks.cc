@@ -97,7 +97,8 @@ void ClassDef::_sanityCheck() {
 
 void UnresolvedConstantLit::_sanityCheck() {
     ENFORCE(scope_);
-    ENFORCE(!segments_.empty());
+    ENFORCE(!names_.empty());
+    ENFORCE(names_.size() == locs_.size());
     ENFORCE(cnst().exists());
 }
 

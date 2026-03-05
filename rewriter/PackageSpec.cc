@@ -27,7 +27,11 @@ void mustContainPackageDef(core::MutableContext ctx, core::LocOffsets loc) {
 
 [[nodiscard]] bool validatePackageName(core::MutableContext ctx, const ast::UnresolvedConstantLit *constLit) {
     bool valid = true;
-    for (auto [name, loc] : constLit->partsReverse()) {
+    auto ns = constLit->names();
+    auto ls = constLit->locs();
+    for (int i = (int)ns.size() - 1; i >= 0; --i) {
+        auto name = ns[i];
+        auto loc = ls[i];
         if (absl::StrContains(name.shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between
             // mangled names and unmangled names by replacing `_` with `::`.

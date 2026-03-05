@@ -1183,19 +1183,28 @@ CheckSize(Literal, 16, 8);
 
 EXPRESSION(UnresolvedConstantLit) {
 public:
-    // Each segment is a (name, loc) pair; segments are stored in root-to-leaf order.
-    using SegmentType = std::pair<core::NameRef, core::LocOffsets>;
+    const core::LocOffsets loc;  // leaf (last) segment loc
+    ExpressionPtr scope_;        // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
+    // Parallel arrays: names_[i] and locs_[i] form the i-th segment (root-to-leaf order).
+    // N=4 for names: 4×4=16 bytes fills the InlinedVector heap-union exactly — free inline slots.
+    // N=2 for locs:  2×8=16 bytes fills the InlinedVector heap-union exactly — free inline slots.
+    InlinedVector<core::NameRef, 4>    names_;
+    InlinedVector<core::LocOffsets, 2> locs_;
 
-    const core::LocOffsets loc;              // leaf (last) segment loc
-    ExpressionPtr scope;                     // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
-    InlinedVector<SegmentType, 3> segments_; // segments in root-to-leaf order
-
-    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope, InlinedVector<SegmentType, 3> segments);
+    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr rootScope,
+                          InlinedVector<core::NameRef, 4> names,
+                          InlinedVector<core::LocOffsets, 2> locs);
 
     // Returns the leaf (last) segment's constant name.
-    core::NameRef cnst() const {
-        return segments_.back().first;
-    }
+    core::NameRef cnst() const { return names_.back(); }
+
+    // Returns the number of segments.
+    size_t segCount() const { return names_.size(); }
+
+    // Span accessors (zero-overhead views into the parallel arrays).
+    absl::Span<const core::NameRef>    names() const { return absl::MakeConstSpan(names_); }
+    absl::Span<const core::LocOffsets> locs()  const { return absl::MakeConstSpan(locs_); }
+    absl::Span<core::NameRef>          mutableNames()  { return absl::MakeSpan(names_); }
 
     // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
     const ExpressionPtr &scope() const {
@@ -1212,79 +1221,6 @@ public:
     std::string_view nodeName() const;
 
     void _sanityCheck();
-
-    // Forward range: yields segments in root-to-leaf order (A, B, C)
-    class ForwardRange {
-    public:
-        using iterator = const SegmentType *;
-
-        iterator begin() const;
-        iterator end() const;
-
-    private:
-        friend class UnresolvedConstantLit;
-        const UnresolvedConstantLit *node_;
-        explicit ForwardRange(const UnresolvedConstantLit *node);
-    };
-
-    // Reverse range: yields segments in leaf-to-root order (C, B, A)
-    class ReverseRange {
-    public:
-        using iterator = std::reverse_iterator<const SegmentType *>;
-
-        iterator begin() const;
-        iterator end() const;
-
-    private:
-        friend class UnresolvedConstantLit;
-        const UnresolvedConstantLit *node_;
-        explicit ReverseRange(const UnresolvedConstantLit *node);
-    };
-
-    // Mutable reverse range: yields mutable references to segments in leaf-to-root order (C, B, A)
-    class MutableReverseRange {
-    public:
-        // Provides mutable references to the name and loc fields of a segment.
-        struct MutableSegment {
-            core::NameRef &cnst;
-            core::LocOffsets &loc;
-
-            MutableSegment(core::NameRef &c, core::LocOffsets &l) : cnst(c), loc(l) {}
-        };
-
-        class iterator {
-        public:
-            using value_type = MutableSegment;
-            using difference_type = std::ptrdiff_t;
-            using pointer = MutableSegment *;
-            using reference = MutableSegment;
-            using iterator_category = std::forward_iterator_tag;
-
-            explicit iterator(UnresolvedConstantLit *node);
-
-            MutableSegment operator*() const;
-            iterator &operator++();
-            iterator operator++(int);
-            bool operator==(const iterator &other) const;
-            bool operator!=(const iterator &other) const;
-
-        private:
-            std::reverse_iterator<SegmentType *> base_;
-        };
-
-        iterator begin() const;
-        iterator end() const;
-
-    private:
-        friend class UnresolvedConstantLit;
-        UnresolvedConstantLit *node_;
-        explicit MutableReverseRange(UnresolvedConstantLit *node);
-    };
-
-    // Create range objects for iteration
-    ForwardRange parts() const;
-    ReverseRange partsReverse() const;
-    MutableReverseRange partsMutable(); // Non-const - allows mutation
 };
 
 EXPRESSION(ConstantLit) {

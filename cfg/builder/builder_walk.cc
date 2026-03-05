@@ -563,17 +563,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     } else if (ast::isa_tree<ast::Send>(orig->scope_)) {
                         LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
                         current = walk(cctx.withTarget(deadSym), orig->scope_, current);
-                    } else if (ast::isa_tree<ast::EmptyTree>(orig->scope_) && orig->segments_.size() > 1) {
+                    } else if (ast::isa_tree<ast::EmptyTree>(orig->scope_) && orig->segCount() > 1) {
                         // Flat multi-segment UCL: create aliases for intermediate segments by
                         // walking up the owner chain from the final symbol. This preserves LSP
                         // hover/completion support for each segment in a multi-segment constant.
                         auto sym = a.symbol();
-                        for (int i = (int)orig->segments_.size() - 2; i >= 0; --i) {
+                        for (int i = (int)orig->segCount() - 2; i >= 0; --i) {
                             auto ownerSym = sym.owner(cctx.ctx.state);
                             if (!ownerSym.exists()) {
                                 break;
                             }
-                            auto segLoc = orig->segments_[i].second;
+                            auto segLoc = orig->locs()[i];
                             auto interimAlias = cctx.newTemporary(core::Names::cfgAlias());
                             if (ownerSym == core::Symbols::StubModule()) {
                                 current->exprs.emplace_back(interimAlias, segLoc,

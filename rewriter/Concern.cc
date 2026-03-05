@@ -27,14 +27,14 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                     return;
                 }
                 // Match `ActiveSupport::Concern`: exactly 2 segments with root scope
-                if (firstArg->segments_.size() != 2) {
+                if (firstArg->segCount() != 2) {
                     return;
                 }
                 if (!ast::MK::isRootScope(firstArg->scope_)) {
                     return;
                 }
-                if (firstArg->segments_[0].first != core::Names::Constants::ActiveSupport() ||
-                    firstArg->segments_[1].first != core::Names::Constants::Concern()) {
+                if (firstArg->names()[0] != core::Names::Constants::ActiveSupport() ||
+                    firstArg->names()[1] != core::Names::Constants::Concern()) {
                     return;
                 }
 

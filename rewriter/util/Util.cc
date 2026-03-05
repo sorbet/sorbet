@@ -24,7 +24,7 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
             return nullptr;
         }
     }
-    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(dupedScope), cons->segments_);
+    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(dupedScope), cons->names_, cons->locs_);
 }
 } // namespace
 
@@ -395,17 +395,17 @@ bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
     if (!ast::MK::isRootScope(ucl->scope())) {
         return false;
     }
-    auto range = ucl->parts();
-    auto partsIt = range.begin();
+    auto ns = ucl->names();
+    auto partsIt = ns.begin();
     auto nameIt = constantName.begin();
-    while (partsIt != range.end() && nameIt != constantName.end()) {
-        if (partsIt->first != *nameIt) {
+    while (partsIt != ns.end() && nameIt != constantName.end()) {
+        if (*partsIt != *nameIt) {
             return false;
         }
         ++partsIt;
         ++nameIt;
     }
-    return partsIt == range.end() && nameIt == constantName.end();
+    return partsIt == ns.end() && nameIt == constantName.end();
 }
 
 optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {

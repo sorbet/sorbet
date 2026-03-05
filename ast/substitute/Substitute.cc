@@ -20,8 +20,8 @@ private:
             TreeWalk::apply(ctx, *this, node);
             return;
         }
-        for (auto segment : constLit->partsMutable()) {
-            segment.cnst = subst.substituteSymbolName(segment.cnst);
+        for (auto &name : constLit->mutableNames()) {
+            name = subst.substituteSymbolName(name);
         }
         auto &root = const_cast<ExpressionPtr &>(constLit->scope());
         if (!isa_tree<EmptyTree>(root)) {

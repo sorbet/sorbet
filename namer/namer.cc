@@ -148,12 +148,14 @@ class SymbolFinder {
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             // Resolve root scope first, then build FoundClass entries root-to-leaf.
             auto current = defineScope(owner, constLit->scope());
-            for (auto [name, loc] : constLit->parts()) {
+            auto ns = constLit->names();
+            auto ls = constLit->locs();
+            for (size_t i = 0; i < ns.size(); ++i) {
                 core::FoundClass found;
                 found.owner = current;
-                found.name = name;
-                found.loc = loc;
-                found.declLoc = loc;
+                found.name = ns[i];
+                found.loc = ls[i];
+                found.declLoc = ls[i];
                 found.classKind = core::FoundClass::Kind::Unknown;
                 current = foundDefs->addClass(move(found));
             }
@@ -190,8 +192,9 @@ public:
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
                 // Process scope_ + all segments except the last to get the owner
                 auto owner = defineScope(getOwner(), constLit.scope_);
-                for (size_t i = 0; i + 1 < constLit.segments_.size(); ++i) {
-                    auto [name, loc] = constLit.segments_[i];
+                for (size_t i = 0; i + 1 < constLit.segCount(); ++i) {
+                    auto name = constLit.names()[i];
+                    auto loc = constLit.locs()[i];
                     core::FoundClass fclass;
                     fclass.owner = owner;
                     fclass.name = name;
@@ -543,8 +546,9 @@ public:
 
         // Process scope_ + all segments except the last to get the owner
         auto owner = defineScope(getOwner(), lhs.scope_);
-        for (size_t i = 0; i + 1 < lhs.segments_.size(); ++i) {
-            auto [name, loc] = lhs.segments_[i];
+        for (size_t i = 0; i + 1 < lhs.segCount(); ++i) {
+            auto name = lhs.names()[i];
+            auto loc = lhs.locs()[i];
             core::FoundClass fclass;
             fclass.owner = owner;
             fclass.name = name;
@@ -692,7 +696,7 @@ public:
             fillAssign(ctx, asgn);
         } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             handleAssignment(ctx, asgn);
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope_) || lhs->segments_.size() > 1) {
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope_) || lhs->segCount() > 1) {
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun.rawId()) {
@@ -1966,16 +1970,16 @@ class TreeSymbolizer {
         ENFORCE(newOwner.exists());
 
         // Process all segments except the last without firstName logic
-        for (size_t i = 0; i + 1 < constLit->segments_.size(); ++i) {
-            auto segName = constLit->segments_[i].first;
+        for (size_t i = 0; i + 1 < constLit->segCount(); ++i) {
+            auto segName = constLit->names()[i];
             core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), segName);
             ENFORCE(existing.exists());
             newOwner = existing;
         }
 
         // Look up the last segment with firstName logic
-        ENFORCE(!constLit->segments_.empty());
-        auto lastSegName = constLit->segments_.back().first;
+        ENFORCE(constLit->segCount() > 0);
+        auto lastSegName = constLit->cnst();
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), lastSegName);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), lastSegName);
@@ -2102,12 +2106,12 @@ public:
         ENFORCE(maybeScope.exists());
 
         // Process all segments except the last to build up the scope
-        for (size_t i = 0; i + 1 < lhs.segments_.size(); ++i) {
+        for (size_t i = 0; i + 1 < lhs.segCount(); ++i) {
             if (!maybeScope.isClassOrModule()) {
                 auto scopeName = maybeScope.name(ctx);
                 maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
             }
-            auto segName = lhs.segments_[i].first;
+            auto segName = lhs.names()[i];
             maybeScope = ctx.state.lookupClassSymbol(maybeScope.asClassOrModuleRef(), segName);
             ENFORCE(maybeScope.exists());
         }
@@ -2388,7 +2392,7 @@ public:
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             tree = handleAssignment(ctx, std::move(tree));
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope_) || lhs->segments_.size() > 1) {
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope_) || lhs->segCount() > 1) {
             tree = handleAssignment(ctx, std::move(tree));
         } else {
             switch (send->fun.rawId()) {

@@ -53,8 +53,9 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
 
     vector<core::NameRef> fullNameReversed;
     while (constantLit != nullptr) {
-        for (auto [name, loc] : constantLit->partsReverse()) {
-            fullNameReversed.emplace_back(name);
+        auto ns = constantLit->names();
+        for (auto it = ns.rbegin(); it != ns.rend(); ++it) {
+            fullNameReversed.emplace_back(*it);
         }
         auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope());
         constantLit = resolvedLit != nullptr ? resolvedLit->original() : nullptr;
@@ -1261,12 +1262,11 @@ bool isTestExport(const ast::ExpressionPtr &expr) {
     if (!ast::isa_tree<ast::EmptyTree>(sym->scope())) {
         return false;
     }
-    auto range = sym->parts();
-    auto it = range.begin();
-    if (it == range.end()) {
+    auto ns = sym->names();
+    if (ns.empty()) {
         return false;
     }
-    return it->first == core::Names::Constants::Test();
+    return ns[0] == core::Names::Constants::Test();
 }
 
 } // namespace

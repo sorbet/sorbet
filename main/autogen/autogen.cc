@@ -63,8 +63,9 @@ class AutogenWalk {
             // chain is encoded as a ConstantLit chain via scope_) and multi-segment UCLs (created
             // by Namer's squashNamesInner, which wraps the entire UCL in one ConstantLit with
             // scope_ = EmptyTree).
-            for (auto it = original.segments_.rbegin(); it != original.segments_.rend(); ++it) {
-                out.emplace_back(it->first);
+            auto ns = original.names();
+            for (auto it = ns.rbegin(); it != ns.rend(); ++it) {
+                out.emplace_back(*it);
             }
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope_);
 

@@ -1202,10 +1202,12 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
 void SerializerImpl::pickle(Pickler &p, const File &f, const ast::UnresolvedConstantLit &lit) {
     pickle(p, lit.loc);
     pickle(p, lit.scope_);
-    p.putU4(lit.segments_.size());
-    for (auto &[name, segLoc] : lit.segments_) {
-        p.putU4(name.rawId());
-        pickle(p, segLoc);
+    p.putU4(lit.segCount());
+    auto ns = lit.names();
+    auto ls = lit.locs();
+    for (size_t i = 0; i < lit.segCount(); ++i) {
+        p.putU4(ns[i].rawId());
+        pickle(p, ls[i]);
     }
 }
 
@@ -1543,14 +1545,17 @@ unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstan
     auto loc = unpickleLocOffsets(p);
     auto rootScope = unpickleExpr(p, gs);
     auto segCount = p.getU4();
-    InlinedVector<ast::UnresolvedConstantLit::SegmentType, 3> segments;
-    segments.reserve(segCount);
+    InlinedVector<core::NameRef, 4> names;
+    InlinedVector<core::LocOffsets, 2> locs;
+    names.reserve(segCount);
+    locs.reserve(segCount);
     for (uint32_t i = 0; i < segCount; ++i) {
         NameRef name = unpickleNameRef(p);
         auto segLoc = unpickleLocOffsets(p);
-        segments.emplace_back(name, segLoc);
+        names.emplace_back(name);
+        locs.emplace_back(segLoc);
     }
-    return make_unique<ast::UnresolvedConstantLit>(loc, std::move(rootScope), std::move(segments));
+    return make_unique<ast::UnresolvedConstantLit>(loc, std::move(rootScope), std::move(names), std::move(locs));
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {

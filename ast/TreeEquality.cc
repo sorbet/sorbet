@@ -285,11 +285,11 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::UnresolvedConstantLit: {
             auto *a = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             auto *b = reinterpret_cast<const UnresolvedConstantLit *>(other);
-            if (a->segments_.size() != b->segments_.size()) {
+            if (a->segCount() != b->segCount()) {
                 return false;
             }
-            for (size_t i = 0; i < a->segments_.size(); ++i) {
-                if (!Comparator::compareNames(gs, a->segments_[i].first, b->segments_[i].first)) {
+            for (size_t i = 0; i < a->segCount(); ++i) {
+                if (!Comparator::compareNames(gs, a->names()[i], b->names()[i])) {
                     return false;
                 }
             }
