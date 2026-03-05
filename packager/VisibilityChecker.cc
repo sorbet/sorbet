@@ -636,6 +636,9 @@ public:
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
+            if (db.testPackages()) {
+                isTestImport = false;
+            }
             core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
             if (isTestImport) {
                 if (this->fileType == FileType::TestHelperFile) {
