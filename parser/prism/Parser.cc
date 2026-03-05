@@ -144,7 +144,7 @@ bool Parser::isSafeNavigationCall(pm_node_t *node) const {
     return PM_NODE_TYPE_P(node, PM_CALL_NODE) && PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION);
 }
 
-bool Parser::isVisibilityCall(pm_node_t *node) const {
+bool Parser::isMethodDefModifierCall(pm_node_t *node) const {
     if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
         return false;
     }
@@ -167,7 +167,7 @@ bool Parser::isVisibilityCall(pm_node_t *node) const {
         return false;
     }
 
-    // Check if the method name is a visibility modifier
+    // Check if the method name is one of the recognized method definition modifiers
     auto methodName = resolveConstant(call->name);
     return methodName == "private"sv || methodName == "protected"sv || methodName == "public"sv ||
            methodName == "private_class_method"sv || methodName == "public_class_method"sv ||
