@@ -44,7 +44,7 @@ public:
                 tree = ast::MK::EmptyTree();
                 return;
             }
-            auto name = ast::MK::Symbol(cnst->loc, cnst->cnst());
+            auto name = ast::MK::Symbol(cnst->loc(), cnst->cnst());
 
             // if the constant is already in a T.let, preserve it, otherwise decay it to unsafe
             movedConstants.emplace_back(createConstAssign(*asgn));

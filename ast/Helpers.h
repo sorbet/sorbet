@@ -240,12 +240,12 @@ public:
         // Scope must never be an UnresolvedConstantLit — callers must resolve the full segment
         // list and pass the outermost non-UCL scope directly.
         ENFORCE(!cast_tree<UnresolvedConstantLit>(scope));
-        return UnresolvedConstantLit::create(locs.back(), std::move(scope), names, locs);
+        return UnresolvedConstantLit::create(std::move(scope), names, locs);
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
         InlinedVector<core::LocOffsets, 4> locVec(parts.size(), loc);
-        return UnresolvedConstantLit::create(loc, EmptyTree(), parts, locVec);
+        return UnresolvedConstantLit::create(EmptyTree(), parts, locVec);
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
@@ -624,8 +624,7 @@ public:
     static bool isRootConstantLitApproximate(const ast::ExpressionPtr &expr, const core::NameRef name,
                                              const core::ClassOrModuleRef symbol) {
         if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
-            return c->segCount() == 1 && c->names()[0] == name &&
-                   ast::MK::isRootScope(c->scope_);
+            return c->segCount() == 1 && c->names()[0] == name && ast::MK::isRootScope(c->scope_);
         } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
             return c->symbol() == symbol;
         }
