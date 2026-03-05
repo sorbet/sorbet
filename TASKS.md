@@ -1004,3 +1004,296 @@ Total effort: Multiple days to weeks depending on complexity of migration.
 3. ✅ No performance regressions in parse/resolve passes
 4. ✅ Code is cleaner and more maintainable
 5. ✅ Iterator abstraction makes future changes easier
+
+---
+
+## Task 9: Restructure `walkUnresolvedConstantLit` to Handle Flat Multi-Segment UCLs Natively
+
+**Goal:** Currently, `walkUnresolvedConstantLit` in `resolver/resolver.cc` explodes a flat
+`UnresolvedConstantLit` (UCL) with N segments into a chain of N single-segment
+`ConstantLit`-wrapping UCLs. This undoes the memory savings from the flat vectorized UCL
+representation introduced by earlier phases. This task restructures the resolver so that a
+flat N-segment UCL is wrapped in exactly ONE `ConstantLit`, and the constant resolution
+machinery is updated to resolve multi-segment UCLs correctly through incremental progress
+tracking.
+
+**Invariant to maintain:** After resolution, each `ast::ConstantLit` that wraps an
+`ast::UnresolvedConstantLit` contains the resolved symbol for the ENTIRE qualified path
+(the leaf/final segment's resolved symbol).
+
+**Current behavior (wrong):** For `A::B::C` (a flat UCL with `segments_=[A,B,C]`,
+`scope_=EmptyTree`), `walkUnresolvedConstantLit` creates three `ConstantLit`s:
+```
+ConstantLit(C_sym, UCL{[C], scope=ConstantLit(B_sym, UCL{[B], scope=ConstantLit(A_sym, UCL{[A], scope=EmptyTree})})})
+```
+This is O(N) allocations per UCL and undoes the flat representation.
+
+**Target behavior:** Create ONE `ConstantLit(C_sym, UCL{[A,B,C], scope=EmptyTree})`.
+
+---
+
+### Subtask 9.1: Add progress-tracking fields to `ConstantResolutionItem`
+
+**File:** `resolver/resolver.cc`
+
+Currently:
+```cpp
+struct ConstantResolutionItem {
+    shared_ptr<Nesting> scope;
+    ast::ConstantLit *out;
+    bool resolutionFailed = false;
+};
+```
+
+Add two fields for incremental multi-segment resolution:
+```cpp
+// How many segments of out->original()->segments_ have been resolved.
+// -1 = none resolved yet.
+// When resolvedUpToSegment == (segCount - 1), all segments are done.
+int resolvedUpToSegment = -1;
+
+// The DEALIASED ClassOrModuleRef of the segment at index resolvedUpToSegment.
+// Used as the starting scope for the next segment lookup on retry.
+// Meaningful only when resolvedUpToSegment >= 0.
+core::ClassOrModuleRef resolvedOwner;
+```
+
+These fields let `resolveConstant` skip re-resolving already-resolved prefixes on retry,
+preserving fixed-point convergence without quadratic re-work.
+
+---
+
+### Subtask 9.2: Restructure `walkUnresolvedConstantLit` to create ONE `ConstantLit` per flat UCL
+
+**File:** `resolver/resolver.cc` (~line 1169)
+
+Replace the current loop-over-segments (which creates N `ConstantLit`s) with a single
+`ConstantLit` wrapping the whole flat UCL:
+
+```cpp
+void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+    if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
+        // Process root scope first (invariant: scope_ is never a UCL)
+        walkUnresolvedConstantLit(ctx, c->scope_);
+
+        // Create ONE ConstantLit for the entire flat UCL
+        auto out = ast::make_expression<ast::ConstantLit>(
+            core::Symbols::noSymbol(), tree.toUnique<ast::UnresolvedConstantLit>());
+        auto constant = ast::cast_tree<ast::ConstantLit>(out);
+        ConstantResolutionItem job{nesting_, constant};
+        if (resolveConstantJob(ctx, job)) {
+            categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+            if (this->loadTimeScope()) {
+                // checkReferenceOrder for each resolved segment (see 9.6)
+            }
+        } else {
+            todo_.emplace_back(std::move(job));
+        }
+        tree = std::move(out);
+        return;
+    }
+    // ... unchanged: EmptyTree, ConstantLit, and dynamic cases
+}
+```
+
+---
+
+### Subtask 9.3: Restructure `resolveConstant` for multi-segment UCLs
+
+**File:** `resolver/resolver.cc` (~line 362)
+
+The core logic change: instead of checking a single `c.cnst()` against either an EmptyTree
+or ConstantLit scope, iterate through all segments of the flat UCL, resuming from
+`job.resolvedUpToSegment` when retrying.
+
+Key design decisions:
+- **EmptyTree scope:** Look up `segments_[0]` via `resolveLhs(ctx, job.scope, name)` (nesting-aware
+  lookup, same as today for the first segment). If that resolves, dealias and use as owner for
+  `segments_[1]`, etc.
+- **ConstantLit scope:** (For `::A::B` form.) `scope_` ConstantLit must already be resolved
+  (guaranteed since `walkUnresolvedConstantLit` processes the scope first). Dealias it and use as
+  owner for `segments_[0]`, then `segments_[1]`, etc.
+- **Dynamic scope:** (E.g., a Send.) Mark `resolutionFailed = true` and error, same as today.
+- **Progress tracking:** When we successfully resolve `segments_[i]` but `segments_[i+1]` is not
+  yet resolvable, set `job.resolvedUpToSegment = i` and `job.resolvedOwner = dealiased_sym_i`
+  (a `ClassOrModuleRef`), then return `noSymbol`. On retry, skip straight to segment `i+1`.
+- **Return value:** Always return the pre-dealias symbol of the LAST (leaf) segment, consistent
+  with current behavior for single-segment UCLs.
+- **Single-segment fast path:** When `segCount == 1` and scope is EmptyTree, behavior is identical
+  to today's code: `return resolveLhs(ctx, job.scope, segments_[0].name)`.
+
+**Type-alias check:** For segments `1..n-1` (explicitly scoped), check if the previously
+resolved segment was a type alias. If so, error "Resolving constants through type aliases is
+not supported" and set `resolutionFailed = true`. (Same semantics as the existing ConstantLit
+scope case.)
+
+**Private constant check:** The existing private-constant check in the ConstantLit scope path
+applies for segments `1..n` (those after the nesting-resolved first segment). For segment 0 with
+EmptyTree scope, no private check (same as today).
+
+---
+
+### Subtask 9.4: Minimal updates to `resolveConstantJob`
+
+**File:** `resolver/resolver.cc` (~line 561)
+
+`resolveConstantJob` calls `resolveConstant` and calls `job.out->setSymbol(resolved)`. Since
+`resolveConstant` now mutates `job.resolvedUpToSegment` and `job.resolvedOwner` in-place as it
+makes progress, `resolveConstantJob` needs no structural changes. The `isAlreadyResolved`
+fast-path is also unchanged.
+
+Verify that the `isTypeAlias` path (returning `false` until the type alias's `resultType` is set)
+still works correctly with multi-segment UCLs.
+
+---
+
+### Subtask 9.5: Update `constantResolutionFailed` for multi-segment UCLs
+
+**File:** `resolver/resolver.cc` (~line 432)
+
+Currently, error messages reference `original.cnst()` (last segment name) and `original.loc`
+(last segment loc). For multi-segment UCLs, the error should target the FIRST UNRESOLVED segment.
+
+Changes needed:
+- Determine `failedSegIdx = job.resolvedUpToSegment + 1` (0 if nothing resolved).
+- Use `c.segments_[failedSegIdx].first` as the failing name for the error message.
+- Use `c.segments_[failedSegIdx].second` as the failing loc for error location.
+- The `constantNameMissing` check should use `c.segments_[failedSegIdx].first` (not `c.cnst()`).
+- The "did you mean" fuzzy match should use `c.segments_[failedSegIdx].first`.
+
+**`resolutionScopes` population:**
+- If `job.resolvedUpToSegment >= 0` (some segments resolved): the scope is the resolved owner
+  symbol. Insert `job.resolvedOwner` as the single explicit scope (analogous to the ConstantLit
+  scope path today).
+- If `job.resolvedUpToSegment == -1` and `scope_` is ConstantLit: use `id->symbol().dealias(ctx)`
+  as the scope (same as today for single-segment explicit scope).
+- If `job.resolvedUpToSegment == -1` and `scope_` is EmptyTree: fill in the full nesting chain
+  (same as today for nesting scope).
+
+**StubModule propagation:** If a previously resolved segment's owner dealiases to StubModule, set
+`alreadyReported = true` to suppress the cascade error (same semantics as today's
+"`C` was already stubbed" check).
+
+---
+
+### Subtask 9.6: Update `checkReferenceOrder` and its call sites
+
+**File:** `resolver/resolver.cc` (~line 331)
+
+`checkReferenceOrder` currently takes `const ast::UnresolvedConstantLit &c` and uses `c.loc`
+(leaf loc) as the reference location. For multi-segment UCLs, each segment needs its own call.
+
+**Change the signature** to take a `core::LocOffsets` instead of the whole UCL:
+```cpp
+static void checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult,
+                                core::LocOffsets refLoc,
+                                const UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs);
+```
+
+**In `walkUnresolvedConstantLit`** (after first-pass success): walk the resolved segments to call
+`checkReferenceOrder` once per segment. To get each segment's resolved symbol, `resolveConstant`
+can be extended (or a separate helper written) to report per-segment symbols. The simplest approach:
+after `resolveConstantJob` succeeds, walk `c.segments_` root-to-leaf, re-resolving each one (using
+the stored `resolvedOwner` to start from the already-dealiased ancestor).
+
+**In the retry loop:** When a previously deferred item finally resolves, also call
+`checkReferenceOrder` for each segment. This requires re-running the per-segment walk after
+successful resolution in `resolveConstantResolutionItems`.
+
+Alternatively (simpler), only check the leaf segment's reference order (conservative: any
+out-of-order error for `A::B::C` is reported at `C`'s loc). This is a demotion of diagnostic
+quality but not correctness. Mark as a known simplification if taken.
+
+---
+
+### Subtask 9.7: Update `constantDepth` for flat UCLs
+
+**File:** `resolver/resolver.cc` (~line 1536)
+
+Currently `constantDepth` counts the depth of a ConstantLit chain by walking
+`original()->scope_` ConstantLit pointers. With flat UCLs, there is no chain, so this returns
+0 for all constants. The sort (parents before children) becomes loc-only, which should be
+correct (outer names appear at earlier locs) but loses some determinism when two constants
+share a loc.
+
+Update to use segment count as the depth proxy:
+```cpp
+static int constantDepth(ast::ConstantLit *exp) {
+    int depth = 0;
+    if (auto original = exp->original()) {
+        depth += (int)original->segments_.size() - 1;
+        // Walk any ConstantLit scope (e.g. ::A::B absolute reference)
+        auto scopeLit = ast::cast_tree<ast::ConstantLit>(original->scope_);
+        while (scopeLit && scopeLit->original()) {
+            depth += (int)scopeLit->original()->segments_.size();
+            scopeLit = ast::cast_tree<ast::ConstantLit>(scopeLit->original()->scope_);
+        }
+    }
+    return depth;
+}
+```
+
+This ensures `A` (depth 0) sorts before `A::B` (depth 1) sorts before `A::B::C` (depth 2).
+
+---
+
+### Subtask 9.8: Verify `transformAncestor` ENFORCE
+
+**File:** `resolver/resolver.cc` (~line 1145)
+
+The existing ENFORCE:
+```cpp
+ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope_) ||
+        ast::isa_tree<ast::EmptyTree>(cnst->original()->scope_));
+```
+With flat UCLs, `cnst->original()->scope_` is always EmptyTree or ConstantLit(root/other resolved
+scope). This ENFORCE should hold as-is. Verify after the other changes by running the test suite.
+
+---
+
+### Subtask 9.9: Verify `autogen.cc` handles flat multi-segment UCLs
+
+**File:** `main/autogen/autogen.cc`
+
+The autogen pass walks `ConstantLit` nodes and inspects `original()->scope_` and the UCL's
+segments. After this task's changes, each `ConstantLit` in the resolver output will wrap a flat
+multi-segment UCL. The autogen code was already updated to iterate `segments_` rather than
+walking a linked list, so it should handle this correctly. Run autogen-specific tests to confirm.
+
+---
+
+### Subtask 9.10: Verify `packager/packager.cc` handles flat multi-segment UCLs
+
+**File:** `packager/packager.cc`
+
+The packager walks `ConstantLit` nodes (and sometimes the UCLs they wrap). After this change,
+the structure of resolved `ConstantLit` nodes changes from chains to flat-wrapping. Verify that
+packager logic (name extraction, test-constant detection, etc.) still works. Run packager-specific
+tests.
+
+---
+
+### Subtask 9.11: Handle `ConstantLit::resolutionScopes` and `markUnresolved`
+
+No structural change needed: `markUnresolved` still allocates the `resolutionScopes` vector on
+the single `ConstantLit`. The change from subtask 9.5 ensures this vector is populated with the
+correct scopes (from the failing segment's context, not the leaf segment's context).
+
+Verify: after resolution fails, `ConstantLit::resolutionScopes()` contains the scopes that were
+searched for the FIRST unresolved segment, consistent with how LSP uses it in `DefLocSaver.cc`.
+
+---
+
+### Subtask 9.12: Testing and validation
+
+- `bazel test //test:test_corpus` — all ~6600+ tests must pass
+- `bazel test //test:test_LSPTests` — all LSP tests must pass
+- `bazel test //test:hello-test` — must pass
+- Pay special attention to tests involving:
+  - Multi-segment constants: `A::B::C`, `::A::B::C`
+  - Constants used as ancestors (superclass, include, extend)
+  - Unresolved constant error messages and locations
+  - Out-of-order constant access checks
+  - Constants with explicit scope that fail to resolve
+  - StubModule / cascade-error suppression
+  - Type alias constant resolution errors
