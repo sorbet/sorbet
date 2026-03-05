@@ -254,7 +254,7 @@ Usage:
                                 (used by chrome://tracing) (default: "")
       --web-trace-file-strict   Whether to close the toplevel array in `--web-trace-file`
       --cache-dir <dir>         Use <dir> to cache certain data. Will create <dir> if it
-                                does not exist (default: "")
+                                does not exist. Caching is off by default. (default: "")
       --max-cache-size-bytes <bytes>
                                 Must be a multiple of OS page size (usually 4096).
                                 Subject to restrictions on mdb_env_set_mapsize function
