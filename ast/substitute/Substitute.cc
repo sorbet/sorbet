@@ -23,9 +23,8 @@ private:
         for (auto &name : constLit->mutableNames()) {
             name = subst.substituteSymbolName(name);
         }
-        auto &root = const_cast<ExpressionPtr &>(constLit->scope());
-        if (!isa_tree<EmptyTree>(root)) {
-            TreeWalk::apply(ctx, *this, root);
+        if (constLit->hasExprPtrScope()) {
+            TreeWalk::apply(ctx, *this, constLit->mutableScopeExpr());
         }
     }
 

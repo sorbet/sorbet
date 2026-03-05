@@ -95,7 +95,7 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
     }
 }
 
-void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
+void matchesQuery(core::Context ctx, const ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
     // Iterate through the ConstantLit chain (for root-scoped constants like ::Foo).
     // For each ConstantLit wrapping an UnresolvedConstantLit, also iterate the UCL's
@@ -147,7 +147,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                     // If the cursor is past the first failure's identifier, use noSymbol instead.
                     bool useResolutionScopes = true;
                     int ruts = lit->resolvedUpToSegmentForFlatUCL();
-                    if (ruts >= 0 && ast::isa_tree<ast::EmptyTree>(unresolved.scope_)) {
+                    if (ruts >= 0 && unresolved.scopeIsEmpty()) {
                         // segments_[ruts+1] is the first failing segment. Its wide segLoc spans
                         // from the start of the expression to the end of that segment's name.
                         // The cursor is "before or at" the first failure iff it's within this span.
@@ -174,7 +174,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                     // the symbol for the last resolved segment from resolutionScopes, then
                     // continue walking owner() backwards for earlier segments.
                     int ruts = lit->resolvedUpToSegmentForFlatUCL();
-                    if (ruts >= 0 && ast::isa_tree<ast::EmptyTree>(unresolved.scope_)) {
+                    if (ruts >= 0 && unresolved.scopeIsEmpty()) {
                         if (i - 1 > ruts) {
                             // Still in the failed/phantom zone; keep StubModule and continue.
                             currentSymBeforeDealias = core::Symbols::StubModule();
@@ -198,7 +198,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
         }
 
-        lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope_);
+        lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope());
         if (lit) {
             symbolBeforeDealias = lit->symbol();
             symbol = symbolBeforeDealias.dealias(ctx);

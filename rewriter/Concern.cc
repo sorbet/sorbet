@@ -30,7 +30,7 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (firstArg->segCount() != 2) {
                     return;
                 }
-                if (!ast::MK::isRootScope(firstArg->scope_)) {
+                if (!ast::MK::isRootScope(firstArg->scope())) {
                     return;
                 }
                 if (firstArg->names()[0] != core::Names::Constants::ActiveSupport() ||

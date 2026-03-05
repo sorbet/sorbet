@@ -34,12 +34,11 @@ ast::ExpressionPtr elemFixedUntyped(core::LocOffsets loc) {
 }
 
 void selfScopeToEmptyTree(ast::UnresolvedConstantLit &cnst) {
-    auto &root = const_cast<ast::ExpressionPtr &>(cnst.scope());
-    if (ast::isa_tree<ast::EmptyTree>(root) || ast::isa_tree<ast::ConstantLit>(root)) {
+    if (!cnst.hasExprPtrScope()) {
         return;
     }
-    if (root.isSelfReference()) {
-        root = ast::MK::EmptyTree();
+    if (cnst.mutableScopeExpr().isSelfReference()) {
+        cnst.mutableScopeExpr() = ast::MK::EmptyTree();
     }
 }
 

@@ -75,6 +75,7 @@ enum class Tag {
 template <typename T> struct ExpressionToTag;
 
 class EmptyTree;
+class ConstantLit;
 
 class ExpressionPtr {
 public:
@@ -1244,6 +1245,27 @@ public:
 
     // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
     const ExpressionPtr &scope() const {
+        return scope_;
+    }
+
+    // Returns true if scope is an EmptyTree (the common case for relative constants like A::B::C).
+    bool scopeIsEmpty() const {
+        return isa_tree<EmptyTree>(scope_);
+    }
+
+    // Returns true if scope is a ConstantLit wrapping core::Symbols::root() (for ::A::B::C paths).
+    // Implemented out-of-line in Trees.cc because ConstantLit is defined after UnresolvedConstantLit.
+    bool isRootQualified() const;
+
+    // Returns true if scope is a non-empty, non-root ExpressionPtr (e.g. dynamic Send scope).
+    bool hasExprPtrScope() const {
+        return !scopeIsEmpty() && !isRootQualified();
+    }
+
+    // Returns a mutable reference to the scope ExpressionPtr.
+    // ENFORCE: must only be called when hasExprPtrScope() is true.
+    ExpressionPtr &mutableScopeExpr() {
+        ENFORCE(hasExprPtrScope());
         return scope_;
     }
 

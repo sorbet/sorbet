@@ -16,10 +16,10 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
 
     // With the vectorized UCL, scope_ is never a UCL itself.
     ast::ExpressionPtr dupedScope;
-    if (ast::isa_tree<ast::EmptyTree>(cons->scope_)) {
+    if (cons->scopeIsEmpty()) {
         dupedScope = ast::MK::EmptyTree();
     } else {
-        dupedScope = ASTUtil::dupType(cons->scope_);
+        dupedScope = ASTUtil::dupType(cons->scope());
         if (dupedScope == nullptr) {
             return nullptr;
         }

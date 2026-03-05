@@ -61,7 +61,7 @@ class AutogenWalk {
             for (auto it = ns.rbegin(); it != ns.rend(); ++it) {
                 out.emplace_back(*it);
             }
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope_);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope());
 
             // If any part of the constant literal scope is a class alias, the final name should be
             // scoped under the alias. This allows subconstants-of-aliases to be referenced correctly
@@ -76,7 +76,7 @@ class AutogenWalk {
                     out.insert(out.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
                     break;
                 }
-            } else if (cnst == nullptr && original.segCount() > 1 && ast::isa_tree<ast::EmptyTree>(original.scope_)) {
+            } else if (cnst == nullptr && original.segCount() > 1 && original.scopeIsEmpty()) {
                 // Flat multi-segment UCL (scope_ = EmptyTree): the ConstantLit chain no longer
                 // exists to trigger the alias check above. Check whether names()[0] (the outermost
                 // scope segment) is a class alias by looking it up in the current nesting chain.
@@ -242,7 +242,7 @@ public:
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original() != nullptr) {
             auto &original = *cnst->original();
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope_);
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope());
         }
         if (cnst && cnst->symbol() == core::Symbols::root()) {
             return true;

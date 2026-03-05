@@ -624,7 +624,7 @@ public:
     static bool isRootConstantLitApproximate(const ast::ExpressionPtr &expr, const core::NameRef name,
                                              const core::ClassOrModuleRef symbol) {
         if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
-            return c->segCount() == 1 && c->names()[0] == name && ast::MK::isRootScope(c->scope_);
+            return c->segCount() == 1 && c->names()[0] == name && ast::MK::isRootScope(c->scope());
         } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
             return c->symbol() == symbol;
         }
