@@ -226,15 +226,18 @@ class PropagateVisibility final {
                               [&](const string &dir) { return absl::StartsWith(path, dir); });
     }
 
+    // Returns true if all the locs that define a symbol come from RBI files.
+    bool onlyInRBI(const core::GlobalState &gs, core::SymbolRef sym) {
+        return absl::c_all_of(sym.locs(gs), [&gs, this](const core::Loc &loc) {
+            return loc.file().data(gs).isRBI() && !ignoreRBIExportEnforcement(gs, loc.file());
+        });
+    }
+
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
     void checkExportPackage(core::MutableContext ctx, core::LocOffsets loc, core::SymbolRef sym) {
         ENFORCE(!sym.locs(ctx).empty()); // Can't be empty
 
-        bool allRBI = absl::c_all_of(sym.locs(ctx), [&](const core::Loc &loc) {
-            return loc.file().data(ctx).isRBI() && !ignoreRBIExportEnforcement(ctx, loc.file());
-        });
-
-        if (allRBI) {
+        if (onlyInRBI(ctx, sym)) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is only defined in an RBI file", sym.show(ctx));
                 e.addErrorLine(sym.loc(ctx), "Defined here");
@@ -313,10 +316,7 @@ class PropagateVisibility final {
                 }
 
                 // We can't export symbols that are only defined in RBI files
-                bool allRBI = absl::c_all_of(member.locs(gs), [&gs, this](const core::Loc &loc) {
-                    return loc.file().data(gs).isRBI() && !ignoreRBIExportEnforcement(gs, loc.file());
-                });
-                if (allRBI) {
+                if (onlyInRBI(gs, member)) {
                     continue;
                 }
 
