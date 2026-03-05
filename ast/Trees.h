@@ -1320,7 +1320,7 @@ private:
     //    bytes of storage.
     //
     //    struct FailedResolutionSymbol {
-    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
+    //        std::unique_ptr<FailedResolutionData> data; // see below
     //        std::unique_ptr<UnresolvedConstantLit> original;
     //    };
     //
@@ -1329,6 +1329,17 @@ private:
     //
     // We can represent all three of these in 16 bytes of space by doing a bunch of manual
     // pointer tagging.
+
+    // Heap-allocated data for a ConstantLit that failed to resolve.
+    struct FailedResolutionData {
+        std::vector<core::SymbolRef> resolutionScopes;
+        // For flat (EmptyTree-scoped) UCLs: the index of the last successfully resolved
+        // segment, or -1 if no segment resolved or this is not a flat UCL with partial
+        // resolution. Used by DefLocSaver::matchesQuery to correctly attribute symbols
+        // to intermediate segments when part of the chain failed.
+        int resolvedUpToSegment = -1;
+    };
+
     enum class Tag : uint8_t {
         KnownSymbol = 1,
         ResolvedSymbol,
@@ -1377,7 +1388,7 @@ private:
         }
 
         static tagged_storage allocateResolutionScopes() {
-            return tagPtr(Tag::FailedResolutionSymbol, new std::vector<core::SymbolRef>());
+            return tagPtr(Tag::FailedResolutionSymbol, new FailedResolutionData());
         }
 
         Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr1(tagSymbol(Tag::KnownSymbol, symbol)) {
@@ -1415,8 +1426,8 @@ private:
                     break;
                 }
                 case Tag::FailedResolutionSymbol: {
-                    auto *scopes = resolutionScopes();
-                    delete scopes;
+                    auto *data = reinterpret_cast<FailedResolutionData *>(untaggedPtr1());
+                    delete data;
                     auto *ucl = original();
                     delete ucl;
                     break;
@@ -1470,7 +1481,7 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return &reinterpret_cast<FailedResolutionData *>(untaggedPtr1())->resolutionScopes;
             }
         }
 
@@ -1480,8 +1491,23 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return &reinterpret_cast<const FailedResolutionData *>(untaggedPtr1())->resolutionScopes;
             }
+        }
+
+        int resolvedUpToSegmentForFlatUCL() const {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return -1;
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<const FailedResolutionData *>(untaggedPtr1())->resolvedUpToSegment;
+            }
+        }
+
+        void setResolvedUpToSegmentForFlatUCL(int idx) {
+            ENFORCE(tag() == Tag::FailedResolutionSymbol);
+            reinterpret_cast<FailedResolutionData *>(untaggedPtr1())->resolvedUpToSegment = idx;
         }
 
         void setSymbol(core::SymbolRef sym) {
@@ -1538,6 +1564,17 @@ public:
     // Marks this constant as unresolved and allocates a vector for `resolutionScopes`.
     void markUnresolved() {
         storage.markUnresolved();
+    }
+
+    // For flat (EmptyTree-scoped) UCLs that failed to resolve: the index of the last
+    // successfully resolved segment, or -1 if no segment resolved or this is an
+    // explicit-scope UCL. Set by the resolver in constantResolutionFailed.
+    int resolvedUpToSegmentForFlatUCL() const {
+        return storage.resolvedUpToSegmentForFlatUCL();
+    }
+
+    void setResolvedUpToSegmentForFlatUCL(int idx) {
+        storage.setResolvedUpToSegmentForFlatUCL(idx);
     }
 
     UnresolvedConstantLit *original() {
