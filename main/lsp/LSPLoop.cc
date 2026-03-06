@@ -269,9 +269,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         while (true) {
             unique_ptr<LSPTask> task;
             {
-                absl::MutexLock lck(taskQueue->getMutex());
                 Timer timeit(logger, "idle");
-                taskQueue->getMutex()->Await(absl::Condition(taskQueue.get(), &TaskQueue::ready));
+                absl::MutexLock lck(taskQueue->getMutex(), absl::Condition(taskQueue.get(), &TaskQueue::ready));
                 ENFORCE(!taskQueue->isPaused());
                 if (taskQueue->isTerminated()) {
                     if (taskQueue->getErrorCode() != 0) {

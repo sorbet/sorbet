@@ -395,12 +395,12 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
         while (true) {
             unique_ptr<LSPMessage> msg;
             {
-                absl::MutexLock lck(&messageQueueMutex);
-                messageQueueMutex.Await(absl::Condition(
-                    +[](MessageQueueState *messageQueue) -> bool {
-                        return messageQueue->terminate || !messageQueue->pendingRequests.empty();
-                    },
-                    &messageQueue));
+                absl::MutexLock lck(&messageQueueMutex, absl::Condition(
+                                                            +[](MessageQueueState *messageQueue) -> bool {
+                                                                return messageQueue->terminate ||
+                                                                       !messageQueue->pendingRequests.empty();
+                                                            },
+                                                            &messageQueue));
                 // Only terminate once incoming queue is drained.
                 if (messageQueue.terminate && messageQueue.pendingRequests.empty()) {
                     config->logger->debug("Preprocessor terminating");
