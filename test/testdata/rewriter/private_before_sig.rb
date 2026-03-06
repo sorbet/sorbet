@@ -4,6 +4,6 @@ class A
   extend T::Sig
 
   private sig {void}
-  #       ^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `NilClass` for argument `arg0`
+  #       ^^^^^^^^^^ error: Expected `Symbol` but found `NilClass` for argument `method_name`
   def foo; end
 end

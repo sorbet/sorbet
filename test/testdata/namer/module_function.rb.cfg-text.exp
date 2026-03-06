@@ -157,11 +157,11 @@ bb19[firstDead=13](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <sel
     <cfgAlias>$73: T.class_of(T) = alias <C T>
     <statTemp>$68: T.class_of(Funcs) = <self>: T.class_of(Funcs).extend(<cfgAlias>$71: T.class_of(T::Sig))
     <statTemp>$77: Symbol(:f) = :f
-    <statTemp>$75: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$77: Symbol(:f))
+    <statTemp>$75: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$77: Symbol(:f))
     <statTemp>$81: Symbol(:g) = :g
-    <statTemp>$79: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$81: Symbol(:g))
+    <statTemp>$79: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$81: Symbol(:g))
     <statTemp>$85: Symbol(:h) = :h
-    <statTemp>$83: T.class_of(Funcs) = <self>: T.class_of(Funcs).private(<statTemp>$85: Symbol(:h))
+    <statTemp>$83: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$85: Symbol(:h))
     <returnMethodTemp>$2: Symbol(:h) = :h
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:h)
     <unconditional> -> bb1
