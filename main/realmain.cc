@@ -725,7 +725,13 @@ int realmain(int argc, char *argv[]) {
             // generated for that symbol. Because of that, we need to put this pass outside of the loop above.
             //
             // A similar principle applies for inserting `visible_to`s with --gen-packages-update-visiblity-for
-            packager::GenPackages::run(*gs);
+            if (opts.genPackages) {
+                if (opts.genPackagesStrict) {
+                    packager::GenPackages::runStrict(*gs);
+                } else {
+                    packager::GenPackages::run(*gs);
+                }
+            }
 
             // One thing typecheck does is call flushErrorsForFile, which provides a consistent
             // ordering for errors when running in single threaded mode. To replicate that behaviour, we loop
