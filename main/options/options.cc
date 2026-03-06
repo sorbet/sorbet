@@ -426,6 +426,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "directory passed to Sorbet, if any.",
                                  cxxopts::value<string>()->default_value(empty.pathPrefix), "<prefix>");
     options.add_options(section)("gen-packages", "Generate package information", cxxopts::value<bool>());
+    options.add_options(section)("gen-packages-strict", "Generate package information (strict mode)",
+                                 cxxopts::value<bool>());
     // }}}
 
     // ----- AUTOCORRECTS ------------------------------------------------- {{{
@@ -1305,6 +1307,28 @@ void readOptions(Options &opts,
         if (opts.genPackages && opts.runLSP) {
             logger->error("--gen-packages can not be used when --lsp is also enabled");
             throw EarlyReturnWithCode(1);
+        }
+        opts.genPackagesStrict = raw["gen-packages-strict"].as<bool>();
+        if (opts.genPackagesStrict) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--gen-packages-strict can only be used in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            if (!opts.genPackages) {
+                logger->error("--gen-packages-strict can only be specified in --gen-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            if (opts.runLSP) {
+                logger->error("--gen-packages-strict can not be used when --lsp is also enabled");
+                throw EarlyReturnWithCode(1);
+            }
+            if (raw.count("gen-packages-update-visibility-for")) {
+                // TODO(neil): These 2 together are disabled for now so we don't have to think about how they interact.
+                // It's possible it makes sense to run them together, in which case, we can remove this restriction.
+                logger->error(
+                    "--gen-packages-strict can not be used when --gen-packages-update-visibility-for is also enabled");
+                throw EarlyReturnWithCode(1);
+            }
         }
         if (raw.count("allow-relaxed-packager-checks-for")) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {

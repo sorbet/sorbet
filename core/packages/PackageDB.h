@@ -68,6 +68,11 @@ public:
         return this->genPackages_;
     }
 
+    // Whether the --gen-packages-strict mode is active.
+    bool genPackagesStrict() const {
+        return this->genPackagesStrict_;
+    }
+
     // Whether to attribute errors to a package in the command line error output
     bool packageAttributedErrors() const {
         return this->packageAttributedErrors_;
@@ -114,6 +119,7 @@ public:
 private:
     bool enabled_ = false;
     bool genPackages_ = false;
+    bool genPackagesStrict_ = false;
     bool packageAttributedErrors_ = false;
     bool testPackages_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
