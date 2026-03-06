@@ -727,7 +727,7 @@ int realmain(int argc, char *argv[]) {
             // A similar principle applies for inserting `visible_to`s with --gen-packages-update-visiblity-for
             switch (opts.genPackagesMode) {
                 case core::packages::GenPackagesMode::Strict:
-                    // TODO
+                    packager::GenPackages::runStrict(*gs);
                     break;
                 case core::packages::GenPackagesMode::Normal:
                     packager::GenPackages::run(*gs);
