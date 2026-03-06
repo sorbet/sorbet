@@ -1,4 +1,4 @@
---gen-packages can only be can only be used in --sorbet-packages mode
+--gen-packages can only be used in --sorbet-packages mode
 --gen-packages can not be used when --lsp is also enabled
 ------- Non package directed -------
 A/__package.rb:3: `A` is missing imports https://srb.help/3734

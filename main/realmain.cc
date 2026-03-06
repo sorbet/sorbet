@@ -705,7 +705,7 @@ int realmain(int argc, char *argv[]) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
 
-                if (!opts.genPackages) {
+                if (opts.genPackagesMode == core::packages::GenPackagesMode::Disabled) {
                     // In --gen-packages mode, we skip typecheck because we only want to show packaging related errors,
                     // and skipping typecheck saves a significant amount of time.
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
@@ -718,14 +718,23 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        if (opts.genPackages) {
+        if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
             // One of the things this pass does is insert missing exports. Because of this, it needs to run after
             // VisibilityChecker has been run for all strata; a symbol might be used in a strata after the strata for
             // the package that owns that symbol, and we need to be able to see that use to know that a export should be
             // generated for that symbol. Because of that, we need to put this pass outside of the loop above.
             //
             // A similar principle applies for inserting `visible_to`s with --gen-packages-update-visiblity-for
-            packager::GenPackages::run(*gs);
+            switch (opts.genPackagesMode) {
+                case core::packages::GenPackagesMode::Strict:
+                    // TODO
+                    break;
+                case core::packages::GenPackagesMode::Normal:
+                    packager::GenPackages::run(*gs);
+                    break;
+                case core::packages::GenPackagesMode::Disabled:
+                    ENFORCE(false);
+            }
 
             // One thing typecheck does is call flushErrorsForFile, which provides a consistent
             // ordering for errors when running in single threaded mode. To replicate that behaviour, we loop

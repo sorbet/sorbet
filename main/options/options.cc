@@ -426,7 +426,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Remove the provided <prefix> from all printed paths. Defaults to the input "
                                  "directory passed to Sorbet, if any.",
                                  cxxopts::value<string>()->default_value(empty.pathPrefix), "<prefix>");
-    options.add_options(section)("gen-packages", "Generate package information", cxxopts::value<bool>());
+    options.add_options(section)("gen-packages", "Generate package information (normal or strict)",
+                                 cxxopts::value<string>()->implicit_value("normal"), "{normal,strict}");
     // }}}
 
     // ----- AUTOCORRECTS ------------------------------------------------- {{{
@@ -1301,14 +1302,34 @@ void readOptions(Options &opts,
             }
         }
 
-        opts.genPackages = raw["gen-packages"].as<bool>();
-        if (opts.genPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
-            logger->error("--gen-packages can only be can only be used in --sorbet-packages mode");
+        if (raw.count("gen-packages")) {
+            auto genPackagesMode = raw["gen-packages"].as<string>();
+            if (genPackagesMode == "normal") {
+                opts.genPackagesMode = core::packages::GenPackagesMode::Normal;
+            } else if (genPackagesMode == "strict") {
+                opts.genPackagesMode = core::packages::GenPackagesMode::Strict;
+            } else {
+                logger->error("--gen-packages must be 'normal' or 'strict', got '{}'", genPackagesMode);
+                throw EarlyReturnWithCode(1);
+            }
+        }
+        auto genPackagesEnabled = opts.genPackagesMode != core::packages::GenPackagesMode::Disabled;
+        if (genPackagesEnabled && !opts.cacheSensitiveOptions.sorbetPackages) {
+            logger->error("--gen-packages can only be used in --sorbet-packages mode");
             throw EarlyReturnWithCode(1);
         }
-        if (opts.genPackages && opts.runLSP) {
+        if (genPackagesEnabled && opts.runLSP) {
             logger->error("--gen-packages can not be used when --lsp is also enabled");
             throw EarlyReturnWithCode(1);
+        }
+        if (opts.genPackagesMode == core::packages::GenPackagesMode::Strict) {
+            if (raw.count("gen-packages-update-visibility-for")) {
+                // TODO(neil): These 2 together are disabled for now so we don't have to think about how they interact.
+                // It's possible it makes sense to run them together, in which case, we can remove this restriction.
+                logger->error(
+                    "--gen-packages=strict can not be used when --gen-packages-update-visibility-for is also enabled");
+                throw EarlyReturnWithCode(1);
+            }
         }
         if (raw.count("allow-relaxed-packager-checks-for")) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
@@ -1332,7 +1353,7 @@ void readOptions(Options &opts,
                 logger->error("--gen-packages-update-visibility-for can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
-            if (!opts.genPackages) {
+            if (!genPackagesEnabled) {
                 logger->error("--gen-packages-update-visibility-for can only be specified in --gen-packages mode");
                 throw EarlyReturnWithCode(1);
             }
@@ -1348,7 +1369,7 @@ void readOptions(Options &opts,
         }
         opts.allowRelaxingTestVisibility = raw["gen-packages-allow-relaxing-test-visibility"].as<bool>();
         if (opts.allowRelaxingTestVisibility) {
-            if (!opts.genPackages) {
+            if (!genPackagesEnabled) {
                 logger->error("--gen-packages-allow-relaxing-test-visibility can only be used in --gen-packages mode");
                 throw EarlyReturnWithCode(1);
             }
