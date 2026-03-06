@@ -302,7 +302,7 @@ class PropagateVisibility final {
 
                     // If we encounter another namespace with no real declaration, continue exporting
                     // its members.
-                    if (!klass.data(gs)->flags.isDeclared) {
+                    if (!klass.data(gs)->isDeclaredInPackage()) {
                         work.push_back(klass);
                         continue;
                     }
@@ -370,9 +370,10 @@ public:
 
                 // The symbol being exported must have an actual declaration, being part of a path that's present for
                 // other declarations isn't sufficient.
-                if (!klassData->isDeclared()) {
+                if (!klassData->isDeclaredInPackage()) {
                     if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
-                        e.setHeader("Constant `{}` lacks a declaration and cannot be exported", sym.show(ctx));
+                        e.setHeader("Constant `{}` lacks a declaration in this package and cannot be exported",
+                                    sym.show(ctx));
 
                         auto lines = computeRecursiveExports(ctx, klass);
                         e.replaceWith(lines.empty() ? "Remove this export" : "Export all child symbols",

@@ -402,16 +402,17 @@ public:
         bool isSealed : 1;
         bool isPrivate : 1;
         bool isDeclared : 1;
+        bool isDeclaredInPackage : 1;
         bool isExported : 1;
         bool isBehaviorDefining : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 11;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
-              isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isExported(false),
-              isBehaviorDefining(false) {}
+              isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isDeclaredInPackage(false),
+              isExported(false), isBehaviorDefining(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
@@ -536,6 +537,18 @@ public:
 
         if (!flags.isDeclared) {
             flags.isDeclared = true;
+        }
+    }
+
+    inline bool isDeclaredInPackage() const {
+        return flags.isDeclaredInPackage;
+    }
+
+    inline void setDeclaredInPackage() {
+        ENFORCE(isDeclared());
+
+        if (!flags.isDeclaredInPackage) {
+            flags.isDeclaredInPackage = true;
         }
     }
 

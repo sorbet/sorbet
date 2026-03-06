@@ -1203,6 +1203,7 @@ private:
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
         auto declLoc = ctx.locAt(klass.declLoc);
 
+        bool isDeclared = false;
         if (symbol.data(ctx)->isClassModuleSet() && !isUnknown && isModule != symbol.data(ctx)->isModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
@@ -1216,10 +1217,19 @@ private:
             }
 
             // Even though the declaration is erroneous, the class/module is technically "declared".
-            symbol.data(ctx)->setDeclared();
+            isDeclared = true;
         } else if (!isUnknown) {
             symbol.data(ctx)->setIsModule(isModule);
+            isDeclared = true;
+        }
+
+        if (isDeclared) {
             symbol.data(ctx)->setDeclared();
+
+            auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+            if (filePackage.exists() && filePackage == symbol.data(ctx)->package) {
+                symbol.data(ctx)->setDeclaredInPackage();
+            }
         }
 
         return symbol;
