@@ -1228,12 +1228,6 @@ private:
 
             auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
             if (filePackage.exists() && filePackage == symbol.data(ctx)->package) {
-                if (symbol.show(ctx) == "Opus::PlatformExtension::Model") {
-                    fmt::println(stderr, "symbol {} owned by package {}", symbol.show(ctx),
-                                 symbol.data(ctx)->package.owner.show(ctx));
-                    fmt::println(stderr, "  definition in file {} owned by package {}", ctx.file.data(ctx).path(),
-                                 filePackage.owner.show(ctx));
-                }
                 symbol.data(ctx)->setDeclaredInPackage();
             }
         }
