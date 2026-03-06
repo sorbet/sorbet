@@ -372,88 +372,85 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
     auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
-        vector<ast::ParsedFile> indexed, nonPackagedIndexed;
+        // Replace error queue with one that is owned by this thread.
+        this->gs->errorQueue =
+            make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
 
-        {
-            // Replace error queue with one that is owned by this thread.
-            this->gs->errorQueue =
-                make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
+        switch (mode) {
+            // Initialization fetches the list of files to index from the options
+            case SlowPathMode::Init: {
+                Timer timeit(this->config->logger, "initial_init");
 
-            optional<Timer> timeit;
-            ShowOperation op(*config, ShowOperation::Kind::Indexing);
-
-            switch (mode) {
-                // Initialization fetches the list of files to index from the options
-                case SlowPathMode::Init: {
-                    ENFORCE(!this->initialized);
-                    timeit.emplace(this->config->logger, "initial_index");
-
-                    this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
-                    break;
-                }
-
-                // Reindexing on the slow path derives the list of inputs files from the file table
-                case SlowPathMode::Cancelable: {
-                    timeit.emplace(this->config->logger, "slow_path_reindex");
-
-                    // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the
-                    // file table to point to the updated files.
-                    if (!updates.updatedFiles.empty()) {
-                        core::UnfreezeFileTable updateFileTable{*this->gs};
-
-                        for (auto &file : updates.updatedFiles) {
-                            auto fref = this->gs->findFileByPath(file->path());
-                            if (!fref.exists()) {
-                                fref = this->gs->enterFile(std::move(file));
-                            } else {
-                                this->gs->replaceFile(fref, std::move(file));
-                            }
-
-                            // Not all files present in the update set will be from open files--some could be watchman
-                            // update events, and others will be the result of a `textDocument/didClose` notification.
-                            // As a result, we may need to remove entries from the set that was eagerly cloned from
-                            // `indexedFinalGS`
-                            if (fref.data(*this->gs).isOpenInClient()) {
-                                openFiles.insert(fref);
-                            } else {
-                                openFiles.erase(fref);
-                            }
-                        }
-
-                        updates.updatedFiles.clear();
-                    }
-
-                    this->workspaceFiles.clear();
-                    this->workspaceFiles.reserve(this->gs->filesUsed());
-
-                    // Rebuild the set of filerefs we're going to index. We're explicitly skipping the `0` file, as
-                    // that's always a nullptr.
-                    auto ix = 0;
-                    for (const auto &file : this->gs->getFiles().subspan(1)) {
-                        ++ix;
-
-                        ENFORCE(file != nullptr);
-
-                        switch (file->sourceType) {
-                            case core::File::Type::NotYetRead:
-                            case core::File::Type::Normal:
-                                this->workspaceFiles.emplace_back(ix);
-                                break;
-
-                            case core::File::Type::PayloadGeneration:
-                            case core::File::Type::Payload:
-                            case core::File::Type::TombStone:
-                                break;
-                        }
-                    }
-
-                    break;
-                }
+                ENFORCE(!this->initialized);
+                this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
+                break;
             }
 
-            ENFORCE(updates.updatedFiles.empty());
-            ENFORCE(gs->lspQuery.isEmpty());
+            // Reindexing on the slow path derives the list of inputs files from the file table
+            case SlowPathMode::Cancelable: {
+                Timer timeit(this->config->logger, "slow_path_init");
 
+                // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the
+                // file table to point to the updated files.
+                if (!updates.updatedFiles.empty()) {
+                    core::UnfreezeFileTable updateFileTable{*this->gs};
+
+                    for (auto &file : updates.updatedFiles) {
+                        auto fref = this->gs->findFileByPath(file->path());
+                        if (!fref.exists()) {
+                            fref = this->gs->enterFile(std::move(file));
+                        } else {
+                            this->gs->replaceFile(fref, std::move(file));
+                        }
+
+                        // Not all files present in the update set will be from open files--some could be watchman
+                        // update events, and others will be the result of a `textDocument/didClose` notification.
+                        // As a result, we may need to remove entries from the set that was eagerly cloned from
+                        // `indexedFinalGS`
+                        if (fref.data(*this->gs).isOpenInClient()) {
+                            openFiles.insert(fref);
+                        } else {
+                            openFiles.erase(fref);
+                        }
+                    }
+
+                    updates.updatedFiles.clear();
+                }
+
+                this->workspaceFiles.clear();
+                this->workspaceFiles.reserve(this->gs->filesUsed());
+
+                // Rebuild the set of filerefs we're going to index. We're explicitly skipping the `0` file, as
+                // that's always a nullptr.
+                auto ix = 0;
+                for (const auto &file : this->gs->getFiles().subspan(1)) {
+                    ++ix;
+
+                    ENFORCE(file != nullptr);
+
+                    switch (file->sourceType) {
+                        case core::File::Type::NotYetRead:
+                        case core::File::Type::Normal:
+                            this->workspaceFiles.emplace_back(ix);
+                            break;
+
+                        case core::File::Type::PayloadGeneration:
+                        case core::File::Type::Payload:
+                        case core::File::Type::TombStone:
+                            break;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        ENFORCE(updates.updatedFiles.empty());
+        ENFORCE(gs->lspQuery.isEmpty());
+
+        auto indexingOp = make_optional<ShowOperation>(*config, ShowOperation::Kind::Indexing);
+
+        {
             // Test-only hook: Stall for as long as `slowPathBlocked` is set.
             {
                 absl::MutexLock lck(&slowPathBlockedMutex);
@@ -470,97 +467,115 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     }
                 }
             }
+        }
+
+        auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
+        vector<ast::ParsedFile> indexed, nonPackagedIndexed;
+
+        // ----- build the package DB -----
+
+        if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
+            Timer timeit(this->config->logger, "buildPackageDB");
+
+            auto numPackageFiles = pipeline::partitionPackageFiles(*this->gs, workspaceFilesSpan);
+            auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
+            workspaceFilesSpan = workspaceFilesSpan.subspan(numPackageFiles);
 
             {
-                Timer timeit(config->logger, "reIndexFromFileSystem");
-
-                auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
-                if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
-                    auto numPackageFiles = pipeline::partitionPackageFiles(*this->gs, workspaceFilesSpan);
-                    auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
-                    workspaceFilesSpan = workspaceFilesSpan.subspan(numPackageFiles);
-
-                    {
-                        auto result = hashing::Hashing::indexAndComputeFileHashes(
-                            *this->gs, this->config->opts, *this->config->logger, inputPackageFiles, workers,
-                            ownedKvstore, cancelable);
-                        if (!result.hasResult()) {
-                            return;
-                        }
-                        indexed = std::move(result.result());
-                    }
-
-                    // Only write the cache during initialization to avoid unbounded growth.
-                    if (mode == SlowPathMode::Init) {
-                        // Cache these before any packager rewrites, so that the cache is still
-                        // usable regardless of whether `--sorbet-packages` was passed.
-                        // Want to keep the kvstore around so we can still write to it later.
-                        ownedKvstore = cache::ownIfUnchanged(
-                            *this->gs,
-                            cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
-                                                                 this->config->opts, *this->gs, workers, indexed));
-                    }
-                    this->cacheUpdatedFiles(indexed, openFiles);
-
-                    // Only need to compute FoundDefHashes when running to compute a FileHash
-                    auto foundHashes = nullptr;
-
-                    // First namer run: only the __package.rb files. This populates the packageDB
-                    auto cancelled =
-                        pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
-                    if (cancelled) {
-                        ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-                        return;
-                    }
-
-                    pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), workspaceFilesSpan, this->config->opts,
-                                             workers);
-                }
-
-                {
-                    auto result = hashing::Hashing::indexAndComputeFileHashes(*this->gs, this->config->opts,
-                                                                              *this->config->logger, workspaceFilesSpan,
-                                                                              workers, ownedKvstore, cancelable);
-                    if (!result.hasResult()) {
-                        ast::ParsedFilesOrCancelled::cancel(std::move(indexed), workers);
-                        return;
-                    }
-                    nonPackagedIndexed = std::move(result.result());
-                    this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
-                }
-
-                // Only write the cache during initialization to avoid unbounded growth.
-                if (mode == SlowPathMode::Init) {
-                    // Cache these before any packager rewrites, so that the cache is still usable
-                    // regardless of whether `--sorbet-packages` was passed.
-                    ownedKvstore = cache::ownIfUnchanged(
-                        *this->gs, cache::maybeCacheGlobalStateAndFiles(
-                                       OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
-                                       *this->gs, workers, nonPackagedIndexed));
-
-                    // Close and copy the global kvstore, so that we have unique access for the rest of the session.
-                    this->sessionCache =
-                        cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
-
-                    this->initialized = true;
-                } else {
-                    // We don't write in the cancelable slow path, and all our read operations have completed.
-                    OwnedKeyValueStore::abort(std::move(ownedKvstore));
-                }
-
-                // Second namer run: all the other files (the packageDB shouldn't change)
-                auto foundHashes = nullptr;
-                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts,
-                                               workers, foundHashes);
-                if (canceled) {
-                    ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
-                    ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+                auto result =
+                    hashing::Hashing::indexAndComputeFileHashes(*this->gs, this->config->opts, *this->config->logger,
+                                                                inputPackageFiles, workers, ownedKvstore, cancelable);
+                if (!result.hasResult()) {
                     return;
                 }
-                pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
-                                                workers);
+                indexed = std::move(result.result());
             }
-        } // Indexing+namer is done at this point
+
+            // Only write the cache during initialization to avoid unbounded growth.
+            if (mode == SlowPathMode::Init) {
+                // Cache these before any packager rewrites, so that the cache is still
+                // usable regardless of whether `--sorbet-packages` was passed.
+                // Want to keep the kvstore around so we can still write to it later.
+                ownedKvstore = cache::ownIfUnchanged(
+                    *this->gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
+                                                                    this->config->opts, *this->gs, workers, indexed));
+            }
+            this->cacheUpdatedFiles(indexed, openFiles);
+
+            // Only need to compute FoundDefHashes when running to compute a FileHash
+            auto foundHashes = nullptr;
+
+            // First namer run: only the __package.rb files. This populates the packageDB
+            auto cancelled =
+                pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
+            if (cancelled) {
+                ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+                return;
+            }
+
+            pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), workspaceFilesSpan, this->config->opts,
+                                     workers);
+        }
+
+        // ----- index -----
+
+        {
+            optional<Timer> timeit;
+            switch (mode) {
+                case SlowPathMode::Init:
+                    timeit.emplace(this->config->logger, "initial_index");
+                    break;
+
+                case SlowPathMode::Cancelable:
+                    timeit.emplace(this->config->logger, "slow_path_reindex");
+                    break;
+            }
+
+            {
+                auto result =
+                    hashing::Hashing::indexAndComputeFileHashes(*this->gs, this->config->opts, *this->config->logger,
+                                                                workspaceFilesSpan, workers, ownedKvstore, cancelable);
+                if (!result.hasResult()) {
+                    ast::ParsedFilesOrCancelled::cancel(std::move(indexed), workers);
+                    return;
+                }
+                nonPackagedIndexed = std::move(result.result());
+                this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
+            }
+
+            // Only write the cache during initialization to avoid unbounded growth.
+            if (mode == SlowPathMode::Init) {
+                // Cache these before any packager rewrites, so that the cache is still usable
+                // regardless of whether `--sorbet-packages` was passed.
+                ownedKvstore = cache::ownIfUnchanged(
+                    *this->gs,
+                    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
+                                                         this->config->opts, *this->gs, workers, nonPackagedIndexed));
+
+                // Close and copy the global kvstore, so that we have unique access for the rest of the session.
+                this->sessionCache =
+                    cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
+
+                this->initialized = true;
+            } else {
+                // We don't write in the cancelable slow path, and all our read operations have completed.
+                OwnedKeyValueStore::abort(std::move(ownedKvstore));
+            }
+
+            // Second namer run: all the other files (the packageDB shouldn't change)
+            auto foundHashes = nullptr;
+            auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackagedIndexed), config->opts, workers,
+                                           foundHashes);
+            if (canceled) {
+                ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+                ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
+                return;
+            }
+            pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts, workers);
+        }
+
+        // Indexing+namer is done at this point, so we can clear the indexing message.
+        indexingOp.reset();
 
         if (epochManager.wasTypecheckingCanceled()) {
             return;
