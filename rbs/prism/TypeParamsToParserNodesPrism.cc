@@ -14,7 +14,7 @@ vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list
 
     for (auto *listNode = rbsTypeParams->head; listNode != nullptr; listNode = listNode->next) {
         auto *rbsTypeParam = rbs_down_cast<rbs_ast_type_param_t>(listNode->node);
-        auto loc = declaration.typeLocFromRange(listNode->node->location->rg);
+        auto loc = declaration.typeLocFromRange(listNode->node->location);
 
         if (rbsTypeParam->unchecked) {
             if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::RBSUnsupported)) {
@@ -27,10 +27,10 @@ vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list
 
         absl::InlinedVector<pm_node_t *, 1> args{};
         if (rbsTypeParam->variance) {
-            auto variance = parser.resolveKeyword(rbsTypeParam->variance);
-            if (variance == "covariant") {
+            auto variance = rbsTypeParam->variance;
+            if (variance == RBS_TYPE_PARAM_VARIANCE_COVARIANT) {
                 args.push_back(prism.Symbol(loc, core::Names::covariant().show(ctx.state)));
-            } else if (variance == "contravariant") {
+            } else if (variance == RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT) {
                 args.push_back(prism.Symbol(loc, core::Names::contravariant().show(ctx.state)));
             }
         }
