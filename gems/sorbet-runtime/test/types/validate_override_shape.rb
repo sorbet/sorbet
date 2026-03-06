@@ -59,6 +59,9 @@ module Opus::Types::Test
 
         sig { abstract.returns(Integer) }
         def foo; end
+
+        sig { returns(Integer) }
+        abstract def foo_kw; end
       end
       another = Class.new(klass) do
         extend T::Sig

@@ -310,12 +310,28 @@ module T::Private::Methods
     method_sig
   end
 
+  @pending_abstract = false # FIXME: Move this to `T::Private::DeclState.current`
+
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
   def self.run_sig(hook_mod, method_name, original_method, declaration_block)
     current_declaration =
       begin
-        run_builder(declaration_block)
+        decl = run_builder(declaration_block)
+
+        if decl && @pending_abstract
+          @pending_abstract = false
+          case decl.mode
+          when Modes.standard
+            decl.mode = Modes.abstract
+          when Modes.abstract
+            raise DeclBuilder::BuilderError.new(".abstract cannot be repeated in a single signature")
+          else
+            raise DeclBuilder::BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
+          end
+        end
+
+        decl
       rescue DeclBuilder::BuilderError => e
         T::Configuration.sig_builder_error_handler(e, declaration_block.loc)
         nil
@@ -402,12 +418,12 @@ module T::Private::Methods
 
   def self.declare_abstract(mod, method_name)
     key = method_owner_and_name_to_key(mod, method_name)
-    sig = signature_for_key(key)
-
-    sig.make_abstract!
-
-    # Unwrap the method, so it will be rewrapped with an abstract wrapper.
-    unwrap_method(mod, sig, sig.method)
+    @pending_abstract = true
+    begin
+      signature_for_key(key)
+    ensure
+      @pending_abstract = false
+    end
   end
 
   def self.unwrap_method(mod, signature, original_method)
