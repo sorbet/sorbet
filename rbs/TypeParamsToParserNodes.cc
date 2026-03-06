@@ -20,7 +20,7 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
                 "TypeParam");
 
         auto rbsTypeParam = (rbs_ast_type_param_t *)list_node->node;
-        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
+        auto loc = declaration.typeLocFromRange(list_node->node->location);
 
         if (rbsTypeParam->unchecked) {
             if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::RBSUnsupported)) {
@@ -33,10 +33,10 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
 
         auto args = parser::NodeVec();
         if (rbsTypeParam->variance) {
-            auto variance = parser.resolveKeyword(rbsTypeParam->variance);
-            if (variance == "covariant") {
+            auto variance = rbsTypeParam->variance;
+            if (variance == RBS_TYPE_PARAM_VARIANCE_COVARIANT) {
                 args.emplace_back(parser::MK::Symbol(loc, core::Names::covariant()));
-            } else if (variance == "contravariant") {
+            } else if (variance == RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT) {
                 args.emplace_back(parser::MK::Symbol(loc, core::Names::contravariant()));
             }
         }
