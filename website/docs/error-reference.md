@@ -943,6 +943,12 @@ The cases where this error can show up in this set of packages are:
 1. If `B` imports `A` with the `uses_internals: true` annotation, as only `test!` packages are allowed to import with `uses_internals: true`.
 2. If `B` imports `Test::A`, as only `test!` packages can import other packages marked `test!`.
 
+## 3736
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+`__package.rb` files can optionally declare a minimum `typed` level that all files in that package must follow (using the `sorbet` directive, see [3729](#3729)). This error occurs when a given file has a `typed` level lower than that minimum.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
