@@ -225,4 +225,8 @@ void GenPackages::run(core::GlobalState &gs) {
     }
 }
 
+void GenPackages::runStrict(core::GlobalState &gs) {
+
+}
+
 } // namespace sorbet::packager
