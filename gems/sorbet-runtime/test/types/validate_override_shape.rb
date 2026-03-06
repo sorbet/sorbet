@@ -11,6 +11,9 @@ module Opus::Types::Test
 
       sig { abstract.returns(Integer) }
       def foo; end
+
+      sig { returns(Integer) }
+      abstract def foo_kw; end
     end
 
     class Base
@@ -25,8 +28,14 @@ module Opus::Types::Test
 
     class AbstractBase
       extend T::Sig
+      extend T::Helpers
+      abstract!
+
       sig { abstract.void }
       def initialize; end
+
+      sig { void }
+      abstract def initialize_kw; end
     end
 
     it "succeeds if the override matches the shape" do
@@ -58,8 +67,14 @@ module Opus::Types::Test
         def foo
           0
         end
+
+        sig { override.returns(Integer) }
+        def foo_kw
+          1
+        end
       end
       assert_equal(0, another.new.foo)
+      assert_equal(1, another.new.foo_kw)
     end
 
     it "succeeds if the override has additional optional args and kwargs" do
@@ -220,6 +235,9 @@ module Opus::Types::Test
         extend T::Sig
         sig { override.void }
         def initialize; super; end
+
+        sig { override.void }
+        def initialize_kw; end
 
         def foo
           0

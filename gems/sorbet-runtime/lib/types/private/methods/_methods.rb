@@ -400,6 +400,16 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
+  def self.declare_abstract(mod, method_name)
+    key = method_owner_and_name_to_key(mod, method_name)
+    sig = signature_for_key(key)
+
+    sig.make_abstract!
+
+    # Unwrap the method, so it will be rewrapped with an abstract wrapper.
+    unwrap_method(mod, sig, sig.method)
+  end
+
   def self.unwrap_method(mod, signature, original_method)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature

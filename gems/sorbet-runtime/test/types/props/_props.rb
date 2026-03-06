@@ -478,11 +478,15 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
 
         sig { abstract.returns(Integer) }
         private def foo; end
+
+        sig { returns(Integer) }
+        abstract private def foo_kw; end
       end
 
       class B < T::Struct
         include A
         const :foo, Integer, override: true
+        const :foo_kw, Integer, override: true
       end
     end
   end
@@ -498,7 +502,11 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
         sig { abstract.returns(Integer) }
         private def foo; end
 
+        sig { returns(Integer) }
+        abstract private def foo_kw; end
+
         const :foo, Integer, override: true
+        const :foo_kw, Integer, override: true
       end
     end
 

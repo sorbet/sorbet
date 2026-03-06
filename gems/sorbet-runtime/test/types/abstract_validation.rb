@@ -18,6 +18,12 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
     def bar; end
 
     sig { returns(Object) }
+    abstract def foo_kw; end
+
+    sig { returns(Object) }
+    abstract def bar_kw; end
+
+    sig { returns(Object) }
     def concrete_standard; end
 
     def concrete_no_signature; end
@@ -33,6 +39,9 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     sig { abstract.returns(Object) }
     def bar; end
+
+    sig { returns(Object) }
+    abstract def bar_kw; end
   end
 
   it "raises an error when defining an abstract class method on a module" do
@@ -61,6 +70,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
       def foo; end
       def bar; end
+      def foo_kw; end
+      def bar_kw; end
     end
 
     klass = Class.new do
@@ -68,6 +79,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
     end
     klass.new.foo
     klass.new.bar
+    klass.new.foo_kw
+    klass.new.bar_kw
   end
 
   it "succeeds when overriding an abstract method with a sig via a mixin" do
@@ -80,6 +93,12 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
       sig { returns(Object) }
       def bar; end
+
+      sig { returns(Object) }
+      def foo_kw; end
+
+      sig { returns(Object) }
+      def bar_kw; end
     end
 
     mod = Module.new do
@@ -93,6 +112,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
     end
     klass.new.foo
     klass.new.bar
+    klass.new.foo_kw
+    klass.new.bar_kw
   end
 
   it "raises an error when calling an abstract method" do
@@ -116,6 +137,12 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
       sig { override.returns(Object) }
       def bar; end
+
+      sig { override.returns(Object) }
+      def foo_kw; end
+
+      sig { override.returns(Object) }
+      def bar_kw; end
     end
 
     klass = Class.new do
@@ -123,6 +150,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
     end
     klass.new.foo
     klass.new.bar
+    klass.new.foo_kw
+    klass.new.bar_kw
   end
 
   it "fails if a concrete module doesn't implement abstract methods" do
@@ -138,6 +167,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
     assert_includes(err.message, "Missing implementation for abstract instance method(s) in #{mod}")
     assert_includes(err.message, "`foo` declared in #{AbstractMixin}")
     assert_includes(err.message, "`bar` declared in #{AbstractMixin}")
+    assert_includes(err.message, "`foo_kw` declared in #{AbstractMixin}")
+    assert_includes(err.message, "`bar_kw` declared in #{AbstractMixin}")
   end
 
   describe "class methods" do
@@ -152,6 +183,12 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
         sig { override.returns(Object) }
         def self.bar; end
+
+        sig { override.returns(Object) }
+        def self.foo_kw; end
+
+        sig { override.returns(Object) }
+        def self.bar_kw; end
       end
 
       T::Private::Abstract::Validate.validate_subclass(mod)
@@ -170,6 +207,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       assert_includes(err.message, "Missing implementation for abstract class method(s) in #{mod.singleton_class}")
       assert_includes(err.message, "`foo` declared in #{AbstractMixin}")
       assert_includes(err.message, "`bar` declared in #{AbstractMixin}")
+      assert_includes(err.message, "`foo_kw` declared in #{AbstractMixin}")
+      assert_includes(err.message, "`bar_kw` declared in #{AbstractMixin}")
     end
   end
 
@@ -183,6 +222,14 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         def bar
           :bar
         end
+
+        def foo_kw
+          :foo_kw
+        end
+
+        def bar_kw
+          :bar_kw
+        end
       end
 
       klass = Class.new(parent) do
@@ -191,12 +238,16 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
       assert_equal(:foo, klass.new.foo)
       assert_equal(:bar, klass.new.bar)
+      assert_equal(:foo_kw, klass.new.foo_kw)
+      assert_equal(:bar_kw, klass.new.bar_kw)
     end
 
     it "succeeds when the method comes from a mixin" do
       mixin = Module.new do
         def foo; end
         def bar; end
+        def foo_kw; end
+        def bar_kw; end
       end
 
       mod = Module.new do
@@ -278,6 +329,8 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         extend T::Helpers
         abstract!
         def foo; end
+        def foo_kw; end
+        def bar_kw; end
         include AbstractMixin
       end
 
@@ -312,9 +365,13 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
         sig { override.returns(Object) }
         def bar; end
+
+        sig { override.returns(Object) }
+        def bar_kw; end
       end
       klass.foo
       klass.new.bar
+      klass.new.bar_kw
     end
 
     it "fails if a class method is unimplemented" do
@@ -323,6 +380,9 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         extend T::Helpers
         sig { override.returns(Object) }
         def bar; end
+
+        sig { override.returns(Object) }
+        def bar_kw; end
       end
 
       err = assert_raises(RuntimeError) do
@@ -353,6 +413,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         "Missing implementation for abstract instance method(s) in #{klass}"
       )
       assert_includes(err.message, "`bar` declared in #{AbstractClass}")
+      assert_includes(err.message, "`bar_kw` declared in #{AbstractClass}")
     end
 
     it "fails when instantiating the class" do
@@ -377,8 +438,14 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         def bar
           "baz"
         end
+
+        sig { override.returns(Object) }
+        def bar_kw
+          "baz_kw"
+        end
       end
       assert_equal("baz", klass.new.bar)
+      assert_equal("baz_kw", klass.new.bar_kw)
     end
 
     it 'succeeds with abstract methods from parents' do
