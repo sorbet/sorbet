@@ -136,7 +136,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::T::Sig::WithoutRuntime.sig() do ||
-    <self>.returns(<emptyTree>::<C NilClass>)
+    <self>.returns(::NilClass)
   end
 
   def base_type5<<todo method>>(&<blk>)

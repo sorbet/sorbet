@@ -7,6 +7,6 @@ ensure
   ARGV.first #: as String
 end
 
-def method_with_only_ensure
+def method_with_only_ensure # error: The method `method_with_only_ensure` does not have a `sig`
 ensure
 end

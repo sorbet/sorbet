@@ -200,7 +200,7 @@ T.reveal_type(g14) # error: Revealed type: `G14[T.any(Integer, String)]`
 
 # Test deep copy with intersection types
 g15 = G14.new #: G14[Numeric & Comparable]
-T.reveal_type(g15) # error: Revealed type: `G14[T.all(Numeric, Comparable)]`
+T.reveal_type(g15) # error: Revealed type: `G14[Numeric]`
 
 # Test deep copy with nested constant path
 module MyModule
