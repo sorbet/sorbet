@@ -10,6 +10,7 @@ class GenPackages final {
 
 public:
     static void run(core::GlobalState &gs);
+    static void runStrict(core::GlobalState &gs);
 };
 
 } // namespace sorbet::packager

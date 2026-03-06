@@ -234,4 +234,25 @@ void GenPackages::run(core::GlobalState &gs) {
     }
 }
 
+void GenPackages::runStrict(core::GlobalState &gs) {
+    for (auto pkgName : gs.packageDB().packages()) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(pkgInfo.exists());
+
+        auto existingContentsLoc = core::Loc(pkgInfo.file, pkgInfo.locs.loc)
+                                       .adjust(gs, pkgInfo.locs.declLoc.length() + 1, -1 * (int32_t) "end"sv.size());
+        auto existingContents = existingContentsLoc.source(gs);
+        ENFORCE(existingContents.has_value());
+
+        auto newContents = pkgInfo.renderPackageRbContents(gs);
+
+        if (existingContents.value() != newContents) {
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("`{}` has changes", pkgInfo.show(gs));
+                e.addAutocorrect({"Update __package.rb", {{existingContentsLoc, newContents}}});
+            }
+        }
+    }
+}
+
 } // namespace sorbet::packager
