@@ -533,75 +533,60 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
 
     int i = 0;
     int before = 0, after = 0;
-    bool didSplat = false;
     auto zloc = loc.copyWithZeroLength();
 
     bool hasSplat = lhs->rest && PM_NODE_TYPE_P(lhs->rest, PM_SPLAT_NODE);
-    size_t totalSize = lefts.size() + (hasSplat ? 1 : 0) + rights.size();
 
-    auto processTarget = [this, &didSplat, &stats, &i, &after, &before, totalSize, zloc, tempExpanded](pm_node_t *c) {
-        if (PM_NODE_TYPE_P(c, PM_SPLAT_NODE)) {
-            auto *splat = down_cast<pm_splat_node>(c);
-            ENFORCE(!didSplat, "did splat already");
-            didSplat = true;
+    auto processTarget = [this, &stats, &i, zloc, tempExpanded](pm_node_t *c) {
+        ENFORCE(!PM_NODE_TYPE_P(c, PM_SPLAT_NODE), "splat already handled");
 
-            int left = i;
-            int right = totalSize - left - 1;
+        auto cloc = translateLoc(c->location);
+        auto zcloc = cloc.copyWithZeroLength();
+        auto val =
+            MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
 
-            if (splat->expression) {
-                ast::ExpressionPtr lh = desugar(splat->expression);
-
-                if (right == 0) {
-                    right = 1;
-                }
-                auto lhloc = lh.loc();
-                auto zlhloc = lhloc.copyWithZeroLength();
-                // Calling `to_ary` is not faithful to the runtime behavior,
-                // but that it is faithful to the expected static type-checking behavior.
-                auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
-                stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
-            }
-            i = -right;
+        if (PM_NODE_TYPE_P(c, PM_MULTI_TARGET_NODE)) {
+            auto *mlhs = down_cast<pm_multi_target_node>(c);
+            stats.emplace_back(desugarMlhs(cloc, mlhs, move(val)));
         } else {
-            if (didSplat) {
-                ++after;
-            } else {
-                ++before;
-            }
-
-            auto cloc = translateLoc(c->location);
-            auto zcloc = cloc.copyWithZeroLength();
-            auto val =
-                MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
-
-            if (PM_NODE_TYPE_P(c, PM_MULTI_TARGET_NODE)) {
-                auto *mlhs = down_cast<pm_multi_target_node>(c);
-                stats.emplace_back(desugarMlhs(cloc, mlhs, move(val)));
-            } else {
-                ast::ExpressionPtr lh = desugar(c);
-                if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
-                    if (auto e =
-                            ctx.beginIndexerError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
-                        e.setHeader("Unsupported rest args in destructure");
-                    }
-                    lh = move(restParam->expr);
+            ast::ExpressionPtr lh = desugar(c);
+            if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
+                if (auto e = ctx.beginIndexerError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
+                    e.setHeader("Unsupported rest args in destructure");
                 }
-
-                auto lhloc = lh.loc();
-                stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
+                lh = move(restParam->expr);
             }
 
-            i++;
+            auto lhloc = lh.loc();
+            stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
         }
+
+        i++;
     };
 
     for (auto *c : lefts) {
+        ++before;
         processTarget(c);
     }
     if (hasSplat) {
-        processTarget(lhs->rest);
+        // Handle splat separately - use to_ary to capture remaining elements
+        auto *splat = down_cast<pm_splat_node>(lhs->rest);
+        size_t totalSize = lefts.size() + 1 + rights.size();
+        int right = totalSize - i - 1;
+        if (right == 0) {
+            right = 1;
+        }
+        if (splat->expression) {
+            ast::ExpressionPtr lh = desugar(splat->expression);
+            auto lhloc = lh.loc();
+            auto zlhloc = lhloc.copyWithZeroLength();
+            auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
+            stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
+        }
+        i = -right;
     }
     for (auto *c : rights) {
+        ++after;
         processTarget(c);
     }
 
@@ -1337,6 +1322,9 @@ ast::ExpressionPtr Translator::desugarSendOpAssign(pm_node_t *untypedNode) {
     }
 }
 
+const uint8_t *startLoc(pm_node_t *anyNode);
+const uint8_t *endLoc(pm_node_t *anyNode);
+
 // ----------------------------------------------------------------------------
 // Regular Assignment Desugaring
 // ----------------------------------------------------------------------------
@@ -1822,6 +1810,20 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             }
 
             auto elseClause = desugarNullable(up_cast(caseNode->else_clause));
+            // Capture the start of the line containing the `else` keyword (or `end` if no else clause).
+            // Whitequark extends empty when bodies to the start of the next line (column 1), not to the
+            // `else`/`end` keyword itself. We find the start of the line by scanning backwards for a newline.
+            core::LocOffsets clauseLoc;
+            if (caseNode->else_clause != nullptr) {
+                clauseLoc = translateLoc(caseNode->else_clause->base.location);
+            } else {
+                // No else clause - use the `end` keyword location as the fallback
+                clauseLoc = translateLoc(caseNode->end_keyword_loc);
+            }
+
+            auto detail = core::Loc::pos2Detail(ctx.file.data(ctx), clauseLoc.beginPos());
+            auto lineStart = core::Loc::detail2Pos(ctx.file.data(ctx), {detail.line, 1}).value();
+            core::LocOffsets nextClauseStartLoc = core::LocOffsets{lineStart, clauseLoc.endPos()};
 
             if (preserveConcreteSyntax) {
                 auto locZeroLen = location.copyWithZeroLength();
@@ -1859,7 +1861,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
             core::NameRef tempName;
             core::LocOffsets predicateLoc;
-            bool hasPredicate = (predicate != nullptr);
+            // Check if the prism node has a predicate, not the desugared result,
+            // because desugarNullable returns EmptyTree (not nullptr) for null nodes.
+            bool hasPredicate = (caseNode->predicate != nullptr);
 
             if (hasPredicate) {
                 predicateLoc = predicate.loc();
@@ -1871,6 +1875,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             // The if/else ladder for the entire case statement, starting with the else clause as the final `else` when
             // building backwards
             ExpressionPtr resultExpr = move(elseClause);
+            // Track the location of the next clause (else, end, or when) for extending empty when bodies.
+            // Initially this is the else/end clause location; after each iteration it becomes the If location.
+            core::LocOffsets nextClauseLoc = nextClauseStartLoc;
 
             // Iterate over Prism when nodes in reverse to build the if/else ladder backwards
             for (auto it = prismWhenNodes.rbegin(); it != prismWhenNodes.rend(); ++it) {
@@ -1916,7 +1923,22 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 }
 
                 auto then = desugarStatements(prismWhen->statements);
-                resultExpr = MK::If(whenLoc, move(patternsResult), move(then), move(resultExpr));
+                // Whitequark extends the when clause location to include the start of the next line,
+                // but ONLY when the when body is empty. Use the start of nextClauseLoc as the end.
+                auto ifLoc = whenLoc;
+                bool bodyIsEmpty = (then == nullptr || ast::isa_tree<ast::EmptyTree>(then));
+                if (bodyIsEmpty && nextClauseLoc.exists()) {
+                    ifLoc = core::LocOffsets{whenLoc.beginPos(), nextClauseLoc.beginPos()};
+                }
+                resultExpr = MK::If(ifLoc, move(patternsResult), move(then), move(resultExpr));
+                // Update nextClauseLoc to be the start of this when clause's LINE for the next iteration.
+                // This ensures empty when bodies extend to column 1, not to the indented clause start.
+                auto source = ctx.file.data(ctx).source();
+                uint32_t lineStart = whenLoc.beginPos();
+                while (lineStart > 0 && source[lineStart - 1] != '\n') {
+                    lineStart--;
+                }
+                nextClauseLoc = core::LocOffsets{lineStart, whenLoc.endPos()};
             }
 
             if (hasPredicate) {
@@ -3169,6 +3191,112 @@ core::LocOffsets Translator::translateLoc(pm_location_t loc) const {
     return parser.translateLocation(loc);
 }
 
+// Returns the end of a closing location, excluding any trailing newline.
+// Used for heredocs where Prism's closing_loc includes the newline after the delimiter.
+const uint8_t *closingLocEnd(pm_location_t closingLoc) {
+    if (closingLoc.start && closingLoc.end) {
+        auto end = closingLoc.end;
+        if (end > closingLoc.start && *(end - 1) == '\n') {
+            end--;
+        }
+        return end;
+    }
+    return nullptr;
+}
+
+// Find the end location of a node, according to the legacy parser's logic.
+// This is *usually* the same as the end of Prism's node's location,
+// but there are some exceptions, which get handled here.
+const uint8_t *endLoc(pm_node_t *anyNode) {
+    switch (PM_NODE_TYPE(anyNode)) {
+        case PM_MULTI_WRITE_NODE: {
+            auto *node = down_cast<pm_multi_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        case PM_CALL_NODE: {
+            // For call nodes with heredoc xstring arguments, Prism's location only includes the opening.
+            // Extend to include the full heredoc by checking the last argument.
+            // NOTE: Only xstrings extend the call location; regular string heredocs do not.
+            auto *node = down_cast<pm_call_node>(anyNode);
+            if (node->arguments && node->arguments->arguments.size > 0) {
+                auto *lastArg = node->arguments->arguments.nodes[node->arguments->arguments.size - 1];
+                if (PM_NODE_TYPE_P(lastArg, PM_X_STRING_NODE) ||
+                    PM_NODE_TYPE_P(lastArg, PM_INTERPOLATED_X_STRING_NODE)) {
+                    return endLoc(lastArg);
+                }
+            }
+            return anyNode->location.end;
+        }
+        case PM_STRING_NODE: {
+            // For heredoc strings, Prism's base.location only includes the opening delimiter.
+            // Use closing_loc to get the full heredoc span, excluding the trailing newline.
+            auto *node = down_cast<pm_string_node>(anyNode);
+            if (auto end = closingLocEnd(node->closing_loc)) {
+                return end;
+            }
+            return anyNode->location.end;
+        }
+        case PM_INTERPOLATED_STRING_NODE: {
+            // Same as PM_STRING_NODE - extend to closing delimiter for heredocs.
+            auto *node = down_cast<pm_interpolated_string_node>(anyNode);
+            if (auto end = closingLocEnd(node->closing_loc)) {
+                return end;
+            }
+            return anyNode->location.end;
+        }
+        case PM_X_STRING_NODE: {
+            // For heredoc xstrings, Prism's base.location only includes the opening delimiter.
+            // Use closing_loc to get the full heredoc span, excluding the trailing newline.
+            auto *node = down_cast<pm_x_string_node>(anyNode);
+            if (auto end = closingLocEnd(node->closing_loc)) {
+                return end;
+            }
+            return anyNode->location.end;
+        }
+        case PM_INTERPOLATED_X_STRING_NODE: {
+            // Same as PM_X_STRING_NODE - extend to closing delimiter for heredocs.
+            auto *node = down_cast<pm_interpolated_x_string_node>(anyNode);
+            if (auto end = closingLocEnd(node->closing_loc)) {
+                return end;
+            }
+            return anyNode->location.end;
+        }
+        case PM_LOCAL_VARIABLE_WRITE_NODE: {
+            // For assignments with heredoc values, extend to the heredoc closing delimiter.
+            auto *node = down_cast<pm_local_variable_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        case PM_INSTANCE_VARIABLE_WRITE_NODE: {
+            auto *node = down_cast<pm_instance_variable_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        case PM_CLASS_VARIABLE_WRITE_NODE: {
+            auto *node = down_cast<pm_class_variable_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        case PM_GLOBAL_VARIABLE_WRITE_NODE: {
+            auto *node = down_cast<pm_global_variable_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        case PM_CONSTANT_WRITE_NODE: {
+            auto *node = down_cast<pm_constant_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        case PM_CONSTANT_PATH_WRITE_NODE: {
+            auto *node = down_cast<pm_constant_path_write_node>(anyNode);
+            return endLoc(node->value);
+        }
+        default: {
+            return anyNode->location.end;
+        }
+    }
+}
+
+// Start counterpart of `endLoc()`. See its docs for details.
+const uint8_t *startLoc(pm_node_t *anyNode) {
+    return anyNode->location.start;
+}
+
 // Similar to `desugar()`, but it's used for pattern-matching nodes.
 //
 // This is necessary because some Prism nodes get translated differently depending on whether they're part of "regular"
@@ -3605,6 +3733,15 @@ core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements)
     core::LocOffsets result;
 
     walkPrismAST(up_cast(statements), [this, &result](const pm_node_t *node) -> bool {
+        // walkPrismAST's `return false` only prevents descending into children—it does not
+        // stop visiting sibling nodes. Without this guard, a later `it` usage in the same
+        // block would overwrite `result`, giving us the *last* usage location instead of the
+        // first. This caused loc mismatches in tests like `it_param_nested_blocks` and
+        // `it_param_proc_lambda` (e.g. the outer block's `it` param loc pointed to the last
+        // `it.first` call instead of the first `it.length` call).
+        if (result.exists()) {
+            return false;
+        }
         if (PM_NODE_TYPE_P(node, PM_IT_LOCAL_VARIABLE_READ_NODE)) {
             result = this->translateLoc(node->location);
             // Found the first usage, stop walking
