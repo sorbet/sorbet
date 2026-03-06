@@ -649,6 +649,71 @@ PackageInfo::aggregateMissingVisibleTo(const core::GlobalState &gs,
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
+std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) const {
+    std::string result;
+    for (auto &directive : extraDirectives_) {
+        auto directiveSource = core::Loc(file, directive).source(gs);
+        ENFORCE(directiveSource.has_value());
+        result += directiveSource.value();
+        result += "\n";
+    }
+    result += fmt::format("layer '{}'\n", layer.show(gs));
+    result += fmt::format("strict_dependencies '{}'\n", strictDependenciesLevelToString(strictDependenciesLevel));
+    result += fmt::format("sorbet min_typed_level: '{}', tests_min_typed_level: '{}'\n",
+            core::SigilTraits<core::StrictLevel>::toString(minTypedLevel), core::SigilTraits<core::StrictLevel>::toString(testsMinTypedLevel));
+
+    // TODO: sort
+    for (auto &import : importedPackageNames) {
+        auto packageName = import.mangledName.owner.show(gs);
+        // TODO: insert strictness category headers as needed
+        switch (import.type) {
+            case ImportType::Normal:
+                if (import.usesInternals) {
+                    result += fmt::format("import {}, uses_internals: true\n", packageName);
+                } else {
+                    result += fmt::format("import {}\n", packageName);
+                }
+                break;
+            case ImportType::TestHelper:
+                result += fmt::format("test_import {}\n", packageName);
+                break;
+            case ImportType::TestUnit:
+                result += fmt::format("test_import {}, only: \"test_rb\"\n", packageName);
+                break;
+        }
+    }
+    result += "\n";
+
+    if (locs.exportAll.exists()) {
+        result += "export_all!\n";
+    } else {
+        // TODO: sort
+        for (auto &export_ : exports_) {
+            auto exportSource = core::Loc(file, export_.loc).source(gs);
+            ENFORCE(exportSource.has_value());
+            result += fmt::format("{}\n", exportSource.value());
+        }
+    }
+
+    // TODO: sort
+    for (auto &visibleTo : visibleTo_) {
+        auto packageName = visibleTo.mangledName.owner.show(gs);
+        switch (visibleTo.type) {
+            case VisibleToType::Normal:
+                result += fmt::format("visible_to {}\n", packageName);
+                break;
+            case VisibleToType::Wildcard:
+                result += fmt::format("visible_to {}::*\n", packageName);
+                break;
+        }
+    }
+
+    if (visibleToTests_) {
+        result += "visible_to 'tests'\n";
+    }
+    return result;
+}
+
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
     return mangledName() == rhs.mangledName();
 }
