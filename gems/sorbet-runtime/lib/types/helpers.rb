@@ -21,6 +21,11 @@ module T::Helpers
     Private::Abstract::Declare.declare_abstract(self, type: :abstract)
   end
 
+  def abstract(method_name)
+    Private::Methods.declare_abstract(self, method_name)
+    method_name
+  end
+
   def interface!
     Private::Abstract::Declare.declare_abstract(self, type: :interface)
   end

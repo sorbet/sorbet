@@ -1,0 +1,50 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/resolver/abstract_keyword.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+  class ::AbstractKeywordInClass < ::Object () @ test/testdata/resolver/abstract_keyword.rb:24
+    method ::AbstractKeywordInClass#priv1 : private|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:30
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInClass#priv2 : private|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:34
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInClass#prot1 : protected|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:29
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInClass#prot2 : protected|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:33
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInClass#pub1 : abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:28
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInClass#pub2 : abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:32
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+  class ::<Class:AbstractKeywordInClass>[<AttachedClass>] < ::<Class:Object> (Helpers) @ test/testdata/resolver/abstract_keyword.rb:24
+    type-member(+) ::<Class:AbstractKeywordInClass>::<AttachedClass> -> T.attached_class (of AbstractKeywordInClass) @ test/testdata/resolver/abstract_keyword.rb:24
+    method ::<Class:AbstractKeywordInClass>#<static-init> (<blk>) @ test/testdata/resolver/abstract_keyword.rb:24
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+  module ::AbstractKeywordInInterface < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/resolver/abstract_keyword.rb:8
+    method ::AbstractKeywordInInterface#bar : abstract (x, y, <blk>) @ test/testdata/resolver/abstract_keyword.rb:13
+      argument x<> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=13:20 end=13:21}
+      argument y<> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=13:23 end=13:24}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInInterface#foo : abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:12
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInInterface#priv1 : private|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:17
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInInterface#priv2 : private|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:21
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInInterface#prot1 : protected|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:16
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInInterface#prot2 : protected|abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:20
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInInterface#pub1 : abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:15
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+    method ::AbstractKeywordInInterface#pub2 : abstract (<blk>) @ test/testdata/resolver/abstract_keyword.rb:19
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+  class ::<Class:AbstractKeywordInInterface>[<AttachedClass>] < ::Module (Helpers) @ test/testdata/resolver/abstract_keyword.rb:8
+    type-member(+) ::<Class:AbstractKeywordInInterface>::<AttachedClass> -> T.attached_class (of AbstractKeywordInInterface) @ test/testdata/resolver/abstract_keyword.rb:8
+    method ::<Class:AbstractKeywordInInterface>#<static-init> (<blk>) @ test/testdata/resolver/abstract_keyword.rb:8
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+  module ::T < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED
+    module ::T::Helpers < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/testdata/resolver/abstract_keyword.rb:3, https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED)
+      method ::T::Helpers#abstract (method_name, <blk>) @ test/testdata/resolver/abstract_keyword.rb:5
+        argument method_name<> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=5:16 end=5:27}
+        argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword.rb start=??? end=???}
+

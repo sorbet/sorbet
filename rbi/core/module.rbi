@@ -1292,13 +1292,11 @@ class Module < Object
   # Mod.one     #=> "This is one"
   # c.call_one  #=> "This is the new one"
   # ```
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def module_function(*arg0); end
+  sig { returns(NilClass) }
+  sig { params(arg0: Symbol).returns(Symbol) }
+  sig { params(arg0: String).returns(String) }
+  sig { params(arg0: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  def module_function(arg0=T.unsafe(nil), *rest); end
 
   # Returns the name of the module *mod*. Returns nil for anonymous modules.
   sig {returns(T.nilable(String))}
@@ -1373,13 +1371,11 @@ class Module < Object
   #
   # Note that to show a private method on
   # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html), use `:doc:`.
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def private(*arg0); end
+  sig { returns(NilClass) }
+  sig { params(method_name: Symbol).returns(Symbol) }
+  sig { params(method_name: String).returns(String) }
+  sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  def private(method_name=T.unsafe(nil), *rest); end
 
   # Makes existing class methods private. Often used to hide the default
   # constructor `new`.
@@ -1490,13 +1486,11 @@ class Module < Object
   # To show a private method on
   # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html), use `:doc:` instead
   # of this.
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def protected(*arg0); end
+  sig { returns(NilClass) }
+  sig { params(method_name: Symbol).returns(Symbol) }
+  sig { params(method_name: String).returns(String) }
+  sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  def protected(method_name=T.unsafe(nil), *rest); end
 
   # Returns a list of the protected instance methods defined in *mod*. If the
   # optional parameter is `false`, the methods of any ancestors are not
@@ -1550,13 +1544,11 @@ class Module < Object
   # Strings is also accepted. If a single argument is passed, it is returned. If
   # no argument is passed, nil is returned. If multiple arguments are passed,
   # the arguments are returned as an array.
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def public(*arg0); end
+  sig { returns(NilClass) }
+  sig { params(method_name: Symbol).returns(Symbol) }
+  sig { params(method_name: String).returns(String) }
+  sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  def public(method_name=T.unsafe(nil), *rest); end
 
   # Makes a list of existing class methods public.
   #
