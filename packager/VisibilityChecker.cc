@@ -372,7 +372,8 @@ public:
                 // other declarations isn't sufficient.
                 if (!klassData->isDeclaredInPackage()) {
                     if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
-                        e.setHeader("Constant `{}` lacks a declaration and cannot be exported", sym.show(ctx));
+                        e.setHeader("Constant `{}` lacks a declaration in this package and cannot be exported",
+                                    sym.show(ctx));
 
                         auto lines = computeRecursiveExports(ctx, klass);
                         e.replaceWith(lines.empty() ? "Remove this export" : "Export all child symbols",

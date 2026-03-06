@@ -140,7 +140,7 @@ root/root.rb:12: Package `Root` has subpackages, so its corresponding class must
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/subpackage/__package.rb:5: Constant `Test::BadTest::Subpackage::Foo` lacks a declaration and cannot be exported https://srb.help/3721
+bad_test/subpackage/__package.rb:5: Constant `Test::BadTest::Subpackage::Foo` lacks a declaration in this package and cannot be exported https://srb.help/3721
      5 |  export Test::BadTest::Subpackage::Foo
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
