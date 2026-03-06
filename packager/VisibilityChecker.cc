@@ -661,7 +661,7 @@ public:
             bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
             referencedPackages[otherPackage].causesModularityError = hasModularityError;
             if (!hasModularityError && !causesVisibilityError) {
-                if (db.genPackages()) {
+                if (db.genPackages() || db.genPackagesStrict()) {
                     return;
                 }
 
@@ -890,7 +890,7 @@ public:
             barrier.DecrementCount();
         });
 
-        if (gs.packageDB().genPackages()) {
+        if (gs.packageDB().genPackages() || gs.packageDB().genPackagesStrict()) {
             std::optional<ThreadResult> threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();

@@ -703,7 +703,7 @@ int realmain(int argc, char *argv[]) {
                     gs->errorQueue->flushAllErrors(*gs);
                 }
 
-                if (!opts.genPackages) {
+                if (!opts.genPackages && !opts.genPackagesStrict) {
                     // In --gen-packages mode, we skip typecheck because we only want to show packaging related errors,
                     // and skipping typecheck saves a significant amount of time.
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, nullopt,
@@ -716,7 +716,7 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        if (opts.genPackages) {
+        if (opts.genPackages || opts.genPackagesStrict) {
             // One of the things this pass does is insert missing exports. Because of this, it needs to run after
             // VisibilityChecker has been run for all strata; a symbol might be used in a strata after the strata for
             // the package that owns that symbol, and we need to be able to see that use to know that a export should be

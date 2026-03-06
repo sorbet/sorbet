@@ -272,10 +272,12 @@ TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::F
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
     ENFORCE(!this->config->opts.genPackages);
+    ENFORCE(!this->config->opts.genPackagesStrict);
     // Copying the global state here means that we snapshot before any files have been loaded. That means that the
     // indexer and typechecker's file tables will almost immediately diverge, but that's not an issue as we don't share
     // `core::FileRef` values between the two.
     auto disableGenPackages = false;
+    auto disableGenPackagesStrict = false;
     auto typecheckerGS = std::exchange(
         this->gs,
         this->gs->copyForLSPTypechecker(
@@ -285,7 +287,8 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
             this->config->opts.extraPackageFilesDirectorySlashPrefixes,
             this->config->opts.packageSkipRBIExportEnforcementDirs, this->config->opts.allowRelaxedPackagerChecksFor,
             this->config->opts.updateVisibilityFor, this->config->opts.packagerLayers,
-            this->config->opts.sorbetPackagesHint, disableGenPackages, this->config->opts.testPackages));
+            this->config->opts.sorbetPackagesHint, disableGenPackages, disableGenPackagesStrict,
+            this->config->opts.testPackages));
 
     task.setGlobalState(std::move(typecheckerGS));
     task.setKeyValueStore(std::move(this->kvstore));
