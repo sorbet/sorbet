@@ -140,6 +140,14 @@ root/root.rb:12: Package `Root` has subpackages, so its corresponding class must
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+bad_test/subpackage/__package.rb:5: Constant `Test::BadTest::Subpackage::Foo` lacks a declaration and cannot be exported https://srb.help/3721
+     5 |  export Test::BadTest::Subpackage::Foo
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    bad_test/subpackage/__package.rb:5: Delete
+     5 |  export Test::BadTest::Subpackage::Foo
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 bad_test/subpackage/__package.rb:5: Cannot export `Test::BadTest::Subpackage::Foo` because it is owned by another package https://srb.help/3721
      5 |  export Test::BadTest::Subpackage::Foo
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -217,4 +225,4 @@ root/test/root.rb:12: Package `Root` has subpackages, so its corresponding class
     root/subpackage/__package.rb:3: First subpackage defined here
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 23
+Errors: 24

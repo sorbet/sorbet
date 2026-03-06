@@ -38,5 +38,13 @@ d/__package.rb:4: Cannot export `Root::D` because it is only defined in an RBI f
     d/util.rbi:3: Defined here
      3 |class Root::D::Util
               ^^^^^^^
-Errors: 5
+
+e/__package.rb:4: Constant `Root::E` lacks a declaration and cannot be exported https://srb.help/3721
+     4 |  export Root::E
+          ^^^^^^^^^^^^^^
+  Autocorrect: Done
+    e/__package.rb:4: Replaced with `export Root::E::Util`
+     4 |  export Root::E
+          ^^^^^^^^^^^^^^
+Errors: 6
 No errors! Great job.
