@@ -1,2 +1,2 @@
 LOG BEGINS
-TIMESTAMP [typeDiagnosticsAndFile] [error] No errors! Great job.
+timestamp="TIMESTAMP" level=error No errors! Great job.
