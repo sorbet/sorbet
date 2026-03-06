@@ -303,17 +303,17 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     if (scheduleToken != nullptr) {
                         logger->debug("[Processing] Preempting slow path for task {}", methodStr);
                         // Preemption scheduling success!
-                        // In this if statement **only**, `taskQueueMutex` protects all accesses to LSPIndexer. This is
-                        // needed to linearize the indexing of edits, which may happen in the typechecking thread if a
-                        // fast path edit preempts, with the `canPreempt` checks of edits in this thread.
-                        auto headOfQueueCanPreempt = [&indexer = this->indexer,
-                                                      &tasks = this->taskQueue->tasks()]() -> bool {
+                        // In this if statement **only**, `taskQueue::stateMutex` protects all accesses to LSPIndexer.
+                        // This is needed to linearize the indexing of edits, which may happen in the typechecking
+                        // thread if a fast path edit preempts, with the `canPreempt` checks of edits in this thread.
+                        auto noPreemptionTasksRemain = [&indexer = this->indexer,
+                                                        &tasks = this->taskQueue->tasks()]() -> bool {
                             // Await always holds taskQueueMutex when calling this function, but absl doesn't know that.
                             return tasks.empty() || !tasks.front()->canPreempt(indexer);
                         };
                         // Wait until the head of the queue turns into a non-preemptible task to resume processing the
                         // queue.
-                        taskQueue->getMutex()->Await(absl::Condition(&headOfQueueCanPreempt));
+                        taskQueue->getMutex()->Await(absl::Condition(&noPreemptionTasksRemain));
 
                         // The queue is now empty or has a task that cannot preempt. There are two possibilities here:
                         // 1) The scheduled work is now irrelevant because the task that was scheduled is now gone
