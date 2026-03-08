@@ -7,6 +7,7 @@
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
+#include <filesystem>
 
 using namespace std;
 
@@ -131,34 +132,6 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
     }
 }
 
-void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfiguration> &clientConfig) {
-    if (this->clientConfig) {
-        Exception::raise("Cannot call setClientConfig twice in one session!");
-    }
-    this->clientConfig = clientConfig;
-}
-
-string LSPConfiguration::localName2Remote(string_view filePath) const {
-    ENFORCE(absl::StartsWith(filePath, rootPath));
-    assertHasClientConfig();
-    string_view relativeUri = filePath.substr(rootPath.length());
-    if (relativeUri.at(0) == '/') {
-        relativeUri = relativeUri.substr(1);
-    }
-
-    // Special case: Root uri is '' (happens in Monaco)
-    if (clientConfig->rootUri.length() == 0) {
-        return string(relativeUri);
-    }
-
-    // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
-    if (clientConfig->enableSorbetURIs &&
-        FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
-        return absl::StrCat(sorbetScheme, relativeUri);
-    }
-    return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
-}
-
 string urlDecode(string_view uri) {
     vector<pair<const absl::string_view, string>> replacements;
 
@@ -175,6 +148,82 @@ string urlDecode(string_view uri) {
     }
 
     return absl::StrReplaceAll(uri, replacements);
+}
+
+void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfiguration> &clientConfig) {
+    if (this->clientConfig) {
+        Exception::raise("Cannot call setClientConfig twice in one session!");
+    }
+    this->clientConfig = clientConfig;
+
+    // Auto-derive the prefix from the relationship between rootUri and rootPath.
+    // When the LSP client's workspace root is an ancestor of Sorbet's input directory
+    // (e.g., editor opens /proj but Sorbet runs against /proj/Library/Homebrew),
+    // file URIs need the intermediate path inserted. We detect this by comparing the
+    // filesystem path implied by rootUri against the absolute form of rootPath.
+    constexpr string_view fileScheme = "file://"sv;
+    if (!absl::StartsWith(clientConfig->rootUri, fileScheme)) {
+        return; // Non-file:// rootUri (e.g. remote Stripe setup): cannot derive prefix
+    }
+    // Decode percent-encoding (e.g. %20 → space) before comparing against the filesystem.
+    // LSPClientConfiguration already strips trailing slashes from rootUri, so no extra
+    // stripping is needed here for the URI side.
+    string rootUriLocalPath = urlDecode(clientConfig->rootUri.substr(fileScheme.length()));
+
+    // Resolve both paths through weakly_canonical so that symlinks (e.g. /var → /private/var
+    // on macOS) don't cause a spurious mismatch between the two sides of the comparison.
+    std::error_code ec;
+    auto canonicalRootPath = std::filesystem::weakly_canonical(rootPath, ec).string();
+    if (ec) {
+        return;
+    }
+    auto canonicalRootUri = std::filesystem::weakly_canonical(rootUriLocalPath, ec).string();
+    if (ec) {
+        return;
+    }
+    // Strip any trailing slashes that weakly_canonical may have left (e.g. for a root path "/")
+    while (!canonicalRootPath.empty() && canonicalRootPath.back() == '/') {
+        canonicalRootPath.pop_back();
+    }
+    while (!canonicalRootUri.empty() && canonicalRootUri.back() == '/') {
+        canonicalRootUri.pop_back();
+    }
+
+    string rootUriPlusSlash = canonicalRootUri + "/";
+    if (absl::StartsWith(canonicalRootPath, rootUriPlusSlash)) {
+        sorbetRootPrefix = canonicalRootPath.substr(rootUriPlusSlash.length());
+        sorbetRootPrefixWithSlash = sorbetRootPrefix + "/";
+    }
+}
+
+string LSPConfiguration::localName2Remote(string_view filePath) const {
+    ENFORCE(absl::StartsWith(filePath, rootPath));
+    assertHasClientConfig();
+    string_view relativeUri = filePath.substr(rootPath.length());
+    if (!relativeUri.empty() && relativeUri.at(0) == '/') {
+        relativeUri = relativeUri.substr(1);
+    }
+
+    // Special case: Root uri is '' (happens in Monaco)
+    if (clientConfig->rootUri.length() == 0) {
+        if (!sorbetRootPrefix.empty()) {
+            return absl::StrCat(sorbetRootPrefix, "/", relativeUri);
+        }
+        return string(relativeUri);
+    }
+
+    // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
+    if (clientConfig->enableSorbetURIs &&
+        FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
+        if (!sorbetRootPrefix.empty()) {
+            return absl::StrCat(sorbetScheme, sorbetRootPrefix, "/", relativeUri);
+        }
+        return absl::StrCat(sorbetScheme, relativeUri);
+    }
+    if (!sorbetRootPrefix.empty()) {
+        return absl::StrCat(clientConfig->rootUri, "/", sorbetRootPrefix, "/", relativeUri);
+    }
+    return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
 }
 
 string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
@@ -201,7 +250,18 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
                          path[httpsScheme.length()] == ':';
     if (isHttps) {
         return path;
-    } else if (rootPath.length() > 0) {
+    }
+
+    // Strip the root path prefix: it fills the gap between rootUri/sorbetScheme and rootPath
+    // in URI space, but is not part of Sorbet's internal file paths. This applies to both
+    // file: and sorbet: URIs — localName2Remote inserts the prefix for both.
+    if (!sorbetRootPrefixWithSlash.empty()) {
+        if (absl::StartsWith(path, sorbetRootPrefixWithSlash)) {
+            path = path.substr(sorbetRootPrefixWithSlash.length());
+        }
+    }
+
+    if (rootPath.length() > 0) {
         return absl::StrCat(rootPath, "/", path);
     } else {
         // Special case: Folder is '' (current directory)
