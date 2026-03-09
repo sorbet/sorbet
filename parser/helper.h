@@ -389,9 +389,9 @@ public:
     }
 
     /**
-     * Is `send` a visibility modifier (private, protected, public, etc.)?
+     * Is `send` a method definition modifier (private, protected, public, etc.)?
      */
-    static bool isVisibilitySend(const parser::Send *send) {
+    static bool isMethodDefModifierSend(const parser::Send *send) {
         return send->receiver == nullptr && send->args.size() == 1 &&
                (parser::isa_node<parser::DefMethod>(send->args[0].get()) ||
                 parser::isa_node<parser::DefS>(send->args[0].get())) &&
