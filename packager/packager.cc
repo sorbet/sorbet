@@ -1078,6 +1078,10 @@ void validatePackage(core::Context ctx) {
 
     bool pkgIsPrelude = pkgInfo.isPreludePackage();
     for (auto &i : pkgInfo.importedPackageNames) {
+        if (packageDB.testPackages()) {
+            ENFORCE(i.type == ImportType::Normal, "test_import found in --test-packages mode");
+        }
+
         auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
 
         // this might mean the other package doesn't exist, but that should have been caught already
