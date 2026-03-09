@@ -4692,7 +4692,17 @@ ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, 
         auto prismStatements = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
 
         // Cover the locations spanned from the first to the last statements.
-        beginNodeLoc = translateLoc(prismStatements.front()->location.start, prismStatements.back()->location.end);
+        // When the RBS rewriter inserts synthetic nodes (like `self.abstract!()`) at the end of a statement
+        // list, those nodes may have locations earlier in the file than the real code (e.g., from comment
+        // locations). This can cause front()->location.start > back()->location.end, which violates the
+        // LocOffsets invariant. In that case, fall back to using the statements node's own location.
+        auto start = prismStatements.front()->location.start;
+        auto end = prismStatements.back()->location.end;
+        if (start <= end) {
+            beginNodeLoc = translateLoc(start, end);
+        } else {
+            beginNodeLoc = translateLoc(stmtsNode->base.location);
+        }
     }
 
     auto statements = nodeListToStore<ast::InsSeq::STATS_store>(stmtsNode->body);
@@ -4766,6 +4776,61 @@ ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
     ast::ExpressionPtr parentExpr;
 
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
+        // Optimization: resolve well-known constant paths eagerly instead of leaving them unresolved.
+        // This is important for the RBS rewriter which generates references to these constants.
+        {
+            absl::InlinedVector<core::NameRef, 4> fullPath;
+            bool isRootAnchored = false;
+            pm_node_t *current = up_cast(const_cast<PrismLhsNode *>(node));
+
+            while (current != nullptr) {
+                switch (PM_NODE_TYPE(current)) {
+                    case PM_CONSTANT_PATH_NODE: {
+                        auto *p = down_cast<pm_constant_path_node>(current);
+                        fullPath.push_back(translateConstantName(p->name));
+                        if (p->parent != nullptr) {
+                            current = p->parent;
+                        } else {
+                            isRootAnchored = true;
+                            current = nullptr;
+                        }
+                        break;
+                    }
+                    case PM_CONSTANT_READ_NODE: {
+                        auto *r = down_cast<pm_constant_read_node>(current);
+                        fullPath.push_back(translateConstantName(r->name));
+                        current = nullptr;
+                        break;
+                    }
+                    default:
+                        current = nullptr;
+                        break;
+                }
+            }
+
+            if (!fullPath.empty()) {
+                absl::c_reverse(fullPath);
+                if (isRootAnchored) {
+                    if (fullPath.size() == 3 && fullPath[0] == ctx.state.enterNameUTF8("Sorbet") &&
+                        fullPath[1] == ctx.state.enterNameUTF8("Private") &&
+                        fullPath[2] == ctx.state.enterNameUTF8("Static")) {
+                        return MK::Constant(location, core::Symbols::Sorbet_Private_Static());
+                    }
+                    if (fullPath.size() == 3 && fullPath[0] == ctx.state.enterNameUTF8("T") &&
+                        fullPath[1] == ctx.state.enterNameUTF8("Sig") &&
+                        fullPath[2] == ctx.state.enterNameUTF8("WithoutRuntime")) {
+                        return MK::Constant(location, core::Symbols::T_Sig_WithoutRuntime());
+                    }
+                    if (fullPath.size() == 4 && fullPath[0] == ctx.state.enterNameUTF8("Sorbet") &&
+                        fullPath[1] == ctx.state.enterNameUTF8("Private") &&
+                        fullPath[2] == ctx.state.enterNameUTF8("Static") &&
+                        fullPath[3] == ctx.state.enterNameUTF8("Void")) {
+                        return MK::Constant(location, core::Symbols::void_());
+                    }
+                }
+            }
+        }
+
         if (auto *prismParentNode = node->parent) {
             // This constant reference is chained onto another constant reference.
             // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the
