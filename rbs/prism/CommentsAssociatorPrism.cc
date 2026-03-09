@@ -1144,7 +1144,7 @@ CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, parse
     : ctx(ctx), parser(parser), prism(parser), commentLocations(commentLocations), commentByLine() {
     auto source = ctx.file.data(ctx).source();
     for (auto &loc : commentLocations) {
-        auto commentString = source.substr(loc.beginPos(), loc.endPos() - loc.beginPos());
+        auto commentString = source.substr(loc.beginPos(), loc.length());
         auto start32 = static_cast<uint32_t>(loc.beginPos());
         auto end32 = static_cast<uint32_t>(loc.endPos());
         auto comment = CommentNodePrism{core::LocOffsets{start32, end32}, commentString};
