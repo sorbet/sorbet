@@ -764,27 +764,25 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Walk the Const/ConstLhs chain iteratively to build a flat UCL.
                 // Both Const (RHS) and ConstLhs (LHS) can appear in the same chain,
                 // e.g. `class Foo::Bar::Baz` gives ConstLhs(scope=Const(scope=Const(nil,Foo),Bar),Baz).
-                std::vector<core::NameRef> names;
-                std::vector<core::LocOffsets> locs;
-                // lastScopeRef: pointer to the unique_ptr<Node> that owns the current node,
-                // used to call node2TreeImpl on the root scope if it's not Cbase/nil.
+
+                // First pass: count segments and find rootScope
+                uint32_t segmentCount = 0;
                 unique_ptr<parser::Node> *lastScopeRef = nullptr;
                 parser::Node *cur = const_;
                 while (cur != nullptr) {
                     if (auto *c = parser::cast_node<parser::Const>(cur)) {
-                        names.push_back(c->name);
-                        locs.push_back(c->loc);
+                        segmentCount++;
                         lastScopeRef = &c->scope;
                         cur = c->scope.get();
                     } else if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
-                        names.push_back(cl->name);
-                        locs.push_back(cl->loc);
+                        segmentCount++;
                         lastScopeRef = &cl->scope;
                         cur = cl->scope.get();
                     } else {
                         break; // Cbase or a dynamic scope (e.g. a method call)
                     }
                 }
+
                 ExpressionPtr rootScope;
                 if (cur == nullptr) {
                     rootScope = MK::EmptyTree();
@@ -795,10 +793,28 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     ENFORCE(lastScopeRef != nullptr);
                     rootScope = node2TreeImpl(dctx, *lastScopeRef);
                 }
-                std::reverse(names.begin(), names.end());
-                std::reverse(locs.begin(), locs.end());
-                ExpressionPtr res = MK::UnresolvedConstant(move(rootScope), names, locs);
-                result = move(res);
+
+                // Second pass: allocate and fill (SlotInit fills backwards from end to start)
+                auto init = UnresolvedConstantLit::make(move(rootScope), segmentCount);
+                auto nameSlot = init.names();
+                auto locSlot = init.locs();
+
+                cur = const_;
+                while (cur != nullptr) {
+                    if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        *nameSlot-- = c->name;
+                        *locSlot-- = c->loc;
+                        cur = c->scope.get();
+                    } else if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        *nameSlot-- = cl->name;
+                        *locSlot-- = cl->loc;
+                        cur = cl->scope.get();
+                    } else {
+                        break;
+                    }
+                }
+
+                result = ExpressionPtr::fromUnique(init.finalize());
             },
             [&](parser::Send *send) {
                 Send::Flags flags;
@@ -1597,27 +1613,25 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Walk the ConstLhs/Const chain iteratively to build a flat UCL.
                 // Both ConstLhs (LHS) and Const (RHS) can appear in the same chain,
                 // e.g. `class Foo::Bar::Baz` gives ConstLhs(scope=Const(scope=Const(nil,Foo),Bar),Baz).
-                std::vector<core::NameRef> names;
-                std::vector<core::LocOffsets> locs;
-                // lastScopeRef: pointer to the unique_ptr<Node> that owns the current node,
-                // used to call node2TreeImpl on the root scope if it's not Cbase/nil.
+
+                // First pass: count segments and find rootScope
+                uint32_t segmentCount = 0;
                 unique_ptr<parser::Node> *lastScopeRef = nullptr;
                 parser::Node *cur = constLhs;
                 while (cur != nullptr) {
                     if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
-                        names.push_back(cl->name);
-                        locs.push_back(cl->loc);
+                        segmentCount++;
                         lastScopeRef = &cl->scope;
                         cur = cl->scope.get();
                     } else if (auto *c = parser::cast_node<parser::Const>(cur)) {
-                        names.push_back(c->name);
-                        locs.push_back(c->loc);
+                        segmentCount++;
                         lastScopeRef = &c->scope;
                         cur = c->scope.get();
                     } else {
                         break; // Cbase or a dynamic scope (e.g. a method call)
                     }
                 }
+
                 ExpressionPtr rootScope;
                 if (cur == nullptr) {
                     rootScope = MK::EmptyTree();
@@ -1628,10 +1642,28 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     ENFORCE(lastScopeRef != nullptr);
                     rootScope = node2TreeImpl(dctx, *lastScopeRef);
                 }
-                std::reverse(names.begin(), names.end());
-                std::reverse(locs.begin(), locs.end());
-                ExpressionPtr res = MK::UnresolvedConstant(move(rootScope), names, locs);
-                result = move(res);
+
+                // Second pass: allocate and fill (SlotInit fills backwards from end to start)
+                auto init = UnresolvedConstantLit::make(move(rootScope), segmentCount);
+                auto nameSlot = init.names();
+                auto locSlot = init.locs();
+
+                cur = constLhs;
+                while (cur != nullptr) {
+                    if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        *nameSlot-- = cl->name;
+                        *locSlot-- = cl->loc;
+                        cur = cl->scope.get();
+                    } else if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        *nameSlot-- = c->name;
+                        *locSlot-- = c->loc;
+                        cur = c->scope.get();
+                    } else {
+                        break;
+                    }
+                }
+
+                result = ExpressionPtr::fromUnique(init.finalize());
             },
             [&](parser::Cbase *cbase) {
                 ExpressionPtr res = MK::Constant(loc, core::Symbols::root());
