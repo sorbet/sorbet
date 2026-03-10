@@ -804,7 +804,9 @@ struct PackageSpecBodyWalk {
             }
         } else {
             // Extra directives
-            info.extraDirectives_.push_back(send.loc);
+            if (send.fun != core::Names::star()) {
+                info.extraDirectives_.push_back(send.loc);
+            }
         }
     }
 
