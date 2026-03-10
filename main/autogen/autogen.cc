@@ -57,22 +57,15 @@ class AutogenWalk {
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original() != nullptr) {
             auto &original = *cnst->original();
-            // Iterate segments in reverse (leaf-to-root) order; we reverse the whole vector at the end.
-            // This handles both single-segment UCLs (from walkUnresolvedConstantLit, where the scope
-            // chain is encoded as a ConstantLit chain via scope_) and multi-segment UCLs (created
-            // by Namer's squashNamesInner, which wraps the entire UCL in one ConstantLit with
-            // scope_ = EmptyTree).
             auto ns = original.names();
             for (auto it = ns.rbegin(); it != ns.rend(); ++it) {
                 out.emplace_back(*it);
             }
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope_);
 
-            // If any part of the constant literal scope is a class alias, the final name should be scoped
-            // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
-            // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
-            // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
-            // heuristics in our package generation tooling to determine whether something was resolved via an alias.
+            // If any part of the constant literal scope is a class alias, the final name should be
+            // scoped under the alias. This allows subconstants-of-aliases to be referenced correctly
+            // -- otherwise, we'd have missing edges in our static analysis dependency graphs.
             if (cnst != nullptr && cnst->original() != nullptr) {
                 auto scopeSym = cnst->symbol();
                 if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
@@ -82,6 +75,35 @@ class AutogenWalk {
                     // then break out of the loop.
                     out.insert(out.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
                     break;
+                }
+            } else if (cnst == nullptr && original.segCount() > 1 && ast::isa_tree<ast::EmptyTree>(original.scope_)) {
+                // Flat multi-segment UCL (scope_ = EmptyTree): the ConstantLit chain no longer
+                // exists to trigger the alias check above. Check whether names()[0] (the outermost
+                // scope segment) is a class alias by looking it up in the current nesting chain.
+                // If it is, replace it with its symbolName (which includes the enclosing module).
+                auto s1name = original.names()[0];
+                core::SymbolRef s1sym;
+                for (auto it = nestingStack.rbegin(); it != nestingStack.rend(); ++it) {
+                    auto defId = it->ref._id;
+                    if (defId >= defs.size()) {
+                        continue;
+                    }
+                    auto defSym = defs[defId].sym;
+                    if (!defSym.exists() || !defSym.isClassOrModule()) {
+                        continue;
+                    }
+                    s1sym = defSym.asClassOrModuleRef().data(ctx)->findMemberNoDealias(s1name);
+                    if (s1sym.exists()) {
+                        break;
+                    }
+                }
+                if (s1sym.exists() && s1sym.isStaticField(ctx) && s1sym.asFieldRef().data(ctx)->isClassAlias()) {
+                    // names()[0] was added last to `out` (since we iterate rbegin→rend above,
+                    // the first segment ends up at the back). Replace it with symbolName(s1sym)
+                    // which includes the enclosing module (e.g. [Foo, Alias] for Foo::Alias).
+                    out.pop_back();
+                    auto s1FullName = symbolName(ctx, s1sym);
+                    out.insert(out.end(), s1FullName.rbegin(), s1FullName.rend());
                 }
             }
         }
