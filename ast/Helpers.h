@@ -244,8 +244,15 @@ public:
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
-        InlinedVector<core::LocOffsets, 4> locVec(parts.size(), loc);
-        return UnresolvedConstantLit::create(EmptyTree(), parts, locVec);
+        auto init = UnresolvedConstantLit::make(EmptyTree(), parts.size());
+        auto nameSlot = init.names();
+        auto locSlot = init.locs();
+        // Fill backwards: parts[size-1] goes to slot[size-1], ..., parts[0] goes to slot[0]
+        for (size_t i = parts.size(); i > 0; --i) {
+            *nameSlot-- = parts[i - 1];
+            *locSlot-- = loc;
+        }
+        return ExpressionPtr::fromUnique(init.finalize());
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {

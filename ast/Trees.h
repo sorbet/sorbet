@@ -1216,6 +1216,110 @@ public:
     static std::unique_ptr<UnresolvedConstantLit> createUnique(
         ExpressionPtr && scope, absl::Span<const core::NameRef> names, absl::Span<const core::LocOffsets> locs);
 
+    // Helper class that manages sequential slot initialization with automatic index progression.
+    // Uses iterator-style API with operator*() and operator--().
+    // Fills slots in reverse order (from end to start), which matches the common pattern
+    // of traversing constant chains forward but needing to fill arrays backwards.
+    //
+    // Usage:
+    //   auto slot = init.names();
+    //   *slot-- = value1;  // Constructs value1 in current slot, then moves to previous
+    //   *slot-- = value2;  // Constructs value2 in current slot, then moves to previous
+    template <typename T> class SlotInit {
+    private:
+        T *current_;
+
+        // Helper class returned by operator* that handles assignment with placement new.
+        class SlotRef {
+        private:
+            T *ptr_;
+            SlotInit &parent_;
+
+        public:
+            SlotRef(T *ptr, SlotInit &parent) : ptr_(ptr), parent_(parent) {}
+
+            // Assignment operator that uses placement new to construct the value.
+            SlotRef &operator=(const T &value) {
+                new (ptr_) T(value);
+                return *this;
+            }
+
+            // Move assignment
+            SlotRef &operator=(T &&value) {
+                new (ptr_) T(std::move(value));
+                return *this;
+            }
+        };
+
+    public:
+        explicit SlotInit(T *start) : current_(start) {}
+
+        // Returns a SlotRef that handles assignment with placement new.
+        SlotRef operator*() {
+            return SlotRef(current_, *this);
+        }
+
+        // Pre-decrement: moves to previous slot and returns *this.
+        SlotInit &operator--() {
+            current_--;
+            return *this;
+        }
+
+        // Post-decrement: moves to previous slot and returns old position.
+        SlotInit operator--(int) {
+            SlotInit old = *this;
+            current_--;
+            return old;
+        }
+    };
+
+    // Helper class for incremental initialization without intermediate vectors.
+    // Provides SlotInit helpers that fill backwards (from end to start).
+    class Initializer {
+    private:
+        UnresolvedConstantLit *ucl_;
+
+        friend class UnresolvedConstantLit;
+        explicit Initializer(UnresolvedConstantLit *ucl) : ucl_(ucl) {}
+
+    public:
+        // Returns the number of segments to initialize.
+        uint32_t count() const {
+            return ucl_->numSegs_;
+        }
+
+        // Returns a SlotInit for names that starts at the END and fills backwards.
+        // Usage: auto slot = init.names(); *slot-- = value1; *slot-- = value2; ...
+        SlotInit<core::NameRef> names() {
+            return SlotInit<core::NameRef>(ucl_->getTrailingObjects<core::NameRef>() + ucl_->numSegs_ - 1);
+        }
+
+        // Returns a SlotInit for locs that starts at the END and fills backwards.
+        // Usage: auto slot = init.locs(); *slot-- = loc1; *slot-- = loc2; ...
+        SlotInit<core::LocOffsets> locs() {
+            return SlotInit<core::LocOffsets>(ucl_->getTrailingObjects<core::LocOffsets>() + ucl_->numSegs_ - 1);
+        }
+
+        // Finalizes the initialization and returns the completed UnresolvedConstantLit.
+        // All slots must have been initialized before calling this.
+        std::unique_ptr<UnresolvedConstantLit> finalize() {
+            ucl_->_sanityCheck();
+            return std::unique_ptr<UnresolvedConstantLit>(ucl_);
+        }
+    };
+
+    // Allocates an UnresolvedConstantLit with trailing storage but does not give you
+    // a fully-formed object.  Initializer will require you to fill in the names and
+    // locs of the names; once that's done, you can call Initializer::finalize to
+    // receive a fully-formed object.
+    static Initializer make(ExpressionPtr && scope, uint32_t numSegs) {
+        ENFORCE(numSegs > 0);
+        size_t sz = totalSizeToAlloc<core::NameRef, core::LocOffsets>(numSegs, numSegs);
+        void *raw = ::operator new(sz);
+        auto *ucl = new (raw) UnresolvedConstantLit(std::move(scope), numSegs);
+        return Initializer(ucl);
+    }
+
     // Returns the loc of the leaf (last) segment.
     core::LocOffsets loc() const {
         return getTrailingObjects<core::LocOffsets>()[numSegs_ - 1];

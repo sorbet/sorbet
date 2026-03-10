@@ -5132,11 +5132,8 @@ ast::ExpressionPtr Desugarer::desugarStatements(pm_statements_node *stmtsNode, b
 // MK::UnresolvedConstant's scope must not itself be an UnresolvedConstantLit.
 ast::ExpressionPtr Desugarer::buildConstantPath(pm_node_t *parentNullable, core::LocOffsets outerLoc,
                                                 core::NameRef outerConstName, core::LocOffsets nullParentRootLoc) {
-    absl::InlinedVector<core::NameRef, 4> names;
-    absl::InlinedVector<core::LocOffsets, 4> locs;
-    names.push_back(outerConstName);
-    locs.push_back(outerLoc);
-
+    // First pass: count segments and determine rootScope
+    uint32_t segmentCount = 1; // Start with outerConst
     ast::ExpressionPtr rootScope;
     auto *current = parentNullable;
 
@@ -5146,37 +5143,62 @@ ast::ExpressionPtr Desugarer::buildConstantPath(pm_node_t *parentNullable, core:
         while (true) {
             if (PM_NODE_TYPE_P(current, PM_CONSTANT_PATH_NODE)) {
                 auto *pathNode = down_cast<pm_constant_path_node>(current);
-                core::NameRef pathConstName;
-                if (pathNode->name != PM_CONSTANT_ID_UNSET) {
-                    pathConstName = ctx.state.enterNameConstant(translateConstantName(pathNode->name));
-                } else {
-                    pathConstName = core::Names::Constants::ConstantNameMissing();
-                }
-                names.push_back(pathConstName);
-                locs.push_back(translateLoc(pathNode->base.location));
+                segmentCount++;
                 if (pathNode->parent == nullptr) {
                     rootScope = MK::Constant(translateLoc(pathNode->delimiter_loc), core::Symbols::root());
                     break;
                 }
                 current = pathNode->parent;
             } else if (PM_NODE_TYPE_P(current, PM_CONSTANT_READ_NODE)) {
-                auto *readNode = down_cast<pm_constant_read_node>(current);
-                names.push_back(ctx.state.enterNameConstant(translateConstantName(readNode->name)));
-                locs.push_back(translateLoc(readNode->base.location));
+                segmentCount++;
                 rootScope = MK::EmptyTree();
                 break;
             } else {
                 // Non-constant parent (e.g. a method call or self): desugar it directly.
-                // desugar() will not return a UCL for these non-constant node types.
                 rootScope = desugar(current);
                 break;
             }
         }
     }
 
-    absl::c_reverse(names);
-    absl::c_reverse(locs);
-    return MK::UnresolvedConstant(move(rootScope), names, locs);
+    // Second pass: allocate and fill (SlotInit fills backwards from end to start)
+    auto init = ast::UnresolvedConstantLit::make(move(rootScope), segmentCount);
+    auto nameSlot = init.names();
+    auto locSlot = init.locs();
+
+    // Fill the outermost segment (at the end of the array)
+    *nameSlot-- = outerConstName;
+    *locSlot-- = outerLoc;
+
+    current = parentNullable;
+    if (current != nullptr) {
+        while (true) {
+            if (PM_NODE_TYPE_P(current, PM_CONSTANT_PATH_NODE)) {
+                auto *pathNode = down_cast<pm_constant_path_node>(current);
+                core::NameRef pathConstName;
+                if (pathNode->name != PM_CONSTANT_ID_UNSET) {
+                    pathConstName = ctx.state.enterNameConstant(translateConstantName(pathNode->name));
+                } else {
+                    pathConstName = core::Names::Constants::ConstantNameMissing();
+                }
+                *nameSlot-- = pathConstName;
+                *locSlot-- = translateLoc(pathNode->base.location);
+                if (pathNode->parent == nullptr) {
+                    break;
+                }
+                current = pathNode->parent;
+            } else if (PM_NODE_TYPE_P(current, PM_CONSTANT_READ_NODE)) {
+                auto *readNode = down_cast<pm_constant_read_node>(current);
+                *nameSlot-- = ctx.state.enterNameConstant(translateConstantName(readNode->name));
+                *locSlot-- = translateLoc(readNode->base.location);
+                break;
+            } else {
+                break;
+            }
+        }
+    }
+
+    return ast::ExpressionPtr::fromUnique(init.finalize());
 }
 
 // Sorbet validator, there is a check that will crash Sorbet if this is detected statically.
