@@ -3605,6 +3605,9 @@ core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements)
     core::LocOffsets result;
 
     walkPrismAST(up_cast(statements), [this, &result](const pm_node_t *node) -> bool {
+        if (result.exists()) {
+            return false;
+        }
         if (PM_NODE_TYPE_P(node, PM_IT_LOCAL_VARIABLE_READ_NODE)) {
             result = this->translateLoc(node->location);
             // Found the first usage, stop walking
